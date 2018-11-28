@@ -1,0 +1,7 @@
+{
+  "specVersion": "0.3",
+	"structure": {
+		"readme": "INTRO.md"
+	},
+	"plugins": ["-sharing"]
+}
