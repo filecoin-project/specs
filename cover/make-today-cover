@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# options
+font="Times-Roman"
+size=56
+
+# params
+src="cover/cover-src.jpg" # run this from specs root. (../)
+dst="cover.jpg"
+
+die() {
+  echo "error: $@"
+  exit 1
+}
+
+require() {
+  which "$1" >/dev/null || die "please install $1 $2"
+}
+
+fexists() {
+  [ -e "$1" ] || die "error: $1 does not exist"
+  [ -f "$1" ] || die "error: $1 is not a file"
+}
+
+drawtext() {
+  convert -font "$font" -fill black -pointsize "$size" -draw "text $1" "$2" "$2"
+}
+
+require convert "(imagemagick)"
+require jq
+require git
+
+fexists "$src"
+fexists "book.json"
+
+# text vars
+t_date=$(date -u '+%Y-%m-%d %H:%M:%S Z')
+t_ver=v$(jq -r '.specVersion' book.json)-$(git rev-parse --short HEAD)
+
+git diff-index --quiet HEAD || t_ver="${t_ver}-dirty"
+
+cp "$src" "$dst"
+drawtext "733,670 '$t_ver'" "$dst"
+drawtext "645,1968 '$t_date'" "$dst"

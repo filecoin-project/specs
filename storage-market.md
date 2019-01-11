@@ -2,9 +2,9 @@
 
 ### What is the Filecoin Storage Market
 
-TODO: why do we even have markets? (motivate the necessity of markets vs the network allocating storage to willing miners)
+The Filecoin `storage market` is the underlying system used to discover, negotiate and form `storage contracts` between clients and storage providers called `storage miners` in a Filecoin network. The `storage market` itself is an `actor` that helps to mediate certain operations in the market, including adding new miners, and punishing faulty ones, it does not directly mediate any actual storage deals. The `storage contracts` between clients and miners specify that a given `piece` will be stored for a given time duration. It is assumed that the `client`, or some delegate of the client, remains online to monitor the `storage miner` and `slash` it in the case that the agreed upon data is removed from the miners proving set before the deal is finished.
 
-The Filecoin `storage market` is the underlying system used to discover, negotiate and form `storage contracts` between clients and storage providers called `storage miners`. These contracts specify that a given `piece` will be stored for a given time duration. It is assumed that the client, or some delegate of the client, remains online to monitor the `storage miner` and `slash` it in the case that it fails to submit proofs for the data.
+The creation of such a storage market is motivated by the need to provide a fast, reliable and inexpensive solution to data generated worldwide. The cost and difficulty involved in starting datacenters around the world make a decentralized solution attractive here, enabling clients and miners to interact directly, forming agreements for storage ad-hoc around the world. Geography is only one such aspect in which a decentralized market can be made competitive. You can read more about the underlying motivations for building a storage market [here](https://www.youtube.com/watch?v=EClPAFPeXIQ).
 
 In the current design of the `storage market`, `storage miners` post `asks` indicating the price they are willing to accepts, and `clients` select (either manually, or via some locally run algorithm) a set of storage miners to store their data with. They then contact the `storage miners` who programmatically either accept or deny their `deal proposals`. In the future, we may allow miners to search for clients and propose deals to them, but for now, for simplicity, we stick with the model described above.
 
@@ -12,33 +12,19 @@ In the current design of the `storage market`, `storage miners` post `asks` indi
 
 TODO: This is a high level overview of how the storage market interacts with components
 
-### What the Filecoin storage market affects
-
-- FIL Block chain via settled payments
-- Exports the `power table` to the block-chain; where a miner's power can be determined in-situ (TODO: requires clarification).
-- Settling up or posting the result of `payment channels` on-chain
-
-### Dependencies
-
-TODO: reading through this is confusing.
-
-- `PoST` is generated fairly by `storage miners`
-- Verification of `PoST` can be done by anyone in the Filecoin Storage Market
-- Deals among `clients`, and `storage miners` are done through a `payment channel` but settled on the Filecoin blockchain
-- Smart contracts can be evaluated deterministically
-
 ## The Market Interface
 
 This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor. For more information about Actors, see TODO.
 
 ```go
 type StorageMarket interface {
-    // CreateStorageMiner creates a new storage miner with the given public key and a pledge
-    // of the given size. The miners collateral is set by the value in the message.
+    // CreateStorageMiner registers a new storage miner with the given public key and a
+    // pledge of the given size. The miners collateral is set by the value in the message.
     // The public key must match the private key used to sign off on blocks created
     // by this miner. This key is the 'worker' key for the miner.
     // The libp2p peer ID specified should reference the libp2p identity that the
     // miner is operating. This is the ID that clients will connect to to propose deals
+    // TODO: maybe rename to 'RegisterStorageMiner'?
     CreateStorageMiner(pubk PublicKey, pledge BytesAmount, pid libp2p.PeerID) Address
 
     // SlashConsensusFault is used to slash a misbehaving miner who submitted two different
@@ -48,12 +34,14 @@ type StorageMarket interface {
     // a small amount to compensate for gas fees (TODO: maybe it should be more?)
     SlashConsensusFault(blk1, blk2 BlockHeader)
 
-    // SlashStorageFaults slashes a storage miner for not submitting their PoSTs within
-    // the correct time window
-    SlashStorageFaults(miners []Address)
+    // SlashStorageFault slashes a storage miner for not submitting their PoSTs within
+    // the correct time window. This may be called by anyone who detects the faulty behavior.
+    // The slashed miner then loses all of their staked collateral, has their power cut to
+    // zero, and as a result, is no longer a candidate leader for extending the chain.
+    SlashStorageFault(miner Address)
     
     // UpdateStorage is called by a miner to adjust the storage market actors
-    // accounting of the total storage in the system.
+    // accounting of the total storage in the storage market.
     UpdateStorage(delta BytesAmount)
     
     // GetTotalStorage returns the total committed storage in the system. This number is
@@ -64,7 +52,7 @@ type StorageMarket interface {
 
 ## The Filecoin Storage Market Operation
 
-The Filecoin storage market operates as follows. Miners providing storage submit ask orders, asking for a certain price for their available storage space, and clients with files to store select an ask they wish to use. Clients negotiate directly with the storage miner that owns that ask, off-chain. Storage is priced in terms of Filecoin per byte per block (note: we may change the units here).
+The Filecoin storage market operates as follows. Miners providing storage submit ask orders, asking for a certain price for their available storage space, and clients with files to store look through the asks and select a miner they wish to use. Clients negotiate directly with the storage miner that owns that ask, off-chain. Storage is priced in terms of Filecoin per byte per block (note: we may change the units here).
 
 ### Market Datastructures
 
@@ -93,6 +81,7 @@ This section describes the flow required to store a single piece with a single s
   - The client sends a `StorageDealProposal` for the piece in question
     - This contains updates for the payment channel that the client may close at any time, unless the piece gets confirmed (see next section), in which case the miner is able to extend the channel.
   - The miner decides whether or not to accept the deal and sends back a `StorageDealResponse`
+    - Note: Different implementations may come up with different ways of making a decision on a given deal.
   - If the miner accepts, the client now sends the data to the miner
   - Once the miner receives the data:
     - They validate that the data matches the hashes claimed by the client

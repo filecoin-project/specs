@@ -22,4 +22,4 @@ TODO: we should likely be smarter here and track which messages we could send al
 
 Messages are propagated over the libp2p pubsub channel `/fil/messages`. The message is [serialized](data-structures.md#messages) and the raw bytes are sent as the content of the pubsub message.
 
-The pubsub validation function for messages checks that the content of each pubsub message on this topic is a properly constructed message. (TODO: discuss checking signatures and account balances, some tricky bits that need consideration). If an invalid message is received from a peer, that peer should be marked as potentially bad.
+The pubsub validation function for messages checks that the content of each pubsub message on this topic is, first, under the maximum size limit for a message, and then that it is a properly constructed message. (TODO: discuss checking signatures and account balances, some tricky bits that need consideration). If an invalid message is received from a peer, that peer should be marked as potentially bad.

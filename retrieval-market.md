@@ -24,20 +24,19 @@ The v0 `retrieval market` will initially be implemented as two `libp2p` services
 ```go
 type RetDealProposal struct {
     // Ref is the cid of the data to be retrieved
-    Ref *cid.Cid
+    Ref Cid
     
     // Price is the total amount that the client is willing to pay for the
     // retrieval of the data
-    Price *TokenAmount
+    Price TokenAmount
     
-    // PayCh is the address of the payment channel actor being used for
-    // payments in this exchange.
-    PayCh types.Address
+    // Payment is a payment info from the client to the retrieval miner for the data
+    Payment PaymentInfo
 }
 
 type ResponseStatus uint
 
-var (
+const (
     Unset = ResponseStatus(iota)
     Accepted
     Rejected
@@ -52,17 +51,32 @@ type RetDealResponse struct {
 type Block struct {
     // Prefix is the cid prefix parameters for this block. It describes how to
     // hash the block to verify it matches the expected value.
-    Prefix *cid.Prefix
+    Prefix CidPrefix
     Data []byte
 }
 ```
 
-`Retrieval miners` should also support a query service that allows clients to request pricing information from a miner. It is a simple endpoint that returns its information once connected to, no request structure needed.
+`Retrieval miners` should also support a query service that allows clients to request pricing information from a miner. 
+
+The query should include the CID of the piece that the client is interested in retrieving. The response contains whether or not the miner will serve that data, the price they will accept for it. 
 
 ```go
-type RetQueryResponse struct {
-    MinPrice *TokenAmount
+type RetQuery struct {
+    Piece Cid
 }
+
+type RetQueryResponse struct {
+    Status RetQueryStatus
+    MinPrice TokenAmount
+}
+
+type RetQueryStatus uint
+
+const (
+    Unset = RetQueryStatus(iota)
+    OK
+    PieceUnavailable
+)
 ```
 
 ## Chain Based Content Routing
@@ -73,7 +87,7 @@ The interface should match the exist libp2p content routing interface:
 
 ```go
 type ChainContentRouting interface {
-	FindProvidersAsync(context.Context, *cid.Cid, int) <-chan pstore.PeerInfo
+	FindProvidersAsync(ref Cid, count int) <-chan pstore.PeerInfo
 }
 ```
 

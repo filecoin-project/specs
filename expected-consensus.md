@@ -116,8 +116,15 @@ Thus, our ticket validation algorithm checks that the last ticket is a winning t
 
 ## Slashing
 
-In the event that a miner submits two blocks for the same round, they should be slashed. Any
-node that detects this occurring should take both block headers, and submit them to the
+A miner should be slashed if they are provably deviating from the honest protocol.
+
+This happens in the following instances: 
+
+- A miner submits two blocks for the same round.
+- A miner mines atop a 'Tipset' that should have contained their own block (same height, same parents) but does not.
+  - While we cannot prove that block omission from a 'Tipset' is malicious (ie not due to network latency), a miner may omit their own block if they find a winning Ticket in the parent 'Tipset' though they themselves have submitted a smaller (losing) Ticket. For obvious reasons, we can assert they are aware of the block they previously mined.
+
+Any node that detects this occurring should take both block headers, and submit them to the
 network slasher. The network will then take all of that node's collateral, give a portion of it to
 the reporter, and keep the rest.
 
@@ -130,9 +137,9 @@ Note(why): This slashing is insufficient to protect against most attacks. Miners
 ## Implementation Notes
 
 - When implementing parent selection, for now, always choose the single heaviest parent set for building on top of. More advanced strategies can be implemented later.
-- When selecting messages from the mempool to include in your block, be aware that other miners may also generate blocks during this round, and if you want to maximize your fee earnings it may be best to select some messages at random.
+- When selecting messages from the mempool to include in your block, be aware that other miners may also generate blocks during this round, and if you want to maximize your fee earnings it may be best to select some messages at random (second in a duplicate earns no fees).
 
 ## Open Questions
 
-- Should null blocks negatively impact chain weight? The concern is that a chain with two null blocks and a chain with three null blocks can be checked at the same time, and there could be more winning tickets on top of a chain with three null blocks than on top of a chain with two, and thats a weird form of parallelism/grinding that we would like to avoid.
-  - An alternative here would be to select the 'Tipset' with the lowest number of null tickets for a given block height and weight.
+- Whether to look back and how far for seed for leader election.
+- When selecting between two forks of equal weight, one strategy might be to select the 'Tipset' with the lowest number of null tickets for a given block height and weight.

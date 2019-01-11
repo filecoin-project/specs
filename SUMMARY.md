@@ -2,6 +2,7 @@
 
 * [Spec Process](process.md)
 * [Node Operation](operation.md)
+  * [Chain Sync](sync.md)
 * [Chain Validation](validation.md)
 * [Storage Market](storage-market.md)
   * [Interface](storage-market.md#the-market-interface)
@@ -15,7 +16,7 @@
   * [System Actors](TODO)
 * [Faults](faults.md)
 * Cryptography
-  * [Signatures](TODO)
+  * [Signatures](signatures.md)
   * [Proofs](proofs.md)
 * Network
   * [Storage Protocols](network-protocols.md)

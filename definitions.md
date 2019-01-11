@@ -14,11 +14,13 @@ To make any updates to these definitions please submit a pull request with the c
 
 #### Actor
 
-An address is an identifier that refers to an actor in some Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address.
+An actor is an on-chain object with its own state and set of methods. An actors state is persisted on-chain in the state tree, keyed by its address. All actors (miner actors, the storage market actor, account actors) have an address. Actors methods are invoked by crafting messages and getting miners to include them in blocks.
+
+Actors are very similar to smart contracts in Ethereum.
 
 #### Address
 
-An address refers to an actor in some Filecoin state.
+An address is an identifier that refers to an actor in the Filecoin state.
 
 #### Ask
 
@@ -39,6 +41,10 @@ See [Data Structures]()
 #### Cid
 
 CID is short for Content Identifier, a self describing content address used throughout the ipfs ecosystem. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
+
+#### Client
+
+A client is any user with an account who wishes to store data with a miner. A client's account is used to pay for the storage, and helps to prove the clients ability to pay.
 
 #### Collateral
 
@@ -88,6 +94,10 @@ See [Filecoin Proofs](https://github.com/filecoin-project/specs/blob/master/proo
 #### Gas, Fees, Prices
 
 #### GHOST
+
+#### Leader
+
+A leader, in the context of Filecoin consensus, is a node that is chosen to propose the next block in the blockchain. 
 
 #### Leader election
 

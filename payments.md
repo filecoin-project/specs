@@ -103,7 +103,7 @@ type SpendVoucher struct {
     Amount *TokenAmount
     
     // Nonce is a number that sets the ordering of vouchers. If you try to redeem
-    // a voucher with an equal or lower nonce, the operation will fail. Nonces are also
+    // a voucher with an equal or lower nonce, the operation will fail. Nonces are
     // per lane.
     Nonce uint64
     
@@ -112,7 +112,8 @@ type SpendVoucher struct {
     Lane uint64
     
     // Merges specifies a list of lane-nonce pairs that this voucher will close. 
-    // This voucher may not be redeemed if any of the lanes specified here are already closed.
+    // This voucher may not be redeemed if any of the lanes specified here are already
+    // closed, or their nonce specified here is lower than the nonce on-chain.
     Merges []Pair<uint64, uint64>
     
     Sig Signature

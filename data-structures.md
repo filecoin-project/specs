@@ -81,11 +81,20 @@ TODO: discuss how method parameters get encoded
 
 ### Signing
 
-TODO: discuss how signed messages work
+A signed message is a wrapper type over the base message.
+
+```go
+type SignedMessage struct {
+    Message Message
+    Signature Signature
+}
+```
+
+The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the [signatures spec](signatures.md).
 
 ### Serialization
 
-Messages are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
+Messages and SignedMessages are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
 
 ## Actor
 
