@@ -8,7 +8,7 @@ An active participant in the filecoin consensus process is a storage miner and e
 
 ### Registration
 
-To become a miner, you must first register a new miner on-chain, set your pledge, and deposit your collateral. This is done through the storage market actors `CreateMiner` method. Invoke that method with your desired pledge size, accompanying collateral, and public key for signature validation. The call will then create a new miner instance and return its address for you.
+To become a miner, you must first register a new miner on-chain, set your pledge, and deposit your collateral. This is done through the storage market actor's `CreateMiner` method. Invoke that method with your desired pledge size, accompanying collateral, and public key for signature validation. The call will then create a new miner instance and return its address for you.
 
 ### Announcement
 
@@ -21,9 +21,9 @@ Once you have asks on the network, you must now wait for deal proposals from sto
 
 ### Committing Storage
 
-Once a miner has filled up a sector with enough deals and sealed it, the next step is for them to commit that storage. To do this, they take the merkleroot commitment from the PoRep sealing setup and the seal proof, and call `CommitSector`.  Internally, `CommitSector` validates the proof, and then augments the miners `Power` by the appropriate amount.
+Once a miner has filled up a sector with enough deals and sealed it, the next step is for them to commit that storage. To do this, they take the merkleroot commitments from the PoRep sealing setup and the seal proof, and call `CommitSector`.  Internally, `CommitSector` validates the proof, and then augments the miners `Power` by the appropriate amount.
 
-It then checks if this is the miner is moving from having zero committed data to a non-zero amount of committed data, and if so sets the miners `ProvingPeriodStart` field to the current block.
+It then checks if the miner is moving from having zero committed data to a non-zero amount of committed data, and if so sets the miners `ProvingPeriodStart` field to the current block.
 
 TODO: sectors need to be globally unique. We can either do this by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain that we check against on each submission. I think that when we go towards sector aggregation, the latter option will become pretty much impossible, so we need to think about how that proof statement could work.
 
@@ -45,7 +45,7 @@ type StorageMinerActor interface {
     AddAsk(price *TokenAmount, expiry uint64) AskID
 
     // CommitSector adds a sector commitment to the chain.
-    CommitSector(commD, commR []byte, proof *SealProof) SectorID
+    CommitSector(commD, commR, commRStar []byte, proof *SealProof) SectorID
 
     // SubmitPoSt is used to submit a coalesced PoSt to the chain to convince the chain
     // that you have been actually storing the files you claim to be. A proof of
@@ -149,13 +149,13 @@ The miner actor has two distinct 'controller' addresses. One is the worker, whic
 
 ### Storage Mining Cycle
 
-Storage miners must continually produce proofs of space time over their storage to convince the network that they are actually storing the sectors that they have committed to. Each PoSt covers a miners entire storage.
+Storage miners must continually produce proofs of space time over their storage to convince the network that they are actually storing the sectors that they have committed to. Each PoSt covers a miner's entire storage.
 
 #### Step 0: Pre-Commit
 
-Before doing anything else, a miner must first pledge some collateral for their storage, and put up an ask to indicate their desired price.
+Before doing anything else, a miner must first pledge some collateral for their storage and put up an ask to indicate their desired price.
 
-After that, they need to make deals with clients, and begin filling up sectors with data. For more information on making deals, see the section on [deal flow](storage-market.md#deal-flow)
+After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on [deal flow](storage-market.md#deal-flow)
 
 When they have a full sector, they should seal it.
 
@@ -171,7 +171,7 @@ During this period, the miner may also commit to new sectors, but they will not 
 
 ```go
 func CommitSector(commD, commR []byte, proof *SealProof) SectorID {
-    if !miner.ValidatePoRep(commD, commR, miner.PublicKey, proof) {
+    if !miner.ValidatePoRep(commD, commR, commRStar, miner.PublicKey, proof) {
         return "bad proof!"
     }
     

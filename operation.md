@@ -1,6 +1,6 @@
 # Filecoin Node Operation
 
-Running a Filecoin full node requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.
+Running a Filecoin `full node` requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.
 
 (TODO: elaborate on all this, obviously)
 
@@ -35,7 +35,7 @@ To accept deals, miners should run the ['storage deal'](network-protocols.md#sto
 
 #### Prove Storage
 
-Once miners have submitted sealed sectors to the chain, they will be on the hook for proving the data over time. Every `proving period`, miners should take their current `proving set` and call `post.GeneratePost` on it. This process will take a fairly long amount of time (TODO: either put specific parameters here, or link to them) and result in a compact Proof of SpaceTime, which must then be submitted to the chain via `SubmitPoSt`
+Once miners have submitted sealed sectors to the chain, they will be on the hook for proving the data over time. Every `proving period`, miners should take their current `proving set` and call `post.GeneratePost` on it. This process will take a fairly long amount of time (TODO: either put specific parameters here, or link to them) and result in a compact Proof of SpaceTime, which must then be submitted to the chain via `SubmitPoSt`
 
 #### Extend the Blockchain
 

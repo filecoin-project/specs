@@ -5,82 +5,101 @@
 Chain syncing is the process a filecoin node runs to sync its internal chain state with new blocks from the network and new blocks it itself has mined.  A node syncs in two distinct modes: `syncing` and `caught up`.  Chain syncing updates both local storage of chain data and the head of the current heaviest observed chain.
 
 ## Interface
-```golang
+```go
 type Syncer struct {
-     head consensus.TipSet    // The heaviest known tipset in the network.
-     store chain.Store        // The interface for accessing and putting tipsets into local storage
-     genTs consensus.TipSet   // The known genesis tipset
-     bad chain.BadTipSetCache // TipSets known to be invalid
+	// The heaviest known tipset in the network.
+	head TipSet
+
+	// The interface for accessing and putting tipsets into local storage
+	store ChainStore
+
+	// The known genesis tipset
+	genesis TipSet
+
+	// TipSets known to be invalid
+	bad BadTipSetCache
 }
 
-func (syncer *Syncer) SyncBootstrap(newHead types.SortedCidSet) err {
-     chain := syncer.collectChainBootstrap(newHead)
+// SyncBootstrap is used to synchronise your chain when first joining
+// the network, or when rejoining after significant downtime.
+func (syncer *Syncer) SyncBootstrap(newHead TipSet) error {
+	chain := syncer.collectChainBootstrap(newHead)
 
-     for _, ts := range chain {
-     	 if err := consensus.Validate(ts, store); err != nil {
-	    return err
-	 }
-	 syncer.store.PutTipSet(ts)
-     }
-     syncer.head = chain[len(chain) -1]
-     return nil
+	for _, ts := range chain {
+		// Fetch the messages for the tipset now, so that we can properly
+		// validate the state transitions.
+		ts.FetchMessages()
+
+		if err := consensus.Validate(ts, store); err != nil {
+			return err
+		}
+		syncer.store.PutTipSet(ts)
+	}
+
+	syncer.head = chain.End()
+
+	return nil
 }
 
-func (syncer *Syncer) collectChainBootstrap(newHead types.SortedCidSet) []consensus.TipSet {
-     ts := tipsetFromCidOverNet(newHead) // lookup over network
-     var chain []consensus.Tipset{}
-     for {
-         chain = append([]consensus.TipSet{ts}, chain...) // block height increases as slice index increases, i.e. we prepend earlier tipsets
-         if ts.Equals(genTS) {
-	    return chain
-	 }
-	 parent := ts.ParentCid()
-	 ts = tipsetFromCidOverNet(parent)
-     }
+func (syncer *Syncer) collectChainBootstrap(newHead types.SortedCidSet) Chain {
+	var chain Chain
+
+	for cur := newHead; !cur.Equals(syncer.Genesis); {
+		ts := tipsetFromCidOverNet(cur) // lookup over network
+
+		chain.InsertFront(ts)
+
+		cur = ts.Parent()
+	}
+
+	return chain
 }
 
+// SyncCaughtUp is used to stay in sync once caught up to
+// the rest of the network.
 func (syncer *Syncer) SyncCaughtUp(maybeHead types.SortedCidSet) error {
-     chain, err := syncer.collectChainCaughtUp(maybeHead)
-     if err != nil {
-     	return err
-     }
+	chain, err := syncer.collectChainCaughtUp(maybeHead)
+	if err != nil {
+		return err
+	}
 
-     for _, ts := range possibleTs(chain[1:]) { // possibleTs enumerates possible tipsets that are the union of tipsets from the chain and the store
-     	 if err := consensus.Validate(ts, store); err != nil {
-	    return err
-	 }
-	 syncer.store.PutTipSet(ts)
-	 if consenus.Weight(ts) > consensus.Weight(head) {
-	    syncer.head = ts
-	 }
-     }
-     return nil
+	// possibleTs enumerates possible tipsets that are the union
+    // of tipsets from the chain and the store
+	for _, ts := range possibleTs(chain[1:]) { 
+		if err := consensus.Validate(ts, store); err != nil {
+			return err
+		}
+		syncer.store.PutTipSet(ts)
+		if consenus.Weight(ts) > consensus.Weight(head) {
+			syncer.head = ts
+		}
+	}
+	return nil
 }
 
-func (syncer *Syncer) collectChainCaughtUp(maybeHead types.SortedCidSet) ([]consensus.TipSet, error) {
-     ts, err := tipsetFromCidOverNet(newHead) // lookup over network
-     if err != nil { // tipset could not be found, maybe it does not exist
-     	return nil, err
-     }
-     var chain []consensus.Tipset{}
-     for {
-     	 if !consensus.Punctual(ts) {
-	    syncer.bad.InvalidateChain(chain)
-	    syncer.bad.InvalidateTipSet(ts)
-	    return nil, errors.New("tipset forks too far back from head")
-         }
-         chain = append([]consensus.TipSet{ts}, chain...) // block height increases as slice index increases, i.e. we prepend earlier tipsets
-         if syncer.store.Contains(ts) { // Store has record of this tipset.
-	    return chain, nil
-	 }
-	 parent := ts.ParentCid()
-	 ts, err = tipsetFromCidOverNet(parent)
-	 if err != nil {
-	    return nil, err
-	 }
-     }
-}
+func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
+	ts := tipsetFromCidOverNet(newHead) // lookup over network
 
+	var chain Chain
+	for {
+		if !consensus.Punctual(ts) {
+			syncer.bad.InvalidateChain(chain)
+			syncer.bad.InvalidateTipSet(ts)
+			return nil, errors.New("tipset forks too far back from head")
+		}
+
+		chain.InsertFront(ts)
+
+		if syncer.store.Contains(ts) { // Store has record of this tipset.
+			return chain, nil
+		}
+		parent := ts.ParentCid()
+		ts, err = tipsetFromCidOverNet(parent)
+		if err != nil {
+			return nil, err
+		}
+	}
+}
 ```
 
 ## Syncing Mode
@@ -101,11 +120,13 @@ To sync new tipsets the `caught up` syncing protocol first runs a consensus vali
 
 # Dependencies
 Things that affect the chain syncing protocol.
-Consensus protocol
+
+**Consensus protocol**
 - The consensus protocol should define a punctual function: `func Punctual([]TipSet chain) bool`. `Punctual(chain) == true` when a provided chain does not fork from the node's view of the current best chain 'too far in the past', and false otherwise.
 - The fork selection rule.  This includes the weighting function.  As part of this in the context of EC the syncer must consider tipsets that are the union of independently propagated tipsets.
 
-Chain storage
+**Chain storage**
+
 - The current chain syncing protocol requires that the chain store never stores an invalid tipset.
 
 # Open Questions

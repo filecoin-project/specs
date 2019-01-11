@@ -8,11 +8,11 @@
 
 ## Miners Claiming Earnings
 
-Storage miners get paid entirely through payment channels. Payment from a client to a storage miner comes in the form of a set of channel updates that get created up-front. These updates are each time-locked, and can only be cashed out if the storage miner has not been slashed for the storage that is being paid for. (TODO: working on a multi-lane payment channel construction that should make this all pretty easy, only requiring a single on-chain channel construction between each client and storage miner).
+Storage miners get paid entirely through payment channels. Payment from a client to a storage miner comes in the form of a set of channel updates that get created when proposing the deal. These updates are each time-locked, and can only be cashed out if the storage miner has not been slashed for the storage that is being paid for. (TODO: working on a multi-lane payment channel construction that should make this all pretty easy, only requiring a single on-chain channel construction between each client and storage miner).
 
 ## Payment Channels
 
-In order for the retrieval market to work in a timely manner, we need to be able to have off-chain payments. This is a solved problem (at least, for our purposes in v0). Payment channels have been implemented and used in bitcoin, ethereum and many other networks.
+In order for the Filecoin Markets to work in a timely manner, we need to be able to have off-chain payments. This is a solved problem (at least, for our purposes in v0). Payment channels have been implemented and used in bitcoin, ethereum and many other networks.
 
 The basic premise is this: User A wants to be able to send many small payments to user B. So user A locks up money in a contract that says "this money will only go to user B, and the unclaimed amount will be returned to user A after a set time period". Once that money is locked up, user A can send user B signed transactions that user B can cash out at any time.
 
