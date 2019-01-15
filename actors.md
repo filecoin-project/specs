@@ -39,8 +39,6 @@ Parameters:
 
 Return: None
 
-NOTE: should probably go on the miner itself...
-
 ```go
 func SlashConsensusFault(block1, block2 BlockHeader) {
 	if block1.Height != block2.Height {
@@ -64,15 +62,12 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
     
     // Remove the miner from the list of network miners
     self.Miners.Remove(miner)
+    self.TotalStorage -= miner.Power
 
     // Now delete the miner (maybe this is a bit harsh, but i'm okay with it for now)
     miner.SelfDestruct()
 }
 ```
-
-
-
-
 
 
 ### UpdateStorage
@@ -287,7 +282,7 @@ func SlashStorageFault(miner Address) {
     }
     
     // Strip miner of their power
-    StorageMarketActor.UpdatePower(-1 * self.Power)
+    StorageMarketActor.UpdateStorage(-1 * self.Power)
     self.Power = 0
     
     // TODO: make this less hand wavey
