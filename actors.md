@@ -60,6 +60,8 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
     // Burn all of the miners collateral
     miner.BurnCollateral()
     
+    // TODO: Some of the slashed collateral should be paid to the slasher
+    
     // Remove the miner from the list of network miners
     self.Miners.Remove(miner)
 
@@ -68,13 +70,9 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 }
 ```
 
-### SlashStorageFault
 
-Parameters:
 
-- miner Address
 
-Return: None
 
 
 ### UpdateStorage
@@ -270,11 +268,48 @@ func SubmitPost(proof PoSt, faults []FaultSet, recovered SectorSet, done SectorS
 }
 ```
 
+### SlashStorageFault
+
+Parameters:
+
+- miner Address
+
+Return: None
+
+```go
+func SlashStorageFault(miner Address) {
+	if self.SlashedAt > 0 {
+        Fatal("miner already slashed")
+	}
+	
+    if chain.Now() <= miner.ProvingPeriodEnd + GenerationAttackTime {
+    	Fatal("miner is not yet tardy")
+    }
+    
+    // Strip miner of their power
+    StorageMarketActor.UpdatePower(-1 * self.Power)
+    self.Power = 0
+    
+    // TODO: make this less hand wavey
+    BurnCollateral(self.ConsensusCollateral)
+    
+    self.SlashedAt = CurrentBlockHeight
+}
+```
+
 ### GetCurrentProvingSet
 
 Parameters: None
 
 Return: `[][]byte`
+
+```go
+func GetCurrentProvingSet() [][]byte {
+    return self.ProvingSet
+}
+```
+
+Note: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)
 
 ### ArbitrateDeal
 
@@ -282,6 +317,34 @@ Parameters:
 - deal Deal
 
 Return: None
+
+```go
+func AbitrateDeal(d Deal) {
+    if !ValidateSignature(d, self.Worker) {
+        Fatal("invalid signature on deal")
+    }
+    
+    if CurrentBlockHeight < d.StartTime {
+        Fatal("Deal not yet started")
+    }
+    
+    if d.Expiry < CurrentBlockHeight {
+        Fatal("Deal is expired")
+    }
+    
+    if !self.NextDoneSet.Has(d.PieceCommitment.Sector) {
+        Fatal("Deal agreement not broken, or arbitration too late") 
+    }
+    
+    coll := CollateralForDeal(d)
+    
+    self.BurnFunds(coll)
+    
+    self.NextDoneSet.Remove(d.PieceCommitment.Sector)
+}
+```
+
+TODO(scaling): This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.
 
 ### GetOwner
 
@@ -358,6 +421,7 @@ Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/10
 
 #### `Integer`
 
+TODO
 
 #### `SectorSet`
 
@@ -372,4 +436,9 @@ TODO
 BlockHeader is a serialized `Block`, as described in [the data structures document](data-structures.md#block).
 
 #### `SealProof`
+
+SealProof is just an array of bytes.
+
 #### `TokenAmount`
+
+TokenAmount is just a re-typed Integer.
