@@ -90,28 +90,28 @@ Legal values for `DealState` are as follows:
 
 ```go
 const (
-	// Unset implies a programmer error. This value should never appear
+    // Unset implies a programmer error. This value should never appear
     // in an actual message
     Unset = 0
     
-	// Unknown signifies an unknown negotiation
-	Unknown = 1
+    // Unknown signifies an unknown negotiation
+    Unknown = 1
 
-	// Rejected means the deal was rejected for some reason
-	Rejected = 2
+    // Rejected means the deal was rejected for some reason
+    Rejected = 2
 
-	// Accepted means the deal was accepted but hasnt yet started
-	Accepted = 3
+    // Accepted means the deal was accepted but hasnt yet started
+    Accepted = 3
 
-	// Started means the deal has started and the transfer is in progress
-	Started = 4
+    // Started means the deal has started and the transfer is in progress
+    Started = 4
 
-	// Failed means the deal has failed for some reason
-	Failed = 5
+    // Failed means the deal has failed for some reason
+    Failed = 5
 
-	// Complete means the deal is complete, and the sector that the deal is contained
+    // Complete means the deal is complete, and the sector that the deal is contained
     // in has been sealed and its commitment posted on chain.
-	Complete = 6
+    Complete = 6
     
     // Staged is used by the storage deal protocol to indicate the data has been
     // received and staged into a sector, but is not sealed yet
@@ -132,8 +132,8 @@ type StorageDealResponse struct {
     // Message is an optional message to add context to any given response
     Message string
     
-    // Proposal is the cid of the StorageDealProposal object this response is for
-    Proposal Cid
+    // ProposalCid is the cid of the StorageDealProposal object this response is for
+    ProposalCid Cid
     
     // PieceConfirmation is a collection of information needed to convince the client that
     // the miner has sealed the data into a sector. 
