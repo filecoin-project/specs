@@ -291,7 +291,9 @@ func SubmitPost(proof PoSt, faults []FaultSet, recovered SectorSet, done SectorS
     
     // update miner power to the amount of data actually proved during
     // the last proving period.
+    oldPower := miner.Power
     miner.Power = SizeOf(Filter(miner.ProvingSet, faults))
+    storageMarket.UpdateStorage(miner.Power - oldPower)
     
     miner.ProvingSet = miner.Sectors
     
