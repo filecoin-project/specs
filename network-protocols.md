@@ -28,7 +28,7 @@ func SayHello(p PeerID) {
     s := OpenStream(p)
     mes := GetHelloMessage()
     serialized := json.Marshal(mes)
-    
+
     s.Write(serialized)
     s.Close()
 }
@@ -49,23 +49,30 @@ type StorageDealProposal struct {
     // PieceRef is the hash of the data in native structure. This will be used for
     // certifying the data transfer
     PieceRef Cid
-    
+
     // TranslatedRef is the data hashed in a form that is compatible with the proofs system
-    // TODO: this *could* possibly be combined with the PieceRef 
+    // TODO: this *could* possibly be combined with the PieceRef
     TranslatedRef Cid
-    
+
     Size NumBytes
-    
+
     TotalPrice TokenAmount
-    
+
     // Duration is how long the file should be stored for
     Duration NumBlocks
-    
+
+    // LastDuplicate is the CID of the last proposal created with identical
+    // values. This field effectively changes the CID of the current proposal,
+    // preventing collisions. This field can also be used for looking up
+    // previous proposals, however it will not be considered a reliable source
+    // for this information as data can be lost.
+    LastDuplicate Cid
+
     // PaymentRef is a reference to the mechanism that the proposer
     // will use to pay the miner. It should be verifiable by the
     // miner using on-chain information.
     Payment PaymentInfo
-    
+
     Signature Signature
 }
 
@@ -73,11 +80,11 @@ type PaymentInfo struct {
     // PayChActor is the address of the payment channel actor
     // that will be used to facilitate payments
     PayChActor Address
-    
+
     // Channel is the ID of the specific channel the client will
     // use to pay the miner. It must already have sufficient funds locked up
     Channel ChannelID
-    
+
     // Vouchers is a set of payments from the client to the miner that can be
     // cashed out contingent on the agreed upon data being provably within a
     // live sector in the miners control on-chain
@@ -93,7 +100,7 @@ const (
 	// Unset implies a programmer error. This value should never appear
     // in an actual message
     Unset = 0
-    
+
 	// Unknown signifies an unknown negotiation
 	Unknown = 1
 
@@ -112,7 +119,7 @@ const (
 	// Complete means the deal is complete, and the sector that the deal is contained
     // in has been sealed and its commitment posted on chain.
 	Complete = 6
-    
+
     // Staged is used by the storage deal protocol to indicate the data has been
     // received and staged into a sector, but is not sealed yet
     Staged = 7
@@ -128,17 +135,17 @@ The miner then decides whether or not to accept the deal, and sends back a respo
 ```go
 type StorageDealResponse struct {
     State DealState
-    
+
     // Message is an optional message to add context to any given response
     Message string
-    
+
     // Proposal is the cid of the StorageDealProposal object this response is for
     Proposal Cid
-    
+
     // PieceConfirmation is a collection of information needed to convince the client that
-    // the miner has sealed the data into a sector. 
+    // the miner has sealed the data into a sector.
     PieceConfirmation PieceConfirmation
-    
+
     // Signature is a signature from the miner over the response
     Signature Signature
 }
@@ -163,7 +170,7 @@ type StorageDealQuery struct {
     // ProposalCid is the cid of the proposal for the deal that we are querying
     // the state of
     ProposalCid *cid.Cid
-    
+
     BaseState DealState
 }
 ```
@@ -239,5 +246,3 @@ type RetrievePieceChunk struct {
 ```
 
 TODO: document the query deal interaction
-
-
