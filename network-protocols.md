@@ -139,8 +139,8 @@ type StorageDealResponse struct {
     // Message is an optional message to add context to any given response
     Message string
 
-    // Proposal is the cid of the StorageDealProposal object this response is for
-    Proposal Cid
+    // ProposalCid is the cid of the StorageDealProposal object this response is for
+    ProposalCid Cid
 
     // PieceConfirmation is a collection of information needed to convince the client that
     // the miner has sealed the data into a sector.
