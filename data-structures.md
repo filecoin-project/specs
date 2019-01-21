@@ -18,7 +18,7 @@ A block represents an individual point in time that the network may achieve cons
 // Block is a block in the blockchain.
 type Block struct {
 	// Miner is the address of the miner actor that mined this block.
-	Miner address.Address
+	Miner Address
 
 	// Ticket is the winning ticket that was submitted with this block.
 	Ticket Signature
@@ -26,13 +26,13 @@ type Block struct {
 	// Parents is the set of parents this block was based on. Typically one,
 	// but can be several in the case where there were multiple winning ticket-
 	// holders for a round.
-	Parents SortedCidSet
+	Parents []Cid
 
 	// ParentWeightNum is the numerator of the aggregate chain weight of the parent set.
-	ParentWeightNum Uint64
+	ParentWeightNum Integer
 
 	// ParentWeightDenom is the denominator of the aggregate chain weight of the parent set
-	ParentWeightDenom Uint64 
+	ParentWeightDenom Integer 
 
 	// Height is the chain height of this block.
 	Height Uint64
@@ -65,9 +65,9 @@ type Message struct {
 	// When receiving a message from a user account the nonce in
 	// the message must match the expected nonce in the from actor.
 	// This prevents replay attacks.
-	Nonce Uint64
+	Nonce Integer
 
-	Value AttoFIL
+	Value Integer
 
 	Method string
 	
@@ -107,7 +107,7 @@ type Actor struct {
 	Head    Cid
     
     // Nonce is a counter of the number of messages this actor has sent
-	Nonce   Uint64
+	Nonce   Integer
     
     // Balance is this actors current balance of filecoin
 	Balance AttoFIL
