@@ -8,13 +8,37 @@ All filecoin network protocols are implemented as libp2p protocols. This documen
 
 ## CBOR RPC
 
-Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will try to use a CBOR RPC protocol format. This format is effectively just a leb128 varint length delimeted series of cbor serialized objects. Whenever a filecoin protocol says "send X", it means "cbor serialize X, write its length encoded using leb128, then write the serialized bytes".
+Reference:
+- [RFC 7049, Concise Binary Object Representation](https://tools.ietf.org/html/rfc7049)
+- [Little Endian Base 128](https://en.wikipedia.org/wiki/LEB128)
+
+Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will try to use a CBOR RPC protocol format. This format is effectively just a leb128 varint length delimeted series of cbor serialized objects. Whenever a filecoin protocol says "send X", it means "cbor serialize the object X, write its length encoded using unsigned leb128, then write the serialized bytes".
+
+```go
+func ReadCborRPC(r io.Reader, out *Object) {
+	l := ReadUVarint(r)
+
+	// Read 'l' bytes from the reader
+	buf := ReadCountBytes(r, l)
+
+	cbor.Unmarshal(buf, out)
+}
+
+func WriteCborRPC(w io.Writer, obj Object) {
+	buf := cbor.Marshal(obj)
+
+	WriteUVarint(w, len(buf))
+
+	w.Write(buf)
+}
+```
 
 # Hello Handshake
 
 The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node. The libp2p protocol ID for this protocol is `/fil/hello/1.0.0`.
 
-Whenever a node gets a new connection, it opens a new stream on that connection and 'says hello'. This is done by crafting a `HelloMessage`, json encoding it (TODO: BAD! switch to CBOR-RPC), writing it over the stream, and finally, closing the stream.
+Whenever a node gets a new connection, it opens a new stream on that connection and 'says hello'. This is done by crafting a `HelloMessage`, sending it to the other peer using CBOR RPC and finally, closing the stream.
+
 ```go
 type HelloMessage struct {
     HeaviestTipSet []Cid
@@ -27,14 +51,16 @@ type HelloMessage struct {
 func SayHello(p PeerID) {
     s := OpenStream(p)
     mes := GetHelloMessage()
-    serialized := json.Marshal(mes)
+    serialized := cbor.Marshal(mes)
+
+    WriteUVarint(s, len(serialized))
 
     s.Write(serialized)
     s.Close()
 }
 ```
 
-Upon receiving a 'hello' stream from another node, you should read off the json serialized hello message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the `HeaviestTipSet`, claimed `HeaviestTipSetHeight`, and peerID of the other node should be passed to the chain sync subsystem.
+Upon receiving a 'hello' stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the `HeaviestTipSet`, claimed `HeaviestTipSetHeight`, and peerID of the other node should be passed to the chain sync subsystem.
 
 # Storage Deal
 
@@ -73,6 +99,7 @@ type StorageDealProposal struct {
     // miner using on-chain information.
     Payment PaymentInfo
 
+    ClientAddress Address
     Signature Signature
 }
 
@@ -126,9 +153,48 @@ const (
 )
 ```
 
+```go
+func SendStorageProposal(miner Address, file Cid, duration NumBlocks, price TokenAmount) {
+    if !IsMiner(miner) {
+        Fatal("given address was not a miner")
+    }
+
+    // Get a PoRep friendly commitment from the file
+    commitment, size := ProcessRef(file)
+
+    // Get a handle on the payment system to be used to pay this miner
+    // Most likely, this grabs an existing payment channel, or creates
+    // a new one
+    payments := PaymentSysToMiner(miner)
+
+    payInfo := payments.CreatePaymentInfo(storageStart, duration, price * size)
+
+    prop := StorageDealProposal{
+	PieceRef: file,
+	TranslatedRef: commitment,
+	TotalPrice: price * size, // Maybe just leave this to the payment info?
+	Duration: duration,
+	Size: size,
+	Payment: payInfo,
+    }
+
+	client.SignProposal(prop)
+
+	peerid := lookup.ByMinerAddress(miner)
+	s := NewStream(peerid, MakeStorageDealProtocolID)
+
+	CborRpc.Write(s, prop)
+
+	resp := CborRpc.Read(s)
+
+	switch resp.State {
+
+	}
+}
+```
 
 
-TODO: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall.
+TODO: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.
 
 The miner then decides whether or not to accept the deal, and sends back a response:
 
@@ -148,6 +214,56 @@ type StorageDealResponse struct {
 
     // Signature is a signature from the miner over the response
     Signature Signature
+}
+```
+
+```go
+func HandleStorageDealProposal(s Stream) {
+    prop := CborRpc.Read(s)
+
+    if !ValidateInput(prop) {
+        Fatal("client sent invalid proposal")
+    }
+
+    if accept, reason := MinerPolicy.ShouldAccept(prop); !accept {
+        CborRpc.Write(s, StorageDealResponse{
+            State: Rejected,
+            Message: reason,
+        })
+        return
+    }
+
+    // Alright, we're accepting
+    resp := StorageDealResponse{
+        State: Accepted,
+        Proposal: prop.Cid(),
+    }
+
+    miner.Sign(resp)
+
+    miner.SetDealState(resp)
+
+    // Make sure we are ready to receive the file (however it may come)
+    // TODO: potentially add in something to the protocol to allow
+    // clients to signal how the file will be transferred
+    miner.RegisterInboundFileTransfer(resp)
+
+    CborRpc.Write(s, resp)
+}
+
+func ValidateInput(prop StorageDealProposal) {
+    // Note: Maybe this is unnecessary, and the payment info being valid suffices?
+    if !ValidateSignature(prop.Signature, prop.ClientAddress) {
+        Fatal("invalid signature from client")
+    }
+
+    if !IsExistingAccount(prop.ClientAddress) {
+        Fatal("proposal came from a fake account")
+    }
+
+    if !ValidatePaymentInfo(prop.Payment, prop.Duration, prop.Size) {
+        Fatal("propsal had invalid payment information")
+    }
 }
 ```
 
@@ -186,7 +302,7 @@ The client initiates the protocol by opening a libp2p stream to the miner using 
 
 The `RetrievePieceRequest` is specified as follows:
 
-```
+```go
 type RetrievePieceRequest struct {
     // `PieceRef` identifies a piece of user data, typically received from the
     // client while consummating a storage deal.
@@ -198,7 +314,7 @@ When the miner receives the request, it responds with a `RetrievePieceResponse` 
 
 The `RetrievePieceResponse` message is specified as follows:
 
-```
+```go
 type RetrievePieceResponse struct {
     // `Status` communicates the miner's willingness to send a piece back to a
     // client. The value of the `Status` field must be one of: `Failure` or
@@ -213,7 +329,7 @@ type RetrievePieceResponse struct {
 
 Legal values for `RetrievePieceStatus` are as follows:
 
-```
+```go
 const (
 	// Unset implies a programmer error. This value should never appear in an
 	// actual message.
@@ -237,7 +353,7 @@ Note: The miner divides the piece in to chunks containing a maximum of `256 << 8
 
 The `RetrievePieceChunk` message is specified as follows:
 
-```
+```go
 type RetrievePieceChunk struct {
     // The `Data` field contains a chunk of a piece. The length of `Data` must
     // be > 0.

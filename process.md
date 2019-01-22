@@ -12,6 +12,10 @@ For anything that is not 'catching up' (like 'repair', for example) the process 
 
 Once there is agreement that the draft should be implemented, it should then get moved from the drafts folder, into the top level along with other spec documents. This process should just be a simple renaming, and should not generate any discussion. Along with the moving of that document, any interested parties in the development teams should be explicitly tagged.
 
+### On merging
+
+For anything in the drafts or notes folder, merge yourself after a review from a relevant person. For anything in the top level (canonical spec), @whyrusleeping will merge after proper review.
+
 ### Issues
 
 Issues in the specs repo will be high signal, they will either be proposals, or issues directly relating to problems in the spec. More speculative research questions and discussion will happen in the research repo.
