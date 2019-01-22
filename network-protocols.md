@@ -99,6 +99,9 @@ type StorageDealProposal struct {
     // miner using on-chain information.
     Payment PaymentInfo
 
+    // MinerAddress is the address of the storage miner in the deal proposal
+    MinerAddress Address
+
     ClientAddress Address
     Signature Signature
 }
