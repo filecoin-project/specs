@@ -271,6 +271,15 @@ If `response.State` is `Accepted` then the client should proceed to transfer the
 
 Next, when the miner receives all the data and validates it, they set the deals state to `Staged`. When the sector gets sealed, and the commitment is posted on chain, the state gets set to `Complete` and the deals `PieceConfirmation` field should be set to the appropriate values.
 
+```go
+func OnDataReceived() {
+    // TODO: document process for updating deal state and
+    // starting seal after data is received
+}
+```
+
+
+
 Once the deal makes it to this state, the client should be able to query and get the `PieceConfirmation` that they need to complete their proofs of repair for the data.
 
 ## Query
