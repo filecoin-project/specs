@@ -1,13 +1,13 @@
 # Expected Consensus
 
-Expected Consensus is a probabilistic Byzantine fault-tolerant consensus protocol. At a high 
+This is a technical design document describing how to implement the protocol in general, for the Filecoin specific mining process that implements Expected Consensus see [Mining Blocks](mining.md#mining-blocks)
+
+Expected Consensus is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
 level, it operates by running a leader election every round in which, on expectation, one 
 participant wins. The important part to note is "on expectation". In each round, any number of 
 participants, or none, may find a winning ticket, and any miner holding a winning ticket may 
 submit a block. The 'best' chain is the one with the highest weight, which is to say that the fork 
 choice rule is to choose the heaviest known chain.
-
-This is a technical design document describing how to implement the protocol.
 
 
 The basic algorithm is as follows:

@@ -99,10 +99,10 @@ The command names here are not final, and are definitely subject to change later
 
 ```text
 USAGE
-  go-filecoin retr get <piece-cid> - Retrieve a piece from a miner.
+  filecoin retr get <piece-cid> - Retrieve a piece from a miner.
 
 SYNOPSIS
-  go-filecoin retr get [--price=<amt>] [--miner=<peerID>] [--] <piece-cid>
+  filecoin retr get [--price=<amt>] [--miner=<peerID>] [--] <piece-cid>
 
 ARGUMENTS
 
@@ -116,10 +116,10 @@ OPTIONS
 
 ```text
 USAGE
-  go-filecoin retr lookup <piece-cid> - Print a list of miners who have the given piece.
+  filecoin retr lookup <piece-cid> - Print a list of miners who have the given piece.
 
 SYNOPSIS
-  go-filecoin retr lookup [--sort=<sorttype>] [--] <piece-cid>
+  filecoin retr lookup [--sort=<sorttype>] [--] <piece-cid>
 
 ARGUMENTS
 
@@ -132,10 +132,10 @@ OPTIONS
 
 ```text
 USAGE
-  go-filecoin retr query <minerID> [<piece-cid>] - Query the given retrieval miner.
+  filecoin retr query <minerID> [<piece-cid>] - Query the given retrieval miner.
 
 SYNOPSIS
-  go-filecoin retr query [--] <miner-id> [<piece-cid>]
+  filecoin retr query [--] <miner-id> [<piece-cid>]
 
 ARGUMENTS
 
