@@ -4,6 +4,8 @@
 
 Chain syncing is the process a filecoin node runs to sync its internal chain state with new blocks from the network and new blocks it itself has mined.  A node syncs in two distinct modes: `syncing` and `caught up`.  Chain syncing updates both local storage of chain data and the head of the current heaviest observed chain.
 
+'Syncing' mode and 'Caught up' mode are two distinct processes. 'Syncing' mode, or 'the initial sync' is a process that is triggered when a node is far enough behind the rest of the network. This process terminates once the nodes 'head' is    sufficiently far ahead. Once 'syncing' is complete, the 'caught up' sync process begins. This process keeps the node up to date with the rest of the network, and terminates only when the node is shut down.
+
 ## Interface
 ```go
 type Syncer struct {
@@ -77,6 +79,7 @@ func (syncer *Syncer) SyncCaughtUp(maybeHead types.SortedCidSet) error {
 	return nil
 }
 
+
 func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 	ts := tipsetFromCidOverNet(newHead) // lookup over network
 
@@ -112,7 +115,7 @@ In this mode of operation a filecoin node should not mine or send messages as it
 (TODO: should include discussion of a `Load()` call to make use of existing chain data on a node during "re-awakening" case of `syncing` mode.)
 
 ## Caught Up Mode
-A filecoin node syncs in `caught up` mode after completing `syncing` mode.  New block cids are gossiped from the network through the hello protocol or the network's block pubsub protocol (TODO is this in the spec?). A node also obtains new block cids coming from its own successfully mined blocks.  These cids are input to the `caught up` syncing protocol.  If these cids belong to a tipset already in the store then they are already synced and the syncing protocol finishes.  If not the syncing protocol resolves the tipset corresponding to the input cids.  It checks that this tipset is not in its badTipSet cache, and that this tipset is not too far back in the chain using the consensus `Punctual` method.  It then resolves the parent tipset by reading off the parent cids in the header of any block of the tipset.  The above procedure repeats until either an error is found or the store contains the next tipset.  In the case of an error bad tipsets and their children not already in the bad tipset cache are added to the cache before the syncing protocol completes.
+A filecoin node syncs in `caught up` mode after completing `syncing` mode. A node stays in this mode until they are shutdown. New block cids are gossiped from the network through the hello protocol or the network's [block pubsub protocol](data-propogation.md#block-propogation). A node also obtains new block cids coming from its own successfully mined blocks.  These cids are input to the `caught up` syncing protocol.  If these cids belong to a tipset already in the store then they are already synced and the syncing protocol finishes.  If not the syncing protocol resolves the tipset corresponding to the input cids.  It checks that this tipset is not in its badTipSet cache, and that this tipset is not too far back in the chain using the consensus `Punctual` method.  It then resolves the parent tipset by reading off the parent cids in the header of any block of the tipset.  The above procedure repeats until either an error is found or the store contains the next tipset.  In the case of an error bad tipsets and their children not already in the bad tipset cache are added to the cache before the call to `collectTipSetCaughtUp` returns.
 
 After collecting a chain up to an ancestor tipset that was previously synced to the store the syncing protocol checks each tipset of the new chain for validity one by one.  When the filecoin network runs Expected Consensus, or any other multiple parents consensus protocol, the syncing protocol must consider not only the tipsets in the new chain but also possible new-heaviest tipsets that are the union of tipsets in the new chain and tipsets already in the store.  In the case of Expected Consensus there is at most one such tipset: the tipset made up of the union of the first new tipset in the new chain being synced and the largest tipset with the same parents kept in the store.
 
