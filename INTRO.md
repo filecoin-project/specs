@@ -1,6 +1,6 @@
 # Filecoin Spec
 
-This is the official Filecoin protocol specification.
+This is the official Filecoin protocol specification. It is a work in progress. While reading, if you notice any discrepancies, or issues, please open an issue on the [specs repo](https://github.com/filecoin-project/specs).
 
 Any content that is written with `code ticks` has a specific definition to Filecoin and is defined in [the glossary](definitions.md).
 
