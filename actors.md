@@ -62,7 +62,7 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
     
     // Remove the miner from the list of network miners
     self.Miners.Remove(miner)
-    self.TotalStorage -= miner.Power
+    self.UpdateStorage(-1 * miner.Power)
 
     // Now delete the miner (maybe this is a bit harsh, but i'm okay with it for now)
     miner.SelfDestruct()
@@ -106,10 +106,14 @@ func GetTotalStorage() Integer {
 
 Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.
 ```go
-func StorageMinerActor(pubkey PublicKey, pledge Integer, pid PeerID) {
+func StorageMinerActor(pubkey PublicKey, pledge BytesAmount, pid PeerID) {
+    if msg.Value < CollateralForPledgeSize(pledge) {
+        Fatal("not enough collateral given")
+    }
+    
     self.PublicKey = pubkey
     self.PeerID = pid
-    self.Pledge = pledge
+    self.PledgeBytes = pledge
 }
 ```
 
@@ -184,6 +188,17 @@ func CommitSector(commD, commR []byte, proof *SealProof) SectorID {
     // TODO: sectors IDs might not be that useful. For now, this should just be the number of
     // the sector within the set of sectors, but that can change as the miner experiences
     // failures.
+    
+    // if miner is not mining, start their proving period now
+    // Note: As written here, every miners first PoSt will only be over one sector.
+    // We could set up a 'grace period' for starting mining that would allow miners
+    // to submit several sectors for their first proving period. Alternatively, we
+    // could simply make the 'CommitSector' call take multiple sectors at a time.
+    if miner.ProvingSet.Size() == 0 {
+       miner.ProvingSet = miner.Sectors
+       miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration
+    }
+    
     return sectorId
 }
 ```
@@ -199,7 +214,7 @@ Parameters:
 Return: None
 
 ```go
-func SubmitPost(proof PoSt, faults []FaultSet, recovered SectorSet, done SectorSet) {
+func SubmitPost(proof PoSt, faults []FaultSet, recovered BitField, done BitField) {
     if msg.From != miner.Worker {
         Fatal("not authorized to submit post for miner")
     }
@@ -235,7 +250,7 @@ func SubmitPost(proof PoSt, faults []FaultSet, recovered SectorSet, done SectorS
         Fatal("proof invalid")
     }
     
-    permLostSet = AggregateSets(faults).Subtract(recovered)
+    permLostSet = AggregateBitfields(faults).Subtract(recovered)
     
     // adjust collateral for 'done' sectors
     miner.ActiveCollateral -= CollateralForSectors(miner.NextDoneSet)
@@ -258,8 +273,34 @@ func SubmitPost(proof PoSt, faults []FaultSet, recovered SectorSet, done SectorS
     
     miner.ProvingSet = miner.Sectors
     
+    // NEEDS REVIEW: early submission of PoSts may give the miner extra time for
+    // their next PoSt, which could compound. Does the beacon reseeding for Posts
+    // address this well enough?
+    miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration
+    
     // update next done set
     miner.NextDoneSet = done
+}
+```
+
+### IncreasePledge
+
+Parameters:
+
+- addspace BytesAmount
+
+Return: None
+
+
+```go
+func IncreasePledge(addspace BytesAmount) {
+    // Note: msg.Value is implicitly transferred to the miner actor
+    if miner.Collateral + msg.Value < CollateralForPledge(addspace + miner.PledgeBytes) {
+        Fatal("not enough total collateral for the requested pledge")
+    }
+    
+    miner.Collateral += msg.Value
+    miner.PledgeBytes += addspace
 }
 ```
 
@@ -279,6 +320,10 @@ func SlashStorageFault(miner Address) {
 	
     if chain.Now() <= miner.ProvingPeriodEnd + GenerationAttackTime {
     	Fatal("miner is not yet tardy")
+    }
+    
+    if miner.ProvingSet.Size() == 0 {
+        Fatal("miner is inactive")
     }
     
     // Strip miner of their power
@@ -340,6 +385,41 @@ func AbitrateDeal(d Deal) {
 ```
 
 TODO(scaling): This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.
+
+### DePledge
+
+Parameters:
+- amt TokenAmount
+
+Return: None
+
+```go
+func DePledge(amt TokenAmount) {
+    // TODO: Do both the worker and the owner have the right to call this?
+    if msg.From != miner.Worker && msg.From != miner.Owner {
+        Fatal("Not authorized to call DePledge")
+    }
+    
+    if miner.DePledgeTime > 0 {
+        if miner.DePledgeTime > CurrentBlockHeight {
+            Fatal("too early to withdraw collateral")
+        }
+        
+        TransferFunds(miner.Owner, miner.DePledgedCollateral)
+        miner.DePledgeTime = 0
+        miner.DePledgedCollateral = 0
+        return
+    }
+    
+    if amt > miner.Collateral {
+        Fatal("Not enough free collateral to withdraw that much")
+    }
+    
+    miner.Collateral -= amt
+    miner.DePledgedCollateral = amt
+    miner.DePledgeTime = CurrentBlockHeight + DePledgeCooldown
+}
+```
 
 ### GetOwner
 
@@ -416,7 +496,11 @@ Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/10
 
 #### `Integer`
 
-TODO
+Integers are encoded as LEB128 signed integers.
+
+#### `BitField`
+
+Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.
 
 #### `SectorSet`
 
@@ -424,7 +508,7 @@ TODO
 
 #### `FaultSet`
 
-TODO
+A fault set is a BitField and a block height, encoding TBD.
 
 #### `BlockHeader`
 
