@@ -96,11 +96,8 @@ Lane state can be easily tracked on-chain with a compact bitfield.
 
 ```go
 type SpendVoucher struct {
-    // ID is the channel ID for this payment channel
-    ID ChannelID
-    
     // Amount is the amount of FIL that this voucher can be redeemed for
-    Amount *TokenAmount
+    Amount TokenAmount
     
     // Nonce is a number that sets the ordering of vouchers. If you try to redeem
     // a voucher with an equal or lower nonce, the operation will fail. Nonces are
@@ -114,11 +111,169 @@ type SpendVoucher struct {
     // Merges specifies a list of lane-nonce pairs that this voucher will close. 
     // This voucher may not be redeemed if any of the lanes specified here are already
     // closed, or their nonce specified here is lower than the nonce on-chain.
-    Merges []Pair<uint64, uint64>
+    Merges []MergePair
+
+    TimeLock uint64
+
+    SecretPreimage []byte
+
+    RequiredSector []byte
+
+    MinCloseHeight uint64
     
     Sig Signature
 }
+
+type MergePair struct {
+    Lane uint64
+    Nonce uint64
+}
 ```
+
+```go
+type PaymentChannel struct {
+    From Address
+    FromBalance TokenAmount
+
+    To Address
+    ToBalance TokenAmount
+
+    ClosingAt uint64
+    MinCloseHeight uint64
+
+    LaneStates map[uint64]LaneState
+}
+
+type LaneState struct {
+    Nonce uint64
+    Closed bool
+    Redeemed TokenAmount
+}
+
+func (paych *PaymentChannel) validateSignature(sv SpendVoucher) {
+    if msg.From == paych.From {
+        ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.To)
+    } else if msg.From == paych.To {
+        ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.From)
+    } else {
+        Fatal("bad programmer")
+    }
+}
+
+func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte) {
+    if !paych.validateSignature(sv) {
+        Fatal("Signature Invalid")
+    }
+
+    if chain.Now() < sv.TimeLock {
+        Fatal("cannot use this voucher yet!")
+    }
+
+    if sv.SecretPreimage != nil {
+        if Hash(secret) != sv.SecretPreimage {
+            Fatal("Incorrect secret!")
+        }
+    }
+
+    if sv.RequiredSector != nil {
+        miner, found := GetMiner(msg.From)
+        if !found {
+            Fatal("Redeemer is not a miner")
+        }
+
+        if !miner.HasSector(sv.RequiredSector) {
+            Fatal("miner does not have sector, cannot redeem payment")
+        }
+    }
+
+    ls := paych.LaneStates[sv.Lane]
+    if ls.Closed {
+        Fatal("cannot redeem a voucher on a closed lane")
+    }
+
+    if ls.Nonce > sv.Nonce {
+        Fatal("voucher has an outdated nonce, cannot redeem")
+    }
+
+    var mergeValue TokenAmount
+    for _, merge := range sv.Merges {
+        ols := paych.LaneStates[merge.Lane]
+        if ols.Closed {
+            Fatal("cannot redeem voucher that merges a closed lane")
+        }
+
+        if ols.Nonce > merge.Nonce {
+            Fatal("merge in voucher has outdated nonce, cannot redeem")
+        }
+
+        mergeValue += ols.Redeemed
+        ols.Closed = true
+    }
+
+    ls.Nonce = sv.Nonce
+    toPayOut = sv.Amount - (mergeValue + ls.Redeemed)
+    if toPayOut <= 0 {
+        Fatal("voucher value not high enough")
+    }
+
+    ls.Redeemed = sv.Amount
+
+    var balance TokenAmount
+    if msg.From == paych.To {
+        balance = paych.FromBalance
+    } else if msg.From == paych.From {
+        balance = paych.ToBalance
+    } else {
+        Fatal("bad programmer")
+    }
+
+    if toPayOut > balance {
+        Fatal("not enough remaining balance in channel to redeem voucher")
+    }
+
+    if msg.From == paych.To {
+        paych.FromBalance -= toPayOut
+        paych.ToBalance += toPayOut
+    } else {
+        paych.ToBalance -= toPayOut
+        paych.FromBalance += toPayOut
+    }
+
+    if sv.MinCloseHeight != 0 {
+        if paych.ClosingAt < sv.MinCloseHeight {
+            paych.ClosingAt = sv.MinCloseHeight
+        }
+        if paych.MinCloseHeight < sv.MinCloseHeight {
+            paych.MinCloseHeight = sv.MinCloseHeight
+        }
+    }
+}
+
+func (paych *PaymentChannel) Withdraw(upTo TokenAmount) {
+    // TODO: this ones tricky, withdraw funds without closing it out entirely...
+}
+
+func (paych *PaymentChannel) Close() {
+    if msg.From != paych.From && msg.From != paych.To {
+        Fatal("not authorized to close channel")
+    }
+    if paych.ClosingAt != 0 {
+        if chain.Now() > paych.ClosingAt {
+            Transfer(paych.FromBalance, paych.From)
+            Transfer(paych.ToBalance, paych.To)
+            return
+        }
+        Fatal("Channel already closing")
+    }
+
+    paych.ClosingAt = chain.Now() + ChannelClosingDelay
+    if paych.ClosingAt < paych.MinCloseHeight {
+        paych.ClosingAt = paych.MinCloseHeight
+    }
+}
+```
+
+
 
 ### Payment Channel Reconciliation
 
