@@ -107,10 +107,10 @@ type SpendVoucher struct {
     // Lane specifies which 'lane' of the payment channel this voucher is for.
     // Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
     Lane uint64
-    
-    // Merges specifies a list of lane-nonce pairs that this voucher will close. 
+
+    // Merges specifies a list of lane-nonce pairs that this voucher will close.
     // This voucher may not be redeemed if any of the lanes specified here are already
-    // closed, or their nonce specified here is lower than the nonce on-chain.
+    // closed, or their nonce specified here is lower than the nonce of the lane on-chain.
     Merges []MergePair
 
     TimeLock uint64
@@ -130,13 +130,13 @@ type MergePair struct {
 }
 ```
 
-```go
+```go 
 type PaymentChannel struct {
     From Address
-    FromBalance TokenAmount
-
     To Address
-    ToBalance TokenAmount
+
+    ChannelTotal TokenAmount
+    ToSend TokenAmount
 
     ClosingAt uint64
     MinCloseHeight uint64
@@ -211,33 +211,20 @@ func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte) 
     }
 
     ls.Nonce = sv.Nonce
-    toPayOut = sv.Amount - (mergeValue + ls.Redeemed)
-    if toPayOut <= 0 {
-        Fatal("voucher value not high enough")
-    }
-
+    balanceDelta = sv.Amount - (mergeValue + ls.Redeemed)
     ls.Redeemed = sv.Amount
 
-    var balance TokenAmount
-    if msg.From == paych.To {
-        balance = paych.FromBalance
-    } else if msg.From == paych.From {
-        balance = paych.ToBalance
-    } else {
-        Fatal("bad programmer")
+    newSendBalance = paych.ToSend + balanceDelta
+    if newSendBalance < 0 {
+        // TODO: is this impossible?
+        Fatal("voucher would leave channel balance negative")
     }
 
-    if toPayOut > balance {
-        Fatal("not enough remaining balance in channel to redeem voucher")
+    if newSendBalance > paych.ChannelTotal {
+        Fatal("not enough funds in channel to cover voucher")
     }
 
-    if msg.From == paych.To {
-        paych.FromBalance -= toPayOut
-        paych.ToBalance += toPayOut
-    } else {
-        paych.ToBalance -= toPayOut
-        paych.FromBalance += toPayOut
-    }
+    paych.ToSend = newSendBalance
 
     if sv.MinCloseHeight != 0 {
         if paych.ClosingAt < sv.MinCloseHeight {
@@ -258,11 +245,6 @@ func (paych *PaymentChannel) Close() {
         Fatal("not authorized to close channel")
     }
     if paych.ClosingAt != 0 {
-        if chain.Now() > paych.ClosingAt {
-            Transfer(paych.FromBalance, paych.From)
-            Transfer(paych.ToBalance, paych.To)
-            return
-        }
         Fatal("Channel already closing")
     }
 
@@ -270,6 +252,17 @@ func (paych *PaymentChannel) Close() {
     if paych.ClosingAt < paych.MinCloseHeight {
         paych.ClosingAt = paych.MinCloseHeight
     }
+}
+
+func (paych *PaymentChannel) Collect() {
+    if paych.ClosingAt == 0 {
+        Fatal("payment channel not closing or closed")
+    }
+    if chain.Now() < paych.ClosingAt {
+        Fatal("Payment channel not yet closed")
+    }
+    Transfer(paych.ChannelTotal - paych.ToSend, paych.From)
+    Transfer(paych.ToSend, paych.To)
 }
 ```
 
