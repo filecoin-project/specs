@@ -130,7 +130,7 @@ type MergePair struct {
 }
 ```
 
-```go 
+```go
 type PaymentChannel struct {
     From Address
     To Address
@@ -146,7 +146,6 @@ type PaymentChannel struct {
 
 type LaneState struct {
     Nonce uint64
-    Closed bool
     Redeemed TokenAmount
 }
 
@@ -198,16 +197,13 @@ func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte) 
     var mergeValue TokenAmount
     for _, merge := range sv.Merges {
         ols := paych.LaneStates[merge.Lane]
-        if ols.Closed {
-            Fatal("cannot redeem voucher that merges a closed lane")
-        }
 
-        if ols.Nonce > merge.Nonce {
+        if ols.Nonce >= merge.Nonce {
             Fatal("merge in voucher has outdated nonce, cannot redeem")
         }
 
         mergeValue += ols.Redeemed
-        ols.Closed = true
+        ols.Nonce = merge.Nonce
     }
 
     ls.Nonce = sv.Nonce
