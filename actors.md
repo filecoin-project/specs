@@ -149,17 +149,18 @@ Note: this may be moved off chain soon, don't worry about testing it too heavily
 ### CommitSector
 
 Parameters:
+- sectorId SectorId
 - commD []byte
 - commR []byte
 - commRStar []byte
 - proof SealProof
 
-Return: SectorID
+Return: None
 
 
 ```go
-func CommitSector(commD, commR []byte, proof *SealProof) SectorID {
-    if !miner.ValidatePoRep(commD, commR, miner.PublicKey, proof) {
+func CommitSector(sectorId SectorId, commD, commR, commRStar []byte, proof *SealProof) {
+    if !miner.ValidatePoRep(sectorId, commD, commR, commRStar, miner.PublicKey, proof) {
         Fatal("bad proof!")
     }
     
@@ -180,11 +181,8 @@ func CommitSector(commD, commR []byte, proof *SealProof) SectorID {
     miner.Collateral -= coll
     miner.ActiveCollateral += coll
     
-    sectorId = miner.Sectors.Add(commR)
-    // TODO: sectors IDs might not be that useful. For now, this should just be the number of
-    // the sector within the set of sectors, but that can change as the miner experiences
-    // failures.
-    return sectorId
+
+    miner.Sectors.Add(commR)
 }
 ```
 
