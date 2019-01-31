@@ -12,8 +12,8 @@
 * [Payments](payments.md)
 * [Mining](mining.md)
 * [Expected Consensus](expected-consensus.md)
-* [State Machine](TODO)
-  * [System Actors](TODO)
+* [State Machine](state-machine.md)
+  * [System Actors](actors.md)
 * [Faults](faults.md)
 * Cryptography
   * [Signatures](signatures.md)
@@ -22,6 +22,6 @@
   * [Storage Protocols](network-protocols.md)
   * [Data Propogation](data-propogation.md)
 * [Data Structures](data-structures.md)
-* [Local Storage](TODO)
+* [Local Storage](local-storage.md)
 * [Glossary of terms](definitions.md)
 

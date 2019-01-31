@@ -11,7 +11,7 @@ discussions.
 ### Gitbook viewing
 The spec follows gitbook format, and can be viewed using the gitbook tooling.
 
-To install this, install `gitbook-cli` via npm and run:
+To view, install `gitbook-cli` via npm and run:
 ```
 gitbook serve
 ```
@@ -23,6 +23,9 @@ gitbook pdf
 
 (Note: on macOS using the pdf printer may require some extra installation)
 
+If you're just browsing on GitHub, start with [INTRO.md](INTRO.md) and the
+table of contents in [SUMMARY.md](SUMMARY.md). But really, prefer
+the Gitbook output.
 
 ## Updates process for specs
 For info on how this spec changes, please see [the process doc](process.md).

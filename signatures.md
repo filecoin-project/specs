@@ -7,7 +7,7 @@ Signatures are cryptographic functions that attest to the origin of a particular
 We use signatures in filecoin to verify *something* was done by *someone*. For example, we use signatures in order to validate deal messages which represent an action like a storage deals We also use signatures to determine who generated a particular message, determine public keys--which can be recovered from signed data and a signature, and find filecoin addresses which generated from a public key.
 
 - Messages (From actors to the blockchain)
-- Tickets (Signature of proof - https://github.com/filecoin-project/specs/blob/master/mining.md)
+- Tickets (Signature of proof - [Mining](mining.md)
 - Block signature (Signature over all data in the block - done by block leader)
 
 # What signatures affect
