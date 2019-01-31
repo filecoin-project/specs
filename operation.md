@@ -8,9 +8,10 @@ Running a Filecoin `full node` requires running many different processes and pro
 
 [Chain validation](validation.md) is the process by which a node stays up to date with the current state of the blockchain. This Involves:
 - Listening for new blocks on the blocks pubsub channel (See [block propagation](data-propogation.md#block-propogation))
-	- As new blocks come in, run through the block validation process
-		- Keep track of valid blocks, keep track of the current 'best' block (according to EC rules)
-	- Rebroadcast valid blocks
+  - As new blocks come in, run through the block validation process
+    - Keep track of valid blocks, keep track of the current 'best' block (according to EC rules)
+  - Rebroadcast valid blocks
+    - Note: the actual rebroadcasting is handled by the underlying gossipsub library. We simply need to signal to that library which blocks should be rebroadcast.
 
 ## MemPool Maintenance
 
