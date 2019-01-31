@@ -42,10 +42,10 @@ After successfully calling `CreateMiner`, a miner actor will be created for you 
 ```go
 type StorageMinerActor interface {
     // AddAsk adds an ask via this miner to the storage markets orderbook
-    AddAsk(price *TokenAmount, expiry uint64) AskID
+    AddAsk(price TokenAmount, expiry uint64) AskID
 
     // CommitSector adds a sector commitment to the chain.
-    CommitSector(commD, commR, commRStar []byte, proof *SealProof) SectorID
+    CommitSector(commD, commR, commRStar []byte, proof SealProof) SectorID
 
     // SubmitPoSt is used to submit a coalesced PoSt to the chain to convince the chain
     // that you have been actually storing the files you claim to be. A proof of
@@ -60,7 +60,13 @@ type StorageMinerActor interface {
     // for any sectors that were permanently lost.
     // The final parameter is the 'doneSet' this is the set of sectors the miner is
     // willingly removing, that they were able to prove for the entire proving period.
-    SubmitPoSt(p *PoSt, faults []FailureSet, recovered SectorSet, doneSet SectorSet)
+    SubmitPoSt(p PoSt, faults []FailureSet, recovered SectorSet, doneSet SectorSet)
+    
+    // IncreasePledge allows a miner to pledge more storage to the network
+    IncreasePledge(addspace Integer)
+    
+    // SlashStorageFault is used to penalized this miner for missing their proofs
+    SlashStorageFault()
     
     // GetCurrentProvingSet returns the current set of sectors that this miner is proving.
     // The next PoSt they submit will use this as an input. This method can be used by
@@ -72,6 +78,9 @@ type StorageMinerActor interface {
     // data contained in a recently removed sector, and is not yet past the expiry date
     // of the deal.
     ArbitrateDeal(d Deal)
+    
+    // DePledge allows a miner to retrieve their pledged collateral.
+    DePledge(amt TokenAmount)
 
     // GetOwner returns the address of the account that owns the miner. The owner is the
     // account that is authorized to control the miner, and is also where mining rewards
@@ -123,6 +132,12 @@ type StorageMinerState struct {
     // ActiveCollateral is the amount of collateral currently committed to live storage
     ActiveCollateral TokenAmount
     
+    // DePledgedCollateral is collateral that is waiting to be withdrawn
+    DePledgedCollateral TokenAmount
+    
+    // DePledgeTime is the time at which the depledged collateral may be withdrawn
+    DePledgeTime BlockHeight
+    
     // Sectors is the set of all sectors this miner has committed
     Sectors SectorSet
     
@@ -161,45 +176,11 @@ When they have a full sector, they should seal it.
 
 #### Step 1: Commit
 
-When the miner has completed their first seal, they should post it on-chain. This starts their proving period.
+When the miner has completed their first seal, they should post it on-chain using [CommitSector](actors.md#commit-sector). This starts their proving period.
 
 The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.
 
 During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next proving period starts.
-
-
-
-```go
-func CommitSector(commD, commR []byte, proof *SealProof) SectorID {
-    if !miner.ValidatePoRep(commD, commR, commRStar, miner.PublicKey, proof) {
-        return "bad proof!"
-    }
-    
-    // make sure the miner isnt trying to submit a pre-existing sector
-    if !miner.EnsureSectorIsUnique(commR) {
-        return "sector already committed!"
-    }
-    
-    // make sure the miner has enough collateral to add more storage
-    // currently, all sectors are the same size, and require the same collateral
-    // in the future, we may have differently sized sectors and need special handling
-    coll = CollateralForSector()
-    
-    if coll < miner.Collateral {
-        return "not enough collateral"
-    }
-    
-    miner.Collateral -= coll
-    miner.ActiveCollateral += coll
-    
-    sectorId = miner.Sectors.Add(commR)
-    // TODO: sectors IDs might not be that useful. For now, this should just be the number of
-    // the sector within the set of sectors, but that can change as the miner experiences
-    // failures.
-    return sectorId
-}
-```
-
 
 
 #### Step 2: Proving Storage (PoSt creation)
@@ -229,85 +210,26 @@ The proving set remains consistent during the proving period. Any sectors added 
 
 #### Step 3: PoSt Submission
 
-When the miner has completed their PoSt, they must submit it to the network. There are two different times that this *could* be done.
+When the miner has completed their PoSt, they must submit it to the network by calling [SubmitPoSt](actors.md#submit-post). There are two different times that this *could* be done.
 
 1. **Standard Submission**: A standard submission is one that makes it on-chain before the end of the proving period. The length of time it takes to compute the PoSts is set such that there is a grace period between then and the actual end of the proving period, so that the effects of network congestion on typical miner actions is minimized.
 2. **Penalized Submission**: A penalized submission is one that makes it on-chain after the end of the proving period, but before the generation attack threshold. These submissions count as valid PoSt submissions, but the miner must pay a penalty for their late submission. (See '[Faults](../faults.md)' for more information)
    - Note: In this case, the next PoSt should still be started at the beginning of the proving period, even if the current one is not yet complete. Miners must submit one PoSt per proving period.
 
-```go
-func SubmitPost(proof PoSt, faults []FaultSet, recovered SectorSet, done SectorSet) {
-    if msg.From != miner.Worker {
-        return "not authorized to submit post for miner"
-    }
-    
-    // ensure the fault sets properly stack, recovered is a subset of the combined
-    // fault sets, and that done does not intersect with either, and that all sets
-    // only reference sectors that currently exist
-    if !miner.ValidateFaultSets(faults, recovered, done) {
-        return "fault sets invalid"
-    }
-    
-    var feesRequired TokenAmount
-    
-    if chain.Now() > miner.ProvingPeriodEnd + GenerationAttackTime {
-        // TODO: determine what exactly happens here. Is the miner permanently banned?
-        return "Post submission too late"
-    } else if chain.Now() > miner.ProvingPeriodEnd {
-        feesRequired += ComputeLateFee(chain.Now() - miner.ProvingPeriodEnd)
-    }
-    
-    feesRequired += ComputeTemporarySectorFailureFee(recovered)
-    
-    if msg.Value < feesRequired {
-        return "not enough funds to pay post submission fees"
-    }
-    
-    // we want to ensure that the miner can submit more fees than required, just in case
-    if msg.Value > feesRequired {
-        Refund(msg.Value - feesRequired)
-    }
-    
-    if !CheckPostProof(proof, faults) {
-        return "proof invalid"
-    }
-    
-    permLostSet = AggregateSets(faults).Subtract(recovered)
-    
-    // adjust collateral for 'done' sectors
-    miner.ActiveCollateral -= CollateralForSectors(miner.NextDoneSet)
-    miner.Collateral += CollateralForSectors(miner.NextDoneSet)
-    
-    // penalize collateral for lost sectors
-    miner.Collateral -= CollateralForSectors(permLostSet)
-    miner.ActiveCollateral -= CollateralForSectors(permLostSet)
-    
-    // burn funds for fees and collateral penalization
-    BurnFunds(miner, CollateralForSectors(permLostSet) + feesRequired)
-    
-    // update sector sets and proving set
-    miner.Sectors.Subtract(miner.NextDoneSet)
-    miner.Sectors.Subtract(permLostSet)
-    
-    // update miner power to the amount of data actually proved during
-    // the last proving period.
-    oldPower := miner.Power
-    miner.Power = SizeOf(Filter(miner.ProvingSet, faults))
-    storageMarket.UpdateStorage(miner.Power - oldPower)
-    
-    miner.ProvingSet = miner.Sectors
-    
-    // update next done set
-    miner.NextDoneSet = done
-}
-```
 
+### Stop Mining
 
-
+In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call `DePledge()` to retrieve their collateral (Note: depledging requires two calls to the chain, and a 'cooldown' period).
 
 ### Faults
 
 Faults are described in the [faults document](../faults.md)
+
+### On Being Slashed (WIP, needs discussion)
+
+If a miner is slashed for failing to submit their PoSt on time, they currently lose all their pledge collateral. They do not necessarily lose their storage collateral. Storage collateral is lost when a miners clients slash them for no longer having the data. Missing a PoSt does not necessarily imply that a miner no longer has the data. There should be an additional timeout here where the miner can submit a PoSt, along with 'refilling' their pledge collateral. If a miner does this, they can continue mining, their mining power will be reinstated, and clients can be assured that their data is still there.
+
+Review Discussion Note: Taking all of a miners collateral for going over the deadline for PoSt submission is really really painful, and is likely to dissuade people from even mining filecoin in the first place (If my internet going out could cause me to lose a very large amount of money, that leads to some pretty hard decisions around profitability). One potential strategy could be to only penalize miners for the amount of sectors they could have generated in that timeframe. 
 
 
 ## Mining Blocks
