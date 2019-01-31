@@ -4,20 +4,29 @@ Running a Filecoin `full node` requires running many different processes and pro
 
 (TODO: elaborate on all this, obviously)
 
+## Chain Validation
 
-- Run [chain validation](validation.md)
-  - Listen for new blocks on the blocks pubsub channel
+[Chain validation](validation.md) is the process by which a node stays up to date with the current state of the blockchain. This Involves:
+- Listening for new blocks on the blocks pubsub channel (See [block propagation](data-propogation.md#block-propogation))
   - As new blocks come in, run through the block validation process
     - Keep track of valid blocks, keep track of the current 'best' block (according to EC rules)
   - Rebroadcast valid blocks
-- Listen for messages on the messages pubsub channel
-  - Validate each message, rebroadcast valid ones
-- Run the DHT protocol for aiding node discovery
-  - libp2p-kad-dht, with just 'find node' RPCs enabled
+    - Note: the actual rebroadcasting is handled by the underlying gossipsub library. We simply need to signal to that library which blocks should be rebroadcast.
+
+## MemPool Maintenance
+
+Listen for messages on the messages pubsub channel (See [message propagation](data-propogation.md#message-propogation)). Validate each message, rebroadcast valid ones. 
+
+## Handshaking
+
 - For each node you connect to, run the ['hello' protocol](network-protocols.md#hello-handshake) with them
-  - If response shows that you and the other node have different genesis blocks, disconnect from them
-    - (Note: maybe this is not the best thing to do?)
-  - If the other node gives a valid chain head that is farther ahead than you, 'sync' the chain and maybe switch to it if it's better.
+  - If response shows that you and the other node have different genesis blocks, disconnect from them.
+  - If the other node gives a valid chain head that is farther ahead than you, 'sync' the chain and maybe switch to it if it's ['heavier'](expected-consensus.md#chain-weighing).
+
+## DHT for Peer Routing
+
+- Run the DHT protocol for aiding node discovery
+  - libp2p-kad-dht, with just 'find node' RPCs enabled.
 
 
 
