@@ -115,6 +115,11 @@ type PaymentInfo struct {
     // use to pay the miner. It must already have sufficient funds locked up
     Channel ChannelID
 
+    // ChannelMsgCid is the B58 encoded CID of the message used to create the
+    // channel. Adding the message cid allows the miner to wait until the
+    // channel is accepted on chain.
+    ChannelMsgCid string
+
     // Vouchers is a set of payments from the client to the miner that can be
     // cashed out contingent on the agreed upon data being provably within a
     // live sector in the miners control on-chain
