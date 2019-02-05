@@ -1,18 +1,24 @@
 # Data Structures
 
-This document serves as an entry point for understanding all of the data structures in filecoin.
+This document serves as an entry point for understanding all of the data structures in filecoin. These structures include
+
+- `CID`
+- `Block`
+- `Message`
+- `SignedMessage`
+- State Tree
 
 TODO: this should also include, or reference, how each data structure is serialized precisely.
 
 ## CID
 
-For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid). 
+A Content Identifier or `CID` is a per-object unique identifier used by Filecoin objects to [TODO: Identify how CIDs are used w.r.t. FIL and data object consumption]. Each `CID` is composed of a hash value,  a hash function (multihash), and a few extra labels to that inform object consumers how to deserialize the data associated with a `CID` and coupled FIlecoin object. For more specific information about CIDs or to learn more, take a look at the [CID Spec](https://github.com/ipld/cid). For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. 
 
-CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
+In Filecoin, `CID`s are serialized by applying a binary multi-base encoding, then encoding that as a CBOR byte array with a tag of `42`. For more information about serialization see [TODO: Add link]
 
 ## Block
 
-A block represents an individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and some notion of a 'weight' for deciding which block is the 'best'.
+A `Block` represents the canonical representation of the Filecoin network and state at a given  point in time. Moreover, a `Block` is the result of consensus. Each `Block` contains  the full state of the system at epoch `E` (via Merkle links [TODO: add reference to Merkle spec]), reference to the previous state, and a notion of a 'weight' [TODO: add reference to weight] which is used by miners to decide which blocks upon which to mine.
 
 ```go
 // Block is a block in the blockchain.
@@ -53,7 +59,7 @@ type Block struct {
 
 ### Serialization
 
-Blocks are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
+`Block`s are currently serialized via CBOR marshaling using lower-camel-cased field names. Information about CBOR can be found here [TODO: add link]
 
 ## Message
 
@@ -75,11 +81,13 @@ type Message struct {
 }
 ```
 
+[TODO: add definition of AttoFIL and link to go-filecoin example to Glossary]
+
 ### Parameter Encoding
 
 TODO: discuss how method parameters get encoded
 
-### Signing
+### Signed Message
 
 A signed message is a wrapper type over the base message.
 
@@ -90,11 +98,11 @@ type SignedMessage struct {
 }
 ```
 
-The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the [signatures spec](signatures.md).
+Where a `signature` is the serialized signature of the serialized representation of `Message`. For more details on how the signature is computed, see the [signatures spec](signatures.md).
 
 ### Serialization
 
-Messages and SignedMessages are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
+`Message`s and `SignedMessage`s are currently serialized via CBOR marshaling using lower-camel-cased field names.
 
 ## Actor
 
@@ -119,11 +127,11 @@ type Actor struct {
 
 ### Serialization
 
-Actors are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
+`Actor`s are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
 
 ## State Tree
 
-The state trie keeps track of all state in Filecoin. It is effectively a map of addresses to `actors` in the system. It is implemented using a HAMT.
+The state tree keeps track of all state in Filecoin. It is effectively a map of addresses to `actors` in the system. It is implemented using a HAMT.
 
 ## HAMT
 
