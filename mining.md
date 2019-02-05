@@ -81,11 +81,17 @@ type StorageMinerActor interface {
     
     // DePledge allows a miner to retrieve their pledged collateral.
     DePledge(amt TokenAmount)
+    
+    // GetPower returns this miners power in the filecoin power table
+    GetPower() Integer
 
     // GetOwner returns the address of the account that owns the miner. The owner is the
     // account that is authorized to control the miner, and is also where mining rewards
     // go to.
     GetOwner() Address
+    
+    // GetKey returns the block signing key for this miner.
+    GetKey() PublicKey
 
     // GetWorkerAddr (name still a WIP) returns the address corresponding to the
     // miners block signing key. Proof submissions for this miner must come from
@@ -215,6 +221,8 @@ When the miner has completed their PoSt, they must submit it to the network by c
 1. **Standard Submission**: A standard submission is one that makes it on-chain before the end of the proving period. The length of time it takes to compute the PoSts is set such that there is a grace period between then and the actual end of the proving period, so that the effects of network congestion on typical miner actions is minimized.
 2. **Penalized Submission**: A penalized submission is one that makes it on-chain after the end of the proving period, but before the generation attack threshold. These submissions count as valid PoSt submissions, but the miner must pay a penalty for their late submission. (See '[Faults](../faults.md)' for more information)
    - Note: In this case, the next PoSt should still be started at the beginning of the proving period, even if the current one is not yet complete. Miners must submit one PoSt per proving period.
+
+Along with the PoSt submission, miners may also subit a set of sectors that they wish to remove from their proving set. This is done by selecting the sectors in the 'done' bitfield passed to `SubmitPoSt`.
 
 
 ### Stop Mining
@@ -352,7 +360,7 @@ Note: This may not yet be the format the go-filecoin codebase is yet using, but 
 ```go
 type Block struct {
     // Parents are the cids of this blocks parents
-    Parents []*cid.Cid
+    Parents []Cid
 
     // Tickets is the array of tickets used to generate the new block from its parent set.
     // On expectation there will be only one, but there could be multiple, null blocks
@@ -367,15 +375,15 @@ type Block struct {
     Ticket Signature
     
     // MsgRoot is the root of the merklized set of state transitions in this block
-    MsgRoot *cid.Cid
+    MsgRoot Cid
     
     // ReceiptsRoot is the root of the merklized set of invocation receipts matching
     // the messages in this block.
-    ReceiptsRoot *cid.Cid
+    ReceiptsRoot Cid
     
     // StateRoot is the resultant state represented by this block after the in-order 
     // application of its set of messages.
-    StateRoot *cid.Cid
+    StateRoot Cid
     
     // BlockSig is a signature over all the other fields in the block with the miners
     // private key
