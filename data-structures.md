@@ -18,7 +18,7 @@ In Filecoin, `CID`s are serialized by applying a binary multi-base encoding, the
 
 ## Block
 
-A `Block` represents the canonical representation of the Filecoin network and state at a given  point in time. Moreover, a `Block` is the result of consensus. Each `Block` contains  the full state of the system at epoch `E` (via Merkle links [TODO: add reference to Merkle spec]), reference to the previous state, and a notion of a 'weight' [TODO: add reference to weight] which is used by miners to decide which blocks upon which to mine.
+A block represents an individual point in time that the network may achieve consensus on. It contains a link to the full state of the system, references to the previous state, and some notion of a 'weight' for deciding which block is the 'best'.
 
 ```go
 // Block is a block in the blockchain.
@@ -59,7 +59,7 @@ type Block struct {
 
 ### Serialization
 
-`Block`s are currently serialized via CBOR marshaling using lower-camel-cased field names. Information about CBOR can be found here [TODO: add link]
+`Block`s are currently serialized via CBOR marshaling using lower-camel-cased field names.
 
 ## Message
 
