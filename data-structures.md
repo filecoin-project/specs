@@ -296,7 +296,7 @@ if ((shift <size) && (sign bit of byte is set))
 
 # Filecoin Compact Serialization
 
-Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields, then CBOR marshaled, and prepended with an object type tag.
+Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
 
 | object | tag  |
 |---|---|
@@ -318,3 +318,4 @@ Each individual type should be encoded as specified:
 | Uint64 | CBOR major type 0 |
 |  BigInteger | [CBOR bignum](https://tools.ietf.org/html/rfc7049#section-2.4.2) |
 | Address | CBOR major type 2 |
+| Uint8 | CBOR Major type 0 |
