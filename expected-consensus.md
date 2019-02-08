@@ -135,7 +135,7 @@ This ticket can be verified to have been generated in the appropriate number of 
 
 **Checking election results again**
 
-Likewise, a miner should take their losing ticket from the original mining attempt (drawn from `K` blocks back), add it to the `Election` array in the block and run a VRF on it once more, generating a new ticket to compare with their power in the table N-L blocks back. Each time it is discovered that nobody has won a given round, every miner should use their failed ticket to repeat the leader election process, appending said ticket to their would-be block's `Election` array. Once a miner finds a winning ticket, they can publish a block (see below).
+Likewise, a miner should take their losing ticket from the original mining attempt (drawn from `K` blocks back), add it to the `Election` array in the block and run a VRF on it once more, generating a new ticket to compare with their power in the table N-L blocks back. Each time it is discovered that nobody has won a given round, every miner should use their failed ticket to repeat the leader election process, appending said ticket to their would-be block's `Election` array. Once a miner finds a winning ticket, they can publish a block (see `Block Generation`).
 
 This new block (with multiple tickets in each array) will have a few key properties:
 
@@ -146,10 +146,11 @@ Thus, our ticket validation algorithm checks that the last ticket in the `Electi
 
 ### Block Generation
 
-When you have found a winning ticket, you may then create a block. To create a block, first compute a few fields:
+When you have found a winning ticket, you may then create a block. For more on this, see the `Mining` section. To create a block, first compute a few fields:
 
-- `Tickets` - An array containing your winning ticket, and, if applicable, the failed intermediary tickets, or `NullTickets` for any null blocks you mined on
-- `ParentWeight` - As described above in "Chain Weighing"
+- `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any null blocks you mined on.
+- `Election` - An array containing your winning ticket proving election, and, if applicable, the failed intermediary tickets, or `NullTickets` for any null blocks you mined on
+- `ParentWeight` - As described below in `Chain Weighting`
 - `ParentState` - To compute this:
   - Take the `ParentState` of one of the blocks in your chosen parent set (invariant: this is the same value for all blocks in a given parent set)
   - For each block in the parent set, ordered by their tickets:
@@ -161,6 +162,8 @@ When you have found a winning ticket, you may then create a block. To create a b
 - `Signature` - A signature with your private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after we propogate it to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
 ## Chain Selection
+
+As we saw, multiple miners can be elected in a given round, likewise multiple blocks can be
 
 ### Chain Weighting
 
