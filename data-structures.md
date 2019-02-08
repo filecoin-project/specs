@@ -6,21 +6,22 @@ TODO: this should also include, or reference, how each data structure is seriali
 
 ## Address
 
-An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, and the data itself.
+An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.
 
 ```go
-type Address string
+type Address struct {
+    // 0: main-net
+    // 1: test-net
+    network byte
 
-func (a Address) Network() Network {
-	return a[0]
-}
+    // 0: SECP256K1 Public Key
+    // 1: ActorID
+    // 2: Builtin Actor
+    // 3: BLS Public Key
+    typ byte
 
-func (a Address) Type() Type {
-	return a[1]
-}
-
-func (a Address) Data() []byte {
-	return []byte(a[2:])
+    // raw bytes associated with typ
+    data []byte
 }
 ```
 
