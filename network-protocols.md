@@ -87,13 +87,6 @@ type StorageDealProposal struct {
     // Duration is how long the file should be stored for
     Duration NumBlocks
 
-    // LastDuplicate is a string of the CID of the last proposal created with
-    // identical values. This field effectively changes the CID of the current
-    // proposal, preventing collisions. This field can also be used for looking
-    // up previous proposals, however it will not be considered a reliable
-    // source for this information as data can be lost.
-    LastDuplicate String
-
     // PaymentRef is a reference to the mechanism that the proposer
     // will use to pay the miner. It should be verifiable by the
     // miner using on-chain information.
