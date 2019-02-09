@@ -2,7 +2,7 @@
 
 ### What is the Filecoin Mining Process
 
-An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. The details of both processes are defined here.
+An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. We currently set rounds to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
 
 ## Becoming a miner
 
@@ -223,7 +223,7 @@ In order to stop mining, a miner must complete all of its storage contracts, and
 
 ### Faults
 
-Faults are described in the [faults document](../faults.md)
+Faults are described in the [faults document](../faults.md).
 
 ### On Being Slashed (WIP, needs discussion)
 
