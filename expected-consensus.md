@@ -48,7 +48,7 @@ Tickets must do the following:
 - Prove leader election -- meaning a block producer can be verified by any participant in the network.
 - Prove appropriate delay between drawings -- meaning a participant can only draw a single ticket per round.
 
-Each block stores its ticket in two places: an array `Tickets` which stores new tickets generated at every round for use as randomness `K` blocks in the future, and in an array `Election` to prove that a miner has indeed been elected miner using a `Ticket` from `K` blocks back . On expectation, the arrays in a block will each contain a single ticket. In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: `Slashing`). In cases in which no block is mined for a round, a block with multiple tickets in each array may be generated in a subsequent round. We deal with this case in the `Null Blocks` section.
+Each block stores its ticket in two places: an array `Tickets` which stores new tickets generated at every round for use as randomness `K` blocks in the future, and in an array `ElectionProofs` to prove that a miner has indeed been elected miner using a `Ticket` from `K` blocks back . On expectation, the arrays in a block will each contain a single ticket. In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: `Slashing`). In cases in which no block is mined for a round, a block with multiple tickets in each array may be generated in a subsequent round. We deal with this case in the `Null Blocks` section.
 
 #### Ticket generation and delay
 
@@ -82,7 +82,7 @@ The process is as follows:
 
 - At block N, the miner will draw the smalelst ticket from the `Tipset` at block N-K, with K the randomness lookback parameter.
 - The miner will use this ticket as input to a Verifiable Random Function, thereby ensuring secrecy: no other participant can generate this output without the miner's private key.
-- The miner will compare the output to their power from block N-L, with L the committee lookback parameter. If it is smaller, they have won and can mine a block inserting this winning ticket in the `Election` array in the block. Else they wait to hear of another block generated in this round.
+- The miner will compare the output to their power from block N-L, with L the committee lookback parameter. If it is smaller, they have won and can mine a block inserting this winning ticket in the `ElectionProofs` array in the block. Else they wait to hear of another block generated in this round.
 
 We have at round N:
 
@@ -140,14 +140,14 @@ This ticket can be verified to have been generated in the appropriate number of 
 
 **Checking election results again**
 
-Likewise, a miner should take their losing ticket from the original mining attempt (drawn from `K` blocks back), add it to the `Election` array in the block and run a VRF on it once more, generating a new ticket to compare with their power in the table N-L blocks back. Each time it is discovered that nobody has won a given round, every miner should use their failed ticket to repeat the leader election process, appending said ticket to their would-be block's `Election` array. Once a miner finds a winning ticket, they can publish a block (see `Block Generation`).
+Likewise, a miner should take their losing ticket from the original mining attempt (drawn from `K` blocks back), add it to the `ElectionProofs` array in the block and run a VRF on it once more, generating a new ticket to compare with their power in the table N-L blocks back. Each time it is discovered that nobody has won a given round, every miner should use their failed ticket to repeat the leader election process, appending said ticket to their would-be block's `ElectionProofs array. Once a miner finds a winning ticket, they can publish a block (see `Block Generation`).
 
 This new block (with multiple tickets in each array) will have a few key properties:
 
 - All tickets in each array are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
-- There is the same number of tickets in both arrays -- to ensure a miner has waited appropriately (in the `Ticket` array) before using their winning ticket (in the `Election` array).
+- There is the same number of tickets in both arrays -- to ensure a miner has waited appropriately (in the `Ticket` array) before using their winning ticket (in the `ElectionProofs` array).
 
-Thus, our ticket validation algorithm checks that the last ticket in the `Election` array is a winning ticket and was adequately generated either from the parent set or from previous failed tickets.
+Thus, our ticket validation algorithm checks that the last ticket in the `ElectionProofs` array is a winning ticket and was adequately generated either from the parent set or from previous failed tickets.
 
 ### Block Generation
 
@@ -156,7 +156,7 @@ See the [Mining spec](./mining.md) for implementation details.
 When you have found a winning ticket, you may then create a block. For more on this, see the `Mining` section. To create a block, first compute a few fields:
 
 - `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any null blocks you mined on.
-- `Election` - An array containing your winning ticket proving election, and, if applicable, the failed intermediary tickets, or `NullTickets` for any null blocks you mined on
+- `ElectionProofs` - An array containing your winning ticket proving election, and, if applicable, the failed intermediary tickets, or `NullTickets` for any null blocks you mined on
 - `ParentWeight` - As described below in `Chain Weighting`
 - `ParentState` - To compute this:
   - Take the `ParentState` of one of the blocks in your chosen parent set (invariant: this is the same value for all blocks in a given parent set)
