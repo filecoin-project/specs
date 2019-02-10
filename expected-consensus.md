@@ -1,6 +1,6 @@
 # Expected Consensus
 
-This is a technical design document describing how to implement the protocol in general, for Filecoin-specific processes and implementation details regarding Expected Consensus, see:
+This spec describes how to implement the protocol in general, for Filecoin-specific processes, see:
 
 - [Mining Blocks](mining.md#mining-blocks)
 - [Faults](./faults.md)
@@ -54,7 +54,7 @@ Each block stores its ticket in two places: an array `Tickets` which stores new 
 
 To generate a new ticket, take a ticket from the prior `Tipset`. Because a `Tipset` can contain multiple blocks (see `Chain Selection` below), the smallest ticket in the Tipset must be drawn (otherwise the block will be invalid). This ensures the miner cannot start the process of checking for a winning ticket until the correct round.
 
-The miner then runs the prior ticket through a Verifiable Delay Function (VDF) to get a new unique output. This creates synchrony in the network and ensures miners have waited for an appropriate delay ahead of drawing a new ticket.
+The miner then runs the prior ticket through a Verifiable Delay Function (VDF) to get a new unique output. This allows us to approximate clock synchrony for miners, thereby ensuring miners have waited for an appropriate delay ahead of drawing a new ticket.
 
 This output is then used as input into a Verifiable Random Function (VRF) generating a new ticket, different from any other miners'. This limits a miner's ability to alter one block to influence the ticket of the next block (given a miner does not know who will win in a given round in advance).
 
@@ -151,22 +151,7 @@ Thus, our ticket validation algorithm checks that the last ticket in the `Electi
 
 ### Block Generation
 
-See the [Mining spec](./mining.md) for implementation details.
-
-When you have found a winning ticket, you may then create a block. For more on this, see the `Mining` section. To create a block, first compute a few fields:
-
-- `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any null blocks you mined on.
-- `ElectionProofs` - An array containing your winning ticket proving election, and, if applicable, the failed intermediary tickets, or `NullTickets` for any null blocks you mined on
-- `ParentWeight` - As described below in `Chain Weighting`
-- `ParentState` - To compute this:
-  - Take the `ParentState` of one of the blocks in your chosen parent set (invariant: this is the same value for all blocks in a given parent set)
-  - For each block in the parent set, ordered by their tickets:
-    - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.
-    - Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
-    - It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state.
-- `Messages` - Select a set of messages from the mempool to include in your block
-- `StateRoot` - Apply each of your chosen messages to the `ParentState` to get this
-- `Signature` - A signature with your private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after we propogate it to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
+When you have found a winning ticket, you may create a block. For more on this, see the [Mining spec](./mining.md).
 
 ## Chain Selection
 
