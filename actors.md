@@ -708,3 +708,180 @@ func UpdatePeerID(pid PeerID) {
 ## Payment Channel Broker Actor
 
 TODO
+
+## Multisig Account Actor
+
+A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Any party can veto any operation (which is a potentially debateable design decision). Completed and/or cancelled operations stick around in the actors state until explicitly cleared out.
+
+#### State
+
+```go
+type Multisig struct {
+    Signers []Address
+    Required uint
+
+    NextTxID uint64
+    Transactions map[int]Transaction
+}
+
+type Transaction struct {
+    TxID uint64
+    To Address
+    Value TokenAmount
+    Method string
+    Params []byte
+    Approved []Address
+    Completed bool
+    Canceled bool
+}
+```
+
+
+
+#### Constructor
+
+```go
+func Multisig(signers []Address, required uint) {
+    self.Signers = signers
+    self.Required = required
+}
+```
+
+
+
+### Propose
+
+```go
+func Propose(to Address, value TokenAmount, method string, params []byte) uint64 {
+    if !isSigner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    txid := self.NextTxID
+    self.NextTxID++
+
+    tx := Transaction{
+        TxID: txid,
+        To: to,
+        Value: value,
+        Method: method,
+        Params: params,
+        Approved: []Address{msg.From},
+    }
+
+    self.Transactions.Append(tx)
+
+    return txid
+}
+```
+
+### Approve
+
+```go
+func Approve(txid uint64) {
+    if !isSigner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    tx := getTransction(txid)
+    if tx.Complete {
+        Fatal("transaction already completed")
+    }
+    if tx.Canceled {
+        Fatal("transaction canceled")
+    }
+
+    for _, signer := range tx.Approved {
+        if signer == msg.From {
+            Fatal("already signed this message")
+        }
+    }
+
+    tx.Approved.Append(msg.From)
+
+    if len(tx.Approved) > self.Required {
+        Send(tx.To, tx.Value, tx.Method, tx.Params)
+        tx.Complete = true
+    }
+}
+```
+
+### Cancel
+
+```go
+func Cancel(txid uint64) {
+    if !isSigner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    tx := getTransaction(txid)
+    if tx.Complete {
+        Fatal("cannot cancel completed transaction")
+    }
+    if tx.Canceled {
+        Fatal("transaction already canceled")
+    }
+
+    tx.Canceled = true
+}
+```
+
+### ClearCompleted
+
+```go
+func ClearCompleted() {
+    if !isOwner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    for tx in range self.Transactions {
+        if tx.Completed || tx.Canceled {
+            self.Transactions.Remove(tx)
+        }
+    }
+}
+```
+
+
+
+### AddSigner
+
+```go
+func AddSigner(signer Address) {
+    if msg.From != self.Address {
+        Fatal("add signer must be called by wallet itself")
+    }
+    if isSigner(signer) {
+        Fatal("new address is already an owner")
+    }
+
+    self.Signers.Append(signer)
+}
+```
+
+### RemoveSigner
+
+```go
+func RemoveSigner(signer Address) {
+    if msg.From != self.Address {
+        Fatal("remove signer must be called by wallet itself")
+    }
+    if !isSigner(signer) {
+        Fatal("given address was not a signer")
+    }
+
+    self.Signers.Remove(signer)
+}
+```
+
+### ChangeRequirement
+
+```go
+func ChangeRequirement(req int) {
+    if msg.From != self.Address {
+        Fatal("change requirement must be called by wallet itself")
+    }
+
+    self.Required = req
+}
+```
