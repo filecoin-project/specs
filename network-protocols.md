@@ -105,7 +105,7 @@ type PaymentInfo struct {
     PayChActor Address
 
     // Payer is the address of the owner of the payment channel
-    Payer address.Address
+    Payer Address
 
     // Channel is the ID of the specific channel the client will
     // use to pay the miner. It must already have sufficient funds locked up
