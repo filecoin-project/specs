@@ -2,6 +2,22 @@
 
 An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.
 
+The Address interface is as follows:
+
+```go
+type Addressi interface {
+    New(n byte, t byte, data []byte) Addressi
+    Marshal(a Addressi) []byte
+    Unmarshal(data []byte) Addressi
+    EncodeString(a Addressi) string
+    DecodeString(s string) Addressi
+    Checksum(a Addressi) []byte
+    validateChecksum(data, cksm []byte) bool
+}
+```
+
+An exampple implementation of this interface is shown below:
+
 ```go
 type Address struct {
     // 0: main-net
@@ -14,14 +30,14 @@ type Address struct {
     // 3: BLS Public Key
     typ byte
     
-    // raw bytes associated with typ
+    // raw bytes containing the data associated with typ
     data []byte
 }
 
 // checksum size
 const CKSM_LEN = 4
 
-// Netowork Byte
+// Network Byte
 const (
     Mainnet = 0
 	Testnet = 1
@@ -65,7 +81,7 @@ func Marshal(a Address) []byte {
 }
 
 // Unmarshal bytes to an Address
-func Unnarshal(a []byte) Address {
+func Unmarshal(a []byte) Address {
     if a[1] == ID {
         return New(a[0], a[1], a[2:])
     }
@@ -144,4 +160,3 @@ func validChecksum(data, cksm []byte) bool {
     return digest == cksm
 }
 ```
-
