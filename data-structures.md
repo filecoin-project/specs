@@ -77,7 +77,7 @@ type Message struct {
 
 ### Parameter Encoding
 
-TODO: discuss how method parameters get encoded
+Parameters to methods get encoded as described in the [basic types](#basic-type-encodings) section below, and then put into a CBOR encoded array.
 
 ### Signing
 
@@ -96,6 +96,22 @@ The signature is a serialized signature over the serialized base message. For mo
 
 Messages and SignedMessages are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
 
+## Message Receipt
+
+```go
+type MessageReceipt struct {
+    ExitCode uint8
+
+    Return []byte
+}
+```
+
+### Serialization
+
+Message receipts are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
+
+
+
 ## Actor
 
 ```go
@@ -104,13 +120,13 @@ type Actor struct {
 	Code    Cid
     
     // Head is a pointer to the root of this actors state
-	Head    Cid
+    Head    Cid
     
     // Nonce is a counter of the number of messages this actor has sent
-	Nonce   Integer
+    Nonce   Integer
     
     // Balance is this actors current balance of filecoin
-	Balance AttoFIL
+    Balance AttoFIL
 }
 ```
 
@@ -123,8 +139,135 @@ Actors are currently serialized simply by CBOR marshaling them, using lower-came
 
 ## State Tree
 
-The state trie keeps track of all state in Filecoin. It is effectively a map of addresses to `actors` in the system. It is implemented using a HAMT.
+The state trie keeps track of all state in Filecoin. It is a map of addresses to `actors` in the system. It is implemented using a HAMT.
 
 ## HAMT
 
 TODO: link to spec for our CHAMP HAMT
+
+# Basic Type Encodings
+
+Types that appear in messages or in state must be encoded as described here.
+
+#### `PublicKey`
+
+The public key type is simply an array of bytes. (TODO: discuss specific encoding of key types, for now just calling it bytes is sufficient)
+
+#### `BytesAmount`
+BytesAmount is just a re-typed Integer.
+
+#### `PeerID`
+PeerID is just the serialized bytes of a libp2p peer ID.
+
+Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/100
+
+#### `Integer`
+
+Integers are encoded as LEB128 signed integers.
+
+#### `BitField`
+
+Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.
+
+#### `SectorSet`
+
+TODO
+
+#### `FaultSet`
+
+A fault set is a BitField and a block height, encoding TBD.
+
+#### `BlockHeader`
+
+BlockHeader is a serialized `Block`.
+
+#### `SealProof`
+
+SealProof is an array of bytes.
+
+#### `TokenAmount`
+
+TokenAmount is a re-typed Integer.
+
+
+
+## LEB128 Encoding Reference
+
+
+This is taken from the Dwarf Standard 4, Appendix C
+
+#### Encode unsigned LEB128
+
+```c
+do
+{
+  byte = low order 7 bits of value;
+  value >>= 7;
+  if (value != 0) /* more bytes to come */
+    set high order bit of byte;
+  emit byte;
+} while (value != 0);
+
+```
+
+#### Encode signed LEB128
+
+```c
+more = 1;
+negative = (value < 0);
+size = no. of bits in signed integer;
+while(more)
+{
+  byte = low order 7 bits of value;
+  value >>= 7;
+  /* the following is unnecessary if the
+   * implementation of >>= uses an arithmetic rather
+   * than logical shift for a signed left operand
+   */
+  if (negative)
+    /* sign extend */
+    value |= - (1 << (size - 7));
+    /* sign bit of byte is second high order bit (0x40) */
+  if ((value ==  0 && sign bit of byte is clear) ||
+      (value == -1 && sign bit of byte is set))
+     more = 0;
+  else
+    set high order bit of byte;
+  emit byte;
+}
+```
+
+#### Decode unsigned LEB128
+
+```c
+result = 0;
+shift = 0;
+while(true)
+{
+  byte = next byte in input;
+  result |= (low order 7 bits of byte << shift);
+  if (high order bit of byte == 0)
+    break;
+  shift += 7;
+}
+```
+
+#### Decode signed LEB128
+
+```c
+result = 0;
+shift = 0;
+size = number of bits in signed integer;
+while(true)
+{
+  byte = next byte in input;
+  result |= (low order 7 bits of byte << shift);
+  shift += 7;
+  /* sign bit of byte is second high order bit (0x40) */
+  if (high order bit of byte == 0)
+  break;
+}
+if ((shift <size) && (sign bit of byte is set))
+  /* sign extend */
+  result |= - (1 << shift);
+```

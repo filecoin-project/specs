@@ -2,7 +2,7 @@
 
 Every filecoin full node must receive and process blocks from the network to ensure that they always know the correct latest state of the chain. How blocks get propogated through the network is discussed in the [Data Propogation](data-propogation.md) document.
 
-Every block that comes in over the network must first be validated structurally. This starts with making sure it unmarshals correctly, making sure that all the fields contain legal values, and that the signature over the block is correct. Then, the consensus rules for the block must be validated. These include:
+Every block that comes in over the network must first be validated structurally. This starts with making sure it unmarshals correctly (see [block](data-structures.md#block)), making sure that all the fields contain legal values, and that the signature over the block is correct. Then, the consensus rules for the block must be validated. These include:
 
 - The blocks parent tipset is valid, meaning that each parent:
   - Is a valid block
@@ -16,6 +16,7 @@ Every block that comes in over the network must first be validated structurally.
 - The state transitions are done correctly:
   - All messages are valid
   - Each message executes correctly and produces a receipt matching the corresponding one in the receipt set
+    - For more information on message execution, see [the state machine spec](state-machine.md).
   - After all messages are applied, the resultant state root matches the one in the block
 
 Once the block passes validation, it should be added to the local datastore, even in the case where we don't accept it right now. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching. Blocks a certain distance from the current chain height may be dropped (exact number TBD, but blocks that havent been included after several days may be purged).

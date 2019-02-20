@@ -35,9 +35,9 @@ type StorageMarket interface {
     SlashConsensusFault(blk1, blk2 BlockHeader)
 
     // SlashStorageFault slashes a storage miner for not submitting their PoSTs within
-    // the correct time window. This may be called by anyone who detects the faulty behavior.
-    // The slashed miner then loses all of their staked collateral, has their power cut to
-    // zero, and as a result, is no longer a candidate leader for extending the chain.
+    // the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
+    // The slashed miner then loses all of their staked collateral, and also loses all
+    // of their power, and as a result, is no longer a candidate leader for extending the chain.
     SlashStorageFault(miner Address)
     
     // UpdateStorage is called by a miner to adjust the storage market actors
@@ -49,6 +49,7 @@ type StorageMarket interface {
     GetTotalStorage() BytesAmount
 }
 ```
+
 
 ## The Filecoin Storage Market Operation
 
@@ -69,13 +70,17 @@ This section describes the flow required to store a single piece with a single s
 
 #### Before Deal
 
-1. **Merkle Translation:** The client runs a 'Local Merkle Translation' to generate the pedersen commitment for their piece of data.
-  - Storage miners reference data by its pedersen commitment, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See [Piece Confirmation](definitions.md#piece-confirmation)
+1. **Merkle Translation:** The client runs a 'Local Merkle Translation' to generate the storage market hash for the data.
+  - Storage miners reference data by its storage market hash, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See [Piece Confirmation](definitions.md#piece-confirmation)
 2. **Miner Selection:** The client looks at asks on the network, and then selects a storage miner to store their data with.
    - Note: this is currently a manual process.
-3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with.
+3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with. All payments between clients and storage providers use payment channels.
+
 
 #### Deal
+
+Note: The details of this protocol including formats, datastructures, and algorithms, can be found [here](network-protocols.md#storage-deal).
+
 
 1. **Storage Deal Staging:** The client now runs the ['make storage deal'](network-protocols.md#storage-deal) protocol, as follows:
   - The client sends a `StorageDealProposal` for the piece in question
@@ -84,15 +89,17 @@ This section describes the flow required to store a single piece with a single s
     - Note: Different implementations may come up with different ways of making a decision on a given deal.
   - If the miner accepts, the client now sends the data to the miner
   - Once the miner receives the data:
-    - They validate that the data matches the hashes claimed by the client
+    - They validate that the data matches the storage market hash claimed by the client
     - They stage it into a sector and set the deal state to `Staged`
 
-2. **Storage Deal Start**: Clients makes sure data is in a sector
-   - **PieceConfirmation:** Once the miner seals the sector, they update the PieceConfirmation in the deal state, which the client then gets the next time they query that state.
-     - The PieceConfirmation proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here.
-     - Note: a client that is not interested in staying online to wait for PieceConfirmation can leave immediately, however, they run the risk that their files don't actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
+
+2. **Storage Deal Start**: Clients makes sure data is in a [sector](definitions.md#sector)
+
+    - **PieceConfirmation:** Once the miner seals the sector, they update the PieceConfirmation in the deal state, which the client then gets the next time they query that state.
+     - The PieceConfirmation proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
+    -  Note: a client that is not interested in staying online to wait for PieceConfirmation can leave immediately, however, they run the risk that their files don't actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
      - Note: In order to provide the piece confirmation, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece confirmation becomes available.
-   - **Mining**: Miner posts `seal commitment` and proof on chain and starts running `proofs of spacetime`
+   - **Mining**: Miner posts `seal commitment` and associated proof on chain by calling `CommitSector` and starts running `proofs of spacetime`. See [storage mining cycle](mining.md#storage-mining-cycle) for more details.
 
 3. **Storage Deal Abort:** If the miner doesn't provide the PieceConfirmation, the client can invalidate the payment channel.
    - This is done by invoking the 'close' method on the channel on-chain. This process starts a timer that, on finishing, will release the funds to the client. 
@@ -101,17 +108,27 @@ This section describes the flow required to store a single piece with a single s
 4. **Storage Deal Complete:** The client periodically queries the miner for the deals status until the deal is 'complete', at which point the client knows that the data is properly replicated.
    - The client should store the returned 'PieceConfirmation' for later validation.
 
-5. **Income Withdrawal**: When the miner wishes to withdraw funds, they call `Payment.RedeemVoucher`.
+TODO: 'complete' isnt really the right word here, as it implies that the deal is over.
+
+
+5. **Income Withdrawal**: When the miner wishes to withdraw funds, they call [`Payment.RedeemVoucher`](#payments).
+
 
 ## The Power Table
 
 The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table, instead, there is a 'total power' exported by the storage market actor, and each individual miner reports its power through their actor.
 
+TODO: rephrase the above to make it clear that power is updated only on PoSt submission and when slashed.
+
+
 ### Power Updates
 
-A miners power is incremented every time they commit a new seal to the chain. (TODO: this should actually change to being updated once the first PoSt for that data is completed).
+A miners power is updated only when they submit a valid PoSt to the chain, or if they are slashed.
 
-Power is deducted when miners remove sectors, either through direct action (calling `RemoveSector`) or by reporting the sector missing in a PoSt.
+TODO: link to methods for post submission and slashing.
+
+Power is deducted when miners remove sectors by reporting the sector 'missing' or 'done' in a PoSt.
+
 
 ## Payments
 
@@ -140,6 +157,8 @@ type Payments interface {
     RedeemVoucher(v Voucher, proof Proof)
 }
 ```
+
+For details on the implementation of the payments system, see [the payments doc](payments.md).
 
 
 
