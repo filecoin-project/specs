@@ -4,6 +4,9 @@
 
 An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. We currently set rounds to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
 
+While we refer to both storage miners and participants in expected consensus as "miners," strictly speaking only the latter are actively mining blocks (by participating in Filecoin consensus). Fulfilling storage orders and generating new blocks for block rewards are two wholly distinct ways to earn Filecoin.
+With that said, it stands to reason that any storage miner would participate in Filecoin consensus (it effectively subsidizes their storage costs) and conversely, any participant in Filecoin consensus must be a storage miner (in order for them to appear in the power table). We therefore refer to these actors as "miners."
+
 ## Becoming a miner
 
 ### Registration
