@@ -2,8 +2,9 @@
 
 This spec describes how to implement the protocol in general, for Filecoin-specific processes, see:
 
-- [Mining Blocks](mining.md#mining-blocks)
-- [Faults](./faults.md)
+- [Mining Blocks](mining.md#mining-blocks) on how consensus is used.
+- [Faults](./faults.md) on slashing.
+- [Storage Market](./storage-market.md#the-power-table) on how the power table is maintained.
 
 Expected Consensus is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
 level, it operates by running a leader election every round in which, on expectation, one 
@@ -38,9 +39,7 @@ We can describe the basic algorithm by looking in turn at its two major componen
 
 ## Secret Leader Election
 
-Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their weight. In the case of Filecoin, participants and weights are drawn from the storage power table.
-
-TODO: Link to power table spec.
+Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their weight. In the case of Filecoin, participants and weights are drawn from the storage [power table](./storage-market.md#the-power-table).
 
 Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness drawn from the chain.
 
