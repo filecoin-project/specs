@@ -84,11 +84,17 @@ type StorageMinerActor interface {
     
     // DePledge allows a miner to retrieve their pledged collateral.
     DePledge(amt TokenAmount)
+    
+    // GetPower returns this miners power in the filecoin power table
+    GetPower() Integer
 
     // GetOwner returns the address of the account that owns the miner. The owner is the
     // account that is authorized to control the miner, and is also where mining rewards
     // go to.
     GetOwner() Address
+    
+    // GetKey returns the block signing key for this miner.
+    GetKey() PublicKey
 
     // GetWorkerAddr (name still a WIP) returns the address corresponding to the
     // miners block signing key. Proof submissions for this miner must come from
@@ -216,6 +222,8 @@ When the miner has completed their PoSt, they must submit it to the network by c
 1. **Standard Submission**: A standard submission is one that makes it on-chain before the end of the proving period. The length of time it takes to compute the PoSts is set such that there is a grace period between then and the actual end of the proving period, so that the effects of network congestion on typical miner actions is minimized.
 2. **Penalized Submission**: A penalized submission is one that makes it on-chain after the end of the proving period, but before the generation attack threshold. These submissions count as valid PoSt submissions, but the miner must pay a penalty for their late submission. (See '[Faults](../faults.md)' for more information)
    - Note: In this case, the next PoSt should still be started at the beginning of the proving period, even if the current one is not yet complete. Miners must submit one PoSt per proving period.
+
+Along with the PoSt submission, miners may also subit a set of sectors that they wish to remove from their proving set. This is done by selecting the sectors in the 'done' bitfield passed to `SubmitPoSt`.
 
 
 ### Stop Mining

@@ -111,6 +111,7 @@ func StorageMinerActor(pubkey PublicKey, pledge BytesAmount, pid PeerID) {
         Fatal("not enough collateral given")
     }
     
+    self.Owner = message.From
     self.PublicKey = pubkey
     self.PeerID = pid
     self.PledgeBytes = pledge
@@ -149,6 +150,8 @@ func AddAsk(price TokenAmount, ttl Integer) AskID {
 ```
 
 Note: this may be moved off chain soon, don't worry about testing it too heavily.
+
+
 
 ### CommitSector
 
@@ -442,6 +445,30 @@ Return: Address
 ```go
 func GetWorkerAddr() Address {
     return self.Worker
+}
+```
+
+### GetPower
+
+Parameters: None
+
+Return: Integer
+
+```go
+func GetPower() Integer {
+    return self.Power
+}
+```
+
+### GetKey
+
+Parameters: None
+
+Return: PublicKey
+
+```go
+func GetKey() PublicKey {
+    return self.PublicKey
 }
 ```
 
