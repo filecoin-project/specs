@@ -146,7 +146,7 @@ Software encoding a Filecoin address must:
 - produce an address encoded to a known protocol
 - produce an address with a valid checksum
 
-Encodes an Address as a string, converting the network value to the corresponding prefix and encoding the protocol and payload to base32.
+Encodes an Address as a string, converting the network value to the corresponding prefix and encoding the protocol and payload to [base32](https://tools.ietf.org/html/rfc4648).
 
 ```go
 func Encode(a Address) string {
