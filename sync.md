@@ -81,6 +81,7 @@ func (syncer *Syncer) SyncBootstrap() {
     // Fetch all the messages for all the blocks in this chain
     // There are many ways to make this more efficient. For now, do the dumb thing
     blockSet.ForEach(func(b Block) {
+        // FetchMessages should use bitswap to fetch any messages we don't have locally
         FetchMessages(b)
     })
     
@@ -151,7 +152,8 @@ func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
 
 
 func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
-	ts := tipsetFromCidOverNet(newHead) // lookup over network
+	// fetch tipset and messages via bitswap
+	ts := tipsetFromCidOverNet(newHead) 
 
 	var chain Chain
 	for {
@@ -163,7 +165,8 @@ func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 
 		chain.InsertFront(ts)
 
-		if syncer.store.Contains(ts) { // Store has record of this tipset.
+		if syncer.store.Contains(ts) { 
+			// Store has record of this tipset.
 			return chain, nil
 		}
 		parent := ts.ParentCid()

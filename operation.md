@@ -28,7 +28,11 @@ Listen for messages on the messages pubsub channel (See [message propagation](da
 - Run the DHT protocol for aiding node discovery
   - libp2p-kad-dht, with just 'find node' RPCs enabled.
 
+## Bitswap for data requests
 
+Run bitswap to fetch and serve data (such as messages) to and from other filecoin nodes. This is used to fill in missing bits during block propogation, and also to fetch data during sync.
+
+There is not yet an official spec for bitswap, but [the protobufs](https://github.com/ipfs/go-bitswap/blob/master/message/pb/message.proto) should help in the interim.
 
 ## Mining
 
