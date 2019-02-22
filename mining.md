@@ -114,59 +114,6 @@ type StorageMinerActor interface {
 
 The miner actor also has underlying state that is persisted on-chain. That state looks like this:
 
-```go
-type StorageMinerState struct {
-    // Owner is the address of the account that owns this miner
-    Owner Address
-    
-    // Worker is the address of the worker account for this miner
-    Worker Address
-    
-    // PeerID is the libp2p peer identity that should be used to connect
-    // to this miner
-    PeerID peer.ID
-    
-    // PublicKey is the public portion of the key that the miner will use to sign blocks
-    PublicKey PublicKey
-    
-    // PledgeBytes is the amount of space being offered by this miner to the network
-    PledgeBytes BytesAmount
-    
-    // Collateral is locked up filecoin the miner has available to commit to storage.
-    // When miners commit new sectors, tokens are moved from here to 'ActiveCollateral'
-    // The sum of collateral here and in activecollateral should equal the required amount
-    // for the size of the miners pledge.
-    Collateral TokenAmount
-    
-    // ActiveCollateral is the amount of collateral currently committed to live storage
-    ActiveCollateral TokenAmount
-    
-    // DePledgedCollateral is collateral that is waiting to be withdrawn
-    DePledgedCollateral TokenAmount
-    
-    // DePledgeTime is the time at which the depledged collateral may be withdrawn
-    DePledgeTime BlockHeight
-    
-    // Sectors is the set of all sectors this miner has committed
-    Sectors SectorSet
-    
-    // ProvingSet is the set of sectors this miner is currently mining. It is only updated
-    // when a PoSt is submitted (not as each new sector commitment is added)
-    ProvingSet SectorSet
-    
-    // NextDoneSet is a set of sectors reported during the last PoSt submission as
-    // being 'done'. The collateral for them is still being held until the next PoSt
-    // submission in case early sector removal penalization is needed.
-    NextDoneSet SectorSet
-    
-    // TODO: maybe this number is redundant with power
-    LockedStorage BytesAmount
-    
-    // Power is the amount of power this miner has
-    Power BytesAmount
-}
-```
-
 ### Owner Worker distinction
 
 The miner actor has two distinct 'controller' addresses. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key. 

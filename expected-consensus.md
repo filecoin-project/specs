@@ -32,6 +32,8 @@ TODO: get accurate estimates for K and L, potentially merge both to a single par
 
 Note: Validity of blocks beyond appropriate ticket generation (defined below) is defined by the implementation. For the filecoin definition of a valid block, see the [mining spec](mining.md).
 
+Expected consensus relies on weighted chains in order to quickly converge on 'one true chain'. 
+
 We can describe the basic algorithm by looking in turn at its two major components: 
 
 - Leader Election
@@ -203,9 +205,8 @@ Due to network propagation delay, it is possible for a miner in round N+1 to omi
 As we saw, it is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided. 
 
 The weight at each block is equal to its `ParentWeight`, plus that block's delta weight. Delta
-weight is a constant `V`, plus the ratio of the total power in the network controlled by the
-miner of the block.  The exact value for `V` and the magnitude of the power ratio value are
-still to be determined, but for now we can use `V = 10` and `(100 * MinerPower) / TotalPower`.
+weight is a constant `V`, plus `X` - a function of the total power in the network as reported in the Power Table.  The exact value for `V` and the magnitude of the power ratio value are
+still to be determined, but for now we can use `V = 10` and `X = log(TotalPower)`.
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given `TipSet` should have 

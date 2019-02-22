@@ -375,3 +375,48 @@ type RetrievePieceChunk struct {
 ```
 
 TODO: document the query deal interaction
+
+# BlockSync
+
+The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of `/fil/sync/blk/0.0.0`. It uses CBOR-RPC.
+
+```go
+type BlockSyncRequest struct {
+    Start Cid
+    RequestLength uint64
+}
+```
+
+The request requests a chain of a given length by the hash of its highest block.
+
+```go
+type BlockSyncResponse struct {
+    Blocks []Block
+    
+    Status uint
+    Message string
+}
+```
+
+The response contains the chain of requested blocks, in reverse iteration order, the zero'th block should be the block referenced by `request.Start`, and the following N blocks should be its N parents, and so on. This is done to streamline validation.
+
+Possible error codes:
+
+```go
+const (
+	Success = 0
+    
+    // Sent back fewer blocks than requested
+    PartialResponse = 101
+    
+    // request.Start not found
+    BlockNotFound = 201
+    
+    // requester is making too many requests
+    GoAway = 202
+    
+    // Internal Error
+    InternalError = 203
+)
+```
+

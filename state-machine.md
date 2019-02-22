@@ -9,7 +9,7 @@ An `actor` is the Filecoin equivalent of Ethereum's smart contracts, it is essen
 ### Method Invocation
 There are two routes to calling a method on an `actor`.
 
-First, to call a method as an external participant of the system (aka, a normal user with Filecoin) you must send a signed `message` to the network, and pay a fee to the miner that includes your `message`.  The signature on the message must match the key associated with an account with sufficient Filecoin to pay for the messages execution. The fee here is equivalent to transaction fees in Bitcoin and Ethereum, where it is proportional to the work that is done to process the message (Bitcoin prices messages per byte, Ethereum uses the concept of 'gas'. We will likely also use 'gas').
+First, to call a method as an external participant of the system (aka, a normal user with Filecoin) you must send a signed `message` to the network, and pay a fee to the miner that includes your `message`.  The signature on the message must match the key associated with an account with sufficient Filecoin to pay for the messages execution. The fee here is equivalent to transaction fees in Bitcoin and Ethereum, where it is proportional to the work that is done to process the message (Bitcoin prices messages per byte, Ethereum uses the concept of 'gas'. We also use 'gas').
 
 Second, an `actor` may call a method on another actor during the invocation of one of its methods.  However, the only time this may happen is as a result of some actor being invoked by an external users message (note: an actor called by a user may call another actor that then calls another actor, as many layers deep as the execution can afford to run for).
 
@@ -17,11 +17,11 @@ Second, an `actor` may call a method on another actor during the invocation of o
 
 The `global state` is modeled as a map of actor addresses to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT). Each actor's `state` is an ipld pointer to a graph that can be entirely defined by the actor.
 
-### Execution
+### Execution (Calling a method on an Actor)
 
-Message execution currently relies entirely on 'built-in' code, with a common external interface. All method invocations have a set of parameters, which are a cbor encoded array of the parameters set by the function definition.
+Message execution currently relies entirely on 'built-in' code, with a common external interface. The method and actor to call it on are specified in the `Method` and `To` fields of a message, respectively. Method parameters are encoded and put into the `Params` field of a message. The encoding is a cbor array of each of the types individually encoded. The individual encodings for each type are as follows.
 
-These functions are given, as input, an 'ExecutionContext' containing useful information for their execution.
+These functions are given, as input, an `ExecutionContext` containing useful information for their execution.
 
 ```go
 type VMContext interface {
@@ -49,7 +49,11 @@ type VMContext interface {
 }
 ```
 
+If the execution completes successfully, changes to the state tree are saved. Otherwise, the message is marked as failed, and any state changes are reverted.
 
+#### Receipts
+
+Every message execution generates a [receipt](data-structures.md#message-receipt). These receipts contain the encoded return value of the method invocation, and an exit code.
 
 #### Storage
 

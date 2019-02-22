@@ -2,7 +2,19 @@
 
 Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture most of the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode.
 
+This spec decsribes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
+
 ## Storage Market Actor
+
+```go
+type StorageMarketActor struct {
+    Miners AddressSet
+
+    TotalStorage Integer
+}
+```
+
+
 
 #### CreateStorageMiner
 
@@ -12,7 +24,7 @@ Parameters:
 
 - pledge BytesAmount
 
-- pid PeerID 
+- pid PeerID
 
 Return: Address
 
@@ -26,7 +38,11 @@ func CreateStorageMiner(pubkey PublicKey, pledge BytesAmount, pid PeerID) Addres
         Fatal("not enough funds to cover required collateral")
     }
     
-    return VM.CreateActor(MinerActor, msg.Value, pubkey, pledge, pid)
+    newminer := VM.CreateActor(MinerActor, msg.Value, pubkey, pledge, pid)
+
+    self.Miners.Add(newminer)
+
+    return newminer
 }
 ```
 
@@ -101,6 +117,59 @@ func GetTotalStorage() Integer {
 ```
 
 ## Storage Miner Actor
+
+```go
+type StorageMiner struct {
+    // Owner is the address of the account that owns this miner
+    Owner Address
+
+    // Worker is the address of the worker account for this miner
+    Worker Address
+
+    // PeerID is the libp2p peer identity that should be used to connect
+    // to this miner
+    PeerID peer.ID
+
+    // PublicKey is the public portion of the key that the miner will use to sign blocks
+    PublicKey PublicKey
+
+    // PledgeBytes is the amount of space being offered by this miner to the network
+    PledgeBytes BytesAmount
+
+    // Collateral is locked up filecoin the miner has available to commit to storage.
+    // When miners commit new sectors, tokens are moved from here to 'ActiveCollateral'
+    // The sum of collateral here and in activecollateral should equal the required amount
+    // for the size of the miners pledge.
+    Collateral TokenAmount
+
+    // ActiveCollateral is the amount of collateral currently committed to live storage
+    ActiveCollateral TokenAmount
+
+    // DePledgedCollateral is collateral that is waiting to be withdrawn
+    DePledgedCollateral TokenAmount
+
+    // DePledgeTime is the time at which the depledged collateral may be withdrawn
+    DePledgeTime BlockHeight
+
+    // Sectors is the set of all sectors this miner has committed
+    Sectors SectorSet
+
+    // ProvingSet is the set of sectors this miner is currently mining. It is only updated
+    // when a PoSt is submitted (not as each new sector commitment is added)
+    ProvingSet SectorSet
+
+    // NextDoneSet is a set of sectors reported during the last PoSt submission as
+    // being 'done'. The collateral for them is still being held until the next PoSt
+    // submission in case early sector removal penalization is needed.
+    NextDoneSet SectorSet
+
+    // TODO: maybe this number is redundant with power
+    LockedStorage BytesAmount
+
+    // Power is the amount of power this miner has
+    Power BytesAmount
+}
+```
 
 ### Constructor
 
@@ -505,46 +574,5 @@ func UpdatePeerID(pid PeerID) {
 
 TODO
 
-## ABI Types and Encodings
 
-Method parameters are encoded and put into the 'Params' field of a message. The encoding is simply a cbor array of each of the types individually encoded. The individual encodings for each type are as follows.
 
-#### `PublicKey`
-
-The public key type is simply an array of bytes. (TODO: discuss specific encoding of key types, for now just calling it bytes is sufficient)
-
-#### `BytesAmount`
-BytesAmount is just a re-typed Integer.
-
-#### `PeerID`
-PeerID is just the serialized bytes of a libp2p peer ID.
-
-Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/100
-
-#### `Integer`
-
-Integers are encoded as LEB128 signed integers.
-
-#### `BitField`
-
-Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.
-
-#### `SectorSet`
-
-TODO
-
-#### `FaultSet`
-
-A fault set is a BitField and a block height, encoding TBD.
-
-#### `BlockHeader`
-
-BlockHeader is a serialized `Block`, as described in [the data structures document](data-structures.md#block).
-
-#### `SealProof`
-
-SealProof is just an array of bytes.
-
-#### `TokenAmount`
-
-TokenAmount is just a re-typed Integer.
