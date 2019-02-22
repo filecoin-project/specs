@@ -185,7 +185,7 @@ This new block (with multiple tickets) will have a few key properties:
 ```
 On looking back
 
-Here are a few examples to help illustrate how the randomness lookback parameter, 'K', functions.
+Here are a few examples to help illustrate how the randomness lookback parameter, 'K', functions, given the fact that it includes null blocks.
 
 At a given height 'N' (or for round N, which is functionally equivalent), sample your ticket from N-K rounds to generate your election proof.
 - This could mean that you are looking back J <= K actual blocks back: since we count null blocks, we may walk back multiple blocks (null blocks + actual block) within a single header.
