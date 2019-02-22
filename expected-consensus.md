@@ -62,10 +62,10 @@ At a high-level, tickets must do the following:
 
 In practice, miners make use of tickets in two main places within a block:
 
-- A `Tickets` array — this stores new tickets generated using the ticket 1 block back and proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` blocks. We discuss generation in `Ticket generation`.
-- An `ElectionProof` — this stores the winning lottery ticket generated using the smallest ticket (from the `Tickets` array) in the parent `Tipset` `K` blocks back. It proves that the leader was elected in this round. We discuss generation in `Checking election results`.
+- A `Tickets` array — this stores new tickets generated using the ticket 1 block back and proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` rounds. We discuss generation in `Ticket generation`.
+- An `ElectionProof` — this stores the winning lottery ticket generated using the smallest ticket (from the `Tickets` array) in the parent `Tipset` `K` round back. It proves that the leader was elected in this round. We discuss generation in `Checking election results`.
 
-On expectation, The `Tickets` array will each contain a single ticket. We discuss the case in which it contains more than one below (see [Null Blocks](#null-blocks)).
+On expectation, the `Tickets` array will contain a single ticket. We discuss the case in which it contains more than one below (see [Null Blocks](#null-blocks)).
 
 ```
 Lookback parameter and why tickets are stored in two different places in a block?
@@ -74,10 +74,10 @@ We use tickets for two main purposes: as a proof that blocks were appropriately 
 
 The proof of delay requires a ticket to be sampled from one block back, this is how tickets are generated for future use.
 
-The proof of election however requires a ticket to be sampled from K blocks back. By sampling randomness from K blocks back, we turn independent events (each drawing from a block one round back) into a global lottery instead. That is that rather than having a distinct chance of winning or losing for each potential fork in a given round, a miner will either win on all or lose on all forks descended from the block in which randomness is sampled. This is useful as it reduces opportunities for grinding, across forks or across sybil identities.
+The proof of election however requires a ticket to be sampled from K rounds back. By sampling randomness from K rounds back, we turn independent events (each drawing from a block one round back) into a global lottery instead. That is that rather than having a distinct chance of winning or losing for each potential fork in a given round, a miner will either win on all or lose on all forks descended from the block in which randomness is sampled. This is useful as it reduces opportunities for grinding, across forks or across sybil identities.
 
 This is a tradeoff however for two reasons:
-- The lookback means that a miner can know K blocks in advance that they will win, decreasing the cost of running a targeted attack (given they have local predictability).
+- The lookback means that a miner can know K rounds in advance that they will win, decreasing the cost of running a targeted attack (given they have local predictability).
 - It means we must store electionProofs separately from "DelayProofs" (i.e. Tickets) in a block, taking up more space on-chain.
 ```
 
@@ -115,7 +115,7 @@ The process is as follows:
 
 - At round N, the miner will draw the smallest ticket from the Tipset at round N-K, with K the randomness lookback parameter.
 - The miner will use this ticket as input to a VRF (Verifiable Random Function), thereby ensuring secrecy: no other participant can generate this output without the miner's private key.
-- The miner will compare the output to their power fraction from round N-L, with L the committee lookback parameter. If it is smaller, they have won and can mine a block inserting this winning ticket in the `ElectionProofs` array in the block produced at round N. Else they wait to hear of another block generated in this round.
+- The miner will compare the output to their power fraction from round N-L, with L the committee lookback parameter. If it is smaller, they have won and can mine a block inserting this winning `ElectionProof` in the block header for the block produced at round N. Else they wait to hear of another block generated in this round.
 
 We have at round N:
 
@@ -128,7 +128,7 @@ sort: bytewise sort
 lookbackTickets: Winning tickets from each of the `Tipset` blocks at round N-K
 ```
 
-It is important to note that a miner generates two artifacts: one, a ticket from last block to prove that they have waited the appropriate delay, and two, an election proof from K blocks back (where K could be 1) to run leader election.
+It is important to note that a miner generates two artifacts: one, a ticket from derived from last block's ticket to prove that they have waited the appropriate delay, and two, an election proof from K blocks back (where K could be 1) to run leader election.
 
 Typically, either a miner will generate a winning ticket (see [Block Generation](#block-generation) or will hear about a new block (or multiple) by the end of a round (and start mining atop the smallest ticket of this new tipset). The round may also have no successful miners.
 
@@ -171,16 +171,26 @@ if winning(electionProof) {
 }
 ```
 
-This ticket can be verified to have been generated in the appropriate number of rounds by looking at the tickets array, and ensuring that each subsequent ticket (leading to the final ticket in that block) was generated using the previous one in the array. Note that this has implications on block size, and client memory requirements, though on expectation, blocks should rarely grow too much because of this.
+This ticket can be verified to have been generated in the appropriate number of rounds by looking at the 'Tickets' array, and ensuring that each subsequent ticket (leading to the final ticket in that block) was generated using the previous one in the array. Note that this has implications on block size, and client memory requirements, though on expectation, blocks should rarely grow too much because of this.
 
 **Checking election results (after mining a null block)**
 
-Likewise, a miner should take their losing ticket from the original mining attempt (drawn from `K` blocks back), add it to the `ElectionProofs` array in the block and run a VRF on it once more, generating a new ticket to compare with their power in the table N-L blocks back. Each time it is discovered that nobody has won a given round, every miner should use their failed ticket to repeat the leader election process, appending said ticket to their would-be block's `ElectionProofs array. Once a miner finds a winning ticket, they can publish a block (see `Block Generation`).
+Failing to generate an election proof, a miner should discard their failed proof from the original mining attempt (drawn from `K` rounds back), and recompute a leader election proof at the next block. That is, the miner will now use the ticket sampled `K-1` rounds back to generate an election proof. They can then compare that proof with their power in the table N-L-1 blocks back. Each time it is discovered that nobody has won a given round, every miner should repeat the leader election process using the next ticket in the chain to generate a new ElectionProof. Once a miner finds a winning ticket, they can publish a block (see `Block Generation`).
 
 This new block (with multiple tickets) will have a few key properties:
 
 - All tickets in are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
-- The election proof was correctly generated from K blocks back, counting null blocks.
+- The election proof was correctly generated from K rounds back, counting null blocks.
+
+```
+On looking back
+
+Here are a few examples to help illustrate how the randomness lookback parameter, 'K', functions.
+
+At a given height 'N' (or for round N, which is functionally equivalent), sample your ticket from N-K rounds to generate your election proof.
+- This could mean that you are looking back J <= K actual blocks back: since we count null blocks, we may walk back multiple blocks (null blocks + actual block) within a single header.
+- This could mean you are sampling a null block ticket (i.e. some element in a 'Tickets' array) to generate your Election Proof.
+```
 
 ### Block Generation
 
