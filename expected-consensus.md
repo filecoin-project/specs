@@ -63,9 +63,9 @@ At a high-level, tickets must do the following:
 In practice, miners make use of tickets in two main places within a block:
 
 - A `Tickets` array — this stores new tickets generated using the ticket 1 block back and proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` blocks. We discuss generation in `Ticket generation`.
-- An `ElectionProofs` array — this array stores the winning lottery ticket generated using the smallest ticket (from the `Tickets` array) in the parent `Tipset` `K` blocks back. This array proves that the leader was elected in this round. We discuss generation in `Checking election results`.
+- An `ElectionProof` — this stores the winning lottery ticket generated using the smallest ticket (from the `Tickets` array) in the parent `Tipset` `K` blocks back. It proves that the leader was elected in this round. We discuss generation in `Checking election results`.
 
-On expectation, these arrays will each contain a single ticket. We discuss the case in which they contain more than one below (see [Null Blocks](#null-blocks)).
+On expectation, The `Tickets` array will each contain a single ticket. We discuss the case in which it contains more than one below (see [Null Blocks](#null-blocks)).
 
 ```
 Lookback parameter and why tickets are stored in two different places in a block?
@@ -115,12 +115,12 @@ The process is as follows:
 
 - At round N, the miner will draw the smallest ticket from the Tipset at round N-K, with K the randomness lookback parameter.
 - The miner will use this ticket as input to a VRF (Verifiable Random Function), thereby ensuring secrecy: no other participant can generate this output without the miner's private key.
-- The miner will compare the output to their power from round N-L, with L the committee lookback parameter. If it is smaller, they have won and can mine a block inserting this winning ticket in the `ElectionProofs` array in the block produced at round N. Else they wait to hear of another block generated in this round.
+- The miner will compare the output to their power fraction from round N-L, with L the committee lookback parameter. If it is smaller, they have won and can mine a block inserting this winning ticket in the `ElectionProofs` array in the block produced at round N. Else they wait to hear of another block generated in this round.
 
 We have at round N:
 
 ```
-T = Sig(H(sort(lookbackTickets)[0]))
+electionProof = Sig(H(sort(lookbackTickets)[0]))
 
 Sig: Signature with the miner's keypair, used as a VRF.
 H: Cryptographic compression function
@@ -128,15 +128,15 @@ sort: bytewise sort
 lookbackTickets: Winning tickets from each of the `Tipset` blocks at round N-K
 ```
 
-It is important to note that a miner uses two tickets: one from last block to prove that they have waited the appropriate delay, and one from K blocks back (where K could be 1) to run leader election.
+It is important to note that a miner generates two artifacts: one, a ticket from last block to prove that they have waited the appropriate delay, and two, an election proof from K blocks back (where K could be 1) to run leader election.
 
 Typically, either a miner will generate a winning ticket (see [Block Generation](#block-generation) or will hear about a new block (or multiple) by the end of a round (and start mining atop the smallest ticket of this new tipset). The round may also have no successful miners.
 
 ### Null Blocks
 
-In the case that nobody wins a ticket in a given round, a `Null block` may be inserted. A 'null block' doesn't technically need to exist as its own separate block, it simply serves as a way to signal that a number of rounds were skipped.
+In the case that nobody wins a ticket in a given round, a `Null block` may be inserted. A 'null block' doesn't actually exist as its own separate block, it simply serves as a way to signal that a number of rounds were skipped.
 
-To 'mine' a null block, you will need to generate two new tickets, one proving appropriate delay (and the fact that winning has taken multiple rounds) to be used for leader election in a future round and another proving your election.
+To 'mine' a null block, you will need to generate a new ticket to prove delay (and the fact that winning has taken multiple rounds), and a new election proof.
 
 **Generating new tickets to prove delay**
 
@@ -150,41 +150,41 @@ Thus, our full ticket generation algorithm (reprised from `Ticket`) is roughly:
 // Ticket is created as an array, with the initial ticket
 // coming from the parent tipset.
 var Tickets []Signature
-old_ticket := sort(parentTickets)[0]
-new_ticket := VRF(VDF(H(old_ticket)))
+oldTicket := sort(parentTickets)[0]
+newTicket := VRF(VDF(H(oldTicket)))
+electionProof := VRF(H(ticketFromHeight(curHeight-K)))
 
-Tickets = append(Tickets, new_ticket)
+Tickets = append(Tickets, newTicket)
 
 // If the current ticket isn't a winner and the block isn't found by another miner,
 // derive a ticket from the last losing ticket
-for !winning(new_ticket) && !blockFound()) {
- new_ticket = VRF(VDF(H(new_ticket)))
- Tickets = append(Tickets, new_ticket)
+for !winning(electionProof) && !blockFound()) {
+ newTicket = VRF(VDF(H(newTicket)))
+ newElectionProof = Sig(H(ticketFromHeight(curHeight+len(Tickets)-K)))
+ Tickets = append(Tickets, newTicket)
 }
 
 // if the process yields a winning ticket, mine and put out a block
 // containing the ticket array
-if winning(T) {
-    mineBlock(ticket)
+if winning(electionProof) {
+    mineBlock(electionProof, Tickets)
 }
 ```
 
-This ticket can be verified to have been generated in the appropriate number of rounds by looking at the tickets array, and ensuring that each subsequent ticket (leading to the winning ticket) was generated using the previous one in the array. Note that this has implications on block size, and client memory requirements, though on expectation, blocks should rarely grow too much because of this.
+This ticket can be verified to have been generated in the appropriate number of rounds by looking at the tickets array, and ensuring that each subsequent ticket (leading to the final ticket in that block) was generated using the previous one in the array. Note that this has implications on block size, and client memory requirements, though on expectation, blocks should rarely grow too much because of this.
 
 **Checking election results (after mining a null block)**
 
 Likewise, a miner should take their losing ticket from the original mining attempt (drawn from `K` blocks back), add it to the `ElectionProofs` array in the block and run a VRF on it once more, generating a new ticket to compare with their power in the table N-L blocks back. Each time it is discovered that nobody has won a given round, every miner should use their failed ticket to repeat the leader election process, appending said ticket to their would-be block's `ElectionProofs array. Once a miner finds a winning ticket, they can publish a block (see `Block Generation`).
 
-This new block (with multiple tickets in each array) will have a few key properties:
+This new block (with multiple tickets) will have a few key properties:
 
-- All tickets in each array are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
-- There is the same number of tickets in both arrays -- to ensure a miner has waited appropriately (in the `Ticket` array) before using their winning ticket (in the `ElectionProofs` array).
-
-Thus, our ticket validation algorithm checks that the last ticket in the `ElectionProofs` array is a winning ticket and was adequately generated either from the parent set or from previous failed tickets.
+- All tickets in are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
+- The election proof was correctly generated from K blocks back, counting null blocks.
 
 ### Block Generation
 
-When you have found a winning ticket, you may create a block. For more on this, see the [Mining spec](./mining.md#block-creation).
+When you have a winning election proof and corresponding ticket, you may create a block. For more on this, see the [Mining spec](./mining.md#block-creation).
 
 ## Chain Selection
 
