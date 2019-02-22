@@ -1,6 +1,6 @@
 # Expected Consensus
 
-This is a technical design document describing how to implement the protocol in general, for the Filecoin specific mining process that implements Expected Consensus see [Mining Blocks](mining.md#mining-blocks)
+This is a technical design document describing how to implement the protocol in general, for the Filecoin specific mining process that implements Expected Consensus see [Mining Blocks](mining.md#mining-blocks).
 
 Expected Consensus is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
 level, it operates by running a leader election every round in which, on expectation, one 
@@ -27,9 +27,8 @@ Note: Validity of blocks is defined by the implementation. For the filecoin defi
 
 Expected consensus relies on weighted chains in order to quickly converge on 'one true chain'. 
 The weight at each block is equal to its `ParentWeight`, plus that block's delta weight. Delta
-weight is a constant `V`, plus the ratio of the total power in the network controlled by the
-miner of the block.  The exact value for `V` and the magnitude of the power ratio value are
-still to be determined, but for now we can use `V = 10` and `(100 * MinerPower) / TotalPower`.
+weight is a constant `V`, plus `X` - a function of the total power in the network as reported in the Power Table.  The exact value for `V` and the magnitude of the power ratio value are
+still to be determined, but for now we can use `V = 10` and `X = log(TotalPower)`.
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given `TipSet` should have 
