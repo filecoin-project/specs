@@ -41,78 +41,7 @@ When a miner no longer needs to store the data in a particular sector, they shou
 
 After successfully calling `CreateMiner`, a miner actor will be created for you on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
 
-
-```go
-type StorageMinerActor interface {
-    // AddAsk adds an ask via this miner to the storage markets orderbook
-    AddAsk(price TokenAmount, expiry uint64) AskID
-
-    // CommitSector adds a sector commitment to the chain.
-    CommitSector(commD, commR, commRStar []byte, proof SealProof) SectorID
-
-    // SubmitPoSt is used to submit a coalesced PoSt to the chain to convince the chain
-    // that you have been actually storing the files you claim to be. A proof of
-    // spacetime convinces the verifier that the sectors specified by the given
-    // sector set are being correctly stored by the miner.
-    // Also passed into this call are a set of FailureSets called 'faults'.
-    // Each of these FailureSets specifies a set of sectors, and the time that they
-    // failed at. During verification of the proof, these sectors will be removed.
-    // recovered is the set of sectors that failed during the PoSt and were
-    // recoverable by the miner. When making this call, the miner must submit enough
-    // funds to pay fees for any faults that were recovered from. Collateral is deducted
-    // for any sectors that were permanently lost.
-    // The final parameter is the 'doneSet' this is the set of sectors the miner is
-    // willingly removing, that they were able to prove for the entire proving period.
-    SubmitPoSt(p PoSt, faults []FailureSet, recovered SectorSet, doneSet SectorSet)
-    
-    // IncreasePledge allows a miner to pledge more storage to the network
-    IncreasePledge(addspace Integer)
-    
-    // SlashStorageFault is used to penalized this miner for missing their proofs
-    SlashStorageFault()
-    
-    // GetCurrentProvingSet returns the current set of sectors that this miner is proving.
-    // The next PoSt they submit will use this as an input. This method can be used by
-    // clients to check that their data is being proven. (TODO: returning a list of commR 
-    // hashes is a LOT of data, maybe find a better way?)
-    GetCurrentProvingSet() [][]byte
-    
-    // ArbitrateDeal is called by a client of this miner whose deal with the miner has
-    // data contained in a recently removed sector, and is not yet past the expiry date
-    // of the deal.
-    ArbitrateDeal(d Deal)
-    
-    // DePledge allows a miner to retrieve their pledged collateral.
-    DePledge(amt TokenAmount)
-    
-    // GetPower returns this miners power in the filecoin power table
-    GetPower() Integer
-
-    // GetOwner returns the address of the account that owns the miner. The owner is the
-    // account that is authorized to control the miner, and is also where mining rewards
-    // go to.
-    GetOwner() Address
-    
-    // GetKey returns the block signing key for this miner.
-    GetKey() PublicKey
-
-    // GetWorkerAddr (name still a WIP) returns the address corresponding to the
-    // miners block signing key. Proof submissions for this miner must come from
-    // this address. This is separate from the miners 'owner' address to allow
-    // multiple miners to pay into a single address, while having separate signing keys
-    // as well as to allow for miners to have their collateral put up by a different party
-    // (e.g. for collateral pools)
-    GetWorkerAddr() Address
-
-    // GetPeerID returns the libp2p peer ID that this miner can be reached at.
-    GetPeerID() libp2p.PeerID
-
-    // UpdatePeerID is used to update the peerID this miner is operating under.
-    UpdatePeerID(pid libp2p.PeerID)
-}
-```
-
-The miner actor also has underlying state that is persisted on-chain. That state looks like this:
+For details on the methods on the miner actor, see its entry in the [actors spec](actors.md#storage-miner-actor).
 
 ### Owner Worker distinction
 
@@ -128,7 +57,7 @@ Before doing anything else, a miner must first pledge some collateral for their 
 
 After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on [deal flow](storage-market.md#deal-flow)
 
-When they have a full sector, they should seal it.
+When they have a full sector, they should seal it. This is done by invoking [`PoRep.Seal`](proofs.md#seal) on the sector.
 
 #### Step 1: Commit
 
@@ -141,7 +70,7 @@ During this period, the miner may also commit to new sectors, but they will not 
 
 #### Step 2: Proving Storage (PoSt creation)
 
-At the beginning of their proving period, miners collect the proving set (the set of all live sealed sectors on the chain at this point), and then call `ProveStorage`.
+At the beginning of their proving period, miners collect the proving set (the set of all live sealed sectors on the chain at this point), and then call `ProveStorage`. This process will take the entire proving period to complete.
 
 ```go
 func ProveStorage(sectors []commR, startTime BlockHeight) (PoSTProof, []Fault) {
@@ -195,95 +124,50 @@ For additional details around how consensus works in Filecoin, see the [expected
 
 ### Receiving Blocks
 
-Receiving blocks from the network, you must do the following:
+When receiving blocks from the network (via [block propagation](data-propogation.md)), you must do the following:
 
-1. Check their validity (see below).
+1. Check their validity (see [below](#block-validation)).
 2. Assemble a `Tipset` with all valid blocks with common parents.
 
 You may sometimes receive blocks belonging to different `Tipsets` (i.e. whose parents are not the same). In that case, you must choose which tipset to mine on.
 
-Chain selection is a crucial component of how the Filecoin blockchain works. In short, every chain has an associated weight accounting for the number of blocks mined on it and the power (storage) they track. It is always preferable to mine atop a heavier block rather than a lighter one. While you may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
-
-### Block structure
-
-In order to go over block validation in detail, we quickly go over block structure (see more in [block creation](#block-creation)).
-
-Note: This may not yet be the format the go-filecoin codebase is yet using, but it describes what the 'ideal' block structure should look like. Implementations may name things differently, or use different types. For a detailed layout of exactly how a block should look and be serialized, see [the datastructures spec](data-structures.md#block).
-
-We have:
-
-```go
-type Block struct {
-    // Parents are the cids of this blocks parents
-    Parents []*cid.Cid
-
-    // Tickets is the array of tickets used to prove delay in block generation.
-    // Generated from tickets in its parent tipset.
-    // On expectation there will be only one, but there could be multiple, null blocks
-    // on which the winning ticket was found.
-    Tickets []Signature
-
-    // ElectionProofs is the array of proofs that the leader was indeed elected.
-    // Generated from tickets in the lookback tipset.
-    // On expectation there will be only one, but there could be multiple, null blocks
-    // on which the winning ticket was found.
-    ElectionProofs []Signature
-    
-    // Parent Weight is the aggregate chain weight of this block's parent set.
-    ParentWeight float64
-        
-    // MsgRoot is the root of the merklized set of state transitions in this block
-    MsgRoot *cid.Cid
-    
-    // ReceiptsRoot is the root of the merklized set of invocation receipts matching
-    // the messages in this block.
-    ReceiptsRoot *cid.Cid
-    
-    // StateRoot is the resultant state represented by this block after the in-order 
-    // application of its set of messages.
-    StateRoot *cid.Cid
-    
-    // BlockSig is a signature over all the other fields in the block with the miners
-    // private key
-    BlockSig Signature
-}
-```
-
-To start, you must validate that the block was well mined.
+Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and the power (storage) they track. It is always preferable to mine atop a heavier `TipSet` rather than a lighter one. While you may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
 
 ### Block Validation
 
+The block structure and serialization is detailed in  [the datastructures spec](data-structures.md#block). Check there for details on fields and types.
+
 In order to validate a block coming in from the network at height `N` was well mined you must do the following:
 
-1. Validate `BlockSig`
-
-2. Ensure that the block content is appropriately referenced in the header. 
-
-3. Validate `ParentWeight`
+1. Validate that `BlockSig` validates with the miners public.
+2. Validate `ParentWeight`
    - Each of the blocks in the block's `ParentTipset` must have the same `ParentWeight`.
    - The new block's ParentWeight must have been properly calculated using the [chain weighting function](./expected-consensus#chain-weighting).
-
-4. Validate `StateRoot`
+3. Validate `StateRoot`
    - In order to do this, you must ensure that applying the block's messages to the `ParentState` (not included in block header) appropriately yields the `StateRoot` and receipts in the `ReceiptRoot`.
-
-5. You must validate that the tickets in the `Tickets` array are valid, thereby proving appropriate delay for this block creation.
+4. You must validate that the tickets in the `Tickets` array are valid, thereby proving appropriate delay for this block creation.
    - Ensure that the new ticket was generated from the smallest ticket in the block's parent tipset (at height `N-1`).
    - Recompute the new ticket, using the miner's public key, ensuring it was computed appropriately.
-
-6. You must validate that the tickets in `ElectionProofs` array were correctly generated by the miner, and that they are eligible to mine.
+5. You must validate that the `ElectionProof` was correctly generated by the miner, and that they are eligible to mine.
    - Ensure that the proof was generated using the smallest ticket at height `N-K` (the lookback tipset).
-   - Recompute the proof, using the miner's public key, and check that the ticket is a valid signature over that value.
+   - Validate the proof using the miner's public key, to check that the `ElectionProof` is a valid signature over that lookback ticket.
    - Verify that the proof is indeed smaller than the miner's power as reported in the power table at height `N-L`.
-
-7. In a case where the block contains multiple values in either the `Tickets` or `ElectionProofs` arrays
+6. In a case where the block contains multiple values in the `Tickets` array
    - Ensure that all tickets in both arrays are signed by the same key.
    - For the `Tickets` array, ensure that each ticket was used to generate the next, starting from the smallest ticket in the Parent tipset (at `N-1`).
-   - For the `ElectionProofs` array, ensure that each ticket was used to generate the next, starting from the smallest ticket in the Lookback tipset (at `N-K`).
-   - Ensure that both arrays contain the same number of tickets.
+   - For the `ElectionProof`, ensure that the correct ticket was used to generate it, from `K` blocks back, accounting for null blocks.
 
 We detail ticket validation as follows:
 
 ```go
+func RandomnessLookback(blk Block) TipSet {
+    return chain.GetAncestorTipset(blk, L)
+}
+
+func PowerLookback(blk Block) TipSet {
+    return chain.GetAncestorTipset(blk, K)
+}
+
 func IsTicketAWinner(t Ticket, minersPower, totalPower Integer) bool {
     return ToFloat(sha256.Sum(ticket)) * totalPower < minersPower
 }
@@ -315,25 +199,19 @@ func VerifyTicket(b Block) error {
     
     // 2. Check leader election
     // get the smallest ticket from the lookback tipset
-    lookbackTicket := selectSmallestTicket(randomnessLookback(b))
-
-    for _, ticket := range b.ElectionProofs {
-            challenge := sha256.Sum(lookbackTicket)
+    lookbackTicket := selectSmallestTicket(RandomnessLookback(b))
+    challenge := sha256.Sum(lookbackTicket)
 	
-        	// Check VRF
-            pubk := getPublicKeyForMiner(b.Miner)
-            if !pubk.VerifySignature(ticket, lookbackTicket) {
-                return "Ticket was not a valid signature over the lookback ticket"
-            }
-            // in case this block was mined atop null blocks
-        lookbackTicket = ticket
-    }
+    // Check VRF
+    pubk := getPublicKeyForMiner(b.Miner)
+    if !pubk.VerifySignature(b.ElectionProof, lookbackTicket) {
+		return "Ticket was not a valid signature over the lookback ticket"
+	}
     
-    state := getStateTree(powerLookback(b))
+    state := getStateTree(PowerLookback(b))
     minersPower := state.getPowerForMiner(b.Miner)
     totalPower := state.getTotalPower()
-    
-    if !IsTicketAWinner(lookbackTicket, minersPower, totalPower) {
+    if !IsTicketAWinner(b.ElectionProof, minersPower, totalPower) {
        return "Ticket was not a winning ticket"
     }
     
@@ -375,7 +253,7 @@ When you have found a winning ticket, it's time to create your very own block!
 To create a block, first compute a few fields:
 
 - `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any null blocks you mined on. See [ticket generation](./expected-consensus.md#ticket-generation).
-- `ElectionProofs` - An array containing your winning ticket proving election, and, if applicable, the failed intermediary tickets for any null blocks you mined on. See [ticket generation](./expected-consensus.md#ticket-generation).
+- `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `ParentWeight` - As described in [Chain Weighting](./expected-consensus.md#chain-weighting).
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
   - Take the `ParentState` of one of the blocks in your chosen parent set (invariant: this is the same value for all blocks in a given parent set).
@@ -386,25 +264,29 @@ To create a block, first compute a few fields:
 - `MsgRoot` - To compute this:
   - Select a set of messages from the mempool to include in your block.
   - Insert them into a Merkle Tree and take its root.
+- `StateRoot` - Apply each of your chosen messages to the `ParentState` to get this.
 - `ReceiptsRoot` - To compute this:
   - Apply the set of messages selected above to the parent state, collecting invocation receipts as you go.
   - Insert them into a Merkle Tree and take its root.
-- `StateRoot` - Apply each of your chosen messages to the `ParentState` to get this.
 - `BlockSig` - A signature with your private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after we propogate it to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
-Start by filling out `Parents`, `Tickets` and `ElectionProofs` with values from the ticket checking process.
+Start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.
 
-Next, compute the aggregate state of your selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of *their* parent tipset, sorting your parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'.
+Next, compute the aggregate state of your selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of *their* parent tipset, sorting your parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
 
-Once you have the aggregate `ParentState`, select a set of messages to put into your block. The miner may include a block reward message in this set.  For this reward message to pass validation it must be the first message in the serialized list of messages and must not claim more than the protocol defined block reward constant.  The `From` field of the block reward message must equal the protocol defined network address constant.  The message should not include a signature.  Apply each message of the message set to your aggregate parent state in order to compute your block's resultant state. Gather the receipts from each execution into a set. Now, merklize the set of messages you selected, and put the root in `MsgRoot`. Merklize the receipts, and put that root in `ReceiptsRoot`. Finally, set the `StateRoot` field with your resultant state.
+Once you have the aggregate `ParentState`, you must apply the mining reward. This is done by adding the correct amount to the miner owners account balance in the state tree. (TODO: link to block reward calculation. Currently, the block reward is a fixed 1000 filecoin).
+
+Now, a set of messages is selected to put into the block. For each message, subtract `msg.GasPrice * msg.GasLimit` from the senders account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain). Then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value (see [receipt](data-structures#message-receipt) for more details). Then, refund the sender in the amount of `(msg.GasLimit - GasUsed) * msg.GasPrice`. Each message should be applied on the resultant state of the previous message execution, unless that message execution failed, in which case all state changes caused by that message are thrown out. The final state tree after this process will be your blocks `StateRoot`.
+
+Merklize the set of messages you selected, and put the root in `MsgRoot`. Gather the receipts from each execution into a set, merklize them, and put that root in `ReceiptsRoot`. Finally, set the `StateRoot` field with your resultant state.
 
 Note that the `ParentState` field from the expected consensus document is left out, this is to help minimize the size of the block header. The parent state for any given parent set should be computed by the client and cached locally.
 
-Now you have a filled out block, all that's left is to sign it. Serialize the block now (without the signature field), take the sha256 hash of it, and sign that hash. Place the resultant signature in the `BlockSig` field, and then you're done.
+Now the block is complete, all that's left is to sign it. Serialize the block now (without the signature field), take the sha256 hash of it, and sign that hash. Place the resultant signature in the `BlockSig` field.
 
 #### Block Broadcast
 
-Broadcast your completed block to the network, and assuming you've done everything correctly, the network will accept it, and other miners will mine on top of it, earning you a block reward!
+Broadcast the completed block to the network (via [block propagation](data-propogation.md)), and assuming everything was done correctly, the network will accept it, and other miners will mine on top of it, earning you a block reward!
 
 ### Open Questions
 
