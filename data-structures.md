@@ -20,19 +20,20 @@ type Block struct {
 	// Miner is the address of the miner actor that mined this block.
 	Miner Address
 
-	// Ticket is the winning ticket that was submitted with this block.
-	Ticket Signature
+	// Tickets are the winning ticket that were submitted with this block.
+	Tickets []Ticket
+    
+    // ElectionProof is a signature over the final ticket that proves this miner
+    // is the leader at this round
+    ElectionProof Signature
 
 	// Parents is the set of parents this block was based on. Typically one,
 	// but can be several in the case where there were multiple winning ticket-
 	// holders for a round.
 	Parents []Cid
 
-	// ParentWeightNum is the numerator of the aggregate chain weight of the parent set.
-	ParentWeightNum Integer
-
-	// ParentWeightDenom is the denominator of the aggregate chain weight of the parent set
-	ParentWeightDenom Integer 
+	// ParentWeight is the aggregate chain weight of the parent set.
+	ParentWeight Integer
 
 	// Height is the chain height of this block.
 	Height Uint64
@@ -68,9 +69,11 @@ type Message struct {
 	Nonce Integer
 
 	Value Integer
+    
+    GasPrice Integer
+    GasLimit Integer
 
 	Method string
-	
 	Params []byte
 }
 ```
