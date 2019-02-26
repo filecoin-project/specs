@@ -10,15 +10,12 @@ An address is an identifier that refers to an actor in the Filecoin state. All a
 
 ```go
 type Address struct {
-    // 0: main-net
-    // 1: test-net
-    network leb128
 
-    // 0: SECP256K1 Public Key
-    // 1: Actor
-    // 2: BLS Public Key
-    // 3: ID
-    typ leb128
+    // 0: ID
+    // 1: SECP256K1 Public Key
+    // 2: Actor
+    // 3: BLS Public Key
+    protocol byte
 
     // raw bytes containing the data associated with protocol
     payload []byte

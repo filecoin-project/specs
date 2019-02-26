@@ -11,58 +11,48 @@ A Filecoin address is an identifier that refers to an actor in the Filecoin stat
 
 ## Specification
 
-A Filecoin address is a byte string consisting of:
-* A **network indicator** that identifies which network this address belongs to.
-* A **protocol indicator** that identifies the type and version of this address.
+A Filecoin address encoded to a byte array consists of:
+* A **protocol indicator** byte that identifies the type and version of this address.
 * The **payload** used to uniquely identify the actor according to the protocol.
-* A **checksum** verifies the address is valid.
+```
+|----------|---------|
+| protocol | payload |
+|----------|---------|
+|  1 byte  | n bytes |
+```
+
+A Filecoin address encoded to a string consistes of:
+* A **network prefix** character that identifies the network the address belongs to.
+* A **protocol indicator** byte that identifies the type and version of this address.
+* A **payload** used to uniquely identify the actor according to the protocol..
+* A **checksum** used to validet the address. 
 
 ```
-|---------|----------|---------|----------|
-| network | protocol | payload | checksum |
-|---------|----------|---------|----------|
-| 1 byte  |  1 byte  | n bytes |  4 bytes |
+|------------|----------|---------|----------|
+|  network   | protocol | payload | checksum |
+|------------|----------|---------|----------|
+| 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 ```
 
 An example of a Filecoin address in golang:
 
 ```go
 type Address struct {
-    // 0: main-net
-    // 1: test-net
-    network byte
     
     // 0: ID
     // 1: Blake2b160-Hash of secp256k1 Public Key
     // 2: Blake2b160-Hash of Actor creation data
     // 3: BLS Public Key
-    protocol byte
+    Protocol byte
     
     // raw bytes containing the data associated with protocol
-    payload []byte
+    Payload []byte
 }
 ```
 
-#### Network Indicator
+#### Network Prefix
 
-The **network** byte identifies the network the address belongs to:
-
-- `0` : Mainnet
-- `1` : Testnet
-
-An example description in golang:
-
-```go
-// String Prefix
-Mainnet_Prefix = 'f'
-Testnet_Prefix = 't'
-
-type Protocol = byte
-const (
-    Mainnet Network = iota
-    Testnet
-)
-```
+The **network prefix** is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be `f` for filecoin mainnet or `t` for filecoin testnet. Is it worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.
 
 #### Protocol Indicator
 
@@ -88,27 +78,91 @@ const (
 
 ###### Protocol 0: IDs
 
-**Protocol 0** addresses are simple ids. These addresses are expected to remain within the network. All actors have a numeric ID even if they don't have public keys. The key part of an ID address is the decimal representation of the id only characters '0'-'9'. IDs are not hashed and do not have a checksum.
+**Protocol 0** addresses are simple IDs. These addresses are expected to remain within the network. All actors have a numeric ID even if they don't have public keys. The payload of an ID address is encoded as decimal numbers '0'-'9'. IDs are not hashed and do not have a checksum.
+
+**Bytes**
+
+```
+|----------|---------|
+| protocol | payload |
+|----------|---------|
+|    0     | '0'-'9' |
+```
+
+**String**
+
+```
+|------------|----------|---------|
+|  network   | protocol | payload |
+|------------|----------|---------|
+| 'f' or 't' |     0    | '0'-'9' |
+```
 
 ###### Protocol 1: libsecpk1 Elliptic Curve Public Keys
 
 **Protocol 1** addresses represent secp256k1 public encryption keys. The payload field contains the [Blake2b 160](https://blake2.net/) hash of the public key. 
 
+**Bytes**
+
+```
+|----------|---------------------|
+| protocol |        payload      |
+|----------|---------------------|
+|    1     | blake2b-160(PubKey) |
+```
+
+**String**
+
+```
+|------------|----------|---------------------|----------|
+|  network   | protocol |      payload        | checksum |
+|------------|----------|---------------------|----------|
+| 'f' or 't' |     1    | blake2b-160(PubKey) |  4 bytes |
+                  base32[................................]
+```
+
 ###### Protocol 2: Actor
 
 **Protocol 2** addresses representing an Actor. The payload field contains the [Blake2b 160](https://blake2.net/) hash of meaningful data produced as a result of creating the actor. 
 
+```
+|------------|----------|---------------------|----------|
+|  network   | protocol |      payload        | checksum |
+|------------|----------|---------------------|----------|
+| 'f' or 't' |     2    |  blake2b-160(TODO)  |  4 bytes |
+                  base32[................................]
+```
+
 ###### Protocol 3: BLS
 
-**Protocol 3** addresses represent BLS public encryptions keys. The payload filed contains the BLS public key.
+**Protocol 3** addresses represent BLS public encryption keys. The payload field contains the BLS public key.
+
+**Bytes**
+
+```
+|----------|---------------------|
+| protocol |        payload      |
+|----------|---------------------|
+|    1     | 48 byte BLS PubKey  |
+```
+
+**String**
+
+```
+|------------|----------|---------------------|----------|
+|  network   | protocol |      payload        | checksum |
+|------------|----------|---------------------|----------|
+| 'f' or 't' |     3    |  48 byte BLS PubKey |  4 bytes |
+                  base32[................................]
+```
 
 #### Payload
 
-The payload represents the data specified by the protocol. All payloads excecpt the payload of the ID protocol are base32 encoded when seralized to their human readable format.
+The payload represents the data specified by the protocol. All payloads except the payload of the ID protocol are [base32](https://tools.ietf.org/html/rfc4648) encoded when seralized to their human readable format. The base32 encoding uses the lowercase alphabet.
 
 #### Checksum
 
-The checksum is calculated using the first 4 bytes of the blake2b-160 hash of the addresses network, protocol, and payload bytes. Checksums are only used when seralizing and deseralizing an address to its human readable format.
+The checksum is calculated using blake2b-4 hash of the addresses protocol, and payload bytes. Checksums are base32 encoded  and only used when encoding and decoding an address to its human readable format -- a string. Checksums will never appear on chain.
 
 
 #### Expected Methods
@@ -117,28 +171,24 @@ All implementations in Filecoin must have methods for creating, encoding, and de
 
 ```go
 type Address interface {
-    New(n byte, p byte, payload []byte) Address
-    Encode(a Adress) string
+    New(p byte, payload []byte) Address
+    Encode(network Network, a Adress) string
     Decode(s string) Address
     Checksum(a Address) []byte
-    Validate(a Address) bool
+    ValidateChecksum(a Address) bool
 }
 ```
 ##### New()
 
-New returns an Address for the specified network and protocol encapsulating corresponding payload. New fails for unknown network or protocol.
+New returns an Address for the specified protocol encapsulating corresponding payload. New fails for unknown protocol.
 
 ```go
-func New(network byte, protocol byte, payload []byte) Address {
-	if network != Mainnet && network != Testnet {
-        Fatal(ErrUnknownNetwork)
-	}
+func New(protocol byte, payload []byte) Address {
 	if protocol < SECP256K1 || protocol > BLS {
-        Fatal(ErrUnknownType)
+		Fatal(ErrUnknownType)
 	}
     return Address{
-        Network:  network,
-        protocol: protocol,
+        Protocol: protocol,
         Payload:  payload,
     }
 }
@@ -152,28 +202,22 @@ Software encoding a Filecoin address must:
 - produce an address encoded to a known protocol
 - produce an address with a valid checksum
 
-Encodes an Address as a string, converting the network byte to the corresponding prefix and encoding the payload to [base32](https://tools.ietf.org/html/rfc4648).
+Encodes an Address as a string, prepending the network prefix, calculating the checksum and encoding the payload and checksum to [base32](https://tools.ietf.org/html/rfc4648).
 
 ```go
-func Encode(a Address) string {
-	var prefix string
-    switch a.network {
-    case Mainnet:
-        prefix = Mainnet_Prefix // "f"
-    case Testnet:
-        prefix = Testnet_Prefix // "t"
-    default:
-        Fatal("invalid address network")
-    }
-    
-    switch a.protocol {
-        case SECP256K1:
-        case Actor:
-        case BLS:
-        	cksm := Checksum(a)
-            return prefix + a.protocol + base32.Encode(a.payload + cksm)
-        case ID:
-        	return prefix + a.protocol + base32.Encode(a.payload)
+func Encode(network string, a Address) string {
+	if network != "f" && network != "t" {
+        Fatal("Invalid Network")
+	}
+	
+    switch a.Protocol {
+    	case SECP256K1:
+    	case Actor:
+    	case BLS:
+    		cksm := Checksum(a)
+    		return network + a.Protocol + base32.Encode(a.Payload + cksm)
+    	case ID:
+        	return network + a.Protocol + base32.Encode(a.Payload)
         default:
         	Fatal("invalid address protocol")
     }
@@ -188,7 +232,7 @@ Software decoding a Filecoin address must:
 
 * verify the checksum is valid
 
-Decode an Address from a string, converting the network prefix and protocol prefix to their corresponding byte values, decoding the payload from base32, and validating the checksum.
+Decode an Address from a string by, removing the network prefix validating the the address is of a know protocol prefix to theidecoding the payload from base32, and validating the checksum.
 
 ```go
 func DecodeString(a string) Address {
@@ -196,60 +240,57 @@ func DecodeString(a string) Address {
         Fatal(ErrInvalidLength)
     }
     
-    var ntwk byte
-    switch a[:2] {
-    case Mainnet_Prefix:
-        ntwk = Mainnet
-    case Testnet_Prefix:
-    	ntwk = Testnet
-    default:
+    if a[0] != "f" && a[0] != "t" {
         Fatal(ErrUnknownNetwork)
     }
     
-    protocol := a[3]
-    payload := a[3:]
-    
+    protocol := a[1]
+    raw := a[2:] 
     if protocol == ID {
         return Address{
-            network: ntwk,
-            protocol: protocol
-            payload: payload
+            Protocol: protocol,
+            Payload: raw,
         }
     }
     
-    cksm := payload[len(payload)-CksmLen:len(payload)]
+    payload = raw[:len(raw)-CksmLen]
+    if protocol == SECP256K1 || protocol == Actor {
+        if len(payload) != 20 {
+            Fatal(ErrInvalidBytes)
+        }
+    }
     
-    if !Validate(a, cksm) {
+    cksm := payload[len(payload)-CksmLen : len(payload)]
+    if !ValidateChecksum(a, cksm) {
         Fatal(ErrInvalidChecksum)
     }
     
     return Address{
-        network: ntwk,
-        protocol: protocol,
-        payload: payload,
+        Protocol: protocol,
+        Payload: payload,
     }
 }
 ```
 
 ##### Checksum()
 
-Checksum produces a byte array of the blake2b-16 checksum of an address, returning the first 4 bytes of the digest.
+Checksum produces a byte array of the blake2b-4 checksum of an addresses protocol and payload.
 
 ```go
 const CksmLen = 4
 
-func Checksum(a Address) [CKSM_LEN]byte {
-    digest = blake2b(a)
+func Checksum(a Address) [CksmLen]byte {
+    digest = blake2b(a.Protocol + a.Payload)
     return digest[:4]
 }
 ```
 
-##### Validate()
+##### ValidateChecksum()
 
-Validate returns true if the Checksum of data matches the expected checksum.
+ValidateChecksum returns true if the Checksum of data matches the expected checksum.
 
 ```go
-func Validate(data, expected []byte) bool {
+func ValidateChecksum(data, expected []byte) bool {
     digest := Checksum(data)
     return digest == expected
 }
@@ -259,4 +300,4 @@ func Validate(data, expected []byte) bool {
 
 > TODO a better definition of checksums
 
-Filecoin checksums are the first 4 bytes of the blake2b-160 hash of an Address. Checksums are only added to an address when encoding the address to its human readable format. Addresses using Protocol 0 do not have a checksum.
+Filecoin checksums are calculated over the address protocol and payload using blake2b-4. Checksums are only added to an address when encoding the address to its human readable format. Addresses under the ID Protocol do not have a checksum.
