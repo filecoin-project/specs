@@ -158,7 +158,7 @@ const (
 
 #### Payload
 
-The payload represents the data specified by the protocol. All payloads except the payload of the ID protocol are [base32](https://tools.ietf.org/html/rfc4648) encoded when seralized to their human readable format. The base32 encoding uses the lowercase alphabet.
+The payload represents the data specified by the protocol. All payloads except the payload of the ID protocol are [base32](https://tools.ietf.org/html/rfc4648) encoded using the lowercase alphabet when seralized to their human readable format.
 
 #### Checksum
 
@@ -280,8 +280,7 @@ Checksum produces a byte array of the blake2b-4 checksum of an addresses protoco
 const CksmLen = 4
 
 func Checksum(a Address) [CksmLen]byte {
-    digest = blake2b(a.Protocol + a.Payload)
-    return digest[:4]
+    blake2b(a.Protocol + a.Payload)
 }
 ```
 
