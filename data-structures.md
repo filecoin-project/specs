@@ -298,12 +298,11 @@ if ((shift <size) && (sign bit of byte is set))
 
 Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
 
-| object | tag  |
+| FCS Type | tag  |
 |---|---|
 | block v1 | 43  |
 | message v1 | 44 |
 | signedMessage v1 | 45 |
-| actor v1 | 46 |
 
 For example, a message would be encoded as:
 
@@ -319,3 +318,11 @@ Each individual type should be encoded as specified:
 |  BigInteger | [CBOR bignum](https://tools.ietf.org/html/rfc7049#section-2.4.2) |
 | Address | CBOR major type 2 |
 | Uint8 | CBOR Major type 0 |
+| []byte | CBOR Major type 2 |
+| string | CBOR Major type 3 |
+
+## Encoding Considerations
+
+Objects should be encoded using [canonical CBOR](https://tools.ietf.org/html/rfc7049#section-3.9), and decoders should operate in [strict mode](https://tools.ietf.org/html/rfc7049#section-3.10).  The maximum size of an FCS Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
+
+Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that object is invalid.
