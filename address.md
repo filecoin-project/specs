@@ -277,10 +277,8 @@ func DecodeString(a string) Address {
 Checksum produces a byte array of the blake2b-4 checksum of an addresses protocol and payload.
 
 ```go
-const CksmLen = 4
-
-func Checksum(a Address) [CksmLen]byte {
-    blake2b(a.Protocol + a.Payload)
+func Checksum(a Address) [4]byte {
+    blake2b4(a.Protocol + a.Payload)
 }
 ```
 
