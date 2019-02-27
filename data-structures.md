@@ -21,6 +21,7 @@ type Address struct {
     payload []byte
 }
 ```
+To learn more, take a look at the [Address Spec](https://github.com/filecoin-project/specs/blob/master/address.md).
 
 ## CID
 
