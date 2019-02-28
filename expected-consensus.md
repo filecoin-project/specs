@@ -186,7 +186,7 @@ The process is as follows:
 At round N:
 
 ```
-electionProof = Sig(H(SampleRandomness(CurrentHeight - K)))
+electionProof = Sig(H(SampleRandomness(CurrentRound - K)))
 
 Sig: Signature with the miner's keypair, used as a VRF.
 H: Cryptographic compression function
@@ -216,7 +216,7 @@ Thus, our full ticket generation algorithm (reprised from [Ticket Generation](#t
 var Tickets []Ticket
 oldTicket := sort(parentTickets)[0]
 newTicket := VRF(VDF(H(oldTicket)))
-electionProof := VRF(H(ticketFromRound(curHeight-K)))
+electionProof := VRF(H(ticketFromRound(curRound-K)))
 
 Tickets = append(Tickets, newTicket)
 
@@ -224,8 +224,9 @@ Tickets = append(Tickets, newTicket)
 // derive a ticket from the last losing ticket
 for !winning(electionProof) && !blockFound()) {
  newTicket = VRF(VDF(H(newTicket)))
- newElectionProof = Sig(H(ticketFromRound(curHeight+len(Tickets)-K)))
+ newElectionProof = Sig(H(ticketFromRound(curRound-K)))
  Tickets = append(Tickets, newTicket)
+ curRound += 1
 }
 
 // if the process yields a winning ticket, mine and put out a block
@@ -301,7 +302,7 @@ the reporter, and keep the rest.
 
 TODO: It is unclear that rewarding the reporter any more than gas fees is the right thing to do. Needs thought. Tracking issue: https://github.com/filecoin-project/specs/issues/159
 
-Note: One may wonder what prevents miners from simply breaking up their power into multiple un-linkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same height at the same time. We call this the "whyru slashing" attack.
+Note: One may wonder what prevents miners from simply breaking up their power into multiple un-linkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. We call this the "whyru slashing" attack.
 
 TODO: Discuss with @zenground0 to ensure the below should not be removed
 
