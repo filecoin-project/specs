@@ -225,7 +225,7 @@ Software encoding a Filecoin address must:
 
 - produce an address encoded to a known network
 - produce an address encoded to a known protocol
-- produce an address with a valid checksum
+- produce an address with a valid checksum (if applicable)
 
 Encodes an Address as a string, prepending the network prefix, calculating the checksum, and encoding the payload and checksum to [base32](https://tools.ietf.org/html/rfc4648).
 
