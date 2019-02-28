@@ -182,7 +182,7 @@ const (
 
 #### Payload
 
-The payload represents the data specified by the protocol. All payloads except the payload of the ID protocol are [base32](https://tools.ietf.org/html/rfc4648) encoded using the lowercase alphabet when seralized to their human readable format.
+The payload represents the data specified by the protocol. All payloads except the payload of the ID protocol are [base32](https://tools.ietf.org/html/rfc4648#section-6) encoded using the lowercase alphabet when seralized to their human readable format.
 
 #### Checksum
 
