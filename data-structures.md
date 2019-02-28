@@ -4,6 +4,25 @@ This document serves as an entry point for understanding all of the data structu
 
 TODO: this should also include, or reference, how each data structure is serialized precisely.
 
+## Address
+
+An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.
+
+```go
+type Address struct {
+
+    // 0: ID
+    // 1: SECP256K1 Public Key
+    // 2: Actor
+    // 3: BLS Public Key
+    protocol byte
+
+    // raw bytes containing the data associated with protocol
+    payload []byte
+}
+```
+To learn more, take a look at the [Address Spec](https://github.com/filecoin-project/specs/blob/master/address.md).
+
 ## CID
 
 For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid). 
