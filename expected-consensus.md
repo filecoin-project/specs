@@ -200,11 +200,11 @@ Typically, either a miner will generate a winning ticket (see [Block Generation]
 
 ### Losing Tickets
 
-In the case that nobody finds a winning ticket in a given round, every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their power in the table `N-(L-1)` blocks back. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
+In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their power in the table `N-(L-1)` blocks back. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
 
-In addition to each attempted `ElectionProof` generation, the miner will need to generate a new ticket using their own "losing" ticket from the prior round (i.e. that which failed to yield a valid `ElectionProof`), rather than the prior block's (as is normally used). This proves appropriate delay (given that finding a winning Ticket has taken multiple rounds). Thus, each time it is discovered that nobody has won in a given round, every miner should use their previously generated ticket to repeat the ticket generation process, appending said ticket to their would-be block's `Ticket` array. This continues until some miner finds a winning ticket (see below), ensuring that the ticket chain remains at least as long as the block chain.
+In addition to each attempted `ElectionProof` generation, the miner will need to extend the ticket chain by generating a new ticket. They use the ticket they generated in the prior round, rather than the prior block's (as is normally used). This proves appropriate delay (given that finding a winning Ticket has taken multiple rounds). Thus, each time it is discovered that nobody has won in a given round, every miner should use their previously generated ticket to repeat the ticket generation process, appending said ticket to their would-be block's `Ticket` array. This continues until some miner finds a winning ticket (see below), ensuring that the ticket chain remains at least as long as the block chain.
 
-As was stated above, in the case where the tickets at round `N-K` are all losing tickets, i.e. if no block was generated in round `N-K`, miners should attempt to generate their `ElectionProof` from that ticket which eventually leads to the creation of the block in the next TipSet with the smallest winning ticket, rather than the smallest block at round `N-K` (both are equivalent but this makes implementation simpler).
+TODO: FIX As was stated above, in the case where the tickets at round `N-K` are all losing tickets, i.e. if no block was generated in round `N-K`, miners should attempt to generate their `ElectionProof` from that ticket which eventually leads to the creation of the block in the next TipSet with the smallest winning ticket, rather than the smallest block at round `N-K` (both are equivalent but this makes implementation simpler).
 
 The VDF ensures fairness by enforcing that miners cannot grind through repeated losing tickets (see more [here](https://github.com/filecoin-project/research/issues/31)) and that a miner cannot "rush" the protocol by outputting a block before others have had a chance to (e.g. geographically disadvantaged miners). The VDF delay is currently to 30 seconds, given estimated network propagation times.
 
@@ -221,7 +221,7 @@ electionProof := VRF(H(ticketFromRound(curRound-K)))
 Tickets = append(Tickets, newTicket)
 
 // If the current ticket isn't a winner and the block isn't found by another miner,
-// derive a ticket from the last losing ticket
+// derive a ticket from the last ticket
 for !winning(electionProof) && !blockFound()) {
  newTicket = VRF(VDF(H(newTicket)))
  newElectionProof = Sig(H(ticketFromRound(curRound-K)))
@@ -238,14 +238,14 @@ if winning(electionProof) {
 
 A ticket can be verified to have been generated in the appropriate number of rounds by looking at the `Tickets` array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array. Note that this has implications on block size, and client memory requirements, though on expectation, the `Ticket` array should only contain one value.
 
-In fact, the length of repeated losing tickets being generated in the ticket chain (i.e. the length of the `Tickets` array) decreases exponentially in the number of repeated losing tickets (see more [here](https://github.com/filecoin-project/go-filecoin/pull/1516)). In the unlikely case the number of losing tickets drawn by miners grows larger than the randomness lookback `K` (i.e. if a miner runs out of existing tickets on the ticket chain for use as randomness), a miner should proceed as usual using losing tickets generated in this epoch for randomness. This has no impact on the protocol safety/validity.
+In fact, the length of repeated losing tickets in the ticket chain (equivalent to the length of generated tickets referenced by a single block, or the length of the `Tickets` array) decreases exponentially in the number of repeated losing tickets (see more [here](https://github.com/filecoin-project/go-filecoin/pull/1516)). In the unlikely case the number of losing tickets drawn by miners grows larger than the randomness lookback `K` (i.e. if a miner runs out of existing tickets on the ticket chain for use as randomness), a miner should proceed as usual using new tickets generated in this epoch for randomness. This has no impact on the protocol safety/validity.
 
 New blocks (with multiple tickets) will have a few key properties:
 
 - All tickets in the `Tickets` array are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
 - The `ElectionProof` was correctly generated from the ticket `K-|Tickets|-1` (with `|Tickets|` the length of the `Tickets` array) rounds back.
 
-This means that valid `ElectionProof`s can be generated from losing tickets as well as winning tickets (i.e. from tickets in the middle of the `Tickets` array).
+This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array.
 
 ### Block Generation
 

@@ -97,54 +97,52 @@ Review Discussion Note: Taking all of a miners collateral for going over the dea
 
 Now that you are a real life filecoin miner, it's time to start making and checking tickets. At this point, you should already be running chain validation, which includes keeping track of the latest [TipSets](./expected-consensus.md#tipsets) that you've seen on the network.
 
-For additional details around how consensus works in Filecoin, see the [expected consensus spec](./expected-consensus.md). For the purposes of this section, we have a consensus protocol (Expected Consensus) that guarantees us a fair process for determining what blocks have been generated in a round and whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
+For additional details around how consensus works in Filecoin, see the [expected consensus spec](./expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
 ### Receiving Blocks
 
-When receiving blocks from the network (via [block propagation](data-propogation.md)), you must do the following:
+When receiving blocks from the network (via [block propagation](data-propogation.md)), a miner must do the following:
 
 1. Check their validity (see [below](#block-validation)).
-2. Assemble a TipSet with all valid blocks with common parents.
+2. Assemble a TipSet with all valid blocks with common parents and the same number of tickets in their `Tickets` array.
 
-You may sometimes receive blocks belonging to different TipSets (i.e. whose parents are not the same). In that case, you must choose which TipSet to mine on.
+A miner may sometimes receive blocks belonging to different TipSets (i.e. whose parents are not the same). In that case, they must choose which TipSet to mine on.
 
-Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and the power (storage) they track. It is always preferable to mine atop a heavier `TipSet` rather than a lighter one. While you may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
+Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier TipSet rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
 
 ### Block Validation
 
 The block structure and serialization is detailed in  [the datastructures spec](data-structures.md#block). Check there for details on fields and types.
 
-In order to validate a block coming in from the network at height `N` was well mined you must do the following:
+In order to validate a block coming in from the network at round `N` was well mined a miner must do the following:
 
-TODO: 'ticket height' -> 'round number'
-
-1. Validate that `BlockSig` validates with the miners public.
+1. Validate that `BlockSig` validates with the miner's public key over the block content.
 2. Validate `ParentWeight`
    - Each of the blocks in the block's `ParentTipset` must have the same `ParentWeight`.
-   - The new block's ParentWeight must have been properly calculated using the [chain weighting function](./expected-consensus#chain-weighting).
+   - The new block's `ParentWeight` must have been properly calculated using the [chain weighting function](./expected-consensus#chain-weighting).
 3. Validate `StateRoot`
-   - In order to do this, you must ensure that applying the block's messages to the `ParentState` (not included in block header) appropriately yields the `StateRoot` and receipts in the `ReceiptRoot`.
-4. You must validate that the tickets in the `Tickets` array are valid, thereby proving appropriate delay for this block creation.
-   - Ensure that the new ticket was generated from the smallest ticket in the block's parent tipset (at round `N-1`, inclusive of null tickets).
+   - In order to do this, a miner must ensure that applying the block's messages to the `ParentState` (not included in block header) appropriately yields the `StateRoot` and the receipts in the `ReceiptRoot`.
+4. Validate that the tickets in the `Tickets` array are valid, thereby proving appropriate delay for this block creation.
+   - Ensure that the new ticket was generated from the smallest ticket in the block's parent TipSet (at round `N-1`).
    - Recompute the new ticket, using the miner's public key, ensuring it was computed appropriately.
-5. You must validate that the `ElectionProof` was correctly generated by the miner, and that they are eligible to mine.
+5. In a case where the block contains multiple values in the `Tickets` array
+   - Ensure that all tickets are signed by the same key.
+   - Ensure that each ticket was used to generate the next, with the first generated from the smallest ticket in the Parent tipset (at `N-1`, as above).
+6. Validate that the `ElectionProof` was correctly generated by the miner, and that they are eligible to mine.
    - Ensure that the proof was generated using the smallest ticket at round `N-K` (the lookback ticket).
+   - TODO: decision on which ticket to use if the round had no blocks mined.
    - Validate the proof using the miner's public key, to check that the `ElectionProof` is a valid signature over that lookback ticket.
-   - Verify that the proof is indeed smaller than the miner's power fraction as reported in the power table at round `N-L`.
-6. In a case where the block contains multiple values in the `Tickets` array
-   - Ensure that all tickets in both arrays are signed by the same key.
-   - Ensure that each ticket was used to generate the next, starting from the smallest ticket in the Parent tipset (at `N-1`).
-   
+   - Verify that the proof is indeed smaller than the miner's power fraction as reported in the Power Table at round `N-L`.
 
 We detail ticket validation as follows:
 
 ```go
 func RandomnessLookback(blk Block) TipSet {
-    return chain.GetAncestorTipset(blk, L)
+    return chain.GetAncestorTipset(blk, K)
 }
 
 func PowerLookback(blk Block) TipSet {
-    return chain.GetAncestorTipset(blk, K)
+    return chain.GetAncestorTipset(blk, L)
 }
 
 func IsTicketAWinner(t Ticket, minersPower, totalPower Integer) bool {
@@ -177,8 +175,8 @@ func VerifyTicket(b Block) error {
     }
     
     // 2. Check leader election
-    // get the smallest ticket from the lookback tipset
-    lookbackTicket := selectSmallestTicket(RandomnessLookback(b))
+    // get the appropriate ticket from the lookback tipset
+    lookbackTicket := selectAppropriateTicket(RandomnessLookback(b))
     challenge := sha256.Sum(lookbackTicket)
 	
     // Check VRF
@@ -200,47 +198,47 @@ func VerifyTicket(b Block) error {
 ```
 
 
-If all of this lines up, the block is valid. Repeat for all blocks in a tipset.
+If all of this lines up, the block is valid. The miner repeats this for all blocks in a TipSet, and for all TipSets formed from incoming blocks.
 
-Once you've ensured all blocks in the `Tipset` received were properly mined, you can mine on top of it. If it wasn't, ensure the next heaviest `Tipset` was properly mined (this might mean the same `Tipset` with invalid blocks removed, or an altogether different one (whose blocks have a different parent set).
+Once they've ensured all blocks in the heaviest TipSet received were properly mined, they can mine on top of it. If they weren't, the miner may need to ensure the next heaviest `Tipset` was properly mined. This might mean the same `Tipset` with invalid blocks removed, or an altogether different one.
 
-If none were, you may need to mine null tickets instead (see the [expected consensus spec](./expected-consensus.md#null-blocks) for more). 
-
-TODO: rename section in EC doc to be 'null tickets' and update link
+If no valid blocks are received, a miner may mine atop the same `TipSet` running leader election again using the next ticket in the ticket chain, and also generating a [new ticket](./expected-consensus.md#losing-tickets) in the process (see the [expected consensus spec](./expected-consensus.md#null-blocks) for more). 
 
 ### Ticket Generation
 
-We detail ticket generation in the [expected consensus spec](./expected-consensus#ticket-generation).
+For details of ticket generation, see the [expected consensus spec](./expected-consensus#ticket-generation).
 
-### Mining a losing ticket with new blocks on the network
+Ticket generation is the twin process of leader election (i.e. generating `ElectionProof`s). Every ticket scratch (i.e. round of leader election) has the miner generate a new ticket to include in the `Tickets` array of their block.
 
-Generating a new ticket will take you some amount of time (as imposed by the VDF in Expected Consensus). If you find yourself with a losing ticket, on expectation you will hear about at least one other block being mined on the network. If so, you should verify the validity of these incoming blocks repeating the above process for a new `Tipset`.
+New tickets are generated using the smallest ticket from the parent TipSet at height `H` and added to the `Tickets` array. Generating a new ticket will take some amount of time (as imposed by the VDF in Expected Consensus).
 
-TODO: find a better title here
+Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block.
 
-#### Mining a losing ticket with no new blocks on the network
+If the lookback ticket yields a valid `ElectionProof`, the miner publishes their block (see [block generation](block-generation)) including the new ticket and earns a block reward. They then assemble a new TipSet using any valid blocks they heard about while generating the ticket  (likely of height `H+1`) and mine atop the smallest ticket in that new TipSet.
 
-If no new blocks appear in the round, you may attempt to mine the same `Tipset` again. In order to do this, simply We call this mining a null block (i.e. mining atop the failed ticket you generated in your previous attempt). 
+### Scratching a losing ticket
 
-To start, you should insert your losing ticket into the `Tickets` array, then repeat the above process (from `Ticket Generation`) using your failed ticket from the previous round rather than the smallest ticket from the parent tipset (multiple null blocks in a row may be found).  This will generate a new ticket.
+If a miner fails to generate a valid `ElectionProof` using their loopback ticket, they may not yet publish a new block at height `H+1`. The miner will likely hear about other blocks being mined on the network at height `H+1` and can thus assemble a new TipSet to mine off of with these blocks (as above).
 
-Repeat this process until you either find a winning ticket or hear about new blocks to mine atop of from the network. If a new block comes in from the network, and it is on a heavier chain than your own, you should abandon your null block mining to mine atop this new block. Due to the way chain selection works in filecoin, a chain with fewer null blocks will be preferred (see the [Expected Consensus spec](./expected-consensus.md#chain-selection) for more details).
+If the miner hears of no new blocks, they must instead draw a new ticket to scratch in order to try leader election again (as other miners will). In order to do so, they must generate a new ticket once more.
 
-#### Mining a winning ticket
+Now, rather than generating this new ticket from the smallest ticket from the parent TipSet (as above), the miner will instead use their ticket from the last round, now in the `Tickets` array.
 
-If you mine a winning ticket, you may proceed to block creation thereby earning a block reward.
+This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner's own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with fewer null blocks will be preferred (see the [Expected Consensus spec](./expected-consensus.md#chain-selection) for more details).
+
+The `Tickets` array in the block to be published grows with each round (and a new ticket generated).
 
 ### Block Creation
 
-When you have found a winning ticket, it's time to create your very own block!
+Scratching a winning ticket, and armed with a valid `ElectionProof`, a miner can now publish a new block!
 
-To create a block, first compute a few fields:
+To create a block, the eligible miner must compute a few fields:
 
 - `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any null blocks you mined on. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `ParentWeight` - As described in [Chain Weighting](./expected-consensus.md#chain-weighting).
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
-  - Take the `ParentState` of one of the blocks in your chosen parent set (invariant: this is the same value for all blocks in a given parent set).
+  - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
   - For each block in the parent set, ordered by their tickets:
     - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.
     - Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
@@ -255,27 +253,29 @@ To create a block, first compute a few fields:
 - `ReceiptsRoot` - To compute this:
   - Apply the set of messages selected above to the parent state, collecting invocation receipts as you go.
   - Insert them into a Merkle Tree and take its root.
-- `BlockSig` - A signature with your private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after we propogate it to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
+- `BlockSig` - A signature with the miner's private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after we propogate it to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
-Start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.
+An eligible miner can start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.
 
-Next, compute the aggregate state of your selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of *their* parent tipset, sorting your parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
+Next, they compute the aggregate state of their selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of the blocks' parent TipSet, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
 
-Once you have the aggregate `ParentState`, you must apply the mining reward. This is done by adding the correct amount to the miner owner's account balance in the state tree. (TODO: link to block reward calculation. Currently, the block reward is a fixed 1000 filecoin).
+Once the miner has the aggregate `ParentState`, they must apply the mining reward. This is done by adding the correct amount to the miner owner's account balance in the state tree. (TODO: link to block reward calculation. Currently, the block reward is a fixed 1000 filecoin).
 
-Now, a set of messages is selected to put into the block. For each message, subtract `msg.GasPrice * msg.GasLimit` from the sender's account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain). Then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value (see [receipt](data-structures#message-receipt) for more details). Then, refund the sender in the amount of `(msg.GasLimit - GasUsed) * msg.GasPrice`. In the event of a message processing error, the remaining gas is refunded to the user, and all other state changes are reverted. (Note: this is a divergence from the way things are done in Ethereum)
+Now, a set of messages is selected to put into the block. For each message, the miner subtracts `msg.GasPrice * msg.GasLimit` from the sender's account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain).
+
+They then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value (see [receipt](data-structures#message-receipt) for more details). Then, they refund the sender in the amount of `(msg.GasLimit - GasUsed) * msg.GasPrice`. In the event of a message processing error, the remaining gas is refunded to the user, and all other state changes are reverted. (Note: this is a divergence from the way things are done in Ethereum)
 
 Each message should be applied on the resultant state of the previous message execution, unless that message execution failed, in which case all state changes caused by that message are thrown out. The final state tree after this process will be your blocks `StateRoot`.
 
-Merklize the set of messages you selected, and put the root in `MsgRoot`. Gather the receipts from each execution into a set, merklize them, and put that root in `ReceiptsRoot`. Finally, set the `StateRoot` field with your resultant state.
+The miner merklizes the set of messages you selected, and put the root in `MsgRoot`. They gather the receipts from each execution into a set, merklize them, and put that root in `ReceiptsRoot`. Finally, they set the `StateRoot` field with the resultant state.
 
 Note that the `ParentState` field from the expected consensus document is left out, this is to help minimize the size of the block header. The parent state for any given parent set should be computed by the client and cached locally.
 
-Now the block is complete, all that's left is to sign it. Serialize the block now (without the signature field), take the sha256 hash of it, and sign that hash. Place the resultant signature in the `BlockSig` field.
+Now the block is complete, all that's left is to sign it. The miner serializes the block now (without the signature field), takes the sha256 hash of it, and signs that hash. They place the resultant signature in the `BlockSig` field.
 
 #### Block Broadcast
 
-Broadcast the completed block to the network (via [block propagation](data-propogation.md)), and assuming everything was done correctly, the network will accept it, and other miners will mine on top of it, earning you a block reward!
+An eligible miner broadcasts the completed block to the network (via [block propagation](data-propogation.md)), and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!
 
 ### Block Rewards
 
