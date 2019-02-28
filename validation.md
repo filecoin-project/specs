@@ -1,6 +1,6 @@
 ## Chain Validation
 
-Every filecoin full node must receive and process blocks from the network to ensure that they always know the correct latest state of the chain. How blocks get propogated through the network is discussed in the [Data Propogation](data-propogation.md) document.
+Every filecoin full node must receive and process blocks from the network to ensure that they always know the correct latest state of the chain. How blocks get propogated through the network is discussed in the [Data Propogation](data-propagation.md) document.
 
 Every block that comes in over the network must first be validated structurally. This starts with making sure it unmarshals correctly (see [block](data-structures.md#block)), making sure that all the fields contain legal values, and that the signature over the block is correct. Then, the consensus rules for the block must be validated. These include:
 

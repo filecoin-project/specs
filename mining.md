@@ -1,43 +1,16 @@
-# The Filecoin Mining Process
+> TODO @nicola: there is a lot of redundancy in this doc, I would divide into three categories:
+> - Storage Mining Cycle (have a single more compact organised set of sections)
+> - Block Mining Cycle (mostly as is)
 
+# The Filecoin Mining Process
 ### What is the Filecoin Mining Process
 
 An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. We currently set rounds to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
 
-While we refer to both storage miners and participants in expected consensus as "miners," strictly speaking only the latter are actively mining blocks (by participating in Filecoin consensus). Fulfilling storage orders and generating new blocks for block rewards are two wholly distinct ways to earn Filecoin.
-With that said, it stands to reason that any storage miner would participate in Filecoin consensus (it effectively subsidizes their storage costs) and conversely, any participant in Filecoin consensus must be a storage miner (in order for them to appear in the [power table](./storage-market.md#the-power-table). We therefore refer to these actors as "miners."
+Any block proposer must be a storage miner, but storage miners can avoid performing the block proposer tasks, however in this way, they will be losing out on block rewards and transaction fees.
 
-## Becoming a miner
-
-### Registration
-
-To become a miner, you must first register a new miner on-chain, set your pledge, and deposit your collateral. This is done through the storage market actor's `CreateMiner` method. Invoke that method with your desired pledge size, accompanying collateral, and public key for signature validation. The call will then create a new miner instance and return its address for you.
-
-### Announcement
-
-The next step is to place one or more storage market asks on the market. This is done through the storage markets `AddAsk` method. You may create a single ask for your entire storage, or partition your storage up in some way with multiple asks (at potentially different prices). 
-
-### Deal Making
-
-Once you have asks on the network, you must now wait for deal proposals from storage clients. Clients will look at all the miners announcing their prices, and use that information to select miners they want to store data with. As deal proposals come in and you accept the deals (TODO: add a section on deal acceptance strategy), you should start filling sectors with that data. Miners should continue to make deals until they run out of storage space.
-
-
-### Committing Storage
-
-Once a miner has filled up a sector with enough deals and sealed it, the next step is for them to commit that storage. To do this, they take the merkleroot commitments from the PoRep sealing setup and the seal proof, and call `CommitSector`.  Internally, `CommitSector` validates the proof, and then augments the miners `Power` by the appropriate amount.
-
-It then checks if the miner is moving from having zero committed data to a non-zero amount of committed data, and if so sets the miners `ProvingPeriodStart` field to the current block.
-
-TODO: sectors need to be globally unique. We can either do this by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain that we check against on each submission. I think that when we go towards sector aggregation, the latter option will become pretty much impossible, so we need to think about how that proof statement could work.
-
-
-#### Sector Removal
-
-When a miner no longer needs to store the data in a particular sector, they should remove it from their proving set by submitting the done sectors via the 'doneSet' parameter of `SubmitPost`. This will move the sectors to being 'removal candidates'. The collateral for those sectors remains locked up until the end of the next proving period, in case the removed sectors were still for valid deals and the client needs to slash them.
 
 ## The Miner Actor
-
-**TODO** Where should this actually go? It feels a bit out of place right here.
 
 After successfully calling `CreateMiner`, a miner actor will be created for you on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
 
@@ -45,28 +18,31 @@ For details on the methods on the miner actor, see its entry in the [actors spec
 
 ### Owner Worker distinction
 
-The miner actor has two distinct 'controller' addresses. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key. 
+The miner actor has two distinct 'controller' addresses. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key.
 
 ### Storage Mining Cycle
 
-Storage miners must continually produce proofs of space time over their storage to convince the network that they are actually storing the sectors that they have committed to. Each PoSt covers a miner's entire storage.
+Storage miners must continually produce Proofs of SpaceTime over their storage to convince the network that they are actually storing the sectors that they have committed to. Each PoSt covers a miner's entire storage.
 
-#### Step 0: Pre-Commit
+#### Step 0: Registration
 
-Before doing anything else, a miner must first pledge some collateral for their storage and put up an ask to indicate their desired price.
+To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor's [`CreateMiner`](actors.md#createminer) method. The call will then create a new miner actor instance and return its address.
 
-After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on [deal flow](storage-market.md#deal-flow)
+The next step is to place one or more storage market asks on the market. This is done through the storage markets [`AddAsk`](actors.md#addask) method. A miner may create a single ask for their entire storage, or partition your storage up in some way with multiple asks (at potentially different prices). 
+
+After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on [deal flow](storage-market.md#deal-flow).
 
 When they have a full sector, they should seal it. This is done by invoking [`PoRep.Seal`](proofs.md#seal) on the sector.
 
 #### Step 1: Commit
 
-When the miner has completed their first seal, they should post it on-chain using [CommitSector](actors.md#commit-sector). This starts their proving period.
+When the miner has completed their first seal, they should post it on-chain using [CommitSector](actors.md#commit-sector). If the miner had zero committed sectors prior to this call, this begins their proving period.
 
 The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.
 
 During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next proving period starts.
 
+TODO: sectors need to be globally unique. We can either do this by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain that we check against on each submission. I think that when we go towards sector aggregation, the latter option will become pretty much impossible, so we need to think about how that proof statement could work.
 
 #### Step 2: Proving Storage (PoSt creation)
 
@@ -101,10 +77,9 @@ When the miner has completed their PoSt, they must submit it to the network by c
 
 Along with the PoSt submission, miners may also subit a set of sectors that they wish to remove from their proving set. This is done by selecting the sectors in the 'done' bitfield passed to `SubmitPoSt`.
 
-
 ### Stop Mining
 
-In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call `DePledge()` to retrieve their collateral (Note: depledging requires two calls to the chain, and a 'cooldown' period).
+In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call [`DePledge()`](actors.md#depledge) to retrieve their collateral. `DePledge` must be called twice, once to start the cooldown, and once again after the cooldown to reclaim the funds. The cooldown period is to allow clients whose files have been dropped by a miner to slash them before they get their money back and get away with it.
 
 ### Faults
 
@@ -113,6 +88,8 @@ Faults are described in the [faults document](../faults.md).
 ### On Being Slashed (WIP, needs discussion)
 
 If a miner is slashed for failing to submit their PoSt on time, they currently lose all their pledge collateral. They do not necessarily lose their storage collateral. Storage collateral is lost when a miners clients slash them for no longer having the data. Missing a PoSt does not necessarily imply that a miner no longer has the data. There should be an additional timeout here where the miner can submit a PoSt, along with 'refilling' their pledge collateral. If a miner does this, they can continue mining, their mining power will be reinstated, and clients can be assured that their data is still there.
+
+TODO: disambiguate the two collaterals across the entire spec
 
 Review Discussion Note: Taking all of a miners collateral for going over the deadline for PoSt submission is really really painful, and is likely to dissuade people from even mining filecoin in the first place (If my internet going out could cause me to lose a very large amount of money, that leads to some pretty hard decisions around profitability). One potential strategy could be to only penalize miners for the amount of sectors they could have generated in that timeframe. 
 
@@ -139,6 +116,8 @@ The block structure and serialization is detailed in  [the datastructures spec](
 
 In order to validate a block coming in from the network at height `N` was well mined you must do the following:
 
+TODO: 'ticket height' -> 'round number'
+
 1. Validate that `BlockSig` validates with the miners public.
 2. Validate `ParentWeight`
    - Each of the blocks in the block's `ParentTipset` must have the same `ParentWeight`.
@@ -146,16 +125,16 @@ In order to validate a block coming in from the network at height `N` was well m
 3. Validate `StateRoot`
    - In order to do this, you must ensure that applying the block's messages to the `ParentState` (not included in block header) appropriately yields the `StateRoot` and receipts in the `ReceiptRoot`.
 4. You must validate that the tickets in the `Tickets` array are valid, thereby proving appropriate delay for this block creation.
-   - Ensure that the new ticket was generated from the smallest ticket in the block's parent tipset (at height `N-1`, inclusive of null blocks).
+   - Ensure that the new ticket was generated from the smallest ticket in the block's parent tipset (at round `N-1`, inclusive of null tickets).
    - Recompute the new ticket, using the miner's public key, ensuring it was computed appropriately.
 5. You must validate that the `ElectionProof` was correctly generated by the miner, and that they are eligible to mine.
-   - Ensure that the proof was generated using the smallest ticket at height `N-K` (the lookback tipset).
+   - Ensure that the proof was generated using the smallest ticket at round `N-K` (the lookback ticket).
    - Validate the proof using the miner's public key, to check that the `ElectionProof` is a valid signature over that lookback ticket.
-   - Verify that the proof is indeed smaller than the miner's power as reported in the power table at height `N-L`.
+   - Verify that the proof is indeed smaller than the miner's power fraction as reported in the power table at round `N-L`.
 6. In a case where the block contains multiple values in the `Tickets` array
    - Ensure that all tickets in both arrays are signed by the same key.
-   - For the `Tickets` array, ensure that each ticket was used to generate the next, starting from the smallest ticket in the Parent tipset (at `N-1`).
-   - For the `ElectionProof`, ensure that the correct ticket was used to generate it, from `K` blocks back, accounting for null blocks.
+   - Ensure that each ticket was used to generate the next, starting from the smallest ticket in the Parent tipset (at `N-1`).
+   
 
 We detail ticket validation as follows:
 
@@ -220,11 +199,14 @@ func VerifyTicket(b Block) error {
 }
 ```
 
+
 If all of this lines up, the block is valid. Repeat for all blocks in a tipset.
 
 Once you've ensured all blocks in the `Tipset` received were properly mined, you can mine on top of it. If it wasn't, ensure the next heaviest `Tipset` was properly mined (this might mean the same `Tipset` with invalid blocks removed, or an altogether different one (whose blocks have a different parent set).
 
-If none were, you may need to mine null blocks instead (see the [expected consensus spec](./expected-consensus.md#null-blocks) for more). 
+If none were, you may need to mine null tickets instead (see the [expected consensus spec](./expected-consensus.md#null-blocks) for more). 
+
+TODO: rename section in EC doc to be 'null tickets' and update link
 
 ### Ticket Generation
 
@@ -233,6 +215,8 @@ We detail ticket generation in the [expected consensus spec](./expected-consensu
 ### Mining a losing ticket with new blocks on the network
 
 Generating a new ticket will take you some amount of time (as imposed by the VDF in Expected Consensus). If you find yourself with a losing ticket, on expectation you will hear about at least one other block being mined on the network. If so, you should verify the validity of these incoming blocks repeating the above process for a new `Tipset`.
+
+TODO: find a better title here
 
 #### Mining a losing ticket with no new blocks on the network
 
@@ -261,6 +245,9 @@ To create a block, first compute a few fields:
     - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.
     - Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
     - It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state.
+    > NOTE (@porcuquine): What does it mean for messages to 'conflict'? Can we define it here or refer to the definition elsewhere?
+    
+    TODO: define this in the state-machine doc, and link to it from here
 - `MsgRoot` - To compute this:
   - Select a set of messages from the mempool to include in your block.
   - Insert them into a Merkle Tree and take its root.
