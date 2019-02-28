@@ -240,7 +240,7 @@ func Encode(network string, a Address) string {
 			cksm := Checksum(a)
 			return network + a.Protocol + base32.Encode(a.Payload + cksm)
 		case ID:
-			return network + a.Protocol + base10.Encode(a.Payload)
+			return network + a.Protocol + base10.Encode(leb128.Decode(a.Payload))
 		default:
  			Fatal("invalid address protocol")
 	}
@@ -257,7 +257,7 @@ Software decoding a Filecoin address must:
 Decode an Address from a string by removing the network prefix, validating the address is of a know protocol, decoding the payload and checksum, and validating the checksum.
 
 ```go
-func DecodeString(a string) Address {
+func Decode(a string) Address {
 	if len(a) < 3 {
 		Fatal(ErrInvalidLength)
 	}
@@ -275,6 +275,7 @@ func DecodeString(a string) Address {
 		}
 	}
 
+	raw = base32.Decode(raw)
 	payload = raw[:len(raw)-CksmLen]
 	if protocol == SECP256K1 || protocol == Actor {
 		if len(payload) != 20 {
@@ -282,14 +283,14 @@ func DecodeString(a string) Address {
 		}
 	}
 
-	cksm := base32.Decode(payload[len(payload)-CksmLen:])
+	cksm := payload[len(payload)-CksmLen:]
 	if !ValidateChecksum(a, cksm) {
 		Fatal(ErrInvalidChecksum)
 	}
 
 	return Address{
 		Protocol: protocol,
-		Payload:  base32.Decode(payload),
+		Payload:  payload,
 	}
 }
 ```
