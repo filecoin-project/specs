@@ -95,7 +95,7 @@ Review Discussion Note: Taking all of a miners collateral for going over the dea
 
 ## Mining Blocks
 
-Now that you are a real life filecoin miner, it's time to start making and checking tickets. At this point, you should already be running chain validation, which includes keeping track of the latest [`Tipsets`](./expected-consensus.md#tipsets) that you've seen on the network.
+Now that you are a real life filecoin miner, it's time to start making and checking tickets. At this point, you should already be running chain validation, which includes keeping track of the latest [TipSets](./expected-consensus.md#tipsets) that you've seen on the network.
 
 For additional details around how consensus works in Filecoin, see the [expected consensus spec](./expected-consensus.md). For the purposes of this section, we have a consensus protocol (Expected Consensus) that guarantees us a fair process for determining what blocks have been generated in a round and whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
@@ -104,9 +104,9 @@ For additional details around how consensus works in Filecoin, see the [expected
 When receiving blocks from the network (via [block propagation](data-propogation.md)), you must do the following:
 
 1. Check their validity (see [below](#block-validation)).
-2. Assemble a `Tipset` with all valid blocks with common parents.
+2. Assemble a TipSet with all valid blocks with common parents.
 
-You may sometimes receive blocks belonging to different `Tipsets` (i.e. whose parents are not the same). In that case, you must choose which tipset to mine on.
+You may sometimes receive blocks belonging to different TipSets (i.e. whose parents are not the same). In that case, you must choose which TipSet to mine on.
 
 Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and the power (storage) they track. It is always preferable to mine atop a heavier `TipSet` rather than a lighter one. While you may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
 
@@ -220,7 +220,7 @@ TODO: find a better title here
 
 #### Mining a losing ticket with no new blocks on the network
 
-If no new blocks appear in the round, you may attempt to mine the same `Tipset` again. We call this mining a null block (i.e. mining atop the failed ticket you generated in your previous attempt). 
+If no new blocks appear in the round, you may attempt to mine the same `Tipset` again. In order to do this, simply We call this mining a null block (i.e. mining atop the failed ticket you generated in your previous attempt). 
 
 To start, you should insert your losing ticket into the `Tickets` array, then repeat the above process (from `Ticket Generation`) using your failed ticket from the previous round rather than the smallest ticket from the parent tipset (multiple null blocks in a row may be found).  This will generate a new ticket.
 
