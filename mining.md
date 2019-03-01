@@ -1,72 +1,43 @@
-# The Filecoin Mining Process
-
 ### What is the Filecoin Mining Process
 
-An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. We currently set rounds to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
+An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
 
-While we refer to both storage miners and participants in expected consensus as "miners," strictly speaking only the latter are actively mining blocks (by participating in Filecoin consensus). Fulfilling storage orders and generating new blocks for block rewards are two wholly distinct ways to earn Filecoin.
-With that said, it stands to reason that any storage miner would participate in Filecoin consensus (it effectively subsidizes their storage costs) and conversely, any participant in Filecoin consensus must be a storage miner (in order for them to appear in the [power table](./storage-market.md#the-power-table). We therefore refer to these actors as "miners."
+Any block proposer must be a storage miner, but storage miners can avoid performing the block proposer tasks, however in this way, they will be losing out on block rewards and transaction fees.
 
-## Becoming a miner
-
-### Registration
-
-To become a miner, you must first register a new miner on-chain, set your pledge, and deposit your collateral. This is done through the storage market actor's `CreateMiner` method. Invoke that method with your desired pledge size, accompanying collateral, and public key for signature validation. The call will then create a new miner instance and return its address for you.
-
-### Announcement
-
-The next step is to place one or more storage market asks on the market. This is done through the storage markets `AddAsk` method. You may create a single ask for your entire storage, or partition your storage up in some way with multiple asks (at potentially different prices). 
-
-### Deal Making
-
-Once you have asks on the network, you must now wait for deal proposals from storage clients. Clients will look at all the miners announcing their prices, and use that information to select miners they want to store data with. As deal proposals come in and you accept the deals (TODO: add a section on deal acceptance strategy), you should start filling sectors with that data. Miners should continue to make deals until they run out of storage space.
-
-
-### Committing Storage
-
-Once a miner has filled up a sector with enough deals and sealed it, the next step is for them to commit that storage. To do this, they take the merkleroot commitments from the PoRep sealing setup and the seal proof, and call `CommitSector`.  Internally, `CommitSector` validates the proof, and then augments the miners `Power` by the appropriate amount.
-
-It then checks if the miner is moving from having zero committed data to a non-zero amount of committed data, and if so sets the miners `ProvingPeriodStart` field to the current block.
-
-TODO: sectors need to be globally unique. We can either do this by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain that we check against on each submission. I think that when we go towards sector aggregation, the latter option will become pretty much impossible, so we need to think about how that proof statement could work.
-
-
-#### Sector Removal
-
-When a miner no longer needs to store the data in a particular sector, they should remove it from their proving set by submitting the done sectors via the 'doneSet' parameter of `SubmitPost`. This will move the sectors to being 'removal candidates'. The collateral for those sectors remains locked up until the end of the next proving period, in case the removed sectors were still for valid deals and the client needs to slash them.
 
 ## The Miner Actor
 
-**TODO** Where should this actually go? It feels a bit out of place right here.
-
-After successfully calling `CreateMiner`, a miner actor will be created for you on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
+After successfully calling `CreateMiner`, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
 
 For details on the methods on the miner actor, see its entry in the [actors spec](actors.md#storage-miner-actor).
 
 ### Owner Worker distinction
 
-The miner actor has two distinct 'controller' addresses. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key. 
+The miner actor has two distinct 'controller' addresses. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key.
 
 ### Storage Mining Cycle
 
-Storage miners must continually produce proofs of space time over their storage to convince the network that they are actually storing the sectors that they have committed to. Each PoSt covers a miner's entire storage.
+Storage miners must continually produce Proofs of SpaceTime over their storage to convince the network that they are actually storing the sectors that they have committed to. Each PoSt covers a miner's entire storage.
 
-#### Step 0: Pre-Commit
+#### Step 0: Registration
 
-Before doing anything else, a miner must first pledge some collateral for their storage and put up an ask to indicate their desired price.
+To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor's [`CreateMiner`](actors.md#createminer) method. The call will then create a new miner actor instance and return its address.
 
-After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on [deal flow](storage-market.md#deal-flow)
+The next step is to place one or more storage market asks on the market. This is done through the storage markets [`AddAsk`](actors.md#addask) method. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices). 
+
+After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on [deal flow](storage-market.md#deal-flow).
 
 When they have a full sector, they should seal it. This is done by invoking [`PoRep.Seal`](proofs.md#seal) on the sector.
 
 #### Step 1: Commit
 
-When the miner has completed their first seal, they should post it on-chain using [CommitSector](actors.md#commit-sector). This starts their proving period.
+When the miner has completed their first seal, they should post it on-chain using [CommitSector](actors.md#commit-sector). If the miner had zero committed sectors prior to this call, this begins their proving period.
 
 The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.
 
 During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next proving period starts.
 
+TODO: sectors need to be globally unique. This can be done either by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain is checked against on each submission. As the system moves towards sector aggregation, the latter option will become unworkable, so more thought needs to go into how that proof statement could work.
 
 #### Step 2: Proving Storage (PoSt creation)
 
@@ -101,10 +72,9 @@ When the miner has completed their PoSt, they must submit it to the network by c
 
 Along with the PoSt submission, miners may also subit a set of sectors that they wish to remove from their proving set. This is done by selecting the sectors in the 'done' bitfield passed to `SubmitPoSt`.
 
-
 ### Stop Mining
 
-In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call `DePledge()` to retrieve their collateral (Note: depledging requires two calls to the chain, and a 'cooldown' period).
+In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call [`DePledge()`](actors.md#depledge) to retrieve their collateral. `DePledge` must be called twice, once to start the cooldown, and once again after the cooldown to reclaim the funds. The cooldown period is to allow clients whose files have been dropped by a miner to slash them before they get their money back and get away with it.
 
 ### Faults
 
@@ -114,58 +84,59 @@ Faults are described in the [faults document](../faults.md).
 
 If a miner is slashed for failing to submit their PoSt on time, they currently lose all their pledge collateral. They do not necessarily lose their storage collateral. Storage collateral is lost when a miners clients slash them for no longer having the data. Missing a PoSt does not necessarily imply that a miner no longer has the data. There should be an additional timeout here where the miner can submit a PoSt, along with 'refilling' their pledge collateral. If a miner does this, they can continue mining, their mining power will be reinstated, and clients can be assured that their data is still there.
 
+TODO: disambiguate the two collaterals across the entire spec
+
 Review Discussion Note: Taking all of a miners collateral for going over the deadline for PoSt submission is really really painful, and is likely to dissuade people from even mining filecoin in the first place (If my internet going out could cause me to lose a very large amount of money, that leads to some pretty hard decisions around profitability). One potential strategy could be to only penalize miners for the amount of sectors they could have generated in that timeframe. 
 
 ## Mining Blocks
 
-Now that you are a real life filecoin miner, it's time to start making and checking tickets. At this point, you should already be running chain validation, which includes keeping track of the latest [`Tipsets`](./expected-consensus.md#tipsets) that you've seen on the network.
+Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [TipSets](./expected-consensus.md#tipsets) seen on the network.
 
-For additional details around how consensus works in Filecoin, see the [expected consensus spec](./expected-consensus.md). For the purposes of this section, we have a consensus protocol (Expected Consensus) that guarantees us a fair process for determining what blocks have been generated in a round and whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
+For additional details around how consensus works in Filecoin, see the [expected consensus spec](./expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
 ### Receiving Blocks
 
-When receiving blocks from the network (via [block propagation](data-propogation.md)), you must do the following:
+When receiving blocks from the network (via [block propagation](data-propogation.md)), a miner must do the following:
 
 1. Check their validity (see [below](#block-validation)).
-2. Assemble a `Tipset` with all valid blocks with common parents.
+2. Assemble a TipSet with all valid blocks with common parents and the same number of tickets in their `Tickets` array.
 
-You may sometimes receive blocks belonging to different `Tipsets` (i.e. whose parents are not the same). In that case, you must choose which tipset to mine on.
+A miner may sometimes receive blocks belonging to different TipSets (i.e. whose parents are not the same). In that case, they must choose which TipSet to mine on.
 
-Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and the power (storage) they track. It is always preferable to mine atop a heavier `TipSet` rather than a lighter one. While you may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
+Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier TipSet rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
 
 ### Block Validation
 
 The block structure and serialization is detailed in  [the datastructures spec](data-structures.md#block). Check there for details on fields and types.
 
-In order to validate a block coming in from the network at height `N` was well mined you must do the following:
+In order to validate a block coming in from the network at round `N` was well mined a miner must do the following:
 
-1. Validate that `BlockSig` validates with the miners public.
+1. Validate that `BlockSig` validates with the miner's public key (`miner.PublicKey`) over the block content.
 2. Validate `ParentWeight`
    - Each of the blocks in the block's `ParentTipset` must have the same `ParentWeight`.
-   - The new block's ParentWeight must have been properly calculated using the [chain weighting function](./expected-consensus#chain-weighting).
+   - The new block's `ParentWeight` must have been properly calculated using the [chain weighting function](./expected-consensus#chain-weighting).
 3. Validate `StateRoot`
-   - In order to do this, you must ensure that applying the block's messages to the `ParentState` (not included in block header) appropriately yields the `StateRoot` and receipts in the `ReceiptRoot`.
-4. You must validate that the tickets in the `Tickets` array are valid, thereby proving appropriate delay for this block creation.
-   - Ensure that the new ticket was generated from the smallest ticket in the block's parent tipset (at height `N-1`, inclusive of null blocks).
+   - In order to do this, a miner must ensure that applying the block's messages to the `ParentState` (not included in block header) appropriately yields the `StateRoot` and the receipts in the `ReceiptRoot`.
+4. Validate that the tickets in the `Tickets` array are valid, thereby proving appropriate delay for this block creation.
+   - Ensure that the new ticket was generated from the smallest ticket in the block's parent TipSet (at round `N-1`).
    - Recompute the new ticket, using the miner's public key, ensuring it was computed appropriately.
-5. You must validate that the `ElectionProof` was correctly generated by the miner, and that they are eligible to mine.
-   - Ensure that the proof was generated using the smallest ticket at height `N-K` (the lookback tipset).
+5. In a case where the block contains multiple values in the `Tickets` array
+   - Ensure that all tickets are signed by the same key.
+   - Ensure that each ticket was used to generate the next, with the first generated from the smallest ticket in the Parent tipset (at `N-1`, as above).
+6. Validate that the `ElectionProof` was correctly generated by the miner, and that they are eligible to mine.
+   - Ensure that the proof was generated using the smallest ticket at round `N-K` (the lookback ticket).
    - Validate the proof using the miner's public key, to check that the `ElectionProof` is a valid signature over that lookback ticket.
-   - Verify that the proof is indeed smaller than the miner's power as reported in the power table at height `N-L`.
-6. In a case where the block contains multiple values in the `Tickets` array
-   - Ensure that all tickets in both arrays are signed by the same key.
-   - For the `Tickets` array, ensure that each ticket was used to generate the next, starting from the smallest ticket in the Parent tipset (at `N-1`).
-   - For the `ElectionProof`, ensure that the correct ticket was used to generate it, from `K` blocks back, accounting for null blocks.
+   - Verify that the proof is indeed smaller than the miner's power fraction as reported in the Power Table at round `N-L`.
 
-We detail ticket validation as follows:
+Ticket validation is detailed as follows:
 
 ```go
 func RandomnessLookback(blk Block) TipSet {
-    return chain.GetAncestorTipset(blk, L)
+    return chain.GetAncestorTipset(blk, K)
 }
 
 func PowerLookback(blk Block) TipSet {
-    return chain.GetAncestorTipset(blk, K)
+    return chain.GetAncestorTipset(blk, L)
 }
 
 func IsTicketAWinner(t Ticket, minersPower, totalPower Integer) bool {
@@ -178,8 +149,7 @@ func VerifyTicket(b Block) error {
     parTicket := selectSmallestTicket(b.Parents)
     
     // Verify each ticket in the chain of tickets. There will be one ticket
-    // plus one ticket for each null block. Only the final ticket must be a
-    // 'winning' ticket.
+    // plus one ticket for each failed election attempt.
     for _, ticket := range b.Tickets {
     	challenge := sha256.Sum(parTicket)
     	
@@ -193,13 +163,13 @@ func VerifyTicket(b Block) error {
     	if !pubk.VerifySignature(ticket, parTicket) {
         	return "Ticket was not a valid signature over the parent ticket"
     	}
-        // in case this block was mined atop null blocks
+        // in case mining this block generated multiple tickets
         parTicket = ticket
     }
     
     // 2. Check leader election
-    // get the smallest ticket from the lookback tipset
-    lookbackTicket := selectSmallestTicket(RandomnessLookback(b))
+    // get the appropriate ticket from the lookback tipset
+    lookbackTicket := selectAppropriateTicket(RandomnessLookback(b))
     challenge := sha256.Sum(lookbackTicket)
 	
     // Check VRF
@@ -220,75 +190,83 @@ func VerifyTicket(b Block) error {
 }
 ```
 
-If all of this lines up, the block is valid. Repeat for all blocks in a tipset.
 
-Once you've ensured all blocks in the `Tipset` received were properly mined, you can mine on top of it. If it wasn't, ensure the next heaviest `Tipset` was properly mined (this might mean the same `Tipset` with invalid blocks removed, or an altogether different one (whose blocks have a different parent set).
+If all of this lines up, the block is valid. The miner repeats this for all blocks in a TipSet, and for all TipSets formed from incoming blocks.
 
-If none were, you may need to mine null blocks instead (see the [expected consensus spec](./expected-consensus.md#null-blocks) for more). 
+Once they've ensured all blocks in the heaviest TipSet received were properly mined, they can mine on top of it. If they weren't, the miner may need to ensure the next heaviest `Tipset` was properly mined. This might mean the same `Tipset` with invalid blocks removed, or an altogether different one.
+
+If no valid blocks are received, a miner may mine atop the same `TipSet` running leader election again using the next ticket in the ticket chain, and also generating a [new ticket](./expected-consensus.md#losing-tickets) in the process (see the [expected consensus spec](./expected-consensus.md#losing-tickets) for more). 
 
 ### Ticket Generation
 
-We detail ticket generation in the [expected consensus spec](./expected-consensus#ticket-generation).
+For details of ticket generation, see the [expected consensus spec](./expected-consensus#ticket-generation).
 
-### Mining a losing ticket with new blocks on the network
+Ticket generation is the twin process of leader election (i.e. generating `ElectionProof`s). Every ticket scratch (i.e. round of leader election) has the miner generate a new ticket to include in the `Tickets` array of their block.
 
-Generating a new ticket will take you some amount of time (as imposed by the VDF in Expected Consensus). If you find yourself with a losing ticket, on expectation you will hear about at least one other block being mined on the network. If so, you should verify the validity of these incoming blocks repeating the above process for a new `Tipset`.
+New tickets are generated using the smallest ticket from the parent TipSet at height `H` and added to the `Tickets` array. Generating a new ticket will take some amount of time (as imposed by the VDF in Expected Consensus).
 
-#### Mining a losing ticket with no new blocks on the network
+Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block.
 
-If no new blocks appear in the round, you may attempt to mine the same `Tipset` again. We call this mining a null block (i.e. mining atop the failed ticket you generated in your previous attempt). 
+If the lookback ticket yields a valid `ElectionProof`, the miner publishes their block (see [block generation](block-generation)) including the new ticket and earns a block reward. They then assemble a new TipSet using any valid blocks they heard about while generating the ticket  (likely of height `H+1`) and mine atop the smallest ticket in that new TipSet.
 
-To start, you should insert your losing ticket into the `Tickets` array, then repeat the above process (from `Ticket Generation`) using your failed ticket from the previous round rather than the smallest ticket from the parent tipset (multiple null blocks in a row may be found).  This will generate a new ticket.
+### Scratching a losing ticket
 
-Repeat this process until you either find a winning ticket or hear about new blocks to mine atop of from the network. If a new block comes in from the network, and it is on a heavier chain than your own, you should abandon your null block mining to mine atop this new block. Due to the way chain selection works in filecoin, a chain with fewer null blocks will be preferred (see the [Expected Consensus spec](./expected-consensus.md#chain-selection) for more details).
+If a miner fails to generate a valid `ElectionProof` using their lookback ticket, they may not yet publish a new block at height `H+1`. The miner will likely hear about other blocks being mined on the network at height `H+1` and can thus assemble a new TipSet to mine off of with these blocks (as above).
 
-#### Mining a winning ticket
+If the miner hears of no new blocks, they must instead draw a new ticket to scratch in order to try leader election again (as other miners will). In order to do so, they must generate a new ticket once more.
 
-If you mine a winning ticket, you may proceed to block creation thereby earning a block reward.
+Now, rather than generating this new ticket from the smallest ticket from the parent TipSet (as above), the miner will instead use their ticket from the last round, now in the `Tickets` array.
+
+This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner's own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see the [Expected Consensus spec](./expected-consensus.md#chain-selection) for more details).
+
+The `Tickets` array in the block to be published grows with each round (and a new ticket generated).
 
 ### Block Creation
 
-When you have found a winning ticket, it's time to create your very own block!
+Scratching a winning ticket, and armed with a valid `ElectionProof`, a miner can now publish a new block!
 
-To create a block, first compute a few fields:
+To create a block, the eligible miner must compute a few fields:
 
-- `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any null blocks you mined on. See [ticket generation](./expected-consensus.md#ticket-generation).
+- `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `ParentWeight` - As described in [Chain Weighting](./expected-consensus.md#chain-weighting).
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
-  - Take the `ParentState` of one of the blocks in your chosen parent set (invariant: this is the same value for all blocks in a given parent set).
+  - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
   - For each block in the parent set, ordered by their tickets:
     - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.
     - Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
-    - It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state.
+    - It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state. 
+    - TODO: define message conflicts in the state-machine doc, and link to it from here
 - `MsgRoot` - To compute this:
-  - Select a set of messages from the mempool to include in your block.
+  - Select a set of messages from the mempool to include in the block.
   - Insert them into a Merkle Tree and take its root.
-- `StateRoot` - Apply each of your chosen messages to the `ParentState` to get this.
+- `StateRoot` - Apply each chosen message to the `ParentState` to get this.
 - `ReceiptsRoot` - To compute this:
-  - Apply the set of messages selected above to the parent state, collecting invocation receipts as you go.
+  - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
   - Insert them into a Merkle Tree and take its root.
-- `BlockSig` - A signature with your private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after we propogate it to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
+- `BlockSig` - A signature with the miner's private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
-Start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.
+An eligible miner can start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.
 
-Next, compute the aggregate state of your selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of *their* parent tipset, sorting your parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
+Next, they compute the aggregate state of their selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of the blocks' parent TipSet, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
 
-Once you have the aggregate `ParentState`, you must apply the mining reward. This is done by adding the correct amount to the miner owner's account balance in the state tree. (TODO: link to block reward calculation. Currently, the block reward is a fixed 1000 filecoin).
+Once the miner has the aggregate `ParentState`, they must apply the mining reward. This is done by adding the correct amount to the miner owner's account balance in the state tree. (TODO: link to block reward calculation. Currently, the block reward is a fixed 1000 filecoin).
 
-Now, a set of messages is selected to put into the block. For each message, subtract `msg.GasPrice * msg.GasLimit` from the sender's account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain). Then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value (see [receipt](data-structures#message-receipt) for more details). Then, refund the sender in the amount of `(msg.GasLimit - GasUsed) * msg.GasPrice`. In the event of a message processing error, the remaining gas is refunded to the user, and all other state changes are reverted. (Note: this is a divergence from the way things are done in Ethereum)
+Now, a set of messages is selected to put into the block. For each message, the miner subtracts `msg.GasPrice * msg.GasLimit` from the sender's account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain).
 
-Each message should be applied on the resultant state of the previous message execution, unless that message execution failed, in which case all state changes caused by that message are thrown out. The final state tree after this process will be your blocks `StateRoot`.
+They then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value (see [receipt](data-structures#message-receipt) for more details). Then, they refund the sender in the amount of `(msg.GasLimit - GasUsed) * msg.GasPrice`. In the event of a message processing error, the remaining gas is refunded to the user, and all other state changes are reverted. (Note: this is a divergence from the way things are done in Ethereum)
 
-Merklize the set of messages you selected, and put the root in `MsgRoot`. Gather the receipts from each execution into a set, merklize them, and put that root in `ReceiptsRoot`. Finally, set the `StateRoot` field with your resultant state.
+Each message should be applied on the resultant state of the previous message execution, unless that message execution failed, in which case all state changes caused by that message are thrown out. The final state tree after this process will be the block's `StateRoot`.
+
+The miner merklizes the set of messages selected, and put the root in `MsgRoot`. They gather the receipts from each execution into a set, merklize them, and put that root in `ReceiptsRoot`. Finally, they set the `StateRoot` field with the resultant state.
 
 Note that the `ParentState` field from the expected consensus document is left out, this is to help minimize the size of the block header. The parent state for any given parent set should be computed by the client and cached locally.
 
-Now the block is complete, all that's left is to sign it. Serialize the block now (without the signature field), take the sha256 hash of it, and sign that hash. Place the resultant signature in the `BlockSig` field.
+Now the block is complete, all that's left is to sign it. The miner serializes the block now (without the signature field), takes the sha256 hash of it, and signs that hash. They place the resultant signature in the `BlockSig` field.
 
 #### Block Broadcast
 
-Broadcast the completed block to the network (via [block propagation](data-propogation.md)), and assuming everything was done correctly, the network will accept it, and other miners will mine on top of it, earning you a block reward!
+An eligible miner broadcasts the completed block to the network (via [block propagation](data-propogation.md)), and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!
 
 ### Block Rewards
 
@@ -299,7 +277,7 @@ Broadcast the completed block to the network (via [block propagation](data-propo
 
 
 ### Future Work
-There are many ideas for improving upon the storage miner, here we note some ideas that may be potentially implemented in the future.
+There are many ideas for improving upon the storage miner, here are ideas that may be potentially implemented in the future.
 
 - **Sector Resealing**: Miners should be able to 're-seal' sectors, to allow them to take a set of sectors with mostly expired pieces, and combine the not-yet-expired pieces into a single (or multiple) sectors.
-- **Sector Transfer**: Miners should be able to re-delegate the responsibility of storing data to another miner. This is tricky for many reasons, so we won't implement it for the initial release of Filecoin, but this could provide some really interesting capabilities down the road.
+- **Sector Transfer**: Miners should be able to re-delegate the responsibility of storing data to another miner. This is tricky for many reasons, and will not be implemented in the initial release of Filecoin, but could provide interesting capabilities down the road.
