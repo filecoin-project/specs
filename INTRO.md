@@ -22,7 +22,7 @@ The network maintains consensus over the current state of a replicated [state ma
 Clients interact with the system by [sending messages](data-propagation.md#message-propagation) to the network. These messages are gathered up and included by miners in blocks. Each of these messages defines a state transition in the state machine. The simplest messages say something like "move Filecoin from *this* account under my control to *this* other account", but more complex ones describe storage sector commitments, storage deals struck, and proofs of storage.
 
 The Filecoin protocol itself is really a suite of protocols, including:
-- the chain protocol for propogating the data that constitutes the blockchain
+- the chain protocol for propagating the data that constitutes the blockchain
 - the [block mining](mining.md) protocol for producing new blocks
 - the [consensus mechanism](expected-consensus.md) and [rules](validation.md) for agreeing on canonical blockchain state
 - the [storage market](storage-market.md) protocol for `storage miners` to sell storage and clients to purchase it
