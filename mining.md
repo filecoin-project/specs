@@ -96,7 +96,7 @@ For additional details around how consensus works in Filecoin, see the [expected
 
 ### Receiving Blocks
 
-When receiving blocks from the network (via [block propagation](data-propogation.md)), a miner must do the following:
+When receiving blocks from the network (via [block propagation](data-propagation.md)), a miner must do the following:
 
 1. Check their validity (see [below](#block-validation)).
 2. Assemble a TipSet with all valid blocks with common parents and the same number of tickets in their `Tickets` array.
@@ -266,7 +266,7 @@ Now the block is complete, all that's left is to sign it. The miner serializes t
 
 #### Block Broadcast
 
-An eligible miner broadcasts the completed block to the network (via [block propagation](data-propogation.md)), and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!
+An eligible miner broadcasts the completed block to the network (via [block propagation](data-propagation.md)), and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!
 
 ### Block Rewards
 

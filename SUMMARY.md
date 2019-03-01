@@ -20,7 +20,7 @@
   * [Proofs](proofs.md)
 * Network
   * [Storage Protocols](network-protocols.md)
-  * [Data Propogation](data-propagation.md)
+  * [Data Propagation](data-propagation.md)
 * [Data Structures](data-structures.md)
 * [Local Storage](local-storage.md)
 * [Glossary of terms](definitions.md)
