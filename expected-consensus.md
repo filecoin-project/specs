@@ -292,12 +292,12 @@ See the [Faults spec](./faults.md) for implementation details.
 
 Due to the existence of potential forks, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
 
-This happens in the following instances: 
+This is detectable when a miner submits two blocks that satisfy either of the following "slashing conditions":
 
-- A miner submits two blocks for the same round.
-- A miner mines atop a TipSet that should have contained their own block (same height, same parents) but does not.
-  - A miner may omit their own block if they find a winning Ticket in the parent TipSet though they themselves have submitted a smaller (losing) ticket. While it cannot be proven that block omission from a TipSet is malicious (i.e. network latency could simply mean the miner did not receive a particular block), for obvious reasons, a miner must be are aware of the block they previously mined.
-- Also: https://github.com/filecoin-project/consensus/issues/45#issuecomment-468035739
+(1) one block contains at least one ticket in its ticket array generated at the same round as one of the tickets in the other block's ticket array.
+(2) one block's parent is a TipSet that could have validly included the other block according to TipSet validity rules, however the parent of the first block does not include the other block.
+
+  - While it cannot be proven that a miner omits known blocks from a TipSet in general (i.e. network latency could simply mean the miner did not receive a particular block) in this case it can be proven because a miner must be aware of a block they mined in a previous round.
 
 Any node that detects this occurring should take both block headers, and call [`storagemarket.SlashConsensusFault`](actors.md#slashconsensusfault). The network will then take all of that node's collateral, give a portion of it to
 the reporter, and keep the rest.

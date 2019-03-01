@@ -57,18 +57,22 @@ Return: None
 
 ```go
 func SlashConsensusFault(block1, block2 BlockHeader) {
-	if block1.Height != block2.Height {
-        Fatal("cannot slash miner for blocks of differing heights")
+    if !ValidateSignature(block1.Signature) || !ValidSignature(block2.Signature) {
+       Fatal("invalid blocks")
     }
-    
-    if !ValidateSignature(block1.Signature) || !ValidateSignature(block2.Signature) {
-        Fatal("Invalid blocks")
-    }
-    
+
     if AuthorOf(block1) != AuthorOf(block2) {
-        Fatal("blocks must be from the same miner")
+       Fatal("blocks must be from the same miner")
     }
-    
+
+    // see the "Consensus Faults" section of the faults spec (faults.md)
+    // for details on these slashing conditions.
+    if !sameTicketRound(block1, block2) &&
+       !(fitsInAncestorSet(block1, block2) && notInAncestorSet(block1, block2)) &&
+       !(fitsInAncestorSet(block2, block1) && notInAncestorSet(block2, block1)) && {
+       Fatal("blocks do not prove a slashable offense")
+    }
+
     miner := AuthorOf(block1)
     
     // Burn all of the miners collateral
