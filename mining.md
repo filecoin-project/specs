@@ -250,7 +250,7 @@ An eligible miner can start by filling out `Parents`, `Tickets` and `ElectionPro
 
 Next, they compute the aggregate state of their selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of the blocks' parent TipSet, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
 
-Once the miner has the aggregate `ParentState`, they must apply the mining reward. This is done by adding the correct amount to the miner owner's account balance in the state tree. (TODO: link to block reward calculation. Currently, the block reward is a fixed 1000 filecoin).
+Once the miner has the aggregate `ParentState`, they must apply the mining reward. This is done by adding the correct amount to the miner owner's account balance in the state tree. See [block reward](#block-rewards) for details.
 
 Now, a set of messages is selected to put into the block. For each message, the miner subtracts `msg.GasPrice * msg.GasLimit` from the sender's account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain).
 
@@ -270,6 +270,7 @@ An eligible miner broadcasts the completed block to the network (via [block prop
 
 ### Block Rewards
 
+Currently the block reward is a fixed 1000 FIL. This will change soon.
 
 ### Open Questions
 

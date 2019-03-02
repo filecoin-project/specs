@@ -19,7 +19,7 @@ The `global state` is modeled as a map of actor addresses to actor structs. This
 
 ### Execution (Calling a method on an Actor)
 
-Message execution currently relies entirely on 'built-in' code, with a common external interface. The method and actor to call it on are specified in the `Method` and `To` fields of a message, respectively. Method parameters are encoded and put into the `Params` field of a message. The encoding is a cbor array of each of the types individually encoded. The individual encodings for each type are as follows.
+Message execution currently relies entirely on 'built-in' code, with a common external interface. The method and actor to call it on are specified in the `Method` and `To` fields of a message, respectively. Method parameters are encoded and put into the `Params` field of a message. The encoding is a cbor array of each of the types individually encoded. The individual encodings for each type are as follows.
 
 These functions are given, as input, an `ExecutionContext` containing useful information for their execution.
 
@@ -34,14 +34,8 @@ type VMContext interface {
 	// Send allows the current execution context to invoke methods on other actors in the system
 	Send(to address.Address, method string, value *types.AttoFIL, params []interface{}) ([][]byte, uint8, error)
 	
-	// AddressForNewActor (TODO: this seems unnecessary in this interface)
-	AddressForNewActor() (address.Address, error)
-	
 	// BlockHeight returns the height of the block this message was added to the chain in
 	BlockHeight() *types.BlockHeight
-	
-	// IsFromAccountActor (TODO: this also feels unnecessary)
-	IsFromAccountActor() bool
 
 	// CreateNewActor is used to create a new actor from the given code and constructor
     // parameters (TODO: address should probably not be a parameter)
@@ -50,6 +44,44 @@ type VMContext interface {
 ```
 
 If the execution completes successfully, changes to the state tree are saved. Otherwise, the message is marked as failed, and any state changes are reverted.
+
+```go
+func ApplyMessage(st StateTree, msg Message) MessageReceipt {
+    st.Snapshot()
+    fromActor := st.GetActor(msg.From)
+    
+    totalCost := msg.Value + (msg.GasLimit * msg.GasPrice)
+    if fromActor.Balance < totalCost {
+        Fatal("not enough funds")
+    }
+    
+    st.DeductFunds(msg.From, totalCost)
+    st.DepositFunds(msg.To, msg.Value)
+    
+    vmctx := makeVMContext(st, msg)
+    
+    ret, errcode := fromActor.Invoke(vmctx, msg.Method, msg.Params)
+    if errcode != 0 {
+        // revert all state changes since snapshot
+        st.Revert()
+        st.DeductFunds(msg.From, vmctx.GasUsed() * msg.GasPrice)
+    } else {
+        // refund unused gas
+        st.DepositFunds(msg.From, (msg.GasLimit - vmctx.GasUsed()) * msg.GasPrice)
+    }
+    
+    // reward miner gas fees
+    st.DepositFunds(msg.To, msg.GasPrice * vmctx.GasUsed())
+    
+    return MessageReceipt{
+        ExitCode: errcode,
+        Return: ret,
+        GasUsed: vmctx.GasUsed(),
+    }
+}
+```
+
+
 
 #### Receipts
 
