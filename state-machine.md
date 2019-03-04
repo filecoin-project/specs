@@ -54,6 +54,10 @@ func ApplyMessage(st StateTree, msg Message) MessageReceipt {
     if fromActor.Balance < totalCost {
         Fatal("not enough funds")
     }
+
+	if msg.Nonce() != fromActor.Nonce + 1 {
+		Fatal("invalid nonce")
+	}
     
     st.DeductFunds(msg.From, totalCost)
     st.DepositFunds(msg.To, msg.Value)
