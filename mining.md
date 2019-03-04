@@ -270,6 +270,31 @@ An eligible miner broadcasts the completed block to the network (via [block prop
 
 ### Block Rewards
 
+Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. The reward amount remains fixed for a period of 1 week (20,160 blocks, the `AdjustmentPeriod`) and is then adjusted.
+
+The equation for the current block reward is of the form:
+
+```
+Reward = IV * (Decay ^ (BlockHeight / 20160))
+```
+
+`IV` is the initial value, and is computed by taking:
+
+```
+IV = TotalIssuance * (1 - Decay)
+```
+
+`Decay` is computed by:
+
+```
+Decay = e^(ln(0.5) / (HalvingPeriodBlocks / AdjustmentPeriod))
+```
+
+```
+HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2
+```
+
+Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it's not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting *too much* FIL.
 
 ### Open Questions
 
