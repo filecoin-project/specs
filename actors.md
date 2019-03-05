@@ -278,7 +278,7 @@ func CommitSector(commD, commR []byte, proof *SealProof) SectorID {
 ### SubmitPoSt
 
 Parameters:
-- proof PoStProof
+- proofs []PoStProof
 - faults []FailureSet
 - recovered SectorSet
 - done SectorSet
@@ -286,7 +286,7 @@ Parameters:
 Return: None
 
 ```go
-func SubmitPost(proof PoSt, faults []FaultSet, recovered BitField, done BitField) {
+func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done BitField) {
     if msg.From != miner.Worker {
         Fatal("not authorized to submit post for miner")
     }
@@ -318,8 +318,9 @@ func SubmitPost(proof PoSt, faults []FaultSet, recovered BitField, done BitField
         Refund(msg.Value - feesRequired)
     }
     
-    if !CheckPostProof(proof, faults) {
-        Fatal("proof invalid")
+
+    if !CheckPostProofs(proofs, faults) {
+        Fatal("proofs invalid")
     }
     
     permLostSet = AggregateBitfields(faults).Subtract(recovered)
