@@ -1,10 +1,15 @@
 # Filecoin State Machine Actors
 
-Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture most of the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode.
+Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode. The algorithms below are correct, and all implementations much match it (including go-filecoin), but details omitted from here should be looked for in the go-filecoin code.
 
 This spec decsribes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
 
+- [Storage Market Actor](#storage-market-actor)
+- [Storage Miner Actor](#storage-miner-actor)
+
 ## Storage Market Actor
+
+The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table.
 
 ```go
 type StorageMarketActor struct {
@@ -71,10 +76,10 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
     
     miner := AuthorOf(block1)
     
+    // TODO: Some of the slashed collateral should be paid to the slasher
+    
     // Burn all of the miners collateral
     miner.BurnCollateral()
-    
-    // TODO: Some of the slashed collateral should be paid to the slasher
     
     // Remove the miner from the list of network miners
     self.Miners.Remove(miner)
@@ -85,8 +90,9 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 }
 ```
 
-
 ### UpdateStorage
+
+UpdateStorage is used to update the global power table.
 
 Parameters:
 
@@ -234,13 +240,14 @@ Return: SectorID
 
 
 ```go
-func CommitSector(commD, commR []byte, proof *SealProof) SectorID {
-    if !miner.ValidatePoRep(commD, commR, miner.PublicKey, proof) {
+// NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector
+func CommitSector(comm Commitment, proof *SealProof) SectorID {
+    if !miner.ValidatePoRep(comm, miner.PublicKey, proof) {
         Fatal("bad proof!")
     }
     
     // make sure the miner isnt trying to submit a pre-existing sector
-    if !miner.EnsureSectorIsUnique(commR) {
+    if !miner.EnsureSectorIsUnique(comm) {
         Fatal("sector already committed!")
     }
     
@@ -286,6 +293,7 @@ Parameters:
 Return: None
 
 ```go
+// NotYetSpeced: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
 func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done BitField) {
     if msg.From != miner.Worker {
         Fatal("not authorized to submit post for miner")
@@ -330,14 +338,13 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
     miner.Collateral += CollateralForSectors(miner.NextDoneSet)
     
     // penalize collateral for lost sectors
-    miner.Collateral -= CollateralForSectors(permLostSet)
     miner.ActiveCollateral -= CollateralForSectors(permLostSet)
     
     // burn funds for fees and collateral penalization
     BurnFunds(miner, CollateralForSectors(permLostSet) + feesRequired)
     
     // update sector sets and proving set
-    miner.Sectors.Subtract(miner.NextDoneSet)
+    miner.Sectors.Subtract(done)
     miner.Sectors.Subtract(permLostSet)
     
     // update miner power to the amount of data actually proved during
@@ -425,6 +432,8 @@ func GetCurrentProvingSet() [][]byte {
 Note: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)
 
 ### ArbitrateDeal
+
+This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.
 
 Parameters:
 - deal Deal
