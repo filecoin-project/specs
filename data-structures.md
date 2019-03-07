@@ -125,6 +125,8 @@ type MessageReceipt struct {
     ExitCode uint8
 
     Return []byte
+    
+    GasUsed Integer
 }
 ```
 
