@@ -162,6 +162,10 @@ type StorageMiner struct {
     // being 'done'. The collateral for them is still being held until the next PoSt
     // submission in case early sector removal penalization is needed.
     NextDoneSet SectorSet
+    
+    // ArbitratedDeals is the set of deals this miner has been slashed for since the
+    // last post submission
+    ArbitratedDeals CidSet
 
     // TODO: maybe this number is redundant with power
     LockedStorage BytesAmount
@@ -353,6 +357,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
     
     // update next done set
     miner.NextDoneSet = done
+    miner.ArbitratedDeals.Clear()
 }
 ```
 
@@ -449,11 +454,20 @@ func AbitrateDeal(d Deal) {
         Fatal("Deal agreement not broken, or arbitration too late") 
     }
     
-    coll := CollateralForDeal(d)
+    if self.ArbitratedDeals.Has(d.PieceRef) {
+        Fatal("cannot slash miner twice for same deal")
+    }
     
-    self.BurnFunds(coll)
+    pledge, storage := CollateralForDeal(d)
     
-    self.NextDoneSet.Remove(d.PieceCommitment.Sector)
+    // burn the pledge collateral
+    self.BurnFunds(pledge)
+    
+    // pay the client the storage collateral
+    TransferFunds(d.ClientAddr, storage)
+    
+    // make sure the miner can't be slashed twice for this deal
+    self.ArbitratedDeals.Add(d.PieceRef)
 }
 ```
 
