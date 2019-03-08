@@ -270,7 +270,7 @@ An eligible miner broadcasts the completed block to the network (via [block prop
 
 ### Block Rewards
 
-Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. The reward amount remains fixed for a period of 1 week (20,160 blocks, the `AdjustmentPeriod`) and is then adjusted.
+Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. The reward amount remains fixed for a period of 1 week (given our 30 second block time, this  is 20,160 blocks, the `AdjustmentPeriod`) and is then adjusted. Over time, the reward will eventually become zero as the fractional amount given out at each step shrinks the network accounts balance to 0.
 
 The equation for the current block reward is of the form:
 
@@ -291,6 +291,7 @@ Decay = e^(ln(0.5) / (HalvingPeriodBlocks / AdjustmentPeriod))
 ```
 
 ```
+// Given one block every 30 seconds, this is how many blocks are in six years
 HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2
 ```
 
