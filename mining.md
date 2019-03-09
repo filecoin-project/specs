@@ -130,14 +130,17 @@ func VerifyBlock(blk Block) {
     }
     
     // 4. Verify ElectionProof
-    lookbackTicket := getTicketAtRound(blk.Round - RandomnessLookback(b))
+    randomnessLookbackTipset := RandomnessLookback(blk)
+    lookbackTicket := minTicket(randomnessLookbackTipset)
     challenge := sha256.Sum(lookbackTicket)
     
     if !ValidateSignature(blk.ElectionProof, pubk, challenge) {
         Fatal("election proof was not a valid signature of the last ticket")
     }
-    minerPower := GetPower(parentState, blk.Miner)
-    totalPower := GetTotalPower(parentState)
+    
+    powerLookbackTipset := PowerLookback(blk)
+    minerPower := GetPower(powerLookbackTipset.state, blk.Miner)
+    totalPower := GetTotalPower(powerLookbackTipset.state)
     if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
         Fatal("election proof was not a winner")
     }
@@ -172,23 +175,23 @@ func IsProofAWinner(p ElectionProof, minersPower, totalPower Integer) bool {
 }
 
 func VerifyTickets(b Block) error {
-    // 1. start with the `Tickets` array
+    // Start with the `Tickets` array
     // get the smallest ticket from the blocks parent tipset
     parTicket := GetSmallestTicket(b.Parents)
     
     // Verify each ticket in the chain of tickets. There will be one ticket
     // plus one ticket for each failed election attempt.
     for _, ticket := range b.Tickets {
-    	challenge := sha256.Sum(parTicket)
+    	challenge := sha256.Sum(parTicket.Signature)
     	
         // Check VDF
-        if !Verify(ticket.VDFProof, ticket.VDFResult, challenge) {
+        if !VerifyVDF(ticket.VDFProof, ticket.VDFResult, challenge) {
             return "VDF was not run properly"
         }
         
         // Check VRF   
     	pubk := getPublicKeyForMiner(b.Miner)
-    	if !pubk.VerifySignature(ticket, parTicket) {
+    	if !VerifySignature(ticket.Signature, pubk, ticket.VDFResult) {
         	return "Ticket was not a valid signature over the parent ticket"
     	}
         // in case mining this block generated multiple tickets

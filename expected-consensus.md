@@ -42,13 +42,13 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
 
 The basic algorithms are as follows:
 
-For each block received over the network, `OnBlockReceived` is called. `IsValid` 
+For each block received over the network, `OnBlockReceived` is called. `VerifyBlock` is defined in the mining spec.
 
 ```go
 func OnBlockReceived(blk Block) {
     // The exact definition of IsValid depends on the protocol
     // For Filecoin, see mining.md
-    if IsValid(blk) {
+    if VerifyBlock(blk) {
         ChainTipsMgr.Add(blk)
     }
     
