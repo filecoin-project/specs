@@ -9,7 +9,7 @@ This spec decsribes a set of actors that operate within the [Filecoin State Mach
 
 ## Storage Market Actor
 
-The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table.
+The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
 
 ```go
 type StorageMarketActor struct {
@@ -240,7 +240,7 @@ Return: SectorID
 
 
 ```go
-// NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector
+// NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
 func CommitSector(comm Commitment, proof *SealProof) SectorID {
     if !miner.ValidatePoRep(comm, miner.PublicKey, proof) {
         Fatal("bad proof!")
