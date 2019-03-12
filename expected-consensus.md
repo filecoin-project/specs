@@ -42,7 +42,7 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
 
 The basic algorithms are as follows:
 
-For each block received over the network, `OnBlockReceived` is called. `VerifyBlock` is defined in the mining spec.
+For each block received over the network, `OnBlockReceived` is called. `VerifyBlock` is defined in the [mining spec](mining.md#block-validation).
 
 ```go
 func OnBlockReceived(blk Block) {
