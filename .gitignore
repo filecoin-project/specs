@@ -1,2 +1,4 @@
 # Build outbook from `gitbook serve`
 _book
+spec.bs
+spec.html

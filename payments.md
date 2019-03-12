@@ -1,10 +1,10 @@
 # Payments
 
-### What are payments
+## What are payments
 
-### What payments affect
+## What payments affect
 
-### Dependencies
+## Dependencies
 
 ## Miners Claiming Earnings
 
@@ -256,12 +256,12 @@ Open Questions:
 TODO: these bits were pulled out of a different doc, and describe strategies by which client payments to a miner might happen. We need to organize 'clients paying miners' better, unclear if it should be the same doc that talks about payment channel constructions.
 
 1. **Updates Contingent on Inclusion Proof**
-   - In this case, the miner must provide an inclusion proof that shows the client data is contained in one of the miners sectors on chain, and submit that along with the payment channel update.
-   - This can be pretty expensive for smaller files, and ideally, we make it to one of the latter two options
-   - This option does however allow clients to upload their files and leave.
+    - In this case, the miner must provide an inclusion proof that shows the client data is contained in one of the miners sectors on chain, and submit that along with the payment channel update.
+    - This can be pretty expensive for smaller files, and ideally, we make it to one of the latter two options
+    - This option does however allow clients to upload their files and leave.
 2. **Update Contingent on CommD Existence**
-   - For this, the client needs to wait around until the miner finishes packing a sector, and computing its commD. The client then signs a set of payment channel updates that are contingent on the given commD existing on chain.
-   - This route makes it difficult for miners to re-seal smaller files (really, small files just suck)
+    - For this, the client needs to wait around until the miner finishes packing a sector, and computing its commD. The client then signs a set of payment channel updates that are contingent on the given commD existing on chain.
+    - This route makes it difficult for miners to re-seal smaller files (really, small files just suck)
 3. **Reconciled Payment**
-   - In either of the above cases, the miner may go back to the client and say "Look, these payment channel updates you gave me are able to be cashed in right now, could you take them all and give me back a single update for a slightly smaller amount?".
-   - The slightly smaller amount could be the difference in transaction fees, meaning the client saves money, and the miner gets the same amount.
+    - In either of the above cases, the miner may go back to the client and say "Look, these payment channel updates you gave me are able to be cashed in right now, could you take them all and give me back a single update for a slightly smaller amount?".
+    - The slightly smaller amount could be the difference in transaction fees, meaning the client saves money, and the miner gets the same amount.

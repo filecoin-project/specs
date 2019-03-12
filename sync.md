@@ -193,7 +193,7 @@ After collecting a chain up to an ancestor tipset that was previously synced to 
 
 To sync new tipsets the `caught up` syncing protocol first runs a consensus validation check on the tipset.  If any tipset is invalid the syncing protocol finishes.  If a tipset is valid the syncer adds the tipset to the chain store.  The syncing protocol then checks whether the tipset is heavier than the current head using the consensus weighting rules.  If it is heavier the chain updates the state of the node to account for the new heaviest tipset.
 
-# Dependencies
+## Dependencies
 Things that affect the chain syncing protocol.
 
 **Consensus protocol**
@@ -204,7 +204,7 @@ Things that affect the chain syncing protocol.
 
 - The current chain syncing protocol requires that the chain store never stores an invalid tipset.
 
-# Open Questions
+## Open Questions
 - Secure bootstrapping in `syncing` mode
 - How do we handle the lag between the initial head bootstrapped in `syncing` mode and the network head once the first `SyncBootstrap` call is complete?  Likely we'll need multiple `SyncBootstrap` calls.  Should they be parallelized?
-- The properties of the chain store implementation have significant impact on the design of the syncing protocol and the syncing protocol's resistance to Denial Of Service (DOS) attacks.  For example if the chain store naively keeps all blocks in storage nodes are more vulnerable to running out of space.  As another example the syncer assumes that the store always contains a punctual ancestor of the heaviest chain. Should the spec grow to include properties of chain storage so that the syncing protocol can guarantee a level of DOS resistance?  Should chain storage be completely up to the implementation?  Should the chain storage spec be a part of the syncing protocol?  
+- The properties of the chain store implementation have significant impact on the design of the syncing protocol and the syncing protocol's resistance to Denial Of Service (DOS) attacks.  For example if the chain store naively keeps all blocks in storage nodes are more vulnerable to running out of space.  As another example the syncer assumes that the store always contains a punctual ancestor of the heaviest chain. Should the spec grow to include properties of chain storage so that the syncing protocol can guarantee a level of DOS resistance?  Should chain storage be completely up to the implementation?  Should the chain storage spec be a part of the syncing protocol?

@@ -1,4 +1,4 @@
-# Filecoin Node Operation
+# Node Operation
 
 Running a Filecoin `full node` requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.
 
@@ -15,7 +15,7 @@ Running a Filecoin `full node` requires running many different processes and pro
 
 ## MemPool Maintenance
 
-Listen for messages on the messages pubsub channel (See [message propagation](data-propagation.md#message-propagation)). Validate each message, rebroadcast valid ones. 
+Listen for messages on the messages pubsub channel (See [message propagation](data-propagation.md#message-propagation)). Validate each message, rebroadcast valid ones.
 
 ## Handshaking
 
@@ -59,4 +59,3 @@ The responsibilities of storage miners are documented in more detail in the [min
 ### Retrieval
 
 To be a filecoin retrieval miner: (todo)
-

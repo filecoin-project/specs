@@ -1,4 +1,4 @@
-# Filecoin Spec Process (v0)
+# Spec Process (v0)
 
 ## 'Catch Up' Mode
 

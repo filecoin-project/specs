@@ -24,7 +24,7 @@ To learn more, take a look at the [Address Spec](https://github.com/filecoin-pro
 
 ## CID
 
-For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid). 
+For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid).
 
 CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
 

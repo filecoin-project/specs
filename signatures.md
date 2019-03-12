@@ -10,7 +10,7 @@ We use signatures in filecoin to verify *something* was done by *someone*. For e
 - Tickets (Signature of proof - [Mining](mining.md)
 - Block signature (Signature over all data in the block - done by block leader)
 
-# What signatures affect
+## What signatures affect
 
 What uses them
 
@@ -18,13 +18,13 @@ What uses them
 - Block validation
 - Tickets which inform leader election in Expected Consensus (EC) [TODO: link to EC spec]
 
-Note that messages between actors are not signed this is because messages between actors are always spawned by a message from a user -- which are singed by that user. 
+Note that messages between actors are not signed this is because messages between actors are always spawned by a message from a user -- which are singed by that user.
 
 Filecoin specific reliance
 
 - SignedMessages in go-filecoin
 
-# Dependencies
+## Dependencies
 
 Things that affect our choices for signatures
 
@@ -36,18 +36,18 @@ Filecoin specific dependancies
 
 - libsecp256k1
 
-# Non-Dependencies
+## Non-Dependencies
 
 Does not affect
 
 - Transport encryption
 - File encodings (PoRep)
 
-# Interface
+## Interface
 
 Filecoin requires a system that fulfils the following interface to function correctly.
 
-Note: `Message` is used here as the object being signed, but this interface should also work for other things that need to be signed. 
+Note: `Message` is used here as the object being signed, but this interface should also work for other things that need to be signed.
 
 ```go
 type Signature interface {
@@ -96,11 +96,11 @@ type Signature interface {
 ```
 
 
-# Selected Signature Scheme
+## Selected Signature Scheme
 
 Currently, Filecoin uses secp256k1 signatures to fulfill the above interface. All signatures on messages, blocks, and tickets currently use the same scheme and format.
 
-## Wire Format
+### Wire Format
 
 What bits are on the wire and in what order/format. We are currently adhering to libsecp256k1 serialization which is laid out as follows. Note that this format description may not be accurate. See the github link below for an authoritative format description.
 
@@ -114,7 +114,7 @@ sig SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 `r` = Compressed elliptic curve point (x-coordinate) of size 32 bytes
 
-`recovery` = Information needed to recover a public key from `sig`. 
+`recovery` = Information needed to recover a public key from `sig`.
 
 - LSB(0) = parity of y-coordinate of r
 - LSB(1) = overflow indicator
@@ -128,10 +128,10 @@ From: <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba847
 ```
 Type SignedMessage Struct {
 
-    Message bytes `JSON`   
+    Message bytes `JSON`
 
-    Signature bytes `JSON` 
-    
+    Signature bytes `JSON`
+
 }
 ```
 
@@ -156,7 +156,7 @@ Type SignedMessage Struct {
 
 - - <http://www.secg.org/sec1-v2.pdf>
 
-- Secp256k1 Signature serialization - 
+- Secp256k1 Signature serialization -
 
 - - Secp256k1 cpp - <https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55>
   - Go-filecoin - <https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98>
@@ -165,7 +165,7 @@ Type SignedMessage Struct {
 
 TODO: this section should likely be removed, and the context it adds should be linked in some other way.
 
-- Maybe Marshal/Unmarshal == NewSignedMessage/SignBytes?  
+- Maybe Marshal/Unmarshal == NewSignedMessage/SignBytes?
 
   - <https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go>
 
@@ -189,7 +189,7 @@ TODO: this section should likely be removed, and the context it adds should be l
 
 - Serialization should account for :
 
-- - Should there be point compression? 
+- - Should there be point compression?
 
   - Point compression (x,y); len(x) = n bits → x, recovery_bit; len(x||r_bit) = n+1 bits
 
@@ -205,10 +205,8 @@ Currently signatures are not sent over the wire on their own, instead they are e
 [Code for marshaling and unmarshaling SignedMessages
 ](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38)For opinions talks to @dig & @phritz
 
-# Inspiration
+### Inspiration
 
-JSON Web Sigs/Keys: <https://tools.ietf.org/html/rfc7515>
-
-NIST Signature Standard: <https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf>
-
-Discussion on slack: <https://protocollabs.slack.com/archives/G7XUR2TU2/p1528984460000977>
+- JSON Web Sigs/Keys: <https://tools.ietf.org/html/rfc7515>
+- NIST Signature Standard: <https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf>
+- Discussion on slack: <https://protocollabs.slack.com/archives/G7XUR2TU2/p1528984460000977>

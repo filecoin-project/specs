@@ -4,7 +4,7 @@ The filecoin network needs to broadcast blocks and messages to all peers in the 
 
 Both blocks and messages are propagated using the gossipsub libp2p pubsub router. The pubsub messages are authenticated. For blocks, the pubsub hop validation function is set to check that the block is valid before re-propagating. For messages, a similar validity check is run, the signature must be valid, and the account in question must have enough funds to cover the actions specified.
 
-### Links
+## Links
 
 - [Gossipsub Spec](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub)
 - [Block Validity Check](mining.md#chain-validation)

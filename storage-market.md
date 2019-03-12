@@ -1,6 +1,6 @@
-# The Filecoin Storage Market
+# Storage Market
 
-### What is the Filecoin Storage Market
+## What is the Filecoin Storage Market
 
 The Filecoin `storage market` is the underlying system used to discover, negotiate and form `storage contracts` between clients and storage providers called `storage miners` in a Filecoin network. The `storage market` itself is an `actor` that helps to mediate certain operations in the market, including adding new miners, and punishing faulty ones, it does not directly mediate any actual storage deals. The `storage contracts` between clients and miners specify that a given `piece` will be stored for a given time duration. It is assumed that the `client`, or some delegate of the client, remains online to monitor the `storage miner` and `slash` it in the case that the agreed upon data is removed from the miners proving set before the deal is finished.
 
@@ -68,50 +68,43 @@ The storage market contains the following data:
 
 This section describes the flow required to store a single piece with a single storage miner. Most use-cases will involve performing this process for multiple pieces, with different miners.
 
-#### Before Deal
+### Before Deal
 
 1. **Merkle Translation:** The client runs a 'Local Merkle Translation' to generate the storage market hash for the data.
-  - Storage miners reference data by its storage market hash, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See [Piece Confirmation](definitions.md#piece-confirmation)
+    - Storage miners reference data by its storage market hash, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See [Piece Confirmation](definitions.md#piece-confirmation)
 2. **Miner Selection:** The client looks at asks on the network, and then selects a storage miner to store their data with.
-   - Note: this is currently a manual process.
+    - Note: this is currently a manual process.
 3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with. All payments between clients and storage providers use payment channels.
 
 
-#### Deal
+### Deal
 
 Note: The details of this protocol including formats, datastructures, and algorithms, can be found [here](network-protocols.md#storage-deal).
 
 
 1. **Storage Deal Staging:** The client now runs the ['make storage deal'](network-protocols.md#storage-deal) protocol, as follows:
-  - The client sends a `StorageDealProposal` for the piece in question
-    - This contains updates for the payment channel that the client may close at any time, unless the piece gets confirmed (see next section), in which case the miner is able to extend the channel.
-  - The miner decides whether or not to accept the deal and sends back a `StorageDealResponse`
-    - Note: Different implementations may come up with different ways of making a decision on a given deal.
-  - If the miner accepts, the client now sends the data to the miner
-  - Once the miner receives the data:
-    - They validate that the data matches the storage market hash claimed by the client
-    - They stage it into a sector and set the deal state to `Staged`
-
-
+    - The client sends a `StorageDealProposal` for the piece in question
+        - This contains updates for the payment channel that the client may close at any time, unless the piece gets confirmed (see next section), in which case the miner is able to extend the channel.
+    - The miner decides whether or not to accept the deal and sends back a `StorageDealResponse`
+        - Note: Different implementations may come up with different ways of making a decision on a given deal.
+    - If the miner accepts, the client now sends the data to the miner
+    - Once the miner receives the data:
+        - They validate that the data matches the storage market hash claimed by the client
+        - They stage it into a sector and set the deal state to `Staged`
 2. **Storage Deal Start**: Clients makes sure data is in a [sector](definitions.md#sector)
-
     - **PieceConfirmation:** Once the miner seals the sector, they update the PieceConfirmation in the deal state, which the client then gets the next time they query that state.
-     - The PieceConfirmation proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
+        - The PieceConfirmation proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
     -  Note: a client that is not interested in staying online to wait for PieceConfirmation can leave immediately, however, they run the risk that their files don't actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
-     - Note: In order to provide the piece confirmation, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece confirmation becomes available.
-   - **Mining**: Miner posts `seal commitment` and associated proof on chain by calling `CommitSector` and starts running `proofs of spacetime`. See [storage mining cycle](mining.md#storage-mining-cycle) for more details.
-
+    - Note: In order to provide the piece confirmation, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece confirmation becomes available.
+    - **Mining**: Miner posts `seal commitment` and associated proof on chain by calling `CommitSector` and starts running `proofs of spacetime`. See [storage mining cycle](mining.md#storage-mining-cycle) for more details.
 3. **Storage Deal Abort:** If the miner doesn't provide the PieceConfirmation, the client can invalidate the payment channel.
-   - This is done by invoking the 'close' method on the channel on-chain. This process starts a timer that, on finishing, will release the funds to the client. 
-   - If a client attempts to abort a deal that they have actually made with a miner, the miner can submit a payment channel update to force the channel to stay open for the length of the agreement.
-
+    - This is done by invoking the 'close' method on the channel on-chain. This process starts a timer that, on finishing, will release the funds to the client.
+    - If a client attempts to abort a deal that they have actually made with a miner, the miner can submit a payment channel update to force the channel to stay open for the length of the agreement.
 4. **Storage Deal Complete:** The client periodically queries the miner for the deals status until the deal is 'complete', at which point the client knows that the data is properly replicated.
-   - The client should store the returned 'PieceConfirmation' for later validation.
-
-TODO: 'complete' isnt really the right word here, as it implies that the deal is over.
-
-
+    - The client should store the returned 'PieceConfirmation' for later validation.
 5. **Income Withdrawal**: When the miner wishes to withdraw funds, they call [`Payment.RedeemVoucher`](#payments).
+
+> TODO: 'complete' isnt really the right word here, as it implies that the deal is over.
 
 
 ## The Power Table
@@ -167,6 +160,6 @@ For details on the implementation of the payments system, see [the payments doc]
 - Slashable Commitments
   - When miners initially receive the data for a deal with a client, that signed response statement can be used to slash the miner in the event that they never include that data in a sector.
 
-# Open questions
+## Open questions
 
 - Storage time should likely be designated in terms of proving period. Where a proving period is the number of blocks in which every miner must submit a proof for their sectors. Not doing this makes accounting hard: "when exactly did this sector fail?"

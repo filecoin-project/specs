@@ -19,6 +19,7 @@ When represented as bytes a filecoin address contains the following:
 
 * A **protocol indicator** byte that identifies the type and version of this address.
 * The **payload** used to uniquely identify the actor according to the protocol.
+
 ```
 |----------|---------|
 | protocol | payload |
