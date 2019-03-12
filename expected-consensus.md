@@ -5,6 +5,7 @@ This spec describes how to implement the protocol in general, for Filecoin-speci
 - [Mining Blocks](mining.md#mining-blocks) on how consensus is used.
 - [Faults](./faults.md) on slashing.
 - [Storage Market](./storage-market.md#the-power-table) on how the power table is maintained.
+- [Block data structure](data-structures.md#block) for details on fields and encoding. 
 
 Important Concepts
 - TipSet
@@ -39,22 +40,65 @@ Expected Consensus is a probabilistic Byzantine fault-tolerant consensus protoco
 level, it operates by running a leader election every round in which, on expectation, one 
 participant may be eligible to submit a block. All valid blocks submitted in a given round form a `TipSet`. Every block in a TipSet adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on this, see [Chain Selection](#chain-selection).
 
-The basic algorithm is as follows:
+The basic algorithms are as follows:
 
-- Collect all incoming blocks.
-- Check their validity as shown in [the mining spec.](./mining.md#block-validation)
-- For each block that is valid, and not known to be based on a bad chain, place it into a `ChainTipsManager.`
-- To check if a miner has won for round `N`:
-  - Sample the secure chain randomness at round `N-K` to receive a ticket (see [Tickets](#tickets) for details). `K` is called the randomness lookback parameter, currently set to 1.
-  - Compute an `ElectionProof` using this ticket as input.
-  - If the hash of the `ElectionProof` is less than the ratio of the miner's power to the total power in the network at the end of round `N-L`, the miner has a winning ticket. `L` is called the committee lookback parameter, currently set to `1`.
-  - The `ElectionProof` will be included in the new block header.
-- If the miner is a winner, generate a new block:
-  - Select the smallest ticket from the heaviest TipSet at round `N-1`.
-  - Generate a new ticket from it for inclusion in the new block.
-  - Generate a new block as shown in [the mining spec](./mining.md#block-creation).
+For each block received over the network, `OnBlockReceived` is called. `VerifyBlock` is defined in the [mining spec](mining.md#block-validation).
 
-TODO: detail exactly how this comparison works
+```go
+func OnBlockReceived(blk Block) {
+    // The exact definition of IsValid depends on the protocol
+    // For Filecoin, see mining.md
+    if VerifyBlock(blk) {
+        ChainTipsMgr.Add(blk)
+    }
+    
+    // Received an invalid block!
+}
+```
+
+Separately, another process is running `Mine` to attempt to generate blocks.
+```go
+func Mine(minerKey PrivateKey) {
+    for r := range rounds { // for each round
+        bestTipset, tickets := ChainTipsMgr.GetBestTipsetAtRound(r-1)
+        
+        ticket := GenerateTicket(minerKey, bestTipset)
+        tickets.Append(ticket)
+        
+        // Generate an election proof and check if we win
+        // Note: even if we don't win, we want to make a ticket
+        // in case we need to mine a null round
+        win, proof := CheckIfWinnerAtRound(minerKey, r, bestTipset)
+        if win {
+            GenerateAndBroadcastBlock(bestTipset, tickets, proof)
+        } else {
+            // Even if we don't win, add our ticket to the tracker in 
+            // case we need to mine on it later.
+            ChainTipsMgr.AddFailedTicket(bestTipset, tickets)
+        }
+    }
+}
+```
+
+`IsProofAWinner` is taken from [the mining doc](mining.md#block-validation).
+
+```go
+const RandomnessLookback = 1 // Also referred to as "K" in many places
+const PowerLookback = 1 // Also referred to as "L" in many places
+
+func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool, ElectionProof) {
+    lbt := ChainTipsMgr.TicketFromRound(n - RandomnessLookback)
+    
+    eproof := ComputeElectionProof(lbt, key)
+    
+    tipset := ChainTipsMgr.TipsetFromRound(n - PowerLookback)
+    minerPower := GetPower(tipset.state, key.Public())
+    totalPower := GetTotalPower(tipset.state)
+    
+    return IsProofAWinner(eproof, minerPower, totalPower), eproof
+}
+```
+
 
 TODO: get accurate estimates for K and L, potentially merge both to a single param.
 
@@ -212,7 +256,7 @@ The VDF ensures fairness by enforcing that miners cannot grind through repeated 
 
 Thus, our full ticket generation algorithm (reprised from [Ticket Generation](#ticket-generation)) is roughly (ticket handling is simplified in the pseudocode below for legibility):
 
-```
+```go
 // Ticket is created as an array, with the initial ticket
 // coming from the parent TipSet.
 var Tickets []Ticket
@@ -224,7 +268,7 @@ Tickets = append(Tickets, newTicket)
 
 // If the current ticket isn't a winner and the block isn't found by another miner,
 // derive a ticket from the last ticket
-for !winning(electionProof) && !blockFound()) {
+for !IsProofAWinner(electionProof) && !blockFound()) {
  newTicket = VRF(VDF(H(newTicket)))
  newElectionProof = Sig(H(ticketFromRound(curRound-K)))
  Tickets = append(Tickets, newTicket)
