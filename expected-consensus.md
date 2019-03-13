@@ -328,7 +328,17 @@ the same `ParentWeight` value) plus the delta weight of each parent. To make the
 computation a bit easier, a block's `ParentWeight` is stored in the block itself (otherwise 
 potentially long chain scans would be required to compute a given block's weight).
 
+### Selecting between TipSets with equal weight
+
 When selecting between TipSets of equal weight, a miner chooses the one with the smallest min ticket (by bytewise comparison).
+
+In the case where two TipSets of equal weight have the same min ticket, the miner will compare the next smallest ticket (and select the TipSet with the next smaller ticket). This continues until one TipSet is selected.
+
+The above case may happen in situations under certain block propagation conditions. Assume three blocks B, C, and D have been mined (by miners 1, 2, and 3 respectively) off of block A, with minTicket(B) < minTicket(C) < minTicket (D).
+
+Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but not each others' blocks. We have miner 2 mining a TipSet made of B and C and miner 3 mining a TipSet made of B and D. If both succesfully mine blocks now, other miners in the network will receive new blocks built off of TipSets with equal weight and the same smallest ticket (that of block B). They should select the block mined atop [B, C] since minTicket(C) < minTicket(D).
+
+The probability that two TipSets with different blocks would have all the same tickets can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes.
 
 ### Slashing
 
