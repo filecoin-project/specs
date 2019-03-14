@@ -207,7 +207,11 @@ BlockHeader is a serialized `Block`.
 
 #### `SealProof`
 
-SealProof is an array of bytes.
+SealProof is a 384-element array of bytes.
+
+#### `PoStProof`
+
+PoStProof is a 192-element array of bytes.
 
 #### `TokenAmount`
 
