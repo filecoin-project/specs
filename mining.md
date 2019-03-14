@@ -119,17 +119,27 @@ func VerifyBlock(blk Block) {
         Fatal("invalid block signature")
     }
     
-    // 2. Verify ParentWeight
+    // 2. Verify Timestamp
+    // first check that it is not in the future
+    if blk.GetTime() > nAdjustedTime {
+        Fatal("block was generated too far in the future")
+    }
+    // next check that it is appropriately delayed from its parents
+    if blk.GetTime() <= blk.maxParentTime() + BLOCK_DELAY {
+        Fatal("block was generated too soon")
+    }
+
+    // 3. Verify ParentWeight
     if blk.ParentWeight != ComputeWeight(blk.Parents) {
         Fatal("invalid parent weight")
     }
 
-    // 3. Verify Tickets
+    // 4. Verify Tickets
     if !VerifyTickets(blk) {
         Fatal("tickets were invalid")
     }
     
-    // 4. Verify ElectionProof
+    // 5. Verify ElectionProof
     randomnessLookbackTipset := RandomnessLookback(blk)
     lookbackTicket := minTicket(randomnessLookbackTipset)
     challenge := sha256.Sum(lookbackTicket)
@@ -145,7 +155,7 @@ func VerifyBlock(blk Block) {
         Fatal("election proof was not a winner")
     }
         
-    // 5. Verify StateRoot
+    // 6. Verify StateRoot
     state := GetParentState(blk.Parents)
     for i, msg := range blk.Messages {
         receipt := ApplyMessage(state, msg)
@@ -241,6 +251,9 @@ To create a block, the eligible miner must compute a few fields:
 
 - `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](./expected-consensus.md#ticket-generation).
+- `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp. The Timestamp in the newly created block must satisfy the following conditions:
+  - the timestamp on the block is not in the future
+  - the timestamp on the block is at least BLOCK_DELAY higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
 - `ParentWeight` - As described in [Chain Weighting](./expected-consensus.md#chain-weighting).
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
   - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
@@ -273,6 +286,10 @@ Each message should be applied on the resultant state of the previous message ex
 The miner merklizes the set of messages selected, and put the root in `MsgRoot`. They gather the receipts from each execution into a set, merklize them, and put that root in `ReceiptsRoot`. Finally, they set the `StateRoot` field with the resultant state.
 
 Note that the `ParentState` field from the expected consensus document is left out, this is to help minimize the size of the block header. The parent state for any given parent set should be computed by the client and cached locally.
+
+Finally, the miner can generate a Unix Timestamp to add to their block, to show that the block generation was appropriately delayed.
+
+The miner will wait until BLOCK_DELAY has passed since the latest block in the parent set was generated to timestamp and send out their block. We recommend using NTP or another clock synchronization protocol to ensure that the timestamp is correctly generated (lest the block be rejected). While this timestamp does not provide a hard proof that the block was delayed (we rely on the VDF in the ticket-chain to do so), it provides some softer form of block delay by ensuring that honest miners will reject undelayed blocks.
 
 Now the block is complete, all that's left is to sign it. The miner serializes the block now (without the signature field), takes the sha256 hash of it, and signs that hash. They place the resultant signature in the `BlockSig` field.
 
