@@ -393,7 +393,7 @@ Parameters:
 Return: None
 
 ```go
-func SlashStorageFault(miner Address) {
+func SlashStorageFault() {
 	if self.SlashedAt > 0 {
         Fatal("miner already slashed")
 	}
