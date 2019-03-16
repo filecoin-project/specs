@@ -9,13 +9,13 @@ Chain syncing is the process a filecoin node runs to sync its internal chain sta
 ## Interface
 ```go
 type Syncer struct {
-	// The heaviest known tipset in the network.
+	// The heaviest known TipSet in the network.
 	head TipSet
 
-	// The interface for accessing and putting tipsets into local storage
+	// The interface for accessing and putting TipSets into local storage
 	store ChainStore
 
-	// The known genesis tipset
+	// The known genesis TipSet
 	genesis TipSet
     
     // the current mode the syncer is in
@@ -27,14 +27,24 @@ type Syncer struct {
     // handle to the block sync service
     bsync BlockSync
     
+    //peer set
+    peerSet map[PeerID]PeerInfo
+    
     // peer heads
     // Note: clear cache on disconnects
-    peerHeads map[PeerID]Cid
+    peerHeads map[PeerID][]Cid
+    
+}
+
+type PeerInfo {
+    initialConnection Timestamp
+    lastConnection Timestamp
+    trustedPeer bool
 }
 
 const BootstrapPeerThreshold = 5
 
-// InformNewHead informs the syncer about a new potential tipset
+// InformNewHead informs the syncer about a new potential TipSet
 // This should be called when connecting to new peers, and additionally
 // when receiving new blocks from the network
 func (syncer *Syncer) InformNewHead(from PeerID, head TipSet) {
@@ -63,7 +73,7 @@ func (syncer *Syncer) SyncBootstrap() {
     var blockSet BlockSet
     for head.Height() > 0 {
         // NB: GetBlocks validates that the blocks are in-fact the ones we
-        // requested, and that they are correctly linked to eachother. It does
+        // requested, and that they are correctly linked to each other. It does
         // not validate any state transitions
         blks := syncer.bsync.GetBlocks(head, RequestWidth)
         blockSet.Insert(blks)
@@ -101,33 +111,6 @@ func (syncer *Syncer) SyncBootstrap() {
     syncer.syncMode = CaughtUp
 }
 
-func selectHead(heads map[PeerID]TipSet) TipSet {
-    headsArr := toArray(heads)
-    sel := headsArr[0]
-    for i := 1; i < len(headsArr); i++ {
-        cur := headsArr[i]
-        
-        if cur.IsAncestorOf(sel) {
-            continue
-        }
-        if sel.IsAncestorOf(cur) {
-            sel = cur
-            continue
-        }
-        
-        nca := NearestCommonAncestor(cur, sel)
-        if sel.Height() - nca.Height() > ForkLengthThreshold {
-        	// TODO: handle this better than refusing to sync
-        	Fatal("Conflict exists in heads set")
-        }
-
-        if cur.Weight() > sel.Weight() {
-            sel = cur
-        }
-    }
-    return sel
-}
-
 // SyncCaughtUp is used to stay in sync once caught up to
 // the rest of the network.
 func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
@@ -136,8 +119,8 @@ func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
 		return err
 	}
 
-	// possibleTs enumerates possible tipsets that are the union
-    // of tipsets from the chain and the store
+	// possibleTs enumerates possible TipSets that are the union
+    // of TipSets from the chain and the store
 	for _, ts := range possibleTs(chain[1:]) { 
 		if err := consensus.Validate(ts, store); err != nil {
 			return err
@@ -152,7 +135,7 @@ func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
 
 
 func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
-	// fetch tipset and messages via bitswap
+	// fetch TipSet and messages via bitswap
 	ts := tipsetFromCidOverNet(newHead) 
 
 	var chain Chain
@@ -160,13 +143,13 @@ func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 		if !consensus.Punctual(ts) {
 			syncer.bad.InvalidateChain(chain)
 			syncer.bad.InvalidateTipSet(ts)
-			return nil, errors.New("tipset forks too far back from head")
+			return nil, errors.New("TipSet forks too far back from head")
 		}
 
 		chain.InsertFront(ts)
 
 		if syncer.store.Contains(ts) { 
-			// Store has record of this tipset.
+			// Store has record of this TipSet.
 			return chain, nil
 		}
 		parent := ts.ParentCid()
@@ -181,29 +164,61 @@ func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 ## Syncing Mode
 A filecoin node syncs in `syncing` mode when entering the network for the first time, or after being separated for a sufficiently long period of time.  The exact period of time comes from the consensus protocol (TODO specify more concretely, for example how does this relate to the consensus.Punctual method?).
 
-During `syncing` mode a node learns about the newest head of the blockchain through the secure bootstrapping protocol. The syncing protocol then syncs the block headers for that entire chain, and validates their linking. It then fetches all the messages for the chain, and checks all the state transitions between the blocks and that the blocks were correctly created.  If validation passes the node's head is updated to the head tipset received from bootstrapping.
+During `syncing` mode a node learns about the newest head of the blockchain through the secure bootstrapping protocol. The syncing protocol then syncs the block headers for that entire chain, and validates their linking. It then fetches all the messages for the chain, and checks all the state transitions between the blocks and that the blocks were correctly created.  If validation passes the node's head is updated to the head TipSet received from bootstrapping.
 
 In this mode of operation a filecoin node should not mine or send messages as it will not be able to successfully generate heaviest blocks or reference the correct state of the chain to verify that messages will execute as expected.
 
 (TODO: should include discussion of a `Load()` call to make use of existing chain data on a node during "re-awakening" case of `syncing` mode.)
 
 ## Caught Up Mode
-A filecoin node syncs in `caught up` mode after completing `syncing` mode. A node stays in this mode until they are shutdown. New block cids are gossiped from the network through the hello protocol or the network's [block pubsub protocol](data-propagation.md#block-propagation). A node also obtains new block cids coming from its own successfully mined blocks.  These cids are input to the `caught up` syncing protocol.  If these cids belong to a tipset already in the store then they are already synced and the syncing protocol finishes.  If not the syncing protocol resolves the tipset corresponding to the input cids.  It checks that this tipset is not in its badTipSet cache, and that this tipset is not too far back in the chain using the consensus `Punctual` method.  It then resolves the parent tipset by reading off the parent cids in the header of any block of the tipset.  The above procedure repeats until either an error is found or the store contains the next tipset.  In the case of an error bad tipsets and their children not already in the bad tipset cache are added to the cache before the call to `collectTipSetCaughtUp` returns.
 
-After collecting a chain up to an ancestor tipset that was previously synced to the store the syncing protocol checks each tipset of the new chain for validity one by one.  When the filecoin network runs Expected Consensus, or any other multiple parents consensus protocol, the syncing protocol must consider not only the tipsets in the new chain but also possible new-heaviest tipsets that are the union of tipsets in the new chain and tipsets already in the store.  In the case of Expected Consensus there is at most one such tipset: the tipset made up of the union of the first new tipset in the new chain being synced and the largest tipset with the same parents kept in the store.
+A filecoin node syncs in `caught up` mode after completing `syncing` mode. A node stays in this mode until it is shut down. New block cids are gossiped from the network through the hello protocol or the network's [block pubsub protocol](data-propagation.md#block-propagation). A node also obtains new block cids coming from its own successfully mined blocks.  These cids are input to the `caught up` syncing protocol.  If these cids belong to a TipSet already in the store then they are already synced and the syncing protocol finishes.  If not the syncing protocol resolves the TipSet corresponding to the input cids.  It checks that this TipSet is not in its badTipSet cache, and that this TipSet is not too far back in the chain using the consensus `Punctual` method.  It then resolves the parent TipSet by reading off the parent cids in the header of any block of the TipSet.  The above procedure repeats until either an error is found or the store contains the next TipSet.  In the case of an error bad TipSets and their children not already in the bad TipSet cache are added to the cache before the call to `collectTipSetCaughtUp` returns.
 
-To sync new tipsets the `caught up` syncing protocol first runs a consensus validation check on the tipset.  If any tipset is invalid the syncing protocol finishes.  If a tipset is valid the syncer adds the tipset to the chain store.  The syncing protocol then checks whether the tipset is heavier than the current head using the consensus weighting rules.  If it is heavier the chain updates the state of the node to account for the new heaviest tipset.
+After collecting a chain up to an ancestor TipSet that was previously synced to the store the syncing protocol checks each TipSet of the new chain for validity one by one.  When the filecoin network runs Expected Consensus, or any other multiple parents consensus protocol, the syncing protocol must consider not only the TipSets in the new chain but also possible new-heaviest TipSets that are the union of TipSets in the new chain and TipSets already in the store.  In the case of Expected Consensus there is at most one such TipSet: the TipSet made up of the union of the first new TipSet in the new chain being synced and the largest TipSet with the same parents kept in the store.
+
+To sync new TipSets the `caught up` syncing protocol first runs a consensus validation check on the TipSet.  If any TipSet is invalid the syncing protocol finishes.  If a TipSet is valid the syncer adds the TipSet to the chain store.  The syncing protocol then checks whether the TipSet is heavier than the current head using the consensus weighting rules.  If it is heavier the chain updates the state of the node to account for the new heaviest TipSet.
+
+## Maintaining a fresh Peer Set
+
+Syncing depends on the validity of a node's peer set. In order to ensure that the peer set remains representative of the network's state after bootstrap, a node should regularly update its peer set.
+
+```go
+func (syncer *Syncer) updatePeerSet() {
+    for peer, info := range syncer.PeerSet {
+        if !trustedPeer && syncer.TimeNow() - info.initialConnection > PEER_RECYCLE {
+            syncer.replacePeer(peer)
+        }
+        
+        if syncer.TimeNow() - peer.lastConnection > PEER_HEARTBEAT {
+            response, err := Heartbeat(peer)
+            if err {
+                syncer.replacePeer(peer)
+            } else {
+                syncer.PeerHeads(response.HeaviestTipSet)
+            }
+        }
+    }
+}
+
+func (syncer *Syncer) replacePeer(peer PeerID) {
+    delete(syncer.PeerSet, peer)
+    delete(syncer.PeerHeads, peer)
+            
+    syncer.getNewPeer()
+}
+```
 
 # Dependencies
+
 Things that affect the chain syncing protocol.
 
 **Consensus protocol**
 - The consensus protocol should define a punctual function: `func Punctual([]TipSet chain) bool`. `Punctual(chain) == true` when a provided chain does not fork from the node's view of the current best chain 'too far in the past', and false otherwise.
-- The fork selection rule.  This includes the weighting function.  As part of this in the context of EC the syncer must consider tipsets that are the union of independently propagated tipsets.
+- The fork selection rule.  This includes the weighting function.  As part of this in the context of EC the syncer must consider TipSets that are the union of independently propagated TipSets.
 
 **Chain storage**
 
-- The current chain syncing protocol requires that the chain store never stores an invalid tipset.
+- The current chain syncing protocol requires that the chain store never stores an invalid TipSet.
 
 # Open Questions
 - Secure bootstrapping in `syncing` mode

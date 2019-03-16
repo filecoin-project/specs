@@ -62,6 +62,34 @@ func SayHello(p PeerID) {
 
 Upon receiving a 'hello' stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the `HeaviestTipSet`, claimed `HeaviestTipSetHeight`, and peerID of the other node should be passed to the chain sync subsystem.
 
+# Heartbeat
+
+The Heartbeat protocol is used to ensure that nodes in a Filecoin node's PeerSet is still running. The libp2p protocol ID for this protocol is `/fil/heartbeat/1.0.0`.
+
+At fixed intervals, a node should open a new stream to nodes in its `PeerHeads` and check their state. This is done by running `heartbeat`. To respond, a node should craft a `HeartbeatMessage`, send it to the other peer using CBOR RPC and close the stream.
+
+```go
+type HeartbeatMessage struct {
+    HeaviestTipSetHeight uint64
+    HeaviestTipSet []Cid
+}
+```
+
+```go
+func Heartbeat(p PeerID) {
+    s := OpenStream(p)
+    mes := GetHeartbeat()
+    serialized := cbor.Marshal(mes)
+
+    WriteUVarint(s, len(serialized))
+
+    s.Write(serialized)
+    s.Close()
+}
+```
+
+Upon receiving a 'heartbeat' stream from another node, you should read off the CBOR RPC message. If no heartbeat is received within HEARTBEAT_TIMEOUT, you should remove the peer from your PeerSet. Otherwise, you can just update their heaviest Tipset in your chain sync subsystem and call `InformNewHead` if their weight is greater than your own.
+
 # Storage Deal
 
 The storage deal protocol is used by any client to store data with a storage miner. The libp2p protocol ID for this protocol is `/fil/storage/mk/1.0.0`.
