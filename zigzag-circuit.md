@@ -88,20 +88,18 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 
         ```
         For each parent = ParentInclusionLeaf_{l}_{c}_{p}`:
-          Assign parent_bits = Fr_to_bits(parent)
-          Check Packed(parent_bits) == parent
+          Assign ParentBits_{l}_{c}_{p} = Fr_to_bits(parent)
+          Check Packed(ParentBits_{l}_{c}_{p}) == parent
         ```
 
       - **Check** that the KDF was run correctly:
 
         ```
-        Assign leaf_bits[i = 0..deg] = challenge_{chall}/encoding_checks/parents_{i}_bits
+        Assign leaf_bits = ParentBits_{l}_{c}_{0..EXPANSION_DEGREE+BASE_DEGREE}
         
         Assign key : Fr = KDF(replica_id_bits, leaf_bits)
         Check KDF(replica_id_bits, leaf_bits)
         ```
-
-      - **Compute** the encoding: a Sloth decoding of the replica data using the key 
 
       - **Check** correct encoding: the decoded leaf equals the input data leaf
 
