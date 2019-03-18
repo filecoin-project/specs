@@ -38,7 +38,7 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 
 **Private Inputs**: *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
-- `CommR_{i=0..LAYERS}`: Commitment of the the encoded data at layer `i`. 
+- `CommR_{i=0..LAYERS-1}`: Commitment of the the encoded data at layer `i`. 
 - Inclusion Proof: For each inclusion path in the public inputs, we provide a Merkle Tree path
   - `InclusionHash_{i=0..LAYERS}_{0..LAYER_CHALLENGES[i]}_{0..TREE_DEPTH-1}`
   - `ReplicaInclusionHash_{i=0..LAYERS}_{0..LAYER_CHALLENGES[i]}_{0..TREE_DEPTH-1}`
@@ -49,37 +49,37 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 
 **Circuit:**
 
-- **Check** `replica_id` is equal to its bit representation
+- **Check** `ReplicaId` is equal to its bit representation
 
   ```
-  Assign replica_id_bits = Fr_to_bits(replica_id)
-  Check Packed(replica_id_bits) == replica_id
+  Assign replica_id_bits = Fr_to_bits(ReplicaId)
+  Check Packed(replica_id_bits) == ReplicaId
   ```
 
-- For each `layer = 0..LAYERS`:
+- For each `l = 0..LAYERS`:
 
-  - For each `challenge = 0..LAYERS_CHALLENGES[layer]`
+  - For each `c = 0..LAYERS_CHALLENGES[l]`
 
     - Inclusion checks:
 
       - Correct inclusions proofs: **Check**  that all the inclusion proofs are correct
 
         ```
-        Check MerkleTreeVerify(InclusionHash_{layer}_{challenge}_{0..TREE_DEPTH})
-        Check MerkleTreeVerify(ReplicaInclusionHash_{layer}_{challenge}_{0..TREE_DEPTH})
+        Check MerkleTreeVerify(InclusionHash_{l}_{c}_{0..TREE_DEPTH})
+        Check MerkleTreeVerify(ReplicaInclusionHash_{l}_{c}_{0..TREE_DEPTH})
         
-        For parent = 0..EXPANSION_DEGREE + BASE_DEGREE:
-        	Check MerkleTreeVerify(InclusionHash_{layer}_{challenge}_{parent}_{0..TREE_DEPTH})
+        For p = 0..EXPANSION_DEGREE + BASE_DEGREE:
+        	Check MerkleTreeVerify(ParentInclusionHash_{l}_{c}_{p}_{0..TREE_DEPTH})
         ```
 
-      - Correct layer: **Check** that `CommR_{layer}` is matching the Replica Inclusion proofs root hash and `CommR_{layer-1}` is matching the Inclusion proof root hash. (If `layer=1`, use `CommD` instead).
+      - Correct layer: **Check** that `CommR_{l}` is matching the Replica Inclusion proofs root hash and `CommR_{l-1}` is matching the Inclusion proof root hash. (If `l=0`, use `CommD` instead, if `l=LAYER-1` use `CommRLast` instead).
 
         ```
-        Check CommR_{layer-1} === InclusionHash_{layer}_{challenge}_{0}
-        Check CommR_{layer} === ReplicationInclusionHash_{layer}_{challenge}_{0}
+        Check CommR_{l-1} === InclusionHash_{l}_{c}_{0}
+        Check CommR_{l} === ReplicationInclusionHash_{l}_{c}_{0}
         
         For parent = 0..EXPANSION_DEGREE + BASE_DEGREE:
-        	Check CommR_{layer} === ParentInclusionHash_{layer}_{challenge}_{parent}_{0}
+        	Check CommR_{l} === ParentInclusionHash_{l}_{c}_{parent}_{0}
         ```
 
     - Encoding checks: **Check** that a challenged replica node decodes to the correct data node.
@@ -103,7 +103,16 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 
       - **Check** correct encoding: the decoded leaf equals the input data leaf
 
+        ```
+        Check ReplicationInclusionValue_{l}_{c} == InclusionValue_{l}_{c} + k
+        ```
+
 - CommRStar check: **Check** that CommRStar is computed by concatenating the replica identifier and the commR at each layer (specified in the aux inputs)
+
+  ```
+  Check CommRStar == PedersenHash(ReplicaId || CommR_{0} || .. || CommR_{LAYERS-1} || CommRLast)
+  // TODO check if we need to do packing/unpacking
+  ```
 
 **Verification of offline porep proof:**
 
