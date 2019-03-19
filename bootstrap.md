@@ -76,7 +76,7 @@ func InitialConnect(config ConfigFile, b Bootstrapper, s Syncer) {
         if b.genesisHash == nil {
 	        b.genesisHash = trustedChain.GenesisHash           
         } else if b.genesisHash != trustedChain.GenesisHash {
-            panic("One of your trusted peers is bad.")
+            Fatal("One of your trusted peers is bad.")
         }
         
         b.bootstrapPeers = append(b.bootstrapPeers, otherPeers)
