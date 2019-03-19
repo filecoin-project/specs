@@ -34,7 +34,7 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 - `CommRStar : Fr`: the aggregate of each layer's Merkle tree root hash
 - Inclusion paths: Binary representation of the Merkle tree path that must be proven packed into a single `Fr` element. We have the following inclusion paths:
   - `InclusionPaths_{i=0..LAYERS}_{0..LAYER_CHALLENGES[i]}`: At each layer `i` we have `LAYER_CHALLENGES[i]` inclusion paths.
-  - `ParentsInclusionPaths_{l=0..LAYERS}_{c=0..LAYER_CHALLENGES[i]}_{EXPANSION_DEGREE+ BASE_DEGREE}`: At each layer `l` we have `LAYER_CHALLENGES[i]` an inclusion path for each parent node of the corresponding `InclusionPaths_{l}_{c}`.
+  - `ParentsInclusionPaths_{l=0..LAYERS}_{c=0..LAYER_CHALLENGES[i]}_{0..EXPANSION_DEGREE+ BASE_DEGREE}`: At each layer `l` we have `LAYER_CHALLENGES[i]` an inclusion path for each parent node of the corresponding `InclusionPaths_{l}_{c}`.
 
 **Private Inputs**: *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
@@ -42,10 +42,10 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 - Inclusion Proof: For each inclusion path in the public inputs, we provide a Merkle Tree path
   - `InclusionHash_{i=0..LAYERS}_{0..LAYER_CHALLENGES[i]}_{0..TREE_DEPTH-1}`
   - `ReplicaInclusionHash_{i=0..LAYERS}_{0..LAYER_CHALLENGES[i]}_{0..TREE_DEPTH-1}`
-  - `ParentInclusionHash_{l=0..LAYERS}_{c=0..LAYER_CHALLENGES[i]}_{EXPANSION_DEGREE+ BASE_DEGREE}_{0..TREE_DEPTH-1}`
+  - `ParentInclusionHash_{l=0..LAYERS}_{c=0..LAYER_CHALLENGES[i]}_{0..EXPANSION_DEGREE+ BASE_DEGREE}_{0..TREE_DEPTH-1}`
   - `InclusionLeaf_{i=0..LAYERS}_{0..LAYER_CHALLENGES[i]}`
   - `ReplicaInclusionLeaf_{i=0..LAYERS}_{0..LAYER_CHALLENGES[i]}`
-  - `ParentInclusionLeaf_{l=0..LAYERS}_{c=0..LAYER_CHALLENGES[i]}_{EXPANSION_DEGREE+ BASE_DEGREE}`
+  - `ParentInclusionLeaf_{l=0..LAYERS}_{c=0..LAYER_CHALLENGES[i]}_{0..EXPANSION_DEGREE+ BASE_DEGREE}`
 
 **Circuit:**
 
@@ -68,7 +68,7 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
         Check MerkleTreeVerify(InclusionHash_{l}_{c}_{0..TREE_DEPTH-1})
         Check MerkleTreeVerify(ReplicaInclusionHash_{l}_{c}_{0..TREE_DEPTH-1})
         
-        For p = 0..EXPANSION_DEGREE + BASE_DEGREE:
+        For p = 0..(EXPANSION_DEGREE + BASE_DEGREE):
         	Check MerkleTreeVerify(ParentInclusionHash_{l}_{c}_{p}_{0..TREE_DEPTH-1})
         ```
 
@@ -78,7 +78,7 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
         Check CommR_{l-1} === InclusionHash_{l}_{c}_{0}
         Check CommR_{l} === ReplicationInclusionHash_{l}_{c}_{0}
         
-        For parent = 0..EXPANSION_DEGREE + BASE_DEGREE:
+        For parent = 0..(EXPANSION_DEGREE + BASE_DEGREE):
         	Check CommR_{l} === ParentInclusionHash_{l}_{c}_{parent}_{0}
         ```
 
@@ -117,7 +117,6 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 **Verification of offline porep proof:**
 
 - SNARK proof check: **Check** that given the SNARK proof and the public inputs, the SNARK verification outputs true
-
 - Parent checks: For each `node = InclusionPaths_{l}_{c}`:
   - **Check** that all `ParentsInclusionPaths_{l}_{c}_{0..EXPANSION_DEGREE+BASE_DEGREE}` are the correct parent nodes of `node` in the DRG graph.
   - **Check** that the parent nodes are in numerical order.
