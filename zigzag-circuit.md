@@ -65,11 +65,11 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
       - Correct inclusions proofs: **Check**  that all the inclusion proofs are correct
 
         ```
-        Check MerkleTreeVerify(InclusionHash_{l}_{c}_{0..TREE_DEPTH})
-        Check MerkleTreeVerify(ReplicaInclusionHash_{l}_{c}_{0..TREE_DEPTH})
+        Check MerkleTreeVerify(InclusionHash_{l}_{c}_{0..TREE_DEPTH-1})
+        Check MerkleTreeVerify(ReplicaInclusionHash_{l}_{c}_{0..TREE_DEPTH-1})
         
         For p = 0..EXPANSION_DEGREE + BASE_DEGREE:
-        	Check MerkleTreeVerify(ParentInclusionHash_{l}_{c}_{p}_{0..TREE_DEPTH})
+        	Check MerkleTreeVerify(ParentInclusionHash_{l}_{c}_{p}_{0..TREE_DEPTH-1})
         ```
 
       - Correct layer: **Check** that `CommR_{l}` is matching the Replica Inclusion proofs root hash and `CommR_{l-1}` is matching the Inclusion proof root hash. (If `l=0`, use `CommD` instead, if `l=LAYER-1` use `CommRLast` instead).
@@ -95,7 +95,7 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
       - **Check** that the KDF was run correctly:
 
         ```
-        Assign leaf_bits = ParentBits_{l}_{c}_{0..EXPANSION_DEGREE+BASE_DEGREE}
+        Assign leaf_bits = ParentBits_{l}_{c}_{0} || .. || ParentBits_{l}_{c}_{EXPANSION_DEGREE+BASE_DEGREE}
         
         Assign key : Fr = KDF(replica_id_bits, leaf_bits)
         Check KDF(replica_id_bits, leaf_bits)
@@ -117,6 +117,7 @@ This circuit proves that given a Merkle root `CommD`, `CommR_l`, and `commRStar`
 **Verification of offline porep proof:**
 
 - SNARK proof check: **Check** that given the SNARK proof and the public inputs, the SNARK verification outputs true
+
 - Parent checks: For each `node = InclusionPaths_{l}_{c}`:
   - **Check** that all `ParentsInclusionPaths_{l}_{c}_{0..EXPANSION_DEGREE+BASE_DEGREE}` are the correct parent nodes of `node` in the DRG graph.
   - **Check** that the parent nodes are in numerical order.
