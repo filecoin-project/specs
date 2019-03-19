@@ -273,7 +273,7 @@ func ValidateInput(prop StorageDealProposal) {
 
 If `response.State` is `Accepted` then the client should proceed to transfer the data in question to the storage miner. This operation happens out of band from this protocol, and can be a simple bitswap transfer at first. Support for other more 'exotic' 'protocols' such as mailing hard drives is an explicit goal.
 
-Next, when the miner receives all the data and validates it, they set the deals state to `Staged`. When the sector gets sealed, and the commitment is posted on chain, the state gets set to `Complete` and the deals `PieceConfirmation` field should be set to the appropriate values.
+Next, when the miner receives all the data and validates it, they set the `DealState` to `Staged`. When the sector gets sealed, and the commitment is posted on chain, the state gets set to `Complete` and the deals `PieceConfirmation` field should be set to the appropriate values.
 
 ```go
 func OnDataReceived() {
