@@ -66,15 +66,9 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 
 - `DataProof : [LAYERS][][TREE_DEPTH-2]Fr`: Merkle tree inclusion proof for the current layer unencoded challenged nodes.
 
-  Note: Size of proof per layer is `TREE_DEPTH-2` because it excludes (1) the roothash, and (2) the leaf value: (1) the root hash of the proof will be the corresponding unencoded data commitment for the current layer `l` (either `CommD` or `CommR[l-1]`), (2) the leaf value is `DataValue[l][c]`
-
 - `ReplicaProof : [LAYERS][][TREE_DEPTH-2]Fr`: Merkle tree inclusion proof for the current layer encoded challenged nodes.
 
-  Note: Size of proof per layer is `TREE_DEPTH-2` because it excludes (1) the roothash, and (2) the leaf value: (1) the root hash of the proof will be the corresponding unencoded data commitment for the current layer  (either `CommR[l]` or `CommRLast`), (2) the leaf value is `ReplicaValue[l][c]`
-
 - `ParentProof : [LAYERS][][PARENT_NODES][TREE_DEPTH-2]Fr`: Pedersen hashes of the Merkle inclusion proofs of the parent nodes for each challenged node at layer `l`.
-
-  Note: Size of proof per layer is `TREE_DEPTH-2` because it excludes (1) the roothash, and (2) the leaf value: (1) the root hash of the proof will be the corresponding unencoded data commitment for the current layer  (either `CommR[l]` or `CommRLast`), (2) the leaf value is `ParentValue[l][c][p]`
 
 - `DataValue : [LAYERS][]Fr`: Value of the unencoded challenged nodes at layer `l`.
 
@@ -83,6 +77,8 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 - `ParentValue : [LAYERS][][PARENT_NODES]Fr`: Value of the parent nodes for each challenged node at layer `l`.
 
 ##### Design notes
+
+- `DataProof`,  `ParentProof`, `ReplicaProof`: Size of proof per layer is `TREE_DEPTH-2` because it excludes (1) the roothash, and (2) the leaf value: (1) the root hash of the proof will be the corresponding unencoded data commitment for the current layer `l`, (2) the leaf value is the corresponding `DataValue`, `ReplicaValue` and `ParentValue`.
 
 #### Circuit
 
