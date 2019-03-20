@@ -107,41 +107,66 @@ In high level, we do 4 checks:
 
 ```go
 // 1: ReplicaId Check - Check ReplicaId is equal to its bit representation
-Assign ReplicaIdBits : [255]Fr = Fr_to_bits(ReplicaId)
-Check Packed(replica_id_bits) == ReplicaId
+let ReplicaIdBits : [255]Fr = Fr_to_bits(ReplicaId)
+assert(Packed(replica_id_bits) == ReplicaId)
 
-For l = 0..LAYERS:
-  For c = 0..LAYERS_CHALLENGES[l]:
+let DataRoot, ReplicaRoot Fr
 
-    Assign DataRoot : Fr = l == 0 ? CommD : CommR[l-1]
-    Assign ReplicaRoot : Fr = l == LAYERS-1 ? CommRLast : CommR[l]
+for l in range LAYERS {
+  
+  if l == 0 {
+    DataRoot = CommD
+  } else {
+    DataRoot = CommR[l-1]
+  }
 
+  if l == LAYERS-1 {
+    ReplicaRoot = CommRLast
+  } else {
+    ReplicaRoot = CommR[l]
+  }
+  
+  for c in range LAYERS_CHALLENGES[l] {
     // 2: Inclusion Proofs Checks
     // 2.1: Check inclusion proofs for data nodes are correct
-    Check MerkleTreeVerify(DataRoot, InclusionPath[l][c], DataProof[l][c], DataValue[l][c])
+    assert(MerkleTreeVerify(DataRoot, InclusionPath[l][c], DataProof[l][c], DataValue[l][c]))
     // 2.2: Check inclusion proofs for replica nodes are correct
-    Check MerkleTreeVerify(ReplicaRoot, InclusionPath[l][c], ReplicaProof[l][c], ReplicaValue[l][c])
+    assert(MerkleTreeVerify(ReplicaRoot, InclusionPath[l][c], ReplicaProof[l][c], ReplicaValue[l][c]))
     // 2.3: Check inclusion proofs for parent nodes are correct
-    For p = 0..PARENT_NODES:
-      Check MerkleTreeVerify(ReplicaRoot, ParentInclusionPath[l][c][p], ParentProof[l][c][p])
+    for p in range PARENT_NODES {
+      assert(MerkleTreeVerify(ReplicaRoot, ParentInclusionPath[l][c][p], ParentProof[l][c][p]))
+    }
 
     // 3: Encoding checks - Check that replica nodes have been correctly encoded
-    For p = 0..PARENT_NODES:
+    let ParentBits [PARENT_NODES][255]Fr
+    for p in range PARENT_NODES {
       // 3.1: Check that each ParentValue is equal to its bit representation
-      Assign parent = ParentValue[l][c][p]
-      Assign ParentBits[l][c][p] : [255]Fr = Fr_to_bits(parent)
-      Check Packed(ParentBits[l][c][p]) == parent
+      let parent = ParentValue[l][c][p]
+      ParentBits[p] = Fr_to_bits(parent)
+      assert(Packed(ParentBits[p]) == parent)
+    }
 
 		// 3.2: Check that each key has generated correctly
-    Assign PreImage = ReplicaIdBits || ParentBits[l][c][0] || .. || ParentBits[l][c][PARENT_NODES-1]
-    Assign key : Fr = PedersenHash(PreImage)
-    Check PedersenHash(PreImage) == key
+		let PreImage = ReplicaIdBits
+		for parentbits in ParentBits[l][c] {
+ 	   PreImage.Append(parentbits)
+		}
+    let key Fr = PedersenHash(PreImage)
+    assert(PedersenHash(PreImage) == key)
     // 3.3: Check that the data has been encoded to a replica with the right key
-    Check ReplicationInclusionValue[l][c] == InclusionValue[l][c] + k
+    assert(ReplicaValue[l][c] == DataValue[l][c] + k)
 
     // 4: CommRStar check - Check that the CommRStar constructed correctly
-    Check CommRStar == PedersenHash(ReplicaId || CommR[0] || .. || CommR[LAYERS-2] || CommRLast)
+    let hash = ReplicaId
+    for l in range LAYERS-1 {
+      hash.Append(CommR[l])
+    }
+    hash.Append(CommRLast)
+
+    assert(CommRStar == PedersenHash(hash))
 		// TODO check if we need to do packing/unpacking
+  }
+}
 ```
 
 
@@ -152,4 +177,3 @@ For l = 0..LAYERS:
 - Parent checks: For each `node = InclusionPaths_{l}_{c}`:
   - **Check** that all `ParentsInclusionPaths_{l}_{c}_{0..PARENT_NODES}` are the correct parent nodes of `node` in the DRG graph.
   - **Check** that the parent nodes are in numerical order.
-
