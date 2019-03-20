@@ -1,6 +1,6 @@
 # The Filecoin State Machine
 
-The majority of Filecoin's user facing functionality (payments, storage market, power table, etc) is managed through the Filecoin State Machine. The network generates a series of blocks, and agrees which 'chain' of blocks is the correct one. Each block contains a series of state transitions called `messages`, and a checkpoint of the current `global state` after the application of those `messages`. 
+The majority of Filecoin's user facing functionality (payments, storage market, power table, etc) is managed through the Filecoin State Machine. The network generates a series of blocks, and agrees which 'chain' of blocks is the correct one. Each block contains a series of state transitions called `messages`, and a checkpoint of the current `global state` after the application of those `messages`.
 
 The `global state` here consists of a set of `actors`, each with their own private `state`.
 
@@ -15,7 +15,7 @@ Second, an `actor` may call a method on another actor during the invocation of o
 
 ### State Representation
 
-The `global state` is modeled as a map of actor addresses to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT). Each actor's `state` is an ipld pointer to a graph that can be entirely defined by the actor.
+The `global state` is modeled as a map of actor `ID`s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT). Each actor's `state` is an ipld pointer to a graph that can be entirely defined by the actor.
 
 ### Execution (Calling a method on an Actor)
 
@@ -27,19 +27,15 @@ These functions are given, as input, an `ExecutionContext` containing useful inf
 type VMContext interface {
 	// Message is the message that kicked off the current invocation
 	Message() Message
-	
+
 	// Storage provides access to the VM storage layer
 	Storage() Storage
-	
-	// Send allows the current execution context to invoke methods on other actors in the system
-	Send(to address.Address, method string, value *types.AttoFIL, params []interface{}) ([][]byte, uint8, error)
-	
-	// BlockHeight returns the height of the block this message was added to the chain in
-	BlockHeight() *types.BlockHeight
 
-	// CreateNewActor is used to create a new actor from the given code and constructor
-    // parameters (TODO: address should probably not be a parameter)
-	CreateNewActor(addr address.Address, code cid.Cid, initalizationParams interface{}) error
+	// Send allows the current execution context to invoke methods on other actors in the system
+	Send(to Address, method string, value AttoFIL, params []interface{}) ([][]byte, uint8, error)
+
+	// BlockHeight returns the height of the block this message was added to the chain in
+	BlockHeight() BlockHeight
 }
 ```
 
@@ -47,45 +43,43 @@ If the execution completes successfully, changes to the state tree are saved. Ot
 
 ```go
 func ApplyMessage(st StateTree, msg Message) MessageReceipt {
-    st.Snapshot()
-    fromActor := st.GetActor(msg.From)
-    
-    totalCost := msg.Value + (msg.GasLimit * msg.GasPrice)
-    if fromActor.Balance < totalCost {
-        Fatal("not enough funds")
-    }
+	st.Snapshot()
+	fromActor := st.GetActor(msg.From)
+
+	totalCost := msg.Value + (msg.GasLimit * msg.GasPrice)
+	if fromActor.Balance < totalCost {
+		Fatal("not enough funds")
+	}
 
 	if msg.Nonce() != fromActor.Nonce + 1 {
 		Fatal("invalid nonce")
 	}
-    
-    st.DeductFunds(msg.From, totalCost)
-    st.DepositFunds(msg.To, msg.Value)
-    
-    vmctx := makeVMContext(st, msg)
-    
-    ret, errcode := fromActor.Invoke(vmctx, msg.Method, msg.Params)
-    if errcode != 0 {
-        // revert all state changes since snapshot
-        st.Revert()
-        st.DeductFunds(msg.From, vmctx.GasUsed() * msg.GasPrice)
-    } else {
-        // refund unused gas
-        st.DepositFunds(msg.From, (msg.GasLimit - vmctx.GasUsed()) * msg.GasPrice)
-    }
-    
-    // reward miner gas fees
-    st.DepositFunds(msg.To, msg.GasPrice * vmctx.GasUsed())
-    
-    return MessageReceipt{
-        ExitCode: errcode,
-        Return: ret,
-        GasUsed: vmctx.GasUsed(),
-    }
+
+	st.DeductFunds(msg.From, totalCost)
+	st.DepositFunds(msg.To, msg.Value)
+
+	vmctx := makeVMContext(st, msg)
+
+	ret, errcode := fromActor.Invoke(vmctx, msg.Method, msg.Params)
+	if errcode != 0 {
+		// revert all state changes since snapshot
+		st.Revert()
+		st.DeductFunds(msg.From, vmctx.GasUsed() * msg.GasPrice)
+	} else {
+		// refund unused gas
+		st.DepositFunds(msg.From, (msg.GasLimit - vmctx.GasUsed()) * msg.GasPrice)
+	}
+
+	// reward miner gas fees
+	st.DepositFunds(msg.To, msg.GasPrice * vmctx.GasUsed())
+
+	return MessageReceipt{
+		ExitCode: errcode,
+		Return: ret,
+		GasUsed: vmctx.GasUsed(),
+	}
 }
 ```
-
-
 
 #### Receipts
 
@@ -99,29 +93,28 @@ Actors are given acess to a `Storage` interface to fulfil their need for persist
 type Storage interface {
 	// Put writes the given object to the storage staging area and returns its CID
 	Put(interface{}) (Cid, error)
-    
+
 	// Get fetches the given object from storage (either staging, or local) and returns
 	// the serialized data.
 	Get(Cid) ([]byte, error)
-    
+
 	// Commit updates the actual stored state for the actor. This is a compare and swap
 	// operation, and will fail if 'old' is not equal to the current return value of `Head`.
 	// This functionality is used to prevent issues with re-entrancy
 	Commit(old Cid, new Cid) error
-    
+
 	// Head returns the CID of the current actor state
 	Head() Cid
 }
 ```
 
-Actors can store state as a single block or implement any persistent 
-data structure that can be built upon a content addressed block store. 
-Implementations may provide data structure implementations to simplify 
-development. The current interface only supports CBOR-IPLD, but this 
+Actors can store state as a single block or implement any persistent
+data structure that can be built upon a content addressed block store.
+Implementations may provide data structure implementations to simplify
+development. The current interface only supports CBOR-IPLD, but this
 should soon expand to allow other types of IPLD data structures (as long
-as the system has resolvers for them).
+		as the system has resolvers for them).
 
 The current state of a given actor can be accessed first by calling `Head` to retrieve the CID of the root of the actors state, then by using `Get` to retrieve the actual object being referenced.
 
 To store data, `Put` is used. Any number of objects may be `Put`, but only the object whose CID is committed, or objects that are linked to in some way by the committed object will be kept. All other objects are dropped after the method invocation returns. Objects stored via `Put` are first marshaled to CBOR-IPLD, and then stored, the returned CID is a 32 byte sha2-256 CBOR-IPLD content identifier.
-

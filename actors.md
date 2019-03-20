@@ -2,14 +2,123 @@
 
 Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode. The algorithms below are correct, and all implementations much match it (including go-filecoin), but details omitted from here should be looked for in the go-filecoin code.
 
-This spec decsribes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
+This spec describes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
 
+
+- [Init Actor](#init-actor)
 - [Storage Market Actor](#storage-market-actor)
 - [Storage Miner Actor](#storage-miner-actor)
+- [Payment Channel Broker Actor](#payment-channel-broker-actor)
+
+
+## Init Actor
+The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors).
+
+```go
+type InitActor struct {
+	// Mapping from Address to ID, for lookups.
+	AddressMap map[Address]BigInt
+
+	NextID BigInt
+}
+```
+
+### `Exec(code Cid, params []Param) Address`
+
+>  This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
+
+#### Parameters
+
+| Name     | Type       | Description                                                  |
+| -------- | ---------- | ------------------------------------------------------------ |
+| `code`   | `Cid`      | A pointer to the location at which the code of the actor to create is stored. |
+| `params` | `[] Param` | The parameters passed to the constructor of the actor.       |
+
+
+
+`Param` is the type representing any valid arugment that can be passed to a function.
+
+TODO: Find a better place for this definition.
+
+
+```go
+func Exec(code Cid, params []byte) Address {
+    // Get the actor ID for this actor.
+    actorID = self.NextID
+    self.NextID++
+
+    // Make sure that only the actors defined in the spec can be launched.
+    if !IsBuiltinActor(code) {
+        Fatal("cannot launch actor instance that is not a builtin actor")
+    }
+
+    // Ensure that singeltons can be only launched once.
+    // TODO: do we want to enforce this? If so how should actors be marked as such?
+    if IsSingletonActor(code) {
+      Fatal("cannot launch another actor of this type")
+    }
+
+    // This generates a unique address for this actor that is stable across message
+    // reordering
+    addr := VM.ComputeActorAddress()
+  
+    // Set up the actor itself
+  	actor := Actor{
+      Code: code,
+      Balance: msg.Value,
+  	}
+  
+    // The call to the actors constructor will set up the initial state
+    // from the given parameters
+    actor.Constructor(params)
+  
+  	VM.GlobalState.Set(actorID, actor)
+
+    // Store the mapping of address to actor ID.
+    self.AddressMap[addr] = actorID
+
+    return addr
+}
+
+func IsSingletonActor(code Cid) bool {
+  return code == StorageMarketActor || code == InitActor
+}
+
+// TODO: find a better home for this logic
+func VM.ComputeActorAddress(creator Address, nonce Integer) Address {
+  return NewActorAddress(bytes.Concat(creator.Bytes(), nonce.BigEndianBytes()))
+}
+```
+
+### `GetIdForAddress(addr Address) BigInt`
+
+> This method allows for fetching the corresponding ID of a given Address
+
+#### Parameters
+
+| Name   | Type      | Description           |
+| ------ | --------- | --------------------- |
+| `addr` | `Address` | The address to lookup |
+
+
+
+```go
+func GetIdForAddress(addr Address) BigInt {
+    id := self.AddressMap[addr]
+    if id == nil {
+        Fault("unknown address")
+    }
+    return id
+}
+```
+
+
+
+
 
 ## Storage Market Actor
 
-The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
+The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
 
 ```go
 type StorageMarketActor struct {
@@ -38,12 +147,12 @@ func CreateStorageMiner(pubkey PublicKey, pledge BytesAmount, pid PeerID) Addres
     if pledge < MinimumPledge {
         Fatal("Pledge too low")
     }
-    
+
     if msg.Value < MinimumCollateral(pledge) {
         Fatal("not enough funds to cover required collateral")
     }
-    
-    newminer := VM.CreateActor(MinerActor, msg.Value, pubkey, pledge, pid)
+
+    newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, pid))
 
     self.Miners.Add(newminer)
 
@@ -65,22 +174,22 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 	if block1.Height != block2.Height {
         Fatal("cannot slash miner for blocks of differing heights")
     }
-    
+
     if !ValidateSignature(block1.Signature) || !ValidateSignature(block2.Signature) {
         Fatal("Invalid blocks")
     }
-    
+
     if AuthorOf(block1) != AuthorOf(block2) {
         Fatal("blocks must be from the same miner")
     }
-    
+
     miner := AuthorOf(block1)
-    
+
     // TODO: Some of the slashed collateral should be paid to the slasher
-    
+
     // Burn all of the miners collateral
     miner.BurnCollateral()
-    
+
     // Remove the miner from the list of network miners
     self.Miners.Remove(miner)
     self.UpdateStorage(-1 * miner.Power)
@@ -105,7 +214,7 @@ func UpdateStorage(delta Integer) {
     if !self.Miners.Has(msg.From) {
         Fatal("update storage must only be called by a miner actor")
     }
-    
+
     self.TotalStorage += delta
 }
 ```
@@ -168,7 +277,7 @@ type StorageMiner struct {
     // being 'done'. The collateral for them is still being held until the next PoSt
     // submission in case early sector removal penalization is needed.
     NextDoneSet SectorSet
-    
+
     // ArbitratedDeals is the set of deals this miner has been slashed for since the
     // last post submission
     ArbitratedDeals CidSet
@@ -189,7 +298,7 @@ func StorageMinerActor(pubkey PublicKey, pledge BytesAmount, pid PeerID) {
     if msg.Value < CollateralForPledgeSize(pledge) {
         Fatal("not enough collateral given")
     }
-    
+
     self.Owner = message.From
     self.PublicKey = pubkey
     self.PeerID = pid
@@ -200,7 +309,7 @@ func StorageMinerActor(pubkey PublicKey, pledge BytesAmount, pid PeerID) {
 
 ### AddAsk
 
-Parameters: 
+Parameters:
 - price TokenAmount
 - ttl Integer
 
@@ -211,19 +320,19 @@ func AddAsk(price TokenAmount, ttl Integer) AskID {
     if msg.From != self.Worker {
         Fatal("Asks may only be added via the worker address")
     }
-    
+
     // Filter out expired asks
     self.Asks.FilterExpired()
-    
+
     askid := self.NextAskID
     self.NextAskID++
-    
+
     self.Asks.Append(Ask{
         Price: price,
         Expiry: CurrentBlockHeight + ttl,
         ID: askid,
     })
-    
+
     return askid
 }
 ```
@@ -249,29 +358,29 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
     if !miner.ValidatePoRep(comm, miner.PublicKey, proof) {
         Fatal("bad proof!")
     }
-    
+
     // make sure the miner isnt trying to submit a pre-existing sector
     if !miner.EnsureSectorIsUnique(comm) {
         Fatal("sector already committed!")
     }
-    
+
     // make sure the miner has enough collateral to add more storage
     // currently, all sectors are the same size, and require the same collateral
     // in the future, we may have differently sized sectors and need special handling
     coll = CollateralForSector()
-    
+
     if coll < miner.Collateral {
         Fatal("not enough collateral")
     }
-    
+
     miner.Collateral -= coll
     miner.ActiveCollateral += coll
-    
+
     sectorId = miner.Sectors.Add(commR)
     // TODO: sectors IDs might not be that useful. For now, this should just be the number of
     // the sector within the set of sectors, but that can change as the miner experiences
     // failures.
-    
+
     // if miner is not mining, start their proving period now
     // Note: As written here, every miners first PoSt will only be over one sector.
     // We could set up a 'grace period' for starting mining that would allow miners
@@ -281,7 +390,7 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
        miner.ProvingSet = miner.Sectors
        miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration
     }
-    
+
     return sectorId
 }
 ```
@@ -302,68 +411,68 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
     if msg.From != miner.Worker {
         Fatal("not authorized to submit post for miner")
     }
-    
+
     // ensure the fault sets properly stack, recovered is a subset of the combined
     // fault sets, and that done does not intersect with either, and that all sets
     // only reference sectors that currently exist
     if !miner.ValidateFaultSets(faults, recovered, done) {
         Fatal("fault sets invalid")
     }
-    
+
     var feesRequired TokenAmount
-    
+
     if chain.Now() > miner.ProvingPeriodEnd + GenerationAttackTime {
         // TODO: determine what exactly happens here. Is the miner permanently banned?
         Fatal("Post submission too late")
     } else if chain.Now() > miner.ProvingPeriodEnd {
         feesRequired += ComputeLateFee(chain.Now() - miner.ProvingPeriodEnd)
     }
-    
+
     feesRequired += ComputeTemporarySectorFailureFee(recovered)
-    
+
     if msg.Value < feesRequired {
         Fatal("not enough funds to pay post submission fees")
     }
-    
+
     // we want to ensure that the miner can submit more fees than required, just in case
     if msg.Value > feesRequired {
         Refund(msg.Value - feesRequired)
     }
-    
+
 
     if !CheckPostProofs(proofs, faults) {
         Fatal("proofs invalid")
     }
-    
+
     permLostSet = AggregateBitfields(faults).Subtract(recovered)
-    
+
     // adjust collateral for 'done' sectors
     miner.ActiveCollateral -= CollateralForSectors(miner.NextDoneSet)
     miner.Collateral += CollateralForSectors(miner.NextDoneSet)
-    
+
     // penalize collateral for lost sectors
     miner.ActiveCollateral -= CollateralForSectors(permLostSet)
-    
+
     // burn funds for fees and collateral penalization
     BurnFunds(miner, CollateralForSectors(permLostSet) + feesRequired)
-    
+
     // update sector sets and proving set
     miner.Sectors.Subtract(done)
     miner.Sectors.Subtract(permLostSet)
-    
+
     // update miner power to the amount of data actually proved during
     // the last proving period.
     oldPower := miner.Power
     miner.Power = SizeOf(Filter(miner.ProvingSet, faults))
     StorageMarket.UpdateStorage(miner.Power - oldPower)
-    
+
     miner.ProvingSet = miner.Sectors
-    
+
     // NEEDS REVIEW: early submission of PoSts may give the miner extra time for
     // their next PoSt, which could compound. Does the beacon reseeding for Posts
     // address this well enough?
     miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration
-    
+
     // update next done set
     miner.NextDoneSet = done
     miner.ArbitratedDeals.Clear()
@@ -385,7 +494,7 @@ func IncreasePledge(addspace BytesAmount) {
     if miner.Collateral + msg.Value < CollateralForPledge(addspace + miner.PledgeBytes) {
         Fatal("not enough total collateral for the requested pledge")
     }
-    
+
     miner.Collateral += msg.Value
     miner.PledgeBytes += addspace
 }
@@ -404,22 +513,22 @@ func SlashStorageFault() {
 	if self.SlashedAt > 0 {
         Fatal("miner already slashed")
 	}
-	
+
     if chain.Now() <= miner.ProvingPeriodEnd + GenerationAttackTime {
     	Fatal("miner is not yet tardy")
     }
-    
+
     if miner.ProvingSet.Size() == 0 {
         Fatal("miner is inactive")
     }
-    
+
     // Strip miner of their power
     StorageMarketActor.UpdateStorage(-1 * self.Power)
     self.Power = 0
-    
+
     // TODO: make this less hand wavey
     BurnCollateral(self.ConsensusCollateral)
-    
+
     self.SlashedAt = CurrentBlockHeight
 }
 ```
@@ -452,31 +561,31 @@ func AbitrateDeal(d Deal) {
     if !ValidateSignature(d, self.Worker) {
         Fatal("invalid signature on deal")
     }
-    
+
     if CurrentBlockHeight < d.StartTime {
         Fatal("Deal not yet started")
     }
-    
+
     if d.Expiry < CurrentBlockHeight {
         Fatal("Deal is expired")
     }
-    
+
     if !self.NextDoneSet.Has(d.PieceCommitment.Sector) {
-        Fatal("Deal agreement not broken, or arbitration too late") 
+        Fatal("Deal agreement not broken, or arbitration too late")
     }
-    
+
     if self.ArbitratedDeals.Has(d.PieceRef) {
         Fatal("cannot slash miner twice for same deal")
     }
-    
+
     pledge, storage := CollateralForDeal(d)
-    
+
     // burn the pledge collateral
     self.BurnFunds(pledge)
-    
+
     // pay the client the storage collateral
     TransferFunds(d.ClientAddr, storage)
-    
+
     // make sure the miner can't be slashed twice for this deal
     self.ArbitratedDeals.Add(d.PieceRef)
 }
@@ -497,22 +606,22 @@ func DePledge(amt TokenAmount) {
     if msg.From != miner.Worker && msg.From != miner.Owner {
         Fatal("Not authorized to call DePledge")
     }
-    
+
     if miner.DePledgeTime > 0 {
         if miner.DePledgeTime > CurrentBlockHeight {
             Fatal("too early to withdraw collateral")
         }
-        
+
         TransferFunds(miner.Owner, miner.DePledgedCollateral)
         miner.DePledgeTime = 0
         miner.DePledgedCollateral = 0
         return
     }
-    
+
     if amt > miner.Collateral {
         Fatal("Not enough free collateral to withdraw that much")
     }
-    
+
     miner.Collateral -= amt
     miner.DePledgedCollateral = amt
     miner.DePledgeTime = CurrentBlockHeight + DePledgeCooldown
@@ -591,7 +700,7 @@ func UpdatePeerID(pid PeerID) {
     if msg.From != self.Worker {
         Fatal("only the mine worker may update the peer ID")
     }
-    
+
     self.PeerID = pid
 }
 ```
@@ -599,6 +708,3 @@ func UpdatePeerID(pid PeerID) {
 ## Payment Channel Broker Actor
 
 TODO
-
-
-
