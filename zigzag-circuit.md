@@ -6,7 +6,7 @@ ZigZag has been presented by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/
 
 #### ZigZag Overview
 
-ZigZag PoRep is based on layering DRG graphs `l` times. The data represented in each DRG layer is the data encoded in the previous layer. The final layer is the replica (which in Filecoin terms is the sealed sector).
+ZigZag PoRep is based on layering DRG graphs `LAYERS` times. The data represented in each DRG layer is the data encoded in the previous layer. The final layer is the replica (which in Filecoin terms is the sealed sector).
 
 - `ReplicaId` is a unique replica identifier (see the Filecoin Proofs spec for details)
 - `CommD` is the Merkle Tree root hash of the input data to the first layer
@@ -37,7 +37,7 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 - `LAYER_CHALLENGES : [LAYERS]UInt`: Number of challenges per layer.
 - `EXPANSION_DEGREE: UInt`: Degree of each bipartite expander graph to extend dependencies between layers.
 - `BASE_DEGREE: UInt`: Degree of each Depth Robust Graph.
-- `TREE_DEPTH: UInt`: Depth of the Merkle tree. Note, this is (log_2(Size of original data in bytes)).
+- `TREE_DEPTH: UInt`: Depth of the Merkle tree. Note, this is (log_2(Size of original data in bytes/32 bytes per leaf node)).
 - `PARENT_NODES : UInt`: Defined as `EXPANSION_DEGREE+BASE_DEGREE`.
 
 #### Public Inputs
@@ -45,24 +45,16 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
 
 - `ReplicaId : Fr`: A unique identifier for the replica.
-
 - `CommD : Fr`: the Merkle tree root hash of the original data (input to the first layer).
-
 - `CommRLast : Fr`: The Merkle tree root hash of the final replica (output of the last layer).
-
 - `CommRStar : Fr`: A commitment to each `l` layer's Merkle tree root hash `CommR[l]` and `ReplicaId`.
-
 - `InclusionPath : [LAYERS][]Fr`: Inclusion path for the challenged data and replica node.
-
-  Note: Each layer `l` has `LAYER_CHALLENGES[l]` inclusion paths.
-
 - `ParentInclusionPath : [LAYERS][][PARENT_NODES]Fr`:  Inclusion path for the parent nodes of the corresponding `InclusionPath[l][c]` nodes.
-
-  Note: Each layer `l` has `LAYER_CHALLENGES[l]` inclusion paths.
 
 ##### Design notes
 
-- `CommRLast` is a public input, since we will be using it during Proof-of-Spacetime
+- `CommRLast` is a public input, since we will be using it during Proof-of-Spacetime.
+- `InclusionPath` and `ParentInclusionPath`: Each layer `l` has `LAYER_CHALLENGES[l]` inclusion paths.
 
 #### Private Inputs
 
@@ -146,15 +138,15 @@ for l in range LAYERS {
       assert(Packed(ParentBits[p]) == parent)
     }
 
-		// 3.2: Check that each key has generated correctly
-		let PreImage = ReplicaIdBits
-		for parentbits in ParentBits[l][c] {
- 	   PreImage.Append(parentbits)
-		}
+    // 3.2: Check that each key has generated correctly
+    let PreImage = ReplicaIdBits
+    for parentbits in ParentBits[l][c] {
+      PreImage.Append(parentbits)
+    }
     let key Fr = PedersenHash(PreImage)
     assert(PedersenHash(PreImage) == key)
     // 3.3: Check that the data has been encoded to a replica with the right key
-    assert(ReplicaValue[l][c] == DataValue[l][c] + k)
+    assert(ReplicaValue[l][c] == DataValue[l][c] + key)
 
     // 4: CommRStar check - Check that the CommRStar constructed correctly
     let hash = ReplicaId
@@ -164,7 +156,7 @@ for l in range LAYERS {
     hash.Append(CommRLast)
 
     assert(CommRStar == PedersenHash(hash))
-		// TODO check if we need to do packing/unpacking
+    // TODO check if we need to do packing/unpacking
   }
 }
 ```
@@ -174,6 +166,7 @@ for l in range LAYERS {
 #### Verification of offline porep proof
 
 - SNARK proof check: **Check** that given the SNARK proof and the public inputs, the SNARK verification outputs true
-- Parent checks: For each `node = InclusionPaths_{l}_{c}`:
-  - **Check** that all `ParentsInclusionPaths_{l}_{c}_{0..PARENT_NODES}` are the correct parent nodes of `node` in the DRG graph.
+- Parent checks: For each `node = InclusionPath[l][c]`:
+  - **Check** that all `ParentsInclusionPaths_[l][c][0..PARENT_NODES}` are the correct parent nodes of `node` in the DRG graph.
   - **Check** that the parent nodes are in numerical order.
+
