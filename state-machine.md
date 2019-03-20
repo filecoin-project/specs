@@ -15,7 +15,7 @@ Second, an `actor` may call a method on another actor during the invocation of o
 
 ### State Representation
 
-The `global state` is modeled as a map of actor addresses to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT). Each actor's `state` is an ipld pointer to a graph that can be entirely defined by the actor.
+The `global state` is modeled as a map of actor `ID`s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT). Each actor's `state` is an ipld pointer to a graph that can be entirely defined by the actor.
 
 ### Execution (Calling a method on an Actor)
 
@@ -37,9 +37,8 @@ type VMContext interface {
 	// BlockHeight returns the height of the block this message was added to the chain in
 	BlockHeight() *types.BlockHeight
 
-	// CreateNewActor is used to create a new actor from the given code and constructor
-    // parameters (TODO: address should probably not be a parameter)
-	CreateNewActor(addr address.Address, code cid.Cid, initalizationParams interface{}) error
+	// CreateNewActor is used to create a new actor from the given code and constructor.
+	CreateNewActor(id BigInt, code cid.Cid, initalizationParams []Param) error
 }
 ```
 

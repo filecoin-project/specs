@@ -13,36 +13,81 @@ The init actor is responsible for creating new actors on the filecoin network. T
 
 ```go
 type InitActor struct {
-    NextActorID uint64
+    // Mapping from Address to ID, for lookups.
+		AddressMap map[Address]BigInt
 }
 ```
 
-#### Exec
+### `Exec(code Cid, params []Param) Address`
 
-Parameters:
+>  This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
 
-- code Cid
-- params []byte
+#### Parameters
 
-TODO: the type of params should probably just be variadic set of arguments. Making it be a `[]byte` here kinda sucks
+| Name     | Type       | Description                                                  |
+| -------- | ---------- | ------------------------------------------------------------ |
+| `code`   | `Cid`      | A pointer to the location at which the code of the actor to create is stored. |
+| `params` | `[] Param` | The parameters passed to the constructor of the actor.       |
+
+
+
+`Param` is the type representing any valid arugment that can be passed to a function.
+
+TODO: Find a better place for this definition.
+
+
 
 ```go
 func Exec(code Cid, params []byte) Address {
-    actorID := self.NextActorID
-    self.NextActorID++
+    // Get the actor ID for this actor.
+    actorID = len(self.AddressMap)
 
-    if code == InitActorCodeCid {
-        Fatal("cannot launch additional init actor instance")
+    // Make sure that only the actors defined in the spec can be launched.
+    if !IsBuiltinActor(code) {
+        Fatal("cannot launch actor instance that is not a builtin actor")
     }
 
-    addr := VM.CreateActor(code, msg.Value, DecodeParams(params))
+    // Ensure that singeltons can be only launched once.
+    // TODO: do we want to enforce this? If so how should actors be marked as such?
+    if IsSingletonActor(code) && self.hasInstance(code) {
+      Fatal("cannot launch singelton, which is already launched")
+    }
 
-    // TODO: where is this mapping stored?
-    SetIDMapping(actorID, addr)
+  	// This call will insert the actor into the global state tree, under the provided ID.
+    addr := VM.CreateNewActor(actorID, code, params)
+
+    // Store the mapping of address to actor ID.
+    self.AddressMap[addr] = actorID
 
     return addr
 }
 ```
+
+### `GetIdForAddress(addr Address) BigInt`
+
+> This method allows for fetching the corresponding ID of a given Address
+
+#### Parameters
+
+| Name   | Type      | Description           |
+| ------ | --------- | --------------------- |
+| `addr` | `Address` | The address to lookup |
+
+
+
+```go
+func GetIdForAddress(addr Address) BigInt {
+    id := self.AddressMap[addr]
+    if id == nil {
+        Fault("unknown address")
+    }
+    return id
+}
+```
+
+
+
+
 
 ## Storage Market Actor
 
