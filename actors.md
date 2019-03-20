@@ -2,11 +2,14 @@
 
 Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode. The algorithms below are correct, and all implementations much match it (including go-filecoin), but details omitted from here should be looked for in the go-filecoin code.
 
-This spec decsribes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
+This spec describes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
 
 
+- [Init Actor](#init-actor)
 - [Storage Market Actor](#storage-market-actor)
 - [Storage Miner Actor](#storage-miner-actor)
+- [Payment Channel Broker Actor](#payment-channel-broker-actor)
+
 
 ## Init Actor
 The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors).
@@ -34,7 +37,6 @@ type InitActor struct {
 `Param` is the type representing any valid arugment that can be passed to a function.
 
 TODO: Find a better place for this definition.
-
 
 
 ```go
