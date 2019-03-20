@@ -32,13 +32,10 @@ type VMContext interface {
 	Storage() Storage
 
 	// Send allows the current execution context to invoke methods on other actors in the system
-	Send(to address.Address, method string, value *types.AttoFIL, params []interface{}) ([][]byte, uint8, error)
+	Send(to Address, method string, value AttoFIL, params []interface{}) ([][]byte, uint8, error)
 
 	// BlockHeight returns the height of the block this message was added to the chain in
-	BlockHeight() *types.BlockHeight
-
-	// CreateNewActor is used to create a new actor from the given code and constructor.
-	CreateNewActor(id BigInt, code cid.Cid, initalizationParams []Param) error
+	BlockHeight() BlockHeight
 }
 ```
 
@@ -46,45 +43,43 @@ If the execution completes successfully, changes to the state tree are saved. Ot
 
 ```go
 func ApplyMessage(st StateTree, msg Message) MessageReceipt {
-    st.Snapshot()
-    fromActor := st.GetActor(msg.From)
+	st.Snapshot()
+	fromActor := st.GetActor(msg.From)
 
-    totalCost := msg.Value + (msg.GasLimit * msg.GasPrice)
-    if fromActor.Balance < totalCost {
-        Fatal("not enough funds")
-    }
+	totalCost := msg.Value + (msg.GasLimit * msg.GasPrice)
+	if fromActor.Balance < totalCost {
+		Fatal("not enough funds")
+	}
 
 	if msg.Nonce() != fromActor.Nonce + 1 {
 		Fatal("invalid nonce")
 	}
 
-    st.DeductFunds(msg.From, totalCost)
-    st.DepositFunds(msg.To, msg.Value)
+	st.DeductFunds(msg.From, totalCost)
+	st.DepositFunds(msg.To, msg.Value)
 
-    vmctx := makeVMContext(st, msg)
+	vmctx := makeVMContext(st, msg)
 
-    ret, errcode := fromActor.Invoke(vmctx, msg.Method, msg.Params)
-    if errcode != 0 {
-        // revert all state changes since snapshot
-        st.Revert()
-        st.DeductFunds(msg.From, vmctx.GasUsed() * msg.GasPrice)
-    } else {
-        // refund unused gas
-        st.DepositFunds(msg.From, (msg.GasLimit - vmctx.GasUsed()) * msg.GasPrice)
-    }
+	ret, errcode := fromActor.Invoke(vmctx, msg.Method, msg.Params)
+	if errcode != 0 {
+		// revert all state changes since snapshot
+		st.Revert()
+		st.DeductFunds(msg.From, vmctx.GasUsed() * msg.GasPrice)
+	} else {
+		// refund unused gas
+		st.DepositFunds(msg.From, (msg.GasLimit - vmctx.GasUsed()) * msg.GasPrice)
+	}
 
-    // reward miner gas fees
-    st.DepositFunds(msg.To, msg.GasPrice * vmctx.GasUsed())
+	// reward miner gas fees
+	st.DepositFunds(msg.To, msg.GasPrice * vmctx.GasUsed())
 
-    return MessageReceipt{
-        ExitCode: errcode,
-        Return: ret,
-        GasUsed: vmctx.GasUsed(),
-    }
+	return MessageReceipt{
+		ExitCode: errcode,
+		Return: ret,
+		GasUsed: vmctx.GasUsed(),
+	}
 }
 ```
-
-
 
 #### Receipts
 
@@ -118,7 +113,7 @@ data structure that can be built upon a content addressed block store.
 Implementations may provide data structure implementations to simplify
 development. The current interface only supports CBOR-IPLD, but this
 should soon expand to allow other types of IPLD data structures (as long
-as the system has resolvers for them).
+		as the system has resolvers for them).
 
 The current state of a given actor can be accessed first by calling `Head` to retrieve the CID of the root of the actors state, then by using `Get` to retrieve the actual object being referenced.
 

@@ -16,8 +16,10 @@ The init actor is responsible for creating new actors on the filecoin network. T
 
 ```go
 type InitActor struct {
-    // Mapping from Address to ID, for lookups.
-		AddressMap map[Address]BigInt
+	// Mapping from Address to ID, for lookups.
+	AddressMap map[Address]BigInt
+
+	NextID BigInt
 }
 ```
 
@@ -42,7 +44,8 @@ TODO: Find a better place for this definition.
 ```go
 func Exec(code Cid, params []byte) Address {
     // Get the actor ID for this actor.
-    actorID = len(self.AddressMap)
+    actorID = self.NextID
+    self.NextID++
 
     // Make sure that only the actors defined in the spec can be launched.
     if !IsBuiltinActor(code) {
@@ -51,17 +54,39 @@ func Exec(code Cid, params []byte) Address {
 
     // Ensure that singeltons can be only launched once.
     // TODO: do we want to enforce this? If so how should actors be marked as such?
-    if IsSingletonActor(code) && self.hasInstance(code) {
-      Fatal("cannot launch singelton, which is already launched")
+    if IsSingletonActor(code) {
+      Fatal("cannot launch another actor of this type")
     }
 
-  	// This call will insert the actor into the global state tree, under the provided ID.
-    addr := VM.CreateNewActor(actorID, code, params)
+    // This generates a unique address for this actor that is stable across message
+    // reordering
+    addr := VM.ComputeActorAddress()
+  
+    // Set up the actor itself
+  	actor := Actor{
+      Code: code,
+      Balance: msg.Value,
+  	}
+  
+    // The call to the actors constructor will set up the initial state
+    // from the given parameters
+    actor.Constructor(params)
+  
+  	VM.GlobalState.Set(actorID, actor)
 
     // Store the mapping of address to actor ID.
     self.AddressMap[addr] = actorID
 
     return addr
+}
+
+func IsSingletonActor(code Cid) bool {
+  return code == StorageMarketActor || code == InitActor
+}
+
+// TODO: find a better home for this logic
+func VM.ComputeActorAddress(creator Address, nonce Integer) Address {
+  return NewActorAddress(bytes.Concat(creator.Bytes(), nonce.BigEndianBytes()))
 }
 ```
 
@@ -93,7 +118,7 @@ func GetIdForAddress(addr Address) BigInt {
 
 ## Storage Market Actor
 
-The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
+The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
 
 ```go
 type StorageMarketActor struct {
