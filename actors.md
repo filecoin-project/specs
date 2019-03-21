@@ -740,6 +740,15 @@ type Transaction struct {
 
 #### Constructor
 
+>  This method sets up the initial state for the multisig account
+
+#### Parameters
+
+| Name     | Type       | Description                                         |
+| -------- | ---------- | ------------------------------------------------------------ |
+| `signers`   | `[]Address`      | The addresses that will be the signatories of this wallet. |
+| `required` | `uint` | The number of signatories required to perform a transaction.       |
+
 ```go
 func Multisig(signers []Address, required uint) {
     self.Signers = signers
@@ -750,6 +759,15 @@ func Multisig(signers []Address, required uint) {
 
 
 ### Propose
+
+> Propose is used to propose a new transaction to be sent by this multisig. The proposer must be a signer, and the proposal also serves as implicit approval from the proposer. If only a single signature is required, then the transaction is executed immediately.
+
+| Name     | Type       | Description  |
+| --- | --- | --- |
+| `to` |  `Address` | The address of the target of the proposed transaction. |
+|  `value` | `TokenAmount` | The amount of funds to send with the proposed transaction |
+|  `method` | `string` | The method that will be invoked on the proposed transactions target. |
+| `params` | `[]byte` | The parameters that will be passed to the method invocation on the proposed transactions target. |
 
 ```go
 func Propose(to Address, value TokenAmount, method string, params []byte) uint64 {
@@ -781,6 +799,13 @@ func Propose(to Address, value TokenAmount, method string, params []byte) uint64
 ```
 
 ### Approve
+
+> Approve is called by a signer to approve a given transaction. If their approval pushes the approvals for this transaction over the threshold, the transaction is executed.
+
+| Name     | Type       | Description  |
+| --- | --- | --- |
+| `txid` |  `uint64` | The ID of the transaction to approve. |
+
 
 ```go
 func Approve(txid uint64) {
