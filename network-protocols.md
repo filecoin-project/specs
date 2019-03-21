@@ -151,6 +151,10 @@ const (
 	// Failed means the deal has failed for some reason
 	Failed = 5
 
+	// Staged is used by the storage deal protocol to indicate the data has been
+	// received and staged into a sector, but is not sealed yet
+	Staged = 6
+
 	// Complete means the deal is complete, and the sector that the deal is contained
 	// in has been sealed and its commitment posted on chain.
 	Complete = 6
@@ -158,6 +162,9 @@ const (
 	// Staged is used by the storage deal protocol to indicate the data has been
 	// received and staged into a sector, but is not sealed yet
 	Staged = 7
+
+    // in has been sealed and its commitment posted on chain.
+	Complete = 7
 )
 ```
 
@@ -233,8 +240,12 @@ type StorageDealResponse struct {
     // that place in the sector.
     PieceConfirmation PieceConfirmation
 
-	// Signature is a signature from the miner over the response
-	Signature Signature
+    // SectorCommitMsg is the Cid of the message that was sent to submit
+    // the sector containing this data to the chain.
+    SectorCommitMsg Cid
+
+    // Signature is a signature from the miner over the response
+    Signature Signature
 }
 ```
 
@@ -307,29 +318,40 @@ func OnDataReceived(prop StorageDealProposal) {
   }
 
   // TODO: is TranslatedRef actually needed? How does it tie in?
-  pieceConfirmation := SectorBuilder.PackData(prop.PieceRef, prop.SerializationMode)
-  // TODO: we can't get a *full* piece confirmation until the sector is actually full.
-  // but we can return something useful here... can't we? Whatever it is should likely
-  // be related to the prop.TranslatedRef in some (proveable) way.
+  SectorBuilder.AddPiece(prop.PieceRef, prop.SerializationMode)
+}
+```
+
+```go
+func OnSectorPacked(prop StorageDealProposal, pieceConf PieceCommitment) {
   resp := StorageDealResponse{
     State: Staged,
     Proposal: prop.Cid(),
-    PieceConfirmation: pieceConfirmation,
+    PieceConfirmation: pieceConf,
   }
+
   miner.Sign(resp)
   miner.SetDealState(resp)
 }
 ```
 
+Once the deal makes it to this state, the client should be able to query and get the `PieceConfirmation` that they need to verify that the miner is indeed storing their data.
+
 ```go
-func OnSectorSealed(prop StorageDealProposal) {
-  // TODO:
+func OnSectorSealed(prop StorageDealProposal, msgcid Cid) {
+	curState := miner.GetDealState(prop)
+	nstate := StorageDealResponse{
+    State: Complete,
+    Proposal: prop.Cid(),
+    PieceConfirmation: curState.PieceConfirmation,
+    SectorCommitMsg: msgcid,
+	}
+
+	miner.Sign(nstate)
+	miner.SetDealState(nstate)
 }
 ```
 
-
-
-Once the deal makes it to this state, the client should be able to query and get the `PieceConfirmation` that they need to complete their proofs of repair for the data.
 
 ## Query
 
