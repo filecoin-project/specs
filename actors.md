@@ -170,17 +170,45 @@ Parameters:
 Return: None
 
 ```go
-func SlashConsensusFault(block1, block2 BlockHeader) {
-	if block1.Height != block2.Height {
-        Fatal("cannot slash miner for blocks of differing heights")
-    }
+func shouldSlash(block1, block2 BlockHeader) bool {
+     // First slashing condition, blocks have the same ticket round
+     if sameTicketRound(block1, block2) {
+     	return true
+     }
 
-    if !ValidateSignature(block1.Signature) || !ValidateSignature(block2.Signature) {
-        Fatal("Invalid blocks")
+     // Second slashing condition, miner ignored own block when mining
+     // Case A: block2 could have been in block1's parent set but is not
+     block1ParentTipSet := parentOf(block1)
+     if !block1Parent.contains(block2) &&
+     	block1ParentTipSet.Height == block2.Height &&
+	block1ParentTipSet.ParentCids == block2.ParentCids {
+	return true	
+     }
+     
+     // Case B: block1 could have been in block2's parent set but is not
+     block2ParentTipSet := parentOf(block2)
+     if !block2Parent.contains(block1) &&
+     	block2ParentTipSet.Height == block1.Height &&
+	block2ParentTipSet.ParentCids == block1.ParentCids {
+	return true	
+     }
+
+     return false
+}
+
+func SlashConsensusFault(block1, block2 BlockHeader) {
+    if !ValidateSignature(block1.Signature) || !ValidSignature(block2.Signature) {
+       Fatal("invalid blocks")
     }
 
     if AuthorOf(block1) != AuthorOf(block2) {
-        Fatal("blocks must be from the same miner")
+       Fatal("blocks must be from the same miner")
+    }
+
+    // see the "Consensus Faults" section of the faults spec (faults.md)
+    // for details on these slashing conditions.
+    if !shouldSlash(block1, block2) {
+       Fatal("blocks do not prove a slashable offense")		
     }
 
     miner := AuthorOf(block1)
