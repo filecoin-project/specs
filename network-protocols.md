@@ -49,14 +49,10 @@ type HelloMessage struct {
 
 ```go
 func SayHello(p PeerID) {
-	s := OpenStream(p)
-	mes := GetHelloMessage()
-	serialized := cbor.Marshal(mes)
-
-	WriteUVarint(s, len(serialized))
-
-	s.Write(serialized)
-	s.Close()
+    s := OpenStream(p)
+    mes := GetHelloMessage()
+	WriteCborRPC(s, mes)
+    s.Close()
 }
 ```
 
@@ -133,8 +129,8 @@ Legal values for `DealState` are as follows:
 ```go
 const (
 	// Unset implies a programmer error. This value should never appear
-	// in an actual message
-	Unset = 0
+  // in an actual message
+  Unset = 0
 
 	// Unknown signifies an unknown negotiation
 	Unknown = 1
