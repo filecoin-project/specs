@@ -771,6 +771,11 @@ func Propose(to Address, value TokenAmount, method string, params []byte) uint64
 
     self.Transactions.Append(tx)
 
+  if self.Required == 1 {
+    Send(tx.To, tx.Value, tx.Method, tx.Params)
+    tx.Complete = true
+  }
+
     return txid
 }
 ```
@@ -783,7 +788,7 @@ func Approve(txid uint64) {
         Fatal("not authorized")
     }
 
-    tx := getTransction(txid)
+    tx := getTransaction(txid)
     if tx.Complete {
         Fatal("transaction already completed")
     }
@@ -799,7 +804,7 @@ func Approve(txid uint64) {
 
     tx.Approved.Append(msg.From)
 
-    if len(tx.Approved) > self.Required {
+    if len(tx.Approved) >= self.Required {
         Send(tx.To, tx.Value, tx.Method, tx.Params)
         tx.Complete = true
     }
@@ -830,7 +835,7 @@ func Cancel(txid uint64) {
 
 ```go
 func ClearCompleted() {
-    if !isOwner(msg.From) {
+    if !isSigner(msg.From) {
         Fatal("not authorized")
     }
 
@@ -842,8 +847,6 @@ func ClearCompleted() {
 }
 ```
 
-
-
 ### AddSigner
 
 ```go
@@ -852,7 +855,7 @@ func AddSigner(signer Address) {
         Fatal("add signer must be called by wallet itself")
     }
     if isSigner(signer) {
-        Fatal("new address is already an owner")
+        Fatal("new address is already a signer")
     }
 
     self.Signers.Append(signer)
@@ -878,10 +881,14 @@ func RemoveSigner(signer Address) {
 
 ```go
 func ChangeRequirement(req int) {
-    if msg.From != self.Address {
-        Fatal("change requirement must be called by wallet itself")
-    }
+  if msg.From != self.Address {
+    Fatal("change requirement must be called by wallet itself")
+  }
+  if req < 1 {
+	Fatal("requirement must be at least 1")
+  }
 
-    self.Required = req
+  self.Required = req
 }
 ```
+
