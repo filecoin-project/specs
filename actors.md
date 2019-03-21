@@ -877,6 +877,27 @@ func RemoveSigner(signer Address) {
 }
 ```
 
+### SwapSigner
+
+```go
+func SwapSigner(old, new Address) {
+  if msg.From != self.Address {
+    Fatal("swap signer must be called by wallet itself")
+  }
+  if !isSigner(old) {
+    Fatal("given old address was not a signer")
+  }
+  if isSigner(new) {
+    Fatal("given new address was already a signer")
+  }
+
+  self.Signers.Remove(old)
+  self.Signers.Append(new)
+}
+```
+
+
+
 ### ChangeRequirement
 
 ```go
