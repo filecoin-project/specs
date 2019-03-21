@@ -140,8 +140,8 @@ for l in range LAYERS {
     for parentbits in ParentBits {
       PreImage.Append(parentbits)
     }
-    let key Fr = PedersenHash(PreImage)
-    assert(PedersenHash(PreImage) == key)
+    let key Fr = Blake2s(PreImage)
+    assert(Blake2s(PreImage) == key)
 
     // 3.3: Check that the data has been encoded to a replica with the right key
     assert(ReplicaValue[l][c] == DataValue[l][c] + key)
