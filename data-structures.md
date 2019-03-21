@@ -28,6 +28,7 @@ For most objects referenced by Filecoin, a Content Identifier (CID for short) is
 
 CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
 
+
 ## Block
 
 A block represents an individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and some notion of a 'weight' for deciding which block is the 'best'.
@@ -315,14 +316,19 @@ Each individual type should be encoded as specified:
 | type | encoding |
 | --- | ---- |
 | Uint64 | CBOR major type 0 |
-|  BigInteger | [CBOR bignum](https://tools.ietf.org/html/rfc7049#section-2.4.2) |
+| BigInteger | [CBOR bignum](https://tools.ietf.org/html/rfc7049#section-2.4.2) |
 | Address | CBOR major type 2 |
 | Uint8 | CBOR Major type 0 |
 | []byte | CBOR Major type 2 |
 | string | CBOR Major type 3 |
+| bool | [CBOR Major type 7, value 20/21](https://tools.ietf.org/html/rfc7049#section-2.3) |
 
 ## Encoding Considerations
 
 Objects should be encoded using [canonical CBOR](https://tools.ietf.org/html/rfc7049#section-3.9), and decoders should operate in [strict mode](https://tools.ietf.org/html/rfc7049#section-3.10).  The maximum size of an FCS Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
 
 Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that object is invalid.
+
+## IPLD Considerations
+
+Cids for FCS objects should use the FCS multicodec (`0x1f`).
