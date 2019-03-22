@@ -10,40 +10,39 @@ We use signatures in filecoin to verify *something* was done by *someone*. For e
 - Tickets (Signature of proof - [Mining](mining.md)
 - Block signature (Signature over all data in the block - done by block leader)
 
-# What signatures affect
+## What signatures affect
 
 What uses them
 
-- Messages [TODO: Link to messages spec]
+- [Messages](https://github.com/filecoin-project/specs/blob/master/data-structures.md)
 - Block validation
-- Tickets which inform leader election in Expected Consensus (EC) [TODO: link to EC spec]
+- Tickets [TODO: link to EC spec; inform leader election in Expected Consensus (EC)]
 
-Note that messages between actors are not signed this is because messages between actors are always spawned by a message from a user -- which are singed by that user. 
+Note that messages between actors are not signed. This is an unfortunate namespace collision. Messages between actors are always spawned by a message from a user. In this way, messages between actors are containers for signed messages.
 
-Filecoin specific reliance
+## Dependencies
 
-- SignedMessages in go-filecoin
+Things that affect Filecoin signatures
 
-# Dependencies
+- Elliptic curve implementations
+  - ECDSA with secp256k1 (BitCoin-style elliptic curve)
+  - BLS12-381 for BLS signatures and aggregation
+- Signature size limits
+  - ECDSA - 64 bytes + 1 byte for public key recovery
+  - BLS Signatures - [Add size of point]
+- Avg. processing power available to a CPU 
+  - Affects ability to verify signature aggregates
+  - [TODO: add POSITRACK dependance note]
 
-Things that affect our choices for signatures
 
-- Elliptic curve choices - We use ECDSA with secp256k1 (aka the BitCoin elliptic curve)
-- Signature size limits - Our signatures are 64 bytes + 1 byte for public key recovery
-- Avg. processing power available to a CPU (signature aggregation)
-
-Filecoin specific dependancies
-
-- libsecp256k1
-
-# Non-Dependencies
+## Non-Dependencies
 
 Does not affect
 
 - Transport encryption
 - File encodings (PoRep)
 
-# Interface
+## Interface
 
 Filecoin requires a system that fulfils the following interface to function correctly.
 
@@ -52,59 +51,89 @@ Note: `Message` is used here as the object being signed, but this interface shou
 ```go
 type Signature interface {
 
-        // Sign generates a proof that miner `M` generate message `m`
+        // Sign generates a proof that miner `M` generated or approved of message `msg`.
         //
         // Out:
-        //    sig - a series of bytes representing a signature usually `r`|`s`
-        //    err - a standard error message indicating any process issues
+        //   sig - a series of bytes representing a signature  
+        //   err - a standard error message indicating any process issues
         // In:
-        //    m - a series of bytes representing a message to be signed
-        //    sk - a private key which cryptographically links `M` to `sig`
+        //   msg - a series of bytes representing a message to be signed
+  		  //   addr - the Filecoin `Address` of the signer
+        //   sk - a private key which cryptographically links `M` to `sig`
         //
-        Sign(m Message, sk PrivateKey) (sig SignatureBytes, err error)
-
-        // Verify validates the statement: only `M` could have generated `sig`
+        Sign(msg Message, addr Address, sk PrivateKey) (sig SignatureBytes, err error)
+        
+        // Aggregate generates a BLS signature aggregate from a set of BLS 
+        // signatures. Associated `Address` must be passed to this function
+  		  // so that the aggregate can be verified. This function will pair a `sig` 
+  			// with an `Address` based on index in `sigs` and `addresses`.
+        //
+        // Out:
+        // 	 sig - a series of bytes representing a single BLS signature
+        //   err - a standard error message indicating any process issues
+        // In:
+     		//   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
+    		//   addrs - an array of Address {address_sig_1, address_sig_2..., address_sig_n}
+  			//
+  			Aggregate(sigs SignatureBytes, addrs Addresses)(sig SignatureBytes, err error)
+  
+  			// Verify validates the statement: only `M` could have generated `sig`
         // given the validator has a message `m`, a signature `sig`, and a
         // public key `pk`.
+  			//
+  			// Verify is context dependant. If more than one Address or Signature is passed, 
+  			// then Verify will assume that SignatureBytes is a BLS signature aggregate. If 
+  			// only one signature is passed then Verify will receive signature type context 
+  			// from Address. 
         //
         // Out:
-        //    valid - a boolean value indicating the signature is valid
-        //    err - a standard error message indicating any process issues
+        //   valid - a boolean value indicating the signature is valid
+        //   err - a standard error message indicating any process issues
         // In:
-        //    m - a series of bytes representing the signed message
-        //    pk - the public key belonging to the signer `M`
-        //    sig - a series of bytes representing a signature usually `r`|`s`
+        //   msgs - an array of bytes representing signed messages
+        //   addrs - an array of Address {address_sig_1, address_sig_2..., address_sig_n}
+        //   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
         //
-        Verify(m Messgage, pk PublicKey, sig SignatureBytes) (valid bool, err error)
+        Verify(msgs Messgages, addrs Addresses, sigs SignatureBytes) (valid bool, err error)
 
-        // Recover, as its name implies, recovers a public key associated with a 
-        // particular signature. In the case of ECDSA signatures, this function can 
-        // be fulfilled via the 'ECRecover' method. If a different signature scheme 
-        // is used, then some other mechanism of 'recovering' a message authors 
-        // public key must be provided.
+        // Recover determines the public key associated with a particular signature. For
+  			// ECDSA signatures public keys can be recovered from SignatureBytes and an
+  			// associated message. For BLS signatures, public keys will be recovered by lookup 
+  			// using a mapping from Address to public key.
         //
         // Out:
-        //    pk - the public key associated with `M` who signed `m`
+        //    pk - the public key associated with `M` who signed `msg`
         //    err - a standard error message indicating any process issues
         //    **
         // In:
-        //    m - a series of bytes representing the signed message
-        //    sig - a series of bytes representing a signature usually `r`|`s`
+        //    msg - a series of bytes representing the signed message
+        //    sig - a series of bytes representing a signature
         //
-        Recover(m Message, sig SignatureBytes) (pk PublicKey, err error)
+        Recover(msg Message, addr Address, sig SignatureBytes) (pk PublicKey, err error)
 }
 ```
 
+## Recovering a public key
 
-# Selected Signature Scheme
+### ECDSA Recovery
 
-Currently, Filecoin uses secp256k1 signatures to fulfill the above interface. All signatures on messages, blocks, and tickets currently use the same scheme and format.
+[TODO: [Reference](http://www.secg.org/sec1-v2.pdf))
 
-## Wire Format
+### BLS Recovery
+
+[TODO: Add algorithm]
+
+## Selected Signature Scheme
+
+Currently, Filecoin uses ECDSA (curve secp256k1) or BLS (curve BLS12-381) signatures to fulfill the above interface. All signatures on messages, blocks, and tickets use the same scheme and format.
+
+### Wire Format
 
 What bits are on the wire and in what order/format. We are currently adhering to libsecp256k1 serialization which is laid out as follows. Note that this format description may not be accurate. See the github link below for an authoritative format description.
 
-**Signature**
+#### Signature
+
+**ECDSA**
 
 ```
 sig SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
@@ -123,7 +152,11 @@ sig SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 From: <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177>
 
-**Signed Message**
+**BLS**
+
+(TODO: [Reference](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2))
+
+#### Signed Message
 
 ```
 Type SignedMessage Struct {
@@ -142,7 +175,7 @@ Type SignedMessage Struct {
 
 <https://github.com/filecoin-project/specs/issues/131>
 
-### External References
+## External References
 
 - How Recovering a Private Key from a message and a signature works in ethereum:
 
@@ -161,7 +194,7 @@ Type SignedMessage Struct {
 - - Secp256k1 cpp - <https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55>
   - Go-filecoin - <https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98>
 
-### References
+## References
 
 TODO: this section should likely be removed, and the context it adds should be linked in some other way.
 
@@ -203,12 +236,10 @@ TODO: this section should likely be removed, and the context it adds should be l
 
 Currently signatures are not sent over the wire on their own, instead they are encapsulated in in a [SignedMessage](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L28). SignesMessage’s contain a Message and a Signature. When we want to send a SignedMessage over the wire we marshal it to cbor and send, once it is recevied it is unmarshaled form [cbor](http://cbor.io/) back into the SignedMessage Structure.
 [Code for marshaling and unmarshaling SignedMessages
-](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38)For opinions talks to @dig & @phritz
+](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38)
 
-# Inspiration
+## Inspiration
 
 JSON Web Sigs/Keys: <https://tools.ietf.org/html/rfc7515>
 
 NIST Signature Standard: <https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf>
-
-Discussion on slack: <https://protocollabs.slack.com/archives/G7XUR2TU2/p1528984460000977>
