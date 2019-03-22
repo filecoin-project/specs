@@ -37,7 +37,7 @@ Important Concepts
 > **Definition:** A `TipSet` is a set of blocks with the same parent set, and same number of tickets (which implies they will have been mined at the same height).
 
 Expected Consensus is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
-level, it operates by running a leader election every round in which, on expectation, one 
+level, it operates by running a leader election every round in which, on expectation, one
 participant may be eligible to submit a block. All valid blocks submitted in a given round form a `TipSet`. Every block in a TipSet adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on this, see [Chain Selection](#chain-selection).
 
 The basic algorithms are as follows:
@@ -87,7 +87,7 @@ const RandomnessLookback = 1 // Also referred to as "K" in many places
 const PowerLookback = 1      // Also referred to as "L" in many places
 
 func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool, ElectionProof) {
-	lbt := ChainTipsMgr.TicketFromRound(n - RandomnessLookback)
+	lbt := ChainTipsMgr.TicketFromRound(parentTipset, n-RandomnessLookback)
 
 	eproof := ComputeElectionProof(lbt, key)
 
@@ -374,6 +374,27 @@ becomes a global lottery for all forks originating after the lookback (where the
 randomness was drawn). That is to say, given a common random seed and public key, each
 sybil will either win on all forks, or lose on all forks. This greatly decreases the
 chances that this attack succeeds, erasing the economic advantage sybils created.
+```
+
+### ChainTipsManager
+
+The Chain Tips Manager is a subcomponent of Filecoin consensus that is technically up to the implementer, but since the pseudocode in previous sections reference it, it is documented here for clarity.
+
+The Chain Tips Manager is responsible for tracking all live tips of the Filecoin blockchain, and tracking what the current 'best' tipset is.
+
+```go
+// Returns the ticket that is at round 'r' in the chain behind 'head'
+func TicketFromRound(head Tipset, r Round) {}
+
+// Returns the tipset that contains round r (Note: multiple rounds may exist within a single // tipset due to null blocks)
+func TipsetFromRound(head Tipset, r Round) {}
+
+// GetBestTipset returns the best known tipset. If the 'best' tipset hasnt changed, then this
+// will return the previous best tipset and the null block we mined on top of it.
+func GetBestTipset()
+
+// Adds the failed ticket to the chaintips manager so that null blocks can be mined on top of
+func AddFailedTicket(parent Tipset, t Ticket)
 ```
 
 
