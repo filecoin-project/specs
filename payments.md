@@ -26,67 +26,7 @@ For example:
 
 At this point, B has two signed messages from A, but the contract is set up such that it can only be cashed out once. So if B decided to cash out, they would obviously select the message with the higher value. Also, once B cashes out, they must not accept any more payments from A on that same channel.
 
-### Simple Payment Channel Actor
-
-We need to implement an actor to allow the creation of payment channels between users. The interface for that should look something like this:
-
-```go
-type ChannelID *big.Int
-type BlockHeight *big.Int
-type Signature []byte
-
-type SpendVoucher struct {
-    Channel ChannelID
-    Amount *TokenAmount
-    Sig Signature
-}
-
-type PaymentBroker interface {
-    // CreateChannel creates a new payment channel from the caller to the target.
-    // The value attached to the invocation is used as the deposit, and the channel
-    // will expire and return all of its money to the owner after the given block height.
-    CreateChannel(target Address, eol BlockHeight) ChannelID
-    
-    // Update updates the payment channel with the given amounts, and sends the current
-    // committed amount to the target. This is useful when you want to checkpoint the 
-    // value in a payment, but continue to use the channel afterwards.
-    Update(channel ChannelID, amt *TokenAmount, sig Signature)
-    
-    // Close is called by the target of a payment channel to cash out and close out
-    // the payment channel. This is really a courtesy call, as the channel will
-    // eventually time out and close on its own.
-    Close(channel ChannelID, amt *TokenAmount, sig Signature)
-    
-    // Extend can be used by the owner of a channel to add more funds to it and
-    // extend the channels lifespan.
-    Extend(target Address, channel ChannelID, eol BlockHeight)
-    
-    // Reclaim is used by the owner of a channel to reclaim unspent funds in timed
-    // out payment channels they own.
-    Reclaim(target Address, channel ChannelID)
-}
-
-// MakeSpendVoucher is used by the owner of a channel to create an offline payment
-// for the target. Note that any amount may be given, but the target gets to select
-// which of the vouchers you give them to cash out, and therefore any rational actor 
-// will only ever keep the one with the largest amount. After calling this function,
-// you should send the returned SpendVoucher to the target out of band.
-func MakeSpendVoucher(ch ChannelID, amt *TokenAmount, sk PrivateKey) *SpendVoucher {
-    data := concatBytes(ch, amt)
-    sig := sk.Sign(data)
-    return &SpendVoucher{
-        Channel: ch,
-        Amount: amt,
-        Sig: sig,
-    }
-}
-```
-
-Channel IDs should be memory efficient and generated is such a way that reordering does not change the channelID. This may be solved by first indexing by the target address internally and then using the nonce of the message that invoked the create channel method.
-
-
-
-### Multi-Lane Payment Channel (WIP)
+### Multi-Lane Payment Channel
 
 The filecoin storage market may require a way to do incremental payments between two parties, over time, for multiple different transactions. The primary motivating usecase for this is to provide payment for file storage over time, for each file stored. An additional requirement is the ability to have less than one message on chain per transaction 'lane', meaning that payments for multiple files should be aggregateable (Note: its okay if this aggregation is an interactive process).
 
@@ -118,6 +58,8 @@ type SpendVoucher struct {
     SecretPreimage []byte
 
     RequiredSector []byte
+  
+    DataCommitment []byte
 
     MinCloseHeight uint64
     
@@ -159,7 +101,7 @@ func (paych *PaymentChannel) validateSignature(sv SpendVoucher) {
     }
 }
 
-func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte) {
+func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
     if !paych.validateSignature(sv) {
         Fatal("Signature Invalid")
     }
@@ -173,6 +115,14 @@ func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte) 
             Fatal("Incorrect secret!")
         }
     }
+  
+  	if sv.DataCommitment != nil {
+      // Checks that the piece inclusion proof is valid, and that the referenced sector
+      // is correctly being stored
+      if !ValidateInclusion(pip, sv.DataCommitment) {
+        Fatal("PieceInclusionProof was invalid")
+      }
+  	}
 
     if sv.RequiredSector != nil {
         miner, found := GetMiner(msg.From)
