@@ -26,10 +26,13 @@ Things that affect Filecoin signatures
 
 - Elliptic curve implementations
   - ECDSA with secp256k1 (BitCoin-style elliptic curve)
-  - BLS12-381 for BLS signatures and aggregation
+  - BLS12-381 for BLS signatures and aggregation. 
+    - Described as *Variant 1* in [IETF BLS Signature Scheme](https://tools.ietf.org/html/draft-boneh-bls-signature-00)
+    - Small signature size
+    - Larger public keys
 - Signature size limits
   - ECDSA - 64 bytes + 1 byte for public key recovery
-  - BLS Signatures - [Add size of point]
+  - BLS Signatures - 48 Bytes
 - Avg. processing power available to a CPU 
   - Affects ability to verify signature aggregates
   - [TODO: add POSITRACK dependance note]
@@ -73,9 +76,9 @@ type Signature interface {
         //   err - a standard error message indicating any process issues
         // In:
      		//   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
-    		//   addrs - an array of Address {address_sig_1, address_sig_2..., address_sig_n}
+    		//   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
   			//
-  			Aggregate(sigs SignatureBytes, addrs Addresses)(sig SignatureBytes, err error)
+  			Aggregate(sigs []SignatureBytes, addrs []Addresse)(sig SignatureBytes, err error)
   
   			// Verify validates the statement: only `M` could have generated `sig`
         // given the validator has a message `m`, a signature `sig`, and a
@@ -91,10 +94,10 @@ type Signature interface {
         //   err - a standard error message indicating any process issues
         // In:
         //   msgs - an array of bytes representing signed messages
-        //   addrs - an array of Address {address_sig_1, address_sig_2..., address_sig_n}
+        //   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
         //   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
         //
-        Verify(msgs Messgages, addrs Addresses, sigs SignatureBytes) (valid bool, err error)
+        Verify(msgs []Messgage, addrs []Addresse, sigs []SignatureBytes) (valid bool, err error)
 
         // Recover determines the public key associated with a particular signature. For
   			// ECDSA signatures public keys can be recovered from SignatureBytes and an
@@ -112,6 +115,86 @@ type Signature interface {
         Recover(msg Message, addr Address, sig SignatureBytes) (pk PublicKey, err error)
 }
 ```
+
+## Key Generation & Elliptic Curve Parameters
+
+This specification assumes the implementer uses a strong cryptographic pseudorandom generator `RANDOM`. The following was adapted from [IETF BLS Signature Scheme - Keygen](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.2). 
+
+```go
+Input: RANDOM
+Output: PK, SK
+
+   1.  SK = x, chosen as a random integer in the range 1 and r-1
+   2.  PK = x*P, P is an element of an elliptic curve E
+   3.  Output PK, SK
+```
+
+For ECDSA, `P` is the generator for `E`. For BLS, we choose `P` to be a generator in `E2` which is the larger of the elliptic curve groups.
+
+### BLS12-381 Parameter Choices
+
+We have chosen to use the same elliptic curve parameters as [zkcrypto/pairing](https://github.com/zkcrypto/pairing/tree/master/src/bls12_381) with the exception that we are signing in G1 and generating public keys in G2. Note: there is a namespace collision between [zkcrypto/pairing](https://github.com/zkcrypto/pairing/tree/master/src/bls12_381) and [IETF BLS Signature Scheme](https://tools.ietf.org/html/draft-boneh-bls-signature-00) concerning G1 and G2. In zkcrypto/paring, G1 and G2 are points defined in the largest prime order subgroup of the elliptic curve defined by BLS12-381. In the IETF BLS Signature Scheme, G1 and G2 represent the largest prime order subgroups in BLS12-381. We will comply with the IETF standard. We will denote the generators of G1 and G2 as P1 and P2 respectively. E1 and E2 will denote the elliptic curve defined by BLS12-381.
+
+```go
+q = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
+
+r = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+
+P1:
+x = 3685416753713387016781088315183077757961620795782546409894578378688607592378376318836054947676345821548104185464507
+y = 1339506544944476473020471379941921221584933875938349620426543736416511423956333506472724655353366534992391756441569
+
+P2:
+x = 3059144344244213709971259814753781636986470325476647558659373206291635324768958432433509563104347017837885763365758*u + 352701069587466618187139116011060144890029952792775240219908644239793785735715026873347600343865175952761926303160
+y = 927553665492332455747201965776037880757740193453592970025027978793976877002675564980949289727957565575433344219582*u + 1985150602287291935568054521177171638300868978215655730859378665066344726373823718423869104263333984641494340347905
+
+```
+
+[TODO: add notes on point compression and effect on serialization]
+
+## Signing a Message
+
+### `Sign` via ECDSA (using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
+
+### `Sign` via BLS (taken from [IETF BLS Signature Scheme - Sign](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.3) with BLS12-381)
+
+```go
+Input: SK = x, h(msg)       
+Output: sigma
+
+	 1.  Input a secret key SK = x and a h(msg)
+	 2.  H = hash_to_G1(suite_string, h(msg))
+   3.  Gamma = x*H
+   4.  sigma = E1_to_string(Gamma)
+   5.  Output sigma
+```
+
+Where h(msg) is the output of a cryptographic hash function. 
+
+## Aggregating Signed Messages
+
+Pairing-based signatures allow a user to represent a collection of signatures as a single element in the base group. In other words, we can take a collection of signatures and "add" them together into a single value that is the same size as a single signature. We call this process Signature Aggregation. The result of this operation is called the Aggregate Signature which has the same general properties as any other pairing-based Signature. Some security [considerations](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html).
+
+### Aggregation Process (taken from [IETF BLS Signature Scheme - Aggregate](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.5) )
+
+```go
+Input: (PK_1, sigma_1), ..., (PK_n, sigma_n)    
+Output: sigma
+
+   1.  Output sigma = sigma_1 + sigma_2 + ... + sigma_n
+```
+
+Where `sigma_i` is a Signature with associated public key  `PK_i`. `sigma` is the Aggregate Signature and will be represented by `SignatureBytes`. `+` is point addition as defined by the cryptographic group.
+
+## Verifying Signed Messages
+
+### `Verify` via ECDSA (using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
+
+### `Verify` via BLS (taken from [IETF BLS Signature Scheme - Verify](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.4) with BLS12-381)
+
+Verify a single signature
+
+Verify a signature aggregate
 
 ## Recovering a public key
 
