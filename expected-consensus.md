@@ -321,11 +321,12 @@ It is possible for forks to emerge naturally in Expected Consensus. EC relies on
 The weight at each block is equal to its `ParentWeight`, plus that block's delta weight. Delta
 weight is a constant `V`, plus `X` - a fraction of the total power in the network as reported in the Power Table.  The exact value for `V` and the magnitude of the power ratio value are
 still to be determined, but for now the magnitude is defined as 100, 
-and `V = 100`,  `X = 100*minerPower/totalPower`.
+and `V = 10`,  `X = 100 * minerPower / totalPower`.
 
 *Note: in the current implementation in [expected.go](https://github.com/filecoin-project/go-filecoin/blob/master/consensus/expected.go), the final value of `V` and `X` adding to weight is 
-actually 1000 times of the value defined above, that is `V = 10000` and `X = 100000*minerPower/totalPower` 
-due to `FixedToBig` and `BigToFixed` converting tricks in [fixed_points.go](https://github.com/filecoin-project/go-filecoin/blob/master/types/fixed_point.go) implementation.*
+actually 1000 times of the value defined above, that is `V = 10000` and `X = 100000 * minerPower / totalPower` 
+due to `FixedToBig` and `BigToFixed` 1000-times converting tricks  in [fixed_points.go](https://github.com/filecoin-project/go-filecoin/blob/master/types/fixed_point.go) implementation. You could also still think `V` and `X` definition
+as original, but the weight in the implemention is 1000 times for more precise.*
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given TipSet should have 
