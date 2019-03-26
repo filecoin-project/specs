@@ -736,3 +736,267 @@ func UpdatePeerID(pid PeerID) {
 ## Payment Channel Broker Actor
 
 TODO
+
+## Multisig Account Actor
+
+A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
+
+Self modification methods (add/remove signer, change requirement) are called by
+doing a multisig transaction invoking the desired method on the contract itself. This means the 'signature 
+threshold' logic only needs to be implemented once, in one place.
+
+The [init actor](#init-actor) is used to create new instances of the multisig.
+
+#### State
+
+```go
+type Multisig struct {
+    Signers []Address
+    Required uint
+
+    NextTxID uint64
+    Transactions map[int]Transaction
+}
+
+type Transaction struct {
+  	Created uint64
+    TxID uint64
+    To Address
+    Value TokenAmount
+    Method string
+    Params []byte
+    Approved []Address
+    Completed bool
+    Canceled bool
+}
+```
+
+
+
+#### Constructor
+
+>  This method sets up the initial state for the multisig account
+
+#### Parameters
+
+| Name     | Type       | Description                                         |
+| -------- | ---------- | ------------------------------------------------------------ |
+| `signers`   | `[]Address`      | The addresses that will be the signatories of this wallet. |
+| `required` | `uint` | The number of signatories required to perform a transaction.       |
+
+```go
+func Multisig(signers []Address, required uint) {
+    self.Signers = signers
+    self.Required = required
+}
+```
+
+
+
+### Propose
+
+> Propose is used to propose a new transaction to be sent by this multisig. The proposer must be a signer, and the proposal also serves as implicit approval from the proposer. If only a single signature is required, then the transaction is executed immediately.
+
+| Name     | Type       | Description  |
+| --- | --- | --- |
+| `to` |  `Address` | The address of the target of the proposed transaction. |
+|  `value` | `TokenAmount` | The amount of funds to send with the proposed transaction |
+|  `method` | `string` | The method that will be invoked on the proposed transactions target. |
+| `params` | `[]byte` | The parameters that will be passed to the method invocation on the proposed transactions target. |
+
+```go
+func Propose(to Address, value TokenAmount, method string, params []byte) uint64 {
+    if !isSigner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    txid := self.NextTxID
+    self.NextTxID++
+
+    tx := Transaction{
+        TxID: txid,
+        To: to,
+        Value: value,
+        Method: method,
+        Params: params,
+        Approved: []Address{msg.From},
+    }
+
+    self.Transactions.Append(tx)
+
+  if self.Required == 1 {
+    vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
+    tx.Complete = true
+  }
+
+    return txid
+}
+```
+
+### Approve
+
+> Approve is called by a signer to approve a given transaction. If their approval pushes the approvals for this transaction over the threshold, the transaction is executed.
+
+| Name     | Type       | Description  |
+| --- | --- | --- |
+| `txid` |  `uint64` | The ID of the transaction to approve. |
+
+
+```go
+func Approve(txid uint64) {
+    if !self.isSigner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    tx := self.getTransaction(txid)
+    if tx.Complete {
+        Fatal("transaction already completed")
+    }
+    if tx.Canceled {
+        Fatal("transaction canceled")
+    }
+
+    for _, signer := range tx.Approved {
+        if signer == msg.From {
+            Fatal("already signed this message")
+        }
+    }
+
+    tx.Approved.Append(msg.From)
+
+    if len(tx.Approved) >= self.Required {
+        Send(tx.To, tx.Value, tx.Method, tx.Params)
+        tx.Complete = true
+    }
+}
+```
+
+### Cancel
+
+```go
+func Cancel(txid uint64) {
+    if !self.isSigner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    tx := self.getTransaction(txid)
+    if tx.Complete {
+        Fatal("cannot cancel completed transaction")
+    }
+    if tx.Canceled {
+        Fatal("transaction already canceled")
+    }
+  
+  proposer := tx.Approved[0]
+  if proposer != msg.From && isSigner(proposer) {
+    Fatal("cannot cancel another signers transaction")
+  }
+
+    tx.Canceled = true
+}
+```
+
+### ClearCompleted
+
+```go
+func ClearCompleted() {
+    if !self.isSigner(msg.From) {
+        Fatal("not authorized")
+    }
+
+    for tx in range self.Transactions {
+        if tx.Completed || tx.Canceled {
+            self.Transactions.Remove(tx)
+        }
+    }
+}
+```
+
+### AddSigner
+
+```go
+func AddSigner(signer Address) {
+    if msg.From != self.Address {
+        Fatal("add signer must be called by wallet itself")
+    }
+    if self.isSigner(signer) {
+        Fatal("new address is already a signer")
+    }
+
+    self.Signers.Append(signer)
+}
+```
+
+### RemoveSigner
+
+```go
+func RemoveSigner(signer Address) {
+    if msg.From != self.Address {
+        Fatal("remove signer must be called by wallet itself")
+    }
+    if !self.isSigner(signer) {
+        Fatal("given address was not a signer")
+    }
+
+    self.Signers.Remove(signer)
+}
+```
+
+### SwapSigner
+
+```go
+func SwapSigner(old, new Address) {
+  if msg.From != self.Address {
+    Fatal("swap signer must be called by wallet itself")
+  }
+  if !self.isSigner(old) {
+    Fatal("given old address was not a signer")
+  }
+  if self.isSigner(new) {
+    Fatal("given new address was already a signer")
+  }
+
+  self.Signers.Remove(old)
+  self.Signers.Append(new)
+}
+```
+
+### ChangeRequirement
+
+```go
+func ChangeRequirement(req int) {
+  if msg.From != self.Address {
+    Fatal("change requirement must be called by wallet itself")
+  }
+  if req < 1 {
+	Fatal("requirement must be at least 1")
+  }
+
+  self.Required = req
+}
+```
+
+### Helper Methods
+
+The various helper methods called above are defined here.
+
+```go
+func isSigner(a Address) bool {
+  for signer := range self.Signers {
+    if a == signer {
+      return true
+    }
+  }
+  return false
+}
+
+func getTransaction(txid int) Transaction {
+  tx, ok := self.Transactions[txid]
+  if !ok {
+    Fatal("no such transaction")
+  }
+  
+  return tx
+}
+```
+
