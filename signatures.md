@@ -78,26 +78,27 @@ type Signature interface {
      		//   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
     		//   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
   			//
-  			Aggregate(sigs []SignatureBytes, addrs []Addresse)(sig SignatureBytes, err error)
+  			Aggregate(sigs []SignatureBytes, addrs []Address)(sig SignatureBytes, err error)
   
   			// Verify validates the statement: only `M` could have generated `sig`
         // given the validator has a message `m`, a signature `sig`, and a
         // public key `pk`.
   			//
-  			// Verify is context dependant. If more than one Address or Signature is passed, 
+  			// Verify is context dependant. If more than one Public Key or Signature is passed, 
   			// then Verify will assume that SignatureBytes is a BLS signature aggregate. If 
   			// only one signature is passed then Verify will receive signature type context 
-  			// from Address. 
+  			// from Public Key. 
         //
         // Out:
         //   valid - a boolean value indicating the signature is valid
         //   err - a standard error message indicating any process issues
         // In:
         //   msgs - an array of bytes representing signed messages
-        //   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
+  			//	 addr - an Address
+        //   pks - an array of Public Keys {pk_sig_1, pk_sig_2..., pk_sig_n}
         //   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
         //
-        Verify(msgs []Messgage, addrs []Addresse, sigs []SignatureBytes) (valid bool, err error)
+        Verify(msgs []Messgage, addr Address, pks []PublicKeys, sigs []SignatureBytes) (valid bool, err error)
 
         // Recover determines the public key associated with a particular signature. For
   			// ECDSA signatures public keys can be recovered from SignatureBytes and an
@@ -115,6 +116,39 @@ type Signature interface {
         Recover(msg Message, addr Address, sig SignatureBytes) (pk PublicKey, err error)
 }
 ```
+
+#### Signed Message
+
+This is the container for a signature that combines a message with an address and signature. 
+
+[TODO: Determine if we should allow the case where an address is not included. This would imply an ECDSA signature]
+
+```go
+Type SignedMessage Struct {
+
+		// Addrs is an array of Addresses associated with a particular message in Msgs 
+  	// at the same index. Each Address tracks the ID of the actor responsible for 
+  	// signing a particular Msg. An ID can be converted into a public key via 
+  	// Address.GetPublicKey(ID).
+		//
+		Addrs []Address
+
+  	// Msgs is an array of messages. Each message in Msgs is represented by raw bytes.
+  	//
+    Msgs []bytes `JSON`   
+
+  	// Sig is a cryptographic signature that was generated according to the type 
+  	// reflected in Address.
+    Sig SignatureBytes `JSON` 
+    
+}
+```
+
+[Current Filecoin Implementation](https://github.com/filecoin-project/go-filecoin/blob/ab60f73af1f86a954ef41e3252ef52a99066bbe2/types/signed_message.go#L25)
+
+### Github
+
+<https://github.com/filecoin-project/specs/issues/131>
 
 ## Key Generation & Elliptic Curve Parameters
 
@@ -169,7 +203,7 @@ Output: sigma
    5.  Output sigma
 ```
 
-Where h(msg) is the output of a cryptographic hash function. 
+Where h(msg) is the output of a cryptographic hash function and sigma is the notation for BLS signature.
 
 ## Aggregating Signed Messages
 
@@ -188,13 +222,56 @@ Where `sigma_i` is a Signature with associated public key  `PK_i`. `sigma` is th
 
 ## Verifying Signed Messages
 
+In order to communicate to `Verify` what kind of verification algorithm to use, Verify will accept `Address` and `SignedMessage` as input. 
+
+**Determining Signature Type**
+
+`Address` will inform `Verify` if the `SignedMessage` is a BLS or ECDSA signature. Verify will infer this data from the `Address` type field. If `Address` is empty then `Verify` will assume the `SignedMessage` is a signature aggregate.
+
+**Determining if the signature is a Signature Aggregate**
+
+If there is more then one message in `SignedMessage.Msgs` then the `SignedMessage` is assumed to be a signature aggregate. If `Address` is empty then `Verify` will assume the `SignedMessage` is a signature aggregate.
+
 ### `Verify` via ECDSA (using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
 
-### `Verify` via BLS (taken from [IETF BLS Signature Scheme - Verify](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.4) with BLS12-381)
+### `Verify` via BLS (adapted from [IETF BLS Signature Scheme - Verify](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.4) with BLS12-381)
 
-Verify a single signature
+In each of the algorithms described below, the public keys were recovered via the `Recover` method.
 
-Verify a signature aggregate
+**Verify a single signature**
+
+```go
+Input: PK, msg, sigma    
+Output: "VALID" or "INVALID"
+   
+	 0.  If len(SignedMessage.Msgs) != 1, output "INVALID"
+   1.  H = hash_to_G1(suite_string, msg)
+   2.  Gamma = string_to_E1(sigma)
+   3.  If Gamma is "INVALID", output "INVALID" and stop
+   4.  If r*Gamma != 0, output "INVALID" and stop
+   5.  Compute c = e(Gamma, P2)
+   6.  Compute c* = e(H, PK)
+   7.  If c and c* are equal,	output "VALID", else output "INVALID"
+```
+
+**Verify a signature aggregate**
+
+```go
+Input: (PK_1, msg_1), ..., (PK_n, msg_n), sigma
+Output: "VALID" or "INVALID"
+
+	 0.  If len(SignedMessage.Msgs)  !> 1, output "INVALID"
+   1.  H_i = hash_to_G1(suite_string, msg_i)
+   2.  Gamma = string_to_E1(sigma)
+   3.  If Gamma is "INVALID", output "INVALID" and stop
+   4.  If r*Gamma != 0,	output "INVALID" and stop
+   5.  Compute c = e(Gamma, P2)
+   6.  Compute c* = e(H_1, PK_1) * ... * e(H_n, PK_n)
+	 7.  If c and c* are equal, output "VALID", else output "INVALID"
+
+```
+
+
 
 ## Recovering a public key
 
@@ -239,24 +316,7 @@ From: <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba847
 
 (TODO: [Reference](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2))
 
-#### Signed Message
 
-```
-Type SignedMessage Struct {
-
-    Message bytes `JSON`   
-
-    Signature bytes `JSON` 
-    
-}
-```
-
-[Current Filecoin Implementation](https://github.com/filecoin-project/go-filecoin/blob/ab60f73af1f86a954ef41e3252ef52a99066bbe2/types/signed_message.go#L25)
-
-
-### Github
-
-<https://github.com/filecoin-project/specs/issues/131>
 
 ## External References
 
