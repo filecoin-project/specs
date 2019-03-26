@@ -711,7 +711,13 @@ TODO
 
 ## Multisig Account Actor
 
-A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Any party can veto any operation (which is a potentially debateable design decision). Completed and/or cancelled operations stick around in the actors state until explicitly cleared out.
+A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
+
+Self modification methods (add/remove signer, change requirement) are called by
+doing a multisig transaction invoking the desired method on the contract itself. This means the 'signature 
+threshold' logic only needs to be implemented once, in one place.
+
+The [init actor](#init-actor) is used to create new instances of the multisig.
 
 #### State
 
@@ -725,6 +731,7 @@ type Multisig struct {
 }
 
 type Transaction struct {
+  	Created uint64
     TxID uint64
     To Address
     Value TokenAmount
@@ -790,7 +797,7 @@ func Propose(to Address, value TokenAmount, method string, params []byte) uint64
     self.Transactions.Append(tx)
 
   if self.Required == 1 {
-    Send(tx.To, tx.Value, tx.Method, tx.Params)
+    vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
     tx.Complete = true
   }
 
@@ -809,11 +816,11 @@ func Propose(to Address, value TokenAmount, method string, params []byte) uint64
 
 ```go
 func Approve(txid uint64) {
-    if !isSigner(msg.From) {
+    if !self.isSigner(msg.From) {
         Fatal("not authorized")
     }
 
-    tx := getTransaction(txid)
+    tx := self.getTransaction(txid)
     if tx.Complete {
         Fatal("transaction already completed")
     }
@@ -840,17 +847,22 @@ func Approve(txid uint64) {
 
 ```go
 func Cancel(txid uint64) {
-    if !isSigner(msg.From) {
+    if !self.isSigner(msg.From) {
         Fatal("not authorized")
     }
 
-    tx := getTransaction(txid)
+    tx := self.getTransaction(txid)
     if tx.Complete {
         Fatal("cannot cancel completed transaction")
     }
     if tx.Canceled {
         Fatal("transaction already canceled")
     }
+  
+  proposer := tx.Approved[0]
+  if proposer != msg.From && isSigner(proposer) {
+    Fatal("cannot cancel another signers transaction")
+  }
 
     tx.Canceled = true
 }
@@ -860,7 +872,7 @@ func Cancel(txid uint64) {
 
 ```go
 func ClearCompleted() {
-    if !isSigner(msg.From) {
+    if !self.isSigner(msg.From) {
         Fatal("not authorized")
     }
 
@@ -879,7 +891,7 @@ func AddSigner(signer Address) {
     if msg.From != self.Address {
         Fatal("add signer must be called by wallet itself")
     }
-    if isSigner(signer) {
+    if self.isSigner(signer) {
         Fatal("new address is already a signer")
     }
 
@@ -894,7 +906,7 @@ func RemoveSigner(signer Address) {
     if msg.From != self.Address {
         Fatal("remove signer must be called by wallet itself")
     }
-    if !isSigner(signer) {
+    if !self.isSigner(signer) {
         Fatal("given address was not a signer")
     }
 
@@ -909,10 +921,10 @@ func SwapSigner(old, new Address) {
   if msg.From != self.Address {
     Fatal("swap signer must be called by wallet itself")
   }
-  if !isSigner(old) {
+  if !self.isSigner(old) {
     Fatal("given old address was not a signer")
   }
-  if isSigner(new) {
+  if self.isSigner(new) {
     Fatal("given new address was already a signer")
   }
 
@@ -920,8 +932,6 @@ func SwapSigner(old, new Address) {
   self.Signers.Append(new)
 }
 ```
-
-
 
 ### ChangeRequirement
 
@@ -935,6 +945,30 @@ func ChangeRequirement(req int) {
   }
 
   self.Required = req
+}
+```
+
+### Helper Methods
+
+The various helper methods called above are defined here.
+
+```go
+func isSigner(a Address) bool {
+  for signer := range self.Signers {
+    if a == signer {
+      return true
+    }
+  }
+  return false
+}
+
+func getTransaction(txid int) Transaction {
+  tx, ok := self.Transactions[txid]
+  if !ok {
+    Fatal("no such transaction")
+  }
+  
+  return tx
 }
 ```
 
