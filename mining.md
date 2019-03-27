@@ -107,7 +107,7 @@ Chain selection is a crucial component of how the Filecoin blockchain works. Eve
 
 ### Block Validation
 
-The block structure and serialization is detailed in [the datastructures spec](data-structures.md#block). Check there for details on fields and types.
+The block structure and serialization is detailed in [the datastructures spec](data-structures.md#block). Check there for details on fields and types. All references to `VaidateSignature` must implement the `Signature` interface found [here](https://github.com/filecoin-project/specs/blob/master/signatures.md).
 
 In order to validate a block coming in from the network at round `N` was well mined a miner must do the following:
 

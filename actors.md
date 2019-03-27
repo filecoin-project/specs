@@ -60,6 +60,8 @@ Parameters:
 
 Return: None
 
+All references to `VaidateSignature` must implement the `Signature` interface found [here](https://github.com/filecoin-project/specs/blob/master/signatures.md).
+
 ```go
 func SlashConsensusFault(block1, block2 BlockHeader) {
 	if block1.Height != block2.Height {
@@ -440,7 +442,7 @@ Note: this is unlikely to ever be called on-chain, and will be a very large amou
 
 ### ArbitrateDeal
 
-This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.
+This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire. All references to `VaidateSignature` must implement the `Signature` interface found [here](https://github.com/filecoin-project/specs/blob/master/signatures.md).
 
 Parameters:
 - deal Deal
