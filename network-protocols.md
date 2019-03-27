@@ -331,7 +331,7 @@ func OnSectorPacked(prop StorageDealProposal, pieceConf PieceCommitment) {
 }
 ```
 
-Once the deal makes it to this state, the client should be able to query and get the `PieceConfirmation` that they need to verify that the miner is indeed storing their data.
+Once the deal makes it to the `Staged` state, the client should be able to query and get the `PieceConfirmation` that they need to verify that the miner is indeed storing their data.
 
 ```go
 func OnSectorSealed(prop StorageDealProposal, msgcid Cid) {
