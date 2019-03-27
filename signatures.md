@@ -18,7 +18,7 @@ What uses them
 - Block validation
 - Tickets [TODO: link to EC spec; inform leader election in Expected Consensus (EC)]
 
-Note that messages between actors are not signed. This is an unfortunate namespace collision. Messages between actors are always spawned by a message from a user. In this way, messages between actors are containers for signed messages.
+Note that messages between actors are not signed. This is an unfortunate namespace collision. Messages between actors are always spawned by a message from a user. In this way, signed messages are containers for messages between actors.
 
 ## Dependencies
 
@@ -35,7 +35,7 @@ Things that affect Filecoin signatures
   - BLS Signatures - 48 Bytes
 - Avg. processing power available to a CPU 
   - Affects ability to verify signature aggregates
-  - [TODO: add POSITRACK dependance note]
+  - Each signature or collection of signatures should be validated with no impact to the consumption of the chain
 
 
 ## Non-Dependencies
@@ -83,22 +83,29 @@ type Signature interface {
   			// Verify validates the statement: only `M` could have generated `sig`
         // given the validator has a message `m`, a signature `sig`, and a
         // public key `pk`.
-  			//
-  			// Verify is context dependant. If more than one Public Key or Signature is passed, 
-  			// then Verify will assume that SignatureBytes is a BLS signature aggregate. If 
-  			// only one signature is passed then Verify will receive signature type context 
-  			// from Public Key. 
         //
         // Out:
         //   valid - a boolean value indicating the signature is valid
         //   err - a standard error message indicating any process issues
         // In:
-        //   msgs - an array of bytes representing signed messages
-  			//	 addr - an Address
-        //   pks - an array of Public Keys {pk_sig_1, pk_sig_2..., pk_sig_n}
-        //   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
+  			//   smsg - a SignedMessage which contains {Message, Address, SignatureBytes}
+        //   pk - a Public Key of the appropriate type
         //
-        Verify(msgs []Messgage, addr Address, pks []PublicKeys, sigs []SignatureBytes) (valid bool, err error)
+        Verify(smsg SignedMessgage, pk PublicKey) (valid bool, err error)
+  
+  			// VerifyAggregate validates a collection of statements that are represeted by 
+  			// a signature aggregate: "For each M_i and PK_i in smsgs, only this collection 
+  			// of {M}, {PK}, and signers could have generated `smsgs.SignatureBytes`
+  			//
+        // Out:
+        //   valid - a boolean value indicating the signature is valid
+        //   err - a standard error message indicating any process issues
+        // In:
+        //   smsgs - a SignedMessage which contains {[]Message, []Address, SignatureBytes}
+        //   pks - an array of Public Keys of the appropriate type associated with a message
+  			// 	 at index `i` in []Message.
+        //
+  			VerifyAggregate(smsgs SignedMessgage,  pks []PublicKeys) (valid bool, err error)
 
         // Recover determines the public key associated with a particular signature. For
   			// ECDSA signatures public keys can be recovered from SignatureBytes and an
@@ -117,11 +124,9 @@ type Signature interface {
 }
 ```
 
-#### Signed Message
+### Signed Message
 
 This is the container for a signature that combines a message with an address and signature. 
-
-[TODO: Determine if we should allow the case where an address is not included. This would imply an ECDSA signature]
 
 ```go
 Type SignedMessage Struct {
@@ -131,9 +136,10 @@ Type SignedMessage Struct {
   	// signing a particular Msg. An ID can be converted into a public key via 
   	// Address.GetPublicKey(ID).
 		//
-		Addrs []Address
+		Addrs []Address `JSON`
 
   	// Msgs is an array of messages. Each message in Msgs is represented by raw bytes.
+  	// Each message in Msgs will correspond to an Address in Addrs by index. 
   	//
     Msgs []bytes `JSON`   
 
@@ -143,12 +149,6 @@ Type SignedMessage Struct {
     
 }
 ```
-
-[Current Filecoin Implementation](https://github.com/filecoin-project/go-filecoin/blob/ab60f73af1f86a954ef41e3252ef52a99066bbe2/types/signed_message.go#L25)
-
-### Github
-
-<https://github.com/filecoin-project/specs/issues/131>
 
 ## Key Generation & Elliptic Curve Parameters
 
@@ -222,23 +222,41 @@ Where `sigma_i` is a Signature with associated public key  `PK_i`. `sigma` is th
 
 ## Verifying Signed Messages
 
-In order to communicate to `Verify` what kind of verification algorithm to use, Verify will accept `Address` and `SignedMessage` as input. 
+In order to communicate to `Verify` what kind of verification algorithm to use, Verify must accept `SignedMessage` as input. 
 
 **Determining Signature Type**
 
-`Address` will inform `Verify` if the `SignedMessage` is a BLS or ECDSA signature. Verify will infer this data from the `Address` type field. If `Address` is empty then `Verify` will assume the `SignedMessage` is a signature aggregate.
+`SignedMessage.Address` will inform `Verify` if the `SignedMessage.SignatureBytes` is a BLS or ECDSA signature. `Verify` will infer this data from the `Address.protocol` field. 
+
+```go
+Input: Address
+Output: "BLS", "ECDSA", or "INVALID"
+   
+   1.  If Address.protocol = 0 output "BLS" and stop
+   2.  If Address.protocol = 1 output "ECDSA" and stop
+   3.  If Address.protocol = 3 output "BLS" and stop
+	 4.  If Address.protocol != {0 OR 1 OR 3} output "INVALID"
+```
 
 **Determining if the signature is a Signature Aggregate**
 
-If there is more then one message in `SignedMessage.Msgs` then the `SignedMessage` is assumed to be a signature aggregate. If `Address` is empty then `Verify` will assume the `SignedMessage` is a signature aggregate.
+If there is more then one message in `SignedMessage.Msgs` then the `SignedMessage` is assumed to be a signature aggregate. If `Address` is empty then `Verify` will assume the `SignedMessage` is a signature aggregate. The procedure below uses `len()` to indicate a function that returns the number of elements in an array.
+
+```go
+Input: SignedMessage
+Output: "Aggregate" or "INVALID"
+   
+	 1.  If SignedMessage.Address[i].protocol != {0 OR 3} for all i output "INVALID" and stop
+	 2.  If len(SignedMessage.Msgs) > 1 output "Aggregate" else output "INVALID"
+```
 
 ### `Verify` via ECDSA (using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
 
 ### `Verify` via BLS (adapted from [IETF BLS Signature Scheme - Verify](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.4) with BLS12-381)
 
-In each of the algorithms described below, the public keys were recovered via the `Recover` method.
+In each of the algorithms described below, the public keys were recovered via the `Recover` method. The procedures below use `len()` to indicate a function that returns the number of elements in an array.
 
-**Verify a single signature**
+**Verify a single signature using `Verify`**
 
 ```go
 Input: PK, msg, sigma    
@@ -254,13 +272,14 @@ Output: "VALID" or "INVALID"
    7.  If c and c* are equal,	output "VALID", else output "INVALID"
 ```
 
-**Verify a signature aggregate**
+**Verify a signature aggregate using `VerifyAggregate`**
+
+Note that mapping a message to a public key is done via index. In other words and given a `SignedMessage`, `PK_i` corresponding to `msg_i = SignedMessage.Msgs[i] ` can be found be performing `Recover(SignedMessage.Msgs[i], SignedMessage.Address[i], NULL)`.
 
 ```go
 Input: (PK_1, msg_1), ..., (PK_n, msg_n), sigma
 Output: "VALID" or "INVALID"
 
-	 0.  If len(SignedMessage.Msgs)  !> 1, output "INVALID"
    1.  H_i = hash_to_G1(suite_string, msg_i)
    2.  Gamma = string_to_E1(sigma)
    3.  If Gamma is "INVALID", output "INVALID" and stop
@@ -270,8 +289,6 @@ Output: "VALID" or "INVALID"
 	 7.  If c and c* are equal, output "VALID", else output "INVALID"
 
 ```
-
-
 
 ## Recovering a public key
 
@@ -289,97 +306,40 @@ Currently, Filecoin uses ECDSA (curve secp256k1) or BLS (curve BLS12-381) signat
 
 ### Wire Format
 
-What bits are on the wire and in what order/format. We are currently adhering to libsecp256k1 serialization which is laid out as follows. Note that this format description may not be accurate. See the github link below for an authoritative format description.
-
-#### Signature
+What bits are on the wire and in what order/format. We are currently adhering to libsecp256k1 serialization for ECDSA but will not list that wire format here. We do point to the code where an authoritative format is defined.
 
 **ECDSA**
 
-```
-sig SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
-```
+Follow: <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177>
 
-`s` = Scalar of size 32 bytes
-
-`r` = Compressed elliptic curve point (x-coordinate) of size 32 bytes
-
-`recovery` = Information needed to recover a public key from `sig`. 
-
-- LSB(0) = parity of y-coordinate of r
-- LSB(1) = overflow indicator
-
-`indicator` = a 2 byte formatting indicator
-
-From: <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177>
-
-**BLS**
+**BLS (Taken from  [IETF BLS Signature Scheme - Type Conversions](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2))**
 
 (TODO: [Reference](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2))
 
+## Github References
 
+<https://github.com/filecoin-project/specs/issues/131>
 
-## External References
+[go-filecoin SignedMessage](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go)
 
-- How Recovering a Private Key from a message and a signature works in ethereum:
+[go-filecoin signer](https://github.com/filecoin-project/go-filecoin/blob/master/types/signer.go)
 
-- - <https://medium.com/@libertylocked/ec-signatures-and-recovery-in-ethereum-smart-contracts-560b6dd8876>
+## References & Notes
 
-- More notes on recovery
+Signatures are not sent over the wire on their own, instead they are encapsulated in in a [SignedMessage](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L28). Each `SignesMessage` contains a `Message`, `Address`, and a signature. `SignedMessage` is sent over the wire by marshaling it to cbor and send, once it is received it is unmarshaled form [cbor](http://cbor.io/) back into the `SignedMessage` Structure.
+[Code for marshaling and unmarshaling SignedMessages](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38)
 
-- - [https://crypto.stackexchan ge.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106](https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106)
+- Notes on ECDSA public key recovery. Public key recovery is an operation that allows one to compute a public key from a message and signature. Typically this increases the signature size by at least 1 bit.
+  - [Creating a recoverable signature in libsecp256k1](https://github.com/ipsn/go-secp256k1/blob/9d62b9f0bc52d16160f79bfb84b2bbf0f6276b03/libsecp256k1/include/secp256k1_recovery.h#L70)
+  - [Ethereum ECDSA Recovery - Medium](https://medium.com/@libertylocked/ec-signatures-and-recovery-in-ethereum-smart-contracts-560b6dd8876)
+  - [Crypto Stack Exchange](https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106)
+  - SECG Org - [4.1.6 Public Key Recovery Operation Page 47](http://www.secg.org/sec1-v2.pdf)
 
-- See “4.1.6 Public Key Recovery Operation Page 47”
-
-- - <http://www.secg.org/sec1-v2.pdf>
-
-- Secp256k1 Signature serialization - 
-
-- - Secp256k1 cpp - <https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55>
-  - Go-filecoin - <https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98>
-
-## References
-
-TODO: this section should likely be removed, and the context it adds should be linked in some other way.
-
-- Maybe Marshal/Unmarshal == NewSignedMessage/SignBytes?  
-
-  - <https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go>
-
-  - <https://github.com/filecoin-project/go-filecoin/blob/master/types/signer.go>
-
-- Message serialization currently: http://cbor.io
-
-- Recover - Extract a PublicKey from SignatureBytes (Trade storage of PublicKey (pk) for CPU work to recover pk from a signature -- assumes signature bits are enough to recover pk which might not be the case for all signature algorithms). For full explanation of recover see: <http://www.secg.org/sec1-v2.pdf>
-
-- Point compression Go - <https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338>
-
-- Create recoverable sig - <https://github.com/ipsn/go-secp256k1/blob/9d62b9f0bc52d16160f79bfb84b2bbf0f6276b03/libsecp256k1/include/secp256k1_recovery.h#L70>
-
-- Recid - <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L288>
-
-- Serialize - <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177>
-
-- Should elliptic curve points always be compressed in Marshal?
-
-- Recover is math trick trading CPU for space to generate sk*G
-
-- Serialization should account for :
-
-- - Should there be point compression? 
-
-  - Point compression (x,y); len(x) = n bits → x, recovery_bit; len(x||r_bit) = n+1 bits
-
-  - - Easy to check add; use (mod2) or check last bit
-
-  - Sig = (r,s) - s is standard but r could be (rx,ry) or rx or r all of these can be used to generate r*G
-
-  - Recovery() can be used for (1) finding r*G from (r,s) and (2) pk = sk*G from SignatureBytes
-
-  - Remember that y = sqrt(curve equation for x) and there are 2 valid solutions for y. This should be accounted for in sig if point compression is used (i.e. if a PublicKey is provided (no compression) or recovered (compression) OR r is a point (no compression) or scalar(compression))
-
-Currently signatures are not sent over the wire on their own, instead they are encapsulated in in a [SignedMessage](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L28). SignesMessage’s contain a Message and a Signature. When we want to send a SignedMessage over the wire we marshal it to cbor and send, once it is recevied it is unmarshaled form [cbor](http://cbor.io/) back into the SignedMessage Structure.
-[Code for marshaling and unmarshaling SignedMessages
-](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38)
+- secp256k1 signature serialization
+  - [secp256k1 recoverable signature](https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55)
+  - [secp256k1 general signatures](https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177)
+  - [Go-filecoin implementation](https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98)
+- [golang implementation of secp256k1 point compression](https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338)
 
 ## Inspiration
 
