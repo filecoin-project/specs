@@ -10,19 +10,15 @@ We use signatures in filecoin to verify *something* was done by *someone*. For e
 - Tickets (Signature of proof - [Mining](mining.md)
 - Block signature (Signature over all data in the block - done by block leader)
 
-## What signatures affect
-
-What uses them
+## Filecoin components that signatures affect
 
 - [Messages](https://github.com/filecoin-project/specs/blob/master/data-structures.md)
-- Block validation
-- Tickets [TODO: link to EC spec; inform leader election in Expected Consensus (EC)]
+- [Block validation](https://github.com/filecoin-project/specs/blob/master/mining.md)
+- [Tickets](https://github.com/filecoin-project/specs/blob/master/mining.md)
 
 Note that messages between actors are not signed. This is an unfortunate namespace collision. Messages between actors are always spawned by a message from a user. In this way, signed messages are containers for messages between actors.
 
 ## Dependencies
-
-Things that affect Filecoin signatures
 
 - Elliptic curve implementations
   - ECDSA with secp256k1 (BitCoin-style elliptic curve)
@@ -36,11 +32,10 @@ Things that affect Filecoin signatures
 - Avg. processing power available to a CPU 
   - Affects ability to verify signature aggregates
   - Each signature or collection of signatures should be validated with no impact to the consumption of the chain
+- `Gas` cost - `Gas(ECDSA) > Gas(BLS)`
 
 
 ## Non-Dependencies
-
-Does not affect
 
 - Transport encryption
 - File encodings (PoRep)
@@ -184,19 +179,36 @@ y = 9275536654923324557472019657760378807577401934535929700250279787939768770026
 
 ```
 
-[TODO: add notes on point compression and effect on serialization]
+[TODO: add notes on point compression and effect on serialization once a standard has been set]
 
 ## Signing a Message
 
-### `Sign` via ECDSA (using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
+### `Sign` via ECDSA ([ECDSA NIST standard](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf) using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
+
+This is a high-level procedure and is meant for exposition. Exact parameterization and procedure is contained here [libsecp256k1](https://github.com/bitcoin-core/secp256k1)
+
+```go
+Input: SK = x, k, h(msg)       
+Output: r,s
+
+1. Input a secret key SK = x, a random integer k, and h(msg)
+2. K = k*G = (x_k, y_k)
+3. r = x_k (mod n)
+4. If r = x_k (mod n) output "INVALID" and stop
+5. If r = 0 (mod n) output "INVALID" and stop
+6. s = ~k*( h(msg) + r*x)
+7. Output (r,s)
+```
+
+The couple `(r,s)` is the ECDSA signature of the signer over the message `msg`. `G` is the generator for the elliptic curve used in ECDSA (cofactor `1`). The order of `G` is `n`. `~y` represents the multiplicative modular inverses of `y`. This procedure assumes that `bit_len(h(msg)) < bit_length(n)`. `k` is chosen randomly from `[1, n-1]`. `h(msg)` is interpreted as an integer in the above procedure.
 
 ### `Sign` via BLS (taken from [IETF BLS Signature Scheme - Sign](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.3) with BLS12-381)
 
 ```go
 Input: SK = x, h(msg)       
 Output: sigma
-
-	 1.  Input a secret key SK = x and a h(msg)
+	 
+	 1.  Input a secret key SK = x and h(msg)
 	 2.  H = hash_to_G1(suite_string, h(msg))
    3.  Gamma = x*H
    4.  sigma = E1_to_string(Gamma)
@@ -245,12 +257,30 @@ If there is more then one message in `SignedMessage.Msgs` then the `SignedMessag
 ```go
 Input: SignedMessage
 Output: "Aggregate" or "INVALID"
-   
+	    
 	 1.  If SignedMessage.Address[i].protocol != {0 OR 3} for all i output "INVALID" and stop
 	 2.  If len(SignedMessage.Msgs) > 1 output "Aggregate" else output "INVALID"
 ```
 
-### `Verify` via ECDSA (using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
+### `Verify` via ECDSA ([ECDSA NIST standard](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf) using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
+
+This is a high-level procedure and is meant for exposition. Exact parameterization and procedure is contained here [libsecp256k1](https://github.com/bitcoin-core/secp256k1).
+
+```go
+Input: PK = x*G, h(msg), (r,s)       
+Output: "VALID" or "INVALID"
+	 
+	 1.  If PK = O output "INVALID" and stop
+	 2.  If PK not in E output "INVALID" and stop
+	 3.  w = ~s (mod n)
+   4.  u1 = h(msg)*w (mod n)
+   5.  u2 = r*w (mod n)
+	 6.  P = u1*G + u2*PK = (x_P, y_P)
+	 7.  If P = O output "INVALID" and stop 
+	 8.  If r = x_P (mod n) output "VALID" else output "INVALID"
+```
+
+`O` is the point at infinity for the elliptic curve `E` over which ECDSA was computed.
 
 ### `Verify` via BLS (adapted from [IETF BLS Signature Scheme - Verify](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.4) with BLS12-381)
 
@@ -292,13 +322,42 @@ Output: "VALID" or "INVALID"
 
 ## Recovering a public key
 
-### ECDSA Recovery
+### ECDSA Recovery (with `redid` in [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
 
-[TODO: [Reference](http://www.secg.org/sec1-v2.pdf))
+This is a high-level procedure and is meant for exposition. Exact parameterization and procedure is contained here [libsecp256k1](https://github.com/bitcoin-core/secp256k1). In libsecp256k1 signatures may slightly larger than needed despite point compression. This is due to the inclusion of `recid` which contains information that is used to recover the public key associated with a particular ECDSA signature. As a result, one can view this kind of signature as the tuple (r, s, v). For more information on why this is needed see, [link](https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work).
+
+```go
+Input: (r, s, v), h(msg)
+Output: PK
+
+	1. y1, y2 = FindY(r)
+	2. R1 = (r, y1), R2 = (r, y2)
+	3. P1 = ~r*(s*R1 - h(msg)*G)
+	4. P2 = ~r*(s*R2 - h(msg)*G)
+  5. PK = CHOOSE(v, P1, P2)
+  6. Output PK
+```
+
+`FindY(r)` determines the y-coordinates associated with an x-coordinate represented by `r`; there are two results. `CHOOSE(v, P1, P2)` chooses the correct public key from `{P1, P2}` given `v`. 
 
 ### BLS Recovery
 
-[TODO: Add algorithm]
+Because BLS public keys are large, the Filecoin protocol ensures that they are only represented on-chain once. As a result, Filecoin uses an `ID` to represent this large BLS public key. The Filecoin protocol stores this `ID` in the address of any `Message` that is associate with the associated public key. The following procedure is procedure needed to recover a public key from an `ID`. 
+
+```go
+Input: Address.payload, ROOT
+Output: PK
+
+1. If Address.protocol = 3 output string_to_E2(Address.payload) and stop
+2. If Address.protocol != 0 output "INVALID" and stop
+3. Actor = ROOT.GetActor(ID)
+4. PK = Actor.GetPublicKey()
+4. Output PK
+```
+
+Where `ROOT` represents the [global state root](https://github.com/filecoin-project/specs/blob/master/state-machine.md#state-representation) indexed by `ID`. `ROOT(ID)` in this context returns a  Filecoin [`actor`]( https://github.com/filecoin-project/specs/blob/master/data-structures.md#actor). [Currently being developed] Note that there will be two `actors` associated with a particular miner: (1) a wallet actor that signs FIL transactions and (2) an online actor that performs `PoRep` and `PoSt` on behalf of the wallet actor.
+
+[TODO: Add Actor methods for `GetActor` and `GetPublicKey`]
 
 ## Selected Signature Scheme
 
@@ -310,11 +369,11 @@ What bits are on the wire and in what order/format. We are currently adhering to
 
 **ECDSA**
 
-Follow: <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177>
+Follow: [secp256k1 Reference](https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177)
 
-**BLS (Taken from  [IETF BLS Signature Scheme - Type Conversions](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2))**
+**BLS**
 
-(TODO: [Reference](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2))
+Follow: [IETF BLS Signature Scheme - Type Conversions](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2)
 
 ## Github References
 
