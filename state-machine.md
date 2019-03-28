@@ -44,8 +44,11 @@ If the execution completes successfully, changes to the state tree are saved. Ot
 ```go
 func ApplyMessage(st StateTree, msg Message) MessageReceipt {
 	st.Snapshot()
-	fromActor := st.GetActor(msg.From)
-
+	fromActor, found := st.GetActor(msg.From)
+  if !found {
+    Fatal("no such from actor")
+  }
+  
 	totalCost := msg.Value + (msg.GasLimit * msg.GasPrice)
 	if fromActor.Balance < totalCost {
 		Fatal("not enough funds")
@@ -55,29 +58,49 @@ func ApplyMessage(st StateTree, msg Message) MessageReceipt {
 		Fatal("invalid nonce")
 	}
 
+  toActor, found := st.GetActor(msg.To)
+  if !found {
+    toActor = TryCreateAccountActor(st, msg.To)
+  }
+  
 	st.DeductFunds(msg.From, totalCost)
 	st.DepositFunds(msg.To, msg.Value)
 
 	vmctx := makeVMContext(st, msg)
 
-	ret, errcode := fromActor.Invoke(vmctx, msg.Method, msg.Params)
-	if errcode != 0 {
-		// revert all state changes since snapshot
-		st.Revert()
-		st.DeductFunds(msg.From, vmctx.GasUsed() * msg.GasPrice)
-	} else {
-		// refund unused gas
-		st.DepositFunds(msg.From, (msg.GasLimit - vmctx.GasUsed()) * msg.GasPrice)
-	}
+  if msg.Method != "" {
+		ret, errcode := toActor.Invoke(vmctx, msg.Method, msg.Params)
+		if errcode != 0 {
+			// revert all state changes since snapshot
+			st.Revert()
+			st.DeductFunds(msg.From, vmctx.GasUsed() * msg.GasPrice)
+		} else {
+			// refund unused gas
+			st.DepositFunds(msg.From, (msg.GasLimit - vmctx.GasUsed()) * msg.GasPrice)
+		}
+  }
 
 	// reward miner gas fees
-	st.DepositFunds(msg.To, msg.GasPrice * vmctx.GasUsed())
+	st.DepositFunds(BlockMiner, msg.GasPrice * vmctx.GasUsed())
 
 	return MessageReceipt{
 		ExitCode: errcode,
 		Return: ret,
 		GasUsed: vmctx.GasUsed(),
 	}
+}
+
+func TryCreateAccountActor(st StateTree, addr Address) Actor {
+  switch addr.Type() {
+  case BLS:
+    return NewBLSAccountActor(addr)
+  case Secp256k1:
+    return NewSecp256k1AccountActor(addr)
+  case ID:
+    Fatal("no actor with given ID")
+  case Actor:
+    Fatal("no such actor")
+  }
 }
 ```
 
