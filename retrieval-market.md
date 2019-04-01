@@ -23,36 +23,36 @@ The v0 `retrieval market` will initially be implemented as two `libp2p` services
 
 ```go
 type RetDealProposal struct {
-    // Ref is the cid of the data to be retrieved
-    Ref Cid
-    
-    // Price is the total amount that the client is willing to pay for the
-    // retrieval of the data
-    Price TokenAmount
-    
-    // Payment is a payment info from the client to the retrieval miner for the data
-    Payment PaymentInfo
+	// Ref is the cid of the data to be retrieved
+	Ref Cid
+
+	// Price is the total amount that the client is willing to pay for the
+	// retrieval of the data
+	Price TokenAmount
+
+	// Payment is a payment info from the client to the retrieval miner for the data
+	Payment PaymentInfo
 }
 
 type ResponseStatus uint
 
 const (
-    Unset = ResponseStatus(iota)
-    Accepted
-    Rejected
-    Error
+	Unset = ResponseStatus(iota)
+	Accepted
+	Rejected
+	Error
 )
 
 type RetDealResponse struct {
-    Status ResponseStatus
-    Message string
+	Status  ResponseStatus
+	Message string
 }
 
 type Block struct {
-    // Prefix is the cid prefix parameters for this block. It describes how to
-    // hash the block to verify it matches the expected value.
-    Prefix CidPrefix
-    Data []byte
+	// Prefix is the cid prefix parameters for this block. It describes how to
+	// hash the block to verify it matches the expected value.
+	Prefix CidPrefix
+	Data   []byte
 }
 ```
 
@@ -62,20 +62,20 @@ The query should include the CID of the piece that the client is interested in r
 
 ```go
 type RetQuery struct {
-    Piece Cid
+	Piece Cid
 }
 
 type RetQueryResponse struct {
-    Status RetQueryStatus
-    MinPrice TokenAmount
+	Status   RetQueryStatus
+	MinPrice TokenAmount
 }
 
 type RetQueryStatus uint
 
 const (
-    Unset = RetQueryStatus(iota)
-    OK
-    PieceUnavailable
+	Unset = RetQueryStatus(iota)
+	OK
+	PieceUnavailable
 )
 ```
 

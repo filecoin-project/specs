@@ -80,6 +80,7 @@ An example description in golang:
 ```go
 // Protocol byte
 type Protocol = byte
+
 const (
 	ID Protocol = iota
 	SECP256K1
@@ -236,13 +237,13 @@ func Encode(network string, a Address) string {
 	}
 
 	switch a.Protocol {
-		case SECP256K1, Actor, BLS:
-			cksm := Checksum(a)
-			return network + a.Protocol + base32.Encode(a.Payload + cksm)
-		case ID:
-			return network + a.Protocol + base10.Encode(leb128.Decode(a.Payload))
-		default:
- 			Fatal("invalid address protocol")
+	case SECP256K1, Actor, BLS:
+		cksm := Checksum(a)
+		return network + a.Protocol + base32.Encode(a.Payload+cksm)
+	case ID:
+		return network + a.Protocol + base10.Encode(leb128.Decode(a.Payload))
+	default:
+		Fatal("invalid address protocol")
 	}
 }
 ```

@@ -18,35 +18,35 @@ This interface, written using Go type notation, defines the set of methods that 
 
 ```go
 type StorageMarket interface {
-    // CreateStorageMiner registers a new storage miner with the given public key and a
-    // pledge of the given size. The miners collateral is set by the value in the message.
-    // The public key must match the private key used to sign off on blocks created
-    // by this miner. This key is the 'worker' key for the miner.
-    // The libp2p peer ID specified should reference the libp2p identity that the
-    // miner is operating. This is the ID that clients will connect to to propose deals
-    // TODO: maybe rename to 'RegisterStorageMiner'?
-    CreateStorageMiner(pubk PublicKey, pledge BytesAmount, pid libp2p.PeerID) Address
+	// CreateStorageMiner registers a new storage miner with the given public key and a
+	// pledge of the given size. The miners collateral is set by the value in the message.
+	// The public key must match the private key used to sign off on blocks created
+	// by this miner. This key is the 'worker' key for the miner.
+	// The libp2p peer ID specified should reference the libp2p identity that the
+	// miner is operating. This is the ID that clients will connect to to propose deals
+	// TODO: maybe rename to 'RegisterStorageMiner'?
+	CreateStorageMiner(pubk PublicKey, pledge BytesAmount, pid libp2p.PeerID) Address
 
-    // SlashConsensusFault is used to slash a misbehaving miner who submitted two different
-    // blocks at the same block height. The signatures on each block are validated
-    // and the offending miner has their entire collateral slashed, including the
-    // invalidation of any any all storage they are providing. The caller is rewarded
-    // a small amount to compensate for gas fees (TODO: maybe it should be more?)
-    SlashConsensusFault(blk1, blk2 BlockHeader)
+	// SlashConsensusFault is used to slash a misbehaving miner who submitted two different
+	// blocks at the same block height. The signatures on each block are validated
+	// and the offending miner has their entire collateral slashed, including the
+	// invalidation of any any all storage they are providing. The caller is rewarded
+	// a small amount to compensate for gas fees (TODO: maybe it should be more?)
+	SlashConsensusFault(blk1, blk2 BlockHeader)
 
-    // SlashStorageFault slashes a storage miner for not submitting their PoSTs within
-    // the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
-    // The slashed miner then loses all of their staked collateral, and also loses all
-    // of their power, and as a result, is no longer a candidate leader for extending the chain.
-    SlashStorageFault(miner Address)
-    
-    // UpdateStorage is called by a miner to adjust the storage market actors
-    // accounting of the total storage in the storage market.
-    UpdateStorage(delta BytesAmount)
-    
-    // GetTotalStorage returns the total committed storage in the system. This number is
-    // also used as the 'total power' in the system for the purposes of the power table
-    GetTotalStorage() BytesAmount
+	// SlashStorageFault slashes a storage miner for not submitting their PoSTs within
+	// the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
+	// The slashed miner then loses all of their staked collateral, and also loses all
+	// of their power, and as a result, is no longer a candidate leader for extending the chain.
+	SlashStorageFault(miner Address)
+
+	// UpdateStorage is called by a miner to adjust the storage market actors
+	// accounting of the total storage in the storage market.
+	UpdateStorage(delta BytesAmount)
+
+	// GetTotalStorage returns the total committed storage in the system. This number is
+	// also used as the 'total power' in the system for the purposes of the power table
+	GetTotalStorage() BytesAmount
 }
 ```
 
@@ -136,25 +136,25 @@ The storage market expects a payments system to allow clients to pay miners for 
 
 ```go
 type Payments interface {
-    // Setup sets up a payment from the caller to the target address. The payment
-    // MUST be contingent on the miner being able to prove that they have the data
-    // referenced by 'piece'. The total amount of Filecoin that may be transfered by
-    // this payment is specified by 'value'
-    Setup(target Address, piece Cid, value TokenAmount) ID
+	// Setup sets up a payment from the caller to the target address. The payment
+	// MUST be contingent on the miner being able to prove that they have the data
+	// referenced by 'piece'. The total amount of Filecoin that may be transfered by
+	// this payment is specified by 'value'
+	Setup(target Address, piece Cid, value TokenAmount) ID
 
-    // MakeVouchers creates a set of vouchers redeemable by the target of the
-    // previously created payment. It creates 'count' vouchers, each of which is
-    // redeemable only after an certain block height, evenly spaced out between
-    // start and end. Each voucher should be redeemable for proportionally more
-    // Filecoin, up to the total amount specified during the payment setup.
-    MakeVouchers(id ID, start, end BlockHeight, count int) []Voucher
+	// MakeVouchers creates a set of vouchers redeemable by the target of the
+	// previously created payment. It creates 'count' vouchers, each of which is
+	// redeemable only after an certain block height, evenly spaced out between
+	// start and end. Each voucher should be redeemable for proportionally more
+	// Filecoin, up to the total amount specified during the payment setup.
+	MakeVouchers(id ID, start, end BlockHeight, count int) []Voucher
 
-    // Redeem voucher is called by the target of a given payment to claim the
-    // funds represented by it. The voucher can only be redeemed after the block
-    // height that is attributed to the voucher, and also only if the proof given
-    // proves that the target is correctly storing the piece referenced in the
-    // payment setup.
-    RedeemVoucher(v Voucher, proof Proof)
+	// Redeem voucher is called by the target of a given payment to claim the
+	// funds represented by it. The voucher can only be redeemed after the block
+	// height that is attributed to the voucher, and also only if the proof given
+	// proves that the target is correctly storing the piece referenced in the
+	// payment setup.
+	RedeemVoucher(v Voucher, proof Proof)
 }
 ```
 
