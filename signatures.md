@@ -59,7 +59,7 @@ type Signature interface {
   		  //   addr - the Filecoin `Address` of the signer
         //   sk - a private key which cryptographically links `M` to `sig`
         //
-        Sign(msg Message, addr Address, sk PrivateKey) (sig SignatureBytes, err error)
+        //Sign(msg Message, addr Address, sk PrivateKey) (sig SignatureBytes, err error)
         
         // Aggregate generates a BLS signature aggregate from a set of BLS 
         // signatures. Associated `Address` must be passed to this function
@@ -73,7 +73,7 @@ type Signature interface {
      		//   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
     		//   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
   			//
-  			Aggregate(sigs []SignatureBytes, addrs []Address)(sig SignatureBytes, err error)
+  			Aggregate(sigs []SignatureBytes, addrs []Address) (sig SignatureBytes, err error)
   
   			// Verify validates the statement: only `M` could have generated `sig`
         // given the validator has a message `m`, a signature `sig`, and a
@@ -89,18 +89,18 @@ type Signature interface {
         Verify(smsg SignedMessgage, pk PublicKey) (valid bool, err error)
   
   			// VerifyAggregate validates a collection of statements that are represeted by 
-  			// a signature aggregate: "For each M_i and PK_i in smsgs, only this collection 
-  			// of {M}, {PK}, and signers could have generated `smsgs.SignatureBytes`
+  			// a signature aggregate: "For each M_i and PK_i in smsg, only this collection 
+  			// of {M}, {PK}, and signers could have generated `smsg.SignatureBytes`.
   			//
         // Out:
         //   valid - a boolean value indicating the signature is valid
         //   err - a standard error message indicating any process issues
         // In:
-        //   smsgs - a SignedMessage which contains {[]Message, []Address, SignatureBytes}
+        //   smsg - a SignedMessage which contains {[]Message, []Address, SignatureBytes}
         //   pks - an array of Public Keys of the appropriate type associated with a message
   			// 	 at index `i` in []Message.
         //
-  			VerifyAggregate(smsgs SignedMessgage,  pks []PublicKeys) (valid bool, err error)
+  			VerifyAggregate(smsg SignedMessgage,  pks []PublicKeys) (valid bool, err error)
 
         // Recover determines the public key associated with a particular signature. For
   			// ECDSA signatures public keys can be recovered from SignatureBytes and an
@@ -375,17 +375,9 @@ Follow: [secp256k1 Reference](https://github.com/bitcoin-core/secp256k1/blob/314
 
 Follow: [IETF BLS Signature Scheme - Type Conversions](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.2)
 
-## Github References
-
-<https://github.com/filecoin-project/specs/issues/131>
-
-[go-filecoin SignedMessage](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go)
-
-[go-filecoin signer](https://github.com/filecoin-project/go-filecoin/blob/master/types/signer.go)
-
 ## References & Notes
 
-Signatures are not sent over the wire on their own, instead they are encapsulated in in a [SignedMessage](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L28). Each `SignesMessage` contains a `Message`, `Address`, and a signature. `SignedMessage` is sent over the wire by marshaling it to cbor and send, once it is received it is unmarshaled form [cbor](http://cbor.io/) back into the `SignedMessage` Structure.
+Each `SignedMessage` contains an array of messages (`[]Message`), an array of addresses (`[]Address`), and a signature (`SignatureBytes`). `SignedMessage` is sent over the wire by marshaling it to cbor and send, once it is received it is unmarshaled form [cbor](http://cbor.io/) back into the `SignedMessage` Structure.
 [Code for marshaling and unmarshaling SignedMessages](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38)
 
 - Notes on ECDSA public key recovery. Public key recovery is an operation that allows one to compute a public key from a message and signature. Typically this increases the signature size by at least 1 bit.
@@ -397,7 +389,6 @@ Signatures are not sent over the wire on their own, instead they are encapsulate
 - secp256k1 signature serialization
   - [secp256k1 recoverable signature](https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55)
   - [secp256k1 general signatures](https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177)
-  - [Go-filecoin implementation](https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98)
 - [golang implementation of secp256k1 point compression](https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338)
 
 ## Inspiration
