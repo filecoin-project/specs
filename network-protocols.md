@@ -49,10 +49,10 @@ type HelloMessage struct {
 
 ```go
 func SayHello(p PeerID) {
-    s := OpenStream(p)
-    mes := GetHelloMessage()
+	s := OpenStream(p)
+	mes := GetHelloMessage()
 	WriteCborRPC(s, mes)
-    s.Close()
+	s.Close()
 }
 ```
 
@@ -72,13 +72,13 @@ type StorageDealProposal struct {
 	// certifying the data transfer
 	PieceRef Cid
 
-    // SerializationMode specifies how the graph referenced by 'PieceRef' gets transformed
-    // into the data that will be packed into a sector.
-    SerializationMode string
+	// SerializationMode specifies how the graph referenced by 'PieceRef' gets transformed
+	// into the data that will be packed into a sector.
+	SerializationMode string
 
-    // TranslatedRef is the data hashed in a form that is compatible with the proofs system
-    // TODO: this *could* possibly be combined with the PieceRef
-    TranslatedRef Cid
+	// TranslatedRef is the data hashed in a form that is compatible with the proofs system
+	// TODO: this *could* possibly be combined with the PieceRef
+	TranslatedRef Cid
 
 	Size NumBytes
 
@@ -129,8 +129,8 @@ Legal values for `DealState` are as follows:
 ```go
 const (
 	// Unset implies a programmer error. This value should never appear
-  // in an actual message
-  Unset = 0
+	// in an actual message
+	Unset = 0
 
 	// Unknown signifies an unknown negotiation
 	Unknown = 1
@@ -159,7 +159,7 @@ const (
 	// received and staged into a sector, but is not sealed yet
 	Staged = 7
 
-    // in has been sealed and its commitment posted on chain.
+	// in has been sealed and its commitment posted on chain.
 	Complete = 7
 )
 ```
@@ -180,36 +180,36 @@ func SendStorageProposal(miner Address, file Cid, duration NumBlocks, price Toke
 
 	payInfo := payments.CreatePaymentInfo(storageStart, duration, price*size)
 
-    prop := StorageDealProposal{
-			PieceRef: file,
-			TranslatedRef: commitment,
-			TotalPrice: price * size, // Maybe just leave this to the payment info?
-			Duration: duration,
-			Size: size,
-			Payment: payInfo,
-    }
+	prop := StorageDealProposal{
+		PieceRef:      file,
+		TranslatedRef: commitment,
+		TotalPrice:    price * size, // Maybe just leave this to the payment info?
+		Duration:      duration,
+		Size:          size,
+		Payment:       payInfo,
+	}
 
-		client.SignProposal(prop)
+	client.SignProposal(prop)
 
-		peerid := lookup.ByMinerAddress(miner)
-		s := NewStream(peerid, MakeStorageDealProtocolID)
+	peerid := lookup.ByMinerAddress(miner)
+	s := NewStream(peerid, MakeStorageDealProtocolID)
 
 	// Send the proposal over
-		CborRpc.Write(s, prop)
+	CborRpc.Write(s, prop)
 
-    // Read the response...
-		resp := CborRpc.Read(s)
+	// Read the response...
+	resp := CborRpc.Read(s)
 
 	switch resp.State {
-  case Accepted:
-    // Yay! the miner accepted our deal, prepare to send them the file, and then check back
-    // later to see how its going
-  case Rejected:
-    // oh no, our deal was rejected.
-    // practically, we should consider whether or not to close our payment channel
-    Fatal("Deal rejected, reason: ", resp.Message)
-  default:
-    // unexpected response state...
+	case Accepted:
+		// Yay! the miner accepted our deal, prepare to send them the file, and then check back
+		// later to see how its going
+	case Rejected:
+		// oh no, our deal was rejected.
+		// practically, we should consider whether or not to close our payment channel
+		Fatal("Deal rejected, reason: ", resp.Message)
+	default:
+		// unexpected response state...
 	}
 }
 ```
@@ -229,19 +229,19 @@ type StorageDealResponse struct {
 	// ProposalCid is the cid of the StorageDealProposal object this response is for
 	ProposalCid Cid
 
-    // PieceConfirmation is a collection of information needed to convince the client that
-    // the miner has sealed the data into a sector.
-    // Note: the miner doesnt necessarily have to have committed the sector at this point
-    // they just need to have staged it into a sector, and be committed to putting it at
-    // that place in the sector.
-    PieceConfirmation PieceConfirmation
+	// PieceConfirmation is a collection of information needed to convince the client that
+	// the miner has sealed the data into a sector.
+	// Note: the miner doesnt necessarily have to have committed the sector at this point
+	// they just need to have staged it into a sector, and be committed to putting it at
+	// that place in the sector.
+	PieceConfirmation PieceConfirmation
 
-    // SectorCommitMsg is the Cid of the message that was sent to submit
-    // the sector containing this data to the chain.
-    SectorCommitMsg Cid
+	// SectorCommitMsg is the Cid of the message that was sent to submit
+	// the sector containing this data to the chain.
+	SectorCommitMsg Cid
 
-    // Signature is a signature from the miner over the response
-    Signature Signature
+	// Signature is a signature from the miner over the response
+	Signature Signature
 }
 ```
 
@@ -271,10 +271,10 @@ func HandleStorageDealProposal(s Stream) {
 
 	miner.SetDealState(resp)
 
-    // Make sure we are ready to receive the file (however it may come)
-    // TODO: potentially add in something to the protocol to allow
-    // clients to signal how the file will be transferred
-    miner.RegisterInboundFileTransfer(prop)
+	// Make sure we are ready to receive the file (however it may come)
+	// TODO: potentially add in something to the protocol to allow
+	// clients to signal how the file will be transferred
+	miner.RegisterInboundFileTransfer(prop)
 
 	CborRpc.Write(s, resp)
 }
@@ -301,33 +301,33 @@ Next, when the miner receives all the data and validates it, they set the `DealS
 
 ```go
 func OnDataReceived(prop StorageDealProposal) {
-  if !ValidatePieceTranslation(prop.PieceRef, prop.SerializationMode, prop.TranslatedRef) {
-    resp := StorageDealResponse{
-        State: Rejected,
-        Proposal: prop.Cid(),
-	Message: "TranslatedRef was invalid, reconstructed data did not match",
-    }
+	if !ValidatePieceTranslation(prop.PieceRef, prop.SerializationMode, prop.TranslatedRef) {
+		resp := StorageDealResponse{
+			State:    Rejected,
+			Proposal: prop.Cid(),
+			Message:  "TranslatedRef was invalid, reconstructed data did not match",
+		}
 
-    miner.Sign(resp)
-    miner.SetDealState(resp)
-    return
-  }
+		miner.Sign(resp)
+		miner.SetDealState(resp)
+		return
+	}
 
-  // TODO: is TranslatedRef actually needed? How does it tie in?
-  SectorBuilder.AddPiece(prop.PieceRef, prop.SerializationMode)
+	// TODO: is TranslatedRef actually needed? How does it tie in?
+	SectorBuilder.AddPiece(prop.PieceRef, prop.SerializationMode)
 }
 ```
 
 ```go
 func OnSectorPacked(prop StorageDealProposal, pieceConf PieceCommitment) {
-  resp := StorageDealResponse{
-    State: Staged,
-    Proposal: prop.Cid(),
-    PieceConfirmation: pieceConf,
-  }
+	resp := StorageDealResponse{
+		State:             Staged,
+		Proposal:          prop.Cid(),
+		PieceConfirmation: pieceConf,
+	}
 
-  miner.Sign(resp)
-  miner.SetDealState(resp)
+	miner.Sign(resp)
+	miner.SetDealState(resp)
 }
 ```
 
@@ -337,10 +337,10 @@ Once the deal makes it to the `Staged` state, the client should be able to query
 func OnSectorSealed(prop StorageDealProposal, msgcid Cid) {
 	curState := miner.GetDealState(prop)
 	nstate := StorageDealResponse{
-    State: Complete,
-    Proposal: prop.Cid(),
-    PieceConfirmation: curState.PieceConfirmation,
-    SectorCommitMsg: msgcid,
+		State:             Complete,
+		Proposal:          prop.Cid(),
+		PieceConfirmation: curState.PieceConfirmation,
+		SectorCommitMsg:   msgcid,
 	}
 
 	miner.Sign(nstate)
