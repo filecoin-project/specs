@@ -41,22 +41,22 @@ Whenever a node gets a new connection, it opens a new stream on that connection 
 
 ```go
 type HelloMessage struct {
-    HeaviestTipSet []Cid
-    HeaviestTipSetHeight uint64
-    GenesisHash Cid
+	HeaviestTipSet       []Cid
+	HeaviestTipSetHeight uint64
+	GenesisHash          Cid
 }
 ```
 
 ```go
 func SayHello(p PeerID) {
-    s := OpenStream(p)
-    mes := GetHelloMessage()
-    serialized := cbor.Marshal(mes)
+	s := OpenStream(p)
+	mes := GetHelloMessage()
+	serialized := cbor.Marshal(mes)
 
-    WriteUVarint(s, len(serialized))
+	WriteUVarint(s, len(serialized))
 
-    s.Write(serialized)
-    s.Close()
+	s.Write(serialized)
+	s.Close()
 }
 ```
 
@@ -72,54 +72,54 @@ First the client sends a signed `StorageDealProposal` to the storage miner:
 
 ```go
 type StorageDealProposal struct {
-    // PieceRef is the hash of the data in native structure. This will be used for
-    // certifying the data transfer
-    PieceRef Cid
+	// PieceRef is the hash of the data in native structure. This will be used for
+	// certifying the data transfer
+	PieceRef Cid
 
-    // TranslatedRef is the data hashed in a form that is compatible with the proofs system
-    // TODO: this *could* possibly be combined with the PieceRef
-    TranslatedRef Cid
+	// TranslatedRef is the data hashed in a form that is compatible with the proofs system
+	// TODO: this *could* possibly be combined with the PieceRef
+	TranslatedRef Cid
 
-    Size NumBytes
+	Size NumBytes
 
-    TotalPrice TokenAmount
+	TotalPrice TokenAmount
 
-    // Duration is how long the file should be stored for
-    Duration NumBlocks
+	// Duration is how long the file should be stored for
+	Duration NumBlocks
 
-    // PaymentRef is a reference to the mechanism that the proposer
-    // will use to pay the miner. It should be verifiable by the
-    // miner using on-chain information.
-    Payment PaymentInfo
+	// PaymentRef is a reference to the mechanism that the proposer
+	// will use to pay the miner. It should be verifiable by the
+	// miner using on-chain information.
+	Payment PaymentInfo
 
-    // MinerAddress is the address of the storage miner in the deal proposal
-    MinerAddress Address
+	// MinerAddress is the address of the storage miner in the deal proposal
+	MinerAddress Address
 
-    ClientAddress Address
-    Signature Signature
+	ClientAddress Address
+	Signature     Signature
 }
 
 type PaymentInfo struct {
-    // PayChActor is the address of the payment channel actor
-    // that will be used to facilitate payments
-    PayChActor Address
+	// PayChActor is the address of the payment channel actor
+	// that will be used to facilitate payments
+	PayChActor Address
 
-    // Payer is the address of the owner of the payment channel
-    Payer Address
+	// Payer is the address of the owner of the payment channel
+	Payer Address
 
-    // Channel is the ID of the specific channel the client will
-    // use to pay the miner. It must already have sufficient funds locked up
-    Channel ChannelID
+	// Channel is the ID of the specific channel the client will
+	// use to pay the miner. It must already have sufficient funds locked up
+	Channel ChannelID
 
-    // ChannelMsgCid is the B58 encoded CID of the message used to create the
-    // channel. Adding the message cid allows the miner to wait until the
-    // channel is accepted on chain.
-    ChannelMsgCid cid.Cid
+	// ChannelMsgCid is the B58 encoded CID of the message used to create the
+	// channel. Adding the message cid allows the miner to wait until the
+	// channel is accepted on chain.
+	ChannelMsgCid cid.Cid
 
-    // Vouchers is a set of payments from the client to the miner that can be
-    // cashed out contingent on the agreed upon data being provably within a
-    // live sector in the miners control on-chain
-    Vouchers []PaymentVouchers
+	// Vouchers is a set of payments from the client to the miner that can be
+	// cashed out contingent on the agreed upon data being provably within a
+	// live sector in the miners control on-chain
+	Vouchers []PaymentVouchers
 }
 ```
 
@@ -129,8 +129,8 @@ Legal values for `DealState` are as follows:
 ```go
 const (
 	// Unset implies a programmer error. This value should never appear
-    // in an actual message
-    Unset = 0
+	// in an actual message
+	Unset = 0
 
 	// Unknown signifies an unknown negotiation
 	Unknown = 1
@@ -148,39 +148,39 @@ const (
 	Failed = 5
 
 	// Complete means the deal is complete, and the sector that the deal is contained
-    // in has been sealed and its commitment posted on chain.
+	// in has been sealed and its commitment posted on chain.
 	Complete = 6
 
-    // Staged is used by the storage deal protocol to indicate the data has been
-    // received and staged into a sector, but is not sealed yet
-    Staged = 7
+	// Staged is used by the storage deal protocol to indicate the data has been
+	// received and staged into a sector, but is not sealed yet
+	Staged = 7
 )
 ```
 
 ```go
 func SendStorageProposal(miner Address, file Cid, duration NumBlocks, price TokenAmount) {
-    if !IsMiner(miner) {
-        Fatal("given address was not a miner")
-    }
+	if !IsMiner(miner) {
+		Fatal("given address was not a miner")
+	}
 
-    // Get a PoRep friendly commitment from the file
-    commitment, size := ProcessRef(file)
+	// Get a PoRep friendly commitment from the file
+	commitment, size := ProcessRef(file)
 
-    // Get a handle on the payment system to be used to pay this miner
-    // Most likely, this grabs an existing payment channel, or creates
-    // a new one
-    payments := PaymentSysToMiner(miner)
+	// Get a handle on the payment system to be used to pay this miner
+	// Most likely, this grabs an existing payment channel, or creates
+	// a new one
+	payments := PaymentSysToMiner(miner)
 
-    payInfo := payments.CreatePaymentInfo(storageStart, duration, price * size)
+	payInfo := payments.CreatePaymentInfo(storageStart, duration, price*size)
 
-    prop := StorageDealProposal{
-	PieceRef: file,
-	TranslatedRef: commitment,
-	TotalPrice: price * size, // Maybe just leave this to the payment info?
-	Duration: duration,
-	Size: size,
-	Payment: payInfo,
-    }
+	prop := StorageDealProposal{
+		PieceRef:      file,
+		TranslatedRef: commitment,
+		TotalPrice:    price * size, // Maybe just leave this to the payment info?
+		Duration:      duration,
+		Size:          size,
+		Payment:       payInfo,
+	}
 
 	client.SignProposal(prop)
 
@@ -204,70 +204,70 @@ The miner then decides whether or not to accept the deal, and sends back a respo
 
 ```go
 type StorageDealResponse struct {
-    State DealState
+	State DealState
 
-    // Message is an optional message to add context to any given response
-    Message string
+	// Message is an optional message to add context to any given response
+	Message string
 
-    // ProposalCid is the cid of the StorageDealProposal object this response is for
-    ProposalCid Cid
+	// ProposalCid is the cid of the StorageDealProposal object this response is for
+	ProposalCid Cid
 
-    // PieceConfirmation is a collection of information needed to convince the client that
-    // the miner has sealed the data into a sector.
-    PieceConfirmation PieceConfirmation
+	// PieceConfirmation is a collection of information needed to convince the client that
+	// the miner has sealed the data into a sector.
+	PieceConfirmation PieceConfirmation
 
-    // Signature is a signature from the miner over the response
-    Signature Signature
+	// Signature is a signature from the miner over the response
+	Signature Signature
 }
 ```
 
 ```go
 func HandleStorageDealProposal(s Stream) {
-    prop := CborRpc.Read(s)
+	prop := CborRpc.Read(s)
 
-    if !ValidateInput(prop) {
-        Fatal("client sent invalid proposal")
-    }
+	if !ValidateInput(prop) {
+		Fatal("client sent invalid proposal")
+	}
 
-    if accept, reason := MinerPolicy.ShouldAccept(prop); !accept {
-        CborRpc.Write(s, StorageDealResponse{
-            State: Rejected,
-            Message: reason,
-        })
-        return
-    }
+	if accept, reason := MinerPolicy.ShouldAccept(prop); !accept {
+		CborRpc.Write(s, StorageDealResponse{
+			State:   Rejected,
+			Message: reason,
+		})
+		return
+	}
 
-    // Alright, we're accepting
-    resp := StorageDealResponse{
-        State: Accepted,
-        Proposal: prop.Cid(),
-    }
+	// Alright, we're accepting
+	resp := StorageDealResponse{
+		State:    Accepted,
+		Proposal: prop.Cid(),
+	}
 
-    miner.Sign(resp)
+	miner.Sign(resp)
 
-    miner.SetDealState(resp)
+	miner.SetDealState(resp)
 
-    // Make sure we are ready to receive the file (however it may come)
-    // TODO: potentially add in something to the protocol to allow
-    // clients to signal how the file will be transferred
-    miner.RegisterInboundFileTransfer(resp)
+	// Make sure we are ready to receive the file (however it may come)
+	// TODO: potentially add in something to the protocol to allow
+	// clients to signal how the file will be transferred
+	miner.RegisterInboundFileTransfer(resp)
 
-    CborRpc.Write(s, resp)
+	CborRpc.Write(s, resp)
 }
 
 func ValidateInput(prop StorageDealProposal) {
-    // Note: Maybe this is unnecessary, and the payment info being valid suffices?
-    if !ValidateSignature(prop.Signature, prop.ClientAddress) {
-        Fatal("invalid signature from client")
-    }
+	// Note: Maybe this is unnecessary, and the payment info being valid suffices?
+	if !ValidateSignature(prop.Signature, prop.ClientAddress) {
+		Fatal("invalid signature from client")
+	}
 
-    if !IsExistingAccount(prop.ClientAddress) {
-        Fatal("proposal came from a fake account")
-    }
+	if !IsExistingAccount(prop.ClientAddress) {
+		Fatal("proposal came from a fake account")
+	}
 
-    if !ValidatePaymentInfo(prop.Payment, prop.Duration, prop.Size) {
-        Fatal("propsal had invalid payment information")
-    }
+	if !ValidatePaymentInfo(prop.Payment, prop.Duration, prop.Size) {
+		Fatal("propsal had invalid payment information")
+	}
 }
 ```
 
@@ -277,8 +277,8 @@ Next, when the miner receives all the data and validates it, they set the `DealS
 
 ```go
 func OnDataReceived() {
-    // TODO: document process for updating deal state and
-    // starting seal after data is received
+	// TODO: document process for updating deal state and
+	// starting seal after data is received
 }
 ```
 
@@ -296,11 +296,11 @@ At any point, the client in this flow may query the miner for the state of a giv
 
 ```go
 type StorageDealQuery struct {
-    // ProposalCid is the cid of the proposal for the deal that we are querying
-    // the state of
-    ProposalCid *cid.Cid
+	// ProposalCid is the cid of the proposal for the deal that we are querying
+	// the state of
+	ProposalCid *cid.Cid
 
-    BaseState DealState
+	BaseState DealState
 }
 ```
 
@@ -317,9 +317,9 @@ The `RetrievePieceRequest` is specified as follows:
 
 ```go
 type RetrievePieceRequest struct {
-    // `PieceRef` identifies a piece of user data, typically received from the
-    // client while consummating a storage deal.
-    PieceRef *cid.Cid
+	// `PieceRef` identifies a piece of user data, typically received from the
+	// client while consummating a storage deal.
+	PieceRef *cid.Cid
 }
 ```
 
@@ -329,14 +329,14 @@ The `RetrievePieceResponse` message is specified as follows:
 
 ```go
 type RetrievePieceResponse struct {
-    // `Status` communicates the miner's willingness to send a piece back to a
-    // client. The value of the `Status` field must be one of: `Failure` or
-    // `Success`.
-    Status RetrievePieceStatus
+	// `Status` communicates the miner's willingness to send a piece back to a
+	// client. The value of the `Status` field must be one of: `Failure` or
+	// `Success`.
+	Status RetrievePieceStatus
 
-    // If `Status` is `Failure`, `ErrorMessage` should contain a string
-    // explaining the cause for the rejection.
-    ErrorMessage string
+	// If `Status` is `Failure`, `ErrorMessage` should contain a string
+	// explaining the cause for the rejection.
+	ErrorMessage string
 }
 ```
 
@@ -368,9 +368,9 @@ The `RetrievePieceChunk` message is specified as follows:
 
 ```go
 type RetrievePieceChunk struct {
-    // The `Data` field contains a chunk of a piece. The length of `Data` must
-    // be > 0.
-    Data []byte
+	// The `Data` field contains a chunk of a piece. The length of `Data` must
+	// be > 0.
+	Data []byte
 }
 ```
 
@@ -382,8 +382,8 @@ The blocksync protocol is a small protocol that allows Filecoin nodes to request
 
 ```go
 type BlockSyncRequest struct {
-    Start Cid
-    RequestLength uint64
+	Start         Cid
+	RequestLength uint64
 }
 ```
 
@@ -391,10 +391,10 @@ The request requests a chain of a given length by the hash of its highest block.
 
 ```go
 type BlockSyncResponse struct {
-    Blocks []Block
-    
-    Status uint
-    Message string
+	Blocks []Block
+
+	Status  uint
+	Message string
 }
 ```
 
@@ -405,18 +405,18 @@ Possible error codes:
 ```go
 const (
 	Success = 0
-    
-    // Sent back fewer blocks than requested
-    PartialResponse = 101
-    
-    // request.Start not found
-    BlockNotFound = 201
-    
-    // requester is making too many requests
-    GoAway = 202
-    
-    // Internal Error
-    InternalError = 203
+
+	// Sent back fewer blocks than requested
+	PartialResponse = 101
+
+	// request.Start not found
+	BlockNotFound = 201
+
+	// requester is making too many requests
+	GoAway = 202
+
+	// Internal Error
+	InternalError = 203
 )
 ```
 

@@ -36,179 +36,179 @@ Lane state can be easily tracked on-chain with a compact bitfield.
 
 ```go
 type SpendVoucher struct {
-    // Amount is the amount of FIL that this voucher can be redeemed for
-    Amount TokenAmount
-    
-    // Nonce is a number that sets the ordering of vouchers. If you try to redeem
-    // a voucher with an equal or lower nonce, the operation will fail. Nonces are
-    // per lane.
-    Nonce uint64
-    
-    // Lane specifies which 'lane' of the payment channel this voucher is for.
-    // Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
-    Lane uint64
+	// Amount is the amount of FIL that this voucher can be redeemed for
+	Amount TokenAmount
 
-    // Merges specifies a list of lane-nonce pairs that this voucher will close.
-    // This voucher may not be redeemed if any of the lanes specified here are already
-    // closed, or their nonce specified here is lower than the nonce of the lane on-chain.
-    Merges []MergePair
+	// Nonce is a number that sets the ordering of vouchers. If you try to redeem
+	// a voucher with an equal or lower nonce, the operation will fail. Nonces are
+	// per lane.
+	Nonce uint64
 
-    TimeLock uint64
+	// Lane specifies which 'lane' of the payment channel this voucher is for.
+	// Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
+	Lane uint64
 
-    SecretPreimage []byte
+	// Merges specifies a list of lane-nonce pairs that this voucher will close.
+	// This voucher may not be redeemed if any of the lanes specified here are already
+	// closed, or their nonce specified here is lower than the nonce of the lane on-chain.
+	Merges []MergePair
 
-    RequiredSector []byte
-  
-    DataCommitment []byte
+	TimeLock uint64
 
-    MinCloseHeight uint64
-    
-    Sig Signature
+	SecretPreimage []byte
+
+	RequiredSector []byte
+
+	DataCommitment []byte
+
+	MinCloseHeight uint64
+
+	Sig Signature
 }
 
 type MergePair struct {
-    Lane uint64
-    Nonce uint64
+	Lane  uint64
+	Nonce uint64
 }
 ```
 
 ```go
 type PaymentChannel struct {
-    From Address
-    To Address
+	From Address
+	To   Address
 
-    ChannelTotal TokenAmount
-    ToSend TokenAmount
+	ChannelTotal TokenAmount
+	ToSend       TokenAmount
 
-    ClosingAt uint64
-    MinCloseHeight uint64
+	ClosingAt      uint64
+	MinCloseHeight uint64
 
-    LaneStates map[uint64]LaneState
+	LaneStates map[uint64]LaneState
 }
 
 type LaneState struct {
-    Nonce uint64
-    Redeemed TokenAmount
+	Nonce    uint64
+	Redeemed TokenAmount
 }
 
 func (paych *PaymentChannel) validateSignature(sv SpendVoucher) {
-    if msg.From == paych.From {
-        ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.To)
-    } else if msg.From == paych.To {
-        ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.From)
-    } else {
-        Fatal("bad programmer")
-    }
+	if msg.From == paych.From {
+		ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.To)
+	} else if msg.From == paych.To {
+		ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.From)
+	} else {
+		Fatal("bad programmer")
+	}
 }
 
 func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
-    if !paych.validateSignature(sv) {
-        Fatal("Signature Invalid")
-    }
+	if !paych.validateSignature(sv) {
+		Fatal("Signature Invalid")
+	}
 
-    if chain.Now() < sv.TimeLock {
-        Fatal("cannot use this voucher yet!")
-    }
+	if chain.Now() < sv.TimeLock {
+		Fatal("cannot use this voucher yet!")
+	}
 
-    if sv.SecretPreimage != nil {
-        if Hash(secret) != sv.SecretPreimage {
-            Fatal("Incorrect secret!")
-        }
-    }
-  
-  	if sv.DataCommitment != nil {
-      // Checks that the piece inclusion proof is valid, and that the referenced sector
-      // is correctly being stored
-      if !ValidateInclusion(pip, sv.DataCommitment) {
-        Fatal("PieceInclusionProof was invalid")
-      }
-  	}
+	if sv.SecretPreimage != nil {
+		if Hash(secret) != sv.SecretPreimage {
+			Fatal("Incorrect secret!")
+		}
+	}
 
-    if sv.RequiredSector != nil {
-        miner, found := GetMiner(msg.From)
-        if !found {
-            Fatal("Redeemer is not a miner")
-        }
+	if sv.DataCommitment != nil {
+		// Checks that the piece inclusion proof is valid, and that the referenced sector
+		// is correctly being stored
+		if !ValidateInclusion(pip, sv.DataCommitment) {
+			Fatal("PieceInclusionProof was invalid")
+		}
+	}
 
-        if !miner.HasSector(sv.RequiredSector) {
-            Fatal("miner does not have sector, cannot redeem payment")
-        }
-    }
+	if sv.RequiredSector != nil {
+		miner, found := GetMiner(msg.From)
+		if !found {
+			Fatal("Redeemer is not a miner")
+		}
 
-    ls := paych.LaneStates[sv.Lane]
-    if ls.Closed {
-        Fatal("cannot redeem a voucher on a closed lane")
-    }
+		if !miner.HasSector(sv.RequiredSector) {
+			Fatal("miner does not have sector, cannot redeem payment")
+		}
+	}
 
-    if ls.Nonce > sv.Nonce {
-        Fatal("voucher has an outdated nonce, cannot redeem")
-    }
+	ls := paych.LaneStates[sv.Lane]
+	if ls.Closed {
+		Fatal("cannot redeem a voucher on a closed lane")
+	}
 
-    var mergeValue TokenAmount
-    for _, merge := range sv.Merges {
-        ols := paych.LaneStates[merge.Lane]
+	if ls.Nonce > sv.Nonce {
+		Fatal("voucher has an outdated nonce, cannot redeem")
+	}
 
-        if ols.Nonce >= merge.Nonce {
-            Fatal("merge in voucher has outdated nonce, cannot redeem")
-        }
+	var mergeValue TokenAmount
+	for _, merge := range sv.Merges {
+		ols := paych.LaneStates[merge.Lane]
 
-        mergeValue += ols.Redeemed
-        ols.Nonce = merge.Nonce
-    }
+		if ols.Nonce >= merge.Nonce {
+			Fatal("merge in voucher has outdated nonce, cannot redeem")
+		}
 
-    ls.Nonce = sv.Nonce
-    balanceDelta = sv.Amount - (mergeValue + ls.Redeemed)
-    ls.Redeemed = sv.Amount
+		mergeValue += ols.Redeemed
+		ols.Nonce = merge.Nonce
+	}
 
-    newSendBalance = paych.ToSend + balanceDelta
-    if newSendBalance < 0 {
-        // TODO: is this impossible?
-        Fatal("voucher would leave channel balance negative")
-    }
+	ls.Nonce = sv.Nonce
+	balanceDelta = sv.Amount - (mergeValue + ls.Redeemed)
+	ls.Redeemed = sv.Amount
 
-    if newSendBalance > paych.ChannelTotal {
-        Fatal("not enough funds in channel to cover voucher")
-    }
+	newSendBalance = paych.ToSend + balanceDelta
+	if newSendBalance < 0 {
+		// TODO: is this impossible?
+		Fatal("voucher would leave channel balance negative")
+	}
 
-    paych.ToSend = newSendBalance
+	if newSendBalance > paych.ChannelTotal {
+		Fatal("not enough funds in channel to cover voucher")
+	}
 
-    if sv.MinCloseHeight != 0 {
-        if paych.ClosingAt < sv.MinCloseHeight {
-            paych.ClosingAt = sv.MinCloseHeight
-        }
-        if paych.MinCloseHeight < sv.MinCloseHeight {
-            paych.MinCloseHeight = sv.MinCloseHeight
-        }
-    }
+	paych.ToSend = newSendBalance
+
+	if sv.MinCloseHeight != 0 {
+		if paych.ClosingAt < sv.MinCloseHeight {
+			paych.ClosingAt = sv.MinCloseHeight
+		}
+		if paych.MinCloseHeight < sv.MinCloseHeight {
+			paych.MinCloseHeight = sv.MinCloseHeight
+		}
+	}
 }
 
 func (paych *PaymentChannel) Withdraw(upTo TokenAmount) {
-    // TODO: this ones tricky, withdraw funds without closing it out entirely...
+	// TODO: this ones tricky, withdraw funds without closing it out entirely...
 }
 
 func (paych *PaymentChannel) Close() {
-    if msg.From != paych.From && msg.From != paych.To {
-        Fatal("not authorized to close channel")
-    }
-    if paych.ClosingAt != 0 {
-        Fatal("Channel already closing")
-    }
+	if msg.From != paych.From && msg.From != paych.To {
+		Fatal("not authorized to close channel")
+	}
+	if paych.ClosingAt != 0 {
+		Fatal("Channel already closing")
+	}
 
-    paych.ClosingAt = chain.Now() + ChannelClosingDelay
-    if paych.ClosingAt < paych.MinCloseHeight {
-        paych.ClosingAt = paych.MinCloseHeight
-    }
+	paych.ClosingAt = chain.Now() + ChannelClosingDelay
+	if paych.ClosingAt < paych.MinCloseHeight {
+		paych.ClosingAt = paych.MinCloseHeight
+	}
 }
 
 func (paych *PaymentChannel) Collect() {
-    if paych.ClosingAt == 0 {
-        Fatal("payment channel not closing or closed")
-    }
-    if chain.Now() < paych.ClosingAt {
-        Fatal("Payment channel not yet closed")
-    }
-    Transfer(paych.ChannelTotal - paych.ToSend, paych.From)
-    Transfer(paych.ToSend, paych.To)
+	if paych.ClosingAt == 0 {
+		Fatal("payment channel not closing or closed")
+	}
+	if chain.Now() < paych.ClosingAt {
+		Fatal("Payment channel not yet closed")
+	}
+	Transfer(paych.ChannelTotal-paych.ToSend, paych.From)
+	Transfer(paych.ToSend, paych.To)
 }
 ```
 
@@ -227,9 +227,9 @@ This is a libp2p service run by all participants wanting to participate in payme
 
 ```go
 type ReconcileRequest struct {
-  Vouchers []Vouchers
+	Vouchers []Vouchers
 
-  ReqVal TokenAmount
+	ReqVal TokenAmount
 }
 ```
 
@@ -239,10 +239,10 @@ Bob receives this request, and checks that all the fields are correct, and then 
 
 ```go
 type ReconcileResponse struct {
-  Combined Voucher
+	Combined Voucher
 
-  Status StatusCode
-  Message string
+	Status  StatusCode
+	Message string
 }
 ```
 
