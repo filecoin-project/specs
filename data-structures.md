@@ -111,18 +111,6 @@ type SignedMessage struct {
 
 The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the [signatures spec](signatures.md).
 
-## MessageReceipt
-
-```go
-type MessageReceipt struct {
-	ExitCode uint8
-
-	Return [][]byte
-
-	GasUsed BigInteger
-}
-```
-
 ## Message Receipt
 
 ```go
