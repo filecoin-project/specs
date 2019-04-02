@@ -10,14 +10,14 @@ An address is an identifier that refers to an actor in the Filecoin state. All a
 ```go
 type Address struct {
 
-    // 0: ID
-    // 1: SECP256K1 Public Key
-    // 2: Actor
-    // 3: BLS Public Key
-    protocol byte
+	// 0: ID
+	// 1: SECP256K1 Public Key
+	// 2: Actor
+	// 3: BLS Public Key
+	protocol byte
 
-    // raw bytes containing the data associated with protocol
-    payload []byte
+	// raw bytes containing the data associated with protocol
+	payload []byte
 }
 ```
 To learn more, take a look at the [Address Spec](https://github.com/filecoin-project/specs/blob/master/address.md).
@@ -41,10 +41,10 @@ type Block struct {
 
 	// Tickets are the winning ticket that were submitted with this block.
 	Tickets []Ticket
-    
-    // ElectionProof is a signature over the final ticket that proves this miner
-    // is the leader at this round
-    ElectionProof Signature
+
+	// ElectionProof is a signature over the final ticket that proves this miner
+	// is the leader at this round
+	ElectionProof Signature
 
 	// Parents is the set of parents this block was based on. Typically one,
 	// but can be several in the case where there were multiple winning ticket-
@@ -56,8 +56,8 @@ type Block struct {
 
 	// Height is the chain height of this block.
 	Height Uint64
-    
-    // StateRoot is a cid pointer to the state tree after application of the
+
+	// StateRoot is a cid pointer to the state tree after application of the
 	// transactions state transitions.
 	StateRoot Cid
 
@@ -66,7 +66,7 @@ type Block struct {
 	Messages []SignedMessage
 
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-    // TODO: should be the same type of merkletree-list thing that the messages are
+	// TODO: should be the same type of merkletree-list thing that the messages are
 	MessageReceipts []MessageReceipt
 }
 ```
@@ -77,16 +77,16 @@ type Block struct {
 type Message struct {
 	To   Address
 	From Address
-	
+
 	// When receiving a message from a user account the nonce in
 	// the message must match the expected nonce in the from actor.
 	// This prevents replay attacks.
 	Nonce Uint64
 
 	Value BigInteger
-    
-    GasPrice Integer
-    GasLimit Integer
+
+	GasPrice Integer
+	GasLimit Integer
 
 	Method string
 	Params []byte
@@ -104,34 +104,22 @@ A signed message is a wrapper type over the base message.
 
 ```go
 type SignedMessage struct {
-    Message Message
-    Signature Signature
+	Message   Message
+	Signature Signature
 }
 ```
 
 The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the [signatures spec](signatures.md).
 
-## MessageReceipt
-
-```go
-type MessageReceipt struct {
-    ExitCode uint8
-
-    Return [][]byte
-
-    GasUsed BigInteger
-}
-```
-
 ## Message Receipt
 
 ```go
 type MessageReceipt struct {
-    ExitCode uint8
+	ExitCode uint8
 
-    Return []byte
-    
-    GasUsed Integer
+	Return []byte
+
+	GasUsed Integer
 }
 ```
 
@@ -145,16 +133,16 @@ Message receipts are currently serialized simply by CBOR marshaling them, using 
 
 ```go
 type Actor struct {
-    // Code is a pointer to the code object for this actor
-	Code    Cid
-    
-    // Head is a pointer to the root of this actors state
-    Head    Cid
-    
-    // Nonce is a counter of the number of messages this actor has sent
-	Nonce   Uint64
-    
-    // Balance is this actors current balance of filecoin
+	// Code is a pointer to the code object for this actor
+	Code Cid
+
+	// Head is a pointer to the root of this actors state
+	Head Cid
+
+	// Nonce is a counter of the number of messages this actor has sent
+	Nonce Uint64
+
+	// Balance is this actors current balance of filecoin
 	Balance BigInteger
 }
 ```
@@ -206,7 +194,11 @@ BlockHeader is a serialized `Block`.
 
 #### `SealProof`
 
-SealProof is an array of bytes.
+SealProof is a 384-element array of bytes.
+
+#### `PoStProof`
+
+PoStProof is a 192-element array of bytes.
 
 #### `TokenAmount`
 

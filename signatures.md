@@ -52,46 +52,46 @@ Note: `Message` is used here as the object being signed, but this interface shou
 ```go
 type Signature interface {
 
-        // Sign generates a proof that miner `M` generate message `m`
-        //
-        // Out:
-        //    sig - a series of bytes representing a signature usually `r`|`s`
-        //    err - a standard error message indicating any process issues
-        // In:
-        //    m - a series of bytes representing a message to be signed
-        //    sk - a private key which cryptographically links `M` to `sig`
-        //
-        Sign(m Message, sk PrivateKey) (sig SignatureBytes, err error)
+	// Sign generates a proof that miner `M` generate message `m`
+	//
+	// Out:
+	//    sig - a series of bytes representing a signature usually `r`|`s`
+	//    err - a standard error message indicating any process issues
+	// In:
+	//    m - a series of bytes representing a message to be signed
+	//    sk - a private key which cryptographically links `M` to `sig`
+	//
+	Sign(m Message, sk PrivateKey) (sig SignatureBytes, err error)
 
-        // Verify validates the statement: only `M` could have generated `sig`
-        // given the validator has a message `m`, a signature `sig`, and a
-        // public key `pk`.
-        //
-        // Out:
-        //    valid - a boolean value indicating the signature is valid
-        //    err - a standard error message indicating any process issues
-        // In:
-        //    m - a series of bytes representing the signed message
-        //    pk - the public key belonging to the signer `M`
-        //    sig - a series of bytes representing a signature usually `r`|`s`
-        //
-        Verify(m Messgage, pk PublicKey, sig SignatureBytes) (valid bool, err error)
+	// Verify validates the statement: only `M` could have generated `sig`
+	// given the validator has a message `m`, a signature `sig`, and a
+	// public key `pk`.
+	//
+	// Out:
+	//    valid - a boolean value indicating the signature is valid
+	//    err - a standard error message indicating any process issues
+	// In:
+	//    m - a series of bytes representing the signed message
+	//    pk - the public key belonging to the signer `M`
+	//    sig - a series of bytes representing a signature usually `r`|`s`
+	//
+	Verify(m Messgage, pk PublicKey, sig SignatureBytes) (valid bool, err error)
 
-        // Recover, as its name implies, recovers a public key associated with a 
-        // particular signature. In the case of ECDSA signatures, this function can 
-        // be fulfilled via the 'ECRecover' method. If a different signature scheme 
-        // is used, then some other mechanism of 'recovering' a message authors 
-        // public key must be provided.
-        //
-        // Out:
-        //    pk - the public key associated with `M` who signed `m`
-        //    err - a standard error message indicating any process issues
-        //    **
-        // In:
-        //    m - a series of bytes representing the signed message
-        //    sig - a series of bytes representing a signature usually `r`|`s`
-        //
-        Recover(m Message, sig SignatureBytes) (pk PublicKey, err error)
+	// Recover, as its name implies, recovers a public key associated with a
+	// particular signature. In the case of ECDSA signatures, this function can
+	// be fulfilled via the 'ECRecover' method. If a different signature scheme
+	// is used, then some other mechanism of 'recovering' a message authors
+	// public key must be provided.
+	//
+	// Out:
+	//    pk - the public key associated with `M` who signed `m`
+	//    err - a standard error message indicating any process issues
+	//    **
+	// In:
+	//    m - a series of bytes representing the signed message
+	//    sig - a series of bytes representing a signature usually `r`|`s`
+	//
+	Recover(m Message, sig SignatureBytes) (pk PublicKey, err error)
 }
 ```
 

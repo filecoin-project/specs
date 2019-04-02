@@ -45,16 +45,16 @@ At the beginning of their proving period, miners collect the proving set (the se
 
 ```go
 func ProveStorage(sectors []commR, startTime BlockHeight) (PoSTProof, []Fault) {
-    proofs []Proofs
-    seeds []Seed
-    faults []Fault
-    for t := 0; t < ProvingPeriod; t += ReseedPeriod {
-        seeds = append(seeds, GetSeedFromBlock(startTime + t))
-        proof, fault := GenPost(sectors, seeds[t], vdfParams)
-        proofs = append(proofs, proof)
-        faults = append(faults, fault)
-    }
-    return GenPostSnark(sectors, seeds, proofs), faults
+	var proofs []Proofs
+	var seeds []Seed
+	var faults []Fault
+	for t := 0; t < ProvingPeriod; t += ReseedPeriod {
+		seeds = append(seeds, GetSeedFromBlock(startTime+t))
+		proof, fault := GenPost(sectors, seeds[t], vdfParams)
+		proofs = append(proofs, proof)
+		faults = append(faults, fault)
+	}
+	return GenPostSnark(sectors, seeds, proofs), faults
 }
 ```
 
@@ -113,49 +113,49 @@ In order to validate a block coming in from the network at round `N` was well mi
 
 ```go
 func VerifyBlock(blk Block) {
-    // 1. Verify Signature
-    pubk := GetPublicKey(blk.Miner)
-    if !ValidateSignature(blk.Signature, pubk, blk) {
-        Fatal("invalid block signature")
-    }
-    
-    // 2. Verify ParentWeight
-    if blk.ParentWeight != ComputeWeight(blk.Parents) {
-        Fatal("invalid parent weight")
-    }
+	// 1. Verify Signature
+	pubk := GetPublicKey(blk.Miner)
+	if !ValidateSignature(blk.Signature, pubk, blk) {
+		Fatal("invalid block signature")
+	}
 
-    // 3. Verify Tickets
-    if !VerifyTickets(blk) {
-        Fatal("tickets were invalid")
-    }
-    
-    // 4. Verify ElectionProof
-    randomnessLookbackTipset := RandomnessLookback(blk)
-    lookbackTicket := minTicket(randomnessLookbackTipset)
-    challenge := sha256.Sum(lookbackTicket)
-    
-    if !ValidateSignature(blk.ElectionProof, pubk, challenge) {
-        Fatal("election proof was not a valid signature of the last ticket")
-    }
-    
-    powerLookbackTipset := PowerLookback(blk)
-    minerPower := GetPower(powerLookbackTipset.state, blk.Miner)
-    totalPower := GetTotalPower(powerLookbackTipset.state)
-    if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
-        Fatal("election proof was not a winner")
-    }
-        
-    // 5. Verify StateRoot
-    state := GetParentState(blk.Parents)
-    for i, msg := range blk.Messages {
-        receipt := ApplyMessage(state, msg)
-        if receipt != blk.MessageReceipts[i] {
-            Fatal("message receipt mismatch")
-        }
-    }
-    if state.Cid() != blk.StateRoot {
-        Fatal("state roots mismatch")
-    }
+	// 2. Verify ParentWeight
+	if blk.ParentWeight != ComputeWeight(blk.Parents) {
+		Fatal("invalid parent weight")
+	}
+
+	// 3. Verify Tickets
+	if !VerifyTickets(blk) {
+		Fatal("tickets were invalid")
+	}
+
+	// 4. Verify ElectionProof
+	randomnessLookbackTipset := RandomnessLookback(blk)
+	lookbackTicket := minTicket(randomnessLookbackTipset)
+	challenge := sha256.Sum(lookbackTicket)
+
+	if !ValidateSignature(blk.ElectionProof, pubk, challenge) {
+		Fatal("election proof was not a valid signature of the last ticket")
+	}
+
+	powerLookbackTipset := PowerLookback(blk)
+	minerPower := GetPower(powerLookbackTipset.state, blk.Miner)
+	totalPower := GetTotalPower(powerLookbackTipset.state)
+	if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
+		Fatal("election proof was not a winner")
+	}
+
+	// 5. Verify StateRoot
+	state := GetParentState(blk.Parents)
+	for i, msg := range blk.Messages {
+		receipt := ApplyMessage(state, msg)
+		if receipt != blk.MessageReceipts[i] {
+			Fatal("message receipt mismatch")
+		}
+	}
+	if state.Cid() != blk.StateRoot {
+		Fatal("state roots mismatch")
+	}
 }
 ```
 
@@ -163,42 +163,42 @@ Ticket validation is detailed as follows:
 
 ```go
 func RandomnessLookback(blk Block) TipSet {
-    return chain.GetAncestorTipset(blk, K)
+	return chain.GetAncestorTipset(blk, K)
 }
 
 func PowerLookback(blk Block) TipSet {
-    return chain.GetAncestorTipset(blk, L)
+	return chain.GetAncestorTipset(blk, L)
 }
 
 func IsProofAWinner(p ElectionProof, minersPower, totalPower Integer) bool {
-    return Integer.FromBytes(sha256.Sum(p)) * totalPower < minersPower * 2^32
+	return Integer.FromBytes(sha256.Sum(p))*totalPower < minersPower*2^32
 }
 
 func VerifyTickets(b Block) error {
-    // Start with the `Tickets` array
-    // get the smallest ticket from the blocks parent tipset
-    parTicket := GetSmallestTicket(b.Parents)
-    
-    // Verify each ticket in the chain of tickets. There will be one ticket
-    // plus one ticket for each failed election attempt.
-    for _, ticket := range b.Tickets {
-    	challenge := sha256.Sum(parTicket.Signature)
-    	
-        // Check VDF
-        if !VerifyVDF(ticket.VDFProof, ticket.VDFResult, challenge) {
-            return "VDF was not run properly"
-        }
-        
-        // Check VRF   
-    	pubk := getPublicKeyForMiner(b.Miner)
-    	if !VerifySignature(ticket.Signature, pubk, ticket.VDFResult) {
-        	return "Ticket was not a valid signature over the parent ticket"
-    	}
-        // in case mining this block generated multiple tickets
-        parTicket = ticket
-    }
-    
-    return nil
+	// Start with the `Tickets` array
+	// get the smallest ticket from the blocks parent tipset
+	parTicket := GetSmallestTicket(b.Parents)
+
+	// Verify each ticket in the chain of tickets. There will be one ticket
+	// plus one ticket for each failed election attempt.
+	for _, ticket := range b.Tickets {
+		challenge := sha256.Sum(parTicket.Signature)
+
+		// Check VDF
+		if !VerifyVDF(ticket.VDFProof, ticket.VDFResult, challenge) {
+			return "VDF was not run properly"
+		}
+
+		// Check VRF
+		pubk := getPublicKeyForMiner(b.Miner)
+		if !VerifySignature(ticket.Signature, pubk, ticket.VDFResult) {
+			return "Ticket was not a valid signature over the parent ticket"
+		}
+		// in case mining this block generated multiple tickets
+		parTicket = ticket
+	}
+
+	return nil
 }
 ```
 
