@@ -131,23 +131,23 @@ Type SignedMessage Struct {
   	// signing a particular Msg. An ID can be converted into a public key via 
   	// Address.GetPublicKey(ID).
 		//
-		Addrs []Address `JSON`
+		Addrs []Address
 
   	// Msgs is an array of messages. Each message in Msgs is represented by raw bytes.
   	// Each message in Msgs will correspond to an Address in Addrs by index. 
   	//
-    Msgs []bytes `JSON`   
+    Msgs []bytes 
 
   	// Sig is a cryptographic signature that was generated according to the type 
   	// reflected in Address.
-    Sig SignatureBytes `JSON` 
+    Sig SignatureBytes
     
 }
 ```
 
 ## Key Generation & Elliptic Curve Parameters
 
-This specification assumes the implementer uses a strong cryptographic pseudorandom generator `RANDOM`. The following was adapted from [IETF BLS Signature Scheme - Keygen](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.2). 
+This specification assumes the implementer uses a strong [cryptographic pseudorandom generator](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf) `RANDOM`. The following was adapted from [IETF BLS Signature Scheme - Keygen](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.2). 
 
 ```go
 Input: RANDOM
@@ -179,7 +179,7 @@ y = 9275536654923324557472019657760378807577401934535929700250279787939768770026
 
 ```
 
-[TODO: add notes on point compression and effect on serialization once a standard has been set]
+This spec will assume ZK-Crypto [point compression and formatting](https://github.com/zkcrypto/pairing/tree/master/src/bls12_381#serialization) until a standard has been set.
 
 ## Signing a Message
 
@@ -352,7 +352,7 @@ Output: PK
 2. If Address.protocol != 0 output "INVALID" and stop
 3. Actor = ROOT.GetActor(ID)
 4. PK = Actor.GetPublicKey()
-4. Output PK
+5. Output PK
 ```
 
 Where `ROOT` represents the [global state root](https://github.com/filecoin-project/specs/blob/master/state-machine.md#state-representation) indexed by `ID`. `ROOT(ID)` in this context returns a  Filecoin [`actor`]( https://github.com/filecoin-project/specs/blob/master/data-structures.md#actor). [Currently being developed] Note that there will be two `actors` associated with a particular miner: (1) a wallet actor that signs FIL transactions and (2) an online actor that performs `PoRep` and `PoSt` on behalf of the wallet actor.
@@ -385,11 +385,11 @@ Each `SignedMessage` contains an array of messages (`[]Message`), an array of ad
   - [Ethereum ECDSA Recovery - Medium](https://medium.com/@libertylocked/ec-signatures-and-recovery-in-ethereum-smart-contracts-560b6dd8876)
   - [Crypto Stack Exchange](https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106)
   - SECG Org - [4.1.6 Public Key Recovery Operation Page 47](http://www.secg.org/sec1-v2.pdf)
-
 - secp256k1 signature serialization
   - [secp256k1 recoverable signature](https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55)
   - [secp256k1 general signatures](https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177)
 - [golang implementation of secp256k1 point compression](https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338)
+- [Cryptographically Secure Pseudorandom Generators](<https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator> )
 
 ## Inspiration
 
