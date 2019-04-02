@@ -128,9 +128,7 @@ type StorageMarketActor struct {
 }
 ```
 
-
-
-#### CreateStorageMiner
+### CreateStorageMiner
 
 Parameters:
 
@@ -741,12 +739,12 @@ TODO
 A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
 
 Self modification methods (add/remove signer, change requirement) are called by
-doing a multisig transaction invoking the desired method on the contract itself. This means the 'signature 
+doing a multisig transaction invoking the desired method on the contract itself. This means the 'signature
 threshold' logic only needs to be implemented once, in one place.
 
 The [init actor](#init-actor) is used to create new instances of the multisig.
 
-#### State
+### State
 
 ```go
 type Multisig struct {
@@ -998,4 +996,3 @@ func getTransaction(txid int) Transaction {
 	return tx
 }
 ```
-

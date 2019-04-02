@@ -156,51 +156,51 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 TODO: link to spec for our CHAMP HAMT
 
 
-# Basic Type Encodings
+## Basic Type Encodings
 
 Types that appear in messages or in state must be encoded as described here.
 
-#### `PublicKey`
+### `PublicKey`
 
 The public key type is simply an array of bytes. (TODO: discuss specific encoding of key types, for now just calling it bytes is sufficient)
 
-#### `BytesAmount`
+### `BytesAmount`
 BytesAmount is just a re-typed Integer.
 
-#### `PeerID`
+### `PeerID`
 PeerID is just the serialized bytes of a libp2p peer ID.
 
 Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/100
 
-#### `Integer`
+### `Integer`
 
 Integers are encoded as LEB128 signed integers.
 
-#### `BitField`
+### `BitField`
 
 Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.
 
-#### `SectorSet`
+### `SectorSet`
 
 TODO
 
-#### `FaultSet`
+### `FaultSet`
 
 A fault set is a BitField and a block height, encoding TBD.
 
-#### `BlockHeader`
+### `BlockHeader`
 
 BlockHeader is a serialized `Block`.
 
-#### `SealProof`
+### `SealProof`
 
 SealProof is a 384-element array of bytes.
 
-#### `PoStProof`
+### `PoStProof`
 
 PoStProof is a 192-element array of bytes.
 
-#### `TokenAmount`
+### `TokenAmount`
 
 TokenAmount is a re-typed Integer.
 
@@ -211,7 +211,7 @@ TokenAmount is a re-typed Integer.
 
 This is taken from the Dwarf Standard 4, Appendix C
 
-#### Encode unsigned LEB128
+### Encode unsigned LEB128
 
 ```c
 do
@@ -225,7 +225,7 @@ do
 
 ```
 
-#### Encode signed LEB128
+### Encode signed LEB128
 
 ```c
 more = 1;
@@ -252,7 +252,7 @@ while(more)
 }
 ```
 
-#### Decode unsigned LEB128
+### Decode unsigned LEB128
 
 ```c
 result = 0;
@@ -267,7 +267,7 @@ while(true)
 }
 ```
 
-#### Decode signed LEB128
+### Decode signed LEB128
 
 ```c
 result = 0;
@@ -287,19 +287,19 @@ if ((shift <size) && (sign bit of byte is set))
   result |= - (1 << shift);
 ```
 
-# Filecoin Compact Serialization
+## Filecoin Compact Serialization
 
 Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
 
 | FCS Type | tag  |
-|---|---|
-| block v1 | 43  |
+|----------|------|
+| block v1 |  43  |
 | message v1 | 44 |
 | signedMessage v1 | 45 |
 
 For example, a message would be encoded as:
 
-```cbor
+```
 tag<44>[msg.To, msg.From, msg.Nonce, msg.Value, msg.Method, msg.Params]
 ```
 
@@ -315,12 +315,12 @@ Each individual type should be encoded as specified:
 | string | CBOR Major type 3 |
 | bool | [CBOR Major type 7, value 20/21](https://tools.ietf.org/html/rfc7049#section-2.3) |
 
-## Encoding Considerations
+### Encoding Considerations
 
 Objects should be encoded using [canonical CBOR](https://tools.ietf.org/html/rfc7049#section-3.9), and decoders should operate in [strict mode](https://tools.ietf.org/html/rfc7049#section-3.10).  The maximum size of an FCS Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
 
 Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that object is invalid.
 
-## IPLD Considerations
+### IPLD Considerations
 
 Cids for FCS objects should use the FCS multicodec (`0x1f`).

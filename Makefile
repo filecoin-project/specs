@@ -7,7 +7,7 @@ daily: cover.jpg
 
 bikeshed.prepare:
 	rm -f spec.bs
-	for f in _pre.md INTRO.md process.md operation.md sync.md validation.md storage-market.md retrieval-market.md payments.md mining.md expected-consensus.md state-machine.md actors.md faults.md signatures.md proofs.md network-protocols.md data-propagation.md data-structures.md local-storage.md definitions.md; \
+	for f in _pre.md INTRO.md process.md operation.md sync.md validation.md storage-market.md retrieval-market.md payments.md mining.md expected-consensus.md state-machine.md actors.md faults.md signatures.md proofs.md drgporep-circuit.md zigzag-circuit.md network-protocols.md data-propagation.md address.md data-structures.md local-storage.md definitions.md; \
 		do (cat "$${f}"; echo) >> spec.bs; \
 	done
 

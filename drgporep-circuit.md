@@ -4,7 +4,7 @@
 
 A Prover wants to convince a verifier that they have run the DRGPoRep replication algorithm on some data with Merkle root `comm_d` and that the Merkle root of the replicated data is `comm_r`.
 
-#### High level description
+### High level description
 
 Circuit inputs:
 
@@ -28,10 +28,10 @@ Inside of circuit checks:
 - Inclusion checks: **Check** that all the inclusion proofs are correct
 - Encoding checks: **Check** that we can derive a decoding of the replica data that equals the original data
   - **Compute** a key: Hash the concatenatation the replica identifier with the replica parent leaves in dependency order in the DRG graph
-  - **Compute** a Sloth decoding of the replica data using the key 
+  - **Compute** a Sloth decoding of the replica data using the key
   - **Check** that the decoded leaf equals the original data leaf
 
-#### Low level description
+### Low level description
 
 - **Public Parameters**: *Parameters that are embeded in the circuits or used to generate the circuit*
   - `jubjub_params: TODO`: TODO find correct structure, default: TODO
@@ -42,7 +42,7 @@ Inside of circuit checks:
 
 - **Public Inputs**: *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
   - `replica_id: Fr`  Unique identity for the replica (in Filecoin `H(replica_id, prover_id)`)
-  - `comm_d: Fr`: Merkle root of the original data 
+  - `comm_d: Fr`: Merkle root of the original data
   - `comm_r: Fr`: Merkle root of the replicated data
   - `challenge_{0..challenge_count}/inclusion_checks`
     - `replica_inclusion/path/input: Fr`: Packed boolean vector that represents the authentication path for the replica inclusion proof; bool says if path is right (1) or left (0).
@@ -112,7 +112,7 @@ Inside of circuit checks:
 
         ```
         Let leaf_bits[i = 0..deg] = challenge_{chall}/encoding_checks/parents_{i}_bits
-        
+
         Assign key : Fr = KDF(replica_id_bits, leaf_bits)
         Check KDF(replica_id_bits, leaf_bits)
         ```
@@ -121,7 +121,7 @@ Inside of circuit checks:
 
         ```
         Let leaf = challenge_{chall}/inclusion_checks/replica_inclusion/value
-        
+
         Assign decoded = SlothDecode(key, leaf, sloth_iterations)
         Check SlothDecode(key, leaf, sloth_iterations)
         ```
@@ -130,7 +130,7 @@ Inside of circuit checks:
 
         ```
         Let leaf = /challenge_{chall}/inclusion_checks/data_inclusion/value
-        
+
         Check leaf == decoded
         ```
 
@@ -142,6 +142,6 @@ Inside of circuit checks:
 - **Merkle root**: Root hash of a binary Merkle tree
 - **UInt**: Unsigned integer
 - **{0..x}**: From 0 (included) to x (not included) (e.g. [0,x)] )
-- **Check**: 
+- **Check**:
   - If there is an equality, create a constraint
   - otherwise, execute the function
