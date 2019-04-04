@@ -424,9 +424,12 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 	// We could set up a 'grace period' for starting mining that would allow miners
 	// to submit several sectors for their first proving period. Alternatively, we
 	// could simply make the 'CommitSector' call take multiple sectors at a time.
+	//
+	// Note: Proving period is a function of sector size; small sectors take less
+	// time to prove than large sectors do. Sector size is selected when pledging.
 	if miner.ProvingSet.Size() == 0 {
 		miner.ProvingSet = miner.Sectors
-		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration
+		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration(miner.SectorSize)
 	}
 
 	return sectorId
@@ -459,7 +462,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 
 	var feesRequired TokenAmount
 
-	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime {
+	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
 		// TODO: determine what exactly happens here. Is the miner permanently banned?
 		Fatal("Post submission too late")
 	} else if chain.Now() > miner.ProvingPeriodEnd {
@@ -508,7 +511,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// NEEDS REVIEW: early submission of PoSts may give the miner extra time for
 	// their next PoSt, which could compound. Does the beacon reseeding for Posts
 	// address this well enough?
-	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration
+	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
 
 	// update next done set
 	miner.NextDoneSet = done
@@ -551,7 +554,7 @@ func SlashStorageFault() {
 		Fatal("miner already slashed")
 	}
 
-	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime {
+	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
 
