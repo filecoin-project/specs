@@ -728,6 +728,18 @@ func GetPeerID() PeerID {
 }
 ```
 
+### GetSectorSize
+
+Parameters: None
+
+Return: BytesAmount
+
+```go
+func GetSectorSize() BytesAmount {
+	return self.SectorSize
+}
+```
+
 ### UpdatePeerID
 
 Parameters:
