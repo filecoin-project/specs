@@ -395,7 +395,7 @@ Return: SectorID
 ```go
 // NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
 func CommitSector(comm Commitment, proof *SealProof) SectorID {
-	if !miner.ValidatePoRep(comm, miner.PublicKey, proof) {
+	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.PublicKey, proof) {
 		Fatal("bad proof!")
 	}
 
