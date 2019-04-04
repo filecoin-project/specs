@@ -124,8 +124,8 @@ The storage market actor is the central point for the Filecoin storage market. I
 type StorageMarketActor struct {
 	Miners AddressSet
 
-    // TODO: Determine correct unit of measure. Could be denominated in the
-    // smallest sector size supported by the network.
+	// TODO: Determine correct unit of measure. Could be denominated in the
+	// smallest sector size supported by the network.
 	TotalStorage BytesAmount
 }
 ```
@@ -148,9 +148,9 @@ Return: Address
 
 ```go
 func CreateStorageMiner(pubkey PublicKey, pledge, sectorSize BytesAmount, pid PeerID) Address {
-    if !SupportedSectorSize(sectorSize) {
-        Fatal("Unsupported sector size")
-    }
+	if !SupportedSectorSize(sectorSize) {
+		Fatal("Unsupported sector size")
+	}
 
 	if pledge < MinimumPledge(sectorSize) {
 		Fatal("Pledge too low")
