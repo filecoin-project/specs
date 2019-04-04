@@ -287,7 +287,7 @@ type StorageMiner struct {
 	// PledgeBytes is the amount of space being offered by this miner to the network
 	PledgeBytes BytesAmount
 
-	// SectorSize is the amount of space in the sectors committed to the network
+	// SectorSize is the amount of space in each sector committed to the network
 	// by this miner.
 	SectorSize BytesAmount
 
