@@ -160,7 +160,7 @@ func CreateStorageMiner(pubkey PublicKey, pledge, sectorSize BytesAmount, pid Pe
 		Fatal("not enough funds to cover required collateral")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, pid, sectorSize))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
 
 	self.Miners.Add(newminer)
 
