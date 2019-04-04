@@ -480,7 +480,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Refund(msg.Value - feesRequired)
 	}
 
-	if !CheckPostProofs(proofs, faults) {
+	if !CheckPostProofs(miner.SectorSize, proofs, faults) {
 		Fatal("proofs invalid")
 	}
 
