@@ -487,14 +487,14 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	permLostSet = AggregateBitfields(faults).Subtract(recovered)
 
 	// adjust collateral for 'done' sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.NextDoneSet)
-	miner.Collateral += CollateralForSectors(miner.NextDoneSet)
+	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
+	miner.Collateral += CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
 
 	// penalize collateral for lost sectors
-	miner.ActiveCollateral -= CollateralForSectors(permLostSet)
+	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, permLostSet)
 
 	// burn funds for fees and collateral penalization
-	BurnFunds(miner, CollateralForSectors(permLostSet)+feesRequired)
+	BurnFunds(miner, CollateralForSectors(miner.SectorSize, permLostSet)+feesRequired)
 
 	// update sector sets and proving set
 	miner.Sectors.Subtract(done)
