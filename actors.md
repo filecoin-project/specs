@@ -124,7 +124,9 @@ The storage market actor is the central point for the Filecoin storage market. I
 type StorageMarketActor struct {
 	Miners AddressSet
 
-	TotalStorage Integer
+    // TODO: Determine correct unit of measure. Could be denominated in the
+    // smallest sector size supported by the network.
+	TotalStorage BytesAmount
 }
 ```
 
@@ -239,12 +241,12 @@ UpdateStorage is used to update the global power table.
 
 Parameters:
 
-- delta Integer
+- delta BytesAmount
 
 Return: None
 
 ```go
-func UpdateStorage(delta Integer) {
+func UpdateStorage(delta BytesAmount) {
 	if !self.Miners.Has(msg.From) {
 		Fatal("update storage must only be called by a miner actor")
 	}
@@ -257,10 +259,10 @@ func UpdateStorage(delta Integer) {
 
 Parameters: None
 
-Return: Integer
+Return: BytesAmount
 
 ```go
-func GetTotalStorage() Integer {
+func GetTotalStorage() BytesAmount {
 	return self.TotalStorage
 }
 ```
@@ -500,7 +502,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// update miner power to the amount of data actually proved during
 	// the last proving period.
 	oldPower := miner.Power
-	miner.Power = SizeOf(Filter(miner.ProvingSet, faults))
+	miner.Power = SizeOf(Filter(miner.ProvingSet, faults)) * miner.SectorSize
 	StorageMarket.UpdateStorage(miner.Power - oldPower)
 
 	miner.ProvingSet = miner.Sectors
@@ -693,10 +695,10 @@ func GetWorkerAddr() Address {
 
 Parameters: None
 
-Return: Integer
+Return: BytesAmount
 
 ```go
-func GetPower() Integer {
+func GetPower() BytesAmount {
 	return self.Power
 }
 ```
