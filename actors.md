@@ -138,13 +138,19 @@ Parameters:
 
 - pledge BytesAmount
 
+- sectorSize BytesAmount
+
 - pid PeerID
 
 Return: Address
 
 ```go
-func CreateStorageMiner(pubkey PublicKey, pledge BytesAmount, pid PeerID) Address {
-	if pledge < MinimumPledge {
+func CreateStorageMiner(pubkey PublicKey, pledge, sectorSize BytesAmount, pid PeerID) Address {
+    if !SupportedSectorSize(sectorSize) {
+        Fatal("Unsupported sector size")
+    }
+
+	if pledge < MinimumPledge(sectorSize) {
 		Fatal("Pledge too low")
 	}
 
@@ -152,7 +158,7 @@ func CreateStorageMiner(pubkey PublicKey, pledge BytesAmount, pid PeerID) Addres
 		Fatal("not enough funds to cover required collateral")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, pid))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, pid, sectorSize))
 
 	self.Miners.Add(newminer)
 
@@ -278,6 +284,10 @@ type StorageMiner struct {
 
 	// PledgeBytes is the amount of space being offered by this miner to the network
 	PledgeBytes BytesAmount
+
+	// SectorSize is the amount of space in the sectors committed to the network
+	// by this miner.
+	SectorSize BytesAmount
 
 	// Collateral is locked up filecoin the miner has available to commit to storage.
 	// When miners commit new sectors, tokens are moved from here to 'ActiveCollateral'
