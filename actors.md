@@ -405,9 +405,7 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 	}
 
 	// make sure the miner has enough collateral to add more storage
-	// currently, all sectors are the same size, and require the same collateral
-	// in the future, we may have differently sized sectors and need special handling
-	coll = CollateralForSector()
+	coll = CollateralForSector(miner.SectorSize)
 
 	if coll < miner.Collateral {
 		Fatal("not enough collateral")
