@@ -324,3 +324,21 @@ Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that 
 ## IPLD Considerations
 
 Cids for FCS objects should use the FCS multicodec (`0x1f`).
+
+## Vectors
+
+Below are some sample vectors for each data type.
+
+### Message
+
+Encoded: `d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d46558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f644d706172616d73617265676f6f64`
+
+Decoded:
+```
+To:     Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
+From:   Address("f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy")
+Nonce:  uint64(117)
+Value:  BigInt(15000000000)
+Method: string("method")
+Params: []byte("paramsaregood")
+```
