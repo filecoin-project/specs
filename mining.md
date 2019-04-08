@@ -44,7 +44,7 @@ TODO: sectors need to be globally unique. This can be done either by having the 
 At the beginning of their proving period, miners collect the proving set (the set of all live sealed sectors on the chain at this point), and then call `ProveStorage`. This process will take the entire proving period to complete.
 
 ```go
-func ProveStorage(sectors []commR, startTime BlockHeight) (PoSTProof, []Fault) {
+func ProveStorage(sectorSize BytesAmount, sectors []commR, startTime BlockHeight) (PoSTProof, []Fault) {
 	var proofs []Proofs
 	var seeds []Seed
 	var faults []Fault
@@ -54,7 +54,7 @@ func ProveStorage(sectors []commR, startTime BlockHeight) (PoSTProof, []Fault) {
 		proofs = append(proofs, proof)
 		faults = append(faults, fault)
 	}
-	return GenPostSnark(sectors, seeds, proofs), faults
+	return GenPostSnark(sectorSize, sectors, seeds, proofs), faults
 }
 ```
 

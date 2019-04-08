@@ -124,7 +124,9 @@ The storage market actor is the central point for the Filecoin storage market. I
 type StorageMarketActor struct {
 	Miners AddressSet
 
-	TotalStorage Integer
+	// TODO: Determine correct unit of measure. Could be denominated in the
+	// smallest sector size supported by the network.
+	TotalStorage BytesAmount
 }
 ```
 
@@ -138,13 +140,19 @@ Parameters:
 
 - pledge BytesAmount
 
+- sectorSize BytesAmount
+
 - pid PeerID
 
 Return: Address
 
 ```go
-func CreateStorageMiner(pubkey PublicKey, pledge BytesAmount, pid PeerID) Address {
-	if pledge < MinimumPledge {
+func CreateStorageMiner(pubkey PublicKey, pledge, sectorSize BytesAmount, pid PeerID) Address {
+	if !SupportedSectorSize(sectorSize) {
+		Fatal("Unsupported sector size")
+	}
+
+	if pledge < MinimumPledge(sectorSize) {
 		Fatal("Pledge too low")
 	}
 
@@ -152,7 +160,7 @@ func CreateStorageMiner(pubkey PublicKey, pledge BytesAmount, pid PeerID) Addres
 		Fatal("not enough funds to cover required collateral")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, pid))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
 
 	self.Miners.Add(newminer)
 
@@ -233,12 +241,12 @@ UpdateStorage is used to update the global power table.
 
 Parameters:
 
-- delta Integer
+- delta BytesAmount
 
 Return: None
 
 ```go
-func UpdateStorage(delta Integer) {
+func UpdateStorage(delta BytesAmount) {
 	if !self.Miners.Has(msg.From) {
 		Fatal("update storage must only be called by a miner actor")
 	}
@@ -251,10 +259,10 @@ func UpdateStorage(delta Integer) {
 
 Parameters: None
 
-Return: Integer
+Return: BytesAmount
 
 ```go
-func GetTotalStorage() Integer {
+func GetTotalStorage() BytesAmount {
 	return self.TotalStorage
 }
 ```
@@ -278,6 +286,10 @@ type StorageMiner struct {
 
 	// PledgeBytes is the amount of space being offered by this miner to the network
 	PledgeBytes BytesAmount
+
+	// SectorSize is the amount of space in each sector committed to the network
+	// by this miner.
+	SectorSize BytesAmount
 
 	// Collateral is locked up filecoin the miner has available to commit to storage.
 	// When miners commit new sectors, tokens are moved from here to 'ActiveCollateral'
@@ -383,7 +395,7 @@ Return: SectorID
 ```go
 // NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
 func CommitSector(comm Commitment, proof *SealProof) SectorID {
-	if !miner.ValidatePoRep(comm, miner.PublicKey, proof) {
+	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.PublicKey, proof) {
 		Fatal("bad proof!")
 	}
 
@@ -393,9 +405,7 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 	}
 
 	// make sure the miner has enough collateral to add more storage
-	// currently, all sectors are the same size, and require the same collateral
-	// in the future, we may have differently sized sectors and need special handling
-	coll = CollateralForSector()
+	coll = CollateralForSector(miner.SectorSize)
 
 	if coll < miner.Collateral {
 		Fatal("not enough collateral")
@@ -414,9 +424,12 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 	// We could set up a 'grace period' for starting mining that would allow miners
 	// to submit several sectors for their first proving period. Alternatively, we
 	// could simply make the 'CommitSector' call take multiple sectors at a time.
+	//
+	// Note: Proving period is a function of sector size; small sectors take less
+	// time to prove than large sectors do. Sector size is selected when pledging.
 	if miner.ProvingSet.Size() == 0 {
 		miner.ProvingSet = miner.Sectors
-		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration
+		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration(miner.SectorSize)
 	}
 
 	return sectorId
@@ -449,7 +462,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 
 	var feesRequired TokenAmount
 
-	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime {
+	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
 		// TODO: determine what exactly happens here. Is the miner permanently banned?
 		Fatal("Post submission too late")
 	} else if chain.Now() > miner.ProvingPeriodEnd {
@@ -467,21 +480,21 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Refund(msg.Value - feesRequired)
 	}
 
-	if !CheckPostProofs(proofs, faults) {
+	if !CheckPostProofs(miner.SectorSize, proofs, faults) {
 		Fatal("proofs invalid")
 	}
 
 	permLostSet = AggregateBitfields(faults).Subtract(recovered)
 
 	// adjust collateral for 'done' sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.NextDoneSet)
-	miner.Collateral += CollateralForSectors(miner.NextDoneSet)
+	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
+	miner.Collateral += CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
 
 	// penalize collateral for lost sectors
-	miner.ActiveCollateral -= CollateralForSectors(permLostSet)
+	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, permLostSet)
 
 	// burn funds for fees and collateral penalization
-	BurnFunds(miner, CollateralForSectors(permLostSet)+feesRequired)
+	BurnFunds(miner, CollateralForSectors(miner.SectorSize, permLostSet)+feesRequired)
 
 	// update sector sets and proving set
 	miner.Sectors.Subtract(done)
@@ -490,7 +503,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// update miner power to the amount of data actually proved during
 	// the last proving period.
 	oldPower := miner.Power
-	miner.Power = SizeOf(Filter(miner.ProvingSet, faults))
+	miner.Power = SizeOf(Filter(miner.ProvingSet, faults)) * miner.SectorSize
 	StorageMarket.UpdateStorage(miner.Power - oldPower)
 
 	miner.ProvingSet = miner.Sectors
@@ -498,7 +511,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// NEEDS REVIEW: early submission of PoSts may give the miner extra time for
 	// their next PoSt, which could compound. Does the beacon reseeding for Posts
 	// address this well enough?
-	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration
+	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
 
 	// update next done set
 	miner.NextDoneSet = done
@@ -541,7 +554,7 @@ func SlashStorageFault() {
 		Fatal("miner already slashed")
 	}
 
-	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime {
+	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
 
@@ -683,10 +696,10 @@ func GetWorkerAddr() Address {
 
 Parameters: None
 
-Return: Integer
+Return: BytesAmount
 
 ```go
-func GetPower() Integer {
+func GetPower() BytesAmount {
 	return self.Power
 }
 ```
@@ -712,6 +725,18 @@ Return: PeerID
 ```go
 func GetPeerID() PeerID {
 	return self.PeerID
+}
+```
+
+### GetSectorSize
+
+Parameters: None
+
+Return: BytesAmount
+
+```go
+func GetSectorSize() BytesAmount {
+	return self.SectorSize
 }
 ```
 
