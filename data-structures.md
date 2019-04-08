@@ -342,3 +342,20 @@ Value:  BigInt(15000000000)
 Method: string("method")
 Params: []byte("paramsaregood")
 ```
+
+### Block
+
+Encoded: `d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f6788080`
+
+Decoded:
+```
+Miner:           Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
+Tickets:         [][]byte{"iamaticket"}
+ElectionProof:   []byte("i am an election proof")
+Parents:         []Cid{"zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B"}
+ParentWeight:    NewInt(47978)
+Height:          uint64(1234567)
+StateRoot:       Cid("zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B")
+Messages:        []SignedMessage{}
+MessageReceipts: []MessageReceipt{}
+```
