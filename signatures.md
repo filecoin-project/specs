@@ -42,9 +42,7 @@ Note that messages between actors are not signed. This is an unfortunate namespa
 
 ## Interfaces
 
-Filecoin requires a system that fulfils the following interfaces to function correctly.
-
-Note: `Message` is used here as the object being signed, but this interface should also work for other things that need to be signed. 
+Filecoin requires a system that fulfils the following interfaces to function correctly. 
 
 ### PrivateKey Interface
 
@@ -125,12 +123,20 @@ type Signature interface {
 	//    sig - a series of bytes representing a signature
 	//
 	Recover(msg Message, addr Address, sig SignatureBytes) (pk PublicKey, err error)
+  
+  //
+  //
+  Marshall(smsg SignedMessage) (SmsgBytes []byte, err error)
+  
+  //
+  //
+  Unmarshall(SmsgBytes []byte) (smsg SignedMessage, err error)
 }
 ```
 
 ## Signed Message
 
-This is the container for a signature that combines a message with an address and signature. 
+This is a container that combines a message with an address and signature. Note that while `PrivateKey.Sign` outputs a serialized representation of a cryptographic signature as `SignatureBytes`, this "signature" should not be sent over the wire. Note also that there are two levels of serialization when signing messages in Filecoin. (1) Representing a cryptographic element as bytes—like the output of `PrivateKey.Sign` and (2) Representing a bundle of information needed to verify the validity of a message—`SignedMessage`. 
 
 ```go
 type SignedMessage struct {
@@ -227,7 +233,7 @@ Where h(msg) is the output of a cryptographic hash function and sigma is the not
 
 ## Aggregating Signed Messages
 
-Pairing-based signatures allow a user to represent a collection of signatures as a single element in the base group. In other words, we can take a collection of signatures and "add" them together into a single value that is the same size as a single signature. We call this process Signature Aggregation. The result of this operation is called the Aggregate Signature which has the same general properties as any other pairing-based Signature. Some security [considerations](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html).
+Pairing-based signatures allow a user to represent a collection of signatures as a single element in the base group. ECDSA signatures are not pairing-based and are not aggregatable in this scheme. In other words, we can take a collection of signatures and "add" them together into a single value that is the same size as a single signature. We call this process Signature Aggregation. The result of this operation is called the Aggregate Signature which has the same general properties as any other pairing-based Signature. Some security [considerations](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html).
 
 ### Aggregation Process (taken from [IETF BLS Signature Scheme - Aggregate](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.5) )
 
