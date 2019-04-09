@@ -67,6 +67,8 @@ The protocol starts with storage client (which in this case may be a normal stor
 First the client sends a signed `StorageDealProposal` to the storage miner:
 
 ```go
+type Commitment []byte;
+
 type StorageDealProposal struct {
 	// PieceRef is the hash of the data in native structure. This will be used for
 	// certifying the data transfer
@@ -76,9 +78,9 @@ type StorageDealProposal struct {
 	// into the data that will be packed into a sector.
 	SerializationMode string
 
-	// TranslatedRef is the data hashed in a form that is compatible with the proofs system
+	// CommP is the data hashed in a form that is compatible with the proofs system
 	// TODO: this *could* possibly be combined with the PieceRef
-	TranslatedRef Cid
+	CommP Commitment
 
 	Size NumBytes
 
@@ -182,7 +184,7 @@ func SendStorageProposal(miner Address, file Cid, duration NumBlocks, price Toke
 
 	prop := StorageDealProposal{
 		PieceRef:      file,
-		TranslatedRef: commitment,
+		CommP: commitment,
 		TotalPrice:    price * size, // Maybe just leave this to the payment info?
 		Duration:      duration,
 		Size:          size,
@@ -229,12 +231,12 @@ type StorageDealResponse struct {
 	// ProposalCid is the cid of the StorageDealProposal object this response is for
 	ProposalCid Cid
 
-	// PieceConfirmation is a collection of information needed to convince the client that
+	// PieceInclusionProof is a collection of information needed to convince the client that
 	// the miner has sealed the data into a sector.
 	// Note: the miner doesnt necessarily have to have committed the sector at this point
 	// they just need to have staged it into a sector, and be committed to putting it at
 	// that place in the sector.
-	PieceConfirmation PieceConfirmation
+	PieceInclusionProof PieceInclusionProof
 
 	// SectorCommitMsg is the Cid of the message that was sent to submit
 	// the sector containing this data to the chain.
@@ -297,15 +299,15 @@ func ValidateInput(prop StorageDealProposal) {
 
 If `response.State` is `Accepted` then the client should proceed to transfer the data in question to the storage miner. This operation happens out of band from this protocol, and can be a simple bitswap transfer at first. Support for other more 'exotic' 'protocols' such as mailing hard drives is an explicit goal.
 
-Next, when the miner receives all the data and validates it, they set the `DealState` to `Staged`. When the sector gets sealed, and the commitment is posted on chain, the state gets set to `Complete` and the deals `PieceConfirmation` field should be set to the appropriate values.
+Next, when the miner receives all the data and validates it, they set the `DealState` to `Staged`. When the sector gets sealed, and the commitment is posted on chain, the state gets set to `Complete` and the deals `PieceInclusionProof` field should be set to the appropriate values.
 
 ```go
 func OnDataReceived(prop StorageDealProposal) {
-	if !ValidatePieceTranslation(prop.PieceRef, prop.SerializationMode, prop.TranslatedRef) {
+	if !ValidatePieceTranslation(prop.PieceRef, prop.SerializationMode, prop.CommP) {
 		resp := StorageDealResponse{
 			State:    Rejected,
 			Proposal: prop.Cid(),
-			Message:  "TranslatedRef was invalid, reconstructed data did not match",
+			Message:  "CommP was invalid, reconstructed data did not match",
 		}
 
 		miner.Sign(resp)
@@ -313,7 +315,7 @@ func OnDataReceived(prop StorageDealProposal) {
 		return
 	}
 
-	// TODO: is TranslatedRef actually needed? How does it tie in?
+	// TODO: is CommP actually needed? How does it tie in?
 	SectorBuilder.AddPiece(prop.PieceRef, prop.SerializationMode)
 }
 ```
@@ -323,7 +325,7 @@ func OnSectorPacked(prop StorageDealProposal, pieceConf PieceCommitment) {
 	resp := StorageDealResponse{
 		State:             Staged,
 		Proposal:          prop.Cid(),
-		PieceConfirmation: pieceConf,
+		PieceInclusionProof: pieceConf,
 	}
 
 	miner.Sign(resp)
@@ -331,7 +333,7 @@ func OnSectorPacked(prop StorageDealProposal, pieceConf PieceCommitment) {
 }
 ```
 
-Once the deal makes it to the `Staged` state, the client should be able to query and get the `PieceConfirmation` that they need to verify that the miner is indeed storing their data.
+Once the deal makes it to the `Staged` state, the client should be able to query and get the `PieceInclusionProof` that they need to verify that the miner is indeed storing their data.
 
 ```go
 func OnSectorSealed(prop StorageDealProposal, msgcid Cid) {
@@ -339,7 +341,7 @@ func OnSectorSealed(prop StorageDealProposal, msgcid Cid) {
 	nstate := StorageDealResponse{
 		State:             Complete,
 		Proposal:          prop.Cid(),
-		PieceConfirmation: curState.PieceConfirmation,
+		PieceInclusionProof: curState.PieceInclusionProof,
 		SectorCommitMsg:   msgcid,
 	}
 
