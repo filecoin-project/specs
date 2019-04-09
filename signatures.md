@@ -21,7 +21,7 @@ Note that messages between actors are not signed. This is an unfortunate namespa
 ## Dependencies
 
 - Elliptic curve implementations
-  - ECDSA with secp256k1 (BitCoin-style elliptic curve)
+  - [ECDSA](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf) with [secp256k1](https://www.secg.org/sec2-v2.pdf) (BitCoin-style ECDSA)
   - BLS12-381 for BLS signatures and aggregation. 
     - Described as *Variant 1* in [IETF BLS Signature Scheme](https://tools.ietf.org/html/draft-boneh-bls-signature-00)
     - Small signature size
@@ -40,108 +40,116 @@ Note that messages between actors are not signed. This is an unfortunate namespa
 - Transport encryption
 - File encodings (PoRep)
 
-## Interface
+## Interfaces
 
-Filecoin requires a system that fulfils the following interface to function correctly.
+Filecoin requires a system that fulfils the following interfaces to function correctly.
 
 Note: `Message` is used here as the object being signed, but this interface should also work for other things that need to be signed. 
+
+### PrivateKey Interface
+
+```go
+type PrivateKey interface {
+
+	// Sign generates a proof that miner `M` generated or approved of message `msg`.
+	//
+	// Out:
+	//   sig - a series of bytes representing a signature
+	//   err - a standard error message indicating any process issues
+	// In:
+	//   msg - a series of bytes representing a message to be signed
+	//   addr - the Filecoin `Address` of the signer
+	//   sk - a private key which cryptographically links `M` to `sig`
+	//
+	Sign(msg Message, addr Address, sk PrivateKey) (sig SignatureBytes, err error)
+}
+```
+
+### Signature Interface
 
 ```go
 type Signature interface {
 
-        // Sign generates a proof that miner `M` generated or approved of message `msg`.
-        //
-        // Out:
-        //   sig - a series of bytes representing a signature  
-        //   err - a standard error message indicating any process issues
-        // In:
-        //   msg - a series of bytes representing a message to be signed
-  		  //   addr - the Filecoin `Address` of the signer
-        //   sk - a private key which cryptographically links `M` to `sig`
-        //
-        //Sign(msg Message, addr Address, sk PrivateKey) (sig SignatureBytes, err error)
-        
-        // Aggregate generates a BLS signature aggregate from a set of BLS 
-        // signatures. Associated `Address` must be passed to this function
-  		  // so that the aggregate can be verified. This function will pair a `sig` 
-  			// with an `Address` based on index in `sigs` and `addresses`.
-        //
-        // Out:
-        // 	 sig - a series of bytes representing a single BLS signature
-        //   err - a standard error message indicating any process issues
-        // In:
-     		//   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
-    		//   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
-  			//
-  			Aggregate(sigs []SignatureBytes, addrs []Address) (sig SignatureBytes, err error)
-  
-  			// Verify validates the statement: only `M` could have generated `sig`
-        // given the validator has a message `m`, a signature `sig`, and a
-        // public key `pk`.
-        //
-        // Out:
-        //   valid - a boolean value indicating the signature is valid
-        //   err - a standard error message indicating any process issues
-        // In:
-  			//   smsg - a SignedMessage which contains {Message, Address, SignatureBytes}
-        //   pk - a Public Key of the appropriate type
-        //
-        Verify(smsg SignedMessgage, pk PublicKey) (valid bool, err error)
-  
-  			// VerifyAggregate validates a collection of statements that are represeted by 
-  			// a signature aggregate: "For each M_i and PK_i in smsg, only this collection 
-  			// of {M}, {PK}, and signers could have generated `smsg.SignatureBytes`.
-  			//
-        // Out:
-        //   valid - a boolean value indicating the signature is valid
-        //   err - a standard error message indicating any process issues
-        // In:
-        //   smsg - a SignedMessage which contains {[]Message, []Address, SignatureBytes}
-        //   pks - an array of Public Keys of the appropriate type associated with a message
-  			// 	 at index `i` in []Message.
-        //
-  			VerifyAggregate(smsg SignedMessgage,  pks []PublicKeys) (valid bool, err error)
+	// Aggregate generates a BLS signature aggregate from a set of BLS
+	// signatures. Associated `Address` must be passed to this function
+	// so that the aggregate can be verified. This function will pair a `sig`
+	// with an `Address` based on index in `sigs` and `addresses`.
+	//
+	// Out:
+	// 	 sig - a series of bytes representing a single BLS signature
+	//   err - a standard error message indicating any process issues
+	// In:
+	//   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
+	//   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
+	//
+	Aggregate(sigs []SignatureBytes, addrs []Address) (sig SignatureBytes, err error)
 
-        // Recover determines the public key associated with a particular signature. For
-  			// ECDSA signatures public keys can be recovered from SignatureBytes and an
-  			// associated message. For BLS signatures, public keys will be recovered by lookup 
-  			// using a mapping from Address to public key.
-        //
-        // Out:
-        //    pk - the public key associated with `M` who signed `msg`
-        //    err - a standard error message indicating any process issues
-        //    **
-        // In:
-        //    msg - a series of bytes representing the signed message
-        //    sig - a series of bytes representing a signature
-        //
-        Recover(msg Message, addr Address, sig SignatureBytes) (pk PublicKey, err error)
+	// Verify validates the statement: only `M` could have generated `sig`
+	// given the validator has a message `m`, a signature `sig`, and a
+	// public key `pk`.
+	//
+	// Out:
+	//   valid - a boolean value indicating the signature is valid
+	//   err - a standard error message indicating any process issues
+	// In:
+	//   smsg - a SignedMessage which contains {Message, Address, SignatureBytes}
+	//   pk - a Public Key of the appropriate type
+	//
+	Verify(smsg SignedMessgage, pk PublicKey) (valid bool, err error)
+
+	// VerifyAggregate validates a collection of statements that are represeted by
+	// a signature aggregate: "For each M_i and PK_i in smsg, only this collection
+	// of {M}, {PK}, and signers could have generated `smsg.SignatureBytes`.
+	//
+	// Out:
+	//   valid - a boolean value indicating the signature is valid
+	//   err - a standard error message indicating any process issues
+	// In:
+	//   smsg - a SignedMessage which contains {[]Message, []Address, SignatureBytes}
+	//   pks - an array of Public Keys of the appropriate type associated with a message
+	// 	 at index `i` in []Message.
+	//
+	VerifyAggregate(smsg SignedMessgage, pks []PublicKeys) (valid bool, err error)
+
+	// Recover determines the public key associated with a particular signature. For
+	// ECDSA signatures public keys can be recovered from SignatureBytes and an
+	// associated message. For BLS signatures, public keys will be recovered by lookup
+	// using a mapping from Address to public key.
+	//
+	// Out:
+	//    pk - the public key associated with `M` who signed `msg`
+	//    err - a standard error message indicating any process issues
+	//    **
+	// In:
+	//    msg - a series of bytes representing the signed message
+	//    sig - a series of bytes representing a signature
+	//
+	Recover(msg Message, addr Address, sig SignatureBytes) (pk PublicKey, err error)
 }
 ```
 
-### Signed Message
+## Signed Message
 
 This is the container for a signature that combines a message with an address and signature. 
 
 ```go
-Type SignedMessage Struct {
+type SignedMessage struct {
 
-		// Addrs is an array of Addresses associated with a particular message in Msgs 
-  	// at the same index. Each Address tracks the ID of the actor responsible for 
-  	// signing a particular Msg. An ID can be converted into a public key via 
-  	// Address.GetPublicKey(ID).
-		//
-		Addrs []Address
+	// Addrs is an array of Addresses associated with a particular message in Msgs
+	// at the same index. Each Address tracks the ID of the actor responsible for
+	// signing a particular Msg. An ID can be converted into a public key via
+	// Address.GetPublicKey(ID).
+	//
+	Addrs []Address
 
-  	// Msgs is an array of messages. Each message in Msgs is represented by raw bytes.
-  	// Each message in Msgs will correspond to an Address in Addrs by index. 
-  	//
-    Msgs []bytes 
+	// Msgs is an array of messages. Each message in Msgs is represented by raw bytes.
+	// Each message in Msgs will correspond to an Address in Addrs by index.
+	//
+	Msgs []bytes
 
-  	// Sig is a cryptographic signature that was generated according to the type 
-  	// reflected in Address.
-    Sig SignatureBytes
-    
+	// Sig is a cryptographic signature that was generated according to the type
+	// reflected in Address.
+	Sig SignatureBytes
 }
 ```
 
@@ -149,13 +157,13 @@ Type SignedMessage Struct {
 
 This specification assumes the implementer uses a strong [cryptographic pseudorandom generator](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf) `RANDOM`. The following was adapted from [IETF BLS Signature Scheme - Keygen](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.2). 
 
-```go
+```text
 Input: RANDOM
 Output: PK, SK
 
-   1.  SK = x, chosen as a random integer in the range 1 and r-1
-   2.  PK = x*P, P is an element of an elliptic curve E
-   3.  Output PK, SK
+    1.  SK = x, chosen as a random integer in the range 1 and r-1
+    2.  PK = x*P, P is an element of an elliptic curve E
+    3.  Output PK, SK
 ```
 
 For ECDSA, `P` is the generator for `E`. For BLS, we choose `P` to be a generator in `E2` which is the larger of the elliptic curve groups.
@@ -164,7 +172,7 @@ For ECDSA, `P` is the generator for `E`. For BLS, we choose `P` to be a generato
 
 We have chosen to use the same elliptic curve parameters as [zkcrypto/pairing](https://github.com/zkcrypto/pairing/tree/master/src/bls12_381) with the exception that we are signing in G1 and generating public keys in G2. Note: there is a namespace collision between [zkcrypto/pairing](https://github.com/zkcrypto/pairing/tree/master/src/bls12_381) and [IETF BLS Signature Scheme](https://tools.ietf.org/html/draft-boneh-bls-signature-00) concerning G1 and G2. In zkcrypto/paring, G1 and G2 are points defined in the largest prime order subgroup of the elliptic curve defined by BLS12-381. In the IETF BLS Signature Scheme, G1 and G2 represent the largest prime order subgroups in BLS12-381. We will comply with the IETF standard. We will denote the generators of G1 and G2 as P1 and P2 respectively. E1 and E2 will denote the elliptic curve defined by BLS12-381.
 
-```go
+```text
 q = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
 
 r = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
@@ -187,32 +195,32 @@ This spec will assume ZK-Crypto [point compression and formatting](https://githu
 
 This is a high-level procedure and is meant for exposition. Exact parameterization and procedure is contained here [libsecp256k1](https://github.com/bitcoin-core/secp256k1)
 
-```go
+```text
 Input: SK = x, k, h(msg)       
 Output: r,s
 
-1. Input a secret key SK = x, a random integer k, and h(msg)
-2. K = k*G = (x_k, y_k)
-3. r = x_k (mod n)
-4. If r = x_k (mod n) output "INVALID" and stop
-5. If r = 0 (mod n) output "INVALID" and stop
-6. s = ~k*( h(msg) + r*x)
-7. Output (r,s)
+    1. Input a secret key SK = x, a random integer k, and h(msg)
+    2. K = k*G = (x_k, y_k)
+    3. r = x_k (mod n)
+    4. If r = x_k (mod n) output "INVALID" and stop
+    5. If r = 0 (mod n) output "INVALID" and stop
+    6. s = ~k*( h(msg) + r*x)
+    7. Output (r,s)
 ```
 
 The couple `(r,s)` is the ECDSA signature of the signer over the message `msg`. `G` is the generator for the elliptic curve used in ECDSA (cofactor `1`). The order of `G` is `n`. `~y` represents the multiplicative modular inverses of `y`. This procedure assumes that `bit_len(h(msg)) < bit_length(n)`. `k` is chosen randomly from `[1, n-1]`. `h(msg)` is interpreted as an integer in the above procedure.
 
 ### `Sign` via BLS (taken from [IETF BLS Signature Scheme - Sign](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.3) with BLS12-381)
 
-```go
+```text
 Input: SK = x, h(msg)       
 Output: sigma
 	 
-	 1.  Input a secret key SK = x and h(msg)
-	 2.  H = hash_to_G1(suite_string, h(msg))
-   3.  Gamma = x*H
-   4.  sigma = E1_to_string(Gamma)
-   5.  Output sigma
+    1.  Input a secret key SK = x and h(msg)
+    2.  H = hash_to_G1(suite_string, h(msg))
+    3.  Gamma = x*H
+    4.  sigma = E1_to_string(Gamma)
+    5.  Output sigma
 ```
 
 Where h(msg) is the output of a cryptographic hash function and sigma is the notation for BLS signature.
@@ -223,11 +231,11 @@ Pairing-based signatures allow a user to represent a collection of signatures as
 
 ### Aggregation Process (taken from [IETF BLS Signature Scheme - Aggregate](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.5) )
 
-```go
+```text
 Input: (PK_1, sigma_1), ..., (PK_n, sigma_n)    
 Output: sigma
 
-   1.  Output sigma = sigma_1 + sigma_2 + ... + sigma_n
+    1.  Output sigma = sigma_1 + sigma_2 + ... + sigma_n
 ```
 
 Where `sigma_i` is a Signature with associated public key  `PK_i`. `sigma` is the Aggregate Signature and will be represented by `SignatureBytes`. `+` is point addition as defined by the cryptographic group.
@@ -240,44 +248,44 @@ In order to communicate to `Verify` what kind of verification algorithm to use, 
 
 `SignedMessage.Address` will inform `Verify` if the `SignedMessage.SignatureBytes` is a BLS or ECDSA signature. `Verify` will infer this data from the `Address.protocol` field. 
 
-```go
+```text
 Input: Address
 Output: "BLS", "ECDSA", or "INVALID"
    
-   1.  If Address.protocol = 0 output "BLS" and stop
-   2.  If Address.protocol = 1 output "ECDSA" and stop
-   3.  If Address.protocol = 3 output "BLS" and stop
-	 4.  If Address.protocol != {0 OR 1 OR 3} output "INVALID"
+    1.  If Address.protocol = 0 output "BLS" and stop
+    2.  If Address.protocol = 1 output "ECDSA" and stop
+    3.  If Address.protocol = 3 output "BLS" and stop
+    4.  If Address.protocol != {0 OR 1 OR 3} output "INVALID"
 ```
 
 **Determining if the signature is a Signature Aggregate**
 
 If there is more then one message in `SignedMessage.Msgs` then the `SignedMessage` is assumed to be a signature aggregate. If `Address` is empty then `Verify` will assume the `SignedMessage` is a signature aggregate. The procedure below uses `len()` to indicate a function that returns the number of elements in an array.
 
-```go
+```text
 Input: SignedMessage
 Output: "Aggregate" or "INVALID"
 	    
-	 1.  If SignedMessage.Address[i].protocol != {0 OR 3} for all i output "INVALID" and stop
-	 2.  If len(SignedMessage.Msgs) > 1 output "Aggregate" else output "INVALID"
+    1.  If SignedMessage.Address[i].protocol != {0 OR 3} for all i output "INVALID" and stop
+    2.  If len(SignedMessage.Msgs) > 1 output "Aggregate" else output "INVALID"
 ```
 
 ### `Verify` via ECDSA ([ECDSA NIST standard](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf) using [libsecp256k1](https://github.com/bitcoin-core/secp256k1))
 
 This is a high-level procedure and is meant for exposition. Exact parameterization and procedure is contained here [libsecp256k1](https://github.com/bitcoin-core/secp256k1).
 
-```go
+```text
 Input: PK = x*G, h(msg), (r,s)       
 Output: "VALID" or "INVALID"
-	 
-	 1.  If PK = O output "INVALID" and stop
-	 2.  If PK not in E output "INVALID" and stop
-	 3.  w = ~s (mod n)
-   4.  u1 = h(msg)*w (mod n)
-   5.  u2 = r*w (mod n)
-	 6.  P = u1*G + u2*PK = (x_P, y_P)
-	 7.  If P = O output "INVALID" and stop 
-	 8.  If r = x_P (mod n) output "VALID" else output "INVALID"
+
+    1.  If PK = O output "INVALID" and stop
+    2.  If PK not in E output "INVALID" and stop
+    3.  w = ~s (mod n)
+    4.  u1 = h(msg)*w (mod n)
+    5.  u2 = r*w (mod n)
+    6.  P = u1*G + u2*PK = (x_P, y_P)
+    7.  If P = O output "INVALID" and stop 
+    8.  If r = x_P (mod n) output "VALID" else output "INVALID"
 ```
 
 `O` is the point at infinity for the elliptic curve `E` over which ECDSA was computed.
@@ -288,36 +296,35 @@ In each of the algorithms described below, the public keys were recovered via th
 
 **Verify a single signature using `Verify`**
 
-```go
+```text
 Input: PK, msg, sigma    
 Output: "VALID" or "INVALID"
-   
-	 0.  If len(SignedMessage.Msgs) != 1, output "INVALID"
-   1.  H = hash_to_G1(suite_string, msg)
-   2.  Gamma = string_to_E1(sigma)
-   3.  If Gamma is "INVALID", output "INVALID" and stop
-   4.  If r*Gamma != 0, output "INVALID" and stop
-   5.  Compute c = e(Gamma, P2)
-   6.  Compute c* = e(H, PK)
-   7.  If c and c* are equal,	output "VALID", else output "INVALID"
+
+    0.  If len(SignedMessage.Msgs) != 1, output "INVALID"
+    1.  H = hash_to_G1(suite_string, msg)
+    2.  Gamma = string_to_E1(sigma)
+    3.  If Gamma is "INVALID", output "INVALID" and stop
+    4.  If r*Gamma != 0, output "INVALID" and stop
+    5.  Compute c = e(Gamma, P2)
+    6.  Compute c* = e(H, PK)
+    7.  If c and c* are equal,	output "VALID", else output "INVALID"
 ```
 
 **Verify a signature aggregate using `VerifyAggregate`**
 
 Note that mapping a message to a public key is done via index. In other words and given a `SignedMessage`, `PK_i` corresponding to `msg_i = SignedMessage.Msgs[i] ` can be found be performing `Recover(SignedMessage.Msgs[i], SignedMessage.Address[i], NULL)`.
 
-```go
+```text
 Input: (PK_1, msg_1), ..., (PK_n, msg_n), sigma
 Output: "VALID" or "INVALID"
 
-   1.  H_i = hash_to_G1(suite_string, msg_i)
-   2.  Gamma = string_to_E1(sigma)
-   3.  If Gamma is "INVALID", output "INVALID" and stop
-   4.  If r*Gamma != 0,	output "INVALID" and stop
-   5.  Compute c = e(Gamma, P2)
-   6.  Compute c* = e(H_1, PK_1) * ... * e(H_n, PK_n)
-	 7.  If c and c* are equal, output "VALID", else output "INVALID"
-
+    1.  H_i = hash_to_G1(suite_string, msg_i)
+    2.  Gamma = string_to_E1(sigma)
+    3.  If Gamma is "INVALID", output "INVALID" and stop
+    4.  If r*Gamma != 0,	output "INVALID" and stop
+    5.  Compute c = e(Gamma, P2)
+    6.  Compute c* = e(H_1, PK_1) * ... * e(H_n, PK_n)
+    7.  If c and c* are equal, output "VALID", else output "INVALID"
 ```
 
 ## Recovering a public key
@@ -326,16 +333,16 @@ Output: "VALID" or "INVALID"
 
 This is a high-level procedure and is meant for exposition. Exact parameterization and procedure is contained here [libsecp256k1](https://github.com/bitcoin-core/secp256k1). In libsecp256k1 signatures may slightly larger than needed despite point compression. This is due to the inclusion of `recid` which contains information that is used to recover the public key associated with a particular ECDSA signature. As a result, one can view this kind of signature as the tuple (r, s, v). For more information on why this is needed see, [link](https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work).
 
-```go
+```text
 Input: (r, s, v), h(msg)
 Output: PK
 
-	1. y1, y2 = FindY(r)
-	2. R1 = (r, y1), R2 = (r, y2)
-	3. P1 = ~r*(s*R1 - h(msg)*G)
-	4. P2 = ~r*(s*R2 - h(msg)*G)
-  5. PK = CHOOSE(v, P1, P2)
-  6. Output PK
+    1. y1, y2 = FindY(r)
+    2. R1 = (r, y1), R2 = (r, y2)
+    3. P1 = ~r*(s*R1 - h(msg)*G)
+    4. P2 = ~r*(s*R2 - h(msg)*G)
+    5. PK = CHOOSE(v, P1, P2)
+    6. Output PK
 ```
 
 `FindY(r)` determines the y-coordinates associated with an x-coordinate represented by `r`; there are two results. `CHOOSE(v, P1, P2)` chooses the correct public key from `{P1, P2}` given `v`. 
@@ -344,15 +351,15 @@ Output: PK
 
 Because BLS public keys are large, the Filecoin protocol ensures that they are only represented on-chain once. As a result, Filecoin uses an `ID` to represent this large BLS public key. The Filecoin protocol stores this `ID` in the address of any `Message` that is associate with the associated public key. The following procedure is procedure needed to recover a public key from an `ID`. 
 
-```go
+```text
 Input: Address.payload, ROOT
 Output: PK
 
-1. If Address.protocol = 3 output string_to_E2(Address.payload) and stop
-2. If Address.protocol != 0 output "INVALID" and stop
-3. Actor = ROOT.GetActor(ID)
-4. PK = Actor.GetPublicKey()
-5. Output PK
+    1. If Address.protocol = 3 output string_to_E2(Address.payload) and stop
+    2. If Address.protocol != 0 output "INVALID" and stop
+    3. Actor = ROOT.GetActor(ID)
+    4. PK = Actor.GetPublicKey()
+    5. Output PK
 ```
 
 Where `ROOT` represents the [global state root](https://github.com/filecoin-project/specs/blob/master/state-machine.md#state-representation) indexed by `ID`. `ROOT(ID)` in this context returns a  Filecoin [`actor`]( https://github.com/filecoin-project/specs/blob/master/data-structures.md#actor). [Currently being developed] Note that there will be two `actors` associated with a particular miner: (1) a wallet actor that signs FIL transactions and (2) an online actor that performs `PoRep` and `PoSt` on behalf of the wallet actor.
@@ -390,6 +397,7 @@ Each `SignedMessage` contains an array of messages (`[]Message`), an array of ad
   - [secp256k1 general signatures](https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177)
 - [golang implementation of secp256k1 point compression](https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338)
 - [Cryptographically Secure Pseudorandom Generators](<https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator> )
+- [ECDSA High-Level](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm)
 
 ## Inspiration
 
