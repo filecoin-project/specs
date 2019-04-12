@@ -18,35 +18,35 @@ This interface, written using Go type notation, defines the set of methods that 
 
 ```go
 type StorageMarket interface {
-    // CreateStorageMiner registers a new storage miner with the given public key and a
-    // pledge of the given size. The miners collateral is set by the value in the message.
-    // The public key must match the private key used to sign off on blocks created
-    // by this miner. This key is the 'worker' key for the miner.
-    // The libp2p peer ID specified should reference the libp2p identity that the
-    // miner is operating. This is the ID that clients will connect to to propose deals
-    // TODO: maybe rename to 'RegisterStorageMiner'?
-    CreateStorageMiner(pubk PublicKey, pledge BytesAmount, pid libp2p.PeerID) Address
+	// CreateStorageMiner registers a new storage miner with the given public key and a
+	// pledge of the given size. The miners collateral is set by the value in the message.
+	// The public key must match the private key used to sign off on blocks created
+	// by this miner. This key is the 'worker' key for the miner.
+	// The libp2p peer ID specified should reference the libp2p identity that the
+	// miner is operating. This is the ID that clients will connect to to propose deals
+	// TODO: maybe rename to 'RegisterStorageMiner'?
+	CreateStorageMiner(pubk PublicKey, pledge BytesAmount, pid libp2p.PeerID) Address
 
-    // SlashConsensusFault is used to slash a misbehaving miner who submitted two different
-    // blocks at the same block height. The signatures on each block are validated
-    // and the offending miner has their entire collateral slashed, including the
-    // invalidation of any any all storage they are providing. The caller is rewarded
-    // a small amount to compensate for gas fees (TODO: maybe it should be more?)
-    SlashConsensusFault(blk1, blk2 BlockHeader)
+	// SlashConsensusFault is used to slash a misbehaving miner who submitted two different
+	// blocks at the same block height. The signatures on each block are validated
+	// and the offending miner has their entire collateral slashed, including the
+	// invalidation of any any all storage they are providing. The caller is rewarded
+	// a small amount to compensate for gas fees (TODO: maybe it should be more?)
+	SlashConsensusFault(blk1, blk2 BlockHeader)
 
-    // SlashStorageFault slashes a storage miner for not submitting their PoSTs within
-    // the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
-    // The slashed miner then loses all of their staked collateral, and also loses all
-    // of their power, and as a result, is no longer a candidate leader for extending the chain.
-    SlashStorageFault(miner Address)
-    
-    // UpdateStorage is called by a miner to adjust the storage market actors
-    // accounting of the total storage in the storage market.
-    UpdateStorage(delta BytesAmount)
-    
-    // GetTotalStorage returns the total committed storage in the system. This number is
-    // also used as the 'total power' in the system for the purposes of the power table
-    GetTotalStorage() BytesAmount
+	// SlashStorageFault slashes a storage miner for not submitting their PoSTs within
+	// the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
+	// The slashed miner then loses all of their staked collateral, and also loses all
+	// of their power, and as a result, is no longer a candidate leader for extending the chain.
+	SlashStorageFault(miner Address)
+
+	// UpdateStorage is called by a miner to adjust the storage market actors
+	// accounting of the total storage in the storage market.
+	UpdateStorage(delta BytesAmount)
+
+	// GetTotalStorage returns the total committed storage in the system. This number is
+	// also used as the 'total power' in the system for the purposes of the power table
+	GetTotalStorage() BytesAmount
 }
 ```
 
@@ -71,7 +71,7 @@ This section describes the flow required to store a single piece with a single s
 #### Before Deal
 
 1. **Merkle Translation:** The client runs a 'Local Merkle Translation' to generate the storage market hash for the data.
-  - Storage miners reference data by its storage market hash, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See [Piece Confirmation](definitions.md#piece-confirmation)
+  - Storage miners reference data by its storage market hash, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See [Piece Inclusion Proof](definitions.md#piece-inclusion-proof)
 2. **Miner Selection:** The client looks at asks on the network, and then selects a storage miner to store their data with.
    - Note: this is currently a manual process.
 3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with. All payments between clients and storage providers use payment channels.
@@ -95,18 +95,18 @@ Note: The details of this protocol including formats, datastructures, and algori
 
 2. **Storage Deal Start**: Clients makes sure data is in a [sector](definitions.md#sector)
 
-    - **PieceConfirmation:** Once the miner seals the sector, they update the PieceConfirmation in the deal state, which the client then gets the next time they query that state.
-     - The PieceConfirmation proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
-    -  Note: a client that is not interested in staying online to wait for PieceConfirmation can leave immediately, however, they run the risk that their files don't actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
-     - Note: In order to provide the piece confirmation, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece confirmation becomes available.
+    - **PieceInclusionProof:** Once the miner seals the sector, they update the PieceInclusionProof in the deal state, which the client then gets the next time they query that state.
+     - The PieceInclusionProof proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
+    -  Note: a client that is not interested in staying online to wait for PieceInclusionProof can leave immediately, however, they run the risk that their files don't actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
+     - Note: In order to provide the piece inclusion proof, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece inclusion proof becomes available.
    - **Mining**: Miner posts `seal commitment` and associated proof on chain by calling `CommitSector` and starts running `proofs of spacetime`. See [storage mining cycle](mining.md#storage-mining-cycle) for more details.
 
-3. **Storage Deal Abort:** If the miner doesn't provide the PieceConfirmation, the client can invalidate the payment channel.
+3. **Storage Deal Abort:** If the miner doesn't provide the PieceInclusionProof, the client can invalidate the payment channel.
    - This is done by invoking the 'close' method on the channel on-chain. This process starts a timer that, on finishing, will release the funds to the client. 
    - If a client attempts to abort a deal that they have actually made with a miner, the miner can submit a payment channel update to force the channel to stay open for the length of the agreement.
 
 4. **Storage Deal Complete:** The client periodically queries the miner for the deals status until the deal is 'complete', at which point the client knows that the data is properly replicated.
-   - The client should store the returned 'PieceConfirmation' for later validation.
+   - The client should store the returned 'PieceInclusionProof' for later validation.
 
 TODO: 'complete' isnt really the right word here, as it implies that the deal is over.
 
@@ -136,25 +136,25 @@ The storage market expects a payments system to allow clients to pay miners for 
 
 ```go
 type Payments interface {
-    // Setup sets up a payment from the caller to the target address. The payment
-    // MUST be contingent on the miner being able to prove that they have the data
-    // referenced by 'piece'. The total amount of Filecoin that may be transfered by
-    // this payment is specified by 'value'
-    Setup(target Address, piece Cid, value TokenAmount) ID
+	// Setup sets up a payment from the caller to the target address. The payment
+	// MUST be contingent on the miner being able to prove that they have the data
+	// referenced by 'piece'. The total amount of Filecoin that may be transfered by
+	// this payment is specified by 'value'
+	Setup(target Address, piece Cid, value TokenAmount) ID
 
-    // MakeVouchers creates a set of vouchers redeemable by the target of the
-    // previously created payment. It creates 'count' vouchers, each of which is
-    // redeemable only after an certain block height, evenly spaced out between
-    // start and end. Each voucher should be redeemable for proportionally more
-    // Filecoin, up to the total amount specified during the payment setup.
-    MakeVouchers(id ID, start, end BlockHeight, count int) []Voucher
+	// MakeVouchers creates a set of vouchers redeemable by the target of the
+	// previously created payment. It creates 'count' vouchers, each of which is
+	// redeemable only after an certain block height, evenly spaced out between
+	// start and end. Each voucher should be redeemable for proportionally more
+	// Filecoin, up to the total amount specified during the payment setup.
+	MakeVouchers(id ID, start, end BlockHeight, count int) []Voucher
 
-    // Redeem voucher is called by the target of a given payment to claim the
-    // funds represented by it. The voucher can only be redeemed after the block
-    // height that is attributed to the voucher, and also only if the proof given
-    // proves that the target is correctly storing the piece referenced in the
-    // payment setup.
-    RedeemVoucher(v Voucher, proof Proof)
+	// Redeem voucher is called by the target of a given payment to claim the
+	// funds represented by it. The voucher can only be redeemed after the block
+	// height that is attributed to the voucher, and also only if the proof given
+	// proves that the target is correctly storing the piece referenced in the
+	// payment setup.
+	RedeemVoucher(v Voucher, proof Proof)
 }
 ```
 

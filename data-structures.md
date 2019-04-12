@@ -2,7 +2,6 @@
 
 This document serves as an entry point for understanding all of the data structures in filecoin.
 
-TODO: this should also include, or reference, how each data structure is serialized precisely.
 
 ## Address
 
@@ -11,14 +10,14 @@ An address is an identifier that refers to an actor in the Filecoin state. All a
 ```go
 type Address struct {
 
-    // 0: ID
-    // 1: SECP256K1 Public Key
-    // 2: Actor
-    // 3: BLS Public Key
-    protocol byte
+	// 0: ID
+	// 1: SECP256K1 Public Key
+	// 2: Actor
+	// 3: BLS Public Key
+	protocol byte
 
-    // raw bytes containing the data associated with protocol
-    payload []byte
+	// raw bytes containing the data associated with protocol
+	payload []byte
 }
 ```
 To learn more, take a look at the [Address Spec](https://github.com/filecoin-project/specs/blob/master/address.md).
@@ -28,6 +27,7 @@ To learn more, take a look at the [Address Spec](https://github.com/filecoin-pro
 For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid). 
 
 CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
+
 
 ## Block
 
@@ -41,10 +41,10 @@ type Block struct {
 
 	// Tickets are the winning ticket that were submitted with this block.
 	Tickets []Ticket
-    
-    // ElectionProof is a signature over the final ticket that proves this miner
-    // is the leader at this round
-    ElectionProof Signature
+
+	// ElectionProof is a signature over the final ticket that proves this miner
+	// is the leader at this round
+	ElectionProof Signature
 
 	// Parents is the set of parents this block was based on. Typically one,
 	// but can be several in the case where there were multiple winning ticket-
@@ -56,8 +56,8 @@ type Block struct {
 
 	// Height is the chain height of this block.
 	Height Uint64
-    
-    // StateRoot is a cid pointer to the state tree after application of the
+
+	// StateRoot is a cid pointer to the state tree after application of the
 	// transactions state transitions.
 	StateRoot Cid
 
@@ -66,7 +66,7 @@ type Block struct {
 	Messages []SignedMessage
 
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-    // TODO: should be the same type of merkletree-list thing that the messages are
+	// TODO: should be the same type of merkletree-list thing that the messages are
 	MessageReceipts []MessageReceipt
     
     // The block Timestamp is used to enforce a form of block delay by honest miners.
@@ -75,26 +75,22 @@ type Block struct {
 }
 ```
 
-### Serialization
-
-Blocks are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
-
 ## Message
 
 ```go
 type Message struct {
 	To   Address
 	From Address
-	
+
 	// When receiving a message from a user account the nonce in
 	// the message must match the expected nonce in the from actor.
 	// This prevents replay attacks.
-	Nonce Integer
+	Nonce Uint64
 
-	Value Integer
-    
-    GasPrice Integer
-    GasLimit Integer
+	Value BigInteger
+
+	GasPrice Integer
+	GasLimit Integer
 
 	Method string
 	Params []byte
@@ -104,6 +100,7 @@ type Message struct {
 ### Parameter Encoding
 
 Parameters to methods get encoded as described in the [basic types](#basic-type-encodings) section below, and then put into a CBOR encoded array.
+(TODO: thinking about this, it might make more sense to just have `Params` be an array of things)
 
 ### Signing
 
@@ -111,26 +108,22 @@ A signed message is a wrapper type over the base message.
 
 ```go
 type SignedMessage struct {
-    Message Message
-    Signature Signature
+	Message   Message
+	Signature Signature
 }
 ```
 
 The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the [signatures spec](signatures.md).
 
-### Serialization
-
-Messages and SignedMessages are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
-
 ## Message Receipt
 
 ```go
 type MessageReceipt struct {
-    ExitCode uint8
+	ExitCode uint8
 
-    Return []byte
-    
-    GasUsed Integer
+	Return []byte
+
+	GasUsed Integer
 }
 ```
 
@@ -144,26 +137,19 @@ Message receipts are currently serialized simply by CBOR marshaling them, using 
 
 ```go
 type Actor struct {
-    // Code is a pointer to the code object for this actor
-	Code    Cid
-    
-    // Head is a pointer to the root of this actors state
-    Head    Cid
-    
-    // Nonce is a counter of the number of messages this actor has sent
-    Nonce   Integer
-    
-    // Balance is this actors current balance of filecoin
-    Balance AttoFIL
+	// Code is a pointer to the code object for this actor
+	Code Cid
+
+	// Head is a pointer to the root of this actors state
+	Head Cid
+
+	// Nonce is a counter of the number of messages this actor has sent
+	Nonce Uint64
+
+	// Balance is this actors current balance of filecoin
+	Balance BigInteger
 }
 ```
-
-
-
-
-### Serialization
-
-Actors are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
 
 ## State Tree
 
@@ -172,6 +158,7 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 ## HAMT
 
 TODO: link to spec for our CHAMP HAMT
+
 
 # Basic Type Encodings
 
@@ -211,7 +198,11 @@ BlockHeader is a serialized `Block`.
 
 #### `SealProof`
 
-SealProof is an array of bytes.
+SealProof is a 384-element array of bytes.
+
+#### `PoStProof`
+
+PoStProof is a 192-element array of bytes.
 
 #### `TokenAmount`
 
@@ -298,4 +289,77 @@ while(true)
 if ((shift <size) && (sign bit of byte is set))
   /* sign extend */
   result |= - (1 << shift);
+```
+
+# Filecoin Compact Serialization
+
+Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
+
+| FCS Type | tag  |
+|---|---|
+| block v1 | 43  |
+| message v1 | 44 |
+| signedMessage v1 | 45 |
+
+For example, a message would be encoded as:
+
+```cbor
+tag<44>[msg.To, msg.From, msg.Nonce, msg.Value, msg.Method, msg.Params]
+```
+
+Each individual type should be encoded as specified:
+
+| type | encoding |
+| --- | ---- |
+| Uint64 | CBOR major type 0 |
+| BigInteger | [CBOR bignum](https://tools.ietf.org/html/rfc7049#section-2.4.2) |
+| Address | CBOR major type 2 |
+| Uint8 | CBOR Major type 0 |
+| []byte | CBOR Major type 2 |
+| string | CBOR Major type 3 |
+| bool | [CBOR Major type 7, value 20/21](https://tools.ietf.org/html/rfc7049#section-2.3) |
+
+## Encoding Considerations
+
+Objects should be encoded using [canonical CBOR](https://tools.ietf.org/html/rfc7049#section-3.9), and decoders should operate in [strict mode](https://tools.ietf.org/html/rfc7049#section-3.10).  The maximum size of an FCS Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
+
+Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that object is invalid.
+
+## IPLD Considerations
+
+Cids for FCS objects should use the FCS multicodec (`0x1f`).
+
+## Vectors
+
+Below are some sample vectors for each data type.
+
+### Message
+
+Encoded: `d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d46558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f644d706172616d73617265676f6f64`
+
+Decoded:
+```
+To:     Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
+From:   Address("f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy")
+Nonce:  uint64(117)
+Value:  BigInt(15000000000)
+Method: string("method")
+Params: []byte("paramsaregood")
+```
+
+### Block
+
+Encoded: `d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f6788080`
+
+Decoded:
+```
+Miner:           Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
+Tickets:         [][]byte{"iamaticket"}
+ElectionProof:   []byte("i am an election proof")
+Parents:         []Cid{"zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B"}
+ParentWeight:    NewInt(47978)
+Height:          uint64(1234567)
+StateRoot:       Cid("zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B")
+Messages:        []SignedMessage{}
+MessageReceipts: []MessageReceipt{}
 ```

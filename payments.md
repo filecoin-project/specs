@@ -26,67 +26,7 @@ For example:
 
 At this point, B has two signed messages from A, but the contract is set up such that it can only be cashed out once. So if B decided to cash out, they would obviously select the message with the higher value. Also, once B cashes out, they must not accept any more payments from A on that same channel.
 
-### Simple Payment Channel Actor
-
-We need to implement an actor to allow the creation of payment channels between users. The interface for that should look something like this:
-
-```go
-type ChannelID *big.Int
-type BlockHeight *big.Int
-type Signature []byte
-
-type SpendVoucher struct {
-    Channel ChannelID
-    Amount *TokenAmount
-    Sig Signature
-}
-
-type PaymentBroker interface {
-    // CreateChannel creates a new payment channel from the caller to the target.
-    // The value attached to the invocation is used as the deposit, and the channel
-    // will expire and return all of its money to the owner after the given block height.
-    CreateChannel(target Address, eol BlockHeight) ChannelID
-    
-    // Update updates the payment channel with the given amounts, and sends the current
-    // committed amount to the target. This is useful when you want to checkpoint the 
-    // value in a payment, but continue to use the channel afterwards.
-    Update(channel ChannelID, amt *TokenAmount, sig Signature)
-    
-    // Close is called by the target of a payment channel to cash out and close out
-    // the payment channel. This is really a courtesy call, as the channel will
-    // eventually time out and close on its own.
-    Close(channel ChannelID, amt *TokenAmount, sig Signature)
-    
-    // Extend can be used by the owner of a channel to add more funds to it and
-    // extend the channels lifespan.
-    Extend(target Address, channel ChannelID, eol BlockHeight)
-    
-    // Reclaim is used by the owner of a channel to reclaim unspent funds in timed
-    // out payment channels they own.
-    Reclaim(target Address, channel ChannelID)
-}
-
-// MakeSpendVoucher is used by the owner of a channel to create an offline payment
-// for the target. Note that any amount may be given, but the target gets to select
-// which of the vouchers you give them to cash out, and therefore any rational actor 
-// will only ever keep the one with the largest amount. After calling this function,
-// you should send the returned SpendVoucher to the target out of band.
-func MakeSpendVoucher(ch ChannelID, amt *TokenAmount, sk PrivateKey) *SpendVoucher {
-    data := concatBytes(ch, amt)
-    sig := sk.Sign(data)
-    return &SpendVoucher{
-        Channel: ch,
-        Amount: amt,
-        Sig: sig,
-    }
-}
-```
-
-Channel IDs should be memory efficient and generated is such a way that reordering does not change the channelID. This may be solved by first indexing by the target address internally and then using the nonce of the message that invoked the create channel method.
-
-
-
-### Multi-Lane Payment Channel (WIP)
+### Multi-Lane Payment Channel
 
 The filecoin storage market may require a way to do incremental payments between two parties, over time, for multiple different transactions. The primary motivating usecase for this is to provide payment for file storage over time, for each file stored. An additional requirement is the ability to have less than one message on chain per transaction 'lane', meaning that payments for multiple files should be aggregateable (Note: its okay if this aggregation is an interactive process).
 
@@ -96,29 +36,183 @@ Lane state can be easily tracked on-chain with a compact bitfield.
 
 ```go
 type SpendVoucher struct {
-    // ID is the channel ID for this payment channel
-    ID ChannelID
-    
-    // Amount is the amount of FIL that this voucher can be redeemed for
-    Amount *TokenAmount
-    
-    // Nonce is a number that sets the ordering of vouchers. If you try to redeem
-    // a voucher with an equal or lower nonce, the operation will fail. Nonces are
-    // per lane.
-    Nonce uint64
-    
-    // Lane specifies which 'lane' of the payment channel this voucher is for.
-    // Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
-    Lane uint64
-    
-    // Merges specifies a list of lane-nonce pairs that this voucher will close. 
-    // This voucher may not be redeemed if any of the lanes specified here are already
-    // closed, or their nonce specified here is lower than the nonce on-chain.
-    Merges []Pair<uint64, uint64>
-    
-    Sig Signature
+	// Amount is the amount of FIL that this voucher can be redeemed for
+	Amount TokenAmount
+
+	// Nonce is a number that sets the ordering of vouchers. If you try to redeem
+	// a voucher with an equal or lower nonce, the operation will fail. Nonces are
+	// per lane.
+	Nonce uint64
+
+	// Lane specifies which 'lane' of the payment channel this voucher is for.
+	// Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
+	Lane uint64
+
+	// Merges specifies a list of lane-nonce pairs that this voucher will close.
+	// This voucher may not be redeemed if any of the lanes specified here are already
+	// closed, or their nonce specified here is lower than the nonce of the lane on-chain.
+	Merges []MergePair
+
+	TimeLock uint64
+
+	SecretPreimage []byte
+
+	RequiredSector []byte
+
+	DataCommitment []byte
+
+	MinCloseHeight uint64
+
+	Sig Signature
+}
+
+type MergePair struct {
+	Lane  uint64
+	Nonce uint64
 }
 ```
+
+```go
+type PaymentChannel struct {
+	From Address
+	To   Address
+
+	ChannelTotal TokenAmount
+	ToSend       TokenAmount
+
+	ClosingAt      uint64
+	MinCloseHeight uint64
+
+	LaneStates map[uint64]LaneState
+}
+
+type LaneState struct {
+	Nonce    uint64
+	Redeemed TokenAmount
+}
+
+func (paych *PaymentChannel) validateSignature(sv SpendVoucher) {
+	if msg.From == paych.From {
+		ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.To)
+	} else if msg.From == paych.To {
+		ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.From)
+	} else {
+		Fatal("bad programmer")
+	}
+}
+
+func (paych *PaymentChannel) UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
+	if !paych.validateSignature(sv) {
+		Fatal("Signature Invalid")
+	}
+
+	if chain.Now() < sv.TimeLock {
+		Fatal("cannot use this voucher yet!")
+	}
+
+	if sv.SecretPreimage != nil {
+		if Hash(secret) != sv.SecretPreimage {
+			Fatal("Incorrect secret!")
+		}
+	}
+
+	if sv.DataCommitment != nil {
+		// Checks that the piece inclusion proof is valid, and that the referenced sector
+		// is correctly being stored
+		if !ValidateInclusion(pip, sv.DataCommitment) {
+			Fatal("PieceInclusionProof was invalid")
+		}
+	}
+
+	if sv.RequiredSector != nil {
+		miner, found := GetMiner(msg.From)
+		if !found {
+			Fatal("Redeemer is not a miner")
+		}
+
+		if !miner.HasSector(sv.RequiredSector) {
+			Fatal("miner does not have sector, cannot redeem payment")
+		}
+	}
+
+	ls := paych.LaneStates[sv.Lane]
+	if ls.Closed {
+		Fatal("cannot redeem a voucher on a closed lane")
+	}
+
+	if ls.Nonce > sv.Nonce {
+		Fatal("voucher has an outdated nonce, cannot redeem")
+	}
+
+	var mergeValue TokenAmount
+	for _, merge := range sv.Merges {
+		ols := paych.LaneStates[merge.Lane]
+
+		if ols.Nonce >= merge.Nonce {
+			Fatal("merge in voucher has outdated nonce, cannot redeem")
+		}
+
+		mergeValue += ols.Redeemed
+		ols.Nonce = merge.Nonce
+	}
+
+	ls.Nonce = sv.Nonce
+	balanceDelta = sv.Amount - (mergeValue + ls.Redeemed)
+	ls.Redeemed = sv.Amount
+
+	newSendBalance = paych.ToSend + balanceDelta
+	if newSendBalance < 0 {
+		// TODO: is this impossible?
+		Fatal("voucher would leave channel balance negative")
+	}
+
+	if newSendBalance > paych.ChannelTotal {
+		Fatal("not enough funds in channel to cover voucher")
+	}
+
+	paych.ToSend = newSendBalance
+
+	if sv.MinCloseHeight != 0 {
+		if paych.ClosingAt < sv.MinCloseHeight {
+			paych.ClosingAt = sv.MinCloseHeight
+		}
+		if paych.MinCloseHeight < sv.MinCloseHeight {
+			paych.MinCloseHeight = sv.MinCloseHeight
+		}
+	}
+}
+
+func (paych *PaymentChannel) Withdraw(upTo TokenAmount) {
+	// TODO: this ones tricky, withdraw funds without closing it out entirely...
+}
+
+func (paych *PaymentChannel) Close() {
+	if msg.From != paych.From && msg.From != paych.To {
+		Fatal("not authorized to close channel")
+	}
+	if paych.ClosingAt != 0 {
+		Fatal("Channel already closing")
+	}
+
+	paych.ClosingAt = chain.Now() + ChannelClosingDelay
+	if paych.ClosingAt < paych.MinCloseHeight {
+		paych.ClosingAt = paych.MinCloseHeight
+	}
+}
+
+func (paych *PaymentChannel) Collect() {
+	if paych.ClosingAt == 0 {
+		Fatal("payment channel not closing or closed")
+	}
+	if chain.Now() < paych.ClosingAt {
+		Fatal("Payment channel not yet closed")
+	}
+	Transfer(paych.ChannelTotal-paych.ToSend, paych.From)
+	Transfer(paych.ToSend, paych.To)
+}
+```
+
+
 
 ### Payment Channel Reconciliation
 
@@ -133,9 +227,9 @@ This is a libp2p service run by all participants wanting to participate in payme
 
 ```go
 type ReconcileRequest struct {
-  Vouchers []Vouchers
+	Vouchers []Vouchers
 
-  ReqVal TokenAmount
+	ReqVal TokenAmount
 }
 ```
 
@@ -145,10 +239,10 @@ Bob receives this request, and checks that all the fields are correct, and then 
 
 ```go
 type ReconcileResponse struct {
-  Combined Voucher
+	Combined Voucher
 
-  Status StatusCode
-  Message string
+	Status  StatusCode
+	Message string
 }
 ```
 
