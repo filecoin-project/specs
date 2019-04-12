@@ -121,11 +121,11 @@ func VerifyBlock(blk Block) {
     
     // 2. Verify Timestamp
     // first check that it is not in the future
-    if blk.GetTime() > nAdjustedTime {
+    if blk.GetTime() > time.Now() {
         Fatal("block was generated too far in the future")
     }
     // next check that it is appropriately delayed from its parents
-    if blk.GetTime() <= blk.maxParentTime() + BLOCK_DELAY {
+    if blk.GetTime() <= blk.minParentTime() + BLOCK_DELAY {
         Fatal("block was generated too soon")
     }
 
