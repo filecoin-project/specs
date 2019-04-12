@@ -17,22 +17,22 @@ type Syncer struct {
 
 	// The known genesis TipSet
 	genesis TipSet
-    
-    // the current mode the syncer is in
-    syncMode SyncMode
+
+	// the current mode the syncer is in
+	syncMode SyncMode
 
 	// TipSets known to be invalid
 	bad BadTipSetCache
     
-    // handle to the block sync service
-    bsync BlockSync
+  // handle to the block sync service
+  bsync BlockSync
     
-    //peer set
-    peerSet map[PeerID]PeerInfo
+  //peer set
+  peerSet map[PeerID]PeerInfo
     
-    // peer heads
-    // Note: clear cache on disconnects
-    peerHeads map[PeerID][]Cid
+  // peer heads
+  // Note: clear cache on disconnects
+  peerHeads map[PeerID][]Cid
     
 }
 
@@ -48,12 +48,12 @@ const BootstrapPeerThreshold = 5
 // This should be called when connecting to new peers, and additionally
 // when receiving new blocks from the network
 func (syncer *Syncer) InformNewHead(from PeerID, head TipSet) {
-    switch syncer.syncMode {
-    case Bootstrap:
-        go SyncBootstrap(from, head)
-    case CaughtUp:
-        go syncer.SyncCaughtUp(blk)
-    }
+	switch syncer.syncMode {
+	case Bootstrap:
+		go SyncBootstrap(from, head)
+	case CaughtUp:
+		go syncer.SyncCaughtUp(blk)
+	}
 }
 
 // SyncBootstrap is used to synchronise your chain when first joining
@@ -119,9 +119,9 @@ func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
 		return err
 	}
 
-	// possibleTs enumerates possible TipSets that are the union
-    // of TipSets from the chain and the store
-	for _, ts := range possibleTs(chain[1:]) { 
+	// possibleTs enumerates possible tipsets that are the union
+	// of tipsets from the chain and the store
+	for _, ts := range possibleTs(chain[1:]) {
 		if err := consensus.Validate(ts, store); err != nil {
 			return err
 		}
@@ -132,7 +132,6 @@ func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
 	}
 	return nil
 }
-
 
 func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 	// fetch TipSet and messages via bitswap
@@ -182,7 +181,10 @@ To sync new TipSets the `caught up` syncing protocol first runs a consensus vali
 
 Syncing depends on the validity of a node's peer set. In order to ensure that the peer set remains representative of the network's state after bootstrap, a node should regularly update its peer set.
 
+Likewise whenever one of the node's peers disconnects, it should be replaced in the peerSet.
+
 ```go
+// TODO update
 func (syncer *Syncer) updatePeerSet() {
     for peer, info := range syncer.PeerSet {
         if !trustedPeer && syncer.TimeNow() - info.initialConnection > PEER_RECYCLE {

@@ -97,7 +97,7 @@ See [Filecoin Proofs](proofs.md)
 
 #### Leader
 
-A leader, in the context of Filecoin consensus, is a node that is chosen to propose the next block in the blockchain. 
+A leader, in the context of Filecoin consensus, is a node that is chosen to propose the next block in the blockchain.
 
 #### Leader election
 

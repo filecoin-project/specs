@@ -35,3 +35,6 @@ Filecoin uses [libp2p](https://libp2p.io) for all network communications. libp2p
 
 Filecoin uses [IPLD](https://ipld.io) for the representation and serialization of the majority of the data in the system. IPLD provides a canonical model for content-addressed data structures, providing a representation of basic data objects and links between them.
 
+### Next Steps
+
+From here, if you're curious how exactly a Filecoin node works, take a look at the [node operations doc](operation.md).
