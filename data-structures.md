@@ -300,7 +300,7 @@ Datastructures in Filecoin are encoded as compactly as is reasonable. At a high 
 For example, a message would be encoded as:
 
 ```cbor
-tag<44>[msg.To, msg.From, msg.Nonce, msg.Value, msg.Method, msg.Params]
+tag<44>[msg.To, msg.From, msg.Nonce, msg.Value, msg.GasPrice, msg.GasLimit, msg.Method, msg.Params]
 ```
 
 Each individual type should be encoded as specified:
