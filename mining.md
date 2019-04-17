@@ -113,7 +113,6 @@ In order to validate a block coming in from the network at round `N` was well mi
 
 ```go
 func VerifyBlock(blk Block) {
-<<<<<<< HEAD
     // 1. Verify Signature
     pubk := GetPublicKey(blk.Miner)
     if !ValidateSignature(blk.Signature, pubk, blk) {
