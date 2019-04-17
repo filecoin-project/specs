@@ -123,39 +123,6 @@ type Signature interface {
 	//    sig - a series of bytes representing a signature
 	//
 	Recover(msg Message, addr Address, sig SignatureBytes) (pk PublicKey, err error)
-  
-  //
-  //
-  Marshall(smsg SignedMessage) (SmsgBytes []byte, err error)
-  
-  //
-  //
-  Unmarshall(SmsgBytes []byte) (smsg SignedMessage, err error)
-}
-```
-
-## Signed Message
-
-This is a container that combines a message with an address and signature. Note that while `PrivateKey.Sign` outputs a serialized representation of a cryptographic signature as `SignatureBytes`, this "signature" should not be sent over the wire. Note also that there are two levels of serialization when signing messages in Filecoin. (1) Representing a cryptographic element as bytes—like the output of `PrivateKey.Sign` and (2) Representing a bundle of information needed to verify the validity of a message—`SignedMessage`. 
-
-```go
-type SignedMessage struct {
-
-	// Addrs is an array of Addresses associated with a particular message in Msgs
-	// at the same index. Each Address tracks the ID of the actor responsible for
-	// signing a particular Msg. An ID can be converted into a public key via
-	// Address.GetPublicKey(ID).
-	//
-	Addrs []Address
-
-	// Msgs is an array of messages. Each message in Msgs is represented by raw bytes.
-	// Each message in Msgs will correspond to an Address in Addrs by index.
-	//
-	Msgs []bytes
-
-	// Sig is a cryptographic signature that was generated according to the type
-	// reflected in Address.
-	Sig SignatureBytes
 }
 ```
 
