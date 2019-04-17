@@ -69,7 +69,7 @@ type Block struct {
 
 	// ElectionProof is a signature over the final ticket that proves this miner
 	// is the leader at this round
-	ElectionProof Signature
+	ElectionProof SignatureBytes
 
 	// Parents is the set of parents this block was based on. Typically one,
 	// but can be several in the case where there were multiple winning ticket-
@@ -86,9 +86,17 @@ type Block struct {
 	// transactions state transitions.
 	StateRoot Cid
 
-	// Messages is the set of messages included in this block
+	// ECDSAMessages is the set of messages signed with ECDSA included in this block
 	// TODO: should be a merkletree-ish thing
-	Messages []SignedMessage
+	ECDSAMessages []SignedMessage
+  
+  // BLSSignatureAggregate is the SignedMessage contianing the aggreate signature of 
+  // all messages signed with the BLS signature scheme.
+  BLSSignatureAggregate SignedMessage
+  
+  // BLSMessages is the set of messages with associated BLS signatures contained
+  // in BLSSignatureAggregate.
+  BLSMessages []Message
 
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 	// TODO: should be the same type of merkletree-list thing that the messages are
@@ -170,8 +178,6 @@ type MessageReceipt struct {
 
 Message receipts are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
 
-
-
 ## Actor
 
 ```go
@@ -189,8 +195,6 @@ type Actor struct {
 	Balance AttoFIL
 }
 ```
-
-
 
 
 ### Serialization
