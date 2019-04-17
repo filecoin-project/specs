@@ -104,6 +104,7 @@ Blocks are currently serialized simply by CBOR marshaling them, using lower-came
 
 ```go
 type Message struct {
+  
 	To   Address
 	From Address
 

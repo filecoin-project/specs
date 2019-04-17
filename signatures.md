@@ -77,10 +77,11 @@ type Signature interface {
 	// 	 sig - a series of bytes representing a single BLS signature
 	//   err - a standard error message indicating any process issues
 	// In:
-	//   sigs - an array of SignatureBytes {sig_1, sig_2..., sig_n}
-	//   addrs - an array of Addresses {address_sig_1, address_sig_2..., address_sig_n}
+	//   Smsgs - an array of SignedMessages that includes a set of signature bytes
+  // {sig_1, sig_2..., sig_n} and set of associated addresses {address_sig_1, 
+  // address_sig_2..., address_sig_n}
 	//
-	Aggregate(sigs []SignatureBytes, addrs []Address) (sig SignatureBytes, err error)
+	Aggregate(Smsgs []SignedMessage) (Sig SignatureBytes, err error)
 
 	// Verify validates the statement: only `M` could have generated `sig`
 	// given the validator has a message `m`, a signature `sig`, and a
@@ -90,10 +91,10 @@ type Signature interface {
 	//   valid - a boolean value indicating the signature is valid
 	//   err - a standard error message indicating any process issues
 	// In:
-	//   smsg - a SignedMessage which contains {Message, Address, SignatureBytes}
-	//   pk - a Public Key of the appropriate type
+	//   Smsg - a SignedMessage which contains {Message, Address, SignatureBytes}
+	//   PK - a Public Key of the appropriate type
 	//
-	Verify(smsg SignedMessgage, pk PublicKey) (valid bool, err error)
+	Verify(Smsg SignedMessgage, PK PublicKey) (valid bool, err error)
 
 	// VerifyAggregate validates a collection of statements that are represeted by
 	// a signature aggregate: "For each M_i and PK_i in smsg, only this collection
@@ -103,11 +104,12 @@ type Signature interface {
 	//   valid - a boolean value indicating the signature is valid
 	//   err - a standard error message indicating any process issues
 	// In:
-	//   smsg - a SignedMessage which contains {[]Message, []Address, SignatureBytes}
-	//   pks - an array of Public Keys of the appropriate type associated with a message
+  //   SigAgg - the SignedMessage containing the signature aggregate
+	//   Msgs- an array of Messages
+	//   PKs - an array of Public Keys of the appropriate type associated with a message
 	// 	 at index `i` in []Message.
 	//
-	VerifyAggregate(smsg SignedMessgage, pks []PublicKeys) (valid bool, err error)
+	VerifyAggregate(SigAgg SignedMessgage, Msgs []Message, PKs []PublicKeys) (valid bool, err error)
 
 	// Recover determines the public key associated with a particular signature. For
 	// ECDSA signatures public keys can be recovered from SignatureBytes and an
