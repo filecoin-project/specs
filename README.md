@@ -8,10 +8,13 @@ that aren't yet accepted as part of the spec, but exist here for discussion.
 Documents in the notes repo are various notes from different meetings and
 discussions.
 
-### Gitbook viewing
-The spec follows gitbook format, and can be viewed using the gitbook tooling.
+### Viewing the spec
 
-To view, install `gitbook-cli` via npm and run:
+*Recommended:* You can view the spec [here](https://filecoin-1.gitbook.io/spec/).
+
+You can also use gitbook tooling to view the spec locally.
+
+First, install `gitbook-cli` via npm and run:
 ```
 gitbook serve
 ```
@@ -24,8 +27,8 @@ gitbook pdf
 (Note: on macOS using the pdf printer may require some extra installation)
 
 If you're just browsing on GitHub, start with [INTRO.md](INTRO.md) and the
-table of contents in [SUMMARY.md](SUMMARY.md). But really, prefer
-the Gitbook output.
+table of contents in [SUMMARY.md](SUMMARY.md). But really, we recommend using 
+the Gitbook output. It is much easier to read and use.
 
 ## Updates process for specs
 For info on how this spec changes, please see [the process doc](process.md).
