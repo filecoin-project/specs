@@ -1,5 +1,11 @@
 # Chain Syncing
 
+This spec describes the Filecoin sync protocol, for related systems, see:
+
+- [Bootstrapping](./bootstrap.md) which describes how a node builds a peer set in the first place.
+- [Network Protocols](./network-protocols.md) on how Filecoin nodes can communicate with each other, with for instance, an [initial handshake](./network-protocols.md#hello-handshake), or [block syncing](./network-protocols.md#blocksync).
+- [Operation](./operation.md) on various operations a functional Filecoin node needs to run, like [DHT routing](./operation.md#dht-for-peer-routing.md).
+
 ## What is chain syncing in Filecoin?
 
 Chain syncing is the process a filecoin node runs to sync its internal chain state with new blocks from the network and new blocks it itself has mined.  A node syncs in two distinct modes: `syncing` and `caught up`.  Chain syncing updates both local storage of chain data and the head of the current heaviest observed chain.
@@ -7,6 +13,7 @@ Chain syncing is the process a filecoin node runs to sync its internal chain sta
 'Syncing' mode and 'Caught up' mode are two distinct processes. 'Syncing' mode, or 'the initial sync' is a process that is triggered when a node is far enough behind the rest of the network. This process terminates once the nodes 'head' is    sufficiently far ahead. Once 'syncing' is complete, the 'caught up' sync process begins. This process keeps the node up to date with the rest of the network, and terminates only when the node is shut down.
 
 ## Interface
+
 ```go
 type Syncer struct {
 	// The heaviest known TipSet in the network.
@@ -28,29 +35,35 @@ type Syncer struct {
   bsync BlockSync
     
   //peer set
-  peerSet map[PeerID]PeerInfo
+  peerSet []PeerID
     
   // peer heads
   // Note: clear cache on disconnects
   peerHeads map[PeerID][]Cid
-    
+  
+  trustedPeers []PeerID
+  trustedHeads map[PeerId][]Cid  
 }
 
-type PeerInfo {
-    initialConnection Timestamp
-    lastConnection Timestamp
-    trustedPeer bool
-}
+const BootstrapPeerThreshold = 25
+const DupThreshold = 10
+```
 
-const BootstrapPeerThreshold = 5
 
+
+## General Operation
+
+Whenever a node hears about a new head, it will sync to it as warranted. `InformNewHead()` is called both during bootstrapping and as peers send across new blocks.
+
+```go
 // InformNewHead informs the syncer about a new potential TipSet
 // This should be called when connecting to new peers, and additionally
 // when receiving new blocks from the network
 func (syncer *Syncer) InformNewHead(from PeerID, head TipSet) {
 	switch syncer.syncMode {
 	case Bootstrap:
-		go SyncBootstrap(from, head)
+    // InformNewHead will only get called during PeerSetExpansion during bootstrapping
+		go SyncBootstrap(true)
 	case CaughtUp:
 		go syncer.SyncCaughtUp(blk)
 	}
@@ -58,15 +71,21 @@ func (syncer *Syncer) InformNewHead(from PeerID, head TipSet) {
 
 // SyncBootstrap is used to synchronise your chain when first joining
 // the network, or when rejoining after significant downtime.
-func (syncer *Syncer) SyncBootstrap() {
+func (syncer *Syncer) SyncBootstrap(bool expanding) {
     syncer.syncLock.Lock()
     defer syncer.syncLock.Unlock()
-    syncer.peerHeads[from] = head
-    if len(syncer.peerHeads) < BootstrapPeerThreshold {
+    if expanding && len(syncer.peerHeads) < BootstrapPeerThreshold {
         // not enough peers to sync yet...
         return
     }
-    
+  
+  	syncPeers := syncer.peerSet
+  	syncHeads := syncer.peerHeads
+  	if (!expanding) {
+    		syncPeers = syncer.trustedPeers
+      	syncHeads = syncer.trustedHeads
+  	}
+  	// Will now get heaviest head from all the heads from our Peerset
     selectedHead := selectHead(syncer.peerHeads)
     
     cur := selectedHead
@@ -80,14 +99,7 @@ func (syncer *Syncer) SyncBootstrap() {
             
         head = blks.Last().Parents()
     }
-    
-    genesis := blockSet.GetByHeight(0)
-    if genesis != syncer.genesis {
-        // TODO: handle this...
-        Error("We synced to the wrong chain!")
-        return
-    }
-    
+        
     // Fetch all the messages for all the blocks in this chain
     // There are many ways to make this more efficient. For now, do the dumb thing
     blockSet.ForEach(func(b Block) {
@@ -96,7 +108,7 @@ func (syncer *Syncer) SyncBootstrap() {
     })
     
     // Now, to validate some state transitions
-    base := genesis
+    base := syncer.genesis
     for i := 1; i < selectedHead.Height(); i++ {
         next := blockSet.GetByHeight(i)
         if !ValidateTransition(base, next) {
@@ -109,6 +121,33 @@ func (syncer *Syncer) SyncBootstrap() {
     blockSet.PersistTo(syncer.store)
     syncer.head = bset.Head()
     syncer.syncMode = CaughtUp
+}
+
+func selectHead(heads map[PeerID]TipSet) TipSet {
+    headsArr := toArray(heads)
+    sel := headsArr[0]
+    for i := 1; i < len(headsArr); i++ {
+        cur := headsArr[i]
+        
+        if cur.IsAncestorOf(sel) {
+            continue
+        }
+        if sel.IsAncestorOf(cur) {
+            sel = cur
+            continue
+        }
+        
+        nca := NearestCommonAncestor(cur, sel)
+        if sel.Height() - nca.Height() > ForkLengthThreshold {
+        	// TODO: handle this better than refusing to sync
+        	Fatal("Conflict exists in heads set")
+        }
+
+        if cur.Weight() > sel.Weight() {
+            sel = cur
+        }
+    }
+    return sel
 }
 
 // SyncCaughtUp is used to stay in sync once caught up to
@@ -160,7 +199,10 @@ func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 }
 ```
 
+
+
 ## Syncing Mode
+
 A filecoin node syncs in `syncing` mode when entering the network for the first time, or after being separated for a sufficiently long period of time.  The exact period of time comes from the consensus protocol (TODO specify more concretely, for example how does this relate to the consensus.Punctual method?).
 
 During `syncing` mode a node learns about the newest head of the blockchain through the secure bootstrapping protocol. The syncing protocol then syncs the block headers for that entire chain, and validates their linking. It then fetches all the messages for the chain, and checks all the state transitions between the blocks and that the blocks were correctly created.  If validation passes the node's head is updated to the head TipSet received from bootstrapping.
@@ -179,34 +221,41 @@ To sync new TipSets the `caught up` syncing protocol first runs a consensus vali
 
 ## Maintaining a fresh Peer Set
 
-Syncing depends on the validity of a node's peer set. In order to ensure that the peer set remains representative of the network's state after bootstrap, a node should regularly update its peer set.
-
-Likewise whenever one of the node's peers disconnects, it should be replaced in the peerSet.
+Syncing depends on the validity of a node's peer set. In order to ensure that the peer set remains representative of the network's state after bootstrap, a node should replace peers as peers disconnect. (TODO in future: cycle through peers on regular basis).
 
 ```go
-// TODO update
-func (syncer *Syncer) updatePeerSet() {
-    for peer, info := range syncer.PeerSet {
-        if !trustedPeer && syncer.TimeNow() - info.initialConnection > PEER_RECYCLE {
-            syncer.replacePeer(peer)
-        }
-        
-        if syncer.TimeNow() - peer.lastConnection > PEER_HEARTBEAT {
-            response, err := Heartbeat(peer)
-            if err {
-                syncer.replacePeer(peer)
-            } else {
-                syncer.PeerHeads(response.HeaviestTipSet)
-            }
-        }
-    }
-}
-
+// triggered when a peer disconnects
 func (syncer *Syncer) replacePeer(peer PeerID) {
     delete(syncer.PeerSet, peer)
     delete(syncer.PeerHeads, peer)
             
-    syncer.getNewPeer()
+  	newPeer := syncer.getRandomPeer()
+  	while !syncer.addPeerToSet(newPeer) {
+      newPeer = syncer.getRandomPeer(self.ownID)
+  	}
+}
+
+func (syncer *Syncer) getRandomPeer(from PeerID) newPeer PeerID {
+  	wantedPeer := generateRandomNodeID()
+    // libp2p's GetClosestPeers gets back k nearest peers, ordered
+    peers := dht.GetClosestPeers(from, wantedPeer)
+	  // We only use the nearest to get a good random peer
+    newPeer := peers[0]
+		return newPeer
+}
+
+func (syncer *Syncer) addPeerToSet(newPeer PeerID) bool {
+  	// verify new peer to check whether to include in peerSet
+    if !s.peerSet.contains(newPeer) {
+      peerChain := sayHello(newPeer)
+      
+      if peerChain.GenesisHash == GENESIS || trustedPeer.isAncestorOf(newPeer) {
+        s.peerSet = append(s.peerSet, newPeer)
+        s.InformNewHead(newPeer, trustedChain.HeaviestTipSet)
+        return true
+      }
+    }
+  return false
 }
 ```
 
