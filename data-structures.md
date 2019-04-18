@@ -68,6 +68,10 @@ type Block struct {
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 	// TODO: should be the same type of merkletree-list thing that the messages are
 	MessageReceipts []MessageReceipt
+    
+    // The block Timestamp is used to enforce a form of block delay by honest miners.
+    // Unix time UTC timestamp stored as an unsigned integer
+    Timestamp Timestamp
 }
 ```
 
