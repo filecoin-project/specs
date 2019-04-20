@@ -106,6 +106,12 @@ func (syncer *Syncer) SyncBootstrap(bool expanding) {
         // FetchMessages should use bitswap to fetch any messages we don't have locally
         FetchMessages(b)
     })
+  
+  	// Ensure that the selectedHead has the right genesis block
+  	// Should be checked for trusted nodes in InitialConnect() and for
+  	// all others in addPeerToSet(), but we leave details up to impl.
+  	selectedGenesis := blockSet.GetByHeight(0)
+	  assert(selectedGenesis == genesis, "State failure: trying to sync to wrong chain")
     
     // Now, to validate some state transitions
     base := syncer.genesis
@@ -230,6 +236,7 @@ func (syncer *Syncer) replacePeer(peer PeerID) {
     delete(syncer.PeerHeads, peer)
             
   	newPeer := syncer.getRandomPeer()
+  	// addPeerToSet will validate this peer (i.e. check it has right genesis, etc.)
   	while !syncer.addPeerToSet(newPeer) {
       newPeer = syncer.getRandomPeer(self.ownID)
   	}
