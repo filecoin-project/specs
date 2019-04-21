@@ -108,7 +108,7 @@ Miners have 2 ways to generate new sealed data as below
 
 *Practical application*：
 
-For example: SA1 in mine machine A fails. SA1 must have its own backup SA1’(on-chain) because Filecoin network will make redundant backups of all data.(The original data of  SA1 and SA1’is exactly the same).Now we find  SA1’and generate a new sealed sector SB-A1 on mine machine B.The new sealed data  SB-A1  has its own unique ID. We report the ID to the mortgage layer M1, and then link M1 to  SB-A1 .
+For example: S<sub>A1</sub>  in mine machine A fails. S<sub>A1</sub> must have its own backup S<sub>A1</sub><sup>'<sup>(on-chain) because Filecoin network will make redundant backups of all data.(The original data of  S<sub>A1</sub>  and S<sub>A1</sub><sup>'<sup> is exactly the same).Now we find   S<sub>A1</sub><sup>'<sup> and generate a new sealed sector S<sub>B-A1</sub><sup>'<sup>  on mine machine B.The new sealed data  S<sub>B-A1</sub><sup>'<sup>   has its own unique ID. We report the ID to the mortgage layer M1, and then link M1 to  S<sub>B-A1</sub><sup>'<sup>  .
 
 ![](img/3.png)
 
@@ -116,7 +116,7 @@ For example: SA1 in mine machine A fails. SA1 must have its own backup SA1’(on
 
 In this solution, each sealed sector has a one-to-one correspondence with the atomic level mortgage layer.The miners make redundant backups of the data in each sealed sector (these backup data are off-chain and are not included in the effective power).When a sealed sector is "broken", the miner reports the faulty sector and the backup data location to the mortgage layer.The mortgage layer can linke to backup data (sealed but off-chain) to repair corrupted data.
 Practical application
-For example:The sealed sector SA1 in the mining machine A fails, and the backup data SB-A1 (off-chain) exists in the mining machine B.The miner reports the ID of SA1 to mortgage Actor1, and then mortgages the Actor1 will link to the SB-A1 .Since  SB-A1 is a redundant backup of SA1, the content stored by SB-A1 is exactly the same as that of SA1.Therefore, we just need to point the link of the mortgage Actor1 to SB-A1.
+For example:The sealed sector S<sub>A1</sub> in the mining machine A fails, and the backup data S<sub>B-A1</sub>(off-chain) exists in the mining machine B.The miner reports the ID of S<sub>A1</sub> to mortgage Actor1, and then mortgages the Actor1 will link to the S<sub>B-A1</sub> .Since  S<sub>B-A1</sub> is a redundant backup of S<sub>A1</sub>, the content stored by S<sub>B-A1</sub> is exactly the same as that of  S<sub>A1</sub>.Therefore, we just need to point the link of the mortgage Actor1 to S<sub>B-A1</sub>.
 
 ![](img/4.png)
 
@@ -130,7 +130,7 @@ The implementation of the data active migration mechanism is based on the decoup
 
 Practical application
 For example:Mine machine A and Mine machine B are on the same mortgage layer Actor1.
-Mine machine A detected that its own hard disk will be damaged. After mine machine A and mine machine B negotiated a migration agreement, mine machine A successfully migrated the original data SA1’ of data SA1 to mine machine B.Next, a new sealed sector SB-A1 is generated in the mine machine B according to SA1’,the new sealed sector SB-A1  has its own unique ID.Mine machine A reports the ID to the mortgage layer M1, and M1 will link to  SB-A1.
-Since  SB-A1 is a sealed sector generated based on the data of  SA1’, the content stored by SB-A1 is exactly the same as the content of SA1.Therefore, we just need to point the link of the mortgage Actor1 to SB-A1.
+Mine machine A detected that its own hard disk will be damaged. After mine machine A and mine machine B negotiated a migration agreement, mine machine A successfully migrated the original data  S<sub>A1</sub><sup>'<sup> of data S<sub>A1</sub> to mine machine B.Next, a new sealed sector S<sub>B-A1</sub> is generated in the mine machine B according to S<sub>A1</sub><sup>'<sup> ,the new sealed sector S<sub>B-A1</sub>  has its own unique ID.Mine machine A reports the ID to the mortgage layer M1, and M1 will link to S<sub>B-A1</sub>.
+Since   S<sub>B-A1</sub> is a sealed sector generated based on the data of  S<sub>A1</sub><sup>'<sup> , the content stored by  S<sub>B-A1</sub> is exactly the same as the content of S<sub>A1</sub>.Therefore, we just need to point the link of the mortgage Actor1 to S<sub>B-A1</sub>.
 
 ![](img/5.png)
