@@ -97,7 +97,7 @@ According to the above ideas, we provide two ways to reconstruct data that can a
 
 
 
-#### 3.5.1 Generate new sealed sector
+#### 3.5.2.1 Generate new sealed sector
 
 When a sealed sector is “broken”, the miner reports the fault to the mortgage layer, and the mortgage layerwill link to the newly generated sealed sector to repair the corrupted data, thereby avoiding deduction of collateral.
 
@@ -108,11 +108,11 @@ Miners have 2 ways to generate new sealed data as below
 
 *Practical application*：
 
-For example: S<sub>A1</sub>  in mine machine A fails. S<sub>A1</sub> must have its own backup S<sub>A1</sub><sup>'<sup>(on-chain) because Filecoin network will make redundant backups of all data.(The original data of  S<sub>A1</sub>  and S<sub>A1</sub><sup>'<sup> is exactly the same).Now we find   S<sub>A1</sub><sup>'<sup> and generate a new sealed sector S<sub>B-A1</sub><sup>'<sup>  on mine machine B.The new sealed data  S<sub>B-A1</sub><sup>'<sup>   has its own unique ID. We report the ID to the mortgage layer M1, and then link M1 to  S<sub>B-A1</sub><sup>'<sup>  .
+For example: S<sub>A1</sub>  in mine machine A fails. S<sub>A1</sub> must have its own backup S<sub>A1</sub><sup>'</sup>  (on-chain) because Filecoin network will make redundant backups of all data.(The original data of  S<sub>A1</sub>  and S<sub>A1</sub><sup>'</sup>  is exactly the same).Now we find   S<sub>A1</sub><sup>'</sup>  and generate a new sealed sector S<sub>B-A1</sub><sup>'</sup>   on mine machine B.The new sealed data  S<sub>B-A1</sub><sup>'</sup>   has its own unique ID. We report the ID to the mortgage layer M1, and then link M1 to  S<sub>B-A1</sub><sup>'</sup>   .
 
 ![](img/3.png)
 
-#### 3.5.2 Link to other sealed but off-chain redundant data
+#### 3.5.2.2 Link to other sealed but off-chain redundant data
 
 In this solution, each sealed sector has a one-to-one correspondence with the atomic level mortgage layer.The miners make redundant backups of the data in each sealed sector (these backup data are off-chain and are not included in the effective power).When a sealed sector is "broken", the miner reports the faulty sector and the backup data location to the mortgage layer.The mortgage layer can linke to backup data (sealed but off-chain) to repair corrupted data.
 Practical application
@@ -130,7 +130,7 @@ The implementation of the data active migration mechanism is based on the decoup
 
 Practical application
 For example:Mine machine A and Mine machine B are on the same mortgage layer Actor1.
-Mine machine A detected that its own hard disk will be damaged. After mine machine A and mine machine B negotiated a migration agreement, mine machine A successfully migrated the original data  S<sub>A1</sub><sup>'<sup> of data S<sub>A1</sub> to mine machine B.Next, a new sealed sector S<sub>B-A1</sub> is generated in the mine machine B according to S<sub>A1</sub><sup>'<sup> ,the new sealed sector S<sub>B-A1</sub>  has its own unique ID.Mine machine A reports the ID to the mortgage layer M1, and M1 will link to S<sub>B-A1</sub>.
-Since   S<sub>B-A1</sub> is a sealed sector generated based on the data of  S<sub>A1</sub><sup>'<sup> , the content stored by  S<sub>B-A1</sub> is exactly the same as the content of S<sub>A1</sub>.Therefore, we just need to point the link of the mortgage Actor1 to S<sub>B-A1</sub>.
+Mine machine A detected that its own hard disk will be damaged. After mine machine A and mine machine B negotiated a migration agreement, mine machine A successfully migrated the original data  S<sub>A1</sub><sup>'</sup> of data S<sub>A1</sub> to mine machine B.Next, a new sealed sector S<sub>B-A1</sub> is generated in the mine machine B according to S<sub>A1</sub><sup>'</sup> ,the new sealed sector S<sub>B-A1</sub>  has its own unique ID.Mine machine A reports the ID to the mortgage layer M1, and M1 will link to S<sub>B-A1</sub>.
+Since   S<sub>B-A1</sub> is a sealed sector generated based on the data of  S<sub>A1</sub><sup>'</sup> , the content stored by  S<sub>B-A1</sub> is exactly the same as the content of S<sub>A1</sub>.Therefore, we just need to point the link of the mortgage Actor1 to S<sub>B-A1</sub>.
 
 ![](img/5.png)
