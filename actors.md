@@ -323,10 +323,13 @@ type StorageMiner struct {
 	ArbitratedDeals CidSet
 
 	// TODO: maybe this number is redundant with power
-	LockedStorage BytesAmount
+	LockedStorage Integer
 
 	// Power is the amount of power this miner has
-	Power BytesAmount
+	Power Integer
+
+	// Asks are the set of active asks this miner has available
+	Asks AskSet
 }
 ```
 
