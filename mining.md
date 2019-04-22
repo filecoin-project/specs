@@ -258,6 +258,11 @@ To create a block, the eligible miner must compute a few fields:
 - `ReceiptsRoot` - To compute this:
   - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
   - Insert them into a Merkle Tree and take its root.
+- `BLSSignatureAggregate` & `BLSMessages` - To compute this:
+  - Compute [`Signature.Aggregate`](https://github.com/filecoin-project/specs/blob/master/signatures.md) over all BLS `SignedMessages` that will be included in this `Block`
+  - Store the output `SignatureBytes` in `BLSSignatureAggregate`
+  - In the order which they were aggregated, store the associated `SignedMessage.Message` in `BLSMessages`. 
+    - `sigma = Aggregate(msg_b, msg_c, msg_a)` implies `BLSMessages = [msg_b, msg_c, msg_a]`
 - `BlockSig` - A signature with the miner's private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
 An eligible miner can start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.
