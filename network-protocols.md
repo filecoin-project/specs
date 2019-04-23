@@ -48,12 +48,12 @@ Upon receiving a "hello" stream from another node, you should read off the CBOR 
 
 > The storage deal protocol is used by any client to store data with a storage miner.
 
-The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a `piece` prior to executing this protocol.
+The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a `piece` prior to executing this protocol. For more details on initial data processing, see [client data](client-data.md).
 
 First the client sends a signed `StorageDealProposal` to the storage miner:
 
 ```go
-type Commitment []byte;
+type Commitment []byte
 
 type StorageDealProposal struct {
 	// PieceRef is the hash of the data in native structure. This will be used for
