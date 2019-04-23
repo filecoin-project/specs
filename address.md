@@ -145,7 +145,7 @@ const (
 |----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
-|    1     | blake2b-160(Random) |
+|    2     | blake2b-160(Random) |
 ```
 
 **String**
@@ -168,7 +168,7 @@ const (
 |----------|---------------------|
 | protocol |        payload      |
 |----------|---------------------|
-|    1     | 48 byte BLS PubKey  |
+|    3     | 48 byte BLS PubKey  |
 ```
 
 **String**
