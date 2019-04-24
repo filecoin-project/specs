@@ -42,7 +42,7 @@ Whenever a node gets a new connection, it opens a new stream on that connection 
 ```go
 type HelloMessage struct {
 	HeaviestTipSet       []Cid
-	HeaviestTipSetHeight uint64
+	HeaviestTipSetWeight uint64
 	GenesisHash          Cid
 }
 ```
@@ -56,7 +56,7 @@ func SayHello(p PeerID) {
 }
 ```
 
-Upon receiving a 'hello' stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the `HeaviestTipSet`, claimed `HeaviestTipSetHeight`, and peerID of the other node should be passed to the chain sync subsystem.
+Upon receiving a 'hello' stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the `HeaviestTipSet`, claimed `HeaviestTipSetWeight`, and peerID of the other node should be passed to the chain sync subsystem.
 
 # Storage Deal
 
