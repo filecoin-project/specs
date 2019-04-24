@@ -92,7 +92,7 @@ type Message struct {
 	GasPrice Integer
 	GasLimit Integer
 
-	Method string
+	Method uint64
 	Params []byte
 }
 ```
