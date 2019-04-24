@@ -149,7 +149,7 @@ A piece is a portion of a file that gets fitted into a sector.
 
 #### Polling Time
 
-Security Parameter. Number of rounds between every proving period.
+Security Parameter. Polling time is the time between two online PoReps in a PoSt proof.
 
 #### Power table
 
@@ -165,7 +165,7 @@ Also referred to as `L` in consensus settings.
 
 #### Proving Period
 
-The period of time during which storage miners must compute Proofs of Spacetime. At the end of the period they must submit their PoSt.
+The period of time during which storage miners must compute Proofs of Spacetime. At the end of the period they must submit their PoSt. Put another way, it is the duration of a PoSt.
 
 #### Proving Set
 
@@ -191,7 +191,7 @@ Used in the Filecoin system by a storage miner to prove that client data was kep
 
 TODO add a note to distinguish predictability from randomness
 
-#### Randomness Lookback
+#### Election Randomness Lookback
 
 Security parameter. A number of rounds to sample back from when choosing randomness for use in leader election. A higher number turns a more localized lottery into a more global one since a miner wins or loses on all descendants of a given randomness, but enables miners to look-ahead and know whether they will be elected in the future.
 
