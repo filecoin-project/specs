@@ -31,4 +31,41 @@ For details on how UnixfsV1 works, see its spec [here](https://github.com/ipfs/s
 
 Storage Encoding is computed by building a merkle tree out of the data using `RepHash`.
 
-TODO(proofs team): Fill in how exactly this works.
+Inputs to `RepHash` must first be preprocessed then padded.
+
+__*Preprocessing*__ adds two zero bits after every 254 bits of original data, yielding a sequence of 32-byte blocks, each of which contains two zeroes in the most-significant bits, when interpreted as a little-endian number. That is, for each block, `0x11000000 & block[31] == 0`.
+
+Next, __*piece padding*__ is added: blocks of 32 zero bytes are added so that the total number of blocks (including __*piece padding*__) is a power of two.
+
+`RepHash` constructs a binary merkle tree from the resulting blocks, designated as the *leaves* — by applying the __*RepHash Compression Function*__, `RepCompress`, to adjacent pairs of leaves. The final result is the merkle root of the constructed tree.
+
+```go
+type node [32]uint8
+
+// Create and return the root of a binary merkle tree.
+// len(leaves) must be a power of 2.
+func RepHash(leaves node) node {
+	currentRow := leaves
+	for height := 0; len(currentRow) > 1; height += 1 {
+		var nextRow []node
+
+		for i := 0; i < len(row)/2; i += 2 {
+			left := row[i]
+			right := row[i+1]
+
+			// NOTE: Depending on choice of RepCompress, heightPart may be trimmed to fewer than 8 bits.
+			heightPart := []uint8{height}
+
+			input1 := append(heightPart, left...)
+			input := append(input1, right...)
+			hashed = RepCompress(input)
+			nextRow = append(nextRow, hashed)
+		}
+
+		currentRow = nextRow
+	}
+
+	return currentRow[0]
+}
+
+```
