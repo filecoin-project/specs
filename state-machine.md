@@ -68,7 +68,7 @@ func ApplyMessage(st StateTree, msg Message) MessageReceipt {
 
 	vmctx := makeVMContext(st, msg)
 
-	if msg.Method != "" {
+	if msg.Method != 0 {
 		ret, errcode := toActor.Invoke(vmctx, msg.Method, msg.Params)
 		if errcode != 0 {
 			// revert all state changes since snapshot
@@ -136,7 +136,7 @@ data structure that can be built upon a content addressed block store.
 Implementations may provide data structure implementations to simplify
 development. The current interface only supports CBOR-IPLD, but this
 should soon expand to allow other types of IPLD data structures (as long
-		as the system has resolvers for them).
+as the system has resolvers for them).
 
 The current state of a given actor can be accessed first by calling `Head` to retrieve the CID of the root of the actors state, then by using `Get` to retrieve the actual object being referenced.
 

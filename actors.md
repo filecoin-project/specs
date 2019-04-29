@@ -23,6 +23,11 @@ type InitActor struct {
 }
 ```
 
+| Index     | Method Name       |
+| -------- | ---------- |
+| 1  | `Exec`     |
+| 2 | `GetIdForAddress` |
+
 ### `Exec(code Cid, params []Param) Address`
 
 >  This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
@@ -130,6 +135,12 @@ type StorageMarketActor struct {
 }
 ```
 
+| Index     | Method Name       |
+| -------- | ---------- |
+| 0   | `CreateStorageMiner`     |
+| 1 | `SlashConsensusFault` |
+| 2 | `UpdateStorage` |
+| 3 | `GetTotalStorage` |
 
 
 #### CreateStorageMiner
@@ -332,6 +343,23 @@ type StorageMiner struct {
 	Asks AskSet
 }
 ```
+
+| Index     | Method Name       |
+| -------- | ---------- |
+| 1   | `AddAsk`     |
+| 2 | `CommitSector` |
+| 3 | `SubmitPoSt` |
+| 4 | `SlashStorageFault` |
+| 5 | `GetCurrentProvingSet` |
+| 6 | `ArbitrateDeal` |
+| 7 | `DePledge` |
+| 8 | `GetOwner` |
+| 9 | `GetWorkerAddr` |
+| 10 | `GetPower` |
+| 11 | `GetKey` |
+| 12 | `GetPeerID` |
+| 13 | `GetSectorSize` |
+| 14 | `UpdatePeerID` |
 
 ### Constructor
 
@@ -798,6 +826,16 @@ type Transaction struct {
 }
 ```
 
+| Index     | Method Name       |
+| -------- | ---------- |
+| 0   | `Propose`     |
+| 1 | `Approve` |
+| 2 | `Cancel` |
+| 3 | `ClearCompleted` |
+| 4 | `AddSigner` |
+| 5 | `RemoveSigner` |
+| 6 | `SwapSigner` |
+| 7 | `ChangeRequirement` |
 
 
 #### Constructor
