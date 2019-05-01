@@ -14,6 +14,10 @@ This format consists of series of [CBOR](https://tools.ietf.org/html/rfc7049) se
 - **Name**: Hello
 - **Protocol ID**: `/fil/hello/1.0.0`
 
+Note: Implementations should limit the maximum number of bytes read during the `ReadCborRPC` call. We suggest 1MB as a sane limit.
+
+# Hello Handshake
+
 > The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node.
 
 Whenever a node gets a new connection, it opens a new stream on that connection and "says hello". This is done by crafting a `HelloMessage`, sending it to the other peer using CBOR RPC and finally, closing the stream.
