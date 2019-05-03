@@ -64,7 +64,7 @@ type Address struct {
 
 #### Network Prefix
 
-The **network prefix** is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be `f` for filecoin mainnet or `t` for filecoin testnet. Is it worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.
+The **network prefix** is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be `f` for filecoin mainnet or `t` for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.
 
 #### Protocol Indicator
 
@@ -239,9 +239,9 @@ func Encode(network string, a Address) string {
 	switch a.Protocol {
 	case SECP256K1, Actor, BLS:
 		cksm := Checksum(a)
-		return network + a.Protocol + base32.Encode(a.Payload+cksm)
+		return network + string(a.Protocol) + base32.Encode(a.Payload+cksm)
 	case ID:
-		return network + a.Protocol + base10.Encode(leb128.Decode(a.Payload))
+		return network + string(a.Protocol) + base10.Encode(leb128.Decode(a.Payload))
 	default:
 		Fatal("invalid address protocol")
 	}
@@ -272,7 +272,7 @@ func Decode(a string) Address {
 	if protocol == ID {
 		return Address{
 			Protocol: protocol,
-			Payload:  base10.Decode(raw),
+			Payload:  leb128.Encode(base10.Decode(raw)),
 		}
 	}
 
