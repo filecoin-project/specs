@@ -15,7 +15,7 @@ Second, an `actor` may call a method on another actor during the invocation of o
 
 ### State Representation
 
-The `global state` is modeled as a map of actor `ID`s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT). Each actor's `state` is an ipld pointer to a graph that can be entirely defined by the actor.
+The `global state` is modeled as a map of actor `ID`s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the 'key' being the serialized ID address (every actor has an ID address that can be looked up via the `InitActor`), and the value is an [`Actor`](data-structures.md#actor) object with the actors information. Within each `Actor` object is a field called `state` that is an ipld pointer to a graph that can be entirely defined by the actor.
 
 ### Execution (Calling a method on an Actor)
 
