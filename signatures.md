@@ -162,8 +162,9 @@ Type SignedMessage Struct {
   - Go-filecoin - <https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98>
 
 ### References
-
-TODO: this section should likely be removed, and the context it adds should be linked in some other way.
+{% hint style='working' %}
+**TODO**: this section should likely be removed, and the context it adds should be linked in some other way.
+{% endhint %}
 
 - Maybe Marshal/Unmarshal == NewSignedMessage/SignBytes?  
 

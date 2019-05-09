@@ -285,7 +285,9 @@ Each message should be applied on the resultant state of the previous message ex
 
 The miner merklizes the set of messages selected, and put the root in `MsgRoot`. They gather the receipts from each execution into a set, merklize them, and put that root in `ReceiptsRoot`. Finally, they set the `StateRoot` field with the resultant state.
 
+{% hint style='info' %}
 Note that the `ParentState` field from the expected consensus document is left out, this is to help minimize the size of the block header. The parent state for any given parent set should be computed by the client and cached locally.
+{% endhint %}
 
 Finally, the miner can generate a Unix Timestamp to add to their block, to show that the block generation was appropriately delayed.
 
