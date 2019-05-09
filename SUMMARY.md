@@ -3,7 +3,7 @@
 * [Spec Process](process.md)
 * [Node Operation](operation.md)
   * [Chain Sync](sync.md)
-* [Chain Validation](validation.md)
+* [Block Validation](validation.md)
 * [Storage Market](storage-market.md)
   * [Interface](storage-market.md#the-market-interface)
   * [Deal Flow](storage-market.md#market-flow)
