@@ -162,6 +162,31 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 {% endhint %}
 
 
+## Signature
+
+All signatures in Filecoin come with a type that signifies which key type was used to create the signature.
+
+```go
+type Signature struct {
+	Type int
+	Data []byte
+}
+```
+
+### `Type` Values
+
+| Key Type | Value |
+|-------|----------|
+|  Secp256k1 | 1 |
+| BLS12-381 ECDSA | 2 | 
+
+### Serialization
+
+`<uvarint(Type)><Data>`
+
+Note: As signatures should always be within wrapper types, length prefixing is not needed here.
+
+
 
 # Basic Type Encodings
 

@@ -10,9 +10,19 @@ This spec describes a set of actors that operate within the [Filecoin State Mach
 - [Storage Miner Actor](#storage-miner-actor)
 - [Payment Channel Broker Actor](#payment-channel-broker-actor)
 
+## Built In Actors
+
+Some state machine actors are 'system' actors that get instantiated in the genesis block, and have their IDs allocated at that point.
+
+| ID   | Actor              | Name                    |
+| ---- | ------------------ | ----------------------- |
+| 0    | InitActor          | Network Init            |
+| 1    | AccountActor       | Network Treasury        |
+| 2    | StorageMarketActor | Filecoin Storage Market |
+
 
 ## Init Actor
-The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors).
+The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that `NextID` will initially be set to 100.
 
 ```go
 type InitActor struct {
@@ -22,6 +32,9 @@ type InitActor struct {
 	NextID BigInt
 }
 ```
+
+### Code Cid
+`<codec:raw><mhType:identity><"init">`
 
 | Index     | Method Name       |
 | -------- | ---------- |
@@ -117,7 +130,18 @@ func GetIdForAddress(addr Address) BigInt {
 }
 ```
 
+## Account Actor
 
+The Account actor is the actor used for normal keypair backed accounts on the filecoin network.
+
+```go
+type AccountActor struct {
+  // The account actor has no extra state
+}
+```
+
+### Code Cid
+`<codec:raw><mhType:identity><"account">`
 
 
 
@@ -134,6 +158,8 @@ type StorageMarketActor struct {
 	TotalStorage BytesAmount
 }
 ```
+### Code Cid
+`<codec:raw><mhType:identity><"smarket">`
 
 | Index     | Method Name       |
 | -------- | ---------- |
@@ -343,6 +369,9 @@ type StorageMiner struct {
 	Asks AskSet
 }
 ```
+
+### Code Cid
+`<codec:raw><mhType:identity><"sminer">`
 
 | Index     | Method Name       |
 | -------- | ---------- |
@@ -825,6 +854,9 @@ type Transaction struct {
 	Canceled  bool
 }
 ```
+
+### Code Cid
+`<codec:raw><mhType:identity><"multisig">`
 
 | Index     | Method Name       |
 | -------- | ---------- |
