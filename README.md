@@ -14,17 +14,22 @@ discussions.
 
 You can also use gitbook tooling to view the spec locally.
 
-First, install `gitbook-cli` via npm and run:
+First, install `gitbook-cli` via npm then run the following to install all necessary plugins:
+```
+gitbook install
+```
+
+Now you can have gitbook serve it to you (with live-reload) via:
 ```
 gitbook serve
 ```
 
-Alternatively, you can use gitbook to print a pdf using:
+Alternatively, you can use gitbook to print a pdf (or epub, or mobi) using:
 ```
 gitbook pdf
 ```
 
-(Note: on macOS using the pdf printer may require some extra installation)
+(Note: on macOS using the pdf printer may require some extra installation, epub and mobi might require callibre to be installed, too)
 
 If you're just browsing on GitHub, start with [INTRO.md](INTRO.md) and the
 table of contents in [SUMMARY.md](SUMMARY.md). But really, we recommend using 

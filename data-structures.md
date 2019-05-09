@@ -157,7 +157,10 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 
 ## HAMT
 
-TODO: link to spec for our CHAMP HAMT
+{% hint style='working' %}
+**TODO**: link to spec for our CHAMP HAMT
+{% endhint %}
+
 
 
 # Basic Type Encodings

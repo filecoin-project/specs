@@ -2,7 +2,10 @@
 
 Running a Filecoin `full node` requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.
 
-(TODO: elaborate on all this, obviously)
+
+{% hint style='working' %}
+**TODO**: elaborate on all this, obviously
+{% endhint %}
 
 ## Chain Validation
 
