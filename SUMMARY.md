@@ -1,4 +1,6 @@
-# Filecoin Spec
+## Filecoin Spec
+
+* [Overview](INTRO.md)
 
 * Core
   * [Data Structures](data-structures.md)
@@ -22,6 +24,10 @@
   * [Payments](payments.md)
   * [Faults](faults.md)
 * [Glossary](definitions.md)
-* [Spec Process](process.md)
-* Changelog
+
+
+* Spec
+ * [Style](style.md)
+ * [Process](process.md)
+ * Changes
 
