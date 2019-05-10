@@ -447,7 +447,7 @@ The blocksync protocol is a small protocol that allows Filecoin nodes to request
 
 ```go
 type BlockSyncRequest struct {
-	Start         Cid
+	Start         []Cid
 	RequestLength uint64
   Options uint64
 }
@@ -477,7 +477,7 @@ type TipSetBundle struct {
 }
 ```
 
-The response contains the requested chain in reverse iteration order. Each item in the `Chain` array is contains the blocks for that tipset if the `Blocks` option bit in the request was set, and if the `Messages` bit was set, the messages across all blocks in that tipset. The `MsgIncludes` array contains one array of integers for each block in the `Blocks` array. Each of the arrays in `MsgIncludes` contains a list of indexes of messages from the `Messages` array that are in each `Block` in the blocks array.
+The response contains the requested chain in reverse iteration order. Each item in the `Chain` array is contains the blocks for that tipset if the `Blocks` option bit in the request was set, and if the `Messages` bit was set, the messages across all blocks in that tipset. The `MsgIncludes` array contains one array of integers for each block in the `Blocks` array. Each of the arrays in `MsgIncludes` contains a list of indexes of messages from the `Messages` array that are in each `Block` in the blocks array.
 
 Possible error codes:
 
