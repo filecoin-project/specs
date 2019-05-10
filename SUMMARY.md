@@ -13,6 +13,7 @@
     * [Chain Sync](sync.md)
   * [Expected Consensus](expected-consensus.md)
   * [State Machine](state-machine.md)
+    * [Local Storage](local-storage.md)
   * [Node Operation](operation.md)
 * [Actors](actors.md)
   * [Mining](mining.md)
