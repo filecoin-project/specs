@@ -368,7 +368,7 @@ MessageReceipts: []MessageReceipt{}
 
 RLE+ is a lossless compression format based on [RLE](https://en.wikipedia.org/wiki/Run-length_encoding).
 It's primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly,
-while keeping the same level of compression for large sets of contigous bits.
+while keeping the same level of compression for large sets of contiugous bits.
 
 In tests it has shown to be more compact than RLE iteself, as well as [Concise](https://arxiv.org/pdf/1004.0403.pdf) and [Roaring](https://roaringbitmap.org/).
 
