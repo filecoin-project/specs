@@ -6,6 +6,7 @@ daily: cover.jpg
 	gitbook pdf . "build/filecoin-spec.$(now).pdf"
 
 publish:
+	git submodule update --init --recursive
 	./publish.sh
 
 cover.jpg:
