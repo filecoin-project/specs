@@ -443,27 +443,59 @@ TODO: document the query deal interaction
 
 # BlockSync
 
-The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of `/fil/sync/blk/0.0.0`. It uses CBOR-RPC.
+The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of `/fil/sync/blk/0.0.1`. It uses CBOR-RPC.
 
 ```go
 type BlockSyncRequest struct {
-	Start         Cid
+  // The TipSet being synced from
+	Start         []Cid
+
+  // How many tipsets to sync
 	RequestLength uint64
+
+  // Query options
+  Options uint64
 }
 ```
 
-The request requests a chain of a given length by the hash of its highest block.
+The request requests a chain of a given length by the hash of its highest block. The `Options` allow the requester to specify whether or not blocks and messages to be included.
+
+| bit  | option   | Description             |
+| ---- | -------- | ----------------------- |
+| 0    | Blocks   | Include blocks if set   |
+| 1    | Messages | Include messages if set |
+
+
 
 ```go
 type BlockSyncResponse struct {
-	Blocks []Block
+	Chain []TipSetBundle
 
 	Status  uint
 	Message string
 }
+
+type TipSetBundle struct {
+  Blocks []Blocks
+  Messages []Message
+  MsgIncludes [][]int
+}
 ```
 
-The response contains the chain of requested blocks, in reverse iteration order, the zero'th block should be the block referenced by `request.Start`, and the following N blocks should be its N parents, and so on. This is done to streamline validation.
+The response contains the requested chain in reverse iteration order. Each item in the `Chain` array contains the blocks for that tipset if the `Blocks` option bit in the request was set, and if the `Messages` bit was set, the messages across all blocks in that tipset. The `MsgIncludes` array contains one array of integers for each block in the `Blocks` array. Each of the arrays in `MsgIncludes` contains a list of indexes of messages from the `Messages` array that are in each `Block` in the blocks array.
+
+Example TipSetBundle:
+```
+Blocks: [b0, b1]
+Messages: [mA, mB, mC, mD]
+MsgIncludes: [[0, 1, 3], [1, 2, 0]]
+```
+
+Corresponds to:
+```
+Block 'b0': [mA, mB, mD]
+Block 'b1': [mB, mC, mA]
+```
 
 Possible error codes:
 
