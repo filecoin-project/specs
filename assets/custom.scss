@@ -17,7 +17,7 @@ $gray: #e1e1e1;
 $lightestGray: #d5dae6;
 $white: #ffffff;
 $black: #000000;
-$purple: #9768d1;
+$purple: #0b3a53;
 $codeBackground: #f7f9fc;
 $detailGray: #f7f7f7;
 $groupGray: #dddddd;
@@ -26,11 +26,18 @@ $orange: #e67e22;
 $red: #e74c3c;
 $blue: #3498db;
 
+
+html {
+  font-size: $font-size-base;
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   box-sizing: border-box;
   height: 100%;
   width: 100%;
+  overflow-x: inherit;
 }
 
 body {
@@ -60,6 +67,8 @@ body {
 }
 
 .markdown {
+  max-width: 90%;
+
   h1,
   h2,
   h3,
@@ -181,8 +190,7 @@ img {
 
 // -- Code
 
-a.no-underline,
-pre a {
+.markdown a, a, pre a {
   color: $purple;
   text-shadow: none;
   text-decoration: none;
@@ -197,41 +205,38 @@ pre a {
   }
 }
 
-.markdown pre {
-  background-color: transparent;
-  padding: 0;
-}
-
-code {
-  font-family: $monoFontFamily;
-  font-style: normal;
-  line-height: 24px;
-  font-weight: 400;
-  background-color: $codeBackground;
-  vertical-align: baseline;
-  border-radius: 2px;
-  padding: .1em .2em;
-  border: 1px solid darken($codeBackground, 10%);
-  text-transform: none;
-}
-
-pre {
-  margin: $baseLineHeight 0;
-
-  &.spec {
-    margin: 0;
-  }
-
-  &.spec code {
+.markdown {
+  pre {
+    background-color: transparent;
     padding: 0;
+    margin: $baseLineHeight 0;
+
+    code {
+      display: block;
+      overflow-x: auto;
+      white-space: inherit;
+      padding: 0.5em 1em;
+      background-color: $codeBackground;
+      font-size: 8px;
+
+      span {
+        font-size: 16px;
+      }
+    }
   }
 
-  code:not(.inline) {
-    display: block;
-    overflow-x: auto;
-    white-space: inherit;
-    padding: 0.5em 1em;
+  code {
+    font-family: $monoFontFamily;
+    font-style: normal;
+    line-height: 24px;
+    font-weight: 400;
     background-color: $codeBackground;
+    vertical-align: baseline;
+    border-radius: 2px;
+    padding: .1em .2em;
+    border: 1px solid darken($codeBackground, 10%);
+    text-transform: none;
+    word-wrap: break-word;
   }
 }
 

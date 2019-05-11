@@ -5,6 +5,9 @@ daily: cover.jpg
 	@mkdir -p build
 	gitbook pdf . "build/filecoin-spec.$(now).pdf"
 
+dev:
+	hugo serve
+
 publish:
 	git submodule update --init --recursive
 	./publish.sh
