@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>http://example.org/docs/actors/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/address/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/bootstrap/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/client/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/data-propagation/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/data-structures/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/definitions/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/drgporep-circuit/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/expected-consensus/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/faults/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/local-storage/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/mining/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/network-protocols/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/operation/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/payments/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/process/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/proofs/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/retrieval-market/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/signatures/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/state-machine/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/storage-market/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/style/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/sync/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/validation/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/zigzag-circuit/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/docs/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.org/</loc>
+  </url>
+  
+  <url>
+    <loc>http://example.org/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

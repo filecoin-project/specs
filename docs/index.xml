@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docs on Filecoin Spec</title>
+    <link>http://example.org/docs/</link>
+    <description>Recent content in Docs on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="http://example.org/docs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/actors/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/actors/</guid>
+      <description>Filecoin State Machine Actors Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode. The algorithms below are correct, and all implementations much match it (including go-filecoin), but details omitted from here should be looked for in the go-filecoin code.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/address/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/address/</guid>
+      <description>Address A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/bootstrap/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/bootstrap/</guid>
+      <description>Filecoin Bootstrapping Routine This spec describes the Filecoin bootstrapping protocol, it must be read along with:
+ Sync on how Filecoin nodes sync with bootstrap nodes to catch up to the chain and stay synced after the initial bootstrapping has occured. The Syncer interface and many of the methods used here are defined in the sync spec.  For related systems, see:
+ Network Protocols on how Filecoin nodes can communicate with each other, with for instance, an initial handshake, or block syncing.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/client/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/client/</guid>
+      <description>Ista qua aera Tetigisse hac duc omnipotens urbis per sapiente Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa protulit, sed sed aere valvis inhaesuro Pallas animam: qui quid, ignes. Miseratus fonte Ditis conubia.
+var mnemonicPcmcia = file; if (bookmarkMultiprocessing) { core.intranetDigitize = menu(vdslWordart(enterprise, dviRealityTeraflops)); } else { portal_socket.jsp_shareware_digital = multicasting(component_uml); memory.ppc_title_hit(lunWebFormat + fontSmartphoneView, tween * default_hard, 5 + laptopMethod); wddm_tablet_null.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/data-propagation/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/data-propagation/</guid>
+      <description>Filecoin Data Propagation The filecoin network needs to broadcast blocks and messages to all peers in the network. This document details how that process works.
+Both blocks and messages are propagated using the gossipsub libp2p pubsub router. The pubsub messages are authenticated. For blocks, the pubsub hop validation function is set to check that the block is valid before re-propagating. For messages, a similar validity check is run, the signature must be valid, and the account in question must have enough funds to cover the actions specified.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/data-structures/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/data-structures/</guid>
+      <description>Data Structures This document serves as an entry point for understanding all of the data structures in filecoin.
+Address An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/definitions/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/definitions/</guid>
+      <description>Definitions / Glossary Updates to definitions To make any updates to these definitions please submit a pull request with the changes, or open an issue and one of the maintainers will do it for you.
+Notes  Want to split all repair stuff to separate doc Let&amp;rsquo;s refer to Filecoin system rather than network. In a sense, the network is an instantiation of the system (this protocol). We can however refer to the Filecoin VM separately which means the system by which we apply changes to the state of the system at a point in time.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/drgporep-circuit/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/drgporep-circuit/</guid>
+      <description>DRGPorep Circuit Design Doc Offline Proof A Prover wants to convince a verifier that they have run the DRGPoRep replication algorithm on some data with Merkle root comm_d and that the Merkle root of the replicated data is comm_r.
+High level description Circuit inputs:
+ (Public input) Commitments to the original data and the replica data (Public input) An identifier for the replica (Public input) The binary representation of the position in the Merkle tree of:  the challenged nodes in the original data the challenged nodes in the replica data the parents of the challenged nodes in the replica data  (Aux input) Inclusion proofs for the set of challenged leaves in the original data and the replica data (Aux input) Inclusion proofs for the replica parent leaves of each challenged replica data leaf (Aux input) An identifier for the replica  Outside of circuit checks:</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/expected-consensus/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/expected-consensus/</guid>
+      <description>Expected Consensus This spec describes how to implement the protocol in general, for Filecoin-specific processes, see:
+ Mining Blocks on how consensus is used. Faults on slashing. Storage Market on how the power table is maintained. Block data structure for details on fields and encoding.  Important Concepts - TipSet
+ Weight
+ Round
+ Height
+ Epoch
+ Ticket
+ ElectionProof
+  Definition: A ticket is used as a source of randomness in EC leader election.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/faults/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/faults/</guid>
+      <description>Faults A fault is what happens when partcipants in the protocol are behaving incorrectly and that behavior needs to be punished. There are a number of possible faults in the Filecoin protocol, their details are all recorded below.
+Fault List Consensus Faults  Duplicate Block Submission Slashing:  Condition: If any miner posts two blocks satisfying the slashing conditions defined in Expected Consensus. Reporting: Anyone may call SlashConsensusFault and pass in the two offending block headers.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/local-storage/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/local-storage/</guid>
+      <description>Filecoin Node Local Storage A Filecoin node stores certain data locally. This section details what exactly gets stored (though exactly how things are stored is not dictated).
+Chain Data Private Keys Sectors Storage Deals ​</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/mining/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/mining/</guid>
+      <description>What is the Filecoin Mining Process An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning ticket to propose a block for each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/network-protocols/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/network-protocols/</guid>
+      <description>Filecoin Network Protocols TODO: table of contents
+All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.
+CBOR RPC Reference: - RFC 7049, Concise Binary Object Representation - Little Endian Base 128
+Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will try to use a CBOR RPC protocol format.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/operation/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/operation/</guid>
+      <description>Filecoin Node Operation Running a Filecoin full node requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.
+TODO: elaborate on all this, obviously Chain Validation Chain validation is the process by which a node stays up to date with the current state of the blockchain. This Involves: - Listening for new blocks on the blocks pubsub channel (See block propagation) - As new blocks come in, run through the block validation process - Keep track of valid blocks, keep track of the current &amp;lsquo;best&amp;rsquo; block (according to EC rules) - Rebroadcast valid blocks - Note: the actual rebroadcasting is handled by the underlying gossipsub library.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/payments/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/payments/</guid>
+      <description>Payments What are payments What payments affect Dependencies Miners Claiming Earnings Storage miners get paid entirely through payment channels. Payment from a client to a storage miner comes in the form of a set of channel updates that get created when proposing the deal. These updates are each time-locked, and can only be cashed out if the storage miner has not been slashed for the storage that is being paid for.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/process/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/process/</guid>
+      <description>Filecoin Spec Process (v0) &amp;lsquo;Catch Up&amp;rsquo; Mode Until we get to &amp;lsquo;spec parity&amp;rsquo; where our current level of understanding of the protocol and the spec are in sync, changes will be made to the spec by a simple PR process. If something is missing, PR it in, if something is wrong, PR a fix, if something needs to be elaborated, PR in updates. What is in the top level of this repo, in master, is the spec.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/proofs/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/proofs/</guid>
+      <description>Filecoin Proofs The Filecoin protocol requires a means of generating and verifying the following cryptographic proofs:
+ Proof of Replication proves that a unique copy of a given sector has been created. The Seal operation creates this unique copy and generates a corresponding Proof of Replication. Proof of Space-Time proves that an arbitrary number of sealed sectors existed over a specified period of time in their own dedicated storage — as opposed to being generated on-the-fly at proof time.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/retrieval-market/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/retrieval-market/</guid>
+      <description>Retrieval Market V0 What is the Retrieval Market What the Retrieval Market affects Dependencies Components Version 0 of the retrieval market protocol is what we (tentatively) will launch the filecoin network with. It is version zero because it will only be good enough to fit the bill as a way to pay another node for a file.
+The main components are as follows:
+ A payment channel actor (See payment channels for details) &amp;lsquo;retrieval-v0&amp;rsquo; libp2p services A chain-based content routing interface A set of commands to interact with the above  Retrieval V0 libp2p Services The v0 retrieval market will initially be implemented as two libp2p services.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/signatures/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/signatures/</guid>
+      <description>Signatures What are signatures in Filecoin Signatures are cryptographic functions that attest to the origin of a particular message. In the context of Filecoin, signatures are used to send and receive messages among with the assurance that each message was generated by specific individuals. In other words, it is infeasible for another individual i to generate a signed message that appears to have been generated by j.
+We use signatures in filecoin to verify something was done by someone.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/state-machine/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/state-machine/</guid>
+      <description>The Filecoin State Machine The majority of Filecoin&amp;rsquo;s user facing functionality (payments, storage market, power table, etc) is managed through the Filecoin State Machine. The network generates a series of blocks, and agrees which &amp;lsquo;chain&amp;rsquo; of blocks is the correct one. Each block contains a series of state transitions called messages, and a checkpoint of the current global state after the application of those messages.
+The global state here consists of a set of actors, each with their own private state.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/storage-market/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/storage-market/</guid>
+      <description>The Filecoin Storage Market What is the Filecoin Storage Market The Filecoin storage market is the underlying system used to discover, negotiate and form storage contracts between clients and storage providers called storage miners in a Filecoin network. The storage market itself is an actor that helps to mediate certain operations in the market, including adding new miners, and punishing faulty ones, it does not directly mediate any actual storage deals.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/style/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/style/</guid>
+      <description>Style Wording Any content that is written with code ticks has a specific definition to Filecoin and is defined in the glossary.
+The key words &amp;ldquo;MUST&amp;rdquo;, &amp;ldquo;MUST NOT&amp;rdquo;, &amp;ldquo;REQUIRED&amp;rdquo;, &amp;ldquo;SHALL&amp;rdquo;, &amp;ldquo;SHALL NOT&amp;rdquo;, &amp;ldquo;SHOULD&amp;rdquo;, &amp;ldquo;SHOULD NOT&amp;rdquo;, &amp;ldquo;RECOMMENDED&amp;rdquo;, &amp;ldquo;MAY&amp;rdquo;, and &amp;ldquo;OPTIONAL&amp;rdquo; in this document are to be interpreted as described in RFC 2119.
+Code Blocks Many sections of the spec use go type notation to describe the functionality of certain components. This is entirely a style preference by the authors and does not imply in any way that one must use go to implement Filecoin.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/sync/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/sync/</guid>
+      <description>Chain Syncing This spec describes the Filecoin sync protocol, for related systems, see:
+ Bootstrapping which describes how a node builds a peer set in the first place. Network Protocols on how Filecoin nodes can communicate with each other, with for instance, an initial handshake, or block syncing. Operation on various operations a functional Filecoin node needs to run, like DHT routing.  What is chain syncing in Filecoin? Chain syncing is the process a filecoin node runs to sync its internal chain state with new blocks from the network and new blocks it itself has mined.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/validation/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/validation/</guid>
+      <description>Block Validation In order to ensure they are always on the correct latest state of the chain a filecoin full node must accept and process blocks continuously. Blocks are propagated was described in the Data Propagation document.
+For every block received, the node must validate it before executing it or passing it on. Before a node can validate a block, it first must ensure the block is structurally correct by decoding it (see block) and ensuring that no field contains any illegal values.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://example.org/docs/zigzag-circuit/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/zigzag-circuit/</guid>
+      <description>ZigZag: Offline PoRep Circuit Spec ZigZag is the Proof of Replication used in Filecoin. The prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
+ZigZag has been presented by Ben Fisch at EUROCRYPT19.
+ZigZag Overview ZigZag PoRep is based on layering DRG graphs LAYERS times. The data represented in each DRG layer is the data encoded in the previous layer.</description>
+    </item>
+    
+  </channel>
+</rss>

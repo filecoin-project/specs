@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Process
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fprocess\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Process
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="filecoin-spec-process-v0">Filecoin Spec Process (v0)</h1>
+
+<h2 id="catch-up-mode">&lsquo;Catch Up&rsquo; Mode</h2>
+
+<p>Until we get to &lsquo;spec parity&rsquo; where our current level of understanding of the protocol and the spec are in sync, changes will be made to the spec by a simple PR process. If something is missing, PR it in, if something is wrong, PR a fix, if something needs to be elaborated, PR in updates. What is in the top level of this repo, in master, is the spec.</p>
+
+<h2 id="proposals-drafts-spec">Proposals -&gt; Drafts -&gt; Spec</h2>
+
+<p>For anything that is not &lsquo;catching up&rsquo; (like &lsquo;repair&rsquo;, for example) the process we will use is to first discuss the problem in an issue (or several issues, if the space is large and multithreaded enough). Then when someone feels like a solution is near, they will write it up as a document, and submit a PR to put it into the &lsquo;drafts&rsquo; folder in the repo.</p>
+
+<p>&lsquo;Drafts&rsquo; are not canonical spec, and should not be considered for implementation. It is acceptable for a PR for a draft to stay open for quite a while, as thought and discussion on the topic happens. At some point (ideally, in two weeks or less), if the reviewers and the author feel that the current state of the draft is stable enough (though not &lsquo;done&rsquo;) then it should be merged into the repo. Further changes to the draft are additional PRs, which may generate more discussion. Comments on these drafts are welcome from anyone, but if you wish to be involved in the actual research process, you will need to devote very considerable time and energy to the process.</p>
+
+<p>Once there is agreement that the draft should be implemented, it should then get moved from the drafts folder, into the top level along with other spec documents. This process should just be a simple renaming, and should not generate any discussion. Along with the moving of that document, any interested parties in the development teams should be explicitly tagged.</p>
+
+<h3 id="on-merging">On merging</h3>
+
+<p>For anything in the drafts or notes folder, merge yourself after a review from a relevant person. For anything in the top level (canonical spec), @whyrusleeping will merge after proper review.</p>
+
+<h3 id="issues">Issues</h3>
+
+<p>Issues in the specs repo will be high signal, they will either be proposals, or issues directly relating to problems in the spec. More speculative research questions and discussion will happen in the research repo.</p>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/process.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#filecoin-spec-process-v0">Filecoin Spec Process (v0)</a>
+<ul>
+<li><a href="#catch-up-mode">&lsquo;Catch Up&rsquo; Mode</a></li>
+<li><a href="#proposals-drafts-spec">Proposals -&gt; Drafts -&gt; Spec</a>
+<ul>
+<li><a href="#on-merging">On merging</a></li>
+<li><a href="#issues">Issues</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

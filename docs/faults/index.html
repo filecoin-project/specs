@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Faults
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f faults\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Faults
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="faults">Faults</h1>
+
+<p>A fault is what happens when partcipants in the protocol are behaving incorrectly and that behavior needs to be punished. There are a number of possible faults in the Filecoin protocol, their details are all recorded below.</p>
+
+<h2 id="fault-list">Fault List</h2>
+
+<h3 id="consensus-faults">Consensus Faults</h3>
+
+<ul>
+<li><strong>Duplicate Block Submission Slashing:</strong>
+
+<ul>
+<li><strong>Condition:</strong> If any miner posts two blocks satisfying the slashing conditions defined in <a href="./expected-consensus.md">Expected Consensus</a>.</li>
+<li><strong>Reporting:</strong> Anyone may call <code>SlashConsensusFault</code> and pass in the two offending block headers.</li>
+<li><strong>Check:</strong> The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.</li>
+<li><strong>Penalization:</strong> All of the miner&rsquo;s pledge collateral and all of their power is irrevocably slashed.</li>
+</ul></li>
+</ul>
+
+<h3 id="market-faults">Market Faults</h3>
+
+<ul>
+<li><strong>Late submission penalty:</strong>
+
+<ul>
+<li><strong>Condition</strong>: If the miner posts their PoSt after the proving period ends, but before the generation attack threshold.</li>
+<li><strong>Reporting:</strong> The miner submits their PoSt as usual, but includes the late submission fee.</li>
+<li><strong>Check:</strong> The chain checks first that the submission is within the <code>generation attack threshold</code>, and then checks that the fee provided matches the required fee for how many blocks late the submission is.</li>
+<li><strong>Penalization:</strong> The miner is penalized proportionally to the delay. Penalizations are enforced by a standard PoSt submission.</li>
+<li><em>Economic penalization</em>: To determine the penalty amount, <code>CalculateLatePenalty(numLate)</code> is called. The miners power is not reduced after the fee submission.</li>
+<li><em>Power penalization</em>: The miners&rsquo; power is not reduced. Note that the current view of the power table is computed with the lookback parameter.
+
+<ul>
+<li><em>Why are we accounting the power table with a lookback parameter ?</em> If we do not use the lookback parameter then, we need to penalize late miners for the duration that they are late. This is tricky to do efficiently. For xample, if miners A, B and C each have <sup>1</sup>&frasl;<sub>3</sub> of the networks power, and C is late in submitting their proofs, then for that duration, A and B should each have effectively half of the networks power (and a 50% chance each of winning the block).</li>
+</ul></li>
+<li>TODO: write on the spec exact parameters for PoSt Deadline and Gen Attack threshold</li>
+</ul></li>
+<li><strong>Unreported storage fault slashing:</strong>
+
+<ul>
+<li><strong>Condition:</strong> If the miner does not submit their PoSt by the <code>generation attack threshold</code>.</li>
+<li><strong>Reporting:</strong> The miner can be slashed by anyone else in the network who calls <code>SlashStorageFaults</code>. We expect miners to report these faults.</li>
+<li>Future design note: moving forward, we should either compensate the caller, or require this</li>
+<li>Note: we could <em>require</em> the method be called, as part of the consensus rules (this gets complicated though). In this case, there is a DoS attack where if I make a large number of miners each with a single sector, and fail them all at the same time, the next block miner will be forced to do a very large amount of work. This would either need an extended &lsquo;gas limit&rsquo;, or some other method to avoid too long validation times.</li>
+<li><strong>Check:</strong> The chain checks that the miners last PoSt submission was before the start of their current proving period, and that the current block is after the generation attack threshold for their current proving period.</li>
+<li><strong>Penalization:</strong> Penalizations are enforced by <code>SlashStorageFault</code> on the <code>storage market</code> actor.</li>
+<li><em>Economic Penalization</em>: Miner loses all collateral.</li>
+<li><em>Power Penalization</em>: Miner loses all power.</li>
+<li>Note: If a miner is in this state, where they have failed to submit a PoST, any block they attempt to mine will be invalid, even if the election function selects them. (the election function should probably be made to never select them)</li>
+<li>Future design note: There is a way to tolerate Internet connection faults. A miner runs an Emergency PoSt which does not take challenges from the chain, if the miner gets reconnected before the VDF attack time (based on Amax), then, they can submit the Emergency PoSt and get pay a late penalization fee.</li>
+</ul></li>
+<li><strong>Reported storage fault penalty:</strong>
+
+<ul>
+<li><strong>Condition:</strong> The miner submits their PoSt with a non-empty set of &lsquo;missing sectors&rsquo;.</li>
+<li><strong>Reporting:</strong> The miner can specify some sectors that they failed to prove during the proving period.</li>
+<li>Note: These faults are output by the <code>ProveStorage</code> routine, and are posted on-chain when posting the proof. This occurs when the miner (for example) has a disk failure, or other local data corruption.</li>
+<li><strong>Check:</strong> The chain checks that the proof verifies with the missing sectors.</li>
+<li><strong>Penalization:</strong> The miner is penalized for collateral and power proportional to the number of missing sectors. The sectors are also removed from the miners proving set.</li>
+<li>TODO: should the collateral lost here be proportional to the remaining time?</li>
+<li>TODO(nicola): check if the time between posting two proofs allows for a generation attack if it does not then we might reconsider the sector not being lost</li>
+<li>Note: if a sector is missed here, and they are recovered after the fact, the miner could simple &rsquo;re-commit&rsquo; the sector. They still have to pay the collateral, but the data can be quickly re-introduced into the system to avoid clients calling them out for breach of contract (this would only work because the sector commD/commR is the same)</li>
+<li>Note: In the case where a miner is temporarily unable to prove some of their data, they can simply wait for the temporary unavailability to recover, and then continue proving, submitting the proofs a bit late if necessary (paying appropriate fees, as described above).</li>
+</ul></li>
+<li><strong>Breach of contract dispute:</strong>
+
+<ul>
+<li><strong>Condition:</strong> A client who has stored data with a miner, and the miner removes the sector containing that data before the end of the agreed upon time period.</li>
+<li><strong>Reporting:</strong> The client invokes <code>ArbitrateDeal</code> on the offending miner actor with a signed deal from that miner for the storage in question. Note: the reporting must happen within one proving period of the miner removing the storage erroneously.</li>
+<li><strong>Check:</strong> The chain checks that the deal was correctly signed by the miner in question, that the deal has not yet expired, and that the sector referenced by the deal is no longer in the miners proving set.</li>
+<li><strong>Penalization:</strong> The miner is penalized an amount proportional to the incorrectly removed sector. This penalty is taken from their pledged collateral .</li>
+<li>Note: This implies that miners cannot re-seal data into different sectors. We could come up with a protocol where the client gives the miner explicit consent to re-seal, but that is more complicated and can be done later.</li>
+</ul></li>
+</ul>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/faults.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#faults">Faults</a>
+<ul>
+<li><a href="#fault-list">Fault List</a>
+<ul>
+<li><a href="#consensus-faults">Consensus Faults</a></li>
+<li><a href="#market-faults">Market Faults</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Data Structures
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f data-structures\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Data Structures
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="data-structures">Data Structures</h1>
+
+<p>This document serves as an entry point for understanding all of the data structures in filecoin.</p>
+
+<h2 id="address">Address</h2>
+
+<p>An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Address</span> <span class="kd">struct</span> <span class="p">{</span>
+
+	<span class="c1">// 0: ID
+</span><span class="c1"></span>	<span class="c1">// 1: SECP256K1 Public Key
+</span><span class="c1"></span>	<span class="c1">// 2: Actor
+</span><span class="c1"></span>	<span class="c1">// 3: BLS Public Key
+</span><span class="c1"></span>	<span class="nx">protocol</span> <span class="kt">byte</span>
+
+	<span class="c1">// raw bytes containing the data associated with protocol
+</span><span class="c1"></span>	<span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span>
+<span class="p">}</span></code></pre></div>
+<p>To learn more, take a look at the <a href="https://github.com/filecoin-project/specs/blob/master/address.md">Address Spec</a>.</p>
+
+<h2 id="cid">CID</h2>
+
+<p>For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the <a href="https://github.com/ipld/cid">CID Spec</a>.</p>
+
+<p>CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.</p>
+
+<h2 id="block">Block</h2>
+
+<p>A block represents an individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and some notion of a &lsquo;weight&rsquo; for deciding which block is the &lsquo;best&rsquo;.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Block is a block in the blockchain.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="c1">// Miner is the address of the miner actor that mined this block.
+</span><span class="c1"></span>	<span class="nx">Miner</span> <span class="nx">Address</span>
+
+	<span class="c1">// Tickets are the winning ticket that were submitted with this block.
+</span><span class="c1"></span>	<span class="nx">Tickets</span> <span class="p">[]</span><span class="nx">Ticket</span>
+
+	<span class="c1">// ElectionProof is a signature over the final ticket that proves this miner
+</span><span class="c1"></span>	<span class="c1">// is the leader at this round
+</span><span class="c1"></span>	<span class="nx">ElectionProof</span> <span class="nx">Signature</span>
+
+	<span class="c1">// Parents is the set of parents this block was based on. Typically one,
+</span><span class="c1"></span>	<span class="c1">// but can be several in the case where there were multiple winning ticket-
+</span><span class="c1"></span>	<span class="c1">// holders for a round.
+</span><span class="c1"></span>	<span class="nx">Parents</span> <span class="p">[]</span><span class="nx">Cid</span>
+
+	<span class="c1">// ParentWeight is the aggregate chain weight of the parent set.
+</span><span class="c1"></span>	<span class="nx">ParentWeight</span> <span class="nx">Integer</span>
+
+	<span class="c1">// Height is the chain height of this block.
+</span><span class="c1"></span>	<span class="nx">Height</span> <span class="nx">Uint64</span>
+
+	<span class="c1">// StateRoot is a cid pointer to the state tree after application of the
+</span><span class="c1"></span>	<span class="c1">// transactions state transitions.
+</span><span class="c1"></span>	<span class="nx">StateRoot</span> <span class="nx">Cid</span>
+
+	<span class="c1">// Messages is the set of messages included in this block
+</span><span class="c1"></span>	<span class="c1">// TODO: should be a merkletree-ish thing
+</span><span class="c1"></span>	<span class="nx">Messages</span> <span class="p">[]</span><span class="nx">SignedMessage</span>
+
+	<span class="c1">// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
+</span><span class="c1"></span>	<span class="c1">// TODO: should be the same type of merkletree-list thing that the messages are
+</span><span class="c1"></span>	<span class="nx">MessageReceipts</span> <span class="p">[]</span><span class="nx">MessageReceipt</span>
+
+    <span class="c1">// The block Timestamp is used to enforce a form of block delay by honest miners.
+</span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp stored as an unsigned integer
+</span><span class="c1"></span>    <span class="nx">Timestamp</span> <span class="nx">Timestamp</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="message">Message</h2>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Message</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">To</span>   <span class="nx">Address</span>
+	<span class="nx">From</span> <span class="nx">Address</span>
+
+	<span class="c1">// When receiving a message from a user account the nonce in
+</span><span class="c1"></span>	<span class="c1">// the message must match the expected nonce in the from actor.
+</span><span class="c1"></span>	<span class="c1">// This prevents replay attacks.
+</span><span class="c1"></span>	<span class="nx">Nonce</span> <span class="nx">Uint64</span>
+
+	<span class="nx">Value</span> <span class="nx">BigInteger</span>
+
+	<span class="nx">GasPrice</span> <span class="nx">Integer</span>
+	<span class="nx">GasLimit</span> <span class="nx">Integer</span>
+
+	<span class="nx">Method</span> <span class="kt">uint64</span>
+	<span class="nx">Params</span> <span class="p">[]</span><span class="kt">byte</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="parameter-encoding">Parameter Encoding</h3>
+
+<p>Parameters to methods get encoded as described in the <a href="#basic-type-encodings">basic types</a> section below, and then put into a CBOR encoded array.
+(TODO: thinking about this, it might make more sense to just have <code>Params</code> be an array of things)</p>
+
+<h3 id="signing">Signing</h3>
+
+<p>A signed message is a wrapper type over the base message.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Message</span>   <span class="nx">Message</span>
+	<span class="nx">Signature</span> <span class="nx">Signature</span>
+<span class="p">}</span></code></pre></div>
+<p>The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the <a href="signatures.md">signatures spec</a>.</p>
+
+<h2 id="message-receipt">Message Receipt</h2>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">ExitCode</span> <span class="kt">uint8</span>
+
+	<span class="nx">Return</span> <span class="p">[]</span><span class="kt">byte</span>
+
+	<span class="nx">GasUsed</span> <span class="nx">Integer</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="serialization">Serialization</h3>
+
+<p>Message receipts are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.</p>
+
+<h2 id="actor">Actor</h2>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Actor</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="c1">// Code is a pointer to the code object for this actor
+</span><span class="c1"></span>	<span class="nx">Code</span> <span class="nx">Cid</span>
+
+	<span class="c1">// Head is a pointer to the root of this actors state
+</span><span class="c1"></span>	<span class="nx">Head</span> <span class="nx">Cid</span>
+
+	<span class="c1">// Nonce is a counter of the number of messages this actor has sent
+</span><span class="c1"></span>	<span class="nx">Nonce</span> <span class="nx">Uint64</span>
+
+	<span class="c1">// Balance is this actors current balance of filecoin
+</span><span class="c1"></span>	<span class="nx">Balance</span> <span class="nx">BigInteger</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="state-tree">State Tree</h2>
+
+<p>The state trie keeps track of all state in Filecoin. It is a map of addresses to <code>actors</code> in the system. It is implemented using a HAMT.</p>
+
+<h2 id="hamt">HAMT</h2>
+
+<div class="notices todo" ><strong>TODO</strong>: link to spec for our CHAMP HAMT</div>
+
+<h2 id="signature">Signature</h2>
+
+<p>All signatures in Filecoin come with a type that signifies which key type was used to create the signature.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Type</span> <span class="kt">int</span>
+	<span class="nx">Data</span> <span class="p">[]</span><span class="kt">byte</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="type-values"><code>Type</code> Values</h3>
+
+<table>
+<thead>
+<tr>
+<th>Key Type</th>
+<th>Value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Secp256k1</td>
+<td>1</td>
+</tr>
+
+<tr>
+<td>BLS12-381 ECDSA</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="serialization-1">Serialization</h3>
+
+<p><code>&lt;uvarint(Type)&gt;&lt;Data&gt;</code></p>
+
+<p>Note: As signatures should always be within wrapper types, length prefixing is not needed here.</p>
+
+<h1 id="basic-type-encodings">Basic Type Encodings</h1>
+
+<p>Types that appear in messages or in state must be encoded as described here.</p>
+
+<h4 id="publickey"><code>PublicKey</code></h4>
+
+<p>The public key type is simply an array of bytes. (TODO: discuss specific encoding of key types, for now just calling it bytes is sufficient)</p>
+
+<h4 id="bytesamount"><code>BytesAmount</code></h4>
+
+<p>BytesAmount is just a re-typed Integer.</p>
+
+<h4 id="peerid"><code>PeerID</code></h4>
+
+<p>PeerID is just the serialized bytes of a libp2p peer ID.</p>
+
+<p>Spec incomplete, take a look at this PR: <a href="https://github.com/libp2p/specs/pull/100">https://github.com/libp2p/specs/pull/100</a></p>
+
+<h4 id="integer"><code>Integer</code></h4>
+
+<p>Integers are encoded as LEB128 signed integers.</p>
+
+<h4 id="bitfield"><code>BitField</code></h4>
+
+<p>Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.</p>
+
+<h4 id="sectorset"><code>SectorSet</code></h4>
+
+<p>TODO</p>
+
+<h4 id="faultset"><code>FaultSet</code></h4>
+
+<p>A fault set is a BitField and a block height, encoding TBD.</p>
+
+<h4 id="blockheader"><code>BlockHeader</code></h4>
+
+<p>BlockHeader is a serialized <code>Block</code>.</p>
+
+<h4 id="sealproof"><code>SealProof</code></h4>
+
+<p>SealProof is a 384-element array of bytes.</p>
+
+<h4 id="postproof"><code>PoStProof</code></h4>
+
+<p>PoStProof is a 192-element array of bytes.</p>
+
+<h4 id="tokenamount"><code>TokenAmount</code></h4>
+
+<p>TokenAmount is a re-typed Integer.</p>
+
+<h2 id="leb128-encoding-reference">LEB128 Encoding Reference</h2>
+
+<p>This is taken from the Dwarf Standard 4, Appendix C</p>
+
+<h4 id="encode-unsigned-leb128">Encode unsigned LEB128</h4>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"><span class="k">do</span>
+<span class="p">{</span>
+  <span class="n">byte</span> <span class="o">=</span> <span class="n">low</span> <span class="n">order</span> <span class="mi">7</span> <span class="n">bits</span> <span class="n">of</span> <span class="n">value</span><span class="p">;</span>
+  <span class="n">value</span> <span class="o">&gt;&gt;=</span> <span class="mi">7</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="cm">/* more bytes to come */</span>
+    <span class="n">set</span> <span class="n">high</span> <span class="n">order</span> <span class="n">bit</span> <span class="n">of</span> <span class="n">byte</span><span class="p">;</span>
+  <span class="n">emit</span> <span class="n">byte</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">value</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">);</span></code></pre></div>
+<h4 id="encode-signed-leb128">Encode signed LEB128</h4>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"><span class="n">more</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">negative</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">size</span> <span class="o">=</span> <span class="n">no</span><span class="p">.</span> <span class="n">of</span> <span class="n">bits</span> <span class="n">in</span> <span class="kt">signed</span> <span class="n">integer</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="n">more</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">byte</span> <span class="o">=</span> <span class="n">low</span> <span class="n">order</span> <span class="mi">7</span> <span class="n">bits</span> <span class="n">of</span> <span class="n">value</span><span class="p">;</span>
+  <span class="n">value</span> <span class="o">&gt;&gt;=</span> <span class="mi">7</span><span class="p">;</span>
+  <span class="cm">/* the following is unnecessary if the
+</span><span class="cm">   * implementation of &gt;&gt;= uses an arithmetic rather
+</span><span class="cm">   * than logical shift for a signed left operand
+</span><span class="cm">   */</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">negative</span><span class="p">)</span>
+    <span class="cm">/* sign extend */</span>
+    <span class="n">value</span> <span class="o">|=</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">7</span><span class="p">));</span>
+    <span class="cm">/* sign bit of byte is second high order bit (0x40) */</span>
+  <span class="k">if</span> <span class="p">((</span><span class="n">value</span> <span class="o">==</span>  <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">sign</span> <span class="n">bit</span> <span class="n">of</span> <span class="n">byte</span> <span class="n">is</span> <span class="n">clear</span><span class="p">)</span> <span class="o">||</span>
+      <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">sign</span> <span class="n">bit</span> <span class="n">of</span> <span class="n">byte</span> <span class="n">is</span> <span class="n">set</span><span class="p">))</span>
+     <span class="n">more</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">else</span>
+    <span class="n">set</span> <span class="n">high</span> <span class="n">order</span> <span class="n">bit</span> <span class="n">of</span> <span class="n">byte</span><span class="p">;</span>
+  <span class="n">emit</span> <span class="n">byte</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+<h4 id="decode-unsigned-leb128">Decode unsigned LEB128</h4>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"><span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">byte</span> <span class="o">=</span> <span class="n">next</span> <span class="n">byte</span> <span class="n">in</span> <span class="n">input</span><span class="p">;</span>
+  <span class="n">result</span> <span class="o">|=</span> <span class="p">(</span><span class="n">low</span> <span class="n">order</span> <span class="mi">7</span> <span class="n">bits</span> <span class="n">of</span> <span class="n">byte</span> <span class="o">&lt;&lt;</span> <span class="n">shift</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">high</span> <span class="n">order</span> <span class="n">bit</span> <span class="n">of</span> <span class="n">byte</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">break</span><span class="p">;</span>
+  <span class="n">shift</span> <span class="o">+=</span> <span class="mi">7</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+<h4 id="decode-signed-leb128">Decode signed LEB128</h4>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"><span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">size</span> <span class="o">=</span> <span class="n">number</span> <span class="n">of</span> <span class="n">bits</span> <span class="n">in</span> <span class="kt">signed</span> <span class="n">integer</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">byte</span> <span class="o">=</span> <span class="n">next</span> <span class="n">byte</span> <span class="n">in</span> <span class="n">input</span><span class="p">;</span>
+  <span class="n">result</span> <span class="o">|=</span> <span class="p">(</span><span class="n">low</span> <span class="n">order</span> <span class="mi">7</span> <span class="n">bits</span> <span class="n">of</span> <span class="n">byte</span> <span class="o">&lt;&lt;</span> <span class="n">shift</span><span class="p">);</span>
+  <span class="n">shift</span> <span class="o">+=</span> <span class="mi">7</span><span class="p">;</span>
+  <span class="cm">/* sign bit of byte is second high order bit (0x40) */</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">high</span> <span class="n">order</span> <span class="n">bit</span> <span class="n">of</span> <span class="n">byte</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">if</span> <span class="p">((</span><span class="n">shift</span> <span class="o">&lt;</span><span class="n">size</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">sign</span> <span class="n">bit</span> <span class="n">of</span> <span class="n">byte</span> <span class="n">is</span> <span class="n">set</span><span class="p">))</span>
+  <span class="cm">/* sign extend */</span>
+  <span class="n">result</span> <span class="o">|=</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">shift</span><span class="p">);</span></code></pre></div>
+<h1 id="filecoin-compact-serialization">Filecoin Compact Serialization</h1>
+
+<p>Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.</p>
+
+<table>
+<thead>
+<tr>
+<th>FCS Type</th>
+<th>tag</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>block v1</td>
+<td>43</td>
+</tr>
+
+<tr>
+<td>message v1</td>
+<td>44</td>
+</tr>
+
+<tr>
+<td>signedMessage v1</td>
+<td>45</td>
+</tr>
+</tbody>
+</table>
+
+<p>For example, a message would be encoded as:</p>
+<div class="highlight"><pre class="chroma"><code class="language-cbor" data-lang="cbor">tag&lt;44&gt;[msg.To, msg.From, msg.Nonce, msg.Value, msg.GasPrice, msg.GasLimit, msg.Method, msg.Params]</code></pre></div>
+<p>Each individual type should be encoded as specified:</p>
+
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>encoding</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Uint64</td>
+<td>CBOR major type 0</td>
+</tr>
+
+<tr>
+<td>BigInteger</td>
+<td><a href="https://tools.ietf.org/html/rfc7049#section-2.4.2">CBOR bignum</a></td>
+</tr>
+
+<tr>
+<td>Address</td>
+<td>CBOR major type 2</td>
+</tr>
+
+<tr>
+<td>Uint8</td>
+<td>CBOR Major type 0</td>
+</tr>
+
+<tr>
+<td>[]byte</td>
+<td>CBOR Major type 2</td>
+</tr>
+
+<tr>
+<td>string</td>
+<td>CBOR Major type 3</td>
+</tr>
+
+<tr>
+<td>bool</td>
+<td><a href="https://tools.ietf.org/html/rfc7049#section-2.3">CBOR Major type 7, value <sup>20</sup>&frasl;<sub>21</sub></a></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="encoding-considerations">Encoding Considerations</h2>
+
+<p>Objects should be encoded using <a href="https://tools.ietf.org/html/rfc7049#section-3.9">canonical CBOR</a>, and decoders should operate in <a href="https://tools.ietf.org/html/rfc7049#section-3.10">strict mode</a>.  The maximum size of an FCS Object should be 1MB (2^20 bytes). Objects larger than this are invalid.</p>
+
+<p>Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that object is invalid.</p>
+
+<h2 id="ipld-considerations">IPLD Considerations</h2>
+
+<p>Cids for FCS objects should use the FCS multicodec (<code>0x1f</code>).</p>
+
+<h2 id="vectors">Vectors</h2>
+
+<p>Below are some sample vectors for each data type.</p>
+
+<h3 id="message-1">Message</h3>
+
+<p>Encoded: <code>d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d46558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f644d706172616d73617265676f6f64</code></p>
+
+<p>Decoded:</p>
+
+<pre><code>To:     Address(&quot;f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy&quot;)
+From:   Address(&quot;f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy&quot;)
+Nonce:  uint64(117)
+Value:  BigInt(15000000000)
+Method: string(&quot;method&quot;)
+Params: []byte(&quot;paramsaregood&quot;)
+</code></pre>
+
+<h3 id="block-1">Block</h3>
+
+<p>Encoded: <code>d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f6788080</code></p>
+
+<p>Decoded:</p>
+
+<pre><code>Miner:           Address(&quot;f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy&quot;)
+Tickets:         [][]byte{&quot;iamaticket&quot;}
+ElectionProof:   []byte(&quot;i am an election proof&quot;)
+Parents:         []Cid{&quot;zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B&quot;}
+ParentWeight:    NewInt(47978)
+Height:          uint64(1234567)
+StateRoot:       Cid(&quot;zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B&quot;)
+Messages:        []SignedMessage{}
+MessageReceipts: []MessageReceipt{}
+</code></pre>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/data-structures.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#data-structures">Data Structures</a>
+<ul>
+<li><a href="#address">Address</a></li>
+<li><a href="#cid">CID</a></li>
+<li><a href="#block">Block</a></li>
+<li><a href="#message">Message</a>
+<ul>
+<li><a href="#parameter-encoding">Parameter Encoding</a></li>
+<li><a href="#signing">Signing</a></li>
+</ul></li>
+<li><a href="#message-receipt">Message Receipt</a>
+<ul>
+<li><a href="#serialization">Serialization</a></li>
+</ul></li>
+<li><a href="#actor">Actor</a></li>
+<li><a href="#state-tree">State Tree</a></li>
+<li><a href="#hamt">HAMT</a></li>
+<li><a href="#signature">Signature</a>
+<ul>
+<li><a href="#type-values"><code>Type</code> Values</a></li>
+<li><a href="#serialization-1">Serialization</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#basic-type-encodings">Basic Type Encodings</a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#publickey"><code>PublicKey</code></a></li>
+<li><a href="#bytesamount"><code>BytesAmount</code></a></li>
+<li><a href="#peerid"><code>PeerID</code></a></li>
+<li><a href="#integer"><code>Integer</code></a></li>
+<li><a href="#bitfield"><code>BitField</code></a></li>
+<li><a href="#sectorset"><code>SectorSet</code></a></li>
+<li><a href="#faultset"><code>FaultSet</code></a></li>
+<li><a href="#blockheader"><code>BlockHeader</code></a></li>
+<li><a href="#sealproof"><code>SealProof</code></a></li>
+<li><a href="#postproof"><code>PoStProof</code></a></li>
+<li><a href="#tokenamount"><code>TokenAmount</code></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#leb128-encoding-reference">LEB128 Encoding Reference</a>
+<ul>
+<li>
+<ul>
+<li><a href="#encode-unsigned-leb128">Encode unsigned LEB128</a></li>
+<li><a href="#encode-signed-leb128">Encode signed LEB128</a></li>
+<li><a href="#decode-unsigned-leb128">Decode unsigned LEB128</a></li>
+<li><a href="#decode-signed-leb128">Decode signed LEB128</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#filecoin-compact-serialization">Filecoin Compact Serialization</a>
+<ul>
+<li><a href="#encoding-considerations">Encoding Considerations</a></li>
+<li><a href="#ipld-considerations">IPLD Considerations</a></li>
+<li><a href="#vectors">Vectors</a>
+<ul>
+<li><a href="#message-1">Message</a></li>
+<li><a href="#block-1">Block</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

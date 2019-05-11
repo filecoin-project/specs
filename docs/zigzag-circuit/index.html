@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Zigzag Circuit
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fzigzag-circuit\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Zigzag Circuit
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="zigzag-offline-porep-circuit-spec">ZigZag: Offline PoRep Circuit Spec</h1>
+
+<p>ZigZag is the Proof of Replication used in Filecoin. The prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.</p>
+
+<p>ZigZag has been presented by <a href="https://eprint.iacr.org/2018/702.pdf">Ben Fisch at EUROCRYPT19</a>.</p>
+
+<h4 id="zigzag-overview">ZigZag Overview</h4>
+
+<p>ZigZag PoRep is based on layering DRG graphs <code>LAYERS</code> times. The data represented in each DRG layer is the data encoded in the previous layer. The final layer is the replica (which in Filecoin terms is the sealed sector).</p>
+
+<ul>
+<li><code>ReplicaId</code> is a unique replica identifier (see the Filecoin Proofs spec for details)</li>
+<li><code>CommD</code> is the Merkle Tree root hash of the input data to the first layer</li>
+<li><code>CommR[l]</code> is the Merkle Tree hash of the output of the DRG encoding at each layer <code>l</code></li>
+<li><code>CommRStar</code> is the hash of the concatenation of the <code>ReplicaId</code> and all the <code>CommR</code>s.</li>
+</ul>
+
+<p>The (offline) proof size in the ZigZag is too large for blockchain usage (~3MB). We use SNARKs to generate a proof of knowledge of a correct ZigZag proof. In other words, we implement the ZigZag proof verification algorithm in an arithmetic circuit and use SNARKs to prove that it was evaluated correctly.</p>
+
+<p>This circuit proves that given a Merkle root <code>CommD</code>, <code>CommRLast</code>, and <code>commRStar</code>, that the prover knew the correct replicated data at each layer.</p>
+
+<h4 id="spec-notation">Spec notation</h4>
+
+<ul>
+<li><strong>Fr</strong>: Field element of BLS12-381</li>
+<li><strong>UInt</strong>: Unsigned integer</li>
+<li><strong>{0..x}</strong>: From <code>0</code> (included) to <code>x</code> (not included) (e.g. <code>[0,x)</code> )</li>
+<li><strong>Check</strong>:
+
+<ul>
+<li>If there is an equality, create a constraint</li>
+<li>otherwise, execute the function</li>
+</ul></li>
+<li><strong>Inclusion path</strong>: Binary representation of the Merkle tree path that must be proven packed into a single <code>Fr</code> element.</li>
+</ul>
+
+<h2 id="offline-porep-circuit">Offline PoRep circuit</h2>
+
+<h4 id="public-parameters">Public Parameters</h4>
+
+<p><em>Parameters that are embeded in the circuits or used to generate the circuit</em></p>
+
+<ul>
+<li><code>LAYERS : UInt</code>: Number of DRG layers.</li>
+<li><code>LAYER_CHALLENGES : [LAYERS]UInt</code>: Number of challenges per layer.</li>
+<li><code>EXPANSION_DEGREE: UInt</code>: Degree of each bipartite expander graph to extend dependencies between layers.</li>
+<li><code>BASE_DEGREE: UInt</code>: Degree of each Depth Robust Graph.</li>
+<li><code>TREE_DEPTH: UInt</code>: Depth of the Merkle tree. Note, this is (log_2(Size of original data in bytes/32 bytes per leaf)).</li>
+<li><code>PARENT_COUNT : UInt</code>: Defined as <code>EXPANSION_DEGREE+BASE_DEGREE</code>.</li>
+</ul>
+
+<h4 id="public-inputs">Public Inputs</h4>
+
+<p><em>Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it</em></p>
+
+<ul>
+<li><code>ReplicaId : Fr</code>: A unique identifier for the replica.</li>
+<li><code>CommD : Fr</code>: the Merkle tree root hash of the original data (input to the first layer).</li>
+<li><code>CommRLast : Fr</code>: The Merkle tree root hash of the final replica (output of the last layer).</li>
+<li><code>CommRStar : Fr</code>: A commitment to each <code>l</code> layer&rsquo;s Merkle tree root hash <code>CommR[l]</code> and <code>ReplicaId</code>.</li>
+<li><code>InclusionPath : [LAYERS][]Fr</code>: Inclusion path for the challenged data and replica leaf.</li>
+<li><code>ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr</code>:  Inclusion path for the parents of the corresponding <code>InclusionPath[l][c]</code> .</li>
+</ul>
+
+<h5 id="design-notes">Design notes</h5>
+
+<ul>
+<li><code>CommRLast</code> is a public input, since we will be using it during Proof-of-Spacetime.</li>
+<li><code>InclusionPath</code> and <code>ParentInclusionPath</code>: Each layer <code>l</code> has <code>LAYER_CHALLENGES[l]</code> inclusion paths.</li>
+</ul>
+
+<h4 id="private-inputs">Private Inputs</h4>
+
+<p><em>Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof</em></p>
+
+<ul>
+<li><code>CommR : [LAYERS-1]Fr</code>: Commitment of the the encoded data at each layer.</li>
+</ul>
+
+<p>Note: Size is <code>LAYERS-1</code> since the commitment to the last layer is <code>CommRLast</code></p>
+
+<ul>
+<li><p><code>DataProof : [LAYERS][][TREE_DEPTH-2]Fr</code>: Merkle tree inclusion proof for the current layer unencoded challenged leaf.</p></li>
+
+<li><p><code>ReplicaProof : [LAYERS][][TREE_DEPTH-2]Fr</code>: Merkle tree inclusion proof for the current layer encoded challenged leaves.</p></li>
+
+<li><p><code>ParentProof : [LAYERS][][PARENT_COUNT][TREE_DEPTH-2]Fr</code>: Pedersen hashes of the Merkle inclusion proofs of the parent leaves for each challenged leaf at layer <code>l</code>.</p></li>
+
+<li><p><code>DataValue : [LAYERS][]Fr</code>: Value of the unencoded challenged leaves at layer <code>l</code>.</p></li>
+
+<li><p><code>ReplicaValue : [LAYERS][]Fr</code>: Value of the encoded leaves for each challenged leaf at layer <code>l</code>.</p></li>
+
+<li><p><code>ParentValue : [LAYERS][][PARENT_COUNT]Fr</code>: Value of the parent leaves for each challenged leaf at layer <code>l</code>.</p></li>
+</ul>
+
+<h5 id="design-notes-1">Design notes</h5>
+
+<ul>
+<li><code>DataProof</code>,  <code>ParentProof</code>, <code>ReplicaProof</code>: Size of proof per layer is <code>TREE_DEPTH-2</code> because it excludes (1) the roothash, and (2) the leaf value: (1) the root hash of the proof will be the corresponding unencoded data commitment for the current layer <code>l</code>, (2) the leaf value is the corresponding <code>DataValue</code>, <code>ReplicaValue</code> and <code>ParentValue</code>.</li>
+</ul>
+
+<h4 id="circuit">Circuit</h4>
+
+<h5 id="high-level">High Level</h5>
+
+<p>In high level, we do 4 checks:</p>
+
+<ol>
+<li><strong>ReplicaId Check</strong>: Check the binary representation of the ReplicaId</li>
+<li><strong>Inclusion Proofs Checks</strong>: Check the inclusion proofs</li>
+<li><strong>Encoding Checks</strong>: Check that the data has been correctly encoding into a replica</li>
+<li><strong>CommRStar Check</strong>: Check that CommRStar has been generated correctly</li>
+</ol>
+
+<h5 id="details">Details</h5>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// 1: ReplicaId Check - Check ReplicaId is equal to its bit representation
+</span><span class="c1"></span><span class="nx">let</span> <span class="nx">ReplicaIdBits</span> <span class="p">:</span> <span class="p">[</span><span class="mi">255</span><span class="p">]</span><span class="nx">Fr</span> <span class="p">=</span> <span class="nf">Fr_to_bits</span><span class="p">(</span><span class="nx">ReplicaId</span><span class="p">)</span>
+<span class="nf">assert</span><span class="p">(</span><span class="nf">Packed</span><span class="p">(</span><span class="nx">replica_id_bits</span><span class="p">)</span> <span class="o">==</span> <span class="nx">ReplicaId</span><span class="p">)</span>
+
+<span class="nx">let</span> <span class="nx">DataRoot</span><span class="p">,</span> <span class="nx">ReplicaRoot</span> <span class="nx">Fr</span>
+
+<span class="k">for</span> <span class="nx">l</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">LAYERS</span> <span class="p">{</span>
+  
+  <span class="k">if</span> <span class="nx">l</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="nx">DataRoot</span> <span class="p">=</span> <span class="nx">CommD</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">DataRoot</span> <span class="p">=</span> <span class="nx">CommR</span><span class="p">[</span><span class="nx">l</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="nx">l</span> <span class="o">==</span> <span class="nx">LAYERS</span><span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
+    <span class="nx">ReplicaRoot</span> <span class="p">=</span> <span class="nx">CommRLast</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">ReplicaRoot</span> <span class="p">=</span> <span class="nx">CommR</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span>
+  <span class="p">}</span>
+  
+  <span class="k">for</span> <span class="nx">c</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">LAYERS_CHALLENGES</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
+    <span class="c1">// 2: Inclusion Proofs Checks
+</span><span class="c1"></span>    <span class="c1">// 2.1: Check inclusion proofs for data leaves are correct
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">DataRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">DataProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]))</span>
+    <span class="c1">// 2.2: Check inclusion proofs for replica leaves are correct
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">InclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">ReplicaProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">],</span> <span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]))</span>
+    <span class="c1">// 2.3: Check inclusion proofs for parent leaves are correct
+</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">p</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">PARENT_COUNT</span> <span class="p">{</span>
+      <span class="nf">assert</span><span class="p">(</span><span class="nf">MerkleTreeVerify</span><span class="p">(</span><span class="nx">ReplicaRoot</span><span class="p">,</span> <span class="nx">ParentInclusionPath</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">],</span> <span class="nx">ParentProof</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">]))</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 3: Encoding checks - Check that replica leaves have been correctly encoded
+</span><span class="c1"></span>    <span class="nx">let</span> <span class="nx">ParentBits</span> <span class="p">[</span><span class="nx">PARENT_COUNT</span><span class="p">][</span><span class="mi">255</span><span class="p">]</span><span class="nx">Fr</span>
+    <span class="k">for</span> <span class="nx">p</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">PARENT_COUNT</span> <span class="p">{</span>
+      <span class="c1">// 3.1: Check that each ParentValue is equal to its bit representation
+</span><span class="c1"></span>      <span class="nx">let</span> <span class="nx">parent</span> <span class="p">=</span> <span class="nx">ParentValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">][</span><span class="nx">p</span><span class="p">]</span>
+      <span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span> <span class="p">=</span> <span class="nf">Fr_to_bits</span><span class="p">(</span><span class="nx">parent</span><span class="p">)</span>
+      <span class="nf">assert</span><span class="p">(</span><span class="nf">Packed</span><span class="p">(</span><span class="nx">ParentBits</span><span class="p">[</span><span class="nx">p</span><span class="p">])</span> <span class="o">==</span> <span class="nx">parent</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 3.2: KDF check - Check that each key has generated correctly
+</span><span class="c1"></span>    <span class="c1">// PreImage = ReplicaIdBits || ParentBits[1] .. ParentBits[PARENT_NODES]
+</span><span class="c1"></span>    <span class="nx">let</span> <span class="nx">PreImage</span> <span class="p">=</span> <span class="nx">ReplicaIdBits</span>
+    <span class="k">for</span> <span class="nx">parentbits</span> <span class="nx">in</span> <span class="nx">ParentBits</span> <span class="p">{</span>
+      <span class="nx">PreImage</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">parentbits</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nx">let</span> <span class="nx">key</span> <span class="nx">Fr</span> <span class="p">=</span> <span class="nf">Blake2s</span><span class="p">(</span><span class="nx">PreImage</span><span class="p">)</span>
+    <span class="nf">assert</span><span class="p">(</span><span class="nf">Blake2s</span><span class="p">(</span><span class="nx">PreImage</span><span class="p">)</span> <span class="o">==</span> <span class="nx">key</span><span class="p">)</span>
+
+    <span class="c1">// 3.3: Check that the data has been encoded to a replica with the right key
+</span><span class="c1"></span>    <span class="nf">assert</span><span class="p">(</span><span class="nx">ReplicaValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]</span> <span class="o">==</span> <span class="nx">DataValue</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">c</span><span class="p">]</span> <span class="o">+</span> <span class="nx">key</span><span class="p">)</span>
+  <span class="p">}</span>
+  
+  <span class="c1">// 4: CommRStar check - Check that the CommRStar constructed correctly
+</span><span class="c1"></span>  <span class="nx">let</span> <span class="nx">hash</span> <span class="p">=</span> <span class="nx">ReplicaId</span>
+  <span class="k">for</span> <span class="nx">l</span> <span class="nx">in</span> <span class="k">range</span> <span class="nx">LAYERS</span><span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
+    <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommR</span><span class="p">[</span><span class="nx">l</span><span class="p">])</span>
+  <span class="p">}</span>
+  <span class="nx">hash</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">CommRLast</span><span class="p">)</span>
+
+  <span class="nf">assert</span><span class="p">(</span><span class="nx">CommRStar</span> <span class="o">==</span> <span class="nf">PedersenHash</span><span class="p">(</span><span class="nx">hash</span><span class="p">))</span>
+  <span class="c1">// TODO check if we need to do packing/unpacking
+</span><span class="c1"></span><span class="p">}</span></code></pre></div>
+<h4 id="verification-of-offline-porep-proof">Verification of offline porep proof</h4>
+
+<ul>
+<li>SNARK proof check: <strong>Check</strong> that given the SNARK proof and the public inputs, the SNARK verification outputs true</li>
+<li>Parent checks: For each <code>leaf = InclusionPath[l][c]</code>:
+
+<ul>
+<li><strong>Check</strong> that all <code>ParentsInclusionPaths_[l][c][0..PARENT_COUNT}</code> are the correct parent leaves of <code>leaf</code> in the DRG graph, if a leaf has less than <code>PARENT_COUNT</code>, repeat the leaf with the highest label in the graph.</li>
+<li><strong>Check</strong> that the parent leaves are in ascending numerical order.</li>
+</ul></li>
+</ul>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/zigzag-circuit.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#zigzag-offline-porep-circuit-spec">ZigZag: Offline PoRep Circuit Spec</a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#zigzag-overview">ZigZag Overview</a></li>
+<li><a href="#spec-notation">Spec notation</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#offline-porep-circuit">Offline PoRep circuit</a>
+<ul>
+<li>
+<ul>
+<li><a href="#public-parameters">Public Parameters</a></li>
+<li><a href="#public-inputs">Public Inputs</a>
+<ul>
+<li><a href="#design-notes">Design notes</a></li>
+</ul></li>
+<li><a href="#private-inputs">Private Inputs</a>
+<ul>
+<li><a href="#design-notes-1">Design notes</a></li>
+</ul></li>
+<li><a href="#circuit">Circuit</a>
+<ul>
+<li><a href="#high-level">High Level</a></li>
+<li><a href="#details">Details</a></li>
+</ul></li>
+<li><a href="#verification-of-offline-porep-proof">Verification of offline porep proof</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

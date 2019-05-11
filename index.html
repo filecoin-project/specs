@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+	<meta name="generator" content="Hugo 0.55.5" />
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    Introduction
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<link rel="alternate" type="application/rss+xml" href="http://example.org/index.xml" title="Filecoin Spec" />
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+    
+    
+  
+
+  <style>
+  nav ul a[href="http\3a\2f\2f example.org\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    Introduction
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="filecoin-spec">Filecoin Spec</h1>
+
+<div class="notices warning" ><strong>Warning:</strong> This is the official Filecoin protocol specification. It is a work in progress. While reading, if you notice any discrepancies, or issues, please open an issue on the <a href="https://github.com/filecoin-project/specs">specs repo</a>.</div>
+
+<p>This collection of pages specify the protocols comprising the Filecoin network. The goal of these specs is to provide sufficient detail that another implementation, written using only this document as reference, can be fully compatible with <code>go-filecoin</code> peers, but this is still a work in progress.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>Filecoin is a distributed storage network, with shared state persisted to a blockchain.</p>
+
+<p>The network maintains consensus over the current state of a replicated <a href="state-machine.md">state machine</a> through <a href="expected-consensus.md">expected consensus</a>. This replicated state machine is used to run the <a href="storage-market.md">filecoin storage market</a>. This market provides a place to buy and sell storage within the distributed network of filecoin miners. The market also provides the needed mechanisms to ensure that the data stored by the network is actually being stored as promised, without requiring client interaction.</p>
+
+<p>Clients interact with the system by <a href="data-propagation.md#message-propagation">sending messages</a> to the network. These messages are gathered up and included by miners in blocks. Each of these messages defines a state transition in the state machine. The simplest messages say something like &ldquo;move Filecoin from <em>this</em> account under my control to <em>this</em> other account&rdquo;, but more complex ones describe storage sector commitments, storage deals struck, and proofs of storage.</p>
+
+<p>The Filecoin protocol itself is really a suite of protocols, including:
+- the chain protocol for propagating the data that constitutes the blockchain
+- the <a href="mining.md">block mining</a> protocol for producing new blocks
+- the <a href="expected-consensus.md">consensus mechanism</a> and <a href="validation.md">rules</a> for agreeing on canonical blockchain state
+- all interacting with the <a href="state-machine.md">state machine</a> and the <a href="actors.md">actors</a> running on it:
+  - the <a href="storage-market.md">storage market</a> protocol for <code>storage miners</code> to sell storage and clients to purchase it
+  - the <a href="retrieval-market.md">retrieval market</a> protocol for retrieving files
+  - the <a href="payments.md">payment channel</a> channel protocol for transferring FIL tokens between actors</p>
+
+<h3 id="message-transport">Message Transport</h3>
+
+<p>Filecoin uses <a href="https://libp2p.io">libp2p</a> for all network communications. libp2p provides transport-agnostic services for peer discovery, naming, routing, pubsub channels and a distributed record store, and there are full or partial <a href="https://libp2p.io/implementations/">implementations</a> in a number of languages. This spec assumes the use of libp2p and its services and does not specify transport-level details. For more details on the exact wire protocol of libp2p, refer to the <a href="https://github.com/libp2p/specs">libp2p specs</a>.</p>
+
+<p>Filecoin uses <a href="https://ipld.io">IPLD</a> for the representation and serialization of the majority of the data in the system. IPLD provides a canonical model for content-addressed data structures, providing a representation of basic data objects and links between them.</p>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/_index.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#filecoin-spec">Filecoin Spec</a>
+<ul>
+<li><a href="#overview">Overview</a>
+<ul>
+<li><a href="#message-transport">Message Transport</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

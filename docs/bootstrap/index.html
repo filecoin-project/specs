@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Bootstrap
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f bootstrap\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Bootstrap
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="filecoin-bootstrapping-routine">Filecoin Bootstrapping Routine</h1>
+
+<p>This spec describes the Filecoin bootstrapping protocol, it must be read along with:</p>
+
+<ul>
+<li><a href="sync.md">Sync</a> on how Filecoin nodes sync with bootstrap nodes to catch up to the chain and stay synced after the initial bootstrapping has occured. The <code>Syncer</code> interface and many of the methods used here are defined in the sync spec.</li>
+</ul>
+
+<p>For related systems, see:</p>
+
+<ul>
+<li><a href="./network-protocols.md">Network Protocols</a> on how Filecoin nodes can communicate with each other, with for instance, an <a href="./network-protocols.md#hello-handshake">initial handshake</a>, or <a href="./network-protocols.md#blocksync">block syncing</a>.</li>
+<li><a href="./operation.md">Operation</a> on various operations a functional Filecoin node needs to run, like <a href="./operation.md#dht-for-peer-routing.md">DHT routing</a>.</li>
+</ul>
+
+<h2 id="what-is-bootstrapping-in-filecoin">What is bootstrapping in Filecoin?</h2>
+
+<p>When a Filecoin node first comes online, it must find the latest head for the chain and then initiate the syncing routine in order to catch up to the chain state and maintain it thereafter as new blocks come in. This is covered in the <a href="./sync.md">sync spec</a>. Bootstrapping is the process through which a node finds the chain&rsquo;s latest head in the first place (thereby enabling it to sync), through other peers in the network.</p>
+
+<p>At its simplest, bootstrapping can be thought of as secure network joining. It must enable a new node to get the latest head/chain that the majority of the network power is mining off and must be both:</p>
+
+<ul>
+<li>Robust — able to do so in adversarial networks (so long as honest nodes make up the majority of the network).</li>
+<li>Consistent — able to reliably get the canonical chain (even given poor latency or state loss in our initial peer set).</li>
+</ul>
+
+<p>The specific bootstrapping heuristic could be left up to the node implementation, but we provide a simple one here as a candidate construction. This spec is divided as follows:</p>
+
+<ul>
+<li><p>Initial Connection — ensuring the node connects to an honest set of initial peers.</p></li>
+
+<li><p>Peer Set Expansion — ensuring that these peers can serve up the network&rsquo;s canonical head reliably in spite of their individual latencies or non-byzantine state loss.</p></li>
+</ul>
+
+<p>Chain Selection is addressed in the <a href="./sync.md">sync spec</a>.</p>
+
+<p>We leave trustless initial peer selection as future work.</p>
+
+<h2 id="initial-connection">Initial Connection</h2>
+
+<p>Initial peer selection is key to avoiding eclipse attacks. If the nodes you initially connect to are malicious, then they can simply serve you malicious other peers to all of your requests, and effectively prevent you from ever discovering the real network. Filecoin assumes 51% of rational or honest miners. Given no prior information, as is the case when bootstrapping, distinguishing a rational node from an adversarial one would require sampling a majority of the network.</p>
+
+<p>This is obviously impractical, so we choose to start the bootstrap sequence with nodes by connecting with an inital set of trusted peers. These can be nodes run by well-known entities (the Filecoin foundation, large exchanges, good actors in the community, etc) or manually specified by the node operator in the config file. Default Filecoin nodes will ship with a set of default nodes though these can be changed at will.</p>
+
+<p>We leave trustless (or fully decentralized) bootstrapping for future work.</p>
+
+<p>A strawman bootstrapping sequence would have nodes use these initial peers to sync up to the canonical chain. However, new connection requests might effecitvely DoS these peers, making the Filecoin network unavailable to new nodes. Therefore, Filecoin bootstrapping seeks to &ldquo;load-balance&rdquo; initial requests to ensure the network remains widely available.</p>
+
+<p>We connect to each of these initial peers and then initiate the <code>hello handshake</code> (see in <a href="./network-protocols.md#hello-handshake">network protocols</a>), getting back</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">HelloMessage</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="nx">HeaviestTipSet</span> <span class="p">[]</span><span class="nx">Cid</span>
+<span class="nx">HeaviestTipSetHeight</span> <span class="kt">uint64</span>
+<span class="nx">GenesisHash</span> <span class="nx">Cid</span>
+<span class="p">}</span></code></pre></div>
+<p>We will use these new peers to sync with the chain, using the chain heads from our initial set of trusted nodes as a means of verifying that these peers are mining the canonical chain. These initial peers do not return their latest heads, but rather their latest confirmed heads, thereby ensuring other honest peers should be aware of these as well.</p>
+
+<p>We assume no long-lived network partitions in Filecoin, meaning these confirmed heads will all be on the same chain (though potentially at different heights). A node should initially connect to 5 trusted nodes to begin bootstrapping.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">InitialConnect</span><span class="p">(</span><span class="nx">config</span> <span class="nx">ConfigFile</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">trustedPeers</span> <span class="p">=</span> <span class="nx">configFile</span><span class="p">.</span><span class="nx">bootstrapPeers</span>
+    
+    <span class="k">for</span> <span class="nx">trustedPeer</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">s</span><span class="p">.</span><span class="nx">trustedPeers</span> <span class="p">{</span>
+        <span class="nx">trustedChain</span> <span class="o">:=</span> <span class="nf">sayHello</span><span class="p">(</span><span class="nx">trustedPeer</span><span class="p">)</span>
+        
+        <span class="nx">s</span><span class="p">.</span><span class="nx">trustedHeads</span><span class="p">[</span><span class="nx">trustedChain</span><span class="p">.</span><span class="nx">HeaviestTipSet</span><span class="p">]</span> <span class="p">=</span> <span class="nx">trustedChain</span><span class="p">.</span><span class="nx">HeaviestTipSetHeight</span>
+    		
+        <span class="k">if</span> <span class="nx">trustedChain</span><span class="p">.</span><span class="nx">GenesisHash</span> <span class="o">!=</span> <span class="nx">GENESIS</span> <span class="p">{</span>
+            <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;One of your trusted peers is bad.&#34;</span><span class="p">)</span>
+        <span class="p">}</span>        
+    <span class="p">}</span>
+    
+    <span class="nx">s</span><span class="p">.</span><span class="nx">genesis</span> <span class="p">=</span> <span class="nx">GENESIS</span>
+ 		<span class="nx">s</span><span class="p">.</span><span class="nf">ExpandPeerSet</span><span class="p">()</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="peer-set-expansion">Peer Set Expansion</h2>
+
+<p>Once connected to some portion of the network, a node will need to expand their peer set in order to get a good sample of the network and a live latest head. To do so, use the DHT to do random <code>FindPeer</code> requests. We do so until we have requested 5 new peers from each peer in the PeerSet.</p>
+
+<p>We look for random peers so our peer set makes up a &ldquo;representative&rdquo; set of the network to avoid both hotspots and potential attacks (syncing from given clusters).</p>
+
+<p>In that sense, during the initial bootstrapping, we treat the Filecoin nodes network and the underlying libp2p network as two distinct networks for bootstrapping purposes. We specifically distinguish this bootstrapping phase (meant to help us sync to the chain and which doesn&rsquo;t use the DHT structure to pick nodes) from the node bootstrapping in which Filecoin nodes use the DHT to find nearby nodes with whom to exchange messages.</p>
+
+<p>We will successively query random IDs (25 times) round-robinning our trusted nodes as starting points. We&rsquo;ll keep the nodes with IDs closest to our random one in our peer set.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">ExpandPeerSet</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">dht</span> <span class="o">:=</span> <span class="nf">getDHT</span><span class="p">()</span>
+  
+  <span class="c1">// get a random node from each trusted peer until we have 25
+</span><span class="c1"></span>  <span class="nx">trustedPeerNum</span> <span class="o">:=</span> <span class="mi">0</span>
+  <span class="c1">// we&#39;ll look for duplicates found sampling the network as a heuristic for interrupting the search if the network is too small
+</span><span class="c1"></span>  <span class="nx">dupCounter</span> <span class="o">:=</span> <span class="mi">0</span>
+  <span class="k">for</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">peerSet</span><span class="p">)</span> <span class="p">&lt;</span> <span class="nx">BootstrapPeerThreshold</span> <span class="o">&amp;&amp;</span> <span class="nx">dupCounter</span> <span class="p">&lt;</span> <span class="nx">DupThreshold</span> <span class="p">{</span>
+    <span class="nx">trustedPeer</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">trustedPeers</span><span class="p">[</span><span class="nx">trustedPeerNum</span><span class="p">]</span>
+   	<span class="nx">newPeer</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">getRandomPeer</span><span class="p">(</span><span class="nx">trustedPeer</span><span class="p">)</span>
+    <span class="c1">// adding a peer to the peer set will trigger syncing if our peer set has grown over the threshold
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">syncer</span><span class="p">.</span><span class="nf">addPeerToSet</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">dupCounter</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="p">}</span>
+    
+    <span class="c1">// round robin
+</span><span class="c1"></span>    <span class="nx">trustedPeerNum</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nx">trustedPeerNum</span> <span class="o">%=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">trustedPeers</span><span class="p">)</span>
+  <span class="p">}</span>
+  
+  <span class="c1">// if we&#39;ve reached the threshold, abandon expansion and sync with trusted heads instead
+</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">dupCounter</span> <span class="o">&gt;=</span> <span class="nx">DupThreshold</span> <span class="p">{</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nf">SyncBootstrap</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+<p>For each of our BootstrapPeerThreshold peers, we perform hello handshakes, and run the following verifications:</p>
+
+<ul>
+<li>Ensure that each of our bootstrapper&rsquo;s <code>trustedHeads.keys</code> are included as ancestors of our peers&rsquo; latestHeads.</li>
+<li>If they are not, include that peer in our syncer&rsquo;s <code>BadTipsetCache</code>.</li>
+<li>If they are, add these peers and latestHeads to our syncer&rsquo;s peerSet/peerHeads</li>
+</ul>
+
+<p>Repeat this process requesting new peers until your PeerHeads contains at least 25 valid peers, to be used to select a latest head to mine off of.</p>
+
+<p>If the random search yields too many duplicates, the peer set expansion is abandoned, under the assumption that the network is too small to support the peer expansion (this would happen early in the network&rsquo;s life or if the number of peers dipped below the threshold at some point).</p>
+
+<p>In that case, the protocol will instead try to sync with the trustedPeers directly. In the steady-state, we assume the trustedPeers would reject such syncing requests under normal network conditions.</p>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/bootstrap.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#filecoin-bootstrapping-routine">Filecoin Bootstrapping Routine</a>
+<ul>
+<li><a href="#what-is-bootstrapping-in-filecoin">What is bootstrapping in Filecoin?</a></li>
+<li><a href="#initial-connection">Initial Connection</a></li>
+<li><a href="#peer-set-expansion">Peer Set Expansion</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

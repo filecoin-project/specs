@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Drgporep Circuit
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f drgporep-circuit\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Drgporep Circuit
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="drgporep-circuit-design-doc">DRGPorep Circuit Design Doc</h1>
+
+<h2 id="offline-proof">Offline Proof</h2>
+
+<p>A Prover wants to convince a verifier that they have run the DRGPoRep replication algorithm on some data with Merkle root <code>comm_d</code> and that the Merkle root of the replicated data is <code>comm_r</code>.</p>
+
+<h4 id="high-level-description">High level description</h4>
+
+<p>Circuit inputs:</p>
+
+<ul>
+<li>(Public input) Commitments to the original data and the replica data</li>
+<li>(Public input) An identifier for the replica</li>
+<li>(Public input) The binary representation of the position in the Merkle tree of:
+
+<ul>
+<li>the challenged nodes in the original data</li>
+<li>the challenged nodes in the replica data</li>
+<li>the parents of the challenged nodes in the replica data</li>
+</ul></li>
+<li>(Aux input) Inclusion proofs for the set of challenged leaves in the original data and the replica data</li>
+<li>(Aux input) Inclusion proofs for the replica parent leaves of each challenged replica data leaf</li>
+<li>(Aux input) An identifier for the replica</li>
+</ul>
+
+<p>Outside of circuit checks:</p>
+
+<ul>
+<li>Parent checks: <strong>Check</strong> that for each challenged data node, the parent replica nodes have the correct position (expressed as binary representation in the public inputs)</li>
+<li>Unique challenges checks:  <strong>Check</strong> that the challenged nodes are all different</li>
+</ul>
+
+<p>Inside of circuit checks:</p>
+
+<ul>
+<li>Inclusion checks: <strong>Check</strong> that all the inclusion proofs are correct</li>
+<li>Encoding checks: <strong>Check</strong> that we can derive a decoding of the replica data that equals the original data
+
+<ul>
+<li><strong>Compute</strong> a key: Hash the concatenatation the replica identifier with the replica parent leaves in dependency order in the DRG graph</li>
+<li><strong>Compute</strong> a Sloth decoding of the replica data using the key</li>
+<li><strong>Check</strong> that the decoded leaf equals the original data leaf</li>
+</ul></li>
+</ul>
+
+<h4 id="low-level-description">Low level description</h4>
+
+<ul>
+<li><p><strong>Public Parameters</strong>: <em>Parameters that are embeded in the circuits or used to generate the circuit</em></p>
+
+<ul>
+<li><code>jubjub_params: TODO</code>: TODO find correct structure, default: TODO</li>
+<li><code>degree: UInt</code>: Degree of the Depth Robust Graph</li>
+<li><code>sloth_iterations: UInt</code>: Number of iteration for Sloth enocding/decoding</li>
+<li><code>challenge_count: UInt</code>: Number of challenges</li>
+<li><code>merkle_tree_depth: UInt</code>: Depth of the Merkle Trees in the inclusion proofs</li>
+</ul></li>
+
+<li><p><strong>Public Inputs</strong>: <em>Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it</em></p>
+
+<ul>
+<li><code>replica_id: Fr</code>  Unique identity for the replica (in Filecoin <code>H(replica_id, prover_id)</code>)</li>
+<li><code>comm_d: Fr</code>: Merkle root of the original data</li>
+<li><code>comm_r: Fr</code>: Merkle root of the replicated data</li>
+<li><code>challenge_{0..challenge_count}/inclusion_checks</code></li>
+<li><code>replica_inclusion/path/input: Fr</code>: Packed boolean vector that represents the authentication path for the replica inclusion proof; bool says if path is right (1) or left (0).</li>
+<li><code>data_inclusion/path/input: Fr</code>: Same previous one for data inclusion proofs</li>
+<li><code>parents_inclusion_{0..degree}/path/input: Fr</code>: Same previous one for data inclusion proofs</li>
+</ul></li>
+
+<li><p><strong>Private Inputs</strong>: <em>Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof</em></p>
+
+<ul>
+<li>AUX (input)</li>
+<li><code>challenge_{0..challenge_count}</code>
+
+<ul>
+<li><code>inclusion_checks</code></li>
+<li><code>replica_inclusion</code>
+
+<ul>
+<li><code>value/num : Fr</code>: Leaf of the Merkle tree</li>
+<li><code>merkle tree hash {0..merkle_tree_depth} : TODO</code>: intermediary hashes for the merkle tree inclusion proof</li>
+</ul></li>
+<li><code>parent_inclusion_{0..degree}</code>
+
+<ul>
+<li><code>value/num : Fr</code>: Leaf of the Merkle tree</li>
+<li><code>merkle tree hash {0..merkle_tree_depth} : TODO</code>: intermediary hashes for the merkle tree inclusion proof</li>
+</ul></li>
+<li><code>data_inclusion</code>
+
+<ul>
+<li><code>value/num : Fr</code>: Leaf of the Merkle tree</li>
+<li><code>merkle tree hash {0..merkle_tree_depth} : TODO</code>: intermediary hashes for the merkle tree inclusion proof</li>
+</ul></li>
+<li><code>encoding_checks/parents_{0..degree}_bits/bit {0..255}: Fr</code>: Bit representation of the parent hashes</li>
+</ul></li>
+<li>AUX (computed)</li>
+<li><code>encoding_checks/kdf: TODO</code>: TODO</li>
+<li><code>replica_id_bits/bit {0..255}/boolean: Fr</code>: bit at position <em>i</em></li>
+</ul></li>
+
+<li><p><strong>Circuit <code>drgporep</code></strong>:</p>
+
+<ul>
+<li><p><code>replica_id_bits</code>: <em>Check <code>replica_id</code> is equal to its bit representation</em></p>
+
+<pre><code>Assign replica_id_bits = Fr_to_bits(replica_id)
+Check Packed(replica_id_bits) == replica_id
+</code></pre></li>
+
+<li><p><code>challenge_{chall = 0..challenge_count}</code></p></li>
+
+<li><p><code>inclusion_checks</code>: <em>Check inclusion proofs</em></p>
+
+<ul>
+<li><p><code>replica_inclusion</code>: <em>Check inclusion for the challenged replica node</em></p>
+
+<pre><code>Check PoR(jubjub_params, replica_inclusion_proofs[chall], comm_r)
+</code></pre></li>
+
+<li><p><code>data_inclusion</code>: <em>Check inclusion proof for the challenged data node</em></p>
+
+<pre><code>Check PoR(jubjub_params, data_inclusion_proofs[chall], comm_d)
+</code></pre></li>
+
+<li><p><code>parents_inclusion_{parent = 0..(degree+expansion_degree)}</code>:  <em>Check inclusion proof for each parent of the challenged data node</em></p>
+
+<pre><code>Check PoR(jubjub_params, parents_inclusion_proofs[chall][parent], comm_r)
+</code></pre></li>
+</ul></li>
+
+<li><p><code>encoding_checks</code>: <em>Check a data node was encoded correctly in replica node</em></p>
+
+<ul>
+<li><p><code>parent_bits = parents_{parent = 0..degree}_bits</code>: <em>Check that a correct bit representation of the parents is known</em></p>
+
+<pre><code>Let leaf = /challenge_{chall}/inclusion_checks/parents_inclusion_{parent}/value
+Assign parent_bits = Fr_to_bits(leaf)
+Check Packed(bits) == leaf
+</code></pre></li>
+
+<li><p><code>kdf</code>: <em>Check that the KDF was run correctly</em></p>
+
+<pre><code>Let leaf_bits[i = 0..deg] = challenge_{chall}/encoding_checks/parents_{i}_bits
+        
+Assign key : Fr = KDF(replica_id_bits, leaf_bits)
+Check KDF(replica_id_bits, leaf_bits)
+</code></pre></li>
+
+<li><p><code>sloth_decode</code>: <em>Check that the Sloth encoding was run correctly</em></p>
+
+<pre><code>Let leaf = challenge_{chall}/inclusion_checks/replica_inclusion/value
+        
+Assign decoded = SlothDecode(key, leaf, sloth_iterations)
+Check SlothDecode(key, leaf, sloth_iterations)
+</code></pre></li>
+
+<li><p><code>equality</code>: <em>Check that the decoded piece is equivalent to the challenged node</em></p>
+
+<pre><code>Let leaf = /challenge_{chall}/inclusion_checks/data_inclusion/value
+        
+Check leaf == decoded
+</code></pre></li>
+</ul></li>
+</ul></li>
+</ul>
+
+<h2 id="glossary">Glossary</h2>
+
+<ul>
+<li><strong>Fr</strong>: Field element of BLS12-381</li>
+<li><strong>Merkle root</strong>: Root hash of a binary Merkle tree</li>
+<li><strong>UInt</strong>: Unsigned integer</li>
+<li><strong>{0..x}</strong>: From 0 (included) to x (not included) (e.g. [0,x)] )</li>
+<li><strong>Check</strong>:
+
+<ul>
+<li>If there is an equality, create a constraint</li>
+<li>otherwise, execute the function</li>
+</ul></li>
+</ul>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/drgporep-circuit.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#drgporep-circuit-design-doc">DRGPorep Circuit Design Doc</a>
+<ul>
+<li><a href="#offline-proof">Offline Proof</a>
+<ul>
+<li>
+<ul>
+<li><a href="#high-level-description">High level description</a></li>
+<li><a href="#low-level-description">Low level description</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#glossary">Glossary</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

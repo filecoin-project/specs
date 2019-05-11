@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Payments
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fpayments\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Payments
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="payments">Payments</h1>
+
+<h3 id="what-are-payments">What are payments</h3>
+
+<h3 id="what-payments-affect">What payments affect</h3>
+
+<h3 id="dependencies">Dependencies</h3>
+
+<h2 id="miners-claiming-earnings">Miners Claiming Earnings</h2>
+
+<p>Storage miners get paid entirely through payment channels. Payment from a client to a storage miner comes in the form of a set of channel updates that get created when proposing the deal. These updates are each time-locked, and can only be cashed out if the storage miner has not been slashed for the storage that is being paid for. (TODO: working on a multi-lane payment channel construction that should make this all pretty easy, only requiring a single on-chain channel construction between each client and storage miner).</p>
+
+<h2 id="payment-channels">Payment Channels</h2>
+
+<p>In order for the Filecoin Markets to work in a timely manner, we need to be able to have off-chain payments. This is a solved problem (at least, for our purposes in v0). Payment channels have been implemented and used in bitcoin, ethereum and many other networks.</p>
+
+<p>The basic premise is this: User A wants to be able to send many small payments to user B. So user A locks up money in a contract that says &ldquo;this money will only go to user B, and the unclaimed amount will be returned to user A after a set time period&rdquo;. Once that money is locked up, user A can send user B signed transactions that user B can cash out at any time.</p>
+
+<p>For example:</p>
+
+<ul>
+<li>User A locks up 10 FIL to B</li>
+<li>User B does something for A</li>
+<li>User A sends <code>SignedVoucher{Channel, 1 FIL}</code> to B</li>
+<li>User B does something for user A</li>
+<li>User A sends <code>SignedVoucher{Channel, 2 FIL}</code> to B</li>
+</ul>
+
+<p>At this point, B has two signed messages from A, but the contract is set up such that it can only be cashed out once. So if B decided to cash out, they would obviously select the message with the higher value. Also, once B cashes out, they must not accept any more payments from A on that same channel.</p>
+
+<h3 id="multi-lane-payment-channel">Multi-Lane Payment Channel</h3>
+
+<p>The filecoin storage market may require a way to do incremental payments between two parties, over time, for multiple different transactions. The primary motivating usecase for this is to provide payment for file storage over time, for each file stored. An additional requirement is the ability to have less than one message on chain per transaction &lsquo;lane&rsquo;, meaning that payments for multiple files should be aggregateable (Note: its okay if this aggregation is an interactive process).</p>
+
+<p>Let&rsquo;s say that <code>A</code> wants to make such an arrangement with <code>B</code>. <code>A</code> should create the payment channel with enough funds to cover all potential transactions. Then <code>A</code> decides to start the first transaction, so they send a signed voucher for the payment channel on &lsquo;lane 1&rsquo;, for 2 FIL. They can then send more updates on lane 1 as needed. Then, at some point <code>A</code> decides to start another independent transaction to <code>B</code>, so they send a voucher on &lsquo;lane 2&rsquo;. The voucher for lane 2 can be cashed out independently of lane 1. However, <code>B</code> can ask <code>A</code> to &lsquo;reconcile&rsquo; the two payment channels for them into a single update. This update could contain a value, and a list of lanes to close. Cashing out that reconciled update would invalidate the other lanes, meaning <code>B</code> couldnt also cash in those. The single update would be much smaller, and therefore cheaper to close out.</p>
+
+<p>Lane state can be easily tracked on-chain with a compact bitfield.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SpendVoucher</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="c1">// Amount is the amount of FIL that this voucher can be redeemed for
+</span><span class="c1"></span>	<span class="nx">Amount</span> <span class="nx">TokenAmount</span>
+
+	<span class="c1">// Nonce is a number that sets the ordering of vouchers. If you try to redeem
+</span><span class="c1"></span>	<span class="c1">// a voucher with an equal or lower nonce, the operation will fail. Nonces are
+</span><span class="c1"></span>	<span class="c1">// per lane.
+</span><span class="c1"></span>	<span class="nx">Nonce</span> <span class="kt">uint64</span>
+
+	<span class="c1">// Lane specifies which &#39;lane&#39; of the payment channel this voucher is for.
+</span><span class="c1"></span>	<span class="c1">// Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
+</span><span class="c1"></span>	<span class="nx">Lane</span> <span class="kt">uint64</span>
+
+	<span class="c1">// Merges specifies a list of lane-nonce pairs that this voucher will close.
+</span><span class="c1"></span>	<span class="c1">// This voucher may not be redeemed if any of the lanes specified here are already
+</span><span class="c1"></span>	<span class="c1">// closed, or their nonce specified here is lower than the nonce of the lane on-chain.
+</span><span class="c1"></span>	<span class="nx">Merges</span> <span class="p">[]</span><span class="nx">MergePair</span>
+
+	<span class="nx">TimeLock</span> <span class="kt">uint64</span>
+
+	<span class="nx">SecretPreimage</span> <span class="p">[]</span><span class="kt">byte</span>
+
+	<span class="nx">RequiredSector</span> <span class="p">[]</span><span class="kt">byte</span>
+
+	<span class="nx">DataCommitment</span> <span class="p">[]</span><span class="kt">byte</span>
+
+	<span class="nx">MinCloseHeight</span> <span class="kt">uint64</span>
+
+	<span class="nx">Sig</span> <span class="nx">Signature</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">MergePair</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Lane</span>  <span class="kt">uint64</span>
+	<span class="nx">Nonce</span> <span class="kt">uint64</span>
+<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PaymentChannel</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">From</span> <span class="nx">Address</span>
+	<span class="nx">To</span>   <span class="nx">Address</span>
+
+	<span class="nx">ChannelTotal</span> <span class="nx">TokenAmount</span>
+	<span class="nx">ToSend</span>       <span class="nx">TokenAmount</span>
+
+	<span class="nx">ClosingAt</span>      <span class="kt">uint64</span>
+	<span class="nx">MinCloseHeight</span> <span class="kt">uint64</span>
+
+	<span class="nx">LaneStates</span> <span class="kd">map</span><span class="p">[</span><span class="kt">uint64</span><span class="p">]</span><span class="nx">LaneState</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">LaneState</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Nonce</span>    <span class="kt">uint64</span>
+	<span class="nx">Redeemed</span> <span class="nx">TokenAmount</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">paych</span> <span class="o">*</span><span class="nx">PaymentChannel</span><span class="p">)</span> <span class="nf">validateSignature</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">SpendVoucher</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">==</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">From</span> <span class="p">{</span>
+		<span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">sv</span><span class="p">.</span><span class="nf">SerializeNoSig</span><span class="p">(),</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">==</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">To</span> <span class="p">{</span>
+		<span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">sv</span><span class="p">.</span><span class="nf">SerializeNoSig</span><span class="p">(),</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;bad programmer&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">paych</span> <span class="o">*</span><span class="nx">PaymentChannel</span><span class="p">)</span> <span class="nf">UpdateChannelState</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">SpendVoucher</span><span class="p">,</span> <span class="nx">secret</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">pip</span> <span class="o">*</span><span class="nx">PieceInclusionProof</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">paych</span><span class="p">.</span><span class="nf">validateSignature</span><span class="p">(</span><span class="nx">sv</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Signature Invalid&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">TimeLock</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot use this voucher yet!&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">SecretPreimage</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nf">Hash</span><span class="p">(</span><span class="nx">secret</span><span class="p">)</span> <span class="o">!=</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">SecretPreimage</span> <span class="p">{</span>
+			<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Incorrect secret!&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">DataCommitment</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="c1">// Checks that the piece inclusion proof is valid, and that the referenced sector
+</span><span class="c1"></span>		<span class="c1">// is correctly being stored
+</span><span class="c1"></span>		<span class="k">if</span> <span class="p">!</span><span class="nf">ValidateInclusion</span><span class="p">(</span><span class="nx">pip</span><span class="p">,</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">DataCommitment</span><span class="p">)</span> <span class="p">{</span>
+			<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;PieceInclusionProof was invalid&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">RequiredSector</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">miner</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nf">GetMiner</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+			<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Redeemer is not a miner&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">HasSector</span><span class="p">(</span><span class="nx">sv</span><span class="p">.</span><span class="nx">RequiredSector</span><span class="p">)</span> <span class="p">{</span>
+			<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner does not have sector, cannot redeem payment&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="nx">ls</span> <span class="o">:=</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">LaneStates</span><span class="p">[</span><span class="nx">sv</span><span class="p">.</span><span class="nx">Lane</span><span class="p">]</span>
+	<span class="k">if</span> <span class="nx">ls</span><span class="p">.</span><span class="nx">Closed</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot redeem a voucher on a closed lane&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="nx">ls</span><span class="p">.</span><span class="nx">Nonce</span> <span class="p">&gt;</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Nonce</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;voucher has an outdated nonce, cannot redeem&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="kd">var</span> <span class="nx">mergeValue</span> <span class="nx">TokenAmount</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">merge</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Merges</span> <span class="p">{</span>
+		<span class="nx">ols</span> <span class="o">:=</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">LaneStates</span><span class="p">[</span><span class="nx">merge</span><span class="p">.</span><span class="nx">Lane</span><span class="p">]</span>
+
+		<span class="k">if</span> <span class="nx">ols</span><span class="p">.</span><span class="nx">Nonce</span> <span class="o">&gt;=</span> <span class="nx">merge</span><span class="p">.</span><span class="nx">Nonce</span> <span class="p">{</span>
+			<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;merge in voucher has outdated nonce, cannot redeem&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="nx">mergeValue</span> <span class="o">+=</span> <span class="nx">ols</span><span class="p">.</span><span class="nx">Redeemed</span>
+		<span class="nx">ols</span><span class="p">.</span><span class="nx">Nonce</span> <span class="p">=</span> <span class="nx">merge</span><span class="p">.</span><span class="nx">Nonce</span>
+	<span class="p">}</span>
+
+	<span class="nx">ls</span><span class="p">.</span><span class="nx">Nonce</span> <span class="p">=</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Nonce</span>
+	<span class="nx">balanceDelta</span> <span class="p">=</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Amount</span> <span class="o">-</span> <span class="p">(</span><span class="nx">mergeValue</span> <span class="o">+</span> <span class="nx">ls</span><span class="p">.</span><span class="nx">Redeemed</span><span class="p">)</span>
+	<span class="nx">ls</span><span class="p">.</span><span class="nx">Redeemed</span> <span class="p">=</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Amount</span>
+
+	<span class="nx">newSendBalance</span> <span class="p">=</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">ToSend</span> <span class="o">+</span> <span class="nx">balanceDelta</span>
+	<span class="k">if</span> <span class="nx">newSendBalance</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="c1">// TODO: is this impossible?
+</span><span class="c1"></span>		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;voucher would leave channel balance negative&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">if</span> <span class="nx">newSendBalance</span> <span class="p">&gt;</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">ChannelTotal</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough funds in channel to cover voucher&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">paych</span><span class="p">.</span><span class="nx">ToSend</span> <span class="p">=</span> <span class="nx">newSendBalance</span>
+
+	<span class="k">if</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">MinCloseHeight</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="p">&lt;</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">MinCloseHeight</span> <span class="p">{</span>
+			<span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="p">=</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">MinCloseHeight</span>
+		<span class="p">}</span>
+		<span class="k">if</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">MinCloseHeight</span> <span class="p">&lt;</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">MinCloseHeight</span> <span class="p">{</span>
+			<span class="nx">paych</span><span class="p">.</span><span class="nx">MinCloseHeight</span> <span class="p">=</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">MinCloseHeight</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">paych</span> <span class="o">*</span><span class="nx">PaymentChannel</span><span class="p">)</span> <span class="nf">Withdraw</span><span class="p">(</span><span class="nx">upTo</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// TODO: this ones tricky, withdraw funds without closing it out entirely...
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">paych</span> <span class="o">*</span><span class="nx">PaymentChannel</span><span class="p">)</span> <span class="nf">Close</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">From</span> <span class="o">&amp;&amp;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">To</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized to close channel&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Channel already closing&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="p">=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">+</span> <span class="nx">ChannelClosingDelay</span>
+	<span class="k">if</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="p">&lt;</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">MinCloseHeight</span> <span class="p">{</span>
+		<span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="p">=</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">MinCloseHeight</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">paych</span> <span class="o">*</span><span class="nx">PaymentChannel</span><span class="p">)</span> <span class="nf">Collect</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;payment channel not closing or closed&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">ClosingAt</span> <span class="p">{</span>
+		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Payment channel not yet closed&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nf">Transfer</span><span class="p">(</span><span class="nx">paych</span><span class="p">.</span><span class="nx">ChannelTotal</span><span class="o">-</span><span class="nx">paych</span><span class="p">.</span><span class="nx">ToSend</span><span class="p">,</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span>
+	<span class="nf">Transfer</span><span class="p">(</span><span class="nx">paych</span><span class="p">.</span><span class="nx">ToSend</span><span class="p">,</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="payment-channel-reconciliation">Payment Channel Reconciliation</h3>
+
+<p>In a situation where peers A and B  have several different payment channels between them, the scenario may frequently come up where A has multiple payment channel updates from B to apply. Submitting each of these individually would cost a noticeable amount in fees, and put excess unnecessary load on the chain. To remedy this, A can contact B and ask them for a single payment channel update for the combined value of all the updates they have (minus some fee to incent B to actually want to do this). This aggregated update would contain a list of the IDs of the other payment channels that it is superceding so that A cannot also cash out on the originals.</p>
+
+<h1 id="payment-reconciliation">Payment Reconciliation</h1>
+
+<p>The filecoin storage market will (likely) have many independent payments between the same parties. These payments will be secured through payment channels, set up initially on chain, but utilized almost entirely off-chain. The point at which they need to touch the chain is when miners wish to cash out their earnings. A naive solution to this problem would have miners perform one on-chain action per file stored for a particular client. This would not scale well. Instead, we need a system where the miner and client can have some additional off-chain communication and end up with the miner submitting only a single message to the chain.</p>
+
+<p>To accomplish this, we introduce the Payment Reconciliation Protocol.</p>
+
+<p>This is a libp2p service run by all participants wanting to participate in payment reconciliation. When Alice has a set of payments from Bob that she is ready to cash out, Alice can send a <code>ReconcileRequest</code> to Bob, containing the following information:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ReconcileRequest</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Vouchers</span> <span class="p">[]</span><span class="nx">Vouchers</span>
+
+	<span class="nx">ReqVal</span> <span class="nx">TokenAmount</span>
+<span class="p">}</span></code></pre></div>
+<p>The Vouchers should all be valid vouchers from Bob to Alice, on the same payment channel, and they should all be ready to be cashed in. <code>ReqVal</code> is a token amount less than or equal to the sum of all the values in the given vouchers. Generally, this value will be between the total sum of the vouchers, and that total sum minus the fees it would cost to submit them all to the chain.</p>
+
+<p>Bob receives this request, and checks that all the fields are correct, and then ensures that the difference between ReqVal and the vouchers sum is sufficient (this is a parameter that the client can set).  Then, he sends back a response which either contains the requested voucher, or an error status and message.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ReconcileResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Combined</span> <span class="nx">Voucher</span>
+
+	<span class="nx">Status</span>  <span class="nx">StatusCode</span>
+	<span class="nx">Message</span> <span class="kt">string</span>
+<span class="p">}</span></code></pre></div>
+<p>Open Questions:</p>
+
+<ul>
+<li>In a number of usecases, this protocol will require the miner look up and connect to a client to propose reconciliation. How does a miner look up and connect to a client over libp2p given only their filecoin address?</li>
+<li>Without repair miners, this protocol will likely not be used that much. Should that be made clear? Should there be other considerations added to compensate?</li>
+</ul>
+
+<h2 id="storage-miner-payments">Storage Miner Payments</h2>
+
+<p>TODO: these bits were pulled out of a different doc, and describe strategies by which client payments to a miner might happen. We need to organize &lsquo;clients paying miners&rsquo; better, unclear if it should be the same doc that talks about payment channel constructions.</p>
+
+<ol>
+<li><strong>Updates Contingent on Inclusion Proof</strong>
+
+<ul>
+<li>In this case, the miner must provide an inclusion proof that shows the client data is contained in one of the miners sectors on chain, and submit that along with the payment channel update.</li>
+<li>This can be pretty expensive for smaller files, and ideally, we make it to one of the latter two options</li>
+<li>This option does however allow clients to upload their files and leave.</li>
+</ul></li>
+<li><strong>Update Contingent on CommD Existence</strong>
+
+<ul>
+<li>For this, the client needs to wait around until the miner finishes packing a sector, and computing its commD. The client then signs a set of payment channel updates that are contingent on the given commD existing on chain.</li>
+<li>This route makes it difficult for miners to re-seal smaller files (really, small files just suck)</li>
+</ul></li>
+<li><strong>Reconciled Payment</strong>
+
+<ul>
+<li>In either of the above cases, the miner may go back to the client and say &ldquo;Look, these payment channel updates you gave me are able to be cashed in right now, could you take them all and give me back a single update for a slightly smaller amount?&rdquo;.</li>
+<li>The slightly smaller amount could be the difference in transaction fees, meaning the client saves money, and the miner gets the same amount.</li>
+</ul></li>
+</ol>
+</article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/payments.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#payments">Payments</a>
+<ul>
+<li>
+<ul>
+<li><a href="#what-are-payments">What are payments</a></li>
+<li><a href="#what-payments-affect">What payments affect</a></li>
+<li><a href="#dependencies">Dependencies</a></li>
+</ul></li>
+<li><a href="#miners-claiming-earnings">Miners Claiming Earnings</a></li>
+<li><a href="#payment-channels">Payment Channels</a>
+<ul>
+<li><a href="#multi-lane-payment-channel">Multi-Lane Payment Channel</a></li>
+<li><a href="#payment-channel-reconciliation">Payment Channel Reconciliation</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#payment-reconciliation">Payment Reconciliation</a>
+<ul>
+<li><a href="#storage-miner-payments">Storage Miner Payments</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Retrieval Market
+  
+ | Filecoin Spec</title>
+
+
+<link href="https://fonts.googleapis.com/css?family=Oxygen|Oxygen+Mono:300,400,700" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="/book.min.659e43aa5b1cb939dd2358006b2618966eb357fc23f28971c9c70d24f7e0128a.css">
+
+
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="/css/syntax.css">
+<link href="/mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="/mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="http://example.org/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fretrieval-market\2f "] {
+      color: #004ed0;
+  }
+  </style>
+
+<ul>
+<li><a href="/"><strong>Overview</strong></a></li>
+<li><strong>Core</strong>
+
+<ul>
+<li><a href="/docs/data-structures/">Data Structures</a></li>
+<li>Cryptography</li>
+<li><a href="/docs/signatures/">Signatures</a></li>
+<li><a href="/docs/proofs/">Proofs</a></li>
+<li><a href="/docs/validation/">Block Validation</a></li>
+<li><a href="/docs/network-protocols/">Network</a></li>
+<li><a href="/docs/bootstrap/">Bootstrapping</a></li>
+<li><a href="/docs/data-propagation/">Data Propagation</a></li>
+<li><a href="/docs/sync/">Chain Sync</a></li>
+<li><a href="/docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="/docs/state-machine/">State Machine</a></li>
+<li><a href="/docs/local-storage/">Local Storage</a></li>
+<li><a href="/docs/operation/">Node Operation</a></li>
+</ul></li>
+<li><a href="/docs/actors/"><strong>Actors</strong></a>
+
+<ul>
+<li><a href="/docs/mining/">Mining</a></li>
+<li><a href="/docs/storage-market/">Storage Market</a></li>
+<li><a href="/docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="/docs/payments/">Payments</a></li>
+<li><a href="/docs/faults/">Faults</a></li>
+</ul></li>
+<li><a href="/docs/client/"><strong>Client</strong></a></li>
+<li><strong>Proofs</strong>
+
+<ul>
+<li><a href="/docs/drgporep-circuit/">DrgPoRep</a></li>
+<li><a href="/docs/zigzag-circuit/">ZigZag</a></li>
+</ul></li>
+<li><a href="/docs/definitions/"><strong>Glossary</strong></a></li>
+<li><strong>Spec</strong>
+
+<ul>
+<li><a href="/docs/style/">Style</a></li>
+<li><a href="/docs/process/">Process</a></li>
+</ul></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Retrieval Market
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="retrieval-market-v0"><code>Retrieval Market</code> V0</h1>
+
+<h3 id="what-is-the-retrieval-market">What is the <code>Retrieval Market</code></h3>
+
+<h3 id="what-the-retrieval-market-affects">What the <code>Retrieval Market</code> affects</h3>
+
+<h3 id="dependencies">Dependencies</h3>
+
+<h2 id="components">Components</h2>
+
+<p>Version 0 of the <code>retrieval market</code> protocol is what we (tentatively) will launch the filecoin network with. It is version zero because it will only be good enough to fit the bill as a way to pay another node for a file.</p>
+
+<p>The main components are as follows:</p>
+
+<ul>
+<li>A payment channel actor (See <a href="payment-channels.md">payment channels</a> for details)</li>
+<li>&lsquo;retrieval-v0&rsquo; <code>libp2p</code> services</li>
+<li>A chain-based content routing interface</li>
+<li>A set of commands to interact with the above</li>
+</ul>
+
+<h2 id="retrieval-v0-libp2p-services">Retrieval V0 <code>libp2p</code> Services</h2>
+
+<p>The v0 <code>retrieval market</code> will initially be implemented as two <code>libp2p</code> services. It will be request response based, where the client who is requesting a file sends a <code>retrieval deal proposal</code> to the miner. The miner chooses whether or not to accept it, sends their response which (if they accept the proposal) includes a <code>signed retrieval deal</code>, followed by the actual requested content, streamed as a series of bitswap block messages, using a pre-order traversal of the dag. Each block should use the <a href="https://github.com/ipfs/go-ipfs/blob/master/exchange/bitswap/message/message.go#L216">bitswap block message format</a>. This way, the client should be able to verify the data incrementally as it receives it. Once the client has received all the data, it should then send a payment channel SpendVoucher of the proposed amount to the miner. This protocol may be easily extended to include payments from the client to the miner every N blocks, but for now we omit that feature.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="c1">// Ref is the cid of the data to be retrieved
+</span><span class="c1"></span>	<span class="nx">Ref</span> <span class="nx">Cid</span>
+
+	<span class="c1">// Price is the total amount that the client is willing to pay for the
+</span><span class="c1"></span>	<span class="c1">// retrieval of the data
+</span><span class="c1"></span>	<span class="nx">Price</span> <span class="nx">TokenAmount</span>
+
+	<span class="c1">// Payment is a payment info from the client to the retrieval miner for the data
+</span><span class="c1"></span>	<span class="nx">Payment</span> <span class="nx">PaymentInfo</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ResponseStatus</span> <span class="kt">uint</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">Unset</span> <span class="p">=</span> <span class="nf">ResponseStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
+	<span class="nx">Accepted</span>
+	<span class="nx">Rejected</span>
+	<span class="nx">Error</span>
+<span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">RetDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Status</span>  <span class="nx">ResponseStatus</span>
+	<span class="nx">Message</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="c1">// Prefix is the cid prefix parameters for this block. It describes how to
+</span><span class="c1"></span>	<span class="c1">// hash the block to verify it matches the expected value.
+</span><span class="c1"></span>	<span class="nx">Prefix</span> <span class="nx">CidPrefix</span>
+	<span class="nx">Data</span>   <span class="p">[]</span><span class="kt">byte</span>
+<span class="p">}</span></code></pre></div>
+<p><code>Retrieval miners</code> should also support a query service that allows clients to request pricing information from a miner.</p>
+
+<p>The query should include the CID of the piece that the client is interested in retrieving. The response contains whether or not the miner will serve that data, the price they will accept for it.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetQuery</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Piece</span> <span class="nx">Cid</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetQueryResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Status</span>   <span class="nx">RetQueryStatus</span>
+	<span class="nx">MinPrice</span> <span class="nx">TokenAmount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetQueryStatus</span> <span class="kt">uint</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">Unset</span> <span class="p">=</span> <span class="nf">RetQueryStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
+	<span class="nx">OK</span>
+	<span class="nx">PieceUnavailable</span>
+<span class="p">)</span></code></pre></div>
+<h2 id="chain-based-content-routing">Chain Based Content Routing</h2>
+
+<p>For the version 0 protocol. We should implement a small helper service that looks up which miners have a given piece based on deals made in the blockchain. The service should first look the content up in the blockchain (or in some client index) to find the chain address of the miner, then use the lookup service to map that to a <code>libp2p</code> <code>peerID</code> and <code>multiaddr</code>.</p>
+
+<p>The interface should match the exist libp2p content routing interface:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ChainContentRouting</span> <span class="kd">interface</span> <span class="p">{</span>
+	<span class="nf">FindProvidersAsync</span><span class="p">(</span><span class="nx">ref</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="nx">pstore</span><span class="p">.</span><span class="nx">PeerInfo</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="retrieval-market-commands">Retrieval Market Commands</h2>
+
+<p>We will need to add a few commands to allow the user to interact with the <code>retrieval market</code>, and for developers to be able to script higher level applications on top of it.</p>
+
+<p>The command names here are not final, and are definitely subject to change later on once we are able to sit and think through proper UX.</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">USAGE
+  filecoin retr get &lt;piece-cid&gt; - Retrieve a piece from a miner.
+
+SYNOPSIS
+  filecoin retr get [--price=&lt;amt&gt;] [--miner=&lt;peerID&gt;] [--] &lt;piece-cid&gt;
+
+ARGUMENTS
+
+  &lt;piece-cid&gt; - Content ID of piece to retrieve.
+
+OPTIONS
+
+  --price                string - Amount of filecoin to offer for this data.
+  --miner                string - Optional Peer ID of miner to connect to. (If unspecified, the chain routing service will be used)</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">USAGE
+  filecoin retr lookup &lt;piece-cid&gt; - Print a list of miners who have the given piece.
+
+SYNOPSIS
+  filecoin retr lookup [--sort=&lt;sorttype&gt;] [--] &lt;piece-cid&gt;
+
+ARGUMENTS
+
+  &lt;piece-cid&gt;... - Content ID of piece to find.
+
+OPTIONS
+
+  --sort                string - Output sorting scheme.</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">USAGE
+  filecoin retr query &lt;minerID&gt; [&lt;piece-cid&gt;] - Query the given retrieval miner.
+
+SYNOPSIS
+  filecoin retr query [--] &lt;miner-id&gt; [&lt;piece-cid&gt;]
+
+ARGUMENTS
+
+  &lt;miner-id&gt;  - ID of miner to query.
+  [&lt;piece-cid&gt;] - Optional cid of piece to query for.</code></pre></div></article>
+
+      
+<div class="align-center book-git-footer justify-end">
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/retrieval-market.md" target="_blank" rel="noopener">
+      <img src="/svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#retrieval-market-v0"><code>Retrieval Market</code> V0</a>
+<ul>
+<li>
+<ul>
+<li><a href="#what-is-the-retrieval-market">What is the <code>Retrieval Market</code></a></li>
+<li><a href="#what-the-retrieval-market-affects">What the <code>Retrieval Market</code> affects</a></li>
+<li><a href="#dependencies">Dependencies</a></li>
+</ul></li>
+<li><a href="#components">Components</a></li>
+<li><a href="#retrieval-v0-libp2p-services">Retrieval V0 <code>libp2p</code> Services</a></li>
+<li><a href="#chain-based-content-routing">Chain Based Content Routing</a></li>
+<li><a href="#retrieval-market-commands">Retrieval Market Commands</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>
