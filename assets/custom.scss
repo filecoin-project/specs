@@ -158,6 +158,8 @@ body {
 
   table {
     margin: 2em 0;
+    table-layout:fixed;
+    width: 100%;
   }
 
   th {
@@ -217,11 +219,6 @@ img {
       white-space: inherit;
       padding: 0.5em 1em;
       background-color: $codeBackground;
-      font-size: 8px;
-
-      span {
-        font-size: 16px;
-      }
     }
   }
 
@@ -284,4 +281,9 @@ img {
   border-left: 3px solid $darkGray;
   display: inline-block;
   background-color: $detailGray;
+}
+
+
+.book-git-footer img {
+  vertical-align: middle !important;
 }

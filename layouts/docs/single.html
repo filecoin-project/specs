@@ -1,0 +1,9 @@
+{{ define "main" }}
+<article class="markdown">
+  {{ .Content | replaceRE "href=\"([^.]+)\\.md\"" "href=\"../$1\"" | safeHTML }}
+</article>
+{{ end }}
+
+{{ define "toc" }}
+  {{ partial "docs/toc" . }}
+{{ end }}

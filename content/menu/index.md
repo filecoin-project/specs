@@ -6,6 +6,7 @@ headless: true
 * **Core**
   * [Data Structures]({{< relref "/docs/data-structures.md" >}})
   * Cryptography
+    * [Address]({{< relref "/docs/address.md" >}})
     * [Signatures]({{< relref "/docs/signatures.md" >}})
     * [Proofs]({{< relref "/docs/proofs.md" >}})
     * [Block Validation]({{< relref "/docs/validation.md" >}})

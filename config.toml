@@ -7,6 +7,8 @@ relativeURLs = true
 theme = "Book"
 pygmentsCodeFences = true
 pygmentsUseClasses = true
+enableGitInfo = true
+disableKinds = ["taxonomy", "taxonomyTerm"]
 
 [params]
 # (Optional, default true) Show or hide table of contents globally
@@ -35,7 +37,7 @@ BookRepo = "https://github.com/filecoin-project/specs"
 # Enable "Edit this page" links for 'doc' page type.
 # Disabled by default. Uncomment to enable. Requires 'BookRepo' param.
 # Path must point to 'content' directory of repo.
-BookEditPath = "edit/master/content"
+BookEditPath = "edit/master"
 
 # Configure the date format used on the pages
 # - In git information
