@@ -2,29 +2,15 @@
 
 This document serves as an entry point for understanding all of the data structures in filecoin.
 
-
 ## Address
 
 An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.
 
-```go
-type Address struct {
-
-	// 0: ID
-	// 1: SECP256K1 Public Key
-	// 2: Actor
-	// 3: BLS Public Key
-	protocol byte
-
-	// raw bytes containing the data associated with protocol
-	payload []byte
-}
-```
-To learn more, take a look at the [Address Spec](https://github.com/filecoin-project/specs/blob/master/address.md).
+To learn more, take a look at the [address spec](address.md).
 
 ## CID
 
-For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid). 
+For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid).
 
 CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
 
@@ -68,7 +54,7 @@ type Block struct {
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 	// TODO: should be the same type of merkletree-list thing that the messages are
 	MessageReceipts []MessageReceipt
-    
+
     // The block Timestamp is used to enforce a form of block delay by honest miners.
     // Unix time UTC timestamp stored as an unsigned integer
     Timestamp Timestamp
@@ -157,9 +143,9 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 
 ## HAMT
 
-{% hint style='working' %}
+{{% notice todo %}}
 **TODO**: link to spec for our CHAMP HAMT
-{% endhint %}
+{{% /notice %}}
 
 
 ## Signature
@@ -178,7 +164,7 @@ type Signature struct {
 | Key Type | Value |
 |-------|----------|
 |  Secp256k1 | 1 |
-| BLS12-381 ECDSA | 2 | 
+| BLS12-381 ECDSA | 2 |
 
 ### Serialization
 
@@ -331,8 +317,17 @@ Datastructures in Filecoin are encoded as compactly as is reasonable. At a high 
 
 For example, a message would be encoded as:
 
-```cbor
-tag<44>[msg.To, msg.From, msg.Nonce, msg.Value, msg.GasPrice, msg.GasLimit, msg.Method, msg.Params]
+```
+tag<44>[
+  msg.To,
+  msg.From,
+  msg.Nonce,
+  msg.Value,
+  msg.GasPrice,
+  msg.GasLimit,
+  msg.Method,
+  msg.Params
+]
 ```
 
 Each individual type should be encoded as specified:

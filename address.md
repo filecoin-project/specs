@@ -46,7 +46,6 @@ An example of a Filecoin address in golang:
 
 ```go
 type Address struct {
-
 	// 0: Mainnet
 	// 1: Testnet
 	Network byte

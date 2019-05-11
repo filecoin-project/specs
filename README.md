@@ -10,34 +10,24 @@ discussions.
 
 ### Viewing the spec
 
-*Recommended:* You can view the spec [here](https://filecoin-1.gitbook.io/spec/).
+*Recommended:* You can view the spec [here](https://filecoin-project.github.io/specs).
 
-You can also use gitbook tooling to view the spec locally.
+You can also view it locally by using [hugo](https://gohugo.io/).
 
-First, install `gitbook-cli` via npm then run the following to install all necessary plugins:
 ```
-gitbook install
-```
-
-Now you can have gitbook serve it to you (with live-reload) via:
-```
-gitbook serve
+> git submodule update --init --recursive
+> hugo serve
 ```
 
-Alternatively, you can use gitbook to print a pdf (or epub, or mobi) using:
-```
-gitbook pdf
-```
 
-(Note: on macOS using the pdf printer may require some extra installation, epub and mobi might require callibre to be installed, too)
-
-If you're just browsing on GitHub, start with [INTRO.md](INTRO.md) and the
-table of contents in [SUMMARY.md](SUMMARY.md). But really, we recommend using 
-the Gitbook output. It is much easier to read and use.
+If you're just browsing on GitHub, start with [INTRO.md](INTRO.md). But really, we recommend using
+the rendered output. It is much easier to read and use.
 
 ## Updates process for specs
 For info on how this spec changes, please see [the process doc](process.md).
 
 ## Owners/ Points of Contact
+
 - [@whyrusleeping](https://github.com/whyrusleeping)
+- [@dignifiedquire](https://github.com/dignifiedquire)
 - [@bvohaska](https://github.com/bvohaska)

@@ -1,0 +1,3 @@
+<div class="definition {{ .Get 0 }}" {{ if len .Params | eq 2 }} id="{{ .Get 1 }}" {{ end }}>
+  <b>Definition:</b> {{ .Inner | markdownify }}
+</div>
