@@ -5,7 +5,10 @@ daily: cover.jpg
 	@mkdir -p build
 	gitbook pdf . "build/filecoin-spec.$(now).pdf"
 
+publish:
+	./publish.sh
+
 cover.jpg:
 	cover/make-today-cover
 
-.PHONY: cover.jpg
+.PHONY: cover.jpg publish

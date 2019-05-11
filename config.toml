@@ -1,4 +1,4 @@
-baseURL = "http://example.org/"
+baseURL = "https://filecoin-project.github.io/specs/"
 languageCode = "en-us"
 title = "Filecoin Spec"
 
