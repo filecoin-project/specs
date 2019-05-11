@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.a2c4f2c7363d7e4899b90033b962e5b296ac9e565ec3f1283651eb747746487a.css">
+<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -64,6 +64,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="../../docs/data-structures/">Data Structures</a></li>
 <li>Cryptography</li>
+<li><a href="../../docs/address/">Address</a></li>
 <li><a href="../../docs/signatures/">Signatures</a></li>
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
@@ -138,6 +139,7 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
+  
 
 <h1 id="the-filecoin-storage-market">The Filecoin Storage Market</h1>
 
@@ -314,7 +316,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="c1">// payment setup.
 </span><span class="c1"></span>	<span class="nf">RedeemVoucher</span><span class="p">(</span><span class="nx">v</span> <span class="nx">Voucher</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">Proof</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
-<p>For details on the implementation of the payments system, see <a href="payments.md">the payments doc</a>.</p>
+<p>For details on the implementation of the payments system, see <a href="../payments">the payments doc</a>.</p>
 
 <h2 id="future-protocol-improvements">Future Protocol Improvements</h2>
 
@@ -331,14 +333,22 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>Storage time should likely be designated in terms of proving period. Where a proving period is the number of blocks in which every miner must submit a proof for their sectors. Not doing this makes accounting hard: &ldquo;when exactly did this sector fail?&rdquo;</li>
 </ul>
+
 </article>
 
       
-<div class="align-center book-git-footer justify-end">
+<div class="align-center book-git-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/filecoin-project/specs/commit/9dcf16da57ae5577304bbf442808d35563add0aa" title='Last modified May 11, 2019 by dignifiedquire' target="_blank" rel="noopener">
+      <img src="../../svg/code-merge.svg" alt="Changed" /> May 11, 2019
+    </a>
+  </div>
   
   
   <div>
-    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/storage-market.md" target="_blank" rel="noopener">
+    <a href="https://github.com/filecoin-project/specs/edit/master/storage-market.md" target="_blank" rel="noopener">
       <img src="../../svg/code-fork.svg" alt="Edit" /> Edit this page
     </a>
   </div>

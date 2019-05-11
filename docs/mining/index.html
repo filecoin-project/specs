@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.a2c4f2c7363d7e4899b90033b962e5b296ac9e565ec3f1283651eb747746487a.css">
+<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -64,6 +64,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="../../docs/data-structures/">Data Structures</a></li>
 <li>Cryptography</li>
+<li><a href="../../docs/address/">Address</a></li>
 <li><a href="../../docs/signatures/">Signatures</a></li>
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
@@ -138,6 +139,7 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
+  
 
 <h3 id="what-is-the-filecoin-mining-process">What is the Filecoin Mining Process</h3>
 
@@ -204,7 +206,7 @@ https://github.com/alex-shpak/hugo-book
 
 <ol>
 <li><strong>Standard Submission</strong>: A standard submission is one that makes it on-chain before the end of the proving period. The length of time it takes to compute the PoSts is set such that there is a grace period between then and the actual end of the proving period, so that the effects of network congestion on typical miner actions is minimized.</li>
-<li><strong>Penalized Submission</strong>: A penalized submission is one that makes it on-chain after the end of the proving period, but before the generation attack threshold. These submissions count as valid PoSt submissions, but the miner must pay a penalty for their late submission. (See &lsquo;<a href="faults.md">Faults</a>&rsquo; for more information)
+<li><strong>Penalized Submission</strong>: A penalized submission is one that makes it on-chain after the end of the proving period, but before the generation attack threshold. These submissions count as valid PoSt submissions, but the miner must pay a penalty for their late submission. (See &lsquo;<a href="../faults">Faults</a>&rsquo; for more information)
 
 <ul>
 <li>Note: In this case, the next PoSt should still be started at the beginning of the proving period, even if the current one is not yet complete. Miners must submit one PoSt per proving period.</li>
@@ -219,7 +221,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="faults">Faults</h3>
 
-<p>Faults are described in the <a href="faults.md">faults document</a>.</p>
+<p>Faults are described in the <a href="../faults">faults document</a>.</p>
 
 <h3 id="on-being-slashed-wip-needs-discussion">On Being Slashed (WIP, needs discussion)</h3>
 
@@ -237,7 +239,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="receiving-blocks">Receiving Blocks</h3>
 
-<p>When receiving blocks from the network (via <a href="data-propagation.md">block propagation</a>), a miner must do the following:</p>
+<p>When receiving blocks from the network (via <a href="../data-propagation">block propagation</a>), a miner must do the following:</p>
 
 <ol>
 <li>Check their validity (see <a href="#block-validation">below</a>).</li>
@@ -421,7 +423,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>An eligible miner can start by filling out <code>Parents</code>, <code>Tickets</code> and <code>ElectionProof</code> with values from the ticket checking process.</p>
 
-<p>Next, they compute the aggregate state of their selected parent blocks, the <code>ParentState</code>. This is done by taking the aggregate parent state of the blocks&rsquo; parent TipSet, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets &lsquo;virtual block&rsquo;. For more details on message execution and state transitions, see the <a href="state-machine.md">Filecoin state machine</a> document.</p>
+<p>Next, they compute the aggregate state of their selected parent blocks, the <code>ParentState</code>. This is done by taking the aggregate parent state of the blocks&rsquo; parent TipSet, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets &lsquo;virtual block&rsquo;. For more details on message execution and state transitions, see the <a href="../state-machine">Filecoin state machine</a> document.</p>
 
 <p>Once the miner has the aggregate <code>ParentState</code>, they must apply the mining reward. This is done by adding the correct amount to the miner owner&rsquo;s account balance in the state tree. See <a href="#block-rewards">block reward</a> for details.</p>
 
@@ -443,7 +445,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h4 id="block-broadcast">Block Broadcast</h4>
 
-<p>An eligible miner broadcasts the completed block to the network (via <a href="data-propagation.md">block propagation</a>), and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!</p>
+<p>An eligible miner broadcasts the completed block to the network (via <a href="../data-propagation">block propagation</a>), and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!</p>
 
 <h3 id="block-rewards">Block Rewards</h3>
 
@@ -484,14 +486,22 @@ HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2
 <li><strong>Sector Resealing</strong>: Miners should be able to &rsquo;re-seal&rsquo; sectors, to allow them to take a set of sectors with mostly expired pieces, and combine the not-yet-expired pieces into a single (or multiple) sectors.</li>
 <li><strong>Sector Transfer</strong>: Miners should be able to re-delegate the responsibility of storing data to another miner. This is tricky for many reasons, and will not be implemented in the initial release of Filecoin, but could provide interesting capabilities down the road.</li>
 </ul>
+
 </article>
 
       
-<div class="align-center book-git-footer justify-end">
+<div class="align-center book-git-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/filecoin-project/specs/commit/9dcf16da57ae5577304bbf442808d35563add0aa" title='Last modified May 11, 2019 by dignifiedquire' target="_blank" rel="noopener">
+      <img src="../../svg/code-merge.svg" alt="Changed" /> May 11, 2019
+    </a>
+  </div>
   
   
   <div>
-    <a href="https://github.com/filecoin-project/specs/edit/master/content/docs/mining.md" target="_blank" rel="noopener">
+    <a href="https://github.com/filecoin-project/specs/edit/master/mining.md" target="_blank" rel="noopener">
       <img src="../../svg/code-fork.svg" alt="Edit" /> Edit this page
     </a>
   </div>

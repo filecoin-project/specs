@@ -128,22 +128,13 @@
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/categories/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>https://filecoin-project.github.io/specs/docs/</loc>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://filecoin-project.github.io/specs/</loc>
-  </url>
-  
-  <url>
-    <loc>https://filecoin-project.github.io/specs/tags/</loc>
-    <priority>0</priority>
+    <lastmod>2019-05-11T15:33:30+01:00</lastmod>
   </url>
   
 </urlset>
