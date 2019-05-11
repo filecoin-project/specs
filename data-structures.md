@@ -380,7 +380,8 @@ The format can be expressed as the following [BNF](https://en.wikipedia.org/wiki
 
 ```
     <encoding> ::= <header> <blocks>
-      <header> ::= <bit>
+      <header> ::= <version> <bit>
+     <version> ::= "00"
       <blocks> ::= <block_single> | <block_short> | <block_long>
 <block_single> ::= "1"
  <block_short> ::= "01" <bit> <bit> <bit> <bit>
