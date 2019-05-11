@@ -20,8 +20,10 @@ A valid block:
 - the resulting state root after all messages are applied, must match the one in the block
 
 
-{% hint style='tip' %}
+{{% notice info %}}
 Once the block passes validation, it should be added to the local datastore, even in the case where we don't accept it right now. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching. Blocks a certain distance from the current chain height may be dropped (exact number TBD, but blocks that havent been included after several days may be purged).
+{{% /notice %}}
 
+{{% notice info %}}
 To make certain validation checks simpler, blocks should be indexed by height and by parent set. That way sets of blocks with a given height and common parents may be quickly queried. It may also be useful to compute and cache the resultant aggregate state of blocks in these sets, this saves extra state computation when checking which state root to start a block at when it has multiple parents.
-{% endhint %}
+{{% /notice %}}

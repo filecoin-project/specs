@@ -24,7 +24,7 @@ To learn more, take a look at the [Address Spec](https://github.com/filecoin-pro
 
 ## CID
 
-For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid). 
+For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid).
 
 CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
 
@@ -68,7 +68,7 @@ type Block struct {
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 	// TODO: should be the same type of merkletree-list thing that the messages are
 	MessageReceipts []MessageReceipt
-    
+
     // The block Timestamp is used to enforce a form of block delay by honest miners.
     // Unix time UTC timestamp stored as an unsigned integer
     Timestamp Timestamp
@@ -157,9 +157,9 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 
 ## HAMT
 
-{% hint style='working' %}
+{{% notice todo %}}
 **TODO**: link to spec for our CHAMP HAMT
-{% endhint %}
+{{% /notice %}}
 
 
 ## Signature
@@ -178,7 +178,7 @@ type Signature struct {
 | Key Type | Value |
 |-------|----------|
 |  Secp256k1 | 1 |
-| BLS12-381 ECDSA | 2 | 
+| BLS12-381 ECDSA | 2 |
 
 ### Serialization
 
