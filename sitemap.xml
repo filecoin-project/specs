@@ -3,146 +3,146 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://example.org/docs/actors/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/actors/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/address/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/address/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/bootstrap/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/bootstrap/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/client/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/client/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/data-propagation/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/data-propagation/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/data-structures/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/data-structures/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/definitions/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/definitions/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/drgporep-circuit/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/drgporep-circuit/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/expected-consensus/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/expected-consensus/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/faults/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/faults/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/local-storage/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/local-storage/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/mining/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/mining/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/network-protocols/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/network-protocols/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/operation/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/operation/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/payments/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/payments/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/process/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/process/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/proofs/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/proofs/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/retrieval-market/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/retrieval-market/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/signatures/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/signatures/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/state-machine/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/state-machine/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/storage-market/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/storage-market/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/style/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/style/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/sync/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/sync/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/validation/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/validation/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/zigzag-circuit/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/zigzag-circuit/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/categories/</loc>
+    <loc>https://filecoin-project.github.io/specs/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/docs/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://example.org/</loc>
+    <loc>https://filecoin-project.github.io/specs/</loc>
   </url>
   
   <url>
-    <loc>http://example.org/tags/</loc>
+    <loc>https://filecoin-project.github.io/specs/tags/</loc>
     <priority>0</priority>
   </url>
   
