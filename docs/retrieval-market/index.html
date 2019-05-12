@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -166,55 +166,55 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The v0 <code>retrieval market</code> will initially be implemented as two <code>libp2p</code> services. It will be request response based, where the client who is requesting a file sends a <code>retrieval deal proposal</code> to the miner. The miner chooses whether or not to accept it, sends their response which (if they accept the proposal) includes a <code>signed retrieval deal</code>, followed by the actual requested content, streamed as a series of bitswap block messages, using a pre-order traversal of the dag. Each block should use the <a href="https://github.com/ipfs/go-ipfs/blob/master/exchange/bitswap/message/message.go#L216">bitswap block message format</a>. This way, the client should be able to verify the data incrementally as it receives it. Once the client has received all the data, it should then send a payment channel SpendVoucher of the proposed amount to the miner. This protocol may be easily extended to include payments from the client to the miner every N blocks, but for now we omit that feature.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// Ref is the cid of the data to be retrieved
-</span><span class="c1"></span>	<span class="nx">Ref</span> <span class="nx">Cid</span>
+    <span class="c1">// Ref is the cid of the data to be retrieved
+</span><span class="c1"></span>    <span class="nx">Ref</span> <span class="nx">Cid</span>
 
-	<span class="c1">// Price is the total amount that the client is willing to pay for the
-</span><span class="c1"></span>	<span class="c1">// retrieval of the data
-</span><span class="c1"></span>	<span class="nx">Price</span> <span class="nx">TokenAmount</span>
+    <span class="c1">// Price is the total amount that the client is willing to pay for the
+</span><span class="c1"></span>    <span class="c1">// retrieval of the data
+</span><span class="c1"></span>    <span class="nx">Price</span> <span class="nx">TokenAmount</span>
 
-	<span class="c1">// Payment is a payment info from the client to the retrieval miner for the data
-</span><span class="c1"></span>	<span class="nx">Payment</span> <span class="nx">PaymentInfo</span>
+    <span class="c1">// Payment is a payment info from the client to the retrieval miner for the data
+</span><span class="c1"></span>    <span class="nx">Payment</span> <span class="nx">PaymentInfo</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ResponseStatus</span> <span class="kt">uint</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">Unset</span> <span class="p">=</span> <span class="nf">ResponseStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
-	<span class="nx">Accepted</span>
-	<span class="nx">Rejected</span>
-	<span class="nx">Error</span>
+    <span class="nx">Unset</span> <span class="p">=</span> <span class="nf">ResponseStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
+    <span class="nx">Accepted</span>
+    <span class="nx">Rejected</span>
+    <span class="nx">Error</span>
 <span class="p">)</span>
 
 <span class="kd">type</span> <span class="nx">RetDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Status</span>  <span class="nx">ResponseStatus</span>
-	<span class="nx">Message</span> <span class="kt">string</span>
+    <span class="nx">Status</span>  <span class="nx">ResponseStatus</span>
+    <span class="nx">Message</span> <span class="kt">string</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// Prefix is the cid prefix parameters for this block. It describes how to
-</span><span class="c1"></span>	<span class="c1">// hash the block to verify it matches the expected value.
-</span><span class="c1"></span>	<span class="nx">Prefix</span> <span class="nx">CidPrefix</span>
-	<span class="nx">Data</span>   <span class="p">[]</span><span class="kt">byte</span>
+    <span class="c1">// Prefix is the cid prefix parameters for this block. It describes how to
+</span><span class="c1"></span>    <span class="c1">// hash the block to verify it matches the expected value.
+</span><span class="c1"></span>    <span class="nx">Prefix</span> <span class="nx">CidPrefix</span>
+    <span class="nx">Data</span>   <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span></code></pre></div>
 <p><code>Retrieval miners</code> should also support a query service that allows clients to request pricing information from a miner.</p>
 
 <p>The query should include the CID of the piece that the client is interested in retrieving. The response contains whether or not the miner will serve that data, the price they will accept for it.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetQuery</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Piece</span> <span class="nx">Cid</span>
+    <span class="nx">Piece</span> <span class="nx">Cid</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">RetQueryResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Status</span>   <span class="nx">RetQueryStatus</span>
-	<span class="nx">MinPrice</span> <span class="nx">TokenAmount</span>
+    <span class="nx">Status</span>   <span class="nx">RetQueryStatus</span>
+    <span class="nx">MinPrice</span> <span class="nx">TokenAmount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">RetQueryStatus</span> <span class="kt">uint</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">Unset</span> <span class="p">=</span> <span class="nf">RetQueryStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
-	<span class="nx">OK</span>
-	<span class="nx">PieceUnavailable</span>
+    <span class="nx">Unset</span> <span class="p">=</span> <span class="nf">RetQueryStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
+    <span class="nx">OK</span>
+    <span class="nx">PieceUnavailable</span>
 <span class="p">)</span></code></pre></div>
 <h2 id="chain-based-content-routing">Chain Based Content Routing</h2>
 
@@ -222,7 +222,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The interface should match the exist libp2p content routing interface:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ChainContentRouting</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="nf">FindProvidersAsync</span><span class="p">(</span><span class="nx">ref</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="nx">pstore</span><span class="p">.</span><span class="nx">PeerInfo</span>
+    <span class="nf">FindProvidersAsync</span><span class="p">(</span><span class="nx">ref</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="nx">pstore</span><span class="p">.</span><span class="nx">PeerInfo</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="retrieval-market-commands">Retrieval Market Commands</h2>
 

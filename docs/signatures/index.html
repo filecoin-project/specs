@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -205,46 +205,46 @@ https://github.com/alex-shpak/hugo-book
 <p>Note: <code>Message</code> is used here as the object being signed, but this interface should also work for other things that need to be signed.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">interface</span> <span class="p">{</span>
 
-	<span class="c1">// Sign generates a proof that miner `M` generate message `m`
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="c1">// Out:
-</span><span class="c1"></span>	<span class="c1">//    sig - a series of bytes representing a signature usually `r`|`s`
-</span><span class="c1"></span>	<span class="c1">//    err - a standard error message indicating any process issues
-</span><span class="c1"></span>	<span class="c1">// In:
-</span><span class="c1"></span>	<span class="c1">//    m - a series of bytes representing a message to be signed
-</span><span class="c1"></span>	<span class="c1">//    sk - a private key which cryptographically links `M` to `sig`
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="nf">Sign</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Message</span><span class="p">,</span> <span class="nx">sk</span> <span class="nx">PrivateKey</span><span class="p">)</span> <span class="p">(</span><span class="nx">sig</span> <span class="nx">SignatureBytes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="c1">// Sign generates a proof that miner `M` generate message `m`
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// Out:
+</span><span class="c1"></span>    <span class="c1">//    sig - a series of bytes representing a signature usually `r`|`s`
+</span><span class="c1"></span>    <span class="c1">//    err - a standard error message indicating any process issues
+</span><span class="c1"></span>    <span class="c1">// In:
+</span><span class="c1"></span>    <span class="c1">//    m - a series of bytes representing a message to be signed
+</span><span class="c1"></span>    <span class="c1">//    sk - a private key which cryptographically links `M` to `sig`
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="nf">Sign</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Message</span><span class="p">,</span> <span class="nx">sk</span> <span class="nx">PrivateKey</span><span class="p">)</span> <span class="p">(</span><span class="nx">sig</span> <span class="nx">SignatureBytes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
 
-	<span class="c1">// Verify validates the statement: only `M` could have generated `sig`
-</span><span class="c1"></span>	<span class="c1">// given the validator has a message `m`, a signature `sig`, and a
-</span><span class="c1"></span>	<span class="c1">// public key `pk`.
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="c1">// Out:
-</span><span class="c1"></span>	<span class="c1">//    valid - a boolean value indicating the signature is valid
-</span><span class="c1"></span>	<span class="c1">//    err - a standard error message indicating any process issues
-</span><span class="c1"></span>	<span class="c1">// In:
-</span><span class="c1"></span>	<span class="c1">//    m - a series of bytes representing the signed message
-</span><span class="c1"></span>	<span class="c1">//    pk - the public key belonging to the signer `M`
-</span><span class="c1"></span>	<span class="c1">//    sig - a series of bytes representing a signature usually `r`|`s`
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="nf">Verify</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Messgage</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">sig</span> <span class="nx">SignatureBytes</span><span class="p">)</span> <span class="p">(</span><span class="nx">valid</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="c1">// Verify validates the statement: only `M` could have generated `sig`
+</span><span class="c1"></span>    <span class="c1">// given the validator has a message `m`, a signature `sig`, and a
+</span><span class="c1"></span>    <span class="c1">// public key `pk`.
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// Out:
+</span><span class="c1"></span>    <span class="c1">//    valid - a boolean value indicating the signature is valid
+</span><span class="c1"></span>    <span class="c1">//    err - a standard error message indicating any process issues
+</span><span class="c1"></span>    <span class="c1">// In:
+</span><span class="c1"></span>    <span class="c1">//    m - a series of bytes representing the signed message
+</span><span class="c1"></span>    <span class="c1">//    pk - the public key belonging to the signer `M`
+</span><span class="c1"></span>    <span class="c1">//    sig - a series of bytes representing a signature usually `r`|`s`
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="nf">Verify</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Messgage</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">sig</span> <span class="nx">SignatureBytes</span><span class="p">)</span> <span class="p">(</span><span class="nx">valid</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
 
-	<span class="c1">// Recover, as its name implies, recovers a public key associated with a
-</span><span class="c1"></span>	<span class="c1">// particular signature. In the case of ECDSA signatures, this function can
-</span><span class="c1"></span>	<span class="c1">// be fulfilled via the &#39;ECRecover&#39; method. If a different signature scheme
-</span><span class="c1"></span>	<span class="c1">// is used, then some other mechanism of &#39;recovering&#39; a message authors
-</span><span class="c1"></span>	<span class="c1">// public key must be provided.
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="c1">// Out:
-</span><span class="c1"></span>	<span class="c1">//    pk - the public key associated with `M` who signed `m`
-</span><span class="c1"></span>	<span class="c1">//    err - a standard error message indicating any process issues
-</span><span class="c1"></span>	<span class="c1">//    **
-</span><span class="c1"></span>	<span class="c1">// In:
-</span><span class="c1"></span>	<span class="c1">//    m - a series of bytes representing the signed message
-</span><span class="c1"></span>	<span class="c1">//    sig - a series of bytes representing a signature usually `r`|`s`
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="nf">Recover</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Message</span><span class="p">,</span> <span class="nx">sig</span> <span class="nx">SignatureBytes</span><span class="p">)</span> <span class="p">(</span><span class="nx">pk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="c1">// Recover, as its name implies, recovers a public key associated with a
+</span><span class="c1"></span>    <span class="c1">// particular signature. In the case of ECDSA signatures, this function can
+</span><span class="c1"></span>    <span class="c1">// be fulfilled via the &#39;ECRecover&#39; method. If a different signature scheme
+</span><span class="c1"></span>    <span class="c1">// is used, then some other mechanism of &#39;recovering&#39; a message authors
+</span><span class="c1"></span>    <span class="c1">// public key must be provided.
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// Out:
+</span><span class="c1"></span>    <span class="c1">//    pk - the public key associated with `M` who signed `m`
+</span><span class="c1"></span>    <span class="c1">//    err - a standard error message indicating any process issues
+</span><span class="c1"></span>    <span class="c1">//    **
+</span><span class="c1"></span>    <span class="c1">// In:
+</span><span class="c1"></span>    <span class="c1">//    m - a series of bytes representing the signed message
+</span><span class="c1"></span>    <span class="c1">//    sig - a series of bytes representing a signature usually `r`|`s`
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="nf">Recover</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Message</span><span class="p">,</span> <span class="nx">sig</span> <span class="nx">SignatureBytes</span><span class="p">)</span> <span class="p">(</span><span class="nx">pk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <h1 id="selected-signature-scheme">Selected Signature Scheme</h1>
 

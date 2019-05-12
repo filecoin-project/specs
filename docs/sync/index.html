@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -159,20 +159,20 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="interface">Interface</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Syncer</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// The heaviest known TipSet in the network.
-</span><span class="c1"></span>	<span class="nx">head</span> <span class="nx">TipSet</span>
+    <span class="c1">// The heaviest known TipSet in the network.
+</span><span class="c1"></span>    <span class="nx">head</span> <span class="nx">TipSet</span>
 
-	<span class="c1">// The interface for accessing and putting TipSets into local storage
-</span><span class="c1"></span>	<span class="nx">store</span> <span class="nx">ChainStore</span>
+    <span class="c1">// The interface for accessing and putting TipSets into local storage
+</span><span class="c1"></span>    <span class="nx">store</span> <span class="nx">ChainStore</span>
 
-	<span class="c1">// The known genesis TipSet
-</span><span class="c1"></span>	<span class="nx">genesis</span> <span class="nx">TipSet</span>
+    <span class="c1">// The known genesis TipSet
+</span><span class="c1"></span>    <span class="nx">genesis</span> <span class="nx">TipSet</span>
 
-	<span class="c1">// the current mode the syncer is in
-</span><span class="c1"></span>	<span class="nx">syncMode</span> <span class="nx">SyncMode</span>
+    <span class="c1">// the current mode the syncer is in
+</span><span class="c1"></span>    <span class="nx">syncMode</span> <span class="nx">SyncMode</span>
 
-	<span class="c1">// TipSets known to be invalid
-</span><span class="c1"></span>	<span class="nx">bad</span> <span class="nx">BadTipSetCache</span>
+    <span class="c1">// TipSets known to be invalid
+</span><span class="c1"></span>    <span class="nx">bad</span> <span class="nx">BadTipSetCache</span>
     
   <span class="c1">// handle to the block sync service
 </span><span class="c1"></span>  <span class="nx">bsync</span> <span class="nx">BlockSync</span>
@@ -197,13 +197,13 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// This should be called when connecting to new peers, and additionally
 </span><span class="c1">// when receiving new blocks from the network
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">syncer</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">InformNewHead</span><span class="p">(</span><span class="nx">from</span> <span class="nx">PeerID</span><span class="p">,</span> <span class="nx">head</span> <span class="nx">TipSet</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">switch</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">syncMode</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">Bootstrap</span><span class="p">:</span>
+    <span class="k">switch</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">syncMode</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">Bootstrap</span><span class="p">:</span>
     <span class="c1">// InformNewHead will only get called during PeerSetExpansion during bootstrapping
-</span><span class="c1"></span>		<span class="k">go</span> <span class="nf">SyncBootstrap</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">CaughtUp</span><span class="p">:</span>
-		<span class="k">go</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">SyncCaughtUp</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span>
-	<span class="p">}</span>
+</span><span class="c1"></span>        <span class="k">go</span> <span class="nf">SyncBootstrap</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">CaughtUp</span><span class="p">:</span>
+        <span class="k">go</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">SyncCaughtUp</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="c1">// SyncBootstrap is used to synchronise your chain when first joining
@@ -216,13 +216,13 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>        <span class="k">return</span>
     <span class="p">}</span>
   
-  	<span class="nx">syncPeers</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">peerSet</span>
-  	<span class="nx">syncHeads</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">peerHeads</span>
-  	<span class="k">if</span> <span class="p">(!</span><span class="nx">expanding</span><span class="p">)</span> <span class="p">{</span>
-    		<span class="nx">syncPeers</span> <span class="p">=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">trustedPeers</span>
-      	<span class="nx">syncHeads</span> <span class="p">=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">trustedHeads</span>
-  	<span class="p">}</span>
-  	<span class="c1">// Will now get heaviest head from all the heads from our Peerset
+      <span class="nx">syncPeers</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">peerSet</span>
+      <span class="nx">syncHeads</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">peerHeads</span>
+      <span class="k">if</span> <span class="p">(!</span><span class="nx">expanding</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">syncPeers</span> <span class="p">=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">trustedPeers</span>
+          <span class="nx">syncHeads</span> <span class="p">=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">trustedHeads</span>
+      <span class="p">}</span>
+      <span class="c1">// Will now get heaviest head from all the heads from our Peerset
 </span><span class="c1"></span>    <span class="nx">selectedHead</span> <span class="o">:=</span> <span class="nf">selectHead</span><span class="p">(</span><span class="nx">syncer</span><span class="p">.</span><span class="nx">peerHeads</span><span class="p">)</span>
     
     <span class="nx">cur</span> <span class="o">:=</span> <span class="nx">selectedHead</span>
@@ -244,11 +244,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>        <span class="nf">FetchMessages</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
     <span class="p">})</span>
   
-  	<span class="c1">// Ensure that the selectedHead has the right genesis block
-</span><span class="c1"></span>  	<span class="c1">// Should be checked for trusted nodes in InitialConnect() and for
-</span><span class="c1"></span>  	<span class="c1">// all others in addPeerToSet(), but we leave details up to impl.
-</span><span class="c1"></span>  	<span class="nx">selectedGenesis</span> <span class="o">:=</span> <span class="nx">blockSet</span><span class="p">.</span><span class="nf">GetByHeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	  <span class="nf">assert</span><span class="p">(</span><span class="nx">selectedGenesis</span> <span class="o">==</span> <span class="nx">genesis</span><span class="p">,</span> <span class="s">&#34;State failure: trying to sync to wrong chain&#34;</span><span class="p">)</span>
+      <span class="c1">// Ensure that the selectedHead has the right genesis block
+</span><span class="c1"></span>      <span class="c1">// Should be checked for trusted nodes in InitialConnect() and for
+</span><span class="c1"></span>      <span class="c1">// all others in addPeerToSet(), but we leave details up to impl.
+</span><span class="c1"></span>      <span class="nx">selectedGenesis</span> <span class="o">:=</span> <span class="nx">blockSet</span><span class="p">.</span><span class="nf">GetByHeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+      <span class="nf">assert</span><span class="p">(</span><span class="nx">selectedGenesis</span> <span class="o">==</span> <span class="nx">genesis</span><span class="p">,</span> <span class="s">&#34;State failure: trying to sync to wrong chain&#34;</span><span class="p">)</span>
     
     <span class="c1">// Now, to validate some state transitions
 </span><span class="c1"></span>    <span class="nx">base</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">genesis</span>
@@ -282,8 +282,8 @@ https://github.com/alex-shpak/hugo-book
         
         <span class="nx">nca</span> <span class="o">:=</span> <span class="nf">NearestCommonAncestor</span><span class="p">(</span><span class="nx">cur</span><span class="p">,</span> <span class="nx">sel</span><span class="p">)</span>
         <span class="k">if</span> <span class="nx">sel</span><span class="p">.</span><span class="nf">Height</span><span class="p">()</span> <span class="o">-</span> <span class="nx">nca</span><span class="p">.</span><span class="nf">Height</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">ForkLengthThreshold</span> <span class="p">{</span>
-        	<span class="c1">// TODO: handle this better than refusing to sync
-</span><span class="c1"></span>        	<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Conflict exists in heads set&#34;</span><span class="p">)</span>
+            <span class="c1">// TODO: handle this better than refusing to sync
+</span><span class="c1"></span>            <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Conflict exists in heads set&#34;</span><span class="p">)</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="nx">cur</span><span class="p">.</span><span class="nf">Weight</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">sel</span><span class="p">.</span><span class="nf">Weight</span><span class="p">()</span> <span class="p">{</span>
@@ -296,49 +296,49 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// SyncCaughtUp is used to stay in sync once caught up to
 </span><span class="c1">// the rest of the network.
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">syncer</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">SyncCaughtUp</span><span class="p">(</span><span class="nx">maybeHead</span> <span class="nx">TipSet</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
-	<span class="nx">chain</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">collectChainCaughtUp</span><span class="p">(</span><span class="nx">maybeHead</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">err</span>
-	<span class="p">}</span>
+    <span class="nx">chain</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">collectChainCaughtUp</span><span class="p">(</span><span class="nx">maybeHead</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">err</span>
+    <span class="p">}</span>
 
-	<span class="c1">// possibleTs enumerates possible tipsets that are the union
-</span><span class="c1"></span>	<span class="c1">// of tipsets from the chain and the store
-</span><span class="c1"></span>	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">ts</span> <span class="o">:=</span> <span class="k">range</span> <span class="nf">possibleTs</span><span class="p">(</span><span class="nx">chain</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">consensus</span><span class="p">.</span><span class="nf">Validate</span><span class="p">(</span><span class="nx">ts</span><span class="p">,</span> <span class="nx">store</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="nx">err</span>
-		<span class="p">}</span>
-		<span class="nx">syncer</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nf">PutTipSet</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">consenus</span><span class="p">.</span><span class="nf">Weight</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">consensus</span><span class="p">.</span><span class="nf">Weight</span><span class="p">(</span><span class="nx">head</span><span class="p">)</span> <span class="p">{</span>
-			<span class="nx">syncer</span><span class="p">.</span><span class="nx">head</span> <span class="p">=</span> <span class="nx">ts</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="kc">nil</span>
+    <span class="c1">// possibleTs enumerates possible tipsets that are the union
+</span><span class="c1"></span>    <span class="c1">// of tipsets from the chain and the store
+</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">ts</span> <span class="o">:=</span> <span class="k">range</span> <span class="nf">possibleTs</span><span class="p">(</span><span class="nx">chain</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">consensus</span><span class="p">.</span><span class="nf">Validate</span><span class="p">(</span><span class="nx">ts</span><span class="p">,</span> <span class="nx">store</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">err</span>
+        <span class="p">}</span>
+        <span class="nx">syncer</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nf">PutTipSet</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nx">consenus</span><span class="p">.</span><span class="nf">Weight</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">consensus</span><span class="p">.</span><span class="nf">Weight</span><span class="p">(</span><span class="nx">head</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">syncer</span><span class="p">.</span><span class="nx">head</span> <span class="p">=</span> <span class="nx">ts</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">syncer</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">collectChainCaughtUp</span><span class="p">(</span><span class="nx">maybeHead</span> <span class="nx">TipSet</span><span class="p">)</span> <span class="p">(</span><span class="nx">Chain</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// fetch TipSet and messages via bitswap
-</span><span class="c1"></span>	<span class="nx">ts</span> <span class="o">:=</span> <span class="nf">tipsetFromCidOverNet</span><span class="p">(</span><span class="nx">newHead</span><span class="p">)</span> 
+    <span class="c1">// fetch TipSet and messages via bitswap
+</span><span class="c1"></span>    <span class="nx">ts</span> <span class="o">:=</span> <span class="nf">tipsetFromCidOverNet</span><span class="p">(</span><span class="nx">newHead</span><span class="p">)</span> 
 
-	<span class="kd">var</span> <span class="nx">chain</span> <span class="nx">Chain</span>
-	<span class="k">for</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="p">!</span><span class="nx">consensus</span><span class="p">.</span><span class="nf">Punctual</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">{</span>
-			<span class="nx">syncer</span><span class="p">.</span><span class="nx">bad</span><span class="p">.</span><span class="nf">InvalidateChain</span><span class="p">(</span><span class="nx">chain</span><span class="p">)</span>
-			<span class="nx">syncer</span><span class="p">.</span><span class="nx">bad</span><span class="p">.</span><span class="nf">InvalidateTipSet</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span>
-			<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;TipSet forks too far back from head&#34;</span><span class="p">)</span>
-		<span class="p">}</span>
+    <span class="kd">var</span> <span class="nx">chain</span> <span class="nx">Chain</span>
+    <span class="k">for</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">!</span><span class="nx">consensus</span><span class="p">.</span><span class="nf">Punctual</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">syncer</span><span class="p">.</span><span class="nx">bad</span><span class="p">.</span><span class="nf">InvalidateChain</span><span class="p">(</span><span class="nx">chain</span><span class="p">)</span>
+            <span class="nx">syncer</span><span class="p">.</span><span class="nx">bad</span><span class="p">.</span><span class="nf">InvalidateTipSet</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;TipSet forks too far back from head&#34;</span><span class="p">)</span>
+        <span class="p">}</span>
 
-		<span class="nx">chain</span><span class="p">.</span><span class="nf">InsertFront</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span>
+        <span class="nx">chain</span><span class="p">.</span><span class="nf">InsertFront</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span>
 
-		<span class="k">if</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">{</span> 
-			<span class="c1">// Store has record of this TipSet.
-</span><span class="c1"></span>			<span class="k">return</span> <span class="nx">chain</span><span class="p">,</span> <span class="kc">nil</span>
-		<span class="p">}</span>
-		<span class="nx">parent</span> <span class="o">:=</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">ParentCid</span><span class="p">()</span>
-		<span class="nx">ts</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nf">tipsetFromCidOverNet</span><span class="p">(</span><span class="nx">parent</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
+        <span class="k">if</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">{</span> 
+            <span class="c1">// Store has record of this TipSet.
+</span><span class="c1"></span>            <span class="k">return</span> <span class="nx">chain</span><span class="p">,</span> <span class="kc">nil</span>
+        <span class="p">}</span>
+        <span class="nx">parent</span> <span class="o">:=</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">ParentCid</span><span class="p">()</span>
+        <span class="nx">ts</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nf">tipsetFromCidOverNet</span><span class="p">(</span><span class="nx">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="syncing-mode">Syncing Mode</h2>
 
@@ -366,24 +366,24 @@ https://github.com/alex-shpak/hugo-book
     <span class="nb">delete</span><span class="p">(</span><span class="nx">syncer</span><span class="p">.</span><span class="nx">PeerSet</span><span class="p">,</span> <span class="nx">peer</span><span class="p">)</span>
     <span class="nb">delete</span><span class="p">(</span><span class="nx">syncer</span><span class="p">.</span><span class="nx">PeerHeads</span><span class="p">,</span> <span class="nx">peer</span><span class="p">)</span>
             
-  	<span class="nx">newPeer</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">getRandomPeer</span><span class="p">()</span>
-  	<span class="c1">// addPeerToSet will validate this peer (i.e. check it has right genesis, etc.)
-</span><span class="c1"></span>  	<span class="nx">while</span> <span class="p">!</span><span class="nx">syncer</span><span class="p">.</span><span class="nf">addPeerToSet</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">newPeer</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">getRandomPeer</span><span class="p">()</span>
+      <span class="c1">// addPeerToSet will validate this peer (i.e. check it has right genesis, etc.)
+</span><span class="c1"></span>      <span class="nx">while</span> <span class="p">!</span><span class="nx">syncer</span><span class="p">.</span><span class="nf">addPeerToSet</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">newPeer</span> <span class="p">=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">getRandomPeer</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">ownID</span><span class="p">)</span>
-  	<span class="p">}</span>
+      <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">syncer</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">getRandomPeer</span><span class="p">(</span><span class="nx">from</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="nx">newPeer</span> <span class="nx">PeerID</span> <span class="p">{</span>
-  	<span class="nx">wantedPeer</span> <span class="o">:=</span> <span class="nf">generateRandomNodeID</span><span class="p">()</span>
+      <span class="nx">wantedPeer</span> <span class="o">:=</span> <span class="nf">generateRandomNodeID</span><span class="p">()</span>
     <span class="c1">// libp2p&#39;s GetClosestPeers gets back k nearest peers, ordered
 </span><span class="c1"></span>    <span class="nx">peers</span> <span class="o">:=</span> <span class="nx">dht</span><span class="p">.</span><span class="nf">GetClosestPeers</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">wantedPeer</span><span class="p">)</span>
-	  <span class="c1">// We only use the nearest to get a good random peer
+      <span class="c1">// We only use the nearest to get a good random peer
 </span><span class="c1"></span>    <span class="nx">newPeer</span> <span class="o">:=</span> <span class="nx">peers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-		<span class="k">return</span> <span class="nx">newPeer</span>
+        <span class="k">return</span> <span class="nx">newPeer</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">syncer</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">addPeerToSet</span><span class="p">(</span><span class="nx">newPeer</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-  	<span class="c1">// verify new peer to check whether to include in peerSet
+      <span class="c1">// verify new peer to check whether to include in peerSet
 </span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">s</span><span class="p">.</span><span class="nx">peerSet</span><span class="p">.</span><span class="nf">contains</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">peerChain</span> <span class="o">:=</span> <span class="nf">sayHello</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span>
       

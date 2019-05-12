@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -162,38 +162,38 @@ https://github.com/alex-shpak/hugo-book
 <p>A block represents an individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and some notion of a &lsquo;weight&rsquo; for deciding which block is the &lsquo;best&rsquo;.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Block is a block in the blockchain.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// Miner is the address of the miner actor that mined this block.
-</span><span class="c1"></span>	<span class="nx">Miner</span> <span class="nx">Address</span>
+    <span class="c1">// Miner is the address of the miner actor that mined this block.
+</span><span class="c1"></span>    <span class="nx">Miner</span> <span class="nx">Address</span>
 
-	<span class="c1">// Tickets are the winning ticket that were submitted with this block.
-</span><span class="c1"></span>	<span class="nx">Tickets</span> <span class="p">[]</span><span class="nx">Ticket</span>
+    <span class="c1">// Tickets are the winning ticket that were submitted with this block.
+</span><span class="c1"></span>    <span class="nx">Tickets</span> <span class="p">[]</span><span class="nx">Ticket</span>
 
-	<span class="c1">// ElectionProof is a signature over the final ticket that proves this miner
-</span><span class="c1"></span>	<span class="c1">// is the leader at this round
-</span><span class="c1"></span>	<span class="nx">ElectionProof</span> <span class="nx">Signature</span>
+    <span class="c1">// ElectionProof is a signature over the final ticket that proves this miner
+</span><span class="c1"></span>    <span class="c1">// is the leader at this round
+</span><span class="c1"></span>    <span class="nx">ElectionProof</span> <span class="nx">Signature</span>
 
-	<span class="c1">// Parents is the set of parents this block was based on. Typically one,
-</span><span class="c1"></span>	<span class="c1">// but can be several in the case where there were multiple winning ticket-
-</span><span class="c1"></span>	<span class="c1">// holders for a round.
-</span><span class="c1"></span>	<span class="nx">Parents</span> <span class="p">[]</span><span class="nx">Cid</span>
+    <span class="c1">// Parents is the set of parents this block was based on. Typically one,
+</span><span class="c1"></span>    <span class="c1">// but can be several in the case where there were multiple winning ticket-
+</span><span class="c1"></span>    <span class="c1">// holders for a round.
+</span><span class="c1"></span>    <span class="nx">Parents</span> <span class="p">[]</span><span class="nx">Cid</span>
 
-	<span class="c1">// ParentWeight is the aggregate chain weight of the parent set.
-</span><span class="c1"></span>	<span class="nx">ParentWeight</span> <span class="nx">Integer</span>
+    <span class="c1">// ParentWeight is the aggregate chain weight of the parent set.
+</span><span class="c1"></span>    <span class="nx">ParentWeight</span> <span class="nx">Integer</span>
 
-	<span class="c1">// Height is the chain height of this block.
-</span><span class="c1"></span>	<span class="nx">Height</span> <span class="nx">Uint64</span>
+    <span class="c1">// Height is the chain height of this block.
+</span><span class="c1"></span>    <span class="nx">Height</span> <span class="nx">Uint64</span>
 
-	<span class="c1">// StateRoot is a cid pointer to the state tree after application of the
-</span><span class="c1"></span>	<span class="c1">// transactions state transitions.
-</span><span class="c1"></span>	<span class="nx">StateRoot</span> <span class="nx">Cid</span>
+    <span class="c1">// StateRoot is a cid pointer to the state tree after application of the
+</span><span class="c1"></span>    <span class="c1">// transactions state transitions.
+</span><span class="c1"></span>    <span class="nx">StateRoot</span> <span class="nx">Cid</span>
 
-	<span class="c1">// Messages is the set of messages included in this block
-</span><span class="c1"></span>	<span class="c1">// TODO: should be a merkletree-ish thing
-</span><span class="c1"></span>	<span class="nx">Messages</span> <span class="p">[]</span><span class="nx">SignedMessage</span>
+    <span class="c1">// Messages is the set of messages included in this block
+</span><span class="c1"></span>    <span class="c1">// TODO: should be a merkletree-ish thing
+</span><span class="c1"></span>    <span class="nx">Messages</span> <span class="p">[]</span><span class="nx">SignedMessage</span>
 
-	<span class="c1">// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-</span><span class="c1"></span>	<span class="c1">// TODO: should be the same type of merkletree-list thing that the messages are
-</span><span class="c1"></span>	<span class="nx">MessageReceipts</span> <span class="p">[]</span><span class="nx">MessageReceipt</span>
+    <span class="c1">// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
+</span><span class="c1"></span>    <span class="c1">// TODO: should be the same type of merkletree-list thing that the messages are
+</span><span class="c1"></span>    <span class="nx">MessageReceipts</span> <span class="p">[]</span><span class="nx">MessageReceipt</span>
 
     <span class="c1">// The block Timestamp is used to enforce a form of block delay by honest miners.
 </span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp stored as an unsigned integer
@@ -201,21 +201,21 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <h2 id="message">Message</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Message</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">To</span>   <span class="nx">Address</span>
-	<span class="nx">From</span> <span class="nx">Address</span>
+    <span class="nx">To</span>   <span class="nx">Address</span>
+    <span class="nx">From</span> <span class="nx">Address</span>
 
-	<span class="c1">// When receiving a message from a user account the nonce in
-</span><span class="c1"></span>	<span class="c1">// the message must match the expected nonce in the from actor.
-</span><span class="c1"></span>	<span class="c1">// This prevents replay attacks.
-</span><span class="c1"></span>	<span class="nx">Nonce</span> <span class="nx">Uint64</span>
+    <span class="c1">// When receiving a message from a user account the nonce in
+</span><span class="c1"></span>    <span class="c1">// the message must match the expected nonce in the from actor.
+</span><span class="c1"></span>    <span class="c1">// This prevents replay attacks.
+</span><span class="c1"></span>    <span class="nx">Nonce</span> <span class="nx">Uint64</span>
 
-	<span class="nx">Value</span> <span class="nx">BigInteger</span>
+    <span class="nx">Value</span> <span class="nx">BigInteger</span>
 
-	<span class="nx">GasPrice</span> <span class="nx">Integer</span>
-	<span class="nx">GasLimit</span> <span class="nx">Integer</span>
+    <span class="nx">GasPrice</span> <span class="nx">Integer</span>
+    <span class="nx">GasLimit</span> <span class="nx">Integer</span>
 
-	<span class="nx">Method</span> <span class="kt">uint64</span>
-	<span class="nx">Params</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="nx">Method</span> <span class="kt">uint64</span>
+    <span class="nx">Params</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="parameter-encoding">Parameter Encoding</h3>
 
@@ -226,18 +226,18 @@ https://github.com/alex-shpak/hugo-book
 
 <p>A signed message is a wrapper type over the base message.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Message</span>   <span class="nx">Message</span>
-	<span class="nx">Signature</span> <span class="nx">Signature</span>
+    <span class="nx">Message</span>   <span class="nx">Message</span>
+    <span class="nx">Signature</span> <span class="nx">Signature</span>
 <span class="p">}</span></code></pre></div>
 <p>The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the <a href="../signatures">signatures spec</a>.</p>
 
 <h2 id="message-receipt">Message Receipt</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">ExitCode</span> <span class="kt">uint8</span>
+    <span class="nx">ExitCode</span> <span class="kt">uint8</span>
 
-	<span class="nx">Return</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="nx">Return</span> <span class="p">[]</span><span class="kt">byte</span>
 
-	<span class="nx">GasUsed</span> <span class="nx">Integer</span>
+    <span class="nx">GasUsed</span> <span class="nx">Integer</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="serialization">Serialization</h3>
 
@@ -245,17 +245,17 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="actor">Actor</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Actor</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// Code is a pointer to the code object for this actor
-</span><span class="c1"></span>	<span class="nx">Code</span> <span class="nx">Cid</span>
+    <span class="c1">// Code is a pointer to the code object for this actor
+</span><span class="c1"></span>    <span class="nx">Code</span> <span class="nx">Cid</span>
 
-	<span class="c1">// Head is a pointer to the root of this actors state
-</span><span class="c1"></span>	<span class="nx">Head</span> <span class="nx">Cid</span>
+    <span class="c1">// Head is a pointer to the root of this actors state
+</span><span class="c1"></span>    <span class="nx">Head</span> <span class="nx">Cid</span>
 
-	<span class="c1">// Nonce is a counter of the number of messages this actor has sent
-</span><span class="c1"></span>	<span class="nx">Nonce</span> <span class="nx">Uint64</span>
+    <span class="c1">// Nonce is a counter of the number of messages this actor has sent
+</span><span class="c1"></span>    <span class="nx">Nonce</span> <span class="nx">Uint64</span>
 
-	<span class="c1">// Balance is this actors current balance of filecoin
-</span><span class="c1"></span>	<span class="nx">Balance</span> <span class="nx">BigInteger</span>
+    <span class="c1">// Balance is this actors current balance of filecoin
+</span><span class="c1"></span>    <span class="nx">Balance</span> <span class="nx">BigInteger</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="state-tree">State Tree</h2>
 
@@ -269,8 +269,8 @@ https://github.com/alex-shpak/hugo-book
 
 <p>All signatures in Filecoin come with a type that signifies which key type was used to create the signature.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Type</span> <span class="kt">int</span>
-	<span class="nx">Data</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="nx">Type</span> <span class="kt">int</span>
+    <span class="nx">Data</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="type-values"><code>Type</code> Values</h3>
 

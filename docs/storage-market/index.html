@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -159,35 +159,35 @@ https://github.com/alex-shpak/hugo-book
 
 <p>This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor. For more information about Actors, see TODO.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageMarket</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// CreateStorageMiner registers a new storage miner with the given public key and a
-</span><span class="c1"></span>	<span class="c1">// pledge of the given size. The miners collateral is set by the value in the message.
-</span><span class="c1"></span>	<span class="c1">// The public key must match the private key used to sign off on blocks created
-</span><span class="c1"></span>	<span class="c1">// by this miner. This key is the &#39;worker&#39; key for the miner.
-</span><span class="c1"></span>	<span class="c1">// The libp2p peer ID specified should reference the libp2p identity that the
-</span><span class="c1"></span>	<span class="c1">// miner is operating. This is the ID that clients will connect to to propose deals
-</span><span class="c1"></span>	<span class="c1">// TODO: maybe rename to &#39;RegisterStorageMiner&#39;?
-</span><span class="c1"></span>	<span class="nf">CreateStorageMiner</span><span class="p">(</span><span class="nx">pubk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">pledge</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span><span class="p">)</span> <span class="nx">Address</span>
+    <span class="c1">// CreateStorageMiner registers a new storage miner with the given public key and a
+</span><span class="c1"></span>    <span class="c1">// pledge of the given size. The miners collateral is set by the value in the message.
+</span><span class="c1"></span>    <span class="c1">// The public key must match the private key used to sign off on blocks created
+</span><span class="c1"></span>    <span class="c1">// by this miner. This key is the &#39;worker&#39; key for the miner.
+</span><span class="c1"></span>    <span class="c1">// The libp2p peer ID specified should reference the libp2p identity that the
+</span><span class="c1"></span>    <span class="c1">// miner is operating. This is the ID that clients will connect to to propose deals
+</span><span class="c1"></span>    <span class="c1">// TODO: maybe rename to &#39;RegisterStorageMiner&#39;?
+</span><span class="c1"></span>    <span class="nf">CreateStorageMiner</span><span class="p">(</span><span class="nx">pubk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">pledge</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span><span class="p">)</span> <span class="nx">Address</span>
 
-	<span class="c1">// SlashConsensusFault is used to slash a misbehaving miner who submitted two different
-</span><span class="c1"></span>	<span class="c1">// blocks at the same block height. The signatures on each block are validated
-</span><span class="c1"></span>	<span class="c1">// and the offending miner has their entire collateral slashed, including the
-</span><span class="c1"></span>	<span class="c1">// invalidation of any any all storage they are providing. The caller is rewarded
-</span><span class="c1"></span>	<span class="c1">// a small amount to compensate for gas fees (TODO: maybe it should be more?)
-</span><span class="c1"></span>	<span class="nf">SlashConsensusFault</span><span class="p">(</span><span class="nx">blk1</span><span class="p">,</span> <span class="nx">blk2</span> <span class="nx">BlockHeader</span><span class="p">)</span>
+    <span class="c1">// SlashConsensusFault is used to slash a misbehaving miner who submitted two different
+</span><span class="c1"></span>    <span class="c1">// blocks at the same block height. The signatures on each block are validated
+</span><span class="c1"></span>    <span class="c1">// and the offending miner has their entire collateral slashed, including the
+</span><span class="c1"></span>    <span class="c1">// invalidation of any any all storage they are providing. The caller is rewarded
+</span><span class="c1"></span>    <span class="c1">// a small amount to compensate for gas fees (TODO: maybe it should be more?)
+</span><span class="c1"></span>    <span class="nf">SlashConsensusFault</span><span class="p">(</span><span class="nx">blk1</span><span class="p">,</span> <span class="nx">blk2</span> <span class="nx">BlockHeader</span><span class="p">)</span>
 
-	<span class="c1">// SlashStorageFault slashes a storage miner for not submitting their PoSTs within
-</span><span class="c1"></span>	<span class="c1">// the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
-</span><span class="c1"></span>	<span class="c1">// The slashed miner then loses all of their staked collateral, and also loses all
-</span><span class="c1"></span>	<span class="c1">// of their power, and as a result, is no longer a candidate leader for extending the chain.
-</span><span class="c1"></span>	<span class="nf">SlashStorageFault</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">)</span>
+    <span class="c1">// SlashStorageFault slashes a storage miner for not submitting their PoSTs within
+</span><span class="c1"></span>    <span class="c1">// the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
+</span><span class="c1"></span>    <span class="c1">// The slashed miner then loses all of their staked collateral, and also loses all
+</span><span class="c1"></span>    <span class="c1">// of their power, and as a result, is no longer a candidate leader for extending the chain.
+</span><span class="c1"></span>    <span class="nf">SlashStorageFault</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">)</span>
 
-	<span class="c1">// UpdateStorage is called by a miner to adjust the storage market actors
-</span><span class="c1"></span>	<span class="c1">// accounting of the total storage in the storage market.
-</span><span class="c1"></span>	<span class="nf">UpdateStorage</span><span class="p">(</span><span class="nx">delta</span> <span class="nx">BytesAmount</span><span class="p">)</span>
+    <span class="c1">// UpdateStorage is called by a miner to adjust the storage market actors
+</span><span class="c1"></span>    <span class="c1">// accounting of the total storage in the storage market.
+</span><span class="c1"></span>    <span class="nf">UpdateStorage</span><span class="p">(</span><span class="nx">delta</span> <span class="nx">BytesAmount</span><span class="p">)</span>
 
-	<span class="c1">// GetTotalStorage returns the total committed storage in the system. This number is
-</span><span class="c1"></span>	<span class="c1">// also used as the &#39;total power&#39; in the system for the purposes of the power table
-</span><span class="c1"></span>	<span class="nf">GetTotalStorage</span><span class="p">()</span> <span class="nx">BytesAmount</span>
+    <span class="c1">// GetTotalStorage returns the total committed storage in the system. This number is
+</span><span class="c1"></span>    <span class="c1">// also used as the &#39;total power&#39; in the system for the purposes of the power table
+</span><span class="c1"></span>    <span class="nf">GetTotalStorage</span><span class="p">()</span> <span class="nx">BytesAmount</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="the-filecoin-storage-market-operation">The Filecoin Storage Market Operation</h2>
 
@@ -296,25 +296,25 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The storage market expects a payments system to allow clients to pay miners for storage. Any payments system that has the following capabilities may be used:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Payments</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// Setup sets up a payment from the caller to the target address. The payment
-</span><span class="c1"></span>	<span class="c1">// MUST be contingent on the miner being able to prove that they have the data
-</span><span class="c1"></span>	<span class="c1">// referenced by &#39;piece&#39;. The total amount of Filecoin that may be transfered by
-</span><span class="c1"></span>	<span class="c1">// this payment is specified by &#39;value&#39;
-</span><span class="c1"></span>	<span class="nf">Setup</span><span class="p">(</span><span class="nx">target</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">piece</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">ID</span>
+    <span class="c1">// Setup sets up a payment from the caller to the target address. The payment
+</span><span class="c1"></span>    <span class="c1">// MUST be contingent on the miner being able to prove that they have the data
+</span><span class="c1"></span>    <span class="c1">// referenced by &#39;piece&#39;. The total amount of Filecoin that may be transfered by
+</span><span class="c1"></span>    <span class="c1">// this payment is specified by &#39;value&#39;
+</span><span class="c1"></span>    <span class="nf">Setup</span><span class="p">(</span><span class="nx">target</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">piece</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">ID</span>
 
-	<span class="c1">// MakeVouchers creates a set of vouchers redeemable by the target of the
-</span><span class="c1"></span>	<span class="c1">// previously created payment. It creates &#39;count&#39; vouchers, each of which is
-</span><span class="c1"></span>	<span class="c1">// redeemable only after an certain block height, evenly spaced out between
-</span><span class="c1"></span>	<span class="c1">// start and end. Each voucher should be redeemable for proportionally more
-</span><span class="c1"></span>	<span class="c1">// Filecoin, up to the total amount specified during the payment setup.
-</span><span class="c1"></span>	<span class="nf">MakeVouchers</span><span class="p">(</span><span class="nx">id</span> <span class="nx">ID</span><span class="p">,</span> <span class="nx">start</span><span class="p">,</span> <span class="nx">end</span> <span class="nx">BlockHeight</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="nx">Voucher</span>
+    <span class="c1">// MakeVouchers creates a set of vouchers redeemable by the target of the
+</span><span class="c1"></span>    <span class="c1">// previously created payment. It creates &#39;count&#39; vouchers, each of which is
+</span><span class="c1"></span>    <span class="c1">// redeemable only after an certain block height, evenly spaced out between
+</span><span class="c1"></span>    <span class="c1">// start and end. Each voucher should be redeemable for proportionally more
+</span><span class="c1"></span>    <span class="c1">// Filecoin, up to the total amount specified during the payment setup.
+</span><span class="c1"></span>    <span class="nf">MakeVouchers</span><span class="p">(</span><span class="nx">id</span> <span class="nx">ID</span><span class="p">,</span> <span class="nx">start</span><span class="p">,</span> <span class="nx">end</span> <span class="nx">BlockHeight</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="nx">Voucher</span>
 
-	<span class="c1">// Redeem voucher is called by the target of a given payment to claim the
-</span><span class="c1"></span>	<span class="c1">// funds represented by it. The voucher can only be redeemed after the block
-</span><span class="c1"></span>	<span class="c1">// height that is attributed to the voucher, and also only if the proof given
-</span><span class="c1"></span>	<span class="c1">// proves that the target is correctly storing the piece referenced in the
-</span><span class="c1"></span>	<span class="c1">// payment setup.
-</span><span class="c1"></span>	<span class="nf">RedeemVoucher</span><span class="p">(</span><span class="nx">v</span> <span class="nx">Voucher</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">Proof</span><span class="p">)</span>
+    <span class="c1">// Redeem voucher is called by the target of a given payment to claim the
+</span><span class="c1"></span>    <span class="c1">// funds represented by it. The voucher can only be redeemed after the block
+</span><span class="c1"></span>    <span class="c1">// height that is attributed to the voucher, and also only if the proof given
+</span><span class="c1"></span>    <span class="c1">// proves that the target is correctly storing the piece referenced in the
+</span><span class="c1"></span>    <span class="c1">// payment setup.
+</span><span class="c1"></span>    <span class="nf">RedeemVoucher</span><span class="p">(</span><span class="nx">v</span> <span class="nx">Voucher</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">Proof</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <p>For details on the implementation of the payments system, see <a href="../payments">the payments doc</a>.</p>
 

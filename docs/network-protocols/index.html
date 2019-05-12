@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -157,20 +157,20 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will try to use a CBOR RPC protocol format. This format is effectively just a leb128 varint length delimeted series of cbor serialized objects. Whenever a filecoin protocol says &ldquo;send X&rdquo;, it means &ldquo;cbor serialize the object X, write its length encoded using unsigned leb128, then write the serialized bytes&rdquo;.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ReadCborRPC</span><span class="p">(</span><span class="nx">r</span> <span class="nx">io</span><span class="p">.</span><span class="nx">Reader</span><span class="p">,</span> <span class="nx">out</span> <span class="o">*</span><span class="nx">Object</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">l</span> <span class="o">:=</span> <span class="nf">ReadUVarint</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
+    <span class="nx">l</span> <span class="o">:=</span> <span class="nf">ReadUVarint</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
 
-	<span class="c1">// Read &#39;l&#39; bytes from the reader
-</span><span class="c1"></span>	<span class="nx">buf</span> <span class="o">:=</span> <span class="nf">ReadCountBytes</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span> <span class="nx">l</span><span class="p">)</span>
+    <span class="c1">// Read &#39;l&#39; bytes from the reader
+</span><span class="c1"></span>    <span class="nx">buf</span> <span class="o">:=</span> <span class="nf">ReadCountBytes</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span> <span class="nx">l</span><span class="p">)</span>
 
-	<span class="nx">cbor</span><span class="p">.</span><span class="nf">Unmarshal</span><span class="p">(</span><span class="nx">buf</span><span class="p">,</span> <span class="nx">out</span><span class="p">)</span>
+    <span class="nx">cbor</span><span class="p">.</span><span class="nf">Unmarshal</span><span class="p">(</span><span class="nx">buf</span><span class="p">,</span> <span class="nx">out</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">WriteCborRPC</span><span class="p">(</span><span class="nx">w</span> <span class="nx">io</span><span class="p">.</span><span class="nx">Writer</span><span class="p">,</span> <span class="nx">obj</span> <span class="nx">Object</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">buf</span> <span class="o">:=</span> <span class="nx">cbor</span><span class="p">.</span><span class="nf">Marshal</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span>
+    <span class="nx">buf</span> <span class="o">:=</span> <span class="nx">cbor</span><span class="p">.</span><span class="nf">Marshal</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span>
 
-	<span class="nf">WriteUVarint</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">buf</span><span class="p">))</span>
+    <span class="nf">WriteUVarint</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">buf</span><span class="p">))</span>
 
-	<span class="nx">w</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">buf</span><span class="p">)</span>
+    <span class="nx">w</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">buf</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <h1 id="hello-handshake">Hello Handshake</h1>
 
@@ -178,14 +178,14 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Whenever a node gets a new connection, it opens a new stream on that connection and &lsquo;says hello&rsquo;. This is done by crafting a <code>HelloMessage</code>, sending it to the other peer using CBOR RPC and finally, closing the stream.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">HelloMessage</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">HeaviestTipSet</span>       <span class="p">[]</span><span class="nx">Cid</span>
-	<span class="nx">HeaviestTipSetWeight</span> <span class="kt">uint64</span>
-	<span class="nx">GenesisHash</span>          <span class="nx">Cid</span>
+    <span class="nx">HeaviestTipSet</span>       <span class="p">[]</span><span class="nx">Cid</span>
+    <span class="nx">HeaviestTipSetWeight</span> <span class="kt">uint64</span>
+    <span class="nx">GenesisHash</span>          <span class="nx">Cid</span>
 <span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SayHello</span><span class="p">(</span><span class="nx">p</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">s</span> <span class="o">:=</span> <span class="nf">OpenStream</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
-	<span class="nx">mes</span> <span class="o">:=</span> <span class="nf">GetHelloMessage</span><span class="p">()</span>
-	<span class="nf">WriteCborRPC</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">mes</span><span class="p">)</span>
-	<span class="nx">s</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+    <span class="nx">s</span> <span class="o">:=</span> <span class="nf">OpenStream</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+    <span class="nx">mes</span> <span class="o">:=</span> <span class="nf">GetHelloMessage</span><span class="p">()</span>
+    <span class="nf">WriteCborRPC</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">mes</span><span class="p">)</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
 <span class="p">}</span></code></pre></div>
 <p>Upon receiving a &lsquo;hello&rsquo; stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the <code>HeaviestTipSet</code>, claimed <code>HeaviestTipSetWeight</code>, and peerID of the other node should be passed to the chain sync subsystem.</p>
 
@@ -199,255 +199,255 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Commitment</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">;</span>
 
 <span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// PieceRef is the hash of the data in native structure. This will be used for
-</span><span class="c1"></span>	<span class="c1">// certifying the data transfer
-</span><span class="c1"></span>	<span class="nx">PieceRef</span> <span class="nx">Cid</span>
+    <span class="c1">// PieceRef is the hash of the data in native structure. This will be used for
+</span><span class="c1"></span>    <span class="c1">// certifying the data transfer
+</span><span class="c1"></span>    <span class="nx">PieceRef</span> <span class="nx">Cid</span>
 
-	<span class="c1">// SerializationMode specifies how the graph referenced by &#39;PieceRef&#39; gets transformed
-</span><span class="c1"></span>	<span class="c1">// into the data that will be packed into a sector.
-</span><span class="c1"></span>	<span class="nx">SerializationMode</span> <span class="kt">string</span>
+    <span class="c1">// SerializationMode specifies how the graph referenced by &#39;PieceRef&#39; gets transformed
+</span><span class="c1"></span>    <span class="c1">// into the data that will be packed into a sector.
+</span><span class="c1"></span>    <span class="nx">SerializationMode</span> <span class="kt">string</span>
 
-	<span class="c1">// CommP is the data hashed in a form that is compatible with the proofs system
-</span><span class="c1"></span>	<span class="c1">// TODO: this *could* possibly be combined with the PieceRef
-</span><span class="c1"></span>	<span class="nx">CommP</span> <span class="nx">Commitment</span>
+    <span class="c1">// CommP is the data hashed in a form that is compatible with the proofs system
+</span><span class="c1"></span>    <span class="c1">// TODO: this *could* possibly be combined with the PieceRef
+</span><span class="c1"></span>    <span class="nx">CommP</span> <span class="nx">Commitment</span>
 
-	<span class="nx">Size</span> <span class="nx">NumBytes</span>
+    <span class="nx">Size</span> <span class="nx">NumBytes</span>
 
-	<span class="nx">TotalPrice</span> <span class="nx">TokenAmount</span>
+    <span class="nx">TotalPrice</span> <span class="nx">TokenAmount</span>
 
-	<span class="c1">// Duration is how long the file should be stored for
-</span><span class="c1"></span>	<span class="nx">Duration</span> <span class="nx">NumBlocks</span>
+    <span class="c1">// Duration is how long the file should be stored for
+</span><span class="c1"></span>    <span class="nx">Duration</span> <span class="nx">NumBlocks</span>
 
-	<span class="c1">// PaymentRef is a reference to the mechanism that the proposer
-</span><span class="c1"></span>	<span class="c1">// will use to pay the miner. It should be verifiable by the
-</span><span class="c1"></span>	<span class="c1">// miner using on-chain information.
-</span><span class="c1"></span>	<span class="nx">Payment</span> <span class="nx">PaymentInfo</span>
+    <span class="c1">// PaymentRef is a reference to the mechanism that the proposer
+</span><span class="c1"></span>    <span class="c1">// will use to pay the miner. It should be verifiable by the
+</span><span class="c1"></span>    <span class="c1">// miner using on-chain information.
+</span><span class="c1"></span>    <span class="nx">Payment</span> <span class="nx">PaymentInfo</span>
 
-	<span class="c1">// MinerAddress is the address of the storage miner in the deal proposal
-</span><span class="c1"></span>	<span class="nx">MinerAddress</span> <span class="nx">Address</span>
+    <span class="c1">// MinerAddress is the address of the storage miner in the deal proposal
+</span><span class="c1"></span>    <span class="nx">MinerAddress</span> <span class="nx">Address</span>
 
-	<span class="nx">ClientAddress</span> <span class="nx">Address</span>
-	<span class="nx">Signature</span>     <span class="nx">Signature</span>
+    <span class="nx">ClientAddress</span> <span class="nx">Address</span>
+    <span class="nx">Signature</span>     <span class="nx">Signature</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PaymentInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// PayChActor is the address of the payment channel actor
-</span><span class="c1"></span>	<span class="c1">// that will be used to facilitate payments
-</span><span class="c1"></span>	<span class="nx">PayChActor</span> <span class="nx">Address</span>
+    <span class="c1">// PayChActor is the address of the payment channel actor
+</span><span class="c1"></span>    <span class="c1">// that will be used to facilitate payments
+</span><span class="c1"></span>    <span class="nx">PayChActor</span> <span class="nx">Address</span>
 
-	<span class="c1">// Payer is the address of the owner of the payment channel
-</span><span class="c1"></span>	<span class="nx">Payer</span> <span class="nx">Address</span>
+    <span class="c1">// Payer is the address of the owner of the payment channel
+</span><span class="c1"></span>    <span class="nx">Payer</span> <span class="nx">Address</span>
 
-	<span class="c1">// Channel is the ID of the specific channel the client will
-</span><span class="c1"></span>	<span class="c1">// use to pay the miner. It must already have sufficient funds locked up
-</span><span class="c1"></span>	<span class="nx">Channel</span> <span class="nx">ChannelID</span>
+    <span class="c1">// Channel is the ID of the specific channel the client will
+</span><span class="c1"></span>    <span class="c1">// use to pay the miner. It must already have sufficient funds locked up
+</span><span class="c1"></span>    <span class="nx">Channel</span> <span class="nx">ChannelID</span>
 
-	<span class="c1">// ChannelMsgCid is the B58 encoded CID of the message used to create the
-</span><span class="c1"></span>	<span class="c1">// channel. Adding the message cid allows the miner to wait until the
-</span><span class="c1"></span>	<span class="c1">// channel is accepted on chain.
-</span><span class="c1"></span>	<span class="nx">ChannelMsgCid</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+    <span class="c1">// ChannelMsgCid is the B58 encoded CID of the message used to create the
+</span><span class="c1"></span>    <span class="c1">// channel. Adding the message cid allows the miner to wait until the
+</span><span class="c1"></span>    <span class="c1">// channel is accepted on chain.
+</span><span class="c1"></span>    <span class="nx">ChannelMsgCid</span> <span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
-	<span class="c1">// Vouchers is a set of payments from the client to the miner that can be
-</span><span class="c1"></span>	<span class="c1">// cashed out contingent on the agreed upon data being provably within a
-</span><span class="c1"></span>	<span class="c1">// live sector in the miners control on-chain
-</span><span class="c1"></span>	<span class="nx">Vouchers</span> <span class="p">[]</span><span class="nx">PaymentVouchers</span>
+    <span class="c1">// Vouchers is a set of payments from the client to the miner that can be
+</span><span class="c1"></span>    <span class="c1">// cashed out contingent on the agreed upon data being provably within a
+</span><span class="c1"></span>    <span class="c1">// live sector in the miners control on-chain
+</span><span class="c1"></span>    <span class="nx">Vouchers</span> <span class="p">[]</span><span class="nx">PaymentVouchers</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="deal-state-values">Deal State Values</h3>
 
 <p>Legal values for <code>DealState</code> are as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="p">(</span>
-	<span class="c1">// Unset implies a programmer error. This value should never appear
-</span><span class="c1"></span>	<span class="c1">// in an actual message
-</span><span class="c1"></span>	<span class="nx">Unset</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="c1">// Unset implies a programmer error. This value should never appear
+</span><span class="c1"></span>    <span class="c1">// in an actual message
+</span><span class="c1"></span>    <span class="nx">Unset</span> <span class="p">=</span> <span class="mi">0</span>
 
-	<span class="c1">// Unknown signifies an unknown negotiation
-</span><span class="c1"></span>	<span class="nx">Unknown</span> <span class="p">=</span> <span class="mi">1</span>
+    <span class="c1">// Unknown signifies an unknown negotiation
+</span><span class="c1"></span>    <span class="nx">Unknown</span> <span class="p">=</span> <span class="mi">1</span>
 
-	<span class="c1">// Rejected means the deal was rejected for some reason
-</span><span class="c1"></span>	<span class="nx">Rejected</span> <span class="p">=</span> <span class="mi">2</span>
+    <span class="c1">// Rejected means the deal was rejected for some reason
+</span><span class="c1"></span>    <span class="nx">Rejected</span> <span class="p">=</span> <span class="mi">2</span>
 
-	<span class="c1">// Accepted means the deal was accepted but hasnt yet started
-</span><span class="c1"></span>	<span class="nx">Accepted</span> <span class="p">=</span> <span class="mi">3</span>
+    <span class="c1">// Accepted means the deal was accepted but hasnt yet started
+</span><span class="c1"></span>    <span class="nx">Accepted</span> <span class="p">=</span> <span class="mi">3</span>
 
-	<span class="c1">// Started means the deal has started and the transfer is in progress
-</span><span class="c1"></span>	<span class="nx">Started</span> <span class="p">=</span> <span class="mi">4</span>
+    <span class="c1">// Started means the deal has started and the transfer is in progress
+</span><span class="c1"></span>    <span class="nx">Started</span> <span class="p">=</span> <span class="mi">4</span>
 
-	<span class="c1">// Failed means the deal has failed for some reason
-</span><span class="c1"></span>	<span class="nx">Failed</span> <span class="p">=</span> <span class="mi">5</span>
+    <span class="c1">// Failed means the deal has failed for some reason
+</span><span class="c1"></span>    <span class="nx">Failed</span> <span class="p">=</span> <span class="mi">5</span>
 
-	<span class="c1">// Staged is used by the storage deal protocol to indicate the data has been
-</span><span class="c1"></span>	<span class="c1">// received and staged into a sector, but is not sealed yet
-</span><span class="c1"></span>	<span class="nx">Staged</span> <span class="p">=</span> <span class="mi">6</span>
+    <span class="c1">// Staged is used by the storage deal protocol to indicate the data has been
+</span><span class="c1"></span>    <span class="c1">// received and staged into a sector, but is not sealed yet
+</span><span class="c1"></span>    <span class="nx">Staged</span> <span class="p">=</span> <span class="mi">6</span>
 
-	<span class="c1">// Complete means the deal is complete, and the sector that the deal is contained
-</span><span class="c1"></span>	<span class="c1">// in has been sealed and its commitment posted on chain.
-</span><span class="c1"></span>	<span class="nx">Complete</span> <span class="p">=</span> <span class="mi">6</span>
+    <span class="c1">// Complete means the deal is complete, and the sector that the deal is contained
+</span><span class="c1"></span>    <span class="c1">// in has been sealed and its commitment posted on chain.
+</span><span class="c1"></span>    <span class="nx">Complete</span> <span class="p">=</span> <span class="mi">6</span>
 
-	<span class="c1">// Staged is used by the storage deal protocol to indicate the data has been
-</span><span class="c1"></span>	<span class="c1">// received and staged into a sector, but is not sealed yet
-</span><span class="c1"></span>	<span class="nx">Staged</span> <span class="p">=</span> <span class="mi">7</span>
+    <span class="c1">// Staged is used by the storage deal protocol to indicate the data has been
+</span><span class="c1"></span>    <span class="c1">// received and staged into a sector, but is not sealed yet
+</span><span class="c1"></span>    <span class="nx">Staged</span> <span class="p">=</span> <span class="mi">7</span>
 
-	<span class="c1">// in has been sealed and its commitment posted on chain.
-</span><span class="c1"></span>	<span class="nx">Complete</span> <span class="p">=</span> <span class="mi">7</span>
+    <span class="c1">// in has been sealed and its commitment posted on chain.
+</span><span class="c1"></span>    <span class="nx">Complete</span> <span class="p">=</span> <span class="mi">7</span>
 <span class="p">)</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SendStorageProposal</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">file</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">NumBlocks</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nf">IsMiner</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;given address was not a miner&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">IsMiner</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;given address was not a miner&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="c1">// Get a PoRep friendly commitment from the file
-</span><span class="c1"></span>	<span class="nx">commitment</span><span class="p">,</span> <span class="nx">size</span> <span class="o">:=</span> <span class="nf">ProcessRef</span><span class="p">(</span><span class="nx">file</span><span class="p">)</span>
+    <span class="c1">// Get a PoRep friendly commitment from the file
+</span><span class="c1"></span>    <span class="nx">commitment</span><span class="p">,</span> <span class="nx">size</span> <span class="o">:=</span> <span class="nf">ProcessRef</span><span class="p">(</span><span class="nx">file</span><span class="p">)</span>
 
-	<span class="c1">// Get a handle on the payment system to be used to pay this miner
-</span><span class="c1"></span>	<span class="c1">// Most likely, this grabs an existing payment channel, or creates
-</span><span class="c1"></span>	<span class="c1">// a new one
-</span><span class="c1"></span>	<span class="nx">payments</span> <span class="o">:=</span> <span class="nf">PaymentSysToMiner</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
+    <span class="c1">// Get a handle on the payment system to be used to pay this miner
+</span><span class="c1"></span>    <span class="c1">// Most likely, this grabs an existing payment channel, or creates
+</span><span class="c1"></span>    <span class="c1">// a new one
+</span><span class="c1"></span>    <span class="nx">payments</span> <span class="o">:=</span> <span class="nf">PaymentSysToMiner</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
 
-	<span class="nx">payInfo</span> <span class="o">:=</span> <span class="nx">payments</span><span class="p">.</span><span class="nf">CreatePaymentInfo</span><span class="p">(</span><span class="nx">storageStart</span><span class="p">,</span> <span class="nx">duration</span><span class="p">,</span> <span class="nx">price</span><span class="o">*</span><span class="nx">size</span><span class="p">)</span>
+    <span class="nx">payInfo</span> <span class="o">:=</span> <span class="nx">payments</span><span class="p">.</span><span class="nf">CreatePaymentInfo</span><span class="p">(</span><span class="nx">storageStart</span><span class="p">,</span> <span class="nx">duration</span><span class="p">,</span> <span class="nx">price</span><span class="o">*</span><span class="nx">size</span><span class="p">)</span>
 
-	<span class="nx">prop</span> <span class="o">:=</span> <span class="nx">StorageDealProposal</span><span class="p">{</span>
-		<span class="nx">PieceRef</span><span class="p">:</span>      <span class="nx">file</span><span class="p">,</span>
-		<span class="nx">CommP</span><span class="p">:</span> <span class="nx">commitment</span><span class="p">,</span>
-		<span class="nx">TotalPrice</span><span class="p">:</span>    <span class="nx">price</span> <span class="o">*</span> <span class="nx">size</span><span class="p">,</span> <span class="c1">// Maybe just leave this to the payment info?
-</span><span class="c1"></span>		<span class="nx">Duration</span><span class="p">:</span>      <span class="nx">duration</span><span class="p">,</span>
-		<span class="nx">Size</span><span class="p">:</span>          <span class="nx">size</span><span class="p">,</span>
-		<span class="nx">Payment</span><span class="p">:</span>       <span class="nx">payInfo</span><span class="p">,</span>
-	<span class="p">}</span>
+    <span class="nx">prop</span> <span class="o">:=</span> <span class="nx">StorageDealProposal</span><span class="p">{</span>
+        <span class="nx">PieceRef</span><span class="p">:</span>      <span class="nx">file</span><span class="p">,</span>
+        <span class="nx">CommP</span><span class="p">:</span> <span class="nx">commitment</span><span class="p">,</span>
+        <span class="nx">TotalPrice</span><span class="p">:</span>    <span class="nx">price</span> <span class="o">*</span> <span class="nx">size</span><span class="p">,</span> <span class="c1">// Maybe just leave this to the payment info?
+</span><span class="c1"></span>        <span class="nx">Duration</span><span class="p">:</span>      <span class="nx">duration</span><span class="p">,</span>
+        <span class="nx">Size</span><span class="p">:</span>          <span class="nx">size</span><span class="p">,</span>
+        <span class="nx">Payment</span><span class="p">:</span>       <span class="nx">payInfo</span><span class="p">,</span>
+    <span class="p">}</span>
 
-	<span class="nx">client</span><span class="p">.</span><span class="nf">SignProposal</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span>
+    <span class="nx">client</span><span class="p">.</span><span class="nf">SignProposal</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span>
 
-	<span class="nx">peerid</span> <span class="o">:=</span> <span class="nx">lookup</span><span class="p">.</span><span class="nf">ByMinerAddress</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
-	<span class="nx">s</span> <span class="o">:=</span> <span class="nf">NewStream</span><span class="p">(</span><span class="nx">peerid</span><span class="p">,</span> <span class="nx">MakeStorageDealProtocolID</span><span class="p">)</span>
+    <span class="nx">peerid</span> <span class="o">:=</span> <span class="nx">lookup</span><span class="p">.</span><span class="nf">ByMinerAddress</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
+    <span class="nx">s</span> <span class="o">:=</span> <span class="nf">NewStream</span><span class="p">(</span><span class="nx">peerid</span><span class="p">,</span> <span class="nx">MakeStorageDealProtocolID</span><span class="p">)</span>
 
-	<span class="c1">// Send the proposal over
-</span><span class="c1"></span>	<span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">prop</span><span class="p">)</span>
+    <span class="c1">// Send the proposal over
+</span><span class="c1"></span>    <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">prop</span><span class="p">)</span>
 
-	<span class="c1">// Read the response...
-</span><span class="c1"></span>	<span class="nx">resp</span> <span class="o">:=</span> <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+    <span class="c1">// Read the response...
+</span><span class="c1"></span>    <span class="nx">resp</span> <span class="o">:=</span> <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
 
-	<span class="k">switch</span> <span class="nx">resp</span><span class="p">.</span><span class="nx">State</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">Accepted</span><span class="p">:</span>
-		<span class="c1">// Yay! the miner accepted our deal, prepare to send them the file, and then check back
-</span><span class="c1"></span>		<span class="c1">// later to see how its going
-</span><span class="c1"></span>	<span class="k">case</span> <span class="nx">Rejected</span><span class="p">:</span>
-		<span class="c1">// oh no, our deal was rejected.
-</span><span class="c1"></span>		<span class="c1">// practically, we should consider whether or not to close our payment channel
-</span><span class="c1"></span>		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Deal rejected, reason: &#34;</span><span class="p">,</span> <span class="nx">resp</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
-	<span class="k">default</span><span class="p">:</span>
-		<span class="c1">// unexpected response state...
-</span><span class="c1"></span>	<span class="p">}</span>
+    <span class="k">switch</span> <span class="nx">resp</span><span class="p">.</span><span class="nx">State</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">Accepted</span><span class="p">:</span>
+        <span class="c1">// Yay! the miner accepted our deal, prepare to send them the file, and then check back
+</span><span class="c1"></span>        <span class="c1">// later to see how its going
+</span><span class="c1"></span>    <span class="k">case</span> <span class="nx">Rejected</span><span class="p">:</span>
+        <span class="c1">// oh no, our deal was rejected.
+</span><span class="c1"></span>        <span class="c1">// practically, we should consider whether or not to close our payment channel
+</span><span class="c1"></span>        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Deal rejected, reason: &#34;</span><span class="p">,</span> <span class="nx">resp</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
+    <span class="k">default</span><span class="p">:</span>
+        <span class="c1">// unexpected response state...
+</span><span class="c1"></span>    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <p>TODO: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.</p>
 
 <p>The miner then decides whether or not to accept the deal, and sends back a response:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">State</span> <span class="nx">DealState</span>
+    <span class="nx">State</span> <span class="nx">DealState</span>
 
-	<span class="c1">// Message is an optional message to add context to any given response
-</span><span class="c1"></span>	<span class="nx">Message</span> <span class="kt">string</span>
+    <span class="c1">// Message is an optional message to add context to any given response
+</span><span class="c1"></span>    <span class="nx">Message</span> <span class="kt">string</span>
 
-	<span class="c1">// ProposalCid is the cid of the StorageDealProposal object this response is for
-</span><span class="c1"></span>	<span class="nx">ProposalCid</span> <span class="nx">Cid</span>
+    <span class="c1">// ProposalCid is the cid of the StorageDealProposal object this response is for
+</span><span class="c1"></span>    <span class="nx">ProposalCid</span> <span class="nx">Cid</span>
 
-	<span class="c1">// PieceInclusionProof is a collection of information needed to convince the client that
-</span><span class="c1"></span>	<span class="c1">// the miner has sealed the data into a sector.
-</span><span class="c1"></span>	<span class="c1">// Note: the miner doesnt necessarily have to have committed the sector at this point
-</span><span class="c1"></span>	<span class="c1">// they just need to have staged it into a sector, and be committed to putting it at
-</span><span class="c1"></span>	<span class="c1">// that place in the sector.
-</span><span class="c1"></span>	<span class="nx">PieceInclusionProof</span> <span class="nx">PieceInclusionProof</span>
+    <span class="c1">// PieceInclusionProof is a collection of information needed to convince the client that
+</span><span class="c1"></span>    <span class="c1">// the miner has sealed the data into a sector.
+</span><span class="c1"></span>    <span class="c1">// Note: the miner doesnt necessarily have to have committed the sector at this point
+</span><span class="c1"></span>    <span class="c1">// they just need to have staged it into a sector, and be committed to putting it at
+</span><span class="c1"></span>    <span class="c1">// that place in the sector.
+</span><span class="c1"></span>    <span class="nx">PieceInclusionProof</span> <span class="nx">PieceInclusionProof</span>
 
-	<span class="c1">// SectorCommitMsg is the Cid of the message that was sent to submit
-</span><span class="c1"></span>	<span class="c1">// the sector containing this data to the chain.
-</span><span class="c1"></span>	<span class="nx">SectorCommitMsg</span> <span class="nx">Cid</span>
+    <span class="c1">// SectorCommitMsg is the Cid of the message that was sent to submit
+</span><span class="c1"></span>    <span class="c1">// the sector containing this data to the chain.
+</span><span class="c1"></span>    <span class="nx">SectorCommitMsg</span> <span class="nx">Cid</span>
 
-	<span class="c1">// Signature is a signature from the miner over the response
-</span><span class="c1"></span>	<span class="nx">Signature</span> <span class="nx">Signature</span>
+    <span class="c1">// Signature is a signature from the miner over the response
+</span><span class="c1"></span>    <span class="nx">Signature</span> <span class="nx">Signature</span>
 <span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">HandleStorageDealProposal</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Stream</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">prop</span> <span class="o">:=</span> <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+    <span class="nx">prop</span> <span class="o">:=</span> <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
 
-	<span class="k">if</span> <span class="p">!</span><span class="nf">ValidateInput</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;client sent invalid proposal&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateInput</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;client sent invalid proposal&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="k">if</span> <span class="nx">accept</span><span class="p">,</span> <span class="nx">reason</span> <span class="o">:=</span> <span class="nx">MinerPolicy</span><span class="p">.</span><span class="nf">ShouldAccept</span><span class="p">(</span><span class="nx">prop</span><span class="p">);</span> <span class="p">!</span><span class="nx">accept</span> <span class="p">{</span>
-		<span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
-			<span class="nx">State</span><span class="p">:</span>   <span class="nx">Rejected</span><span class="p">,</span>
-			<span class="nx">Message</span><span class="p">:</span> <span class="nx">reason</span><span class="p">,</span>
-		<span class="p">})</span>
-		<span class="k">return</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="nx">accept</span><span class="p">,</span> <span class="nx">reason</span> <span class="o">:=</span> <span class="nx">MinerPolicy</span><span class="p">.</span><span class="nf">ShouldAccept</span><span class="p">(</span><span class="nx">prop</span><span class="p">);</span> <span class="p">!</span><span class="nx">accept</span> <span class="p">{</span>
+        <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
+            <span class="nx">State</span><span class="p">:</span>   <span class="nx">Rejected</span><span class="p">,</span>
+            <span class="nx">Message</span><span class="p">:</span> <span class="nx">reason</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
 
-	<span class="c1">// Alright, we&#39;re accepting
-</span><span class="c1"></span>	<span class="nx">resp</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
-		<span class="nx">State</span><span class="p">:</span>    <span class="nx">Accepted</span><span class="p">,</span>
-		<span class="nx">Proposal</span><span class="p">:</span> <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
-	<span class="p">}</span>
+    <span class="c1">// Alright, we&#39;re accepting
+</span><span class="c1"></span>    <span class="nx">resp</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
+        <span class="nx">State</span><span class="p">:</span>    <span class="nx">Accepted</span><span class="p">,</span>
+        <span class="nx">Proposal</span><span class="p">:</span> <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
+    <span class="p">}</span>
 
-	<span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
 
-	<span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
 
-	<span class="c1">// Make sure we are ready to receive the file (however it may come)
-</span><span class="c1"></span>	<span class="c1">// TODO: potentially add in something to the protocol to allow
-</span><span class="c1"></span>	<span class="c1">// clients to signal how the file will be transferred
-</span><span class="c1"></span>	<span class="nx">miner</span><span class="p">.</span><span class="nf">RegisterInboundFileTransfer</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span>
+    <span class="c1">// Make sure we are ready to receive the file (however it may come)
+</span><span class="c1"></span>    <span class="c1">// TODO: potentially add in something to the protocol to allow
+</span><span class="c1"></span>    <span class="c1">// clients to signal how the file will be transferred
+</span><span class="c1"></span>    <span class="nx">miner</span><span class="p">.</span><span class="nf">RegisterInboundFileTransfer</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span>
 
-	<span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">resp</span><span class="p">)</span>
+    <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">resp</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">ValidateInput</span><span class="p">(</span><span class="nx">prop</span> <span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// Note: Maybe this is unnecessary, and the payment info being valid suffices?
-</span><span class="c1"></span>	<span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">ClientAddress</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid signature from client&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="c1">// Note: Maybe this is unnecessary, and the payment info being valid suffices?
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">ClientAddress</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid signature from client&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="k">if</span> <span class="p">!</span><span class="nf">IsExistingAccount</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">ClientAddress</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;proposal came from a fake account&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">IsExistingAccount</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">ClientAddress</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;proposal came from a fake account&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="k">if</span> <span class="p">!</span><span class="nf">ValidatePaymentInfo</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">Payment</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">Duration</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">Size</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;propsal had invalid payment information&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidatePaymentInfo</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">Payment</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">Duration</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">Size</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;propsal had invalid payment information&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <p>If <code>response.State</code> is <code>Accepted</code> then the client should proceed to transfer the data in question to the storage miner. This operation happens out of band from this protocol, and can be a simple bitswap transfer at first. Support for other more &lsquo;exotic&rsquo; &lsquo;protocols&rsquo; such as mailing hard drives is an explicit goal.</p>
 
 <p>Next, when the miner receives all the data and validates it, they set the <code>DealState</code> to <code>Staged</code>. When the sector gets sealed, and the commitment is posted on chain, the state gets set to <code>Complete</code> and the deals <code>PieceInclusionProof</code> field should be set to the appropriate values.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">OnDataReceived</span><span class="p">(</span><span class="nx">prop</span> <span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nf">ValidatePieceTranslation</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">PieceRef</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">SerializationMode</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">CommP</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nx">resp</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
-			<span class="nx">State</span><span class="p">:</span>    <span class="nx">Rejected</span><span class="p">,</span>
-			<span class="nx">Proposal</span><span class="p">:</span> <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
-			<span class="nx">Message</span><span class="p">:</span>  <span class="s">&#34;CommP was invalid, reconstructed data did not match&#34;</span><span class="p">,</span>
-		<span class="p">}</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidatePieceTranslation</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">PieceRef</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">SerializationMode</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">CommP</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">resp</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
+            <span class="nx">State</span><span class="p">:</span>    <span class="nx">Rejected</span><span class="p">,</span>
+            <span class="nx">Proposal</span><span class="p">:</span> <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
+            <span class="nx">Message</span><span class="p">:</span>  <span class="s">&#34;CommP was invalid, reconstructed data did not match&#34;</span><span class="p">,</span>
+        <span class="p">}</span>
 
-		<span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
-		<span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
-		<span class="k">return</span>
-	<span class="p">}</span>
+        <span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
+        <span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
 
-	<span class="c1">// TODO: is CommP actually needed? How does it tie in?
-</span><span class="c1"></span>	<span class="nx">SectorBuilder</span><span class="p">.</span><span class="nf">AddPiece</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">PieceRef</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">SerializationMode</span><span class="p">)</span>
+    <span class="c1">// TODO: is CommP actually needed? How does it tie in?
+</span><span class="c1"></span>    <span class="nx">SectorBuilder</span><span class="p">.</span><span class="nf">AddPiece</span><span class="p">(</span><span class="nx">prop</span><span class="p">.</span><span class="nx">PieceRef</span><span class="p">,</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">SerializationMode</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">OnSectorPacked</span><span class="p">(</span><span class="nx">prop</span> <span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">pieceConf</span> <span class="nx">PieceCommitment</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">resp</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
-		<span class="nx">State</span><span class="p">:</span>             <span class="nx">Staged</span><span class="p">,</span>
-		<span class="nx">Proposal</span><span class="p">:</span>          <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
-		<span class="nx">PieceInclusionProof</span><span class="p">:</span> <span class="nx">pieceConf</span><span class="p">,</span>
-	<span class="p">}</span>
+    <span class="nx">resp</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
+        <span class="nx">State</span><span class="p">:</span>             <span class="nx">Staged</span><span class="p">,</span>
+        <span class="nx">Proposal</span><span class="p">:</span>          <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
+        <span class="nx">PieceInclusionProof</span><span class="p">:</span> <span class="nx">pieceConf</span><span class="p">,</span>
+    <span class="p">}</span>
 
-	<span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
-	<span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">resp</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <p>Once the deal makes it to the <code>Staged</code> state, the client should be able to query and get the <code>PieceInclusionProof</code> that they need to verify that the miner is indeed storing their data.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">OnSectorSealed</span><span class="p">(</span><span class="nx">prop</span> <span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">msgcid</span> <span class="nx">Cid</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">curState</span> <span class="o">:=</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">GetDealState</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span>
-	<span class="nx">nstate</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
-		<span class="nx">State</span><span class="p">:</span>             <span class="nx">Complete</span><span class="p">,</span>
-		<span class="nx">Proposal</span><span class="p">:</span>          <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
-		<span class="nx">PieceInclusionProof</span><span class="p">:</span> <span class="nx">curState</span><span class="p">.</span><span class="nx">PieceInclusionProof</span><span class="p">,</span>
-		<span class="nx">SectorCommitMsg</span><span class="p">:</span>   <span class="nx">msgcid</span><span class="p">,</span>
-	<span class="p">}</span>
+    <span class="nx">curState</span> <span class="o">:=</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">GetDealState</span><span class="p">(</span><span class="nx">prop</span><span class="p">)</span>
+    <span class="nx">nstate</span> <span class="o">:=</span> <span class="nx">StorageDealResponse</span><span class="p">{</span>
+        <span class="nx">State</span><span class="p">:</span>             <span class="nx">Complete</span><span class="p">,</span>
+        <span class="nx">Proposal</span><span class="p">:</span>          <span class="nx">prop</span><span class="p">.</span><span class="nf">Cid</span><span class="p">(),</span>
+        <span class="nx">PieceInclusionProof</span><span class="p">:</span> <span class="nx">curState</span><span class="p">.</span><span class="nx">PieceInclusionProof</span><span class="p">,</span>
+        <span class="nx">SectorCommitMsg</span><span class="p">:</span>   <span class="nx">msgcid</span><span class="p">,</span>
+    <span class="p">}</span>
 
-	<span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">nstate</span><span class="p">)</span>
-	<span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">nstate</span><span class="p">)</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">nstate</span><span class="p">)</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">nstate</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="query">Query</h2>
 
@@ -457,11 +457,11 @@ https://github.com/alex-shpak/hugo-book
 
 <p>At any point, the client in this flow may query the miner for the state of a given proposal. To query, they send a &lsquo;StorageDealQuery&rsquo; that looks like this:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageDealQuery</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// ProposalCid is the cid of the proposal for the deal that we are querying
-</span><span class="c1"></span>	<span class="c1">// the state of
-</span><span class="c1"></span>	<span class="nx">ProposalCid</span> <span class="o">*</span><span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+    <span class="c1">// ProposalCid is the cid of the proposal for the deal that we are querying
+</span><span class="c1"></span>    <span class="c1">// the state of
+</span><span class="c1"></span>    <span class="nx">ProposalCid</span> <span class="o">*</span><span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 
-	<span class="nx">BaseState</span> <span class="nx">DealState</span>
+    <span class="nx">BaseState</span> <span class="nx">DealState</span>
 <span class="p">}</span></code></pre></div>
 <p>If <code>BaseState</code> is <code>Unset</code> or a terminal state (<code>Complete</code>, <code>Rejected</code>, or <code>Failed</code>) then the current state of the deal in question is returned. If the <code>BaseState</code> is different than the current state of the deal, the current state of the deal is also returned immediately. In the case that the <code>BaseState</code> matches the current state of the deal, then the stream is held open until the state changes, at which point the new state of the deal is returned.</p>
 
@@ -473,34 +473,34 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The <code>RetrievePieceRequest</code> is specified as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetrievePieceRequest</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// `PieceRef` identifies a piece of user data, typically received from the
-</span><span class="c1"></span>	<span class="c1">// client while consummating a storage deal.
-</span><span class="c1"></span>	<span class="nx">PieceRef</span> <span class="o">*</span><span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
+    <span class="c1">// `PieceRef` identifies a piece of user data, typically received from the
+</span><span class="c1"></span>    <span class="c1">// client while consummating a storage deal.
+</span><span class="c1"></span>    <span class="nx">PieceRef</span> <span class="o">*</span><span class="nx">cid</span><span class="p">.</span><span class="nx">Cid</span>
 <span class="p">}</span></code></pre></div>
 <p>When the miner receives the request, it responds with a <code>RetrievePieceResponse</code> message indicating that it has accepted or rejected the request.</p>
 
 <p>The <code>RetrievePieceResponse</code> message is specified as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetrievePieceResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// `Status` communicates the miner&#39;s willingness to send a piece back to a
-</span><span class="c1"></span>	<span class="c1">// client. The value of the `Status` field must be one of: `Failure` or
-</span><span class="c1"></span>	<span class="c1">// `Success`.
-</span><span class="c1"></span>	<span class="nx">Status</span> <span class="nx">RetrievePieceStatus</span>
+    <span class="c1">// `Status` communicates the miner&#39;s willingness to send a piece back to a
+</span><span class="c1"></span>    <span class="c1">// client. The value of the `Status` field must be one of: `Failure` or
+</span><span class="c1"></span>    <span class="c1">// `Success`.
+</span><span class="c1"></span>    <span class="nx">Status</span> <span class="nx">RetrievePieceStatus</span>
 
-	<span class="c1">// If `Status` is `Failure`, `ErrorMessage` should contain a string
-</span><span class="c1"></span>	<span class="c1">// explaining the cause for the rejection.
-</span><span class="c1"></span>	<span class="nx">ErrorMessage</span> <span class="kt">string</span>
+    <span class="c1">// If `Status` is `Failure`, `ErrorMessage` should contain a string
+</span><span class="c1"></span>    <span class="c1">// explaining the cause for the rejection.
+</span><span class="c1"></span>    <span class="nx">ErrorMessage</span> <span class="kt">string</span>
 <span class="p">}</span></code></pre></div>
 <p>Legal values for <code>RetrievePieceStatus</code> are as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="p">(</span>
-	<span class="c1">// Unset implies a programmer error. This value should never appear in an
-</span><span class="c1"></span>	<span class="c1">// actual message.
-</span><span class="c1"></span>	<span class="nx">Unset</span> <span class="p">=</span> <span class="nf">RetrievePieceStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
+    <span class="c1">// Unset implies a programmer error. This value should never appear in an
+</span><span class="c1"></span>    <span class="c1">// actual message.
+</span><span class="c1"></span>    <span class="nx">Unset</span> <span class="p">=</span> <span class="nf">RetrievePieceStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
 
-	<span class="c1">// Failure indicates that the piece can not be retrieved from the miner.
-</span><span class="c1"></span>	<span class="nx">Failure</span>
+    <span class="c1">// Failure indicates that the piece can not be retrieved from the miner.
+</span><span class="c1"></span>    <span class="nx">Failure</span>
 
-	<span class="c1">// Success means that the piece can be retrieved from the miner.
-</span><span class="c1"></span>	<span class="nx">Success</span>
+    <span class="c1">// Success means that the piece can be retrieved from the miner.
+</span><span class="c1"></span>    <span class="nx">Success</span>
 <span class="p">)</span></code></pre></div>
 <p>If the miner does not accept the request, it sends a <code>RetrievePieceResponse</code> with the <code>Status</code> field set to <code>Failure</code>. The miner should set the <code>ErrorMessage</code> field to indicate a reason for the request being rejected.</p>
 
@@ -512,9 +512,9 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The <code>RetrievePieceChunk</code> message is specified as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetrievePieceChunk</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// The `Data` field contains a chunk of a piece. The length of `Data` must
-</span><span class="c1"></span>	<span class="c1">// be &gt; 0.
-</span><span class="c1"></span>	<span class="nx">Data</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="c1">// The `Data` field contains a chunk of a piece. The length of `Data` must
+</span><span class="c1"></span>    <span class="c1">// be &gt; 0.
+</span><span class="c1"></span>    <span class="nx">Data</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span></code></pre></div>
 <p>TODO: document the query deal interaction</p>
 
@@ -523,10 +523,10 @@ https://github.com/alex-shpak/hugo-book
 <p>The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of <code>/fil/sync/blk/0.0.1</code>. It uses CBOR-RPC.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BlockSyncRequest</span> <span class="kd">struct</span> <span class="p">{</span>
   <span class="c1">// The TipSet being synced from
-</span><span class="c1"></span>	<span class="nx">Start</span>         <span class="p">[]</span><span class="nx">Cid</span>
+</span><span class="c1"></span>    <span class="nx">Start</span>         <span class="p">[]</span><span class="nx">Cid</span>
 
   <span class="c1">// How many tipsets to sync
-</span><span class="c1"></span>	<span class="nx">RequestLength</span> <span class="kt">uint64</span>
+</span><span class="c1"></span>    <span class="nx">RequestLength</span> <span class="kt">uint64</span>
 
   <span class="c1">// Query options
 </span><span class="c1"></span>  <span class="nx">Options</span> <span class="kt">uint64</span>
@@ -557,10 +557,10 @@ https://github.com/alex-shpak/hugo-book
 </tbody>
 </table>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BlockSyncResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Chain</span> <span class="p">[]</span><span class="nx">TipSetBundle</span>
+    <span class="nx">Chain</span> <span class="p">[]</span><span class="nx">TipSetBundle</span>
 
-	<span class="nx">Status</span>  <span class="kt">uint</span>
-	<span class="nx">Message</span> <span class="kt">string</span>
+    <span class="nx">Status</span>  <span class="kt">uint</span>
+    <span class="nx">Message</span> <span class="kt">string</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">TipSetBundle</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -585,19 +585,19 @@ Block 'b1': [mB, mC, mA]
 
 <p>Possible error codes:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">Success</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="nx">Success</span> <span class="p">=</span> <span class="mi">0</span>
 
-	<span class="c1">// Sent back fewer blocks than requested
-</span><span class="c1"></span>	<span class="nx">PartialResponse</span> <span class="p">=</span> <span class="mi">101</span>
+    <span class="c1">// Sent back fewer blocks than requested
+</span><span class="c1"></span>    <span class="nx">PartialResponse</span> <span class="p">=</span> <span class="mi">101</span>
 
-	<span class="c1">// request.Start not found
-</span><span class="c1"></span>	<span class="nx">BlockNotFound</span> <span class="p">=</span> <span class="mi">201</span>
+    <span class="c1">// request.Start not found
+</span><span class="c1"></span>    <span class="nx">BlockNotFound</span> <span class="p">=</span> <span class="mi">201</span>
 
-	<span class="c1">// requester is making too many requests
-</span><span class="c1"></span>	<span class="nx">GoAway</span> <span class="p">=</span> <span class="mi">202</span>
+    <span class="c1">// requester is making too many requests
+</span><span class="c1"></span>    <span class="nx">GoAway</span> <span class="p">=</span> <span class="mi">202</span>
 
-	<span class="c1">// Internal Error
-</span><span class="c1"></span>	<span class="nx">InternalError</span> <span class="p">=</span> <span class="mi">203</span>
+    <span class="c1">// Internal Error
+</span><span class="c1"></span>    <span class="nx">InternalError</span> <span class="p">=</span> <span class="mi">203</span>
 <span class="p">)</span></code></pre></div>
 </article>
 

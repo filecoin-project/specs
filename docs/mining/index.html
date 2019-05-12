@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -185,16 +185,16 @@ https://github.com/alex-shpak/hugo-book
 
 <p>At the beginning of their proving period, miners collect the proving set (the set of all live sealed sectors on the chain at this point), and then call <code>ProveStorage</code>. This process will take the entire proving period to complete.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ProveStorage</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">commR</span><span class="p">,</span> <span class="nx">startTime</span> <span class="nx">BlockHeight</span><span class="p">)</span> <span class="p">(</span><span class="nx">PoSTProof</span><span class="p">,</span> <span class="p">[]</span><span class="nx">FaultSet</span><span class="p">)</span> <span class="p">{</span>
-	<span class="kd">var</span> <span class="nx">proofs</span> <span class="p">[]</span><span class="nx">Proofs</span>
-	<span class="kd">var</span> <span class="nx">seeds</span> <span class="p">[]</span><span class="nx">Seed</span>
-	<span class="kd">var</span> <span class="nx">faults</span> <span class="p">[]</span><span class="nx">FaultSet</span>
-	<span class="k">for</span> <span class="nx">t</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">t</span> <span class="p">&lt;</span> <span class="nx">ProvingPeriod</span><span class="p">;</span> <span class="nx">t</span> <span class="o">+=</span> <span class="nx">ReseedPeriod</span> <span class="p">{</span>
-		<span class="nx">seeds</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">seeds</span><span class="p">,</span> <span class="nf">GetSeedFromBlock</span><span class="p">(</span><span class="nx">startTime</span><span class="o">+</span><span class="nx">t</span><span class="p">))</span>
-		<span class="nx">proof</span><span class="p">,</span> <span class="nx">faultset</span> <span class="o">:=</span> <span class="nf">GenPost</span><span class="p">(</span><span class="nx">sectors</span><span class="p">,</span> <span class="nx">seeds</span><span class="p">[</span><span class="nx">t</span><span class="p">],</span> <span class="nx">vdfParams</span><span class="p">)</span>
-		<span class="nx">proofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofs</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span>
-		<span class="nx">faults</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">faults</span><span class="p">,</span> <span class="nx">faultset</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="nf">GenPostSnark</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">seeds</span><span class="p">,</span> <span class="nx">proofs</span><span class="p">),</span> <span class="nx">faults</span>
+    <span class="kd">var</span> <span class="nx">proofs</span> <span class="p">[]</span><span class="nx">Proofs</span>
+    <span class="kd">var</span> <span class="nx">seeds</span> <span class="p">[]</span><span class="nx">Seed</span>
+    <span class="kd">var</span> <span class="nx">faults</span> <span class="p">[]</span><span class="nx">FaultSet</span>
+    <span class="k">for</span> <span class="nx">t</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">t</span> <span class="p">&lt;</span> <span class="nx">ProvingPeriod</span><span class="p">;</span> <span class="nx">t</span> <span class="o">+=</span> <span class="nx">ReseedPeriod</span> <span class="p">{</span>
+        <span class="nx">seeds</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">seeds</span><span class="p">,</span> <span class="nf">GetSeedFromBlock</span><span class="p">(</span><span class="nx">startTime</span><span class="o">+</span><span class="nx">t</span><span class="p">))</span>
+        <span class="nx">proof</span><span class="p">,</span> <span class="nx">faultset</span> <span class="o">:=</span> <span class="nf">GenPost</span><span class="p">(</span><span class="nx">sectors</span><span class="p">,</span> <span class="nx">seeds</span><span class="p">[</span><span class="nx">t</span><span class="p">],</span> <span class="nx">vdfParams</span><span class="p">)</span>
+        <span class="nx">proofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofs</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span>
+        <span class="nx">faults</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">faults</span><span class="p">,</span> <span class="nx">faultset</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nf">GenPostSnark</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">seeds</span><span class="p">,</span> <span class="nx">proofs</span><span class="p">),</span> <span class="nx">faults</span>
 <span class="p">}</span></code></pre></div>
 <p>Note: See <a href="proofs.md#proof-of-space-time">&lsquo;Proof of Space Time&rsquo;</a> for more details.</p>
 
@@ -312,42 +312,42 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <p>Ticket validation is detailed as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">RandomnessLookback</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="nx">TipSet</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">GetAncestorTipset</span><span class="p">(</span><span class="nx">blk</span><span class="p">,</span> <span class="nx">K</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">GetAncestorTipset</span><span class="p">(</span><span class="nx">blk</span><span class="p">,</span> <span class="nx">K</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">PowerLookback</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="nx">TipSet</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">GetAncestorTipset</span><span class="p">(</span><span class="nx">blk</span><span class="p">,</span> <span class="nx">L</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">GetAncestorTipset</span><span class="p">(</span><span class="nx">blk</span><span class="p">,</span> <span class="nx">L</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">IsProofAWinner</span><span class="p">(</span><span class="nx">p</span> <span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">minersPower</span><span class="p">,</span> <span class="nx">totalPower</span> <span class="nx">Integer</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">Integer</span><span class="p">.</span><span class="nf">FromBytes</span><span class="p">(</span><span class="nx">sha256</span><span class="p">.</span><span class="nf">Sum</span><span class="p">(</span><span class="nx">p</span><span class="p">))</span><span class="o">*</span><span class="nx">totalPower</span> <span class="p">&lt;</span> <span class="nx">minersPower</span><span class="o">*</span><span class="mi">2</span><span class="p">^</span><span class="mi">32</span>
+    <span class="k">return</span> <span class="nx">Integer</span><span class="p">.</span><span class="nf">FromBytes</span><span class="p">(</span><span class="nx">sha256</span><span class="p">.</span><span class="nf">Sum</span><span class="p">(</span><span class="nx">p</span><span class="p">))</span><span class="o">*</span><span class="nx">totalPower</span> <span class="p">&lt;</span> <span class="nx">minersPower</span><span class="o">*</span><span class="mi">2</span><span class="p">^</span><span class="mi">32</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">VerifyTickets</span><span class="p">(</span><span class="nx">b</span> <span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
-	<span class="c1">// Start with the `Tickets` array
-</span><span class="c1"></span>	<span class="c1">// get the smallest ticket from the blocks parent tipset
-</span><span class="c1"></span>	<span class="nx">parTicket</span> <span class="o">:=</span> <span class="nf">GetSmallestTicket</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">Parents</span><span class="p">)</span>
+    <span class="c1">// Start with the `Tickets` array
+</span><span class="c1"></span>    <span class="c1">// get the smallest ticket from the blocks parent tipset
+</span><span class="c1"></span>    <span class="nx">parTicket</span> <span class="o">:=</span> <span class="nf">GetSmallestTicket</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">Parents</span><span class="p">)</span>
 
-	<span class="c1">// Verify each ticket in the chain of tickets. There will be one ticket
-</span><span class="c1"></span>	<span class="c1">// plus one ticket for each failed election attempt.
-</span><span class="c1"></span>	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">ticket</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">b</span><span class="p">.</span><span class="nx">Tickets</span> <span class="p">{</span>
-		<span class="nx">challenge</span> <span class="o">:=</span> <span class="nx">sha256</span><span class="p">.</span><span class="nf">Sum</span><span class="p">(</span><span class="nx">parTicket</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span>
+    <span class="c1">// Verify each ticket in the chain of tickets. There will be one ticket
+</span><span class="c1"></span>    <span class="c1">// plus one ticket for each failed election attempt.
+</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">ticket</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">b</span><span class="p">.</span><span class="nx">Tickets</span> <span class="p">{</span>
+        <span class="nx">challenge</span> <span class="o">:=</span> <span class="nx">sha256</span><span class="p">.</span><span class="nf">Sum</span><span class="p">(</span><span class="nx">parTicket</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span>
 
-		<span class="c1">// Check VDF
-</span><span class="c1"></span>		<span class="k">if</span> <span class="p">!</span><span class="nf">VerifyVDF</span><span class="p">(</span><span class="nx">ticket</span><span class="p">.</span><span class="nx">VDFProof</span><span class="p">,</span> <span class="nx">ticket</span><span class="p">.</span><span class="nx">VDFResult</span><span class="p">,</span> <span class="nx">challenge</span><span class="p">)</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="s">&#34;VDF was not run properly&#34;</span>
-		<span class="p">}</span>
+        <span class="c1">// Check VDF
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">!</span><span class="nf">VerifyVDF</span><span class="p">(</span><span class="nx">ticket</span><span class="p">.</span><span class="nx">VDFProof</span><span class="p">,</span> <span class="nx">ticket</span><span class="p">.</span><span class="nx">VDFResult</span><span class="p">,</span> <span class="nx">challenge</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">&#34;VDF was not run properly&#34;</span>
+        <span class="p">}</span>
 
-		<span class="c1">// Check VRF
-</span><span class="c1"></span>		<span class="nx">pubk</span> <span class="o">:=</span> <span class="nf">getPublicKeyForMiner</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">Miner</span><span class="p">)</span>
-		<span class="k">if</span> <span class="p">!</span><span class="nf">VerifySignature</span><span class="p">(</span><span class="nx">ticket</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">pubk</span><span class="p">,</span> <span class="nx">ticket</span><span class="p">.</span><span class="nx">VDFResult</span><span class="p">)</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="s">&#34;Ticket was not a valid signature over the parent ticket&#34;</span>
-		<span class="p">}</span>
-		<span class="c1">// in case mining this block generated multiple tickets
-</span><span class="c1"></span>		<span class="nx">parTicket</span> <span class="p">=</span> <span class="nx">ticket</span>
-	<span class="p">}</span>
+        <span class="c1">// Check VRF
+</span><span class="c1"></span>        <span class="nx">pubk</span> <span class="o">:=</span> <span class="nf">getPublicKeyForMiner</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">Miner</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">!</span><span class="nf">VerifySignature</span><span class="p">(</span><span class="nx">ticket</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">pubk</span><span class="p">,</span> <span class="nx">ticket</span><span class="p">.</span><span class="nx">VDFResult</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">&#34;Ticket was not a valid signature over the parent ticket&#34;</span>
+        <span class="p">}</span>
+        <span class="c1">// in case mining this block generated multiple tickets
+</span><span class="c1"></span>        <span class="nx">parTicket</span> <span class="p">=</span> <span class="nx">ticket</span>
+    <span class="p">}</span>
 
-	<span class="k">return</span> <span class="kc">nil</span>
+    <span class="k">return</span> <span class="kc">nil</span>
 <span class="p">}</span></code></pre></div>
 <p>If all of this lines up, the block is valid. The miner repeats this for all blocks in a TipSet, and for all TipSets formed from incoming blocks.</p>
 

@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -167,78 +167,78 @@ https://github.com/alex-shpak/hugo-book
 
 <p>These functions are given, as input, an <code>ExecutionContext</code> containing useful information for their execution.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">VMContext</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// Message is the message that kicked off the current invocation
-</span><span class="c1"></span>	<span class="nf">Message</span><span class="p">()</span> <span class="nx">Message</span>
+    <span class="c1">// Message is the message that kicked off the current invocation
+</span><span class="c1"></span>    <span class="nf">Message</span><span class="p">()</span> <span class="nx">Message</span>
 
-	<span class="c1">// Storage provides access to the VM storage layer
-</span><span class="c1"></span>	<span class="nf">Storage</span><span class="p">()</span> <span class="nx">Storage</span>
+    <span class="c1">// Storage provides access to the VM storage layer
+</span><span class="c1"></span>    <span class="nf">Storage</span><span class="p">()</span> <span class="nx">Storage</span>
 
-	<span class="c1">// Send allows the current execution context to invoke methods on other actors in the system
-</span><span class="c1"></span>	<span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">AttoFIL</span><span class="p">,</span> <span class="nx">params</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">uint8</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="c1">// Send allows the current execution context to invoke methods on other actors in the system
+</span><span class="c1"></span>    <span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">AttoFIL</span><span class="p">,</span> <span class="nx">params</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">uint8</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
-	<span class="c1">// BlockHeight returns the height of the block this message was added to the chain in
-</span><span class="c1"></span>	<span class="nf">BlockHeight</span><span class="p">()</span> <span class="nx">BlockHeight</span>
+    <span class="c1">// BlockHeight returns the height of the block this message was added to the chain in
+</span><span class="c1"></span>    <span class="nf">BlockHeight</span><span class="p">()</span> <span class="nx">BlockHeight</span>
 <span class="p">}</span></code></pre></div>
 <p>If the execution completes successfully, changes to the state tree are saved. Otherwise, the message is marked as failed, and any state changes are reverted.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">st</span> <span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">Message</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
-	<span class="nx">st</span><span class="p">.</span><span class="nf">Snapshot</span><span class="p">()</span>
-	<span class="nx">fromActor</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such from actor&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">Snapshot</span><span class="p">()</span>
+    <span class="nx">fromActor</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such from actor&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="o">+</span> <span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasLimit</span> <span class="o">*</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nx">Balance</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough funds&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="o">+</span> <span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasLimit</span> <span class="o">*</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nx">Balance</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough funds&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">Nonce</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nx">Nonce</span><span class="o">+</span><span class="mi">1</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid nonce&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">Nonce</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nx">Nonce</span><span class="o">+</span><span class="mi">1</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid nonce&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="nx">toActor</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-		<span class="nx">toActor</span> <span class="p">=</span> <span class="nf">TryCreateAccountActor</span><span class="p">(</span><span class="nx">st</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="nx">toActor</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="nx">toActor</span> <span class="p">=</span> <span class="nf">TryCreateAccountActor</span><span class="p">(</span><span class="nx">st</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="nx">st</span><span class="p">.</span><span class="nf">DeductFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="nx">totalCost</span><span class="p">)</span>
-	<span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">DeductFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="nx">totalCost</span><span class="p">)</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">To</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span>
 
-	<span class="nx">vmctx</span> <span class="o">:=</span> <span class="nf">makeVMContext</span><span class="p">(</span><span class="nx">st</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
+    <span class="nx">vmctx</span> <span class="o">:=</span> <span class="nf">makeVMContext</span><span class="p">(</span><span class="nx">st</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
 
-	<span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Method</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
-		<span class="nx">ret</span><span class="p">,</span> <span class="nx">errcode</span> <span class="o">:=</span> <span class="nx">toActor</span><span class="p">.</span><span class="nf">Invoke</span><span class="p">(</span><span class="nx">vmctx</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Method</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Params</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">errcode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
-			<span class="c1">// revert all state changes since snapshot
-</span><span class="c1"></span>			<span class="nx">st</span><span class="p">.</span><span class="nf">Revert</span><span class="p">()</span>
-			<span class="nx">st</span><span class="p">.</span><span class="nf">DeductFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">()</span><span class="o">*</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
-		<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-			<span class="c1">// refund unused gas
-</span><span class="c1"></span>			<span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasLimit</span><span class="o">-</span><span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">())</span><span class="o">*</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Method</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nx">ret</span><span class="p">,</span> <span class="nx">errcode</span> <span class="o">:=</span> <span class="nx">toActor</span><span class="p">.</span><span class="nf">Invoke</span><span class="p">(</span><span class="nx">vmctx</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Method</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nx">errcode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="c1">// revert all state changes since snapshot
+</span><span class="c1"></span>            <span class="nx">st</span><span class="p">.</span><span class="nf">Revert</span><span class="p">()</span>
+            <span class="nx">st</span><span class="p">.</span><span class="nf">DeductFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">()</span><span class="o">*</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// refund unused gas
+</span><span class="c1"></span>            <span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasLimit</span><span class="o">-</span><span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">())</span><span class="o">*</span><span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-	<span class="c1">// reward miner gas fees
-</span><span class="c1"></span>	<span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">BlockMiner</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="o">*</span><span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">())</span>
+    <span class="c1">// reward miner gas fees
+</span><span class="c1"></span>    <span class="nx">st</span><span class="p">.</span><span class="nf">DepositFunds</span><span class="p">(</span><span class="nx">BlockMiner</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="o">*</span><span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">())</span>
 
-	<span class="k">return</span> <span class="nx">MessageReceipt</span><span class="p">{</span>
-		<span class="nx">ExitCode</span><span class="p">:</span> <span class="nx">errcode</span><span class="p">,</span>
-		<span class="nx">Return</span><span class="p">:</span>   <span class="nx">ret</span><span class="p">,</span>
-		<span class="nx">GasUsed</span><span class="p">:</span>  <span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span>
-	<span class="p">}</span>
+    <span class="k">return</span> <span class="nx">MessageReceipt</span><span class="p">{</span>
+        <span class="nx">ExitCode</span><span class="p">:</span> <span class="nx">errcode</span><span class="p">,</span>
+        <span class="nx">Return</span><span class="p">:</span>   <span class="nx">ret</span><span class="p">,</span>
+        <span class="nx">GasUsed</span><span class="p">:</span>  <span class="nx">vmctx</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">TryCreateAccountActor</span><span class="p">(</span><span class="nx">st</span> <span class="nx">StateTree</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">Actor</span> <span class="p">{</span>
-	<span class="k">switch</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Type</span><span class="p">()</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">BLS</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nf">NewBLSAccountActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">Secp256k1</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nf">NewSecp256k1AccountActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">ID</span><span class="p">:</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no actor with given ID&#34;</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">Actor</span><span class="p">:</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such actor&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">switch</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Type</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">BLS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nf">NewBLSAccountActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">Secp256k1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nf">NewSecp256k1AccountActor</span><span class="p">(</span><span class="nx">addr</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">ID</span><span class="p">:</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no actor with given ID&#34;</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">Actor</span><span class="p">:</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such actor&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <h4 id="receipts">Receipts</h4>
 
@@ -248,20 +248,20 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Actors are given acess to a <code>Storage</code> interface to fulfil their need for persistent storage. The <code>Storage</code> interface describes a content addressed block storage system (<code>Put</code> and <code>Get</code>) and a pointer into it (<code>Head</code> and <code>Commit</code>) that points to the actor&rsquo;s current state.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Storage</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// Put writes the given object to the storage staging area and returns its CID
-</span><span class="c1"></span>	<span class="nf">Put</span><span class="p">(</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="nx">Cid</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="c1">// Put writes the given object to the storage staging area and returns its CID
+</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="nx">Cid</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
-	<span class="c1">// Get fetches the given object from storage (either staging, or local) and returns
-</span><span class="c1"></span>	<span class="c1">// the serialized data.
-</span><span class="c1"></span>	<span class="nf">Get</span><span class="p">(</span><span class="nx">Cid</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="c1">// Get fetches the given object from storage (either staging, or local) and returns
+</span><span class="c1"></span>    <span class="c1">// the serialized data.
+</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">Cid</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
-	<span class="c1">// Commit updates the actual stored state for the actor. This is a compare and swap
-</span><span class="c1"></span>	<span class="c1">// operation, and will fail if &#39;old&#39; is not equal to the current return value of `Head`.
-</span><span class="c1"></span>	<span class="c1">// This functionality is used to prevent issues with re-entrancy
-</span><span class="c1"></span>	<span class="nf">Commit</span><span class="p">(</span><span class="nx">old</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">Cid</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="c1">// Commit updates the actual stored state for the actor. This is a compare and swap
+</span><span class="c1"></span>    <span class="c1">// operation, and will fail if &#39;old&#39; is not equal to the current return value of `Head`.
+</span><span class="c1"></span>    <span class="c1">// This functionality is used to prevent issues with re-entrancy
+</span><span class="c1"></span>    <span class="nf">Commit</span><span class="p">(</span><span class="nx">old</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">Cid</span><span class="p">)</span> <span class="kt">error</span>
 
-	<span class="c1">// Head returns the CID of the current actor state
-</span><span class="c1"></span>	<span class="nf">Head</span><span class="p">()</span> <span class="nx">Cid</span>
+    <span class="c1">// Head returns the CID of the current actor state
+</span><span class="c1"></span>    <span class="nf">Head</span><span class="p">()</span> <span class="nx">Cid</span>
 <span class="p">}</span></code></pre></div>
 <p>Actors can store state as a single block or implement any persistent
 data structure that can be built upon a content addressed block store.

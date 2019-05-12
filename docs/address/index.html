@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -194,18 +194,18 @@ https://github.com/alex-shpak/hugo-book
 
 <p>An example of a Filecoin address in golang:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Address</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// 0: Mainnet
-</span><span class="c1"></span>	<span class="c1">// 1: Testnet
-</span><span class="c1"></span>	<span class="nx">Network</span> <span class="kt">byte</span>
+    <span class="c1">// 0: Mainnet
+</span><span class="c1"></span>    <span class="c1">// 1: Testnet
+</span><span class="c1"></span>    <span class="nx">Network</span> <span class="kt">byte</span>
 
-	<span class="c1">// 0: ID
-</span><span class="c1"></span>	<span class="c1">// 1: Blake2b160-Hash of secp256k1 Public Key
-</span><span class="c1"></span>	<span class="c1">// 2: Blake2b160-Hash of Actor creation data
-</span><span class="c1"></span>	<span class="c1">// 3: BLS Public Key
-</span><span class="c1"></span>	<span class="nx">Protocol</span> <span class="kt">byte</span>
+    <span class="c1">// 0: ID
+</span><span class="c1"></span>    <span class="c1">// 1: Blake2b160-Hash of secp256k1 Public Key
+</span><span class="c1"></span>    <span class="c1">// 2: Blake2b160-Hash of Actor creation data
+</span><span class="c1"></span>    <span class="c1">// 3: BLS Public Key
+</span><span class="c1"></span>    <span class="nx">Protocol</span> <span class="kt">byte</span>
 
-	<span class="c1">// raw bytes containing the data associated with protocol
-</span><span class="c1"></span>	<span class="nx">Payload</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="c1">// raw bytes containing the data associated with protocol
+</span><span class="c1"></span>    <span class="nx">Payload</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span></code></pre></div>
 <h4 id="network-prefix">Network Prefix</h4>
 
@@ -227,10 +227,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Protocol</span> <span class="p">=</span> <span class="kt">byte</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">ID</span> <span class="nx">Protocol</span> <span class="p">=</span> <span class="kc">iota</span>
-	<span class="nx">SECP256K1</span>
-	<span class="nx">Actor</span>
-	<span class="nx">BLS</span>
+    <span class="nx">ID</span> <span class="nx">Protocol</span> <span class="p">=</span> <span class="kc">iota</span>
+    <span class="nx">SECP256K1</span>
+    <span class="nx">Actor</span>
+    <span class="nx">BLS</span>
 <span class="p">)</span></code></pre></div>
 <h6 id="protocol-0-ids">Protocol 0: IDs</h6>
 
@@ -330,22 +330,22 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span>
 
 <span class="kd">type</span> <span class="nx">Address</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="nf">Encode</span><span class="p">(</span><span class="nx">network</span> <span class="nx">Network</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">Adress</span><span class="p">)</span> <span class="kt">string</span>
-	<span class="nf">Decode</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span>
-	<span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span>
-	<span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">Encode</span><span class="p">(</span><span class="nx">network</span> <span class="nx">Network</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">Adress</span><span class="p">)</span> <span class="kt">string</span>
+    <span class="nf">Decode</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span>
+    <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span></code></pre></div>
 <h5 id="new">New()</h5>
 
 <p>New returns an Address for the specified protocol encapsulating corresponding payload. New fails for unknown protocols.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">protocol</span> <span class="p">&lt;</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="p">&gt;</span> <span class="nx">BLS</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrUnknownType</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
-		<span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
-		<span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="nx">protocol</span> <span class="p">&lt;</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="p">&gt;</span> <span class="nx">BLS</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrUnknownType</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
+        <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
+        <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <h5 id="encode">Encode()</h5>
 
@@ -359,19 +359,19 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Encodes an Address as a string, prepending the network prefix, calculating the checksum, and encoding the payload and checksum to <a href="https://tools.ietf.org/html/rfc4648">base32</a>.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Encode</span><span class="p">(</span><span class="nx">network</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;f&#34;</span> <span class="o">&amp;&amp;</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;t&#34;</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Invalid Network&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;f&#34;</span> <span class="o">&amp;&amp;</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;t&#34;</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Invalid Network&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="k">switch</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">SECP256K1</span><span class="p">,</span> <span class="nx">Actor</span><span class="p">,</span> <span class="nx">BLS</span><span class="p">:</span>
-		<span class="nx">cksm</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
-		<span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="o">+</span><span class="nx">cksm</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">ID</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base10</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">leb128</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">))</span>
-	<span class="k">default</span><span class="p">:</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid address protocol&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">switch</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">SECP256K1</span><span class="p">,</span> <span class="nx">Actor</span><span class="p">,</span> <span class="nx">BLS</span><span class="p">:</span>
+        <span class="nx">cksm</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="o">+</span><span class="nx">cksm</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">ID</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base10</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">leb128</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">))</span>
+    <span class="k">default</span><span class="p">:</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid address protocol&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <h5 id="decode">Decode()</h5>
 
@@ -382,53 +382,53 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Decode an Address from a string by removing the network prefix, validating the address is of a know protocol, decoding the payload and checksum, and validating the checksum.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">&lt;</span> <span class="mi">3</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidLength</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">&lt;</span> <span class="mi">3</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidLength</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="k">if</span> <span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#34;f&#34;</span> <span class="o">&amp;&amp;</span> <span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#34;t&#34;</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrUnknownNetwork</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="k">if</span> <span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#34;f&#34;</span> <span class="o">&amp;&amp;</span> <span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#34;t&#34;</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrUnknownNetwork</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="nx">protocol</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-	<span class="nx">raw</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-	<span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">ID</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
-			<span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
-			<span class="nx">Payload</span><span class="p">:</span>  <span class="nx">leb128</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">base10</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)),</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
+    <span class="nx">protocol</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nx">raw</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">ID</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
+            <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
+            <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">leb128</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">base10</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)),</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-	<span class="nx">raw</span> <span class="p">=</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span>
-	<span class="nx">payload</span> <span class="p">=</span> <span class="nx">raw</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">]</span>
-	<span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">Actor</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">20</span> <span class="p">{</span>
-			<span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidBytes</span><span class="p">)</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
+    <span class="nx">raw</span> <span class="p">=</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span>
+    <span class="nx">payload</span> <span class="p">=</span> <span class="nx">raw</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">Actor</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">20</span> <span class="p">{</span>
+            <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidBytes</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-	<span class="nx">cksm</span> <span class="o">:=</span> <span class="nx">payload</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">:]</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">cksm</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidChecksum</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="nx">cksm</span> <span class="o">:=</span> <span class="nx">payload</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">cksm</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidChecksum</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
-		<span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
-		<span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
-	<span class="p">}</span>
+    <span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
+        <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
+        <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <h5 id="checksum-1">Checksum()</h5>
 
 <p>Checksum produces a byte array by taking the blake2b-4 hash of an address protocol and payload.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">byte</span> <span class="p">{</span>
-	<span class="nf">blake2b4</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span> <span class="o">+</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">)</span>
+    <span class="nf">blake2b4</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span> <span class="o">+</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <h5 id="validatechecksum">ValidateChecksum()</h5>
 
 <p>ValidateChecksum returns true if the Checksum of data matches the expected checksum.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">expected</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nx">digest</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">digest</span> <span class="o">==</span> <span class="nx">expected</span>
+    <span class="nx">digest</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">digest</span> <span class="o">==</span> <span class="nx">expected</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="vectors">Vectors</h2>
 

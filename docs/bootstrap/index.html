@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -205,14 +205,14 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">trustedChain</span> <span class="o">:=</span> <span class="nf">sayHello</span><span class="p">(</span><span class="nx">trustedPeer</span><span class="p">)</span>
         
         <span class="nx">s</span><span class="p">.</span><span class="nx">trustedHeads</span><span class="p">[</span><span class="nx">trustedChain</span><span class="p">.</span><span class="nx">HeaviestTipSet</span><span class="p">]</span> <span class="p">=</span> <span class="nx">trustedChain</span><span class="p">.</span><span class="nx">HeaviestTipSetHeight</span>
-    		
+            
         <span class="k">if</span> <span class="nx">trustedChain</span><span class="p">.</span><span class="nx">GenesisHash</span> <span class="o">!=</span> <span class="nx">GENESIS</span> <span class="p">{</span>
             <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;One of your trusted peers is bad.&#34;</span><span class="p">)</span>
         <span class="p">}</span>        
     <span class="p">}</span>
     
     <span class="nx">s</span><span class="p">.</span><span class="nx">genesis</span> <span class="p">=</span> <span class="nx">GENESIS</span>
- 		<span class="nx">s</span><span class="p">.</span><span class="nf">ExpandPeerSet</span><span class="p">()</span>
+         <span class="nx">s</span><span class="p">.</span><span class="nf">ExpandPeerSet</span><span class="p">()</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="peer-set-expansion">Peer Set Expansion</h2>
 
@@ -232,7 +232,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>  <span class="nx">dupCounter</span> <span class="o">:=</span> <span class="mi">0</span>
   <span class="k">for</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">peerSet</span><span class="p">)</span> <span class="p">&lt;</span> <span class="nx">BootstrapPeerThreshold</span> <span class="o">&amp;&amp;</span> <span class="nx">dupCounter</span> <span class="p">&lt;</span> <span class="nx">DupThreshold</span> <span class="p">{</span>
     <span class="nx">trustedPeer</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">trustedPeers</span><span class="p">[</span><span class="nx">trustedPeerNum</span><span class="p">]</span>
-   	<span class="nx">newPeer</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">getRandomPeer</span><span class="p">(</span><span class="nx">trustedPeer</span><span class="p">)</span>
+       <span class="nx">newPeer</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">getRandomPeer</span><span class="p">(</span><span class="nx">trustedPeer</span><span class="p">)</span>
     <span class="c1">// adding a peer to the peer set will trigger syncing if our peer set has grown over the threshold
 </span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">syncer</span><span class="p">.</span><span class="nf">addPeerToSet</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">dupCounter</span> <span class="o">+=</span> <span class="mi">1</span>

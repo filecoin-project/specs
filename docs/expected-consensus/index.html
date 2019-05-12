@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.23bc357da004b7208ee3a465a6b397897001a1caf12e2f6b6d283ca4705e8380.css">
+<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -201,49 +201,49 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
 
 <p>For each block received over the network, <code>OnBlockReceived</code> is called. <code>VerifyBlock</code> is defined in the <a href="mining.md#block-validation">mining spec</a>.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">OnBlockReceived</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// The exact definition of IsValid depends on the protocol
-</span><span class="c1"></span>	<span class="c1">// For Filecoin, see mining.md
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nf">VerifyBlock</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span> <span class="p">{</span>
-		<span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span>
-	<span class="p">}</span>
+    <span class="c1">// The exact definition of IsValid depends on the protocol
+</span><span class="c1"></span>    <span class="c1">// For Filecoin, see mining.md
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nf">VerifyBlock</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span>
+    <span class="p">}</span>
 
-	<span class="c1">// Received an invalid block!
+    <span class="c1">// Received an invalid block!
 </span><span class="c1"></span><span class="p">}</span></code></pre></div>
 <p>Separately, another process is running <code>Mine</code> to attempt to generate blocks.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Mine</span><span class="p">(</span><span class="nx">minerKey</span> <span class="nx">PrivateKey</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">for</span> <span class="nx">r</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">rounds</span> <span class="p">{</span> <span class="c1">// for each round
-</span><span class="c1"></span>		<span class="nx">bestTipset</span><span class="p">,</span> <span class="nx">tickets</span> <span class="o">:=</span> <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">GetBestTipsetAtRound</span><span class="p">(</span><span class="nx">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">r</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">rounds</span> <span class="p">{</span> <span class="c1">// for each round
+</span><span class="c1"></span>        <span class="nx">bestTipset</span><span class="p">,</span> <span class="nx">tickets</span> <span class="o">:=</span> <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">GetBestTipsetAtRound</span><span class="p">(</span><span class="nx">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
-		<span class="nx">ticket</span> <span class="o">:=</span> <span class="nf">GenerateTicket</span><span class="p">(</span><span class="nx">minerKey</span><span class="p">,</span> <span class="nx">bestTipset</span><span class="p">)</span>
-		<span class="nx">tickets</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">ticket</span><span class="p">)</span>
+        <span class="nx">ticket</span> <span class="o">:=</span> <span class="nf">GenerateTicket</span><span class="p">(</span><span class="nx">minerKey</span><span class="p">,</span> <span class="nx">bestTipset</span><span class="p">)</span>
+        <span class="nx">tickets</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">ticket</span><span class="p">)</span>
 
-		<span class="c1">// Generate an election proof and check if we win
-</span><span class="c1"></span>		<span class="c1">// Note: even if we don&#39;t win, we want to make a ticket
-</span><span class="c1"></span>		<span class="c1">// in case we need to mine a null round
-</span><span class="c1"></span>		<span class="nx">win</span><span class="p">,</span> <span class="nx">proof</span> <span class="o">:=</span> <span class="nf">CheckIfWinnerAtRound</span><span class="p">(</span><span class="nx">minerKey</span><span class="p">,</span> <span class="nx">r</span><span class="p">,</span> <span class="nx">bestTipset</span><span class="p">)</span>
-		<span class="k">if</span> <span class="nx">win</span> <span class="p">{</span>
-			<span class="nf">GenerateAndBroadcastBlock</span><span class="p">(</span><span class="nx">bestTipset</span><span class="p">,</span> <span class="nx">tickets</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span>
-		<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-			<span class="c1">// Even if we don&#39;t win, add our ticket to the tracker in
-</span><span class="c1"></span>			<span class="c1">// case we need to mine on it later.
-</span><span class="c1"></span>			<span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">AddFailedTicket</span><span class="p">(</span><span class="nx">bestTipset</span><span class="p">,</span> <span class="nx">tickets</span><span class="p">)</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
+        <span class="c1">// Generate an election proof and check if we win
+</span><span class="c1"></span>        <span class="c1">// Note: even if we don&#39;t win, we want to make a ticket
+</span><span class="c1"></span>        <span class="c1">// in case we need to mine a null round
+</span><span class="c1"></span>        <span class="nx">win</span><span class="p">,</span> <span class="nx">proof</span> <span class="o">:=</span> <span class="nf">CheckIfWinnerAtRound</span><span class="p">(</span><span class="nx">minerKey</span><span class="p">,</span> <span class="nx">r</span><span class="p">,</span> <span class="nx">bestTipset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nx">win</span> <span class="p">{</span>
+            <span class="nf">GenerateAndBroadcastBlock</span><span class="p">(</span><span class="nx">bestTipset</span><span class="p">,</span> <span class="nx">tickets</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// Even if we don&#39;t win, add our ticket to the tracker in
+</span><span class="c1"></span>            <span class="c1">// case we need to mine on it later.
+</span><span class="c1"></span>            <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">AddFailedTicket</span><span class="p">(</span><span class="nx">bestTipset</span><span class="p">,</span> <span class="nx">tickets</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
 <p><code>IsProofAWinner</code> is taken from <a href="mining.md#block-validation">the mining doc</a>.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="nx">RandomnessLookback</span> <span class="p">=</span> <span class="mi">1</span> <span class="c1">// Also referred to as &#34;K&#34; in many places
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">PowerLookback</span> <span class="p">=</span> <span class="mi">1</span>      <span class="c1">// Also referred to as &#34;L&#34; in many places
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="nf">CheckIfWinnerAtRound</span><span class="p">(</span><span class="nx">key</span> <span class="nx">PrivateKey</span><span class="p">,</span> <span class="nx">n</span> <span class="nx">Integer</span><span class="p">,</span> <span class="nx">parentTipset</span> <span class="nx">Tipset</span><span class="p">)</span> <span class="p">(</span><span class="kt">bool</span><span class="p">,</span> <span class="nx">ElectionProof</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">lbt</span> <span class="o">:=</span> <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">TicketFromRound</span><span class="p">(</span><span class="nx">parentTipset</span><span class="p">,</span> <span class="nx">n</span><span class="o">-</span><span class="nx">RandomnessLookback</span><span class="p">)</span>
+    <span class="nx">lbt</span> <span class="o">:=</span> <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">TicketFromRound</span><span class="p">(</span><span class="nx">parentTipset</span><span class="p">,</span> <span class="nx">n</span><span class="o">-</span><span class="nx">RandomnessLookback</span><span class="p">)</span>
 
-	<span class="nx">eproof</span> <span class="o">:=</span> <span class="nf">ComputeElectionProof</span><span class="p">(</span><span class="nx">lbt</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span>
+    <span class="nx">eproof</span> <span class="o">:=</span> <span class="nf">ComputeElectionProof</span><span class="p">(</span><span class="nx">lbt</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span>
 
-	<span class="nx">tipset</span> <span class="o">:=</span> <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">TipsetFromRound</span><span class="p">(</span><span class="nx">n</span> <span class="o">-</span> <span class="nx">PowerLookback</span><span class="p">)</span>
-	<span class="nx">minerPower</span> <span class="o">:=</span> <span class="nf">GetPower</span><span class="p">(</span><span class="nx">tipset</span><span class="p">.</span><span class="nx">state</span><span class="p">,</span> <span class="nx">key</span><span class="p">.</span><span class="nf">Public</span><span class="p">())</span>
-	<span class="nx">totalPower</span> <span class="o">:=</span> <span class="nf">GetTotalPower</span><span class="p">(</span><span class="nx">tipset</span><span class="p">.</span><span class="nx">state</span><span class="p">)</span>
+    <span class="nx">tipset</span> <span class="o">:=</span> <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">TipsetFromRound</span><span class="p">(</span><span class="nx">n</span> <span class="o">-</span> <span class="nx">PowerLookback</span><span class="p">)</span>
+    <span class="nx">minerPower</span> <span class="o">:=</span> <span class="nf">GetPower</span><span class="p">(</span><span class="nx">tipset</span><span class="p">.</span><span class="nx">state</span><span class="p">,</span> <span class="nx">key</span><span class="p">.</span><span class="nf">Public</span><span class="p">())</span>
+    <span class="nx">totalPower</span> <span class="o">:=</span> <span class="nf">GetTotalPower</span><span class="p">(</span><span class="nx">tipset</span><span class="p">.</span><span class="nx">state</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="nf">IsProofAWinner</span><span class="p">(</span><span class="nx">eproof</span><span class="p">,</span> <span class="nx">minerPower</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">),</span> <span class="nx">eproof</span>
+    <span class="k">return</span> <span class="nf">IsProofAWinner</span><span class="p">(</span><span class="nx">eproof</span><span class="p">,</span> <span class="nx">minerPower</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">),</span> <span class="nx">eproof</span>
 <span class="p">}</span></code></pre></div>
 <p>TODO: get accurate estimates for K and L, potentially merge both to a single param.</p>
 
@@ -285,13 +285,13 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
 
 <p>For tickets in EC, one may use the following:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="c1">// The VDF Result is derived from the prior ticket in the ticket chain
-</span><span class="c1"></span>	<span class="nx">VDFResult</span> <span class="nx">BigInteger</span>
-	<span class="c1">// The VDF proves a delay between tickets generated
-</span><span class="c1"></span>	<span class="nx">VDFProof</span> <span class="nx">BigInteger</span>
-	<span class="c1">// This signature is generated by the miner&#39;s keypair run on the VDFResult.
-</span><span class="c1"></span>	<span class="c1">// It is the value that will be used to generate future tickets or ElectionProofs.
-</span><span class="c1"></span>	<span class="nx">Signature</span> <span class="nx">Signature</span>
+    <span class="c1">// The VDF Result is derived from the prior ticket in the ticket chain
+</span><span class="c1"></span>    <span class="nx">VDFResult</span> <span class="nx">BigInteger</span>
+    <span class="c1">// The VDF proves a delay between tickets generated
+</span><span class="c1"></span>    <span class="nx">VDFProof</span> <span class="nx">BigInteger</span>
+    <span class="c1">// This signature is generated by the miner&#39;s keypair run on the VDFResult.
+</span><span class="c1"></span>    <span class="c1">// It is the value that will be used to generate future tickets or ElectionProofs.
+</span><span class="c1"></span>    <span class="nx">Signature</span> <span class="nx">Signature</span>
 <span class="p">}</span></code></pre></div>
 <p>In practice, EC defines two different fields within a block:</p>
 
@@ -416,16 +416,16 @@ SampleRandomness: returns the appropriate ticket from round N-K
 <span class="c1">// If the current ticket isn&#39;t a winner and the block isn&#39;t found by another miner,
 </span><span class="c1">// derive a ticket from the last ticket
 </span><span class="c1"></span><span class="k">for</span> <span class="p">!</span><span class="nf">IsProofAWinner</span><span class="p">(</span><span class="nx">electionProof</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">!</span><span class="nf">blockFound</span><span class="p">()</span> <span class="p">{</span>
-	<span class="nx">newTicket</span> <span class="p">=</span> <span class="nf">VRF</span><span class="p">(</span><span class="nf">VDF</span><span class="p">(</span><span class="nf">H</span><span class="p">(</span><span class="nx">newTicket</span><span class="p">)))</span>
-	<span class="nx">newElectionProof</span> <span class="p">=</span> <span class="nf">Sig</span><span class="p">(</span><span class="nf">H</span><span class="p">(</span><span class="nf">ticketFromRound</span><span class="p">(</span><span class="nx">curRound</span> <span class="o">-</span> <span class="nx">K</span><span class="p">)))</span>
-	<span class="nx">Tickets</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">Tickets</span><span class="p">,</span> <span class="nx">newTicket</span><span class="p">)</span>
-	<span class="nx">curRound</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nx">newTicket</span> <span class="p">=</span> <span class="nf">VRF</span><span class="p">(</span><span class="nf">VDF</span><span class="p">(</span><span class="nf">H</span><span class="p">(</span><span class="nx">newTicket</span><span class="p">)))</span>
+    <span class="nx">newElectionProof</span> <span class="p">=</span> <span class="nf">Sig</span><span class="p">(</span><span class="nf">H</span><span class="p">(</span><span class="nf">ticketFromRound</span><span class="p">(</span><span class="nx">curRound</span> <span class="o">-</span> <span class="nx">K</span><span class="p">)))</span>
+    <span class="nx">Tickets</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">Tickets</span><span class="p">,</span> <span class="nx">newTicket</span><span class="p">)</span>
+    <span class="nx">curRound</span> <span class="o">+=</span> <span class="mi">1</span>
 <span class="p">}</span>
 
 <span class="c1">// if the process yields a winning ticket, mine and put out a block
 </span><span class="c1">// containing the ticket array
 </span><span class="c1"></span><span class="k">if</span> <span class="nf">winning</span><span class="p">(</span><span class="nx">electionProof</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nf">mineBlock</span><span class="p">(</span><span class="nx">electionProof</span><span class="p">,</span> <span class="nx">Tickets</span><span class="p">)</span>
+    <span class="nf">mineBlock</span><span class="p">(</span><span class="nx">electionProof</span><span class="p">,</span> <span class="nx">Tickets</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <p>A ticket can be verified to have been generated in the appropriate number of rounds by looking at the <code>Tickets</code> array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array. Note that this has implications on block size, and client memory requirements, though on expectation, the <code>Ticket</code> array should only contain one value.</p>
 
