@@ -4,7 +4,6 @@ Any implementations of the Filecoin actors must be exactly byte for byte compati
 
 This spec describes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
 
-
 - [Init Actor](#init-actor)
 - [Storage Market Actor](#storage-market-actor)
 - [Storage Miner Actor](#storage-miner-actor)
@@ -826,7 +825,7 @@ TODO
 A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
 
 Self modification methods (add/remove signer, change requirement) are called by
-doing a multisig transaction invoking the desired method on the contract itself. This means the 'signature 
+doing a multisig transaction invoking the desired method on the contract itself. This means the 'signature
 threshold' logic only needs to be implemented once, in one place.
 
 The [init actor](#init-actor) is used to create new instances of the multisig.
@@ -1096,4 +1095,3 @@ func getTransaction(txid int) Transaction {
 	return tx
 }
 ```
-
