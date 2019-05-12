@@ -520,19 +520,68 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="blocksync">BlockSync</h1>
 
-<p>The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of <code>/fil/sync/blk/0.0.0</code>. It uses CBOR-RPC.</p>
+<p>The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of <code>/fil/sync/blk/0.0.1</code>. It uses CBOR-RPC.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BlockSyncRequest</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Start</span>         <span class="nx">Cid</span>
-	<span class="nx">RequestLength</span> <span class="kt">uint64</span>
+  <span class="c1">// The TipSet being synced from
+</span><span class="c1"></span>	<span class="nx">Start</span>         <span class="p">[]</span><span class="nx">Cid</span>
+
+  <span class="c1">// How many tipsets to sync
+</span><span class="c1"></span>	<span class="nx">RequestLength</span> <span class="kt">uint64</span>
+
+  <span class="c1">// Query options
+</span><span class="c1"></span>  <span class="nx">Options</span> <span class="kt">uint64</span>
 <span class="p">}</span></code></pre></div>
-<p>The request requests a chain of a given length by the hash of its highest block.</p>
+<p>The request requests a chain of a given length by the hash of its highest block. The <code>Options</code> allow the requester to specify whether or not blocks and messages to be included.</p>
+
+<table>
+<thead>
+<tr>
+<th>bit</th>
+<th>option</th>
+<th>Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>0</td>
+<td>Blocks</td>
+<td>Include blocks if set</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>Messages</td>
+<td>Include messages if set</td>
+</tr>
+</tbody>
+</table>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BlockSyncResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">Blocks</span> <span class="p">[]</span><span class="nx">Block</span>
+	<span class="nx">Chain</span> <span class="p">[]</span><span class="nx">TipSetBundle</span>
 
 	<span class="nx">Status</span>  <span class="kt">uint</span>
 	<span class="nx">Message</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">TipSetBundle</span> <span class="kd">struct</span> <span class="p">{</span>
+  <span class="nx">Blocks</span> <span class="p">[]</span><span class="nx">Blocks</span>
+  <span class="nx">Messages</span> <span class="p">[]</span><span class="nx">Message</span>
+  <span class="nx">MsgIncludes</span> <span class="p">[][]</span><span class="kt">int</span>
 <span class="p">}</span></code></pre></div>
-<p>The response contains the chain of requested blocks, in reverse iteration order, the zero&rsquo;th block should be the block referenced by <code>request.Start</code>, and the following N blocks should be its N parents, and so on. This is done to streamline validation.</p>
+<p>The response contains the requested chain in reverse iteration order. Each item in the <code>Chain</code> array contains the blocks for that tipset if the <code>Blocks</code> option bit in the request was set, and if the <code>Messages</code> bit was set, the messages across all blocks in that tipset. The <code>MsgIncludes</code> array contains one array of integers for each block in the <code>Blocks</code> array. Each of the arrays in <code>MsgIncludes</code> contains a list of indexes of messages from the <code>Messages</code> array that are in each <code>Block</code> in the blocks array.</p>
+
+<p>Example TipSetBundle:</p>
+
+<pre><code>Blocks: [b0, b1]
+Messages: [mA, mB, mC, mD]
+MsgIncludes: [[0, 1, 3], [1, 2, 0]]
+</code></pre>
+
+<p>Corresponds to:</p>
+
+<pre><code>Block 'b0': [mA, mB, mD]
+Block 'b1': [mB, mC, mA]
+</code></pre>
 
 <p>Possible error codes:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="p">(</span>

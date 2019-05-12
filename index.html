@@ -157,14 +157,20 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Clients interact with the system by <a href="data-propagation.md#message-propagation">sending messages</a> to the network. These messages are gathered up and included by miners in blocks. Each of these messages defines a state transition in the state machine. The simplest messages say something like &ldquo;move Filecoin from <em>this</em> account under my control to <em>this</em> other account&rdquo;, but more complex ones describe storage sector commitments, storage deals struck, and proofs of storage.</p>
 
-<p>The Filecoin protocol itself is really a suite of protocols, including:
-- the chain protocol for propagating the data that constitutes the blockchain
-- the <a href="mining.md">block mining</a> protocol for producing new blocks
-- the <a href="expected-consensus.md">consensus mechanism</a> and <a href="validation.md">rules</a> for agreeing on canonical blockchain state
-- all interacting with the <a href="state-machine.md">state machine</a> and the <a href="actors.md">actors</a> running on it:
-  - the <a href="storage-market.md">storage market</a> protocol for <code>storage miners</code> to sell storage and clients to purchase it
-  - the <a href="retrieval-market.md">retrieval market</a> protocol for retrieving files
-  - the <a href="payments.md">payment channel</a> channel protocol for transferring FIL tokens between actors</p>
+<p>The Filecoin protocol itself is really a suite of protocols, including:</p>
+
+<ul>
+<li>the chain protocol for propagating the data that constitutes the blockchain</li>
+<li>the <a href="mining.md">block mining</a> protocol for producing new blocks</li>
+<li>the <a href="expected-consensus.md">consensus mechanism</a> and <a href="validation.md">rules</a> for agreeing on canonical blockchain state</li>
+<li>all interacting with the <a href="state-machine.md">state machine</a> and the <a href="actors.md">actors</a> running on it:
+
+<ul>
+<li>the <a href="storage-market.md">storage market</a> protocol for <code>storage miners</code> to sell storage and clients to purchase it</li>
+<li>the <a href="retrieval-market.md">retrieval market</a> protocol for retrieving files</li>
+<li>the <a href="payments.md">payment channel</a> channel protocol for transferring FIL tokens between actors</li>
+</ul></li>
+</ul>
 
 <h3 id="message-transport">Message Transport</h3>
 
