@@ -1,3 +1,4 @@
 # Build outbook from `gitbook serve`
 _book
 public
+resources/_gen
