@@ -10,7 +10,9 @@ This spec describes the Filecoin sync protocol, for related systems, see:
 
 Chain syncing is the process a filecoin node runs to sync its internal chain state with new blocks from the network and new blocks it itself has mined.  A node syncs in two distinct modes: `syncing` and `caught up`.  Chain syncing updates both local storage of chain data and the head of the current heaviest observed chain.
 
-'Syncing' mode and 'Caught up' mode are two distinct processes. 'Syncing' mode, or 'the initial sync' is a process that is triggered when a node is far enough behind the rest of the network. This process terminates once the nodes 'head' is    sufficiently far ahead. Once 'syncing' is complete, the 'caught up' sync process begins. This process keeps the node up to date with the rest of the network, and terminates only when the node is shut down.
+'Syncing' mode and 'Caught up' mode are two distinct processes. 'Syncing' mode, or 'the initial sync' is a process that is triggered when a node is far enough behind the rest of the network. This process terminates once the node's 'head' is sufficiently close to the current chain head. This is a configurable default, but as a default we may use 10*Block_Time.
+
+Once 'syncing' is complete, the 'caught up' sync process begins. This process keeps the node up to date with the rest of the network, and terminates only when the node is shut down.
 
 ## Interface
 
@@ -41,11 +43,20 @@ type Syncer struct {
   // Note: clear cache on disconnects
   peerHeads map[PeerID][]Cid
   
+  // trustedPeers will be used to kick off peer set expansion
+  // Filecoin nodes will ship with a default set
   trustedPeers []PeerID
+  
+  // trusted heads are the latest heads as reported by the trusted peers
   trustedHeads map[PeerId][]Cid  
 }
 
+// BoostrapPeerThreshold is the threshold needed to move from peerSetExpansion phase
+// (see bootstrap.md) to chain syncing. This is a node parameter that can be changed.
 const BootstrapPeerThreshold = 25
+// Likewise dupThreshold is the number of duplicate nodes the node can be routed to 
+// making "randomPeer" requests before it assumes the network is too small to reach the
+// bootstrapPeerThreshold and falls back to trying to sync with the trustedPeers.
 const DupThreshold = 10
 ```
 
@@ -213,6 +224,10 @@ A filecoin node syncs in `syncing` mode when entering the network for the first 
 
 During `syncing` mode a node learns about the newest head of the blockchain through the secure bootstrapping protocol. The syncing protocol then syncs the block headers for that entire chain, and validates their linking. It then fetches all the messages for the chain, and checks all the state transitions between the blocks and that the blocks were correctly created.  If validation passes the node's head is updated to the head TipSet received from bootstrapping.
 
+Note that this series of node validations during `syncing` is a potential vector for DoSing nodes in the network. In summary, a fake chain of blocks with a large height could be passed to a node, causing it to expend a lot of resources fetching that chain before eventually discarding it. The malicious node passing the fake chain can spoof their genesis block thereby foiling that validation step. To that end, Filecoin nodes will ship with a default confirmation time parameter, enabling nodes to discard nodes within confirmation_time/block_time rounds if they have not yet converged with the known chain.
+
+In the event a node thus receives a bad block, it should drop the connection to the peer who sent it, replacing it in its peer set with another random peer.
+
 In this mode of operation a filecoin node should not mine or send messages as it will not be able to successfully generate heaviest blocks or reference the correct state of the chain to verify that messages will execute as expected.
 
 (TODO: should include discussion of a `Load()` call to make use of existing chain data on a node during "re-awakening" case of `syncing` mode.)
@@ -276,9 +291,4 @@ Things that affect the chain syncing protocol.
 
 **Chain storage**
 
-- The current chain syncing protocol requires that the chain store never stores an invalid TipSet.
-
-# Open Questions
-- Secure bootstrapping in `syncing` mode
-- How do we handle the lag between the initial head bootstrapped in `syncing` mode and the network head once the first `SyncBootstrap` call is complete?  Likely we'll need multiple `SyncBootstrap` calls.  Should they be parallelized?
-- The properties of the chain store implementation have significant impact on the design of the syncing protocol and the syncing protocol's resistance to Denial Of Service (DOS) attacks.  For example if the chain store naively keeps all blocks in storage nodes are more vulnerable to running out of space.  As another example the syncer assumes that the store always contains a punctual ancestor of the heaviest chain. Should the spec grow to include properties of chain storage so that the syncing protocol can guarantee a level of DOS resistance?  Should chain storage be completely up to the implementation?  Should the chain storage spec be a part of the syncing protocol?  
+- The current chain syncing protocol requires that the chain store never stores an invalid TipSet. If it does, then chain sync may sync to an invalid chain.
