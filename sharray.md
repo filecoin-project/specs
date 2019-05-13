@@ -4,12 +4,6 @@
 
 The Sharray is an IPLD tree structure used to store an array of items. It is designed for usecases that know all items at the time of creation and do not need insertion or deletion.
 
-## Overview
-
-Each node has a height, and a number of items. The number of items must not exceed the trees given degree.
-
-The tree must not be sparse, if the tree represents an array of N items, then the left `N/Width` leaves must contain the first `N` items. If `N` is not evenly divisible by `Width` then the final leaf must contain the final remainder. Every node in the tree must have its height set to one less than the node above it. Nodes with a height of 0 contain array values, and nodes with heights greater than zero contain the cids of their child nodes.
-
 ## IPLD Representation
 
 Each sharray node is represented by an IPLD node of the following schema:
@@ -26,6 +20,17 @@ type Node struct {
 (For details on IPLD Schemas, see the [IPLD Schema Spec (draft)](https://github.com/ipld/specs/blob/dcbfb25468092be796bab90e90e3f2535fdeddc7/schema/representations.md))
 
 We use DAG-CBOR for serialization, and blake2b-256 for hashing.
+
+## Construction
+
+The tree must not be sparse.
+Given an array of size `N` and a fixed width of `W`.
+- The left `floor(N/W)` leaves contain the first `N` items.
+- If `N % W != 0` the final leaf contains the final remainder.
+- The tree is perfectly balanced.
+- The height is the distance from the leaves, not the root.
+- Leaves (nodes with a height of 0) contain array values.
+- Inner nodes (nodes with height greater than zero) contain the cids of their child nodes.
 
 ## Operations
 
