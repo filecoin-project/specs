@@ -2,11 +2,11 @@
 
 > Sharded IPLD Array
 
-The Sharray is a fixed width IPLD tree structure used to store an array of items.
+The Sharray is an IPLD tree structure used to store an array of items. It is designed for usecases that know all items at the time of creation and do not need insertion or deletion.
 
 ## Overview
 
-Each node has a height, and a number of items. The number of items must not exceed the trees given width.
+Each node has a height, and a number of items. The number of items must not exceed the trees given degree.
 
 The tree must not be sparse, if the tree represents an array of N items, then the left `N/Width` leaves must contain the first `N` items. If `N` is not evenly divisible by `Width` then the final leaf must contain the final remainder. Every node in the tree must have its height set to one less than the node above it. Nodes with a height of 0 contain array values, and nodes with heights greater than zero contain the cids of their child nodes.
 
@@ -35,37 +35,43 @@ We use DAG-CBOR for serialization, and blake2b-256 for hashing.
 
 ```go
 func create(items []Item) Cid {
-  var layer []cid.Cid
+	var layer cidQueue
 
-  for len(items) > 0 {
-    // get the next 'Width' items from the input items
-    vals, items = getNextN(Width, items)
+	itemQ := queue(items)
+	for !itemQ.Empty() {
+		// get the next 'Width' items from the input items
+		vals := itemQ.PopN(width)
 
-    nd := Node{
-      height: 0,
-      items: vals,
-    }
+		nd := Node{
+			height: 0,
+			items:  vals,
+		}
 
-    layer.append(nd.Cid())
-  }
+		// persist the node to the datastore
+		storeNode(nd)
 
-  var nextLayer []cid.Cid
-  for height := 1; len(layer) > 1; height++ {
-    for len(layer) > 0 {
-      vals, layer = getNextN(Width, layer)
+		layer.push(nd.Cid())
+	}
 
-      nd := Node{
-        height: height,
-        items: vals,
-      }
+	var nextLayer cidQueue
+	for height := 1; layer.Len() > 1; height++ {
+		for layer.Len() > 0 {
+			vals := layer.PopN(width)
 
-      nextLayer.append(nd.Cid())
-    }
-    layer = nextLayer
-    nextLayer = []
-  }
+			nd := Node{
+				height: height,
+				items:  vals,
+			}
 
-  return nextLayer[0]
+			storeNode(nd)
+
+			nextLayer.append(nd.Cid())
+		}
+		layer = nextLayer
+		nextLayer.ClearItems()
+	}
+
+	return nextLayer.First()
 }
 ```
 
@@ -77,13 +83,14 @@ func create(items []Item) Cid {
 
 ```go
 func (n node) get(i int) Item {
-  if n.Height == 0 {
-    return n.Array[i]
-  }
+	if n.Height == 0 {
+		return n.Array[i]
+	}
 
-  childWidth := Pow(Width, n.Height)
+	childWidth := Pow(Width, n.Height)
 
-  child := loadNode(n.Array[i / childWidth])
-  return child.get( i % childWidth )
+	child := loadNode(n.Array[i/childWidth])
+	return child.get(i % childWidth)
 }
 ```
+
