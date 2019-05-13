@@ -160,26 +160,25 @@ body {
     margin: 2em 0;
     table-layout:fixed;
     width: 100%;
-  }
+    th {
+      text-align: left;
+      font-family: $sansFontFamily;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding-bottom: .5em;
+    }
 
-  th {
-    text-align: left;
-    font-family: $sansFontFamily;
-    text-transform: uppercase;
-    font-weight: 700;
-    padding-bottom: .5em;
-  }
+    tr {
+      border-bottom: 1px solid $lightestGray;
+      vertical-align: bottom;
+      height: 2.5em;
 
-  tr {
-    border-bottom: 1px solid $lightestGray;
-    vertical-align: bottom;
-    height: 2.5em;
-  }
-
-  td, th {
-    padding-left: 1em;
-    line-height: 2em;
-    vertical-align: top;
+      td, th {
+        padding-left: 1em;
+        line-height: 1.5em;
+        vertical-align: top;
+      }
+    }
   }
 }
 
