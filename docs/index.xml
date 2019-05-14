@@ -142,10 +142,9 @@ Chain Data Private Keys Sectors Storage Deals ​</description>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/network-protocols/</guid>
-      <description>Filecoin Network Protocols TODO: table of contents
-All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.
-CBOR RPC Reference: - RFC 7049, Concise Binary Object Representation - Little Endian Base 128
-Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will try to use a CBOR RPC protocol format.</description>
+      <description>Filecoin Network Protocols All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.
+CBOR RPC Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will use the CBOR RPC protocol format, defined below.
+This format consists of series of CBOR serialized objects.</description>
     </item>
     
     <item>

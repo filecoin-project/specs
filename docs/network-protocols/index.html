@@ -17,7 +17,7 @@
 
 
 
-<link rel="stylesheet" href="../../book.min.8ed296f7d0513f1357d39495dfefb38ccd496a6be349c5e1e3aea0248d053f46.css">
+<link rel="stylesheet" href="../../book.min.23e4d1e3709b51090814a78569072de166323089d7e859dbabb823c874bdc20d.css">
 
 
 <link rel="icon" href="../../favicon.png" type="image/x-icon">
@@ -143,40 +143,26 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="filecoin-network-protocols">Filecoin Network Protocols</h1>
 
-<p>TODO: table of contents</p>
-
-<hr />
-
 <p>All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.</p>
 
 <h2 id="cbor-rpc">CBOR RPC</h2>
 
-<p>Reference:
-- <a href="https://tools.ietf.org/html/rfc7049">RFC 7049, Concise Binary Object Representation</a>
-- <a href="https://en.wikipedia.org/wiki/LEB128">Little Endian Base 128</a></p>
+<p>Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will use the CBOR RPC protocol format, defined below.</p>
 
-<p>Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will try to use a CBOR RPC protocol format. This format is effectively just a leb128 varint length delimeted series of cbor serialized objects. Whenever a filecoin protocol says &ldquo;send X&rdquo;, it means &ldquo;cbor serialize the object X, write its length encoded using unsigned leb128, then write the serialized bytes&rdquo;.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ReadCborRPC</span><span class="p">(</span><span class="nx">r</span> <span class="nx">io</span><span class="p">.</span><span class="nx">Reader</span><span class="p">,</span> <span class="nx">out</span> <span class="o">*</span><span class="nx">Object</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">l</span> <span class="o">:=</span> <span class="nf">ReadUVarint</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
+<p>This format consists of series of <a href="https://tools.ietf.org/html/rfc7049">CBOR</a> serialized objects. Whenever a filecoin protocol says &ldquo;send X&rdquo;, it means &ldquo;cbor serialize the object X, then write the serialized bytes&rdquo;.</p>
 
-    <span class="c1">// Read &#39;l&#39; bytes from the reader
-</span><span class="c1"></span>    <span class="nx">buf</span> <span class="o">:=</span> <span class="nf">ReadCountBytes</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span> <span class="nx">l</span><span class="p">)</span>
+<h2 id="hello-handshake">Hello Handshake</h2>
 
-    <span class="nx">cbor</span><span class="p">.</span><span class="nf">Unmarshal</span><span class="p">(</span><span class="nx">buf</span><span class="p">,</span> <span class="nx">out</span><span class="p">)</span>
-<span class="p">}</span>
+<ul>
+<li><strong>Name</strong>: Hello</li>
+<li><strong>Protocol ID</strong>: <code>/fil/hello/1.0.0</code></li>
+</ul>
 
-<span class="kd">func</span> <span class="nf">WriteCborRPC</span><span class="p">(</span><span class="nx">w</span> <span class="nx">io</span><span class="p">.</span><span class="nx">Writer</span><span class="p">,</span> <span class="nx">obj</span> <span class="nx">Object</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">buf</span> <span class="o">:=</span> <span class="nx">cbor</span><span class="p">.</span><span class="nf">Marshal</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span>
+<blockquote>
+<p>The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node.</p>
+</blockquote>
 
-    <span class="nf">WriteUVarint</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">buf</span><span class="p">))</span>
-
-    <span class="nx">w</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="nx">buf</span><span class="p">)</span>
-<span class="p">}</span></code></pre></div>
-<h1 id="hello-handshake">Hello Handshake</h1>
-
-<p>The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node. The libp2p protocol ID for this protocol is <code>/fil/hello/1.0.0</code>.</p>
-
-<p>Whenever a node gets a new connection, it opens a new stream on that connection and &lsquo;says hello&rsquo;. This is done by crafting a <code>HelloMessage</code>, sending it to the other peer using CBOR RPC and finally, closing the stream.</p>
+<p>Whenever a node gets a new connection, it opens a new stream on that connection and &ldquo;says hello&rdquo;. This is done by crafting a <code>HelloMessage</code>, sending it to the other peer using CBOR RPC and finally, closing the stream.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">HelloMessage</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">HeaviestTipSet</span>       <span class="p">[]</span><span class="nx">Cid</span>
     <span class="nx">HeaviestTipSetWeight</span> <span class="kt">uint64</span>
@@ -187,11 +173,18 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">WriteCborRPC</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">mes</span><span class="p">)</span>
     <span class="nx">s</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
 <span class="p">}</span></code></pre></div>
-<p>Upon receiving a &lsquo;hello&rsquo; stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the <code>HeaviestTipSet</code>, claimed <code>HeaviestTipSetWeight</code>, and peerID of the other node should be passed to the chain sync subsystem.</p>
+<p>Upon receiving a &ldquo;hello&rdquo; stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the <code>HeaviestTipSet</code>, claimed <code>HeaviestTipSetWeight</code>, and peerID of the other node should be passed to the chain sync subsystem.</p>
 
-<h1 id="storage-deal">Storage Deal</h1>
+<h2 id="storage-deal">Storage Deal</h2>
 
-<p>The storage deal protocol is used by any client to store data with a storage miner. The libp2p protocol ID for this protocol is <code>/fil/storage/mk/1.0.0</code>.</p>
+<ul>
+<li><strong>Name</strong>: Storage Deal</li>
+<li><strong>Protocol ID</strong>: <code>/fil/storage/mk/1.0.0</code></li>
+</ul>
+
+<blockquote>
+<p>The storage deal protocol is used by any client to store data with a storage miner.</p>
+</blockquote>
 
 <p>The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a <code>piece</code> prior to executing this protocol.</p>
 
@@ -255,41 +248,73 @@ https://github.com/alex-shpak/hugo-book
 <h3 id="deal-state-values">Deal State Values</h3>
 
 <p>Legal values for <code>DealState</code> are as follows:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="p">(</span>
-    <span class="c1">// Unset implies a programmer error. This value should never appear
-</span><span class="c1"></span>    <span class="c1">// in an actual message
-</span><span class="c1"></span>    <span class="nx">Unset</span> <span class="p">=</span> <span class="mi">0</span>
 
-    <span class="c1">// Unknown signifies an unknown negotiation
-</span><span class="c1"></span>    <span class="nx">Unknown</span> <span class="p">=</span> <span class="mi">1</span>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
 
-    <span class="c1">// Rejected means the deal was rejected for some reason
-</span><span class="c1"></span>    <span class="nx">Rejected</span> <span class="p">=</span> <span class="mi">2</span>
+<tbody>
+<tr>
+<td>Unset</td>
+<td><code>0</code></td>
+<td>This implies a programmer error and should never appear in an actual message.</td>
+</tr>
 
-    <span class="c1">// Accepted means the deal was accepted but hasnt yet started
-</span><span class="c1"></span>    <span class="nx">Accepted</span> <span class="p">=</span> <span class="mi">3</span>
+<tr>
+<td>Unknown</td>
+<td><code>1</code></td>
+<td>Signifies an unknown negotiation.</td>
+</tr>
 
-    <span class="c1">// Started means the deal has started and the transfer is in progress
-</span><span class="c1"></span>    <span class="nx">Started</span> <span class="p">=</span> <span class="mi">4</span>
+<tr>
+<td>Rejected</td>
+<td><code>2</code></td>
+<td>The deal was rejected for some reason.</td>
+</tr>
 
-    <span class="c1">// Failed means the deal has failed for some reason
-</span><span class="c1"></span>    <span class="nx">Failed</span> <span class="p">=</span> <span class="mi">5</span>
+<tr>
+<td>Accepted</td>
+<td><code>3</code></td>
+<td>The deal was accepted but hasn&rsquo;t yet started.</td>
+</tr>
 
-    <span class="c1">// Staged is used by the storage deal protocol to indicate the data has been
-</span><span class="c1"></span>    <span class="c1">// received and staged into a sector, but is not sealed yet
-</span><span class="c1"></span>    <span class="nx">Staged</span> <span class="p">=</span> <span class="mi">6</span>
+<tr>
+<td>Started</td>
+<td><code>4</code></td>
+<td>Tthe deal has started and the transfer is in progress.</td>
+</tr>
 
-    <span class="c1">// Complete means the deal is complete, and the sector that the deal is contained
-</span><span class="c1"></span>    <span class="c1">// in has been sealed and its commitment posted on chain.
-</span><span class="c1"></span>    <span class="nx">Complete</span> <span class="p">=</span> <span class="mi">6</span>
+<tr>
+<td>Failed</td>
+<td><code>5</code></td>
+<td>The deal has failed for some reason.</td>
+</tr>
 
-    <span class="c1">// Staged is used by the storage deal protocol to indicate the data has been
-</span><span class="c1"></span>    <span class="c1">// received and staged into a sector, but is not sealed yet
-</span><span class="c1"></span>    <span class="nx">Staged</span> <span class="p">=</span> <span class="mi">7</span>
+<tr>
+<td>Staged</td>
+<td><code>6</code></td>
+<td>The data has been received and staged into a sector, but is not sealed yet.</td>
+</tr>
 
-    <span class="c1">// in has been sealed and its commitment posted on chain.
-</span><span class="c1"></span>    <span class="nx">Complete</span> <span class="p">=</span> <span class="mi">7</span>
-<span class="p">)</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SendStorageProposal</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">file</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">NumBlocks</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+<tr>
+<td>Complete</td>
+<td><code>6</code></td>
+<td>Deal is complete, and the sector that the deal is contained in has been sealed and its commitment posted on chain.</td>
+</tr>
+
+<tr>
+<td>Staged</td>
+<td><code>7</code></td>
+<td>The data has been received and staged into a sector, but is not sealed yet.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SendStorageProposal</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">file</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">NumBlocks</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">IsMiner</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;given address was not a miner&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -336,7 +361,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="c1">// unexpected response state...
 </span><span class="c1"></span>    <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
-<p>TODO: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.</p>
+<div class="notices todo" ><strong>TODO</strong>: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.</div>
 
 <p>The miner then decides whether or not to accept the deal, and sends back a response:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -449,7 +474,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">miner</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">nstate</span><span class="p">)</span>
     <span class="nx">miner</span><span class="p">.</span><span class="nf">SetDealState</span><span class="p">(</span><span class="nx">nstate</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
-<h2 id="query">Query</h2>
+<h3 id="query">Query</h3>
 
 <p>Here we describe a basic protocol for querying the current state of a given storage deal. In the future we may want something more complex that is able to multiplex waiting for notifications about a large set of deals over a single stream simultaneously. Upgrading to that from this should be relatively simple, so for now, we do the simple thing.</p>
 
@@ -465,11 +490,18 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <p>If <code>BaseState</code> is <code>Unset</code> or a terminal state (<code>Complete</code>, <code>Rejected</code>, or <code>Failed</code>) then the current state of the deal in question is returned. If the <code>BaseState</code> is different than the current state of the deal, the current state of the deal is also returned immediately. In the case that the <code>BaseState</code> matches the current state of the deal, then the stream is held open until the state changes, at which point the new state of the deal is returned.</p>
 
-<h1 id="retrieve-piece-for-free">Retrieve Piece for Free</h1>
+<h2 id="retrieve-piece-for-free">Retrieve Piece for Free</h2>
 
+<ul>
+<li><strong>Name</strong>: Retrieve Piece for Free</li>
+<li><strong>Protocol ID</strong>: <code>/fil/retrieval/free/0.0.0</code></li>
+</ul>
+
+<blockquote>
 <p>The Retrieve Piece for Free protocol is used to coordinate the transfer of a piece from miner to client at no cost to the client.</p>
+</blockquote>
 
-<p>The client initiates the protocol by opening a libp2p stream to the miner using the <code>/fil/retrieval/free/0.0.0</code> protocol id. To find and connect to the miner, the <a href="../lookup-service">address lookup service</a> should be used. Once connected, the client must send the miner a <code>RetrievePieceRequest</code> message using the <a href="#CBOR-RPC">CBOR RPC</a> protocol format.</p>
+<p>The client initiates the protocol by opening a libp2p stream to the miner. To find and connect to the miner, the <a href="../lookup-service">address lookup service</a> should be used. Once connected, the client must send the miner a <code>RetrievePieceRequest</code> message using the <a href="#CBOR-RPC">CBOR RPC</a> protocol format.</p>
 
 <p>The <code>RetrievePieceRequest</code> is specified as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetrievePieceRequest</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -516,20 +548,18 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// be &gt; 0.
 </span><span class="c1"></span>    <span class="nx">Data</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="p">}</span></code></pre></div>
-<p>TODO: document the query deal interaction</p>
+<div class="notices todo" ><strong>TODO</strong>: document the query deal interaction</div>
 
-<h1 id="blocksync">BlockSync</h1>
+<h2 id="blocksync">BlockSync</h2>
 
 <p>The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of <code>/fil/sync/blk/0.0.1</code>. It uses CBOR-RPC.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BlockSyncRequest</span> <span class="kd">struct</span> <span class="p">{</span>
-  <span class="c1">// The TipSet being synced from
+    <span class="c1">// The TipSet being synced from
 </span><span class="c1"></span>    <span class="nx">Start</span>         <span class="p">[]</span><span class="nx">Cid</span>
-
-  <span class="c1">// How many tipsets to sync
+    <span class="c1">// How many tipsets to sync
 </span><span class="c1"></span>    <span class="nx">RequestLength</span> <span class="kt">uint64</span>
-
-  <span class="c1">// Query options
-</span><span class="c1"></span>  <span class="nx">Options</span> <span class="kt">uint64</span>
+    <span class="c1">// Query options
+</span><span class="c1"></span>    <span class="nx">Options</span> <span class="kt">uint64</span>
 <span class="p">}</span></code></pre></div>
 <p>The request requests a chain of a given length by the hash of its highest block. The <code>Options</code> allow the requester to specify whether or not blocks and messages to be included.</p>
 
@@ -544,13 +574,13 @@ https://github.com/alex-shpak/hugo-book
 
 <tbody>
 <tr>
-<td>0</td>
+<td><code>0</code></td>
 <td>Blocks</td>
 <td>Include blocks if set</td>
 </tr>
 
 <tr>
-<td>1</td>
+<td><code>1</code></td>
 <td>Messages</td>
 <td>Include messages if set</td>
 </tr>
@@ -558,7 +588,6 @@ https://github.com/alex-shpak/hugo-book
 </table>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BlockSyncResponse</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Chain</span> <span class="p">[]</span><span class="nx">TipSetBundle</span>
-
     <span class="nx">Status</span>  <span class="kt">uint</span>
     <span class="nx">Message</span> <span class="kt">string</span>
 <span class="p">}</span>
@@ -570,35 +599,65 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <p>The response contains the requested chain in reverse iteration order. Each item in the <code>Chain</code> array contains the blocks for that tipset if the <code>Blocks</code> option bit in the request was set, and if the <code>Messages</code> bit was set, the messages across all blocks in that tipset. The <code>MsgIncludes</code> array contains one array of integers for each block in the <code>Blocks</code> array. Each of the arrays in <code>MsgIncludes</code> contains a list of indexes of messages from the <code>Messages</code> array that are in each <code>Block</code> in the blocks array.</p>
 
-<p>Example TipSetBundle:</p>
+<h3 id="example">Example</h3>
+
+<p>The TipSetBundle</p>
 
 <pre><code>Blocks: [b0, b1]
 Messages: [mA, mB, mC, mD]
 MsgIncludes: [[0, 1, 3], [1, 2, 0]]
 </code></pre>
 
-<p>Corresponds to:</p>
+<p>corresponds to:</p>
 
 <pre><code>Block 'b0': [mA, mB, mD]
 Block 'b1': [mB, mC, mA]
 </code></pre>
 
-<p>Possible error codes:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">Success</span> <span class="p">=</span> <span class="mi">0</span>
+<h3 id="error-codes">Error Codes</h3>
 
-    <span class="c1">// Sent back fewer blocks than requested
-</span><span class="c1"></span>    <span class="nx">PartialResponse</span> <span class="p">=</span> <span class="mi">101</span>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
 
-    <span class="c1">// request.Start not found
-</span><span class="c1"></span>    <span class="nx">BlockNotFound</span> <span class="p">=</span> <span class="mi">201</span>
+<tbody>
+<tr>
+<td>Success</td>
+<td><code>0</code></td>
+<td>All is well.</td>
+</tr>
 
-    <span class="c1">// requester is making too many requests
-</span><span class="c1"></span>    <span class="nx">GoAway</span> <span class="p">=</span> <span class="mi">202</span>
+<tr>
+<td>PartialResponse</td>
+<td><code>101</code></td>
+<td>Sent back fewer blocks than requested.</td>
+</tr>
 
-    <span class="c1">// Internal Error
-</span><span class="c1"></span>    <span class="nx">InternalError</span> <span class="p">=</span> <span class="mi">203</span>
-<span class="p">)</span></code></pre></div>
+<tr>
+<td>BlockNotFound</td>
+<td><code>201</code></td>
+<td>Request.Start not found</td>
+</tr>
+
+<tr>
+<td>GoAway</td>
+<td><code>202</code></td>
+<td>Requester is making too many requests.</td>
+</tr>
+
+<tr>
+<td>InternalError</td>
+<td><code>203</code></td>
+<td>Internal error occured.</td>
+</tr>
+</tbody>
+</table>
+
 </article>
 
       
@@ -633,18 +692,19 @@ Block 'b1': [mB, mC, mA]
 <li><a href="#filecoin-network-protocols">Filecoin Network Protocols</a>
 <ul>
 <li><a href="#cbor-rpc">CBOR RPC</a></li>
-</ul></li>
 <li><a href="#hello-handshake">Hello Handshake</a></li>
 <li><a href="#storage-deal">Storage Deal</a>
 <ul>
-<li>
-<ul>
 <li><a href="#deal-state-values">Deal State Values</a></li>
-</ul></li>
 <li><a href="#query">Query</a></li>
 </ul></li>
 <li><a href="#retrieve-piece-for-free">Retrieve Piece for Free</a></li>
-<li><a href="#blocksync">BlockSync</a></li>
+<li><a href="#blocksync">BlockSync</a>
+<ul>
+<li><a href="#example">Example</a></li>
+<li><a href="#error-codes">Error Codes</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
   </aside>
