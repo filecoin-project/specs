@@ -24,7 +24,6 @@ headless: true
   * [Retrieval Market]({{< relref "/docs/retrieval-market.md" >}})
   * [Payments]({{< relref "/docs/payments.md" >}})
   * [Faults]({{< relref "/docs/faults.md" >}})
-* [**Client**]({{< relref "/docs/client.md" >}})
 * **Proofs**
   * [DrgPoRep]({{< relref "/docs/drgporep-circuit.md" >}})
   * [ZigZag]({{< relref "/docs/zigzag-circuit.md" >}})
