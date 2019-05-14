@@ -499,7 +499,7 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 
 Parameters:
 - proofs []PoStProof
-- faults []FailureSet
+- faults []FaultSet
 - recovered SectorSet
 - done SectorSet
 
