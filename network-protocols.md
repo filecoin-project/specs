@@ -1,43 +1,22 @@
 # Filecoin Network Protocols
 
-TODO: table of contents
-
----
-
 All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.
 
 ## CBOR RPC
 
-Reference:
-- [RFC 7049, Concise Binary Object Representation](https://tools.ietf.org/html/rfc7049)
-- [Little Endian Base 128](https://en.wikipedia.org/wiki/LEB128)
+Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will use the CBOR RPC protocol format, defined below.
 
-Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will try to use a CBOR RPC protocol format. This format is effectively just a leb128 varint length delimeted series of cbor serialized objects. Whenever a filecoin protocol says "send X", it means "cbor serialize the object X, write its length encoded using unsigned leb128, then write the serialized bytes".
+This format consists of series of [CBOR](https://tools.ietf.org/html/rfc7049) serialized objects. Whenever a filecoin protocol says "send X", it means "cbor serialize the object X, then write the serialized bytes".
 
-```go
-func ReadCborRPC(r io.Reader, out *Object) {
-	l := ReadUVarint(r)
 
-	// Read 'l' bytes from the reader
-	buf := ReadCountBytes(r, l)
+## Hello Handshake
 
-	cbor.Unmarshal(buf, out)
-}
+- **Name**: Hello
+- **Protocol ID**: `/fil/hello/1.0.0`
 
-func WriteCborRPC(w io.Writer, obj Object) {
-	buf := cbor.Marshal(obj)
+> The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node.
 
-	WriteUVarint(w, len(buf))
-
-	w.Write(buf)
-}
-```
-
-# Hello Handshake
-
-The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node. The libp2p protocol ID for this protocol is `/fil/hello/1.0.0`.
-
-Whenever a node gets a new connection, it opens a new stream on that connection and 'says hello'. This is done by crafting a `HelloMessage`, sending it to the other peer using CBOR RPC and finally, closing the stream.
+Whenever a node gets a new connection, it opens a new stream on that connection and "says hello". This is done by crafting a `HelloMessage`, sending it to the other peer using CBOR RPC and finally, closing the stream.
 
 ```go
 type HelloMessage struct {
@@ -56,11 +35,14 @@ func SayHello(p PeerID) {
 }
 ```
 
-Upon receiving a 'hello' stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the `HeaviestTipSet`, claimed `HeaviestTipSetWeight`, and peerID of the other node should be passed to the chain sync subsystem.
+Upon receiving a "hello" stream from another node, you should read off the CBOR RPC message, and then check that the genesis hash matches you genesis hash. If it does not, that node is not part of your network, and should probably be disconnected from. Next, the `HeaviestTipSet`, claimed `HeaviestTipSetWeight`, and peerID of the other node should be passed to the chain sync subsystem.
 
-# Storage Deal
+## Storage Deal
 
-The storage deal protocol is used by any client to store data with a storage miner. The libp2p protocol ID for this protocol is `/fil/storage/mk/1.0.0`.
+- **Name**: Storage Deal
+- **Protocol ID**: `/fil/storage/mk/1.0.0`
+
+> The storage deal protocol is used by any client to store data with a storage miner.
 
 The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a `piece` prior to executing this protocol.
 
@@ -126,45 +108,21 @@ type PaymentInfo struct {
 ```
 
 ### Deal State Values
+
 Legal values for `DealState` are as follows:
 
-```go
-const (
-	// Unset implies a programmer error. This value should never appear
-	// in an actual message
-	Unset = 0
+| State | Value | Description |
+|-------|-------|-------------|
+| Unset | `0`   | This implies a programmer error and should never appear in an actual message. |
+| Unknown | `1` | Signifies an unknown negotiation. |
+| Rejected | `2` | The deal was rejected for some reason. |
+| Accepted | `3` | The deal was accepted but hasn't yet started. |
+| Started | `4` | Tthe deal has started and the transfer is in progress. |
+| Failed | `5` | The deal has failed for some reason. |
+| Staged | `6` | The data has been received and staged into a sector, but is not sealed yet. |
+| Complete | `6` | Deal is complete, and the sector that the deal is contained in has been sealed and its commitment posted on chain. |
+| Staged | `7` | The data has been received and staged into a sector, but is not sealed yet. |
 
-	// Unknown signifies an unknown negotiation
-	Unknown = 1
-
-	// Rejected means the deal was rejected for some reason
-	Rejected = 2
-
-	// Accepted means the deal was accepted but hasnt yet started
-	Accepted = 3
-
-	// Started means the deal has started and the transfer is in progress
-	Started = 4
-
-	// Failed means the deal has failed for some reason
-	Failed = 5
-
-	// Staged is used by the storage deal protocol to indicate the data has been
-	// received and staged into a sector, but is not sealed yet
-	Staged = 6
-
-	// Complete means the deal is complete, and the sector that the deal is contained
-	// in has been sealed and its commitment posted on chain.
-	Complete = 6
-
-	// Staged is used by the storage deal protocol to indicate the data has been
-	// received and staged into a sector, but is not sealed yet
-	Staged = 7
-
-	// in has been sealed and its commitment posted on chain.
-	Complete = 7
-)
-```
 
 ```go
 func SendStorageProposal(miner Address, file Cid, duration NumBlocks, price TokenAmount) {
@@ -216,8 +174,9 @@ func SendStorageProposal(miner Address, file Cid, duration NumBlocks, price Toke
 }
 ```
 
-
-TODO: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.
+{{% notice todo %}}
+**TODO**: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.
+{{% /notice %}}
 
 The miner then decides whether or not to accept the deal, and sends back a response:
 
@@ -351,7 +310,7 @@ func OnSectorSealed(prop StorageDealProposal, msgcid Cid) {
 ```
 
 
-## Query
+### Query
 
 Here we describe a basic protocol for querying the current state of a given storage deal. In the future we may want something more complex that is able to multiplex waiting for notifications about a large set of deals over a single stream simultaneously. Upgrading to that from this should be relatively simple, so for now, we do the simple thing.
 
@@ -372,11 +331,14 @@ type StorageDealQuery struct {
 If `BaseState` is `Unset` or a terminal state (`Complete`, `Rejected`, or `Failed`) then the current state of the deal in question is returned. If the `BaseState` is different than the current state of the deal, the current state of the deal is also returned immediately. In the case that the `BaseState` matches the current state of the deal, then the stream is held open until the state changes, at which point the new state of the deal is returned.
 
 
-# Retrieve Piece for Free
+## Retrieve Piece for Free
 
-The Retrieve Piece for Free protocol is used to coordinate the transfer of a piece from miner to client at no cost to the client.
+- **Name**: Retrieve Piece for Free
+- **Protocol ID**: `/fil/retrieval/free/0.0.0`
 
-The client initiates the protocol by opening a libp2p stream to the miner using the `/fil/retrieval/free/0.0.0` protocol id. To find and connect to the miner, the [address lookup service](lookup-service.md) should be used. Once connected, the client must send the miner a `RetrievePieceRequest` message using the [CBOR RPC](#CBOR-RPC) protocol format.
+> The Retrieve Piece for Free protocol is used to coordinate the transfer of a piece from miner to client at no cost to the client.
+
+The client initiates the protocol by opening a libp2p stream to the miner. To find and connect to the miner, the [address lookup service](lookup-service.md) should be used. Once connected, the client must send the miner a `RetrievePieceRequest` message using the [CBOR RPC](#CBOR-RPC) protocol format.
 
 The `RetrievePieceRequest` is specified as follows:
 
@@ -439,22 +401,22 @@ type RetrievePieceChunk struct {
 }
 ```
 
-TODO: document the query deal interaction
+{{% notice todo %}}
+**TODO**: document the query deal interaction
+{{% /notice %}}
 
-# BlockSync
+## BlockSync
 
 The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol with a protocol ID of `/fil/sync/blk/0.0.1`. It uses CBOR-RPC.
 
 ```go
 type BlockSyncRequest struct {
-  // The TipSet being synced from
+    // The TipSet being synced from
 	Start         []Cid
-
-  // How many tipsets to sync
+    // How many tipsets to sync
 	RequestLength uint64
-
-  // Query options
-  Options uint64
+    // Query options
+    Options uint64
 }
 ```
 
@@ -462,15 +424,13 @@ The request requests a chain of a given length by the hash of its highest block.
 
 | bit  | option   | Description             |
 | ---- | -------- | ----------------------- |
-| 0    | Blocks   | Include blocks if set   |
-| 1    | Messages | Include messages if set |
-
+| `0`    | Blocks   | Include blocks if set   |
+| `1`    | Messages | Include messages if set |
 
 
 ```go
 type BlockSyncResponse struct {
 	Chain []TipSetBundle
-
 	Status  uint
 	Message string
 }
@@ -484,36 +444,29 @@ type TipSetBundle struct {
 
 The response contains the requested chain in reverse iteration order. Each item in the `Chain` array contains the blocks for that tipset if the `Blocks` option bit in the request was set, and if the `Messages` bit was set, the messages across all blocks in that tipset. The `MsgIncludes` array contains one array of integers for each block in the `Blocks` array. Each of the arrays in `MsgIncludes` contains a list of indexes of messages from the `Messages` array that are in each `Block` in the blocks array.
 
-Example TipSetBundle:
+### Example
+
+The TipSetBundle
+
 ```
 Blocks: [b0, b1]
 Messages: [mA, mB, mC, mD]
 MsgIncludes: [[0, 1, 3], [1, 2, 0]]
 ```
 
-Corresponds to:
+corresponds to:
+
 ```
 Block 'b0': [mA, mB, mD]
 Block 'b1': [mB, mC, mA]
 ```
 
-Possible error codes:
+### Error Codes
 
-```go
-const (
-	Success = 0
-
-	// Sent back fewer blocks than requested
-	PartialResponse = 101
-
-	// request.Start not found
-	BlockNotFound = 201
-
-	// requester is making too many requests
-	GoAway = 202
-
-	// Internal Error
-	InternalError = 203
-)
-```
-
+| Name | Value | Description |
+|------|-------|-------------|
+| Success | `0`| All is well. |
+| PartialResponse | `101` | Sent back fewer blocks than requested. |
+| BlockNotFound | `201` | Request.Start not found |
+| GoAway | `202` | Requester is making too many requests. |
+| InternalError | `203` | Internal error occured.|
