@@ -160,6 +160,8 @@ body {
     margin: 2em 0;
     table-layout:fixed;
     width: 100%;
+    display: block;
+
     th {
       text-align: left;
       font-family: $sansFontFamily;
@@ -283,6 +285,10 @@ img {
 }
 
 
-.book-git-footer img {
-  vertical-align: middle !important;
+.book-git-footer {
+  margin-top: 4em;
+
+  img {
+    vertical-align: middle !important;
+  }
 }
