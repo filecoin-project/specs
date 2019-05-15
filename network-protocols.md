@@ -120,8 +120,7 @@ Legal values for `DealState` are as follows:
 | Started | `4` | Tthe deal has started and the transfer is in progress. |
 | Failed | `5` | The deal has failed for some reason. |
 | Staged | `6` | The data has been received and staged into a sector, but is not sealed yet. |
-| Complete | `6` | Deal is complete, and the sector that the deal is contained in has been sealed and its commitment posted on chain. |
-| Staged | `7` | The data has been received and staged into a sector, but is not sealed yet. |
+| Complete | `7` | Deal is complete, and the sector that the deal is contained in has been sealed and its commitment posted on chain. |
 
 
 ```go
