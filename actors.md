@@ -444,17 +444,18 @@ Note: this may be moved off chain soon, don't worry about testing it too heavily
 ### CommitSector
 
 Parameters:
+- sectorID SectorID
 - commD []byte
 - commR []byte
 - commRStar []byte
 - proof SealProof
 
-Return: SectorID
+Return: None
 
 
 ```go
 // NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
-func CommitSector(comm Commitment, proof *SealProof) SectorID {
+func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealProof) SectorID {
 	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.PublicKey, proof) {
 		Fatal("bad proof!")
 	}
@@ -474,7 +475,7 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 	miner.Collateral -= coll
 	miner.ActiveCollateral += coll
 
-	sectorId = miner.Sectors.Add(commR)
+	miner.Sectors.Add(commR)
 	// TODO: sectors IDs might not be that useful. For now, this should just be the number of
 	// the sector within the set of sectors, but that can change as the miner experiences
 	// failures.
@@ -491,8 +492,6 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 		miner.ProvingSet = miner.Sectors
 		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration(miner.SectorSize)
 	}
-
-	return sectorId
 }
 ```
 
