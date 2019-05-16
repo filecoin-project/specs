@@ -57,27 +57,37 @@ https://github.com/alex-shpak/hugo-book
   }
   </style>
 
-<ul>
-<li><a href="../../"><strong>Overview</strong></a></li>
-<li><strong>Core</strong>
+<p><a href="../../"><strong>Overview</strong></a></p>
+
+<p><strong>Core</strong></p>
 
 <ul>
 <li><a href="../../docs/data-structures/">Data Structures</a></li>
-<li>Cryptography</li>
+<li>Cryptography
+
+<ul>
 <li><a href="../../docs/address/">Address</a></li>
 <li><a href="../../docs/signatures/">Signatures</a></li>
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
-<li><a href="../../docs/network-protocols/">Network</a></li>
+</ul></li>
+<li><a href="../../docs/network-protocols/">Network</a>
+
+<ul>
 <li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
 <li><a href="../../docs/sync/">Chain Sync</a></li>
-<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
-<li><a href="../../docs/state-machine/">State Machine</a></li>
-<li><a href="../../docs/local-storage/">Local Storage</a></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul></li>
-<li><a href="../../docs/actors/"><strong>Actors</strong></a>
+<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="../../docs/state-machine/">State Machine</a>
+
+<ul>
+<li><a href="../../docs/local-storage/">Local Storage</a></li>
+</ul></li>
+<li><a href="../../docs/operation/">Node Operation</a></li>
+</ul>
+
+<p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
 
 <ul>
 <li><a href="../../docs/mining/">Mining</a></li>
@@ -85,21 +95,22 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/retrieval-market/">Retrieval Market</a></li>
 <li><a href="../../docs/payments/">Payments</a></li>
 <li><a href="../../docs/faults/">Faults</a></li>
-</ul></li>
-<li><a href="../../docs/client/"><strong>Client</strong></a></li>
-<li><strong>Proofs</strong>
+</ul>
+
+<p><strong>Proofs</strong></p>
 
 <ul>
 <li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
-</ul></li>
-<li><a href="../../docs/definitions/"><strong>Glossary</strong></a></li>
-<li><strong>Spec</strong>
+</ul>
+
+<p><a href="../../docs/definitions/"><strong>Glossary</strong></a></p>
+
+<p><strong>Spec</strong></p>
 
 <ul>
 <li><a href="../../docs/style/">Style</a></li>
 <li><a href="../../docs/process/">Process</a></li>
-</ul></li>
 </ul>
 
 
@@ -157,7 +168,12 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="block-propagation">Block Propagation</h2>
 
-<p>Blocks are propagated over the libp2p pubsub channel <code>/fil/blocks</code>. The block is <a href="data-structures.md#block">serialized</a> and the raw bytes are sent as the content of the pubsub message. No messages, computed state, or other additional information is sent along with the block message.</p>
+<p>Blocks are propagated over the libp2p pubsub channel <code>/fil/blocks</code>. The following structure is filled out with the appropriate information, serialized (with CBOR-RPC), and sent over the wire:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BlockMsg</span> <span class="kd">struct</span> <span class="p">{</span>
+  <span class="nx">Header</span> <span class="nx">Block</span>
+  <span class="nx">Messages</span> <span class="p">[]</span><span class="nx">Cid</span>
+<span class="p">}</span></code></pre></div>
+<p>The array of message cids must match the <code>Messages</code> field in the block when used to construct a <a href="../sharray">sharray</a>.</p>
 
 <p>Each Filecoin node sets a &lsquo;validation function&rsquo; for the blocks topic that checks that the block is properly constructed, its ticket is valid, the block signature is valid, the miner is a valid miner, and the block is a child of a known good tipset. (TODO: clarify which of these checks are needed, any slowness here impacts propagation time significantly, this is not a full validity check) If an invalid block is received, the peer it was received from should be marked as potentially bad (TODO: we could blacklist peers who send bad blocks, maybe need support from libp2p for this?)</p>
 

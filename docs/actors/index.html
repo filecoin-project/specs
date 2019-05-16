@@ -57,27 +57,37 @@ https://github.com/alex-shpak/hugo-book
   }
   </style>
 
-<ul>
-<li><a href="../../"><strong>Overview</strong></a></li>
-<li><strong>Core</strong>
+<p><a href="../../"><strong>Overview</strong></a></p>
+
+<p><strong>Core</strong></p>
 
 <ul>
 <li><a href="../../docs/data-structures/">Data Structures</a></li>
-<li>Cryptography</li>
+<li>Cryptography
+
+<ul>
 <li><a href="../../docs/address/">Address</a></li>
 <li><a href="../../docs/signatures/">Signatures</a></li>
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
-<li><a href="../../docs/network-protocols/">Network</a></li>
+</ul></li>
+<li><a href="../../docs/network-protocols/">Network</a>
+
+<ul>
 <li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
 <li><a href="../../docs/sync/">Chain Sync</a></li>
-<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
-<li><a href="../../docs/state-machine/">State Machine</a></li>
-<li><a href="../../docs/local-storage/">Local Storage</a></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul></li>
-<li><a href="../../docs/actors/"><strong>Actors</strong></a>
+<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="../../docs/state-machine/">State Machine</a>
+
+<ul>
+<li><a href="../../docs/local-storage/">Local Storage</a></li>
+</ul></li>
+<li><a href="../../docs/operation/">Node Operation</a></li>
+</ul>
+
+<p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
 
 <ul>
 <li><a href="../../docs/mining/">Mining</a></li>
@@ -85,21 +95,22 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/retrieval-market/">Retrieval Market</a></li>
 <li><a href="../../docs/payments/">Payments</a></li>
 <li><a href="../../docs/faults/">Faults</a></li>
-</ul></li>
-<li><a href="../../docs/client/"><strong>Client</strong></a></li>
-<li><strong>Proofs</strong>
+</ul>
+
+<p><strong>Proofs</strong></p>
 
 <ul>
 <li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
-</ul></li>
-<li><a href="../../docs/definitions/"><strong>Glossary</strong></a></li>
-<li><strong>Spec</strong>
+</ul>
+
+<p><a href="../../docs/definitions/"><strong>Glossary</strong></a></p>
+
+<p><strong>Spec</strong></p>
 
 <ul>
 <li><a href="../../docs/style/">Style</a></li>
 <li><a href="../../docs/process/">Process</a></li>
-</ul></li>
 </ul>
 
 
@@ -607,56 +618,61 @@ https://github.com/alex-shpak/hugo-book
 
 <tr>
 <td>4</td>
-<td><code>SlashStorageFault</code></td>
+<td><code>IncreasePledge</code></td>
 </tr>
 
 <tr>
 <td>5</td>
-<td><code>GetCurrentProvingSet</code></td>
+<td><code>SlashStorageFault</code></td>
 </tr>
 
 <tr>
 <td>6</td>
-<td><code>ArbitrateDeal</code></td>
+<td><code>GetCurrentProvingSet</code></td>
 </tr>
 
 <tr>
 <td>7</td>
-<td><code>DePledge</code></td>
+<td><code>ArbitrateDeal</code></td>
 </tr>
 
 <tr>
 <td>8</td>
-<td><code>GetOwner</code></td>
+<td><code>DePledge</code></td>
 </tr>
 
 <tr>
 <td>9</td>
-<td><code>GetWorkerAddr</code></td>
+<td><code>GetOwner</code></td>
 </tr>
 
 <tr>
 <td>10</td>
-<td><code>GetPower</code></td>
+<td><code>GetWorkerAddr</code></td>
 </tr>
 
 <tr>
 <td>11</td>
-<td><code>GetKey</code></td>
+<td><code>GetPower</code></td>
 </tr>
 
 <tr>
 <td>12</td>
-<td><code>GetPeerID</code></td>
+<td><code>GetKey</code></td>
 </tr>
 
 <tr>
 <td>13</td>
-<td><code>GetSectorSize</code></td>
+<td><code>GetPeerID</code></td>
 </tr>
 
 <tr>
 <td>14</td>
+<td><code>GetSectorSize</code></td>
+</tr>
+
+<tr>
+<td>15</td>
 <td><code>UpdatePeerID</code></td>
 </tr>
 </tbody>
@@ -757,7 +773,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Parameters:
 - proofs []PoStProof
-- faults []FailureSet
+- faults []FaultSet
 - recovered SectorSet
 - done SectorSet</p>
 

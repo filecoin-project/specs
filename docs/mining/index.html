@@ -57,27 +57,37 @@ https://github.com/alex-shpak/hugo-book
   }
   </style>
 
-<ul>
-<li><a href="../../"><strong>Overview</strong></a></li>
-<li><strong>Core</strong>
+<p><a href="../../"><strong>Overview</strong></a></p>
+
+<p><strong>Core</strong></p>
 
 <ul>
 <li><a href="../../docs/data-structures/">Data Structures</a></li>
-<li>Cryptography</li>
+<li>Cryptography
+
+<ul>
 <li><a href="../../docs/address/">Address</a></li>
 <li><a href="../../docs/signatures/">Signatures</a></li>
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
-<li><a href="../../docs/network-protocols/">Network</a></li>
+</ul></li>
+<li><a href="../../docs/network-protocols/">Network</a>
+
+<ul>
 <li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
 <li><a href="../../docs/sync/">Chain Sync</a></li>
-<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
-<li><a href="../../docs/state-machine/">State Machine</a></li>
-<li><a href="../../docs/local-storage/">Local Storage</a></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul></li>
-<li><a href="../../docs/actors/"><strong>Actors</strong></a>
+<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="../../docs/state-machine/">State Machine</a>
+
+<ul>
+<li><a href="../../docs/local-storage/">Local Storage</a></li>
+</ul></li>
+<li><a href="../../docs/operation/">Node Operation</a></li>
+</ul>
+
+<p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
 
 <ul>
 <li><a href="../../docs/mining/">Mining</a></li>
@@ -85,21 +95,22 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/retrieval-market/">Retrieval Market</a></li>
 <li><a href="../../docs/payments/">Payments</a></li>
 <li><a href="../../docs/faults/">Faults</a></li>
-</ul></li>
-<li><a href="../../docs/client/"><strong>Client</strong></a></li>
-<li><strong>Proofs</strong>
+</ul>
+
+<p><strong>Proofs</strong></p>
 
 <ul>
 <li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
-</ul></li>
-<li><a href="../../docs/definitions/"><strong>Glossary</strong></a></li>
-<li><strong>Spec</strong>
+</ul>
+
+<p><a href="../../docs/definitions/"><strong>Glossary</strong></a></p>
+
+<p><strong>Spec</strong></p>
 
 <ul>
 <li><a href="../../docs/style/">Style</a></li>
 <li><a href="../../docs/process/">Process</a></li>
-</ul></li>
 </ul>
 
 
@@ -149,7 +160,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="the-miner-actor">The Miner Actor</h2>
 
-<p>After successfully calling <code>CreateMiner</code>, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.</p>
+<p>After successfully calling <code>CreateStorageMiner</code>, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.</p>
 
 <p>For details on the methods on the miner actor, see its entry in the <a href="actors.md#storage-miner-actor">actors spec</a>.</p>
 
@@ -163,7 +174,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h4 id="step-0-registration">Step 0: Registration</h4>
 
-<p>To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor&rsquo;s <a href="actors.md#createstorageminer"><code>CreateMiner</code></a> method. The call will then create a new miner actor instance and return its address.</p>
+<p>To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor&rsquo;s <a href="actors.md#createstorageminer"><code>CreateStorageMiner</code></a> method. The call will then create a new miner actor instance and return its address.</p>
 
 <p>The next step is to place one or more storage market asks on the market. This is done through the storage markets <a href="actors.md#addask"><code>AddAsk</code></a> method. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).</p>
 

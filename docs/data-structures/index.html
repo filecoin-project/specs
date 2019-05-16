@@ -57,27 +57,37 @@ https://github.com/alex-shpak/hugo-book
   }
   </style>
 
-<ul>
-<li><a href="../../"><strong>Overview</strong></a></li>
-<li><strong>Core</strong>
+<p><a href="../../"><strong>Overview</strong></a></p>
+
+<p><strong>Core</strong></p>
 
 <ul>
 <li><a href="../../docs/data-structures/">Data Structures</a></li>
-<li>Cryptography</li>
+<li>Cryptography
+
+<ul>
 <li><a href="../../docs/address/">Address</a></li>
 <li><a href="../../docs/signatures/">Signatures</a></li>
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
-<li><a href="../../docs/network-protocols/">Network</a></li>
+</ul></li>
+<li><a href="../../docs/network-protocols/">Network</a>
+
+<ul>
 <li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
 <li><a href="../../docs/sync/">Chain Sync</a></li>
-<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
-<li><a href="../../docs/state-machine/">State Machine</a></li>
-<li><a href="../../docs/local-storage/">Local Storage</a></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul></li>
-<li><a href="../../docs/actors/"><strong>Actors</strong></a>
+<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="../../docs/state-machine/">State Machine</a>
+
+<ul>
+<li><a href="../../docs/local-storage/">Local Storage</a></li>
+</ul></li>
+<li><a href="../../docs/operation/">Node Operation</a></li>
+</ul>
+
+<p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
 
 <ul>
 <li><a href="../../docs/mining/">Mining</a></li>
@@ -85,21 +95,22 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/retrieval-market/">Retrieval Market</a></li>
 <li><a href="../../docs/payments/">Payments</a></li>
 <li><a href="../../docs/faults/">Faults</a></li>
-</ul></li>
-<li><a href="../../docs/client/"><strong>Client</strong></a></li>
-<li><strong>Proofs</strong>
+</ul>
+
+<p><strong>Proofs</strong></p>
 
 <ul>
 <li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
-</ul></li>
-<li><a href="../../docs/definitions/"><strong>Glossary</strong></a></li>
-<li><strong>Spec</strong>
+</ul>
+
+<p><a href="../../docs/definitions/"><strong>Glossary</strong></a></p>
+
+<p><strong>Spec</strong></p>
 
 <ul>
 <li><a href="../../docs/style/">Style</a></li>
 <li><a href="../../docs/process/">Process</a></li>
-</ul></li>
 </ul>
 
 
@@ -187,18 +198,22 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// transactions state transitions.
 </span><span class="c1"></span>    <span class="nx">StateRoot</span> <span class="nx">Cid</span>
 
-    <span class="c1">// Messages is the set of messages included in this block
-</span><span class="c1"></span>    <span class="c1">// TODO: should be a merkletree-ish thing
-</span><span class="c1"></span>    <span class="nx">Messages</span> <span class="p">[]</span><span class="nx">SignedMessage</span>
+    <span class="c1">// Messages is the set of messages included in this block. This field is the Cid
+</span><span class="c1"></span>    <span class="c1">// of the root of a sharray of Messages.
+</span><span class="c1"></span>    <span class="nx">Messages</span> <span class="nx">Cid</span>
 
     <span class="c1">// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-</span><span class="c1"></span>    <span class="c1">// TODO: should be the same type of merkletree-list thing that the messages are
-</span><span class="c1"></span>    <span class="nx">MessageReceipts</span> <span class="p">[]</span><span class="nx">MessageReceipt</span>
+</span><span class="c1"></span>    <span class="c1">// This field is the Cid of the root of a sharray of MessageReceipts.
+</span><span class="c1"></span>    <span class="nx">MessageReceipts</span> <span class="nx">Cid</span>
 
     <span class="c1">// The block Timestamp is used to enforce a form of block delay by honest miners.
 </span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp stored as an unsigned integer
 </span><span class="c1"></span>    <span class="nx">Timestamp</span> <span class="nx">Timestamp</span>
 <span class="p">}</span></code></pre></div>
+<h4 id="sharded-messages-and-receipts">Sharded Messages and Receipts</h4>
+
+<p>The Message and MessageReceipts fields are each Cids of <a href="../sharray">sharray</a> datastructures. The <code>Messages</code> sharray contains the Cids of the messages that are included in the block. The <code>MessageReceipts</code> sharray contains the receipts directly.</p>
+
 <h2 id="message">Message</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Message</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">To</span>   <span class="nx">Address</span>
@@ -514,7 +529,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="ipld-considerations">IPLD Considerations</h2>
 
-<p>Cids for FCS objects should use the FCS multicodec (<code>0x1f</code>).</p>
+<p>Cids for FCS objects should use the FCS multicodec (<code>0x1f</code>), and should use a blake2b-256 multihash.</p>
 
 <h2 id="vectors">Vectors</h2>
 
@@ -642,7 +657,13 @@ the same encoding, given the same input.</p>
 <ul>
 <li><a href="#address">Address</a></li>
 <li><a href="#cid">CID</a></li>
-<li><a href="#block">Block</a></li>
+<li><a href="#block">Block</a>
+<ul>
+<li>
+<ul>
+<li><a href="#sharded-messages-and-receipts">Sharded Messages and Receipts</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#message">Message</a>
 <ul>
 <li><a href="#parameter-encoding">Parameter Encoding</a></li>
