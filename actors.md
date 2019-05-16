@@ -377,17 +377,18 @@ type StorageMiner struct {
 | 1   | `AddAsk`     |
 | 2 | `CommitSector` |
 | 3 | `SubmitPoSt` |
-| 4 | `SlashStorageFault` |
-| 5 | `GetCurrentProvingSet` |
-| 6 | `ArbitrateDeal` |
-| 7 | `DePledge` |
-| 8 | `GetOwner` |
-| 9 | `GetWorkerAddr` |
-| 10 | `GetPower` |
-| 11 | `GetKey` |
-| 12 | `GetPeerID` |
-| 13 | `GetSectorSize` |
-| 14 | `UpdatePeerID` |
+| 4 | `IncreasePledge` |
+| 5 | `SlashStorageFault` |
+| 6 | `GetCurrentProvingSet` |
+| 7 | `ArbitrateDeal` |
+| 8 | `DePledge` |
+| 9 | `GetOwner` |
+| 10 | `GetWorkerAddr` |
+| 11 | `GetPower` |
+| 12 | `GetKey` |
+| 13 | `GetPeerID` |
+| 14 | `GetSectorSize` |
+| 15 | `UpdatePeerID` |
 
 ### Constructor
 
