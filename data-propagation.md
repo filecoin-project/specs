@@ -12,7 +12,16 @@ Both blocks and messages are propagated using the gossipsub libp2p pubsub router
 
 ## Block Propagation
 
-Blocks are propagated over the libp2p pubsub channel `/fil/blocks`. The block is [serialized](data-structures.md#block) and the raw bytes are sent as the content of the pubsub message. No messages, computed state, or other additional information is sent along with the block message.
+Blocks are propagated over the libp2p pubsub channel `/fil/blocks`. The following structure is filled out with the appropriate information, serialized (with CBOR-RPC), and sent over the wire:
+
+```go
+type BlockMsg struct {
+  Header Block
+  Messages []Cid
+}
+```
+
+The array of message cids must match the `Messages` field in the block when used to construct a [sharray](sharray.md).
 
 Each Filecoin node sets a 'validation function' for the blocks topic that checks that the block is properly constructed, its ticket is valid, the block signature is valid, the miner is a valid miner, and the block is a child of a known good tipset. (TODO: clarify which of these checks are needed, any slowness here impacts propagation time significantly, this is not a full validity check) If an invalid block is received, the peer it was received from should be marked as potentially bad (TODO: we could blacklist peers who send bad blocks, maybe need support from libp2p for this?)
 
