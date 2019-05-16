@@ -47,19 +47,23 @@ type Block struct {
 	// transactions state transitions.
 	StateRoot Cid
 
-	// Messages is the set of messages included in this block
-	// TODO: should be a merkletree-ish thing
-	Messages []SignedMessage
+	// Messages is the set of messages included in this block. This field is the Cid
+	// of the root of a sharray of Messages.
+	Messages Cid
 
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-	// TODO: should be the same type of merkletree-list thing that the messages are
-	MessageReceipts []MessageReceipt
+	// This field is the Cid of the root of a sharray of MessageReceipts.
+	MessageReceipts Cid
 
-    // The block Timestamp is used to enforce a form of block delay by honest miners.
-    // Unix time UTC timestamp stored as an unsigned integer
-    Timestamp Timestamp
+	// The block Timestamp is used to enforce a form of block delay by honest miners.
+	// Unix time UTC timestamp stored as an unsigned integer
+	Timestamp Timestamp
 }
 ```
+
+#### Sharded Messages and Receipts
+
+The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
 
 ## Message
 
@@ -350,7 +354,7 @@ Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that 
 
 ## IPLD Considerations
 
-Cids for FCS objects should use the FCS multicodec (`0x1f`).
+Cids for FCS objects should use the FCS multicodec (`0x1f`), and should use a blake2b-256 multihash.
 
 ## Vectors
 
