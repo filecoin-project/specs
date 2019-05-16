@@ -61,7 +61,7 @@ TODO: This storage-market.md doc should try to describe the high level interface
 
 The storage market contains the following data:
 
-- StorageMiners - The storage market keeps track of the set of the addresses of all storage miners in the storage market. All miners referenced here were created by the storage market via the `CreateMiner` method.
+- StorageMiners - The storage market keeps track of the set of the addresses of all storage miners in the storage market. All miners referenced here were created by the storage market via the `CreateStorageMiner` method.
 - TotalComittedStorage - This is a tally of all the committed storage in the network. This is both a nice metric to see how much data is being stored by the filecoin network, and a critical piece of information used by mining routine to compute each miners storage ratio.
 
 ## Market Flow

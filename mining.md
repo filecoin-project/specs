@@ -7,7 +7,7 @@ Any block proposer must be a storage miner, but storage miners can avoid perform
 
 ## The Miner Actor
 
-After successfully calling `CreateMiner`, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
+After successfully calling `CreateStorageMiner`, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
 
 For details on the methods on the miner actor, see its entry in the [actors spec](actors.md#storage-miner-actor).
 
@@ -21,7 +21,7 @@ Storage miners must continually produce Proofs of SpaceTime over their storage t
 
 #### Step 0: Registration
 
-To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor's [`CreateMiner`](actors.md#createstorageminer) method. The call will then create a new miner actor instance and return its address.
+To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor's [`CreateStorageMiner`](actors.md#createstorageminer) method. The call will then create a new miner actor instance and return its address.
 
 The next step is to place one or more storage market asks on the market. This is done through the storage markets [`AddAsk`](actors.md#addask) method. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).
 
