@@ -21,7 +21,7 @@ A valid block:
 
 
 {{% notice info %}}
-Once the block passes validation, it should be added to the local datastore, even in the case where we don't accept it right now. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching. Blocks a certain distance from the current chain height may be dropped (exact number TBD, but blocks that havent been included after several days may be purged).
+Once the block passes validation, it should be added to the local datastore, even in the case where we don't accept it as our best tip right now. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching. Blocks a certain distance from the current chain height may be dropped (exact number TBD, but blocks that havent been included after several days may be purged).
 {{% /notice %}}
 
 {{% notice info %}}
