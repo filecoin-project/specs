@@ -17,6 +17,16 @@ Second, an `actor` may call a method on another actor during the invocation of o
 
 The `global state` is modeled as a map of actor `ID`s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the 'key' being the serialized ID address (every actor has an ID address that can be looked up via the `InitActor`), and the value is an [`Actor`](data-structures.md#actor) object with the actors information. Within each `Actor` object is a field called `state` that is an ipld pointer to a graph that can be entirely defined by the actor.
 
+### Actor Creation
+
+There are two mechanisms by which an actor can be created. By explicitly invoking `exec` on the `Init` actor, and by sending a message to a public key address (secp256k1 or BLS, address types 1 and 3 respectively).
+
+Calling `exec` to create an actor should generate an Actor address, and register it in the state tree (see [Init Actor](actors.md#init-actor) for more details).
+
+Sending a message to a non-existant account via a public key address causes the creation of an account actor for that address. The `To` address should be placed into the actor storage for later use in validating messages sent from this actor.
+
+This second route for creating an actor is allowed to avoid the necessity of an explicit 'register account' step for creating new accounts.
+
 ### Execution (Calling a method on an Actor)
 
 Message execution currently relies entirely on 'built-in' code, with a common external interface. The method and actor to call it on are specified in the `Method` and `To` fields of a message, respectively. Method parameters are encoded and put into the `Params` field of a message. The encoding is a cbor array of each of the types individually encoded. The individual encodings for each type are as follows.
