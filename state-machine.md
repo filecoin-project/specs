@@ -19,7 +19,7 @@ The `global state` is modeled as a map of actor `ID`s to actor structs. This map
 
 ### Actor Creation
 
-There are two mechanisms by which an actor can be created. By explicitly invoking `exec` on the `Init` actor, and by sending a message to a public key address (secp256k1 or BLS, address types 1 and 3 respectively).
+There are two mechanisms by which an actor can be created. By explicitly invoking `exec` on the `Init` actor, and by sending a message to a `Public Key` typed `Address`.
 
 Calling `exec` to create an actor should generate an Actor address, and register it in the state tree (see [Init Actor](actors.md#init-actor) for more details).
 
