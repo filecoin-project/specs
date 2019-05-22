@@ -168,7 +168,7 @@ type Signature struct {
 
 ### Serialization
 
-Uses FCS.
+In their serialized form the raw bytes (only the `Data` field) are serialized and then tagged according to the FCS tags, to indicated which signature type they are.
 
 # Basic Type Encodings
 
@@ -305,13 +305,14 @@ if ((shift <size) && (sign bit of byte is set))
 
 Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
 
-| FCS Type          | CBOR tag  |
-|-------------------|-----------|
-| Block v1          | `43`      |
-| Message v1        | `44`      |
-| SignedMessage v1  | `45`      |
-| Signature v1      | `46`      |
-| MessageReceipt v1 | `47`      |
+| FCS Type               | CBOR tag  |
+|------------------------|-----------|
+| Block v1               | `43`      |
+| Message v1             | `44`      |
+| SignedMessage v1       | `45`      |
+| MessageReceipt v1      | `46`      |
+| Signature Secp256k1 v1 | `47`      |
+| Signature BLS12-381 v1 | `48`      |
 
 
 For example, a message would be encoded as:
