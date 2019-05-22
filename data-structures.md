@@ -43,6 +43,10 @@ type Block struct {
 	// Height is the chain height of this block.
 	Height Uint64
 
+	// BlockSig is a signature over the hash of the entire block with the miners
+	// worker key to ensure that it is not tampered with after creation
+	BlockSig Signature
+
 	// StateRoot is a cid pointer to the state tree after application of the
 	// transactions state transitions.
 	StateRoot Cid
@@ -50,6 +54,10 @@ type Block struct {
 	// Messages is the set of messages included in this block. This field is the Cid
 	// of the root of a sharray of Messages.
 	Messages Cid
+
+	// BLSAggregate is an aggregated BLS signature for all the messages in this block that
+	// were signed using BLS signatures
+	BLSAggregate Signature
 
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 	// This field is the Cid of the root of a sharray of MessageReceipts.
