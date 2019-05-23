@@ -72,8 +72,9 @@ type BlockHeader struct {
 	// This field is the Cid of the root of a sharray of MessageReceipts.
 	MessageReceipts Cid
 
-	// The block Timestamp is used to enforce a form of block delay by honest miners.
-	// Unix time UTC timestamp stored as an unsigned integer
+	// The Timestamp is used to enforce a form of block delay by honest miners.
+	// Unix time UTC timestamp stored as an unsigned integer (uint64). To be specific, the
+	// timestamp is seconds since Jan 01 1970 (UTC timezone).
 	Timestamp Timestamp
 }
 ```
