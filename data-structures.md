@@ -5,10 +5,10 @@ This document serves as an entry point for understanding the data structures in 
 ## Address
 
 An address is an identifier that refers to an actor in the Filecoin state. All [actors](actors.md) (miner actors, the storage market actor, account actors) have an address. An address encodes information about:
-- the network this address belongs to
-- the type of data it contains
-- the data itself
-- (depending on the type of address) a checksum
+- Network this address belongs to
+- Type of data the address contains
+- The data itself
+- Checksum (depending on the type of address)
 
 For more detail about the different types of addresses and how they are structured and used, take a look at the [address spec](address.md).
 
@@ -30,9 +30,9 @@ A block header contains information relevant to a particular point in time over 
 - Merkle root of the message receipts in this block
 - Timestamp
 
-Note: A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the phrases `block` and `block header` interchangeably.
+Note: A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms `block` and `block header` interchangeably.
 
-Below is a sample interface (written in Go) for defining a Block Header.
+Below is a sample interface (written in Go) for defining a block header.
 
 ```go
 // BlockHeader is a block header in the blockchain.
@@ -78,6 +78,8 @@ type BlockHeader struct {
 }
 ```
 
+### Ordering of Elements in Block Header Arrays
+
 As you see in the interface defined above, a typical block header contains many different arrays. The ordering of these arrays is important and should be consistent across implementations.
 
 | Array | Ordering |
@@ -85,9 +87,11 @@ As you see in the interface defined above, a typical block header contains many 
 | `Tickets` | Sorted by the order in which the tickets were created (each ticket in the array is created at a specific block height). |
 | `Parents` | Sorted lexicographically |
 
-#### Sharded Messages and Receipts
+### Sharded Messages and Receipts
 
-The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
+In a block header, the `Messages` and `MessageReceipts` fields are each CIDs that reference [sharray](sharray.md) datastructures. The `Messages` sharray contains the CIDs of the messages that are included in the block. The `MessageReceipts` sharray contains the message receipts directly.
+
+Read more about sharrays in the [sharray spec](sharray.md).
 
 ## Message
 
