@@ -63,7 +63,7 @@ type Block struct {
 
 #### Sharded Messages and Receipts
 
-The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
+The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
 
 ## Message
 

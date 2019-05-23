@@ -18,9 +18,10 @@ Some state machine actors are 'system' actors that get instantiated in the genes
 | 0    | InitActor          | Network Init            |
 | 1    | AccountActor       | Network Treasury        |
 | 2    | StorageMarketActor | Filecoin Storage Market |
-
+|  99 | AccountActor | Burnt Funds |
 
 ## Init Actor
+
 The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that `NextID` will initially be set to 100.
 
 ```go
@@ -135,14 +136,17 @@ The Account actor is the actor used for normal keypair backed accounts on the fi
 
 ```go
 type AccountActor struct {
-  // The account actor has no extra state
+  // Address contains the public key based address that this account was created with. If unset, this account may not send funds by normal means.
+  Address Address
 }
 ```
 
 ### Code Cid
 `<codec:raw><mhType:identity><"account">`
 
-
+| Index     | Method Name       |
+| -------- | ---------- |
+| 1  | `GetAddress` |
 
 ## Storage Market Actor
 
@@ -162,10 +166,10 @@ type StorageMarketActor struct {
 
 | Index     | Method Name       |
 | -------- | ---------- |
-| 0   | `CreateStorageMiner`     |
-| 1 | `SlashConsensusFault` |
-| 2 | `UpdateStorage` |
-| 3 | `GetTotalStorage` |
+| 1   | `CreateStorageMiner`     |
+| 2 | `SlashConsensusFault` |
+| 3 | `UpdateStorage` |
+| 4 | `GetTotalStorage` |
 
 
 #### CreateStorageMiner
@@ -860,15 +864,14 @@ type Transaction struct {
 
 | Index     | Method Name       |
 | -------- | ---------- |
-| 0   | `Propose`     |
-| 1 | `Approve` |
-| 2 | `Cancel` |
-| 3 | `ClearCompleted` |
-| 4 | `AddSigner` |
-| 5 | `RemoveSigner` |
-| 6 | `SwapSigner` |
-| 7 | `ChangeRequirement` |
-
+| 1   | `Propose`     |
+| 2 | `Approve` |
+| 3 | `Cancel` |
+| 4 | `ClearCompleted` |
+| 5 | `AddSigner` |
+| 6 | `RemoveSigner` |
+| 7 | `SwapSigner` |
+| 8 | `ChangeRequirement` |
 
 #### Constructor
 
