@@ -323,6 +323,8 @@ All valid blocks generated in a round form a `TipSet` that participants will att
 
 The first condition implies that all blocks in a TipSet were mined at the same height (remember that height refers to block height as opposed to ticket round). This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a TipSet bringing these blocks together. The second rule means blocks in a TipSet are mined in a same round.
 
+The blocks in a tipset have no defined order in representation. During state computation, blocks in a tipset are processed in order of block ticket, breaking ties with the block CID bytes.
+
 Due to network propagation delay, it is possible for a miner in round N+1 to omit valid blocks mined at round N from their TipSet. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol.
 
 ### Chain Weighting

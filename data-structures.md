@@ -25,16 +25,17 @@ type Block struct {
 	// Miner is the address of the miner actor that mined this block.
 	Miner Address
 
-	// Tickets are the winning ticket that were submitted with this block.
+	// Tickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
 	Tickets []Ticket
 
 	// ElectionProof is a signature over the final ticket that proves this miner
 	// is the leader at this round
 	ElectionProof Signature
 
-	// Parents is the set of parents this block was based on. Typically one,
-	// but can be several in the case where there were multiple winning ticket-
+	// Parents is an array of distinct CIDs of parents on which this block was based. 
+	// Typically one, but can be several in the case where there were multiple winning ticket-
 	// holders for a round.
+	// The order of parent CIDs is not defined.
 	Parents []Cid
 
 	// ParentWeight is the aggregate chain weight of the parent set.
@@ -60,7 +61,7 @@ type Block struct {
 	MessageReceipts Cid
 
 	// The block Timestamp is used to enforce a form of block delay by honest miners.
-	// Unix time UTC timestamp stored as an unsigned integer
+	// Unix time UTC timestamp (in seconds) stored as an unsigned integer.
 	Timestamp Timestamp
 
 	// BlockSig is a signature over the hash of the entire block with the miners
