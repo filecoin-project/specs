@@ -1,31 +1,48 @@
 # Data Structures
 
-This document serves as an entry point for understanding all of the data structures in filecoin.
+This document serves as an entry point for understanding the data structures in Filecoin. In this document, we give an introduction to each of the protocol data structures (linking to more detailed data structure specs in some places) and then explain how to encode these data structures for use in other parts of Filecoin such as the network protocols and the blockchain.
 
 ## Address
 
-An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.
+An address is an identifier that refers to an actor in the Filecoin state. All [actors](actors.md) (miner actors, the storage market actor, account actors) have an address. An address encodes information about:
+- the network this address belongs to
+- the type of data it contains
+- the data itself
+- (depending on the type of address) a checksum
 
-To learn more, take a look at the [address spec](address.md).
+For more detail about the different types of addresses and how they are structured and used, take a look at the [address spec](address.md).
 
-## CID
+## Content Identifier (CID)
 
-For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid).
+Most objects in Filecoin are referenced by their Content Identifiers (CID for short). The CID is a hash value, prefixed with its hash function (multihash), prepended with a few extra labels to inform applications about how to deserialize the given data. 
 
-CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
+For more information about CIDs, take a look at the [CID Spec](https://github.com/ipld/cid).
 
+## Block Header
 
-## Block
+A block header contains information relevant to a particular point in time over which the network may achieve consensus. The block header contains:
+- The address of the miner that mined the block
+- An array of the tickets that led to this particular miner being selected as the leader for this round (see the [Secret Leader Election portion of the Expected Consensus spec](expected-consensus.md#secret-leader-election) for more) and a signature on the winning ticket
+- The set of parent blocks and aggregate [chain weight](expected-consensus.md#chain-weighting) of the parents
+- This block's height
+- Merkle root of the state tree (after applying the messages -- state transitions -- included in this block)
+- Merkle root of the messages (state transitions) in this block
+- Merkle root of the message receipts in this block
+- Timestamp
 
-A block represents an individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and some notion of a 'weight' for deciding which block is the 'best'.
+Note: A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the phrases `block` and `block header` interchangeably.
+
+Below is a sample interface (written in Go) for defining a Block Header.
 
 ```go
-// Block is a block in the blockchain.
-type Block struct {
+// BlockHeader is a block header in the blockchain.
+type BlockHeader struct {
 	// Miner is the address of the miner actor that mined this block.
 	Miner Address
 
-	// Tickets are the winning ticket that were submitted with this block.
+	// Tickets are the winning ticket that were submitted with this block. The tickets
+	// array should include all the intervening tickets generated between (but not including) the 
+	// parents' block height and the current block height.
 	Tickets []Ticket
 
 	// ElectionProof is a signature over the final ticket that proves this miner
@@ -60,6 +77,13 @@ type Block struct {
 	Timestamp Timestamp
 }
 ```
+
+As you see in the interface defined above, a typical block header contains many different arrays. The ordering of these arrays is important and should be consistent across implementations.
+
+| Array | Ordering |
+| --- | --- |
+| `Tickets` | Sorted by the order in which the tickets were created (each ticket in the array is created at a specific block height). |
+| `Parents` | Sorted lexicographically |
 
 #### Sharded Messages and Receipts
 
@@ -179,6 +203,11 @@ Note: As signatures should always be within wrapper types, length prefixing is n
 
 
 # Basic Type Encodings
+
+
+## CID Serialization
+
+CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
 
 Types that appear in messages or in state must be encoded as described here.
 
