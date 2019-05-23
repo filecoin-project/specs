@@ -44,6 +44,7 @@ We mitigate SEALSTACK by introducing two phases: commitment phase, proving phase
 - The network is forced to operate in phases
 
 ## Proposal 2: Slow Decoding PoRep to solve SEALSTACK
+
 A prover generates a response to a challenge in `k` steps and must reply before `T` time steps.
 
 Assume a prover that is performing a 2-layers SEALSTACK attack. If the prover is challenged on the first layer, then they must decode the second layer which takes `t` time. A PoRep is secure against `n`-SEALSTACK if a malicious miner proof algorithm takes `t+k*n > T` steps.
@@ -53,5 +54,6 @@ In order to make PoRep secure, we can increase `t` by making honest proving taki
 Note: ZigZag is a favorable construction since in order to decode the graph for a single challenge is equivalent to decode the graph for multiple challenges. This means that a prover can only reply challenges for one layer per time, otherwise the prover would be using more storage than they have (so, not performing a SEALSTACK)
 
 ### Questions to answer
+
 - What is `k` concretely?
 - Calculate what is `k` in ZigZag (assuming bounded parallelization)

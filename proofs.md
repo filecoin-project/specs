@@ -61,6 +61,7 @@ Seal
 ```
 
 ### VerifySeal
+
 `VerifySeal` is the functional counterpart to `Seal`'s proof component. It takes all of `Seal's` outputs, along with those of Seal's inputs which are required to uniquely identify the created __*sealed sector*__. This allows a __*verifier*__ to determine whether a given proof is valid.  All inputs are required because verification requires sufficient context to determine not only that a proof is *valid* but also that the proof indeed corresponds to what it purports to prove.
 
 ```
@@ -100,12 +101,14 @@ Unseal
 ### Security Notes
 
 #### Guaranteeing sector uniqueness
+
 Every sealed sector is unique, even if the unsealed data is identical. This prevents a malicious miner from storing the same sector twice without dedicating twice the amount of storage, or two malicious miners pretending to store the same sector, but only storing one copy. Sector uniqueness is guaranteed by having unique `proverId` and `sectorId`. Each miner has a unique `proverID`, and each sector has a unique `sectorID`within that miner's sectors. Taken together, `proverID` and `sectorID` are globally unique . Both the `proverId` and the `sectorId` are used to encode the sealed data.
 
 The Filecoin node verifies that the correct `proverId` and `sectorId` is used when verifying the proof.
 
 ---
 ## Proof of Space-Time
+
 __NOTE:__ __*Proof of Space-Time*__ is in transition. Current implementations are mocked, and the final design has not been implemented. Consumers may refer to the below for reference, but nothing should be implemented until the spec is updated and synchronized with what will be the canonical construction.
 
 ### GeneratePost
@@ -144,6 +147,7 @@ VerifyPoSt
 
 ---
 ## Piece Inclusion Proof
+
 ### PieceInclusionProof
 A `PieceInclusionProof` contains a potentially complex merkle inclusion proof that all leaves included in `CommP` (the piece commitment) are also included in `CommD` (the sector data commitment).
 

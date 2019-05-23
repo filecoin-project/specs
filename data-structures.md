@@ -195,9 +195,11 @@ Types that appear in messages or in state must be encoded as described here.
 The public key type is simply an array of bytes. (TODO: discuss specific encoding of key types, for now just calling it bytes is sufficient)
 
 #### `BytesAmount`
+
 BytesAmount is just a re-typed Integer.
 
 #### `PeerID`
+
 PeerID is just the serialized bytes of a libp2p peer ID.
 
 Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/100
@@ -370,9 +372,16 @@ Below are some sample vectors for each data type.
 
 ### Message
 
-Encoded: `d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d46558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f644d706172616d73617265676f6f64`
+Encoded:
+
+```
+d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d4
+6558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f64
+4d706172616d73617265676f6f64
+```
 
 Decoded:
+
 ```
 To:     Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
 From:   Address("f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy")
@@ -384,9 +393,19 @@ Params: []byte("paramsaregood")
 
 ### Block
 
-Encoded: `d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f6788080`
+Encoded:
+
+```
+d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617
+469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a
+5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a1733
+26507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25
+e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678808
+0
+```
 
 Decoded:
+
 ```
 Miner:           Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
 Tickets:         [][]byte{"iamaticket"}

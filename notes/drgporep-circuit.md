@@ -28,111 +28,112 @@ Inside of circuit checks:
 - Inclusion checks: **Check** that all the inclusion proofs are correct
 - Encoding checks: **Check** that we can derive a decoding of the replica data that equals the original data
   - **Compute** a key: Hash the concatenatation the replica identifier with the replica parent leaves in dependency order in the DRG graph
-  - **Compute** a Sloth decoding of the replica data using the key 
+  - **Compute** a Sloth decoding of the replica data using the key
   - **Check** that the decoded leaf equals the original data leaf
 
 #### Low level description
 
-- **Public Parameters**: *Parameters that are embeded in the circuits or used to generate the circuit*
-  - `jubjub_params: TODO`: TODO find correct structure, default: TODO
-  - `degree: UInt`: Degree of the Depth Robust Graph
-  - `sloth_iterations: UInt`: Number of iteration for Sloth enocding/decoding
-  - `challenge_count: UInt`: Number of challenges
-  - `merkle_tree_depth: UInt`: Depth of the Merkle Trees in the inclusion proofs
+**Public Parameters**: *Parameters that are embeded in the circuits or used to generate the circuit*
 
-- **Public Inputs**: *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
-  - `replica_id: Fr`  Unique identity for the replica (in Filecoin `H(replica_id, prover_id)`)
-  - `comm_d: Fr`: Merkle root of the original data 
-  - `comm_r: Fr`: Merkle root of the replicated data
-  - `challenge_{0..challenge_count}/inclusion_checks`
-    - `replica_inclusion/path/input: Fr`: Packed boolean vector that represents the authentication path for the replica inclusion proof; bool says if path is right (1) or left (0).
-    - `data_inclusion/path/input: Fr`: Same previous one for data inclusion proofs
-    - `parents_inclusion_{0..degree}/path/input: Fr`: Same previous one for data inclusion proofs
+- `jubjub_params: TODO`: TODO find correct structure, default: TODO
+- `degree: UInt`: Degree of the Depth Robust Graph
+- `sloth_iterations: UInt`: Number of iteration for Sloth enocding/decoding
+- `challenge_count: UInt`: Number of challenges
+- `merkle_tree_depth: UInt`: Depth of the Merkle Trees in the inclusion proofs
 
-- **Private Inputs**: *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
-  - AUX (input)
-    - `challenge_{0..challenge_count}`
-      - `inclusion_checks`
-        - `replica_inclusion`
-          - `value/num : Fr`: Leaf of the Merkle tree
-          - `merkle tree hash {0..merkle_tree_depth} : TODO`: intermediary hashes for the merkle tree inclusion proof
-        - `parent_inclusion_{0..degree}`
-          - `value/num : Fr`: Leaf of the Merkle tree
-          - `merkle tree hash {0..merkle_tree_depth} : TODO`: intermediary hashes for the merkle tree inclusion proof
-        - `data_inclusion`
-          - `value/num : Fr`: Leaf of the Merkle tree
-          - `merkle tree hash {0..merkle_tree_depth} : TODO`: intermediary hashes for the merkle tree inclusion proof
-      - `encoding_checks/parents_{0..degree}_bits/bit {0..255}: Fr`: Bit representation of the parent hashes
-  - AUX (computed)
-    - `encoding_checks/kdf: TODO`: TODO
-    - `replica_id_bits/bit {0..255}/boolean: Fr`: bit at position *i*
+**Public Inputs**: *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
 
-- **Circuit `drgporep`**:
+- `replica_id: Fr`  Unique identity for the replica (in Filecoin `H(replica_id, prover_id)`)
+- `comm_d: Fr`: Merkle root of the original data
+- `comm_r: Fr`: Merkle root of the replicated data
+- `challenge_{0..challenge_count}/inclusion_checks`
+  - `replica_inclusion/path/input: Fr`: Packed boolean vector that represents the authentication path for the replica inclusion proof; bool says if path is right (1) or left (0).
+  - `data_inclusion/path/input: Fr`: Same previous one for data inclusion proofs
+  - `parents_inclusion_{0..degree}/path/input: Fr`: Same previous one for data inclusion proofs
 
-  - `replica_id_bits`: *Check `replica_id` is equal to its bit representation*
+**Private Inputs**: *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
-    ```
-    Assign replica_id_bits = Fr_to_bits(replica_id)
-    Check Packed(replica_id_bits) == replica_id
-    ```
+- AUX (input)
+  - `challenge_{0..challenge_count}`
+    - `inclusion_checks`
+      - `replica_inclusion`
+        - `value/num : Fr`: Leaf of the Merkle tree
+        - `merkle tree hash {0..merkle_tree_depth} : TODO`: intermediary hashes for the merkle tree inclusion proof
+      - `parent_inclusion_{0..degree}`
+        - `value/num : Fr`: Leaf of the Merkle tree
+        - `merkle tree hash {0..merkle_tree_depth} : TODO`: intermediary hashes for the merkle tree inclusion proof
+      - `data_inclusion`
+        - `value/num : Fr`: Leaf of the Merkle tree
+        - `merkle tree hash {0..merkle_tree_depth} : TODO`: intermediary hashes for the merkle tree inclusion proof
+    - `encoding_checks/parents_{0..degree}_bits/bit {0..255}: Fr`: Bit representation of the parent hashes
+- AUX (computed)
+  - `encoding_checks/kdf: TODO`: TODO
+  - `replica_id_bits/bit {0..255}/boolean: Fr`: bit at position *i*
 
-  - `challenge_{chall = 0..challenge_count}`
+**Circuit `drgporep`**:
 
-    - `inclusion_checks`: *Check inclusion proofs*
+- `replica_id_bits`: *Check `replica_id` is equal to its bit representation*
 
-      - `replica_inclusion`: *Check inclusion for the challenged replica node*
+  ```
+  Assign replica_id_bits = Fr_to_bits(replica_id)
+  Check Packed(replica_id_bits) == replica_id
+  ```
 
-        ```
-        Check PoR(jubjub_params, replica_inclusion_proofs[chall], comm_r)
-        ```
+- `challenge_{chall = 0..challenge_count}`
+  - `inclusion_checks`: *Check inclusion proofs*
+    - `replica_inclusion`: *Check inclusion for the challenged replica node*
 
-      - `data_inclusion`: *Check inclusion proof for the challenged data node*
+      ```
+      Check PoR(jubjub_params, replica_inclusion_proofs[chall], comm_r)
+      ```
 
-        ```
-        Check PoR(jubjub_params, data_inclusion_proofs[chall], comm_d)
-        ```
+    - `data_inclusion`: *Check inclusion proof for the challenged data node*
 
-      - `parents_inclusion_{parent = 0..(degree+expansion_degree)}`:  *Check inclusion proof for each parent of the challenged data node*
+      ```
+      Check PoR(jubjub_params, data_inclusion_proofs[chall], comm_d)
+      ```
 
-        ```
-        Check PoR(jubjub_params, parents_inclusion_proofs[chall][parent], comm_r)
-        ```
+    - `parents_inclusion_{parent = 0..(degree+expansion_degree)}`:  *Check inclusion proof for each parent of the challenged data node*
 
-    - `encoding_checks`: *Check a data node was encoded correctly in replica node*
+      ```
+      Check PoR(jubjub_params, parents_inclusion_proofs[chall][parent], comm_r)
+      ```
 
-      - `parent_bits = parents_{parent = 0..degree}_bits`: *Check that a correct bit representation of the parents is known*
+  - `encoding_checks`: *Check a data node was encoded correctly in replica node*
 
-        ```
-        Let leaf = /challenge_{chall}/inclusion_checks/parents_inclusion_{parent}/value
-        Assign parent_bits = Fr_to_bits(leaf)
-        Check Packed(bits) == leaf
-        ```
+    - `parent_bits = parents_{parent = 0..degree}_bits`: *Check that a correct bit representation of the parents is known*
 
-      - `kdf`: *Check that the KDF was run correctly*
+      ```
+      Let leaf = /challenge_{chall}/inclusion_checks/parents_inclusion_{parent}/value
+      Assign parent_bits = Fr_to_bits(leaf)
+      Check Packed(bits) == leaf
+      ```
 
-        ```
-        Let leaf_bits[i = 0..deg] = challenge_{chall}/encoding_checks/parents_{i}_bits
-        
-        Assign key : Fr = KDF(replica_id_bits, leaf_bits)
-        Check KDF(replica_id_bits, leaf_bits)
-        ```
+    - `kdf`: *Check that the KDF was run correctly*
 
-      - `sloth_decode`: *Check that the Sloth encoding was run correctly*
+      ```
+      Let leaf_bits[i = 0..deg] = challenge_{chall}/encoding_checks/parents_{i}_bits
 
-        ```
-        Let leaf = challenge_{chall}/inclusion_checks/replica_inclusion/value
-        
-        Assign decoded = SlothDecode(key, leaf, sloth_iterations)
-        Check SlothDecode(key, leaf, sloth_iterations)
-        ```
+      Assign key : Fr = KDF(replica_id_bits, leaf_bits)
+      Check KDF(replica_id_bits, leaf_bits)
+      ```
 
-      - `equality`: *Check that the decoded piece is equivalent to the challenged node*
+    - `sloth_decode`: *Check that the Sloth encoding was run correctly*
 
-        ```
-        Let leaf = /challenge_{chall}/inclusion_checks/data_inclusion/value
-        
-        Check leaf == decoded
-        ```
+      ```
+      Let leaf = challenge_{chall}/inclusion_checks/replica_inclusion/value
+
+      Assign decoded = SlothDecode(key, leaf, sloth_iterations)
+      Check SlothDecode(key, leaf, sloth_iterations)
+      ```
+
+    - `equality`: *Check that the decoded piece is equivalent to the challenged node*
+
+      ```
+      Let leaf = /challenge_{chall}/inclusion_checks/data_inclusion/value
+
+      Check leaf == decoded
+      ```
 
 
 
@@ -142,6 +143,6 @@ Inside of circuit checks:
 - **Merkle root**: Root hash of a binary Merkle tree
 - **UInt**: Unsigned integer
 - **{0..x}**: From 0 (included) to x (not included) (e.g. [0,x)] )
-- **Check**: 
+- **Check**:
   - If there is an equality, create a constraint
   - otherwise, execute the function

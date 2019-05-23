@@ -369,6 +369,7 @@ Note: Due to jitter in EC, and the gregorian calendar, there may be some error i
 
 
 ### Future Work
+
 There are many ideas for improving upon the storage miner, here are ideas that may be potentially implemented in the future.
 
 - **Sector Resealing**: Miners should be able to 're-seal' sectors, to allow them to take a set of sectors with mostly expired pieces, and combine the not-yet-expired pieces into a single (or multiple) sectors.

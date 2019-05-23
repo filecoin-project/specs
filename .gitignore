@@ -2,3 +2,5 @@
 _book
 public
 resources/_gen
+pdf-build
+.pdfworking
