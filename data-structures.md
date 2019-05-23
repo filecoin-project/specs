@@ -78,7 +78,7 @@ type BlockHeader struct {
 }
 ```
 
-### Ordering of Elements in Block Header Arrays
+### Element Ordering in Arrays
 
 As you see in the interface defined above, a typical block header contains many different arrays. The ordering of these arrays is important and should be consistent across implementations.
 
