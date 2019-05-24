@@ -70,8 +70,7 @@ This section describes the flow required to store a single piece with a single s
 
 #### Before Deal
 
-1. **Merkle Translation:** The client runs a 'Local Merkle Translation' to generate the storage market hash for the data.
-  - Storage miners reference data by its storage market hash, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See [Piece Inclusion Proof](definitions.md#piece-inclusion-proof)
+1. **Data Preparation:** The client prepares their input data. See [client data](client-data.md) for more details.
 2. **Miner Selection:** The client looks at asks on the network, and then selects a storage miner to store their data with.
    - Note: this is currently a manual process.
 3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with. All payments between clients and storage providers use payment channels.
