@@ -49,7 +49,7 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 - `CommRLast : Fr`: The Merkle tree root hash of the final replica (output of the last layer).
 - `CommRStar : Fr`: A commitment to each `l` layer's Merkle tree root hash `CommR[l]` and `ReplicaId`.
 - `InclusionPath : [LAYERS][]Fr`: Inclusion path for the challenged data and replica leaf.
-- `ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr`:  Inclusion path for the parents of the corresponding `InclusionPath[l][c]` .
+- `ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr`:  Inclusion path for the parents of the corresponding `InclusionPath[l][c]`.
 
 ##### Design notes
 
@@ -64,21 +64,17 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
 
   Note: Size is `LAYERS-1` since the commitment to the last layer is `CommRLast`
 
-- `DataProof : [LAYERS][][TREE_DEPTH-2]Fr`: Merkle tree inclusion proof for the current layer unencoded challenged leaf.
+- `DataProof : [LAYERS][][TREE_DEPTH]Fr`: Merkle tree inclusion proof for the current layer unencoded challenged leaf.
 
-- `ReplicaProof : [LAYERS][][TREE_DEPTH-2]Fr`: Merkle tree inclusion proof for the current layer encoded challenged leaves.
+- `ReplicaProof : [LAYERS][][TREE_DEPTH]Fr`: Merkle tree inclusion proof for the current layer encoded challenged leaves.
 
-- `ParentProof : [LAYERS][][PARENT_COUNT][TREE_DEPTH-2]Fr`: Pedersen hashes of the Merkle inclusion proofs of the parent leaves for each challenged leaf at layer `l`.
+- `ParentProof : [LAYERS][][PARENT_COUNT][TREE_DEPTH]Fr`: Pedersen hashes of the Merkle inclusion proofs of the parent leaves for each challenged leaf at layer `l`.
 
 - `DataValue : [LAYERS][]Fr`: Value of the unencoded challenged leaves at layer `l`.
 
 - `ReplicaValue : [LAYERS][]Fr`: Value of the encoded leaves for each challenged leaf at layer `l`.
 
 - `ParentValue : [LAYERS][][PARENT_COUNT]Fr`: Value of the parent leaves for each challenged leaf at layer `l`.
-
-##### Design notes
-
-- `DataProof`,  `ParentProof`, `ReplicaProof`: Size of proof per layer is `TREE_DEPTH-2` because it excludes (1) the roothash, and (2) the leaf value: (1) the root hash of the proof will be the corresponding unencoded data commitment for the current layer `l`, (2) the leaf value is the corresponding `DataValue`, `ReplicaValue` and `ParentValue`.
 
 #### Circuit
 
