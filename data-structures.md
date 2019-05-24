@@ -51,6 +51,10 @@ type Block struct {
 	// of the root of a sharray of Messages.
 	Messages Cid
 
+	// BLSAggregate is an aggregated BLS signature for all the messages in this block that
+	// were signed using BLS signatures
+	BLSAggregate Signature
+
 	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 	// This field is the Cid of the root of a sharray of MessageReceipts.
 	MessageReceipts Cid
@@ -58,6 +62,10 @@ type Block struct {
 	// The block Timestamp is used to enforce a form of block delay by honest miners.
 	// Unix time UTC timestamp stored as an unsigned integer
 	Timestamp Timestamp
+  
+  	// BlockSig is a signature over the hash of the entire block with the miners
+	// worker key to ensure that it is not tampered with after creation
+	BlockSig Signature
 }
 ```
 
