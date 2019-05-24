@@ -15,9 +15,9 @@ The next sections will go into some additional detail on how each of these encod
 
 ## Transfer Encoding
 
-Transfer Encoding may be computed in a variety of ways, as long as it is supported by both the client and miner involved. Here, we document the `default` transfer encoding.
+Transfer Encoding may be computed in a variety of ways, as long as it is supported by both the client and miner involved. Here, we document the `unixfsv1` transfer encoding.
 
-### `default`
+### `unixfsv1`
 
 The default transfer encoding is Unixfsv1 with the following parameters:
 
