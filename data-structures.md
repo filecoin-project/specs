@@ -43,10 +43,6 @@ type Block struct {
 	// Height is the chain height of this block.
 	Height Uint64
 
-	// BlockSig is a signature over the hash of the entire block with the miners
-	// worker key to ensure that it is not tampered with after creation
-	BlockSig Signature
-
 	// StateRoot is a cid pointer to the state tree after application of the
 	// transactions state transitions.
 	StateRoot Cid
@@ -66,12 +62,16 @@ type Block struct {
 	// The block Timestamp is used to enforce a form of block delay by honest miners.
 	// Unix time UTC timestamp stored as an unsigned integer
 	Timestamp Timestamp
+  
+  	// BlockSig is a signature over the hash of the entire block with the miners
+	// worker key to ensure that it is not tampered with after creation
+	BlockSig Signature
 }
 ```
 
 #### Sharded Messages and Receipts
 
-The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
+The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
 
 ## Message
 

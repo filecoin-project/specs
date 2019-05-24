@@ -177,9 +177,6 @@ func VerifyBlock(blk Block) {
 	// 7. Validate State Transitions
 	receipts := LoadReceipts(blk.MessageReceipts)
 	for i, msg := range messages {
-		if IsBlsMessage(msg) {
-			blsMessages = append()
-		}
 		receipt := ApplyMessage(state, msg)
 		if receipt != receipts[i] {
 			Fatal("message receipt mismatch")
@@ -188,6 +185,16 @@ func VerifyBlock(blk Block) {
 	if state.Cid() != blk.StateRoot {
 		Fatal("state roots mismatch")
 	}
+}
+
+func (state StateTree) LookupPublicKey(a Address) PubKey {
+	act := state.GetActor(a)
+	if !act.Code == AccountActor {
+		Fatal("only account actors have public keys")
+	}
+
+	ast := LoadAccountActorState(act)
+	return ast.PublicKey
 }
 ```
 
@@ -287,7 +294,7 @@ To create a block, the eligible miner must compute a few fields:
 - `MsgRoot` - To compute this:
   - Select a set of messages from the mempool to include in the block.
   - Insert them into a Merkle Tree and take its root.
-    - Note: Messages with BLS signatures should be included as raw `Message` types, and not `SignedMessage`. Their signatures should be gathered up and aggregated for the `BLSAggregate` field. 
+    - Note: Messages with BLS signatures should be included as raw `Message` types, and not `SignedMessage`. Their signatures should be gathered up and aggregated for the `BLSAggregate` field. 
 - `StateRoot` - Apply each chosen message to the `ParentState` to get this.
 - `ReceiptsRoot` - To compute this:
   - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
