@@ -505,8 +505,8 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 Parameters:
 - proofs []PoStProof
 - faults []FaultSet
-- recovered SectorSet
-- done SectorSet
+- recovered Bitfield
+- done Bitfield
 
 Return: None
 

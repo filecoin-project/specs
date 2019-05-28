@@ -208,7 +208,7 @@ Integers are encoded as LEB128 signed integers.
 
 #### `BitField`
 
-Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.
+Bitfields are a set of bits encoded using a custom run length encoding: rle+.  rle+ is specified below.
 
 #### `SectorSet`
 
