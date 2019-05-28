@@ -194,7 +194,10 @@ func (state StateTree) LookupPublicKey(a Address) PubKey {
 	}
 
 	ast := LoadAccountActorState(act)
-	return ast.PublicKey
+  if act.Address.Type == BLS {
+    return ExtractBLSPubKey(act.Address)
+  }
+  Fatal("can only look up public keys for BLS controlled accounts")
 }
 ```
 
