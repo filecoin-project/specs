@@ -18,7 +18,6 @@ headless: true
 * [Expected Consensus]({{< relref "/docs/expected-consensus.md" >}})
 * [State Machine]({{< relref "/docs/state-machine.md" >}})
   * [Local Storage]({{< relref "/docs/local-storage.md" >}})
-* [Node Operation]({{< relref "/docs/operation.md" >}})
 
 [**Actors**]({{< relref "/docs/actors.md" >}})
 
