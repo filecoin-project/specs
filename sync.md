@@ -1,5 +1,9 @@
 # Chain Syncing
 
+{{% notice warning %}}
+Outdated. The link that got you here should probably link to [`networking.md`](./networking.md) instead.
+{{% /notice %}}
+
 This spec describes the Filecoin sync protocol, for related systems, see:
 
 - [Bootstrapping](./bootstrap.md) which describes how a node builds a peer set in the first place.
@@ -11,43 +15,6 @@ This spec describes the Filecoin sync protocol, for related systems, see:
 Chain syncing is the process a filecoin node runs to sync its internal chain state with new blocks from the network and new blocks it itself has mined.  A node syncs in two distinct modes: `syncing` and `caught up`.  Chain syncing updates both local storage of chain data and the head of the current heaviest observed chain.
 
 'Syncing' mode and 'Caught up' mode are two distinct processes. 'Syncing' mode, or 'the initial sync' is a process that is triggered when a node is far enough behind the rest of the network. This process terminates once the nodes 'head' is    sufficiently far ahead. Once 'syncing' is complete, the 'caught up' sync process begins. This process keeps the node up to date with the rest of the network, and terminates only when the node is shut down.
-
-## Interface
-
-```go
-type Syncer struct {
-	// The heaviest known TipSet in the network.
-	head TipSet
-
-	// The interface for accessing and putting TipSets into local storage
-	store ChainStore
-
-	// The known genesis TipSet
-	genesis TipSet
-
-	// the current mode the syncer is in
-	syncMode SyncMode
-
-	// TipSets known to be invalid
-	bad BadTipSetCache
-    
-  // handle to the block sync service
-  bsync BlockSync
-    
-  //peer set
-  peerSet []PeerID
-    
-  // peer heads
-  // Note: clear cache on disconnects
-  peerHeads map[PeerID][]Cid
-  
-  trustedPeers []PeerID
-  trustedHeads map[PeerId][]Cid  
-}
-
-const BootstrapPeerThreshold = 25
-const DupThreshold = 10
-```
 
 
 

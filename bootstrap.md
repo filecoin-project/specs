@@ -1,5 +1,10 @@
 # Filecoin Bootstrapping Routine
 
+
+{{% notice warning %}}
+Outdated. The link that got you here should probably link to [`networking.md`](./networking.md) instead.
+{{% /notice %}}
+
 This spec describes the Filecoin bootstrapping protocol, it must be read along with:
 
 - [Sync](sync.md) on how Filecoin nodes sync with bootstrap nodes to catch up to the chain and stay synced after the initial bootstrapping has occured. The `Syncer` interface and many of the methods used here are defined in the sync spec.
