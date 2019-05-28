@@ -1,4 +1,4 @@
-# Filecoin Network Protocols
+# Filecoin Custom Network Protocols
 
 All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream as outlined in [networking(./networking.md)
 

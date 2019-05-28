@@ -1,11 +1,11 @@
 # Filecoin Node Operation
 
+{{% notice warning %}}
+**Obsolete**: move this into the corresponding sections, obviously. Also what ever linked you here should probably be updated, too! 
+{{% /notice %}}
+
 Running a Filecoin `full node` requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.
 
-
-{{% notice todo %}}
-**TODO**: elaborate on all this, obviously
-{{% /notice %}}
 
 ## Chain Validation
 
@@ -19,23 +19,6 @@ Running a Filecoin `full node` requires running many different processes and pro
 ## MemPool Maintenance
 
 Listen for messages on the messages pubsub channel (See [message propagation](data-propagation.md#message-propagation)). Validate each message, rebroadcast valid ones.
-
-## Handshaking
-
-- For each node you connect to, run the ['hello' protocol](network-protocols.md#hello-handshake) with them
-  - If response shows that you and the other node have different genesis blocks, disconnect from them.
-  - If the other node gives a valid chain head that is farther ahead than you, 'sync' the chain and maybe switch to it if it's ['heavier'](expected-consensus.md#chain-weighing).
-
-## DHT for Peer Routing
-
-- Run the DHT protocol for aiding node discovery
-  - libp2p-kad-dht, with just 'find node' RPCs enabled.
-
-## Bitswap for data requests
-
-Run bitswap to fetch and serve data (such as messages) to and from other filecoin nodes. This is used to fill in missing bits during block propagation, and also to fetch data during sync.
-
-There is not yet an official spec for bitswap, but [the protobufs](https://github.com/ipfs/go-bitswap/blob/master/message/pb/message.proto) should help in the interim.
 
 ## Mining
 

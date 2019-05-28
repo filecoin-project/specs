@@ -1,7 +1,17 @@
 # Filecoin Network
 
-The filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional filecoin specific protocols, as outlined in [Network Protocols](./network-protocols.md).
+The filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional filecoin specific protocols as outlined in [Network Protocols](./network-protocols.md).
 
+## Required Protocols
+
+Every full node must support the following libp2p protocols:
+
+ - [gossipsub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) ([for data announcements](./data-propagation.md))
+ - [bitswap] ([for data exchange](./))
+ - Filecoin specific Protocols:
+   - Hello Handshake
+   - StorageDeal
+   - BlockSync
 
 ## Transports, Streams & Encryption
 
