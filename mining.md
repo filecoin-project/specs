@@ -124,8 +124,9 @@ func VerifyBlock(blk Block) {
 	if blk.GetTime() > time.Now() {
 		Fatal("block was generated too far in the future")
 	}
-	// next check that it is appropriately delayed from its parents
-	if blk.GetTime() <= blk.minParentTime()+BLOCK_DELAY {
+	// next check that it is appropriately delayed from its parents including
+	// null blocks.
+	if blk.GetTime() <= blk.minParentTime() + (BLOCK_DELAY * len(blk.Tickets)) {
 		Fatal("block was generated too soon")
 	}
 
