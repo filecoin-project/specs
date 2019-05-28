@@ -283,7 +283,7 @@ To create a block, the eligible miner must compute a few fields:
 - `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp. The Timestamp in the newly created block must satisfy the following conditions:
   - the timestamp on the block is not in the future
-  - the timestamp on the block is at least BLOCK_DELAY higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
+  - the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
 - `ParentWeight` - As described in [Chain Weighting](./expected-consensus.md#chain-weighting).
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
   - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
