@@ -448,17 +448,18 @@ Note: this may be moved off chain soon, don't worry about testing it too heavily
 ### CommitSector
 
 Parameters:
+- sectorID SectorID
 - commD []byte
 - commR []byte
 - commRStar []byte
 - proof SealProof
 
-Return: SectorID
+Return: None
 
 
 ```go
 // NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
-func CommitSector(comm Commitment, proof *SealProof) SectorID {
+func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealProof) SectorID {
 	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.PublicKey, proof) {
 		Fatal("bad proof!")
 	}
@@ -478,10 +479,10 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 	miner.Collateral -= coll
 	miner.ActiveCollateral += coll
 
-	sectorId = miner.Sectors.Add(commR)
-	// TODO: sectors IDs might not be that useful. For now, this should just be the number of
-	// the sector within the set of sectors, but that can change as the miner experiences
-	// failures.
+    // Note: There must exist a unique index in the miner's sector set for each
+    // sector ID. The `faults`, `recovered`, and `done` parameters of the
+    // SubmitPoSt method express indices into this sector set.
+	miner.Sectors.Add((sectorID, commR, commD))
 
 	// if miner is not mining, start their proving period now
 	// Note: As written here, every miners first PoSt will only be over one sector.
@@ -495,8 +496,6 @@ func CommitSector(comm Commitment, proof *SealProof) SectorID {
 		miner.ProvingSet = miner.Sectors
 		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration(miner.SectorSize)
 	}
-
-	return sectorId
 }
 ```
 
