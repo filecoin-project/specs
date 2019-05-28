@@ -475,10 +475,10 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	miner.Collateral -= coll
 	miner.ActiveCollateral += coll
 
-	miner.Sectors.Add(commR)
-	// TODO: sectors IDs might not be that useful. For now, this should just be the number of
-	// the sector within the set of sectors, but that can change as the miner experiences
-	// failures.
+    // Note: There must exist a unique index in the miner's sector set for each
+    // sector ID. The `faults`, `recovered`, and `done` parameters of the
+    // SubmitPoSt method express indices into this sector set.
+	miner.Sectors.Add((sectorID, commR, commD))
 
 	// if miner is not mining, start their proving period now
 	// Note: As written here, every miners first PoSt will only be over one sector.
