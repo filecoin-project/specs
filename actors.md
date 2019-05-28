@@ -504,8 +504,8 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 Parameters:
 - proofs []PoStProof
 - faults []FaultSet
-- recovered SectorSet
-- done SectorSet
+- recovered Bitfield
+- done Bitfield
 
 Return: None
 
