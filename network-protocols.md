@@ -1,13 +1,13 @@
 # Filecoin Network Protocols
 
-All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.
+All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream as outlined in [networking(./networking.md)
+
 
 ## CBOR RPC
 
 Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will use the CBOR RPC protocol format, defined below.
 
 This format consists of series of [CBOR](https://tools.ietf.org/html/rfc7049) serialized objects. Whenever a filecoin protocol says "send X", it means "cbor serialize the object X, then write the serialized bytes".
-
 
 ## Hello Handshake
 
@@ -18,7 +18,7 @@ Note: Implementations should limit the maximum number of bytes read during the `
 
 # Hello Handshake
 
-> The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node.
+> The Hello protocol is used when two filecoin nodes initially connect to each other in order to determine information about the other node.
 
 Whenever a node gets a new connection, it opens a new stream on that connection and "says hello". This is done by crafting a `HelloMessage`, sending it to the other peer using CBOR RPC and finally, closing the stream.
 
