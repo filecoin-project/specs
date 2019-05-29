@@ -136,8 +136,8 @@ The Account actor is the actor used for normal keypair backed accounts on the fi
 
 ```go
 type AccountActor struct {
-  // Address contains the public key based address that this account was created with. If unset, this account may not send funds by normal means.
-  Address Address
+	// Address contains the public key based address that this account was created with. If unset, this account may not send funds by normal means.
+	Address Address
 }
 ```
 
@@ -482,7 +482,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	// Note: There must exist a unique index in the miner's sector set for each
 	// sector ID. The `faults`, `recovered`, and `done` parameters of the
 	// SubmitPoSt method express indices into this sector set.
-	miner.Sectors.Add((sectorID, commR, commD))
+	miner.Sectors.Add(sectorID, commR, commD)
 
 	// if miner is not mining, start their proving period now
 	// Note: As written here, every miners first PoSt will only be over one sector.
@@ -516,9 +516,9 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Fatal("not authorized to submit post for miner")
 	}
 
-	// ensure the fault sets properly stack, recovered is a subset of the combined
-	// fault sets, and that done does not intersect with either, and that all sets
-	// only reference sectors that currently exist
+	// ensure recovered is a subset of the combined fault sets, and that done
+	// does not intersect with either, and that all sets only reference sectors
+	// that currently exist
 	if !miner.ValidateFaultSets(faults, recovered, done) {
 		Fatal("fault sets invalid")
 	}
@@ -579,6 +579,38 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// update next done set
 	miner.NextDoneSet = done
 	miner.ArbitratedDeals.Clear()
+}
+
+func ValidateFaultSets(faults []FaultSet, recovered, done BitField) bool {
+	var aggregate BitField
+	for _, fs := range faults {
+		aggregate.Combine(fs.BitField)
+	}
+
+	// all sectors marked recovered must have actually failed
+	if !recovered.IsSubsetOf(aggregate) {
+		return false
+	}
+
+	// the done set cannot intersect with the aggregated faults
+	// you can't mark a fault as 'done'
+	if aggregate.Intersects(done) {
+		return false
+	}
+
+	for _, bit := range aggregate.Bits() {
+		if !miner.HasSectorByID(bit) {
+			return false
+		}
+	}
+
+	for _, bit := range done.Bits() {
+		if !miner.HasSectorByID(bit) {
+			return false
+		}
+	}
+
+	return true
 }
 ```
 

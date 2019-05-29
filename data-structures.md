@@ -62,8 +62,8 @@ type Block struct {
 	// The block Timestamp is used to enforce a form of block delay by honest miners.
 	// Unix time UTC timestamp stored as an unsigned integer
 	Timestamp Timestamp
-  
-  	// BlockSig is a signature over the hash of the entire block with the miners
+
+	// BlockSig is a signature over the hash of the entire block with the miners
 	// worker key to ensure that it is not tampered with after creation
 	BlockSig Signature
 }
@@ -184,7 +184,18 @@ type Signature struct {
 
 Note: As signatures should always be within wrapper types, length prefixing is not needed here.
 
+## FaultSet
 
+FaultSets are used to denote which sectors failed at which block height.
+
+```go
+type FaultSet struct {
+	Index    uint64
+	BitField BitField
+}
+```
+
+The `Index` field is a block height offset from the start of the miners proving period (in order to make it more compact).
 
 # Basic Type Encodings
 
