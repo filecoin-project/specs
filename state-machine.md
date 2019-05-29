@@ -151,3 +151,7 @@ as the system has resolvers for them).
 The current state of a given actor can be accessed first by calling `Head` to retrieve the CID of the root of the actors state, then by using `Get` to retrieve the actual object being referenced.
 
 To store data, `Put` is used. Any number of objects may be `Put`, but only the object whose CID is committed, or objects that are linked to in some way by the committed object will be kept. All other objects are dropped after the method invocation returns. Objects stored via `Put` are first marshaled to CBOR-IPLD, and then stored, the returned CID is a 32 byte sha2-256 CBOR-IPLD content identifier.
+
+### Burning Funds
+
+In the case that an actor needs to provably burn funds, the funds should be transferred to the 'Burnt Funds Actor' (ID 99).  
