@@ -176,18 +176,15 @@ type StorageMarketActor struct {
 
 Parameters:
 
-- pubkey PublicKey
-
+- worker Address
 - pledge BytesAmount
-
 - sectorSize BytesAmount
-
 - pid PeerID
 
 Return: Address
 
 ```go
-func CreateStorageMiner(pubkey PublicKey, pledge, sectorSize BytesAmount, pid PeerID) Address {
+func CreateStorageMiner(worker Address, pledge, sectorSize BytesAmount, pid PeerID) Address {
 	if !SupportedSectorSize(sectorSize) {
 		Fatal("Unsupported sector size")
 	}
@@ -311,18 +308,20 @@ func GetTotalStorage() BytesAmount {
 
 ```go
 type StorageMiner struct {
-	// Owner is the address of the account that owns this miner
+	// Owner is the address of the account that owns this miner. Income and returned
+	// collateral are paid to this address. This address is also allowed to change the
+	// worker address for the miner.
 	Owner Address
 
-	// Worker is the address of the worker account for this miner
+	// Worker is the address of the worker account for this miner.
+	// This will be the key that is used to sign blocks created by this miner, and
+	// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+	// other day to day miner activities.
 	Worker Address
 
 	// PeerID is the libp2p peer identity that should be used to connect
 	// to this miner
 	PeerID peer.ID
-
-	// PublicKey is the public portion of the key that the miner will use to sign blocks
-	PublicKey PublicKey
 
 	// PledgeBytes is the amount of space being offered by this miner to the network
 	PledgeBytes BytesAmount
@@ -389,22 +388,22 @@ type StorageMiner struct {
 | 9 | `GetOwner` |
 | 10 | `GetWorkerAddr` |
 | 11 | `GetPower` |
-| 12 | `GetKey` |
-| 13 | `GetPeerID` |
-| 14 | `GetSectorSize` |
-| 15 | `UpdatePeerID` |
+| 12 | `GetPeerID` |
+| 13 | `GetSectorSize` |
+| 14 | `UpdatePeerID` |
+| 15 |  `ChangeWorker` |
 
 ### Constructor
 
 Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.
 ```go
-func StorageMinerActor(pubkey PublicKey, pledge BytesAmount, pid PeerID) {
+func StorageMinerActor(worker Address, pledge BytesAmount, pid PeerID) {
 	if msg.Value < CollateralForPledgeSize(pledge) {
 		Fatal("not enough collateral given")
 	}
 
 	self.Owner = message.From
-	self.PublicKey = pubkey
+	self.Worker = worker
 	self.PeerID = pid
 	self.PledgeBytes = pledge
 }
@@ -460,7 +459,7 @@ Return: None
 ```go
 // NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
 func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealProof) SectorID {
-	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.PublicKey, proof) {
+	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.Worker, proof) {
 		Fatal("bad proof!")
 	}
 
@@ -612,6 +611,12 @@ func ValidateFaultSets(faults []FaultSet, recovered, done BitField) bool {
 
 	return true
 }
+
+func ProvingPeriodDuration(sectorSize uint64) Integer {
+	// TODO: eventually, this needs to be different for different sector sizes
+	// The research team should give us concrete numbers
+	return 24 * 60 * 60 * 2 // number of blocks in one day
+}
 ```
 
 ### IncreasePledge
@@ -737,7 +742,6 @@ Return: None
 
 ```go
 func DePledge(amt TokenAmount) {
-	// TODO: Do both the worker and the owner have the right to call this?
 	if msg.From != miner.Worker && msg.From != miner.Owner {
 		Fatal("Not authorized to call DePledge")
 	}
@@ -799,18 +803,6 @@ func GetPower() BytesAmount {
 }
 ```
 
-### GetKey
-
-Parameters: None
-
-Return: PublicKey
-
-```go
-func GetKey() PublicKey {
-	return self.PublicKey
-}
-```
-
 ### GetPeerID
 
 Parameters: None
@@ -849,6 +841,25 @@ func UpdatePeerID(pid PeerID) {
 	}
 
 	self.PeerID = pid
+}
+```
+
+### ChangeWorker
+
+Changes the worker address. Note that since Sector Commitments take the miners worker key as an input, any sectors sealed with the old key but not yet submitted to the chain will be invalid. All future sectors must be sealed with the new worker key.
+
+Parameters:
+- addr Address
+
+Return: None
+
+```go
+func ChangeWorker(addr Address) {
+	if msg.From != self.Owner {
+		Fatal("only the owner can change the worker address")
+	}
+
+	self.Worker = addr
 }
 ```
 
