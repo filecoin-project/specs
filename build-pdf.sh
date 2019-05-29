@@ -25,8 +25,8 @@ files=(
     retrieval-market.md
     payments.md
     faults.md
-    drgporep-circuit.md
     zigzag-circuit.md
+    zigzap-porep.md
     definitions.md
     style.md
     process.md
@@ -39,7 +39,7 @@ mkdir -p pdf-build
 i=0
 for f in ${files[@]}; do
     printf -v n "%03d" $i
-    cp "${f}" "./.pdfworking/${n}_${f}"
+    cp "./${f}" "./.pdfworking/${n}_${f}"
     i=$((i + 1))
 done
 
