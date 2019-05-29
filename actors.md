@@ -518,6 +518,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// ensure recovered is a subset of the combined fault sets, and that done
 	// does not intersect with either, and that all sets only reference sectors
 	// that currently exist
+	allFaults = AggregateBitfields(faults)
 	if !miner.ValidateFaultSets(faults, recovered, done) {
 		Fatal("fault sets invalid")
 	}
@@ -546,7 +547,9 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Fatal("proofs invalid")
 	}
 
-	permLostSet = AggregateBitfields(faults).Subtract(recovered)
+	// combine all the fault set bitfields, and subtract out the recovered
+	// ones to get the set of sectors permanently lost
+	permLostSet = allFaults.Subtract(recovered)
 
 	// adjust collateral for 'done' sectors
 	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
@@ -565,7 +568,8 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// update miner power to the amount of data actually proved during
 	// the last proving period.
 	oldPower := miner.Power
-	miner.Power = SizeOf(Filter(miner.ProvingSet, faults)) * miner.SectorSize
+
+	miner.Power = (miner.ProvingSet.Count() - allFaults.Count()) * miner.SectorSize
 	StorageMarket.UpdateStorage(miner.Power - oldPower)
 
 	miner.ProvingSet = miner.Sectors
