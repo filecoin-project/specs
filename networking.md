@@ -15,7 +15,7 @@ Every full node must support the following libp2p protocols:
 
 ## Transports, Streams & Encryption
 
-Connections between nodes are end-to-end-encrypted and -authenticated, thus every node has a `peerId` associated with it. Any node can also support unencrypted or unauthenticated connection request, but it is not required to do so.
+Connections between nodes are end-to-end-encrypted and -authenticated, thus every node has a `peerId` associated with it.
 
 Filecoin protocols are run as multiple streams over a single connection. Only one connection should exist between two nodes at any time, multiple streams within that connections must be used to exchange different protocols.
 
