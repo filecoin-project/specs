@@ -584,7 +584,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 func ValidateFaultSets(faults []FaultSet, recovered, done BitField) bool {
 	var aggregate BitField
 	for _, fs := range faults {
-		aggregate.Combine(fs.BitField)
+		aggregate = aggregate.Union(fs.BitField)
 	}
 
 	// all sectors marked recovered must have actually failed
