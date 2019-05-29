@@ -22,7 +22,7 @@ echo "Generating PDF"
 name=$(./build-pdf.sh)
 echo $name
 cp "pdf-build/$name" "static/$name"
-msg="You can also download this spec in [PDF format](.\/$name)."
+msg="You can also download the full spec in [PDF format](.\/$name)."
 sed -i "" "s/<\!\-\- REPLACE_ME_PDF_LINK \-\->/$msg/" INTRO.md
 
 echo "Generating site"
