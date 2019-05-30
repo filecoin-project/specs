@@ -177,24 +177,19 @@ type StorageMarketActor struct {
 Parameters:
 
 - worker Address
-- pledge BytesAmount
 - sectorSize BytesAmount
 - pid PeerID
 
 Return: Address
 
 ```go
-func CreateStorageMiner(worker Address, pledge, sectorSize BytesAmount, pid PeerID) Address {
+func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Address {
 	if !SupportedSectorSize(sectorSize) {
 		Fatal("Unsupported sector size")
 	}
 
 	if pledge < MinimumPledge(sectorSize) {
 		Fatal("Pledge too low")
-	}
-
-	if msg.Value < MinimumCollateral(pledge) {
-		Fatal("not enough funds to cover required collateral")
 	}
 
 	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
@@ -323,18 +318,9 @@ type StorageMiner struct {
 	// to this miner
 	PeerID peer.ID
 
-	// PledgeBytes is the amount of space being offered by this miner to the network
-	PledgeBytes BytesAmount
-
 	// SectorSize is the amount of space in each sector committed to the network
 	// by this miner.
 	SectorSize BytesAmount
-
-	// Collateral is locked up filecoin the miner has available to commit to storage.
-	// When miners commit new sectors, tokens are moved from here to 'ActiveCollateral'
-	// The sum of collateral here and in activecollateral should equal the required amount
-	// for the size of the miners pledge.
-	Collateral TokenAmount
 
 	// ActiveCollateral is the amount of collateral currently committed to live storage
 	ActiveCollateral TokenAmount
@@ -360,9 +346,6 @@ type StorageMiner struct {
 	// ArbitratedDeals is the set of deals this miner has been slashed for since the
 	// last post submission
 	ArbitratedDeals CidSet
-
-	// TODO: maybe this number is redundant with power
-	LockedStorage Integer
 
 	// Power is the amount of power this miner has
 	Power Integer
@@ -397,15 +380,11 @@ type StorageMiner struct {
 
 Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.
 ```go
-func StorageMinerActor(worker Address, pledge BytesAmount, pid PeerID) {
-	if msg.Value < CollateralForPledgeSize(pledge) {
-		Fatal("not enough collateral given")
-	}
-
+func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
 	self.Owner = message.From
 	self.Worker = worker
 	self.PeerID = pid
-	self.PledgeBytes = pledge
+  self.SectorSize = sectorSize
 }
 ```
 
@@ -471,11 +450,10 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	// make sure the miner has enough collateral to add more storage
 	coll = CollateralForSector(miner.SectorSize)
 
-	if coll < miner.Collateral {
+  if coll < vm.MyBalance() - miner.ActiveCollateral {
 		Fatal("not enough collateral")
 	}
 
-	miner.Collateral -= coll
 	miner.ActiveCollateral += coll
 
 	// Note: There must exist a unique index in the miner's sector set for each
@@ -528,10 +506,10 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		// TODO: determine what exactly happens here. Is the miner permanently banned?
 		Fatal("Post submission too late")
 	} else if chain.Now() > miner.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(chain.Now() - miner.ProvingPeriodEnd)
+		feesRequired += ComputeLateFee(miner.Power, chain.Now() - miner.ProvingPeriodEnd)
 	}
 
-	feesRequired += ComputeTemporarySectorFailureFee(recovered)
+	feesRequired += ComputeTemporarySectorFailureFee(miner.SectorSize, recovered)
 
 	if msg.Value < feesRequired {
 		Fatal("not enough funds to pay post submission fees")
@@ -550,7 +528,6 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 
 	// adjust collateral for 'done' sectors
 	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
-	miner.Collateral += CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
 
 	// penalize collateral for lost sectors
 	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, permLostSet)
@@ -617,26 +594,13 @@ func ProvingPeriodDuration(sectorSize uint64) Integer {
 	// The research team should give us concrete numbers
 	return 24 * 60 * 60 * 2 // number of blocks in one day
 }
-```
 
-### IncreasePledge
+func ComputeLateFee(power Integer, blocksLate Integer) TokenAmount {
+  return 4 // TODO: real collateral calculation, obviously
+}
 
-Parameters:
-
-- addspace BytesAmount
-
-Return: None
-
-
-```go
-func IncreasePledge(addspace BytesAmount) {
-	// Note: msg.Value is implicitly transferred to the miner actor
-	if miner.Collateral+msg.Value < CollateralForPledge(addspace+miner.PledgeBytes) {
-		Fatal("not enough total collateral for the requested pledge")
-	}
-
-	miner.Collateral += msg.Value
-	miner.PledgeBytes += addspace
+func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer) TokenAmount {
+  return 4 // TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
 }
 ```
 
