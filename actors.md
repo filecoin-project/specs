@@ -721,11 +721,10 @@ func DePledge(amt TokenAmount) {
 		return
 	}
 
-	if amt > miner.Collateral {
+	if amt > vm.MyBalance() - miner.ActiveCollateral {
 		Fatal("Not enough free collateral to withdraw that much")
 	}
 
-	miner.Collateral -= amt
 	miner.DePledgedCollateral = amt
 	miner.DePledgeTime = CurrentBlockHeight + DePledgeCooldown
 }
