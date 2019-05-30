@@ -10,7 +10,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
   - **Condition:** If any miner posts two blocks satisfying the slashing conditions defined in [Expected Consensus](./expected-consensus.md).
   - **Reporting:** Anyone may call `SlashConsensusFault` and pass in the two offending block headers.
   - **Check:** The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.
-  - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed.
+  - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.
 
 ### Market Faults
 
