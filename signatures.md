@@ -6,42 +6,10 @@ Signatures are cryptographic functions that attest to the origin of a particular
 
 We use signatures in filecoin to verify *something* was done by *someone*. For example, we use signatures in order to validate deal messages which represent an action like a storage deals We also use signatures to determine who generated a particular message, determine public keys--which can be recovered from signed data and a signature, and find filecoin addresses which generated from a public key.
 
-- Messages (From actors to the blockchain)
-- Tickets (Signature of proof - [Mining](mining.md)
+- Messages (From users to the blockchain)
+- Tickets (Signature of proof - [Mining](mining.md))
 - Block signature (Signature over all data in the block - done by block leader)
 
-# What signatures affect
-
-What uses them
-
-- Messages [TODO: Link to messages spec]
-- Block validation
-- Tickets which inform leader election in Expected Consensus (EC) [TODO: link to EC spec]
-
-Note that messages between actors are not signed this is because messages between actors are always spawned by a message from a user -- which are singed by that user.
-
-Filecoin specific reliance
-
-- SignedMessages in go-filecoin
-
-# Dependencies
-
-Things that affect our choices for signatures
-
-- Elliptic curve choices - We use ECDSA with secp256k1 (aka the BitCoin elliptic curve)
-- Signature size limits - Our signatures are 64 bytes + 1 byte for public key recovery
-- Avg. processing power available to a CPU (signature aggregation)
-
-Filecoin specific dependancies
-
-- libsecp256k1
-
-# Non-Dependencies
-
-Does not affect
-
-- Transport encryption
-- File encodings (PoRep)
 
 # Interface
 
@@ -96,18 +64,22 @@ type Signature interface {
 ```
 
 
-# Selected Signature Scheme
+# Secp256k1 Signatures
 
 Currently, Filecoin uses secp256k1 signatures to fulfill the above interface. All signatures on messages, blocks, and tickets currently use the same scheme and format.
 
-## Wire Format
+## Signing Messages
 
-What bits are on the wire and in what order/format. We are currently adhering to libsecp256k1 serialization which is laid out as follows. Note that this format description may not be accurate. See the github link below for an authoritative format description.
+To generate a signature for the [`Message`](data-structures.md#message) type, first serialize it, then hash the serialized bytes with blake2b-256. Then, take the 32 byte digest output the hash and compute the secp256k1 signature over it.
+
+### Wire Format
+
+We use standard secp256k1 signature serialization, as described below. For more details on how the Filecoin `Signature` type is serialized, see the relevant section in [the data structures spec](data-structures.md#signature)
 
 **Signature**
 
 ```
-sig SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
+SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 ```
 
 `s` = Scalar of size 32 bytes
@@ -121,96 +93,9 @@ sig SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 `indicator` = a 2 byte formatting indicator
 
-From: <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177>
-
-**Signed Message**
-
-```
-Type SignedMessage Struct {
-
-    Message bytes `JSON`
-
-    Signature bytes `JSON`
-
-}
-```
-
-[Current Filecoin Implementation](https://github.com/filecoin-project/go-filecoin/blob/ab60f73af1f86a954ef41e3252ef52a99066bbe2/types/signed_message.go#L25)
-
-
-### Github
-
-<https://github.com/filecoin-project/specs/issues/131>
 
 ### External References
 
-- How Recovering a Private Key from a message and a signature works in ethereum:
+- Elliptic Curve Cryptography Paper
+	- http://www.secg.org/sec1-v2.pdf
 
-- - <https://medium.com/@libertylocked/ec-signatures-and-recovery-in-ethereum-smart-contracts-560b6dd8876>
-
-- More notes on recovery
-
-- - [https://crypto.stackexchan ge.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106](https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106)
-
-- See “4.1.6 Public Key Recovery Operation Page 47”
-
-- - <http://www.secg.org/sec1-v2.pdf>
-
-- Secp256k1 Signature serialization -
-
-- - Secp256k1 cpp - <https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55>
-  - Go-filecoin - <https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98>
-
-### References
-
-{{% notice todo %}}
-**TODO**: this section should likely be removed, and the context it adds should be linked in some other way.
-{{ % /notice }}
-
-- Maybe Marshal/Unmarshal == NewSignedMessage/SignBytes?
-
-  - <https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go>
-
-  - <https://github.com/filecoin-project/go-filecoin/blob/master/types/signer.go>
-
-- Message serialization currently: http://cbor.io
-
-- Recover - Extract a PublicKey from SignatureBytes (Trade storage of PublicKey (pk) for CPU work to recover pk from a signature -- assumes signature bits are enough to recover pk which might not be the case for all signature algorithms). For full explanation of recover see: <http://www.secg.org/sec1-v2.pdf>
-
-- Point compression Go - <https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338>
-
-- Create recoverable sig - <https://github.com/ipsn/go-secp256k1/blob/9d62b9f0bc52d16160f79bfb84b2bbf0f6276b03/libsecp256k1/include/secp256k1_recovery.h#L70>
-
-- Recid - <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L288>
-
-- Serialize - <https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177>
-
-- Should elliptic curve points always be compressed in Marshal?
-
-- Recover is math trick trading CPU for space to generate sk*G
-
-- Serialization should account for :
-
-- - Should there be point compression?
-
-  - Point compression (x,y); len(x) = n bits → x, recovery_bit; len(x||r_bit) = n+1 bits
-
-  - - Easy to check add; use (mod2) or check last bit
-
-  - Sig = (r,s) - s is standard but r could be (rx,ry) or rx or r all of these can be used to generate r*G
-
-  - Recovery() can be used for (1) finding r*G from (r,s) and (2) pk = sk*G from SignatureBytes
-
-  - Remember that y = sqrt(curve equation for x) and there are 2 valid solutions for y. This should be accounted for in sig if point compression is used (i.e. if a PublicKey is provided (no compression) or recovered (compression) OR r is a point (no compression) or scalar(compression))
-
-Currently signatures are not sent over the wire on their own, instead they are encapsulated in in a [SignedMessage](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L28). SignesMessage’s contain a Message and a Signature. When we want to send a SignedMessage over the wire we marshal it to cbor and send, once it is recevied it is unmarshaled form [cbor](http://cbor.io/) back into the SignedMessage Structure.
-[Code for marshaling and unmarshaling SignedMessages
-](https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38)For opinions talks to @dig & @phritz
-
-# Inspiration
-
-JSON Web Sigs/Keys: <https://tools.ietf.org/html/rfc7515>
-
-NIST Signature Standard: <https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf>
-
-Discussion on slack: <https://protocollabs.slack.com/archives/G7XUR2TU2/p1528984460000977>
