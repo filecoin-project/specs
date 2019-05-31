@@ -310,7 +310,7 @@ Return: BytesAmount
 ```go
 func PowerLookup(miner Address) BytesAmount {
 	if !self.Miners.Has(miner) {
-	  Fatal("miner not registered with storage market")
+		Fatal("miner not registered with storage market")
 	}
 
 	mact := LoadMinerActor(miner)
@@ -419,7 +419,7 @@ func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
 	self.Owner = message.From
 	self.Worker = worker
 	self.PeerID = pid
-  self.SectorSize = sectorSize
+	self.SectorSize = sectorSize
 }
 ```
 
@@ -487,7 +487,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	// make sure the miner has enough collateral to add more storage
 	coll = CollateralForSector(miner.SectorSize)
 
-	if coll < vm.MyBalance() - miner.ActiveCollateral {
+	if coll < vm.MyBalance()-miner.ActiveCollateral {
 		Fatal("not enough collateral")
 	}
 
@@ -545,7 +545,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		// TODO: determine what exactly happens here. Is the miner permanently banned?
 		Fatal("Post submission too late")
 	} else if chain.Now() > miner.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(miner.Power, chain.Now() - miner.ProvingPeriodEnd)
+		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
 	}
 
 	feesRequired += ComputeTemporarySectorFailureFee(miner.SectorSize, recovered)
@@ -638,11 +638,11 @@ func ProvingPeriodDuration(sectorSize uint64) Integer {
 }
 
 func ComputeLateFee(power Integer, blocksLate Integer) TokenAmount {
-  return 4 // TODO: real collateral calculation, obviously
+	return 4 // TODO: real collateral calculation, obviously
 }
 
 func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer) TokenAmount {
-  return 4 // TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
+	return 4 // TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
 }
 ```
 
@@ -765,7 +765,7 @@ func DePledge(amt TokenAmount) {
 		return
 	}
 
-	if amt > vm.MyBalance() - miner.ActiveCollateral {
+	if amt > vm.MyBalance()-miner.ActiveCollateral {
 		Fatal("Not enough free collateral to withdraw that much")
 	}
 
