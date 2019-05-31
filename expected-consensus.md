@@ -68,6 +68,7 @@ func OnBlockReceived(blk Block) {
 ```
 
 Separately, another process is running `Mine` to attempt to generate blocks.
+
 ```go
 func Mine(minerKey PrivateKey) {
 	for r := range rounds { // for each round
@@ -147,6 +148,7 @@ At a high-level, tickets must do the following:
 - Ensure a single drawing per round — derived in part from the above, thereby preventing miners from grinding on tickets (e.g. by repeatedly drawing new tickets in the hopes of winning) within a round.
 
 For tickets in EC, one may use the following:
+
 ```go
 type Ticket struct {
 	// The VDF Result is derived from the prior ticket in the ticket chain

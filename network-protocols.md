@@ -48,12 +48,12 @@ Upon receiving a "hello" stream from another node, you should read off the CBOR 
 
 > The storage deal protocol is used by any client to store data with a storage miner.
 
-The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a `piece` prior to executing this protocol.
+The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a `piece` prior to executing this protocol. For more details on initial data processing, see [client data](client-data.md).
 
-First the client sends a signed `StorageDealProposal` to the storage miner:
+First the client sends a `SignedStorageDealProposal` to the storage miner:
 
 ```go
-type Commitment []byte;
+type Commitment []byte
 
 type StorageDealProposal struct {
 	// PieceRef is the hash of the data in native structure. This will be used for
@@ -84,7 +84,13 @@ type StorageDealProposal struct {
 	MinerAddress Address
 
 	ClientAddress Address
-	Signature     Signature
+}
+
+type SignedStorageDealProposal struct {	
+	Proposal StorageDealProposal
+
+	// Signature over the cbor encoded StorageDealProposal signed by client
+	Signature Signature
 }
 
 type PaymentInfo struct {
@@ -181,7 +187,7 @@ func SendStorageProposal(miner Address, file Cid, duration NumBlocks, price Toke
 **TODO**: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.
 {{% /notice %}}
 
-The miner then decides whether or not to accept the deal, and sends back a response:
+The miner then decides whether or not to accept the deal, and sends back a SignedStorageDealResponse:
 
 ```go
 type StorageDealResponse struct {
@@ -203,8 +209,12 @@ type StorageDealResponse struct {
 	// SectorCommitMsg is the Cid of the message that was sent to submit
 	// the sector containing this data to the chain.
 	SectorCommitMsg Cid
+}
 
-	// Signature is a signature from the miner over the response
+type SignedStorageDealResponse struct {
+	Response StorageDealResponse
+
+	// Signature is a signature from the miner over the cbor encoded response
 	Signature Signature
 }
 ```
