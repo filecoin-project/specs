@@ -31,7 +31,6 @@ headless: true
 
 **Proofs**
 
-* [DrgPoRep]({{< relref "/docs/drgporep-circuit.md" >}})
 * [ZigZag]({{< relref "/docs/zigzag-circuit.md" >}})
 
 [**Glossary**]({{< relref "/docs/definitions.md" >}})

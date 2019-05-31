@@ -9,7 +9,3 @@ A Filecoin node stores certain data locally. This section details what exactly g
 ## Sectors
 
 ## Storage Deals
-
-
-
-​	

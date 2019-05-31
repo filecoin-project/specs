@@ -34,6 +34,7 @@ type InitActor struct {
 ```
 
 ### Code Cid
+
 `<codec:raw><mhType:identity><"init">`
 
 | Index     | Method Name       |
@@ -45,7 +46,7 @@ type InitActor struct {
 
 >  This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
 
-#### Parameters
+### Parameters
 
 | Name     | Type       | Description                                                  |
 | -------- | ---------- | ------------------------------------------------------------ |
@@ -112,7 +113,7 @@ func (VM VM) ComputeActorAddress(creator Address, nonce Integer) Address {
 
 > This method allows for fetching the corresponding ID of a given Address
 
-#### Parameters
+### Parameters
 
 | Name   | Type      | Description           |
 | ------ | --------- | --------------------- |
@@ -142,6 +143,7 @@ type AccountActor struct {
 ```
 
 ### Code Cid
+
 `<codec:raw><mhType:identity><"account">`
 
 | Index     | Method Name       |
@@ -162,6 +164,7 @@ type StorageMarketActor struct {
 }
 ```
 ### Code Cid
+
 `<codec:raw><mhType:identity><"smarket">`
 
 | Index     | Method Name       |
@@ -172,7 +175,7 @@ type StorageMarketActor struct {
 | 4 | `GetTotalStorage` |
 
 
-#### CreateStorageMiner
+### CreateStorageMiner
 
 Parameters:
 
@@ -356,6 +359,7 @@ type StorageMiner struct {
 ```
 
 ### Code Cid
+
 `<codec:raw><mhType:identity><"sminer">`
 
 | Index     | Method Name       |
@@ -379,6 +383,7 @@ type StorageMiner struct {
 ### Constructor
 
 Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.
+
 ```go
 func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
 	self.Owner = message.From
@@ -392,6 +397,7 @@ func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
 ### AddAsk
 
 Parameters:
+
 - price TokenAmount
 - ttl Integer
 
@@ -426,6 +432,7 @@ Note: this may be moved off chain soon, don't worry about testing it too heavily
 ### CommitSector
 
 Parameters:
+
 - sectorID SectorID
 - commD []byte
 - commR []byte
@@ -479,6 +486,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 ### SubmitPoSt
 
 Parameters:
+
 - proofs []PoStProof
 - faults []FaultSet
 - recovered Bitfield
@@ -660,6 +668,7 @@ Note: this is unlikely to ever be called on-chain, and will be a very large amou
 This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.
 
 Parameters:
+
 - deal Deal
 
 Return: None
@@ -704,6 +713,7 @@ TODO(scaling): This method, as currently designed, must be called once per secto
 ### DePledge
 
 Parameters:
+
 - amt TokenAmount
 
 Return: None
@@ -797,6 +807,7 @@ func GetSectorSize() BytesAmount {
 ### UpdatePeerID
 
 Parameters:
+
 - pid PeerID
 
 Return: None
@@ -844,7 +855,7 @@ threshold' logic only needs to be implemented once, in one place.
 
 The [init actor](#init-actor) is used to create new instances of the multisig.
 
-#### State
+### State
 
 ```go
 type Multisig struct {
@@ -869,6 +880,7 @@ type Transaction struct {
 ```
 
 ### Code Cid
+
 `<codec:raw><mhType:identity><"multisig">`
 
 | Index     | Method Name       |
@@ -882,11 +894,11 @@ type Transaction struct {
 | 7 | `SwapSigner` |
 | 8 | `ChangeRequirement` |
 
-#### Constructor
+### Constructor
 
 >  This method sets up the initial state for the multisig account
 
-#### Parameters
+### Parameters
 
 | Name     | Type       | Description                                         |
 | -------- | ---------- | ------------------------------------------------------------ |

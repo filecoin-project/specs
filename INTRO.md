@@ -9,6 +9,9 @@ type: docs
 **Warning:** This is the official Filecoin protocol specification. It is a work in progress. While reading, if you notice any discrepancies, or issues, please open an issue on the [specs repo](https://github.com/filecoin-project/specs).
 {{% /notice %}}
 
+<!-- the below comment is replaced with the pdf link on site builds -->
+<!-- REPLACE_ME_PDF_LINK -->
+
 This collection of pages specify the protocols comprising the Filecoin network. The goal of these specs is to provide sufficient detail that another implementation, written using only this document as reference, can be fully compatible with `go-filecoin` peers, but this is still a work in progress.
 
 ## Overview
