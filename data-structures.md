@@ -118,18 +118,14 @@ The signature is a serialized signature over the serialized base message. For mo
 ```go
 type MessageReceipt struct {
 	ExitCode uint8
-
 	Return []byte
-
 	GasUsed Integer
 }
 ```
 
 ### Serialization
 
-Message receipts are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
-
-
+Message receipts are serialized by using the FCS.
 
 ## Actor
 
@@ -173,16 +169,14 @@ type Signature struct {
 
 ### `Type` Values
 
-| Key Type | Value |
-|-------|----------|
-|  Secp256k1 | 1 |
-| BLS12-381 ECDSA | 2 |
+| Key Type        | Value |
+|-----------------|-------|
+| Secp256k1       | `1`     |
+| BLS12-381 ECDSA | `2`     |
 
 ### Serialization
 
-`<uvarint(Type)><Data>`
-
-Note: As signatures should always be within wrapper types, length prefixing is not needed here.
+In their serialized form the raw bytes (only the `Data` field) are serialized and then tagged according to the FCS tags, to indicated which signature type they are.
 
 ## FaultSet
 
@@ -334,11 +328,15 @@ if ((shift <size) && (sign bit of byte is set))
 
 Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
 
-| FCS Type | tag  |
-|---|---|
-| block v1 | 43  |
-| message v1 | 44 |
-| signedMessage v1 | 45 |
+| FCS Type               | CBOR tag  |
+|------------------------|-----------|
+| Block v1               | `43`      |
+| Message v1             | `44`      |
+| SignedMessage v1       | `45`      |
+| MessageReceipt v1      | `46`      |
+| Signature Secp256k1 v1 | `47`      |
+| Signature BLS12-381 v1 | `48`      |
+
 
 For example, a message would be encoded as:
 
