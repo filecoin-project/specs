@@ -160,6 +160,8 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 
 All signatures in Filecoin come with a type that signifies which key type was used to create the signature.
 
+For more details on signature creation, see [the signatures spec](signatures.md).
+
 ```go
 type Signature struct {
 	Type int
