@@ -159,7 +159,7 @@ type StorageMarketActor struct {
 	Miners AddressSet
 
 	// TODO: Determine correct unit of measure. Could be denominated in the
-	// smallest sector size supported by the network.
+	// smallest sector size for which verifying keys have been published.
 	TotalStorage BytesAmount
 }
 ```
@@ -180,17 +180,12 @@ type StorageMarketActor struct {
 Parameters:
 
 - worker Address
-- sectorSize BytesAmount
 - pid PeerID
 
 Return: Address
 
 ```go
 func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Address {
-	if !SupportedSectorSize(sectorSize) {
-		Fatal("Unsupported sector size")
-	}
-
 	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
 
 	self.Miners.Add(newminer)

@@ -40,7 +40,7 @@ First apply preprocessing as described in [Filecoin Client Data Processing](clie
 > Preprocessing adds two zero bits after every 254 bits of original data, yielding a sequence of 32-byte blocks, each of which contains two zeroes in the most-significant bits, when interpreted as a little-endian number. That is, for each block, 0x11000000 & block[31] == 0.
 
 ## Sector Padding
-After preprocessing, the data is padded with zero bytes so that the total length of the data is the sector size, __*SectorSize*__. __*SectorSize*__ must be one of a set of explicitly supported sizes and must be a power-of-two multiple of 32 bytes. The preprocessed and padded data is now considered to be an __*unsealed sector*__.
+After preprocessing, the data is padded with zero bytes so that the total length of the data is the sector size, __*SectorSize*__. __*SectorSize*__ must be one of a set of supported sector sizes (for which verifying keys have been published) and must be a power-of-two multiple of 32 bytes. The preprocessed and padded data is now considered to be an __*unsealed sector*__.
 
 ## Replication
 
