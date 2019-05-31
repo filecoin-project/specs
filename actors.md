@@ -173,6 +173,8 @@ type StorageMarketActor struct {
 | 2 | `SlashConsensusFault` |
 | 3 | `UpdateStorage` |
 | 4 | `GetTotalStorage` |
+| 5 |  `PowerLookup` |
+| 6 | `IsMiner` |
 
 
 ### CreateStorageMiner
@@ -295,6 +297,38 @@ Return: BytesAmount
 ```go
 func GetTotalStorage() BytesAmount {
 	return self.TotalStorage
+}
+```
+
+### PowerLookup
+
+Parameters:
+- miner Address
+
+Return: BytesAmount
+
+```go
+func PowerLookup(miner Address) BytesAmount {
+	if !self.Miners.Has(miner) {
+	  Fatal("miner not registered with storage market")
+	}
+
+	mact := LoadMinerActor(miner)
+
+	return mact.GetPower()
+}
+```
+
+### IsMiner
+
+Parameters:
+- addr Address
+
+Return: BytesAmount
+
+```go
+func IsMiner(addr Address) bool {
+	return self.Miners.Has(miner)
 }
 ```
 

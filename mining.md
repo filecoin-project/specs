@@ -130,17 +130,23 @@ func VerifyBlock(blk Block) {
 		Fatal("block was generated too soon")
 	}
 
-	// 3. Verify ParentWeight
+  // 3. Verify miner has not been slashed and is still valid miner
+  curStorageMarket := LoadStorageMarket(blk.State)
+  if !curStorageMarket.IsMiner(blk.Miner) {
+    Fatal("block miner not valid")
+  }
+
+	// 4. Verify ParentWeight
 	if blk.ParentWeight != ComputeWeight(blk.Parents) {
 		Fatal("invalid parent weight")
 	}
 
-	// 4. Verify Tickets
+	// 5. Verify Tickets
 	if !VerifyTickets(blk) {
 		Fatal("tickets were invalid")
 	}
 
-	// 5. Verify ElectionProof
+	// 6. Verify ElectionProof
 	randomnessLookbackTipset := RandomnessLookback(blk)
 	lookbackTicket := minTicket(randomnessLookbackTipset)
 	challenge := sha256.Sum(lookbackTicket)
@@ -150,13 +156,15 @@ func VerifyBlock(blk Block) {
 	}
 
 	powerLookbackTipset := PowerLookback(blk)
-	minerPower := GetPower(powerLookbackTipset.state, blk.Miner)
-	totalPower := GetTotalPower(powerLookbackTipset.state)
+
+  lbStorageMarket := LoadStorageMarket(powerLookbackTipset.state)
+  minerPower := lbStorageMarket.PowerLookup(blk.Miner)
+  totalPower := lbStorageMarket.GetTotalStorage()
 	if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
 		Fatal("election proof was not a winner")
 	}
 
-	// 6. Verify Message Signatures
+	// 7. Verify Message Signatures
 	messages := LoadMessages(blk.Messages)
 	state := GetParentState(blk.Parents)
 
@@ -175,7 +183,7 @@ func VerifyBlock(blk Block) {
 
 	ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys)
 
-	// 7. Validate State Transitions
+	// 8. Validate State Transitions
 	receipts := LoadReceipts(blk.MessageReceipts)
 	for i, msg := range messages {
 		receipt := ApplyMessage(state, msg)
