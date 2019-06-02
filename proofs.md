@@ -44,17 +44,18 @@ The commitments are used to verify that the correct __*original data*__ was seal
 Seal
  (
   // request represents a request to seal a sector.
+  partitions     uint64,      // influences the size of the output proof; using less partitions requires more hardware but produces shorter proofs
+  sectorSize     uint64,      // the number of bytes in the sealed sector
+  unsealedPath   string,      // path of unsealed sector (regular file, ramdisk, etc.) from which a unique replica will be created
+  sealedPath     string,      // path to which sealed sector will be written
   proverID       [31]byte,    // uniquely identifies miner
-  ticket         [32]byte,    // commits to recent ticket
-  sealedAccess   string,      // identifier providing access to sealed sector-access
+  roundNumber    uint64,      // round (block height) to which a miner commits when sealing begins
   sectorID       [31]byte,    // uniquely identifies sector
-  storage        SectorStore, // used to manipulate sectors
-  unsealedAccess string       // identifier providing access to unsealed sector-access
  ) err Error | (
   // response contains the commitments resulting from a successful Seal().
-  commD          [32]byte,                       // data commitment: merkle root of original data
-  commR          [32]byte,                       // replica commitment: merkle root of replicated data [will be removed in future iteration]
-  commRStar      [32]byte,                       // a hash of intermediate layers
+  commD          [32]byte,    // data commitment: merkle root of original data
+  commR          [32]byte,    // replica commitment: merkle root of replicated data [will be removed in future iteration]
+  commRStar      [32]byte,    // a hash of intermediate layers
   proof          []byte, 
  )
 
@@ -69,15 +70,15 @@ Seal
 VerifySeal
  (
   // request represents a request to verify the output of a Seal() operation.
-  commD     [32]byte,                       // returned from Seal
-  commR     [32]byte,                       // returned from Seal [will be removed in future iteration] 
-  commRStar [32]byte,                       // returned from Seal
-  proof     []byte,                         // returned from Seal
-  proverID  [31]byte,                       // uniquely identifies miner
-  ticket                                    // identifies ticket provided when sealing
-  sectorID  [31]byte,                       // uniquely identifies sector
+  commD       [32]byte, // returned from Seal
+  commR       [32]byte, // returned from Seal [will be removed in future iteration]
+  commRStar   [32]byte, // returned from Seal
+  proof       []byte,   // returned from Seal
+  proverID    [31]byte, // uniquely identifies miner
+  roundNumber uint64,   // round (block height) to which a miner committed when sealing began
+  sectorID    [31]byte, // uniquely identifies sector
 ) err Error | 
-  IsValid bool                              // true iff the provided proof-of-replication os valid
+  IsValid bool          // true iff the provided proof-of-replication os valid
 
 ```
 ### Unseal
@@ -87,15 +88,15 @@ VerifySeal
 Unseal
  (
   // request represents a request to unseal a sector.
-  numBytes      uint64,      // number of bytes to unseal (corresponds to contents of unsealed sector-file)
-  outputAccess  string,      // identifier providing access to write unsealed file-bytes
-  proverID      [31]byte,    // uniquely identifies miner
-  sealedAccess  string,      // identifier providing access to sealed sector-file
-  sectorID      [31]byte,    // uniquely identifies sector
-  startOffset   uint64,      // zero-based byte offset in original, unsealed sector-file
-  storage       SectorStore  // used to manipulate sectors
+  sectorSize    uint64,   // the number of bytes in the sealed sector
+  sealedPath    string,   // path from which sealed bytes will be read
+  outputPath    string,   // path to which unsealed bytes will be written (regular file, ramdisk, etc.)
+  proverID      [31]byte, // uniquely identifies miner
+  sectorID      [31]byte, // uniquely identifies sector
+  startOffset   uint64,   // zero-based byte offset in original, unsealed sector-file
+  numBytes      uint64,   // number of bytes to unseal (corresponds to contents of unsealed sector-file)
  ) err Error |
-  NumBytesWritten uint64     // the number of bytes unsealed (and written) by Unseal()
+  NumBytesWritten uint64  // the number of bytes unsealed (and written) by Unseal()
 ```
 
 ### Security Notes
