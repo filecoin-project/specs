@@ -457,7 +457,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	// make sure the miner has enough collateral to add more storage
 	coll = CollateralForSector(miner.SectorSize)
 
-  if coll < vm.MyBalance() - miner.ActiveCollateral {
+	if coll < vm.MyBalance() - miner.ActiveCollateral {
 		Fatal("not enough collateral")
 	}
 
