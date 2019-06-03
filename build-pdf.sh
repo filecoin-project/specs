@@ -1,6 +1,33 @@
 #!/bin/sh
 set -e
 
+die() {
+    echo >&2 "error: $@"
+    exit 1
+}
+
+require() {
+    which "$1" >/dev/null || die "please install $1"
+}
+
+require_tex() {
+    tlmgr info --only-installed "$1" | grep installed | grep Yes >/dev/null || \
+        die "please install $1:\n  sudo tlmgr install $1"
+}
+
+require pandoc
+require xelatex
+
+require_tex adjustbox
+require_tex collectbox
+require_tex enumitem
+require_tex pagecolor
+require_tex csquotes
+require_tex mdframed
+require_tex needspace
+require_tex titling
+require_tex lm-math
+
 short=$(git rev-parse --short HEAD)
 tag=${1-$short}
 
