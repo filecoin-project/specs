@@ -306,7 +306,7 @@ To create a block, the eligible miner must compute a few fields:
 - `MsgRoot` - To compute this:
   - Select a set of messages from the mempool to include in the block.
   - Insert them into a Merkle Tree and take its root.
-    - Note: Messages with BLS signatures should be included as raw `Message` types, and not `SignedMessage`. Their signatures should be gathered up and aggregated for the `BLSAggregate` field. 
+    - Note: Messages with BLS signatures should be included as raw `Message` types, and not `SignedMessage`. Their signatures should be gathered up and aggregated for the `BLSAggregate` field.
 - `StateRoot` - Apply each chosen message to the `ParentState` to get this.
 - `ReceiptsRoot` - To compute this:
   - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
@@ -370,6 +370,8 @@ HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2
 ```
 
 Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it's not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting *too much* FIL.
+
+TODO: Ensure that if a miner earns a block reward while undercollateralized, then `min(blockReward, requiredCollateral-availableBalance)` is garnished (transfered to the miner actor instead of the owner).
 
 ### Open Questions
 
