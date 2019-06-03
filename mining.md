@@ -126,15 +126,15 @@ func VerifyBlock(blk Block) {
 	}
 	// next check that it is appropriately delayed from its parents including
 	// null blocks.
-	if blk.GetTime() <= blk.minParentTime() + (BLOCK_DELAY * len(blk.Tickets)) {
+	if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
 		Fatal("block was generated too soon")
 	}
 
-  // 3. Verify miner has not been slashed and is still valid miner
-  curStorageMarket := LoadStorageMarket(blk.State)
-  if !curStorageMarket.IsMiner(blk.Miner) {
-    Fatal("block miner not valid")
-  }
+	// 3. Verify miner has not been slashed and is still valid miner
+	curStorageMarket := LoadStorageMarket(blk.State)
+	if !curStorageMarket.IsMiner(blk.Miner) {
+		Fatal("block miner not valid")
+	}
 
 	// 4. Verify ParentWeight
 	if blk.ParentWeight != ComputeWeight(blk.Parents) {
@@ -157,9 +157,9 @@ func VerifyBlock(blk Block) {
 
 	powerLookbackTipset := PowerLookback(blk)
 
-  lbStorageMarket := LoadStorageMarket(powerLookbackTipset.state)
-  minerPower := lbStorageMarket.PowerLookup(blk.Miner)
-  totalPower := lbStorageMarket.GetTotalStorage()
+	lbStorageMarket := LoadStorageMarket(powerLookbackTipset.state)
+	minerPower := lbStorageMarket.PowerLookup(blk.Miner)
+	totalPower := lbStorageMarket.GetTotalStorage()
 	if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
 		Fatal("election proof was not a winner")
 	}
@@ -203,10 +203,10 @@ func (state StateTree) LookupPublicKey(a Address) PubKey {
 	}
 
 	ast := LoadAccountActorState(act)
-  if act.Address.Type == BLS {
-    return ExtractBLSPubKey(act.Address)
-  }
-  Fatal("can only look up public keys for BLS controlled accounts")
+	if act.Address.Type == BLS {
+		return ExtractBLSPubKey(act.Address)
+	}
+	Fatal("can only look up public keys for BLS controlled accounts")
 }
 ```
 
