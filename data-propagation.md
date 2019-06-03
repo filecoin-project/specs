@@ -2,9 +2,9 @@
 
 The filecoin network needs to broadcast blocks and messages to all peers in the network. This document details how that process works.
 
-Both block headers and message references are propagated using the [gossipsub libp2p pubsub router](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub). Every full node must implement and run that protocol. All pubsub messages are authenticated and must be validated before being propagated further.
+Messages and block headers along side the message references are propagated using the [gossipsub libp2p pubsub router](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub). Every full node must implement and run that protocol. All pubsub messages are authenticated and must be validated before being propagated further.
 
-The Data itself is propagated through bitswap and can be fetched through it. Every full node must implement and offer the bitswap protocol.
+Further more, every full node must implement and offer the bitswap protocol and provide all Cid Referenced objects, it knows of, through it. This allows any node to fetch missing pieces (e.g. `Message`) from any node it is connected to. However, the node should fan out these requests to multiple nodes and not bombard any single node with too many requests at a time. A node may implement throttling and DDoS protection to prevent such a bombardment.
 
 ## Bitswap
 
