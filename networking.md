@@ -7,7 +7,7 @@ The filecoin network is built using libp2p building blocks, as transports and pr
 Every full node must support the following libp2p protocols:
 
  - [gossipsub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) ([for data announcements](./data-propagation.md))
- - [bitswap] ([for data exchange](./))
+ - [bitswap] ([for data exchange](./data-propagation.md))
  - Filecoin specific Protocols:
    - Hello Handshake
    - StorageDeal
@@ -33,13 +33,13 @@ If the node learns through that handshake about newer blocks it should request t
 
 ### Syncing
 
-Whenever a node learns about a new `BlockHead` it should attempt to import the block - let that be through the `HelloMessage` or through the [block pubsub protocol](data-propagation.md#block-propagation). For that it may fetches the ancestors of that block until it is fully caught up. This mode is known as "syncing". During "syncing" the same node may not mine blocks.
+Whenever a node learns about a new `BlockHead` it should attempt to import the block - let that be through the `HelloMessage` or through the [block pubsub protocol](data-propagation.md#block-propagation). For that it may fetches the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in [Validation](./validation.md) and storing it locally. This mode is known as "syncing". During "syncing" the same node may not mine blocks.
 
-See [Syncing](./sync.md) to learn more about the syncing operation.
+
 
 ## Establishing a network
 
-Every node should aim to establish a set of stable connections to the network in order to stay up to date with latest changes and block propagation - aka [sync](./sync.md) - as well as to participate in the processes of the network - e.g. mining.
+Every node should aim to establish a set of stable connections to the network in order to stay up to date with latest changes and block propagation - aka to sync - as well as to participate in the processes of the network - e.g. mining.
 
 In order to do that a node must be "bootstrapped" when starting up. At its simplest, bootstrapping can be thought of as secure network joining. It must enable a new node to get the latest head/chain that the majority of the network power is mining off and must be both:
 
