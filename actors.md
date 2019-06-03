@@ -191,7 +191,7 @@ func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Addr
 		Fatal("Unsupported sector size")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, msg.Value, sectorSize, pid))
 
 	self.Miners.Add(newminer)
 
