@@ -89,8 +89,10 @@ pandoc ./.pdfworking/*.md \
     -V listings-disable-line-numbers=true \
     -V block-headings=true \
     -V mainfont="Georgia" \
-    --metadata title="Filecoin Specification $tag"
+    -V fontsize=9pt \
+    --metadata title="Filecoin Specification $tag" \
+    --metadata subtitle="$(date -u '+%Y-%m-%d %H:%M:%S Z')"
 
 rm -rf .pdfbuild
 
-echo "filecoin-spec-$tag.pdf"
+echo "open pdf-build/filecoin-spec-$tag.pdf"
