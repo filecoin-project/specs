@@ -17,16 +17,12 @@ Every full node must support the following libp2p protocols:
 
 Connections between nodes are end-to-end-encrypted and -authenticated, thus every node has a `peerId` associated with it.
 
-Filecoin protocols are run as multiple streams over a single connection. Only one connection should exist between two nodes at any time, multiple streams within that connections must be used to exchange different protocols.
+Filecoin protocols are run as multiple streams over a single connection. Only one connection should exist between two nodes at any time, multiple streams within that connections must be used to exchange different protocols. This is usually handled from within the libp2p stack if configured properly.
 
-This document doesn't make any assumptions on which transports and multiplexing features a particular node offers, however it must at least be able to respond and communicate through ABC AND XYZ
-
-{{% notice todo %}}
-Define minimum requirements in terms of network/e2ee-protocols and multiplexing mechanism. Should we directly jump to yamux?
-{{% /notice %}}
+This document doesn't make any assumptions on which transports and multiplexing features a particular node offers, however it must at least be able to respond and communicate through mplex channels via a secio transport.
 
 {{% notice info %}}
-Implementers are encouraged to offer and experiment with more protocols and transports, as long as the above mentioned requirements of ee2e, authentication and muxing are still met. In particular the authors encourage to look into TLS1.3 and QUIC as libp2p protocol layers.
+Implementers are encouraged to offer and experiment with more protocols and transports, as long as the above mentioned requirements of ee2e, authentication and muxing are still met. In particular the authors encourage to look into TLS1.3 and QUIC as libp2p protocol/transport layers.
 {{% /notice %}}
 
 ### Establishing connections
