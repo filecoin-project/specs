@@ -49,7 +49,7 @@ Seal
   unsealedPath   string,      // path of unsealed sector (regular file, ramdisk, etc.) from which a unique replica will be created
   sealedPath     string,      // path to which sealed sector will be written
   proverID       [31]byte,    // uniquely identifies miner
-  roundNumber    uint64,      // round (block height) to which a miner commits when sealing begins
+  ticket         [32]byte,    // ticket to which miner commits when sealing begins
   sectorID       [31]byte,    // uniquely identifies sector
  ) err Error | (
   // response contains the commitments resulting from a successful Seal().
@@ -75,7 +75,7 @@ VerifySeal
   commRStar   [32]byte, // returned from Seal
   proof       []byte,   // returned from Seal
   proverID    [31]byte, // uniquely identifies miner
-  roundNumber uint64,   // round (block height) to which a miner committed when sealing began
+  ticket      [32]byte, // ticket to which miner committed when sealing began
   sectorID    [31]byte, // uniquely identifies sector
 ) err Error | 
   IsValid bool          // true iff the provided proof-of-replication os valid
