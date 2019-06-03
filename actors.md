@@ -156,11 +156,11 @@ The storage market actor is the central point for the Filecoin storage market. I
 
 ```go
 type StorageMarketActor struct {
+	// A set containing the actor address of all storage miner actors.
 	Miners AddressSet
 
-	// TODO: Determine correct unit of measure. Could be denominated in the
-	// smallest sector size supported by the network.
-	TotalStorage BytesAmount
+    // The number of bytes of proven storage in the market.
+	TotalComittedStorage BytesAmount
 }
 ```
 ### Code Cid
@@ -168,8 +168,8 @@ type StorageMarketActor struct {
 `<codec:raw><mhType:identity><"smarket">`
 
 | Index     | Method Name       |
-| -------- | ---------- |
-| 1   | `CreateStorageMiner`     |
+| --------- | ---------- |
+| 1 | `CreateStorageMiner`     |
 | 2 | `SlashConsensusFault` |
 | 3 | `UpdateStorage` |
 | 4 | `GetTotalStorage` |
@@ -178,6 +178,8 @@ type StorageMarketActor struct {
 
 
 ### CreateStorageMiner
+
+> CreateStorageMiner registers a new storage miner with the given public key. The miner's collateral is set by the value in the message. The public key must match the private key used to sign off on blocks created by this miner. This key is the 'worker' key for the miner. The libp2p peer ID specified should reference the libp2p identity that the miner is operating. This is the ID to which clients will connect to propose deals.
 
 Parameters:
 
@@ -193,7 +195,7 @@ func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Addr
 		Fatal("Unsupported sector size")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(worker, sectorSize, pid))
 
 	self.Miners.Add(newminer)
 
@@ -202,6 +204,8 @@ func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Addr
 ```
 
 ### SlashConsensusFault
+
+> SlashConsensusFault penalizes a miner which submits two different blocks at the same block height. The signatures on each block are validated and the offending miner has their entire collateral burned. All storage the miner is providing is invalidated and the actor is removed from the market's list of miners and from the network state. The caller is rewarded an amount to compensate for gas fees. See [faults](faults.md#consensus-faults).
 
 Parameters:
 
@@ -263,14 +267,14 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 	self.Miners.Remove(miner)
 	self.UpdateStorage(-1 * miner.Power)
 
-	// Now delete the miner (maybe this is a bit harsh, but i'm okay with it for now)
+	// Remove the actor's state from the network entirely.
 	miner.SelfDestruct()
 }
 ```
 
 ### UpdateStorage
 
-UpdateStorage is used to update the global power table.
+> UpdateStorage alters the market's total committed storage amount. It is callable only by a miner actor.
 
 Parameters:
 
@@ -289,6 +293,8 @@ func UpdateStorage(delta BytesAmount) {
 ```
 
 ### GetTotalStorage
+
+> GetTotalStorage returns the total committed storage in the system. This number is also used as the 'total power' in the system for the purposes of the power table.
 
 Parameters: None
 
@@ -647,6 +653,8 @@ func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer
 ```
 
 ### SlashStorageFault
+
+> SlashStorageFault penalizes a storage miner for not submitting a PoSt within the required time window. This may be called by anyone who detects the faulty behavior. The slashed miner loses all of their staked collateral and all of their power, and as a result, is no longer a candidate leader for extending the chain. See [faults](faults.md#market-faults).
 
 Parameters:
 

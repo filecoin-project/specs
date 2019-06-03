@@ -14,42 +14,7 @@ TODO: This is a high level overview of how the storage market interacts with com
 
 ## The Market Interface
 
-This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor. For more information about Actors, see TODO.
-
-```go
-type StorageMarket interface {
-	// CreateStorageMiner registers a new storage miner with the given public key and a
-	// pledge of the given size. The miners collateral is set by the value in the message.
-	// The public key must match the private key used to sign off on blocks created
-	// by this miner. This key is the 'worker' key for the miner.
-	// The libp2p peer ID specified should reference the libp2p identity that the
-	// miner is operating. This is the ID that clients will connect to to propose deals
-	// TODO: maybe rename to 'RegisterStorageMiner'?
-	CreateStorageMiner(pubk PublicKey, pledge BytesAmount, pid libp2p.PeerID) Address
-
-	// SlashConsensusFault is used to slash a misbehaving miner who submitted two different
-	// blocks at the same block height. The signatures on each block are validated
-	// and the offending miner has their entire collateral slashed, including the
-	// invalidation of any any all storage they are providing. The caller is rewarded
-	// a small amount to compensate for gas fees (TODO: maybe it should be more?)
-	SlashConsensusFault(blk1, blk2 BlockHeader)
-
-	// SlashStorageFault slashes a storage miner for not submitting their PoSTs within
-	// the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
-	// The slashed miner then loses all of their staked collateral, and also loses all
-	// of their power, and as a result, is no longer a candidate leader for extending the chain.
-	SlashStorageFault(miner Address)
-
-	// UpdateStorage is called by a miner to adjust the storage market actors
-	// accounting of the total storage in the storage market.
-	UpdateStorage(delta BytesAmount)
-
-	// GetTotalStorage returns the total committed storage in the system. This number is
-	// also used as the 'total power' in the system for the purposes of the power table
-	GetTotalStorage() BytesAmount
-}
-```
-
+The market is defined and operated by a built-in network actor. See [storage market actor](actors.md#storage-market-actor).
 
 ## The Filecoin Storage Market Operation
 
@@ -115,16 +80,14 @@ TODO: 'complete' isnt really the right word here, as it implies that the deal is
 
 ## The Power Table
 
-The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table, instead, there is a 'total power' exported by the storage market actor, and each individual miner reports its power through their actor.
+The storage market actor maintains a total committed storage amount, aka "total power". The "power table" is a logical construct which is the fraction of this total power that each miner contributes. This is used by the consensus algorithm.
 
-TODO: rephrase the above to make it clear that power is updated only on PoSt submission and when slashed.
+Each individual miner reports its power through its on-chain actor. A miner's power (and hence the total power) is updated only upon PoSt submission (when the set of sectors being proved may change) or when a miner is slashed.
 
 
 ### Power Updates
 
-A miners power is updated only when they submit a valid PoSt to the chain, or if they are slashed.
-
-TODO: link to methods for post submission and slashing.
+A miner's power is updated only when they submit a valid PoSt to the chain, or when slashed. See [storage market actor](actors.md#storage-market-actor).
 
 Power is deducted when miners remove sectors by reporting the sector 'missing' or 'done' in a PoSt.
 

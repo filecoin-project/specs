@@ -10,7 +10,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
   - **Condition:** If any miner posts two blocks satisfying the slashing conditions defined in [Expected Consensus](./expected-consensus.md).
   - **Reporting:** Anyone may call `SlashConsensusFault` and pass in the two offending block headers.
   - **Check:** The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.
-  - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.
+  - **Penalization:** All of the miner's pledge collateral and power is slashed and the miner is irrevocably removed from the market. This miner can never again produce blocks, even if they attempt to repost their collateral.
 
 ### Market Faults
 
@@ -33,6 +33,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
     - *Economic Penalization*: Miner loses all collateral.
     - *Power Penalization*: Miner loses all power. 
     - Note: If a miner is in this state, where they have failed to submit a PoST, any block they attempt to mine will be invalid, even if the election function selects them. (the election function should probably be made to never select them)
+    - Note: This penalty is recoverable; a miner may post new collateral and commit new sectors.
     - Future design note: There is a way to tolerate Internet connection faults. A miner runs an Emergency PoSt which does not take challenges from the chain, if the miner gets reconnected before the VDF attack time (based on Amax), then, they can submit the Emergency PoSt and get pay a late penalization fee.
 - **Reported storage fault penalty:** 
   - **Condition:** The miner submits their PoSt with a non-empty set of 'missing sectors'.
