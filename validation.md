@@ -27,3 +27,9 @@ Once the block passes validation, it must be added to the local datastore, regar
 {{% notice info %}}
 To make certain validation checks simpler, blocks should be indexed by height and by parent set. That way sets of blocks with a given height and common parents may be quickly queried. It may also be useful to compute and cache the resultant aggregate state of blocks in these sets, this saves extra state computation when checking which state root to start a block at when it has multiple parents.
 {{% /notice %}}
+
+### Basic check
+
+{{% notice todo %}}
+clarify which of these checks are needed in order to be allowed to validate and propagate a block. This is probably a sub-set of the above mentioned - and thus this paragraph might be moved there - that should be reasonably quick to check and hard to spoof or get around.
+{{% /notice %}}

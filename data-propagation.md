@@ -26,12 +26,7 @@ type BlockMsg struct {
 
 The array of message cids must match the `Messages` field in the block when used to construct a [sharray](sharray.md).
 
-Every `BlockMsg` received must be validated before being propagated again. If validation fails, it must not be propagated. The validation must check that is its ticket is valid, the block signature is valid, the miner is a valid miner, and the block is a child of a known good tipset.
-
-
-{{% notice todo %}} 
-clarify which of these checks are needed, any slowness here impacts propagation time significantly, this is not a full validity check.
-{{% /notice %}}
+Every `BlockMsg` received must be validated [through the basic check](./validation.md#basic-check) before being propagated again. If validation fails, it must not be propagated.
 
 
 ## Message Propagation
