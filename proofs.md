@@ -149,12 +149,11 @@ VerifyPoSt
 ## Piece Inclusion Proof
 
 ### PieceInclusionProof
-A `PieceInclusionProof` contains a potentially complex merkle inclusion proof that all leaves included in `CommP` (the piece commitment) are also included in `CommD` (the sector data commitment).
+A `PieceInclusionProof` contains a potentially complex merkle inclusion proof that all leaves included in `commP` (the piece commitment) are also included in `commD` (the sector data commitment).
 
 ```
 struct PieceInclusionProof {
     Position uint,
-    PieceLeaves uint,
     ProofElements [32]byte
 }
 ```
@@ -187,15 +186,17 @@ GeneratePieceInclusionProof
  ) err Error |  proof PieceInclusionProof
 ```
 
-`VerifyPieceInclusionProof` takes a merkle root and (pre-processed) piece data.
-Iff it returns true, then `PieceInclusionProof` indeed proves that piece's
-bytes were included in the merkle tree corresponding to root — and at the
-position encoded in the proof.
+`VerifyPieceInclusionProof` takes a sector data commitment (`commD`), piece commitment (`commP`), sector size, and piece size.
+Iff it returns true, then `PieceInclusionProof` indeed proves that all of piece's bytes were included in the merkle tree corresponding
+to `commD` of a sector of `sectorSize`. The size inputs are necessary to prevent malicious provers from claiming to store the entire
+piece but actually storing only the piece commitment. 
 ```
 VerifyPieceInclusionProof
  (
   proof PieceInclusionProof,  
-  root  [32]byte,
+  commD  [32]byte,
   commP [32]byte,
+  sectorSize uint,
+  pieceSize uint,
  ) err Error | IsValid bool // true iff the provided PieceInclusionProof is valid.
 ```
