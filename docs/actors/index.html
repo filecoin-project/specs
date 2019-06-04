@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -196,6 +195,12 @@ https://github.com/alex-shpak/hugo-book
 <td>StorageMarketActor</td>
 <td>Filecoin Storage Market</td>
 </tr>
+
+<tr>
+<td>99</td>
+<td>AccountActor</td>
+<td>Burnt Funds</td>
+</tr>
 </tbody>
 </table>
 
@@ -239,7 +244,7 @@ https://github.com/alex-shpak/hugo-book
 <p>This method is the core of the <code>Init Actor</code>. It handles instantiating new actors and assigning them their IDs.</p>
 </blockquote>
 
-<h4 id="parameters">Parameters</h4>
+<h3 id="parameters">Parameters</h3>
 
 <table>
 <thead>
@@ -320,7 +325,7 @@ https://github.com/alex-shpak/hugo-book
 <p>This method allows for fetching the corresponding ID of a given Address</p>
 </blockquote>
 
-<h4 id="parameters-1">Parameters</h4>
+<h3 id="parameters-1">Parameters</h3>
 
 <table>
 <thead>
@@ -350,11 +355,28 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The Account actor is the actor used for normal keypair backed accounts on the filecoin network.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">AccountActor</span> <span class="kd">struct</span> <span class="p">{</span>
-  <span class="c1">// The account actor has no extra state
-</span><span class="c1"></span><span class="p">}</span></code></pre></div>
+    <span class="c1">// Address contains the public key based address that this account was created with. If unset, this account may not send funds by normal means.
+</span><span class="c1"></span>    <span class="nx">Address</span> <span class="nx">Address</span>
+<span class="p">}</span></code></pre></div>
 <h3 id="code-cid-1">Code Cid</h3>
 
 <p><code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;account&quot;&gt;</code></p>
+
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Method Name</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>1</td>
+<td><code>GetAddress</code></td>
+</tr>
+</tbody>
+</table>
 
 <h2 id="storage-market-actor">Storage Market Actor</h2>
 
@@ -380,53 +402,41 @@ https://github.com/alex-shpak/hugo-book
 
 <tbody>
 <tr>
-<td>0</td>
+<td>1</td>
 <td><code>CreateStorageMiner</code></td>
 </tr>
 
 <tr>
-<td>1</td>
+<td>2</td>
 <td><code>SlashConsensusFault</code></td>
 </tr>
 
 <tr>
-<td>2</td>
+<td>3</td>
 <td><code>UpdateStorage</code></td>
 </tr>
 
 <tr>
-<td>3</td>
+<td>4</td>
 <td><code>GetTotalStorage</code></td>
 </tr>
 </tbody>
 </table>
 
-<h4 id="createstorageminer">CreateStorageMiner</h4>
+<h3 id="createstorageminer">CreateStorageMiner</h3>
 
 <p>Parameters:</p>
 
 <ul>
-<li><p>pubkey PublicKey</p></li>
-
-<li><p>pledge BytesAmount</p></li>
-
-<li><p>sectorSize BytesAmount</p></li>
-
-<li><p>pid PeerID</p></li>
+<li>worker Address</li>
+<li>sectorSize BytesAmount</li>
+<li>pid PeerID</li>
 </ul>
 
 <p>Return: Address</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">CreateStorageMiner</span><span class="p">(</span><span class="nx">pubkey</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">pledge</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">CreateStorageMiner</span><span class="p">(</span><span class="nx">worker</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">SupportedSectorSize</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Unsupported sector size&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="nx">pledge</span> <span class="p">&lt;</span> <span class="nf">MinimumPledge</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Pledge too low&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="p">&lt;</span> <span class="nf">MinimumCollateral</span><span class="p">(</span><span class="nx">pledge</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough funds to cover required collateral&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="nx">newminer</span> <span class="o">:=</span> <span class="nx">InitActor</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="nx">MinerActorCodeCid</span><span class="p">,</span> <span class="nf">EncodeParams</span><span class="p">(</span><span class="nx">pubkey</span><span class="p">,</span> <span class="nx">pledge</span><span class="p">,</span> <span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">pid</span><span class="p">))</span>
@@ -528,31 +538,24 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <h2 id="storage-miner-actor">Storage Miner Actor</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageMiner</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Owner is the address of the account that owns this miner
+    <span class="c1">// Owner is the address of the account that owns this miner. Income and returned
+</span><span class="c1"></span>    <span class="c1">// collateral are paid to this address. This address is also allowed to change the
+</span><span class="c1"></span>    <span class="c1">// worker address for the miner.
 </span><span class="c1"></span>    <span class="nx">Owner</span> <span class="nx">Address</span>
 
-    <span class="c1">// Worker is the address of the worker account for this miner
+    <span class="c1">// Worker is the address of the worker account for this miner.
+</span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
+</span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+</span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
 </span><span class="c1"></span>    <span class="nx">Worker</span> <span class="nx">Address</span>
 
     <span class="c1">// PeerID is the libp2p peer identity that should be used to connect
 </span><span class="c1"></span>    <span class="c1">// to this miner
 </span><span class="c1"></span>    <span class="nx">PeerID</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
 
-    <span class="c1">// PublicKey is the public portion of the key that the miner will use to sign blocks
-</span><span class="c1"></span>    <span class="nx">PublicKey</span> <span class="nx">PublicKey</span>
-
-    <span class="c1">// PledgeBytes is the amount of space being offered by this miner to the network
-</span><span class="c1"></span>    <span class="nx">PledgeBytes</span> <span class="nx">BytesAmount</span>
-
     <span class="c1">// SectorSize is the amount of space in each sector committed to the network
 </span><span class="c1"></span>    <span class="c1">// by this miner.
 </span><span class="c1"></span>    <span class="nx">SectorSize</span> <span class="nx">BytesAmount</span>
-
-    <span class="c1">// Collateral is locked up filecoin the miner has available to commit to storage.
-</span><span class="c1"></span>    <span class="c1">// When miners commit new sectors, tokens are moved from here to &#39;ActiveCollateral&#39;
-</span><span class="c1"></span>    <span class="c1">// The sum of collateral here and in activecollateral should equal the required amount
-</span><span class="c1"></span>    <span class="c1">// for the size of the miners pledge.
-</span><span class="c1"></span>    <span class="nx">Collateral</span> <span class="nx">TokenAmount</span>
 
     <span class="c1">// ActiveCollateral is the amount of collateral currently committed to live storage
 </span><span class="c1"></span>    <span class="nx">ActiveCollateral</span> <span class="nx">TokenAmount</span>
@@ -578,9 +581,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// ArbitratedDeals is the set of deals this miner has been slashed for since the
 </span><span class="c1"></span>    <span class="c1">// last post submission
 </span><span class="c1"></span>    <span class="nx">ArbitratedDeals</span> <span class="nx">CidSet</span>
-
-    <span class="c1">// TODO: maybe this number is redundant with power
-</span><span class="c1"></span>    <span class="nx">LockedStorage</span> <span class="nx">Integer</span>
 
     <span class="c1">// Power is the amount of power this miner has
 </span><span class="c1"></span>    <span class="nx">Power</span> <span class="nx">Integer</span>
@@ -658,22 +658,22 @@ https://github.com/alex-shpak/hugo-book
 
 <tr>
 <td>12</td>
-<td><code>GetKey</code></td>
-</tr>
-
-<tr>
-<td>13</td>
 <td><code>GetPeerID</code></td>
 </tr>
 
 <tr>
-<td>14</td>
+<td>13</td>
 <td><code>GetSectorSize</code></td>
 </tr>
 
 <tr>
-<td>15</td>
+<td>14</td>
 <td><code>UpdatePeerID</code></td>
+</tr>
+
+<tr>
+<td>15</td>
+<td><code>ChangeWorker</code></td>
 </tr>
 </tbody>
 </table>
@@ -681,21 +681,20 @@ https://github.com/alex-shpak/hugo-book
 <h3 id="constructor">Constructor</h3>
 
 <p>Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">StorageMinerActor</span><span class="p">(</span><span class="nx">pubkey</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">pledge</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="p">&lt;</span> <span class="nf">CollateralForPledgeSize</span><span class="p">(</span><span class="nx">pledge</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough collateral given&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">StorageMinerActor</span><span class="p">(</span><span class="nx">worker</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">=</span> <span class="nx">message</span><span class="p">.</span><span class="nx">From</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">PublicKey</span> <span class="p">=</span> <span class="nx">pubkey</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">=</span> <span class="nx">worker</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">PeerID</span> <span class="p">=</span> <span class="nx">pid</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">PledgeBytes</span> <span class="p">=</span> <span class="nx">pledge</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span> <span class="p">=</span> <span class="nx">sectorSize</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="addask">AddAsk</h3>
 
-<p>Parameters:
-- price TokenAmount
-- ttl Integer</p>
+<p>Parameters:</p>
+
+<ul>
+<li>price TokenAmount</li>
+<li>ttl Integer</li>
+</ul>
 
 <p>Return: AskID</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AddAsk</span><span class="p">(</span><span class="nx">price</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ttl</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">AskID</span> <span class="p">{</span>
@@ -721,16 +720,20 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="commitsector">CommitSector</h3>
 
-<p>Parameters:
-- commD []byte
-- commR []byte
-- commRStar []byte
-- proof SealProof</p>
+<p>Parameters:</p>
 
-<p>Return: SectorID</p>
+<ul>
+<li>sectorID SectorID</li>
+<li>commD []byte</li>
+<li>commR []byte</li>
+<li>commRStar []byte</li>
+<li>proof SealProof</li>
+</ul>
+
+<p>Return: None</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">comm</span> <span class="nx">Commitment</span><span class="p">,</span> <span class="nx">proof</span> <span class="o">*</span><span class="nx">SealProof</span><span class="p">)</span> <span class="nx">SectorID</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ValidatePoRep</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">comm</span><span class="p">,</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">sectorID</span> <span class="nx">SectorID</span><span class="p">,</span> <span class="nx">commD</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">commRStar</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">SealProof</span><span class="p">)</span> <span class="nx">SectorID</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ValidatePoRep</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">comm</span><span class="p">,</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Worker</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;bad proof!&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -742,18 +745,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// make sure the miner has enough collateral to add more storage
 </span><span class="c1"></span>    <span class="nx">coll</span> <span class="p">=</span> <span class="nf">CollateralForSector</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nx">coll</span> <span class="p">&lt;</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Collateral</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">coll</span> <span class="p">&lt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="o">-</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough collateral&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">miner</span><span class="p">.</span><span class="nx">Collateral</span> <span class="o">-=</span> <span class="nx">coll</span>
     <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="o">+=</span> <span class="nx">coll</span>
 
-    <span class="nx">sectorId</span> <span class="p">=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">commR</span><span class="p">)</span>
-    <span class="c1">// TODO: sectors IDs might not be that useful. For now, this should just be the number of
-</span><span class="c1"></span>    <span class="c1">// the sector within the set of sectors, but that can change as the miner experiences
-</span><span class="c1"></span>    <span class="c1">// failures.
-</span><span class="c1"></span>
+    <span class="c1">// Note: There must exist a unique index in the miner&#39;s sector set for each
+</span><span class="c1"></span>    <span class="c1">// sector ID. The `faults`, `recovered`, and `done` parameters of the
+</span><span class="c1"></span>    <span class="c1">// SubmitPoSt method express indices into this sector set.
+</span><span class="c1"></span>    <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">sectorID</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">commD</span><span class="p">)</span>
+
     <span class="c1">// if miner is not mining, start their proving period now
 </span><span class="c1"></span>    <span class="c1">// Note: As written here, every miners first PoSt will only be over one sector.
 </span><span class="c1"></span>    <span class="c1">// We could set up a &#39;grace period&#39; for starting mining that would allow miners
@@ -766,16 +768,17 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span> <span class="p">=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span>
         <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">+</span> <span class="nf">ProvingPeriodDuration</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
     <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nx">sectorId</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="submitpost">SubmitPoSt</h3>
 
-<p>Parameters:
-- proofs []PoStProof
-- faults []FaultSet
-- recovered SectorSet
-- done SectorSet</p>
+<p>Parameters:</p>
+
+<ul>
+<li>proofs []PoStProof</li>
+<li>faults []FaultSet</li>
+<li>recovered Bitfield</li>
+<li>done Bitfield</li>
+</ul>
 
 <p>Return: None</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// NotYetSpeced: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
@@ -784,10 +787,11 @@ https://github.com/alex-shpak/hugo-book
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized to submit post for miner&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// ensure the fault sets properly stack, recovered is a subset of the combined
-</span><span class="c1"></span>    <span class="c1">// fault sets, and that done does not intersect with either, and that all sets
-</span><span class="c1"></span>    <span class="c1">// only reference sectors that currently exist
-</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ValidateFaultSets</span><span class="p">(</span><span class="nx">faults</span><span class="p">,</span> <span class="nx">recovered</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// ensure recovered is a subset of the combined fault sets, and that done
+</span><span class="c1"></span>    <span class="c1">// does not intersect with either, and that all sets only reference sectors
+</span><span class="c1"></span>    <span class="c1">// that currently exist
+</span><span class="c1"></span>    <span class="nx">allFaults</span> <span class="p">=</span> <span class="nf">AggregateBitfields</span><span class="p">(</span><span class="nx">faults</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ValidateFaultSets</span><span class="p">(</span><span class="nx">faults</span><span class="p">,</span> <span class="nx">recovered</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;fault sets invalid&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -797,10 +801,10 @@ https://github.com/alex-shpak/hugo-book
         <span class="c1">// TODO: determine what exactly happens here. Is the miner permanently banned?
 </span><span class="c1"></span>        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Post submission too late&#34;</span><span class="p">)</span>
     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">{</span>
-        <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span><span class="p">)</span>
+        <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span><span class="p">,</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">recovered</span><span class="p">)</span>
+    <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">recovered</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="p">&lt;</span> <span class="nx">feesRequired</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough funds to pay post submission fees&#34;</span><span class="p">)</span>
@@ -815,11 +819,12 @@ https://github.com/alex-shpak/hugo-book
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;proofs invalid&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">permLostSet</span> <span class="p">=</span> <span class="nf">AggregateBitfields</span><span class="p">(</span><span class="nx">faults</span><span class="p">).</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">recovered</span><span class="p">)</span>
+    <span class="c1">// combine all the fault set bitfields, and subtract out the recovered
+</span><span class="c1"></span>    <span class="c1">// ones to get the set of sectors permanently lost
+</span><span class="c1"></span>    <span class="nx">permLostSet</span> <span class="p">=</span> <span class="nx">allFaults</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">recovered</span><span class="p">)</span>
 
     <span class="c1">// adjust collateral for &#39;done&#39; sectors
 </span><span class="c1"></span>    <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="o">-=</span> <span class="nf">CollateralForSectors</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">NextDoneSet</span><span class="p">)</span>
-    <span class="nx">miner</span><span class="p">.</span><span class="nx">Collateral</span> <span class="o">+=</span> <span class="nf">CollateralForSectors</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">NextDoneSet</span><span class="p">)</span>
 
     <span class="c1">// penalize collateral for lost sectors
 </span><span class="c1"></span>    <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="o">-=</span> <span class="nf">CollateralForSectors</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">permLostSet</span><span class="p">)</span>
@@ -834,7 +839,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// update miner power to the amount of data actually proved during
 </span><span class="c1"></span>    <span class="c1">// the last proving period.
 </span><span class="c1"></span>    <span class="nx">oldPower</span> <span class="o">:=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span>
-    <span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span> <span class="p">=</span> <span class="nf">SizeOf</span><span class="p">(</span><span class="nf">Filter</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span><span class="p">,</span> <span class="nx">faults</span><span class="p">))</span> <span class="o">*</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span>
+
+    <span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span> <span class="p">=</span> <span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span><span class="p">.</span><span class="nf">Count</span><span class="p">()</span> <span class="o">-</span> <span class="nx">allFaults</span><span class="p">.</span><span class="nf">Count</span><span class="p">())</span> <span class="o">*</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span>
     <span class="nx">StorageMarket</span><span class="p">.</span><span class="nf">UpdateStorage</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span> <span class="o">-</span> <span class="nx">oldPower</span><span class="p">)</span>
 
     <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span> <span class="p">=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span>
@@ -847,25 +853,53 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// update next done set
 </span><span class="c1"></span>    <span class="nx">miner</span><span class="p">.</span><span class="nx">NextDoneSet</span> <span class="p">=</span> <span class="nx">done</span>
     <span class="nx">miner</span><span class="p">.</span><span class="nx">ArbitratedDeals</span><span class="p">.</span><span class="nf">Clear</span><span class="p">()</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="increasepledge">IncreasePledge</h3>
+<span class="p">}</span>
 
-<p>Parameters:</p>
-
-<ul>
-<li>addspace BytesAmount</li>
-</ul>
-
-<p>Return: None</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">IncreasePledge</span><span class="p">(</span><span class="nx">addspace</span> <span class="nx">BytesAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// Note: msg.Value is implicitly transferred to the miner actor
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Collateral</span><span class="o">+</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="p">&lt;</span> <span class="nf">CollateralForPledge</span><span class="p">(</span><span class="nx">addspace</span><span class="o">+</span><span class="nx">miner</span><span class="p">.</span><span class="nx">PledgeBytes</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough total collateral for the requested pledge&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">ValidateFaultSets</span><span class="p">(</span><span class="nx">faults</span> <span class="p">[]</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">recovered</span><span class="p">,</span> <span class="nx">done</span> <span class="nx">BitField</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">aggregate</span> <span class="nx">BitField</span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">fs</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">faults</span> <span class="p">{</span>
+        <span class="nx">aggregate</span> <span class="p">=</span> <span class="nx">aggregate</span><span class="p">.</span><span class="nf">Union</span><span class="p">(</span><span class="nx">fs</span><span class="p">.</span><span class="nx">BitField</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">miner</span><span class="p">.</span><span class="nx">Collateral</span> <span class="o">+=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span>
-    <span class="nx">miner</span><span class="p">.</span><span class="nx">PledgeBytes</span> <span class="o">+=</span> <span class="nx">addspace</span>
-<span class="p">}</span></code></pre></div>
+    <span class="c1">// all sectors marked recovered must have actually failed
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">recovered</span><span class="p">.</span><span class="nf">IsSubsetOf</span><span class="p">(</span><span class="nx">aggregate</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+
+    <span class="c1">// the done set cannot intersect with the aggregated faults
+</span><span class="c1"></span>    <span class="c1">// you can&#39;t mark a fault as &#39;done&#39;
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">aggregate</span><span class="p">.</span><span class="nf">Intersects</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">bit</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">aggregate</span><span class="p">.</span><span class="nf">Bits</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">HasSectorByID</span><span class="p">(</span><span class="nx">bit</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">bit</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">done</span><span class="p">.</span><span class="nf">Bits</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">HasSectorByID</span><span class="p">(</span><span class="nx">bit</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="kc">true</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ProvingPeriodDuration</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="kt">uint64</span><span class="p">)</span> <span class="nx">Integer</span> <span class="p">{</span>
+    <span class="c1">// TODO: eventually, this needs to be different for different sector sizes
+</span><span class="c1"></span>    <span class="c1">// The research team should give us concrete numbers
+</span><span class="c1"></span>    <span class="k">return</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">2</span> <span class="c1">// number of blocks in one day
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">power</span> <span class="nx">Integer</span><span class="p">,</span> <span class="nx">blocksLate</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: real collateral calculation, obviously
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
+</span><span class="c1"></span><span class="p">}</span></code></pre></div>
 <h3 id="slashstoragefault">SlashStorageFault</h3>
 
 <p>Parameters:</p>
@@ -911,8 +945,11 @@ https://github.com/alex-shpak/hugo-book
 
 <p>This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.</p>
 
-<p>Parameters:
-- deal Deal</p>
+<p>Parameters:</p>
+
+<ul>
+<li>deal Deal</li>
+</ul>
 
 <p>Return: None</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AbitrateDeal</span><span class="p">(</span><span class="nx">d</span> <span class="nx">Deal</span><span class="p">)</span> <span class="p">{</span>
@@ -951,13 +988,15 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="depledge">DePledge</h3>
 
-<p>Parameters:
-- amt TokenAmount</p>
+<p>Parameters:</p>
+
+<ul>
+<li>amt TokenAmount</li>
+</ul>
 
 <p>Return: None</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">DePledge</span><span class="p">(</span><span class="nx">amt</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// TODO: Do both the worker and the owner have the right to call this?
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Worker</span> <span class="o">&amp;&amp;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Worker</span> <span class="o">&amp;&amp;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Not authorized to call DePledge&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -972,11 +1011,10 @@ https://github.com/alex-shpak/hugo-book
         <span class="k">return</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">amt</span> <span class="p">&gt;</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Collateral</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">amt</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="o">-</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Not enough free collateral to withdraw that much&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="nx">miner</span><span class="p">.</span><span class="nx">Collateral</span> <span class="o">-=</span> <span class="nx">amt</span>
     <span class="nx">miner</span><span class="p">.</span><span class="nx">DePledgedCollateral</span> <span class="p">=</span> <span class="nx">amt</span>
     <span class="nx">miner</span><span class="p">.</span><span class="nx">DePledgeTime</span> <span class="p">=</span> <span class="nx">CurrentBlockHeight</span> <span class="o">+</span> <span class="nx">DePledgeCooldown</span>
 <span class="p">}</span></code></pre></div>
@@ -1004,14 +1042,6 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetPower</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Power</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getkey">GetKey</h3>
-
-<p>Parameters: None</p>
-
-<p>Return: PublicKey</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetKey</span><span class="p">()</span> <span class="nx">PublicKey</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">PublicKey</span>
-<span class="p">}</span></code></pre></div>
 <h3 id="getpeerid">GetPeerID</h3>
 
 <p>Parameters: None</p>
@@ -1030,8 +1060,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <h3 id="updatepeerid">UpdatePeerID</h3>
 
-<p>Parameters:
-- pid PeerID</p>
+<p>Parameters:</p>
+
+<ul>
+<li>pid PeerID</li>
+</ul>
 
 <p>Return: None</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">UpdatePeerID</span><span class="p">(</span><span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
@@ -1040,6 +1073,21 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">PeerID</span> <span class="p">=</span> <span class="nx">pid</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="changeworker">ChangeWorker</h3>
+
+<p>Changes the worker address. Note that since Sector Commitments take the miners worker key as an input, any sectors sealed with the old key but not yet submitted to the chain will be invalid. All future sectors must be sealed with the new worker key.</p>
+
+<p>Parameters:
+- addr Address</p>
+
+<p>Return: None</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ChangeWorker</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;only the owner can change the worker address&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">=</span> <span class="nx">addr</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="payment-channel-broker-actor">Payment Channel Broker Actor</h2>
 
@@ -1055,7 +1103,7 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
 <p>The <a href="#init-actor">init actor</a> is used to create new instances of the multisig.</p>
 
-<h4 id="state">State</h4>
+<h3 id="state">State</h3>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Multisig</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Signers</span>  <span class="p">[]</span><span class="nx">Address</span>
     <span class="nx">Required</span> <span class="kt">uint</span>
@@ -1089,54 +1137,54 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
 <tbody>
 <tr>
-<td>0</td>
+<td>1</td>
 <td><code>Propose</code></td>
 </tr>
 
 <tr>
-<td>1</td>
+<td>2</td>
 <td><code>Approve</code></td>
 </tr>
 
 <tr>
-<td>2</td>
+<td>3</td>
 <td><code>Cancel</code></td>
 </tr>
 
 <tr>
-<td>3</td>
+<td>4</td>
 <td><code>ClearCompleted</code></td>
 </tr>
 
 <tr>
-<td>4</td>
+<td>5</td>
 <td><code>AddSigner</code></td>
 </tr>
 
 <tr>
-<td>5</td>
+<td>6</td>
 <td><code>RemoveSigner</code></td>
 </tr>
 
 <tr>
-<td>6</td>
+<td>7</td>
 <td><code>SwapSigner</code></td>
 </tr>
 
 <tr>
-<td>7</td>
+<td>8</td>
 <td><code>ChangeRequirement</code></td>
 </tr>
 </tbody>
 </table>
 
-<h4 id="constructor-1">Constructor</h4>
+<h3 id="constructor-1">Constructor</h3>
 
 <blockquote>
 <p>This method sets up the initial state for the multisig account</p>
 </blockquote>
 
-<h4 id="parameters-2">Parameters</h4>
+<h3 id="parameters-2">Parameters</h3>
 
 <table>
 <thead>
@@ -1419,14 +1467,10 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 <li><a href="#init-actor">Init Actor</a>
 <ul>
 <li><a href="#code-cid">Code Cid</a></li>
-<li><a href="#exec-code-cid-params-param-address"><code>Exec(code Cid, params []Param) Address</code></a>
-<ul>
+<li><a href="#exec-code-cid-params-param-address"><code>Exec(code Cid, params []Param) Address</code></a></li>
 <li><a href="#parameters">Parameters</a></li>
-</ul></li>
-<li><a href="#getidforaddress-addr-address-bigint"><code>GetIdForAddress(addr Address) BigInt</code></a>
-<ul>
+<li><a href="#getidforaddress-addr-address-bigint"><code>GetIdForAddress(addr Address) BigInt</code></a></li>
 <li><a href="#parameters-1">Parameters</a></li>
-</ul></li>
 </ul></li>
 <li><a href="#account-actor">Account Actor</a>
 <ul>
@@ -1434,10 +1478,8 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 </ul></li>
 <li><a href="#storage-market-actor">Storage Market Actor</a>
 <ul>
-<li><a href="#code-cid-2">Code Cid</a>
-<ul>
+<li><a href="#code-cid-2">Code Cid</a></li>
 <li><a href="#createstorageminer">CreateStorageMiner</a></li>
-</ul></li>
 <li><a href="#slashconsensusfault">SlashConsensusFault</a></li>
 <li><a href="#updatestorage">UpdateStorage</a></li>
 <li><a href="#gettotalstorage">GetTotalStorage</a></li>
@@ -1449,7 +1491,6 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 <li><a href="#addask">AddAsk</a></li>
 <li><a href="#commitsector">CommitSector</a></li>
 <li><a href="#submitpost">SubmitPoSt</a></li>
-<li><a href="#increasepledge">IncreasePledge</a></li>
 <li><a href="#slashstoragefault">SlashStorageFault</a></li>
 <li><a href="#getcurrentprovingset">GetCurrentProvingSet</a></li>
 <li><a href="#arbitratedeal">ArbitrateDeal</a></li>
@@ -1457,23 +1498,18 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 <li><a href="#getowner">GetOwner</a></li>
 <li><a href="#getworkeraddr">GetWorkerAddr</a></li>
 <li><a href="#getpower">GetPower</a></li>
-<li><a href="#getkey">GetKey</a></li>
 <li><a href="#getpeerid">GetPeerID</a></li>
 <li><a href="#getsectorsize">GetSectorSize</a></li>
 <li><a href="#updatepeerid">UpdatePeerID</a></li>
+<li><a href="#changeworker">ChangeWorker</a></li>
 </ul></li>
 <li><a href="#payment-channel-broker-actor">Payment Channel Broker Actor</a></li>
 <li><a href="#multisig-account-actor">Multisig Account Actor</a>
 <ul>
-<li>
-<ul>
 <li><a href="#state">State</a></li>
-</ul></li>
-<li><a href="#code-cid-4">Code Cid</a>
-<ul>
+<li><a href="#code-cid-4">Code Cid</a></li>
 <li><a href="#constructor-1">Constructor</a></li>
 <li><a href="#parameters-2">Parameters</a></li>
-</ul></li>
 <li><a href="#propose">Propose</a></li>
 <li><a href="#approve">Approve</a></li>
 <li><a href="#cancel">Cancel</a></li>

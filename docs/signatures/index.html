@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -161,52 +160,9 @@ https://github.com/alex-shpak/hugo-book
 <p>We use signatures in filecoin to verify <em>something</em> was done by <em>someone</em>. For example, we use signatures in order to validate deal messages which represent an action like a storage deals We also use signatures to determine who generated a particular message, determine public keys&ndash;which can be recovered from signed data and a signature, and find filecoin addresses which generated from a public key.</p>
 
 <ul>
-<li>Messages (From actors to the blockchain)</li>
-<li>Tickets (Signature of proof - <a href="../mining">Mining</a></li>
+<li>Messages (From users to the blockchain)</li>
+<li>Tickets (Signature of proof - <a href="../mining">Mining</a>)</li>
 <li>Block signature (Signature over all data in the block - done by block leader)</li>
-</ul>
-
-<h1 id="what-signatures-affect">What signatures affect</h1>
-
-<p>What uses them</p>
-
-<ul>
-<li>Messages [TODO: Link to messages spec]</li>
-<li>Block validation</li>
-<li>Tickets which inform leader election in Expected Consensus (EC) [TODO: link to EC spec]</li>
-</ul>
-
-<p>Note that messages between actors are not signed this is because messages between actors are always spawned by a message from a user &ndash; which are singed by that user.</p>
-
-<p>Filecoin specific reliance</p>
-
-<ul>
-<li>SignedMessages in go-filecoin</li>
-</ul>
-
-<h1 id="dependencies">Dependencies</h1>
-
-<p>Things that affect our choices for signatures</p>
-
-<ul>
-<li>Elliptic curve choices - We use ECDSA with secp256k1 (aka the BitCoin elliptic curve)</li>
-<li>Signature size limits - Our signatures are 64 bytes + 1 byte for public key recovery</li>
-<li>Avg. processing power available to a CPU (signature aggregation)</li>
-</ul>
-
-<p>Filecoin specific dependancies</p>
-
-<ul>
-<li>libsecp256k1</li>
-</ul>
-
-<h1 id="non-dependencies">Non-Dependencies</h1>
-
-<p>Does not affect</p>
-
-<ul>
-<li>Transport encryption</li>
-<li>File encodings (PoRep)</li>
 </ul>
 
 <h1 id="interface">Interface</h1>
@@ -257,17 +213,21 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">//
 </span><span class="c1"></span>    <span class="nf">Recover</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Message</span><span class="p">,</span> <span class="nx">sig</span> <span class="nx">SignatureBytes</span><span class="p">)</span> <span class="p">(</span><span class="nx">pk</span> <span class="nx">PublicKey</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
-<h1 id="selected-signature-scheme">Selected Signature Scheme</h1>
+<h1 id="secp256k1-signatures">Secp256k1 Signatures</h1>
 
 <p>Currently, Filecoin uses secp256k1 signatures to fulfill the above interface. All signatures on messages, blocks, and tickets currently use the same scheme and format.</p>
 
-<h2 id="wire-format">Wire Format</h2>
+<h2 id="signing-messages">Signing Messages</h2>
 
-<p>What bits are on the wire and in what order/format. We are currently adhering to libsecp256k1 serialization which is laid out as follows. Note that this format description may not be accurate. See the github link below for an authoritative format description.</p>
+<p>To generate a signature for the <a href="data-structures.md#message"><code>Message</code></a> type, first serialize it, then hash the serialized bytes with blake2b-256. Then, take the 32 byte digest output the hash and compute the secp256k1 signature over it.</p>
+
+<h3 id="wire-format">Wire Format</h3>
+
+<p>We use standard secp256k1 signature serialization, as described below. For more details on how the Filecoin <code>Signature</code> type is serialized, see the relevant section in <a href="data-structures.md#signature">the data structures spec</a></p>
 
 <p><strong>Signature</strong></p>
 
-<pre><code>sig SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
+<pre><code>SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 </code></pre>
 
 <p><code>s</code> = Scalar of size 32 bytes</p>
@@ -283,120 +243,15 @@ https://github.com/alex-shpak/hugo-book
 
 <p><code>indicator</code> = a 2 byte formatting indicator</p>
 
-<p>From: <a href="https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177">https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177</a></p>
-
-<p><strong>Signed Message</strong></p>
-
-<pre><code>Type SignedMessage Struct {
-
-    Message bytes `JSON`
-
-    Signature bytes `JSON`
-
-}
-</code></pre>
-
-<p><a href="https://github.com/filecoin-project/go-filecoin/blob/ab60f73af1f86a954ef41e3252ef52a99066bbe2/types/signed_message.go#L25">Current Filecoin Implementation</a></p>
-
-<h3 id="github">Github</h3>
-
-<p><a href="https://github.com/filecoin-project/specs/issues/131">https://github.com/filecoin-project/specs/issues/131</a></p>
-
 <h3 id="external-references">External References</h3>
 
 <ul>
-<li><p>How Recovering a Private Key from a message and a signature works in ethereum:</p></li>
+<li>Elliptic Curve Cryptography Paper
 
-<li><ul>
-<li><a href="https://medium.com/@libertylocked/ec-signatures-and-recovery-in-ethereum-smart-contracts-560b6dd8876">https://medium.com/@libertylocked/ec-signatures-and-recovery-in-ethereum-smart-contracts-560b6dd8876</a></li>
-</ul></li>
-
-<li><p>More notes on recovery</p></li>
-
-<li><ul>
-<li><a href="https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106">https://crypto.stackexchan ge.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work/18106#18106</a></li>
-</ul></li>
-
-<li><p>See “4.1.6 Public Key Recovery Operation Page 47”</p></li>
-
-<li><ul>
+<ul>
 <li><a href="http://www.secg.org/sec1-v2.pdf">http://www.secg.org/sec1-v2.pdf</a></li>
 </ul></li>
-
-<li><p>Secp256k1 Signature serialization -</p></li>
-
-<li><ul>
-<li>Secp256k1 cpp - <a href="https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55">https://github.com/ethereum/ethash/blob/f5f0a8b1962544d2b6f40df8e4b0d9a32faf8f8e/vendor/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp256k1/include/secp256k1_recovery.h#L55</a></li>
 </ul>
-
-<ul>
-<li>Go-filecoin - <a href="https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98">https://github.com/filecoin-project/go-filecoin/blob/e95bde8ff289b0c88d748e92b1bcca99ecc403cb/crypto/secp256k1/secp256.go#L98</a></li>
-</ul></li>
-</ul>
-
-<h3 id="references">References</h3>
-
-<div class="notices todo" ><p><strong>TODO</strong>: this section should likely be removed, and the context it adds should be linked in some other way.
-{{ % /notice }}</p>
-
-<ul>
-<li><p>Maybe Marshal/Unmarshal == NewSignedMessage/SignBytes?</p>
-
-<ul>
-<li><p><a href="https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go">https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go</a></p></li>
-
-<li><p><a href="https://github.com/filecoin-project/go-filecoin/blob/master/types/signer.go">https://github.com/filecoin-project/go-filecoin/blob/master/types/signer.go</a></p></li>
-</ul></li>
-
-<li><p>Message serialization currently: <a href="http://cbor.io">http://cbor.io</a></p></li>
-
-<li><p>Recover - Extract a PublicKey from SignatureBytes (Trade storage of PublicKey (pk) for CPU work to recover pk from a signature &ndash; assumes signature bits are enough to recover pk which might not be the case for all signature algorithms). For full explanation of recover see: <a href="http://www.secg.org/sec1-v2.pdf">http://www.secg.org/sec1-v2.pdf</a></p></li>
-
-<li><p>Point compression Go - <a href="https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338">https://github.com/btcsuite/btcd/blob/86fed781132ac890ee03e906e4ecd5d6fa180c64/btcec/signature.go#L338</a></p></li>
-
-<li><p>Create recoverable sig - <a href="https://github.com/ipsn/go-secp256k1/blob/9d62b9f0bc52d16160f79bfb84b2bbf0f6276b03/libsecp256k1/include/secp256k1_recovery.h#L70">https://github.com/ipsn/go-secp256k1/blob/9d62b9f0bc52d16160f79bfb84b2bbf0f6276b03/libsecp256k1/include/secp256k1_recovery.h#L70</a></p></li>
-
-<li><p>Recid - <a href="https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L288">https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L288</a></p></li>
-
-<li><p>Serialize - <a href="https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177">https://github.com/bitcoin-core/secp256k1/blob/314a61d72474aa29ff4afba8472553ad91d88e9d/src/ecdsa_impl.h#L177</a></p></li>
-
-<li><p>Should elliptic curve points always be compressed in Marshal?</p></li>
-
-<li><p>Recover is math trick trading CPU for space to generate sk*G</p></li>
-
-<li><p>Serialization should account for :</p></li>
-
-<li><ul>
-<li>Should there be point compression?</li>
-</ul>
-
-<ul>
-<li><p>Point compression (x,y); len(x) = n bits → x, recovery_bit; len(x||r_bit) = n+1 bits</p></li>
-
-<li><ul>
-<li>Easy to check add; use (mod2) or check last bit</li>
-</ul></li>
-
-<li><p>Sig = (r,s) - s is standard but r could be (rx,ry) or rx or r all of these can be used to generate r*G</p></li>
-
-<li><p>Recovery() can be used for (1) finding r*G from (r,s) and (2) pk = sk*G from SignatureBytes</p></li>
-
-<li><p>Remember that y = sqrt(curve equation for x) and there are 2 valid solutions for y. This should be accounted for in sig if point compression is used (i.e. if a PublicKey is provided (no compression) or recovered (compression) OR r is a point (no compression) or scalar(compression))</p></li>
-</ul></li>
-</ul>
-
-<p>Currently signatures are not sent over the wire on their own, instead they are encapsulated in in a <a href="https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L28">SignedMessage</a>. SignesMessage’s contain a Message and a Signature. When we want to send a SignedMessage over the wire we marshal it to cbor and send, once it is recevied it is unmarshaled form <a href="http://cbor.io/">cbor</a> back into the SignedMessage Structure.
-<a href="https://github.com/filecoin-project/go-filecoin/blob/master/types/signed_message.go#L22-L38">Code for marshaling and unmarshaling SignedMessages
-</a>For opinions talks to @dig &amp; @phritz</p>
-
-<h1 id="inspiration">Inspiration</h1>
-
-<p>JSON Web Sigs/Keys: <a href="https://tools.ietf.org/html/rfc7515">https://tools.ietf.org/html/rfc7515</a></p>
-
-<p>NIST Signature Standard: <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf">https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf</a></p>
-
-<p>Discussion on slack: <a href="https://protocollabs.slack.com/archives/G7XUR2TU2/p1528984460000977">https://protocollabs.slack.com/archives/G7XUR2TU2/p1528984460000977</a></p>
-</div>
 
 </article>
 
@@ -433,17 +288,13 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="#what-are-signatures-in-filecoin">What are signatures in Filecoin</a></li>
 </ul></li>
-<li><a href="#what-signatures-affect">What signatures affect</a></li>
-<li><a href="#dependencies">Dependencies</a></li>
-<li><a href="#non-dependencies">Non-Dependencies</a></li>
 <li><a href="#interface">Interface</a></li>
-<li><a href="#selected-signature-scheme">Selected Signature Scheme</a>
+<li><a href="#secp256k1-signatures">Secp256k1 Signatures</a>
 <ul>
-<li><a href="#wire-format">Wire Format</a>
+<li><a href="#signing-messages">Signing Messages</a>
 <ul>
-<li><a href="#github">Github</a></li>
+<li><a href="#wire-format">Wire Format</a></li>
 <li><a href="#external-references">External References</a></li>
-<li><a href="#references">References</a></li>
 </ul></li>
 </ul></li>
 </ul>

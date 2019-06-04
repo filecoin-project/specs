@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -201,10 +200,10 @@ https://github.com/alex-shpak/hugo-book
 <p>The storage deal protocol is used by any client to store data with a storage miner.</p>
 </blockquote>
 
-<p>The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a <code>piece</code> prior to executing this protocol.</p>
+<p>The protocol starts with storage client (which in this case may be a normal storage client, or a broker). It is assumed that the client has their data already prepared into a <code>piece</code> prior to executing this protocol. For more details on initial data processing, see <a href="../client-data">client data</a>.</p>
 
-<p>First the client sends a signed <code>StorageDealProposal</code> to the storage miner:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Commitment</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">;</span>
+<p>First the client sends a <code>SignedStorageDealProposal</code> to the storage miner:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Commitment</span> <span class="p">[]</span><span class="kt">byte</span>
 
 <span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// PieceRef is the hash of the data in native structure. This will be used for
@@ -235,7 +234,13 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nx">MinerAddress</span> <span class="nx">Address</span>
 
     <span class="nx">ClientAddress</span> <span class="nx">Address</span>
-    <span class="nx">Signature</span>     <span class="nx">Signature</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SignedStorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>    
+    <span class="nx">Proposal</span> <span class="nx">StorageDealProposal</span>
+
+    <span class="c1">// Signature over the cbor encoded StorageDealProposal signed by client
+</span><span class="c1"></span>    <span class="nx">Signature</span> <span class="nx">Signature</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PaymentInfo</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -372,7 +377,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <div class="notices todo" ><strong>TODO</strong>: possibly also include a starting block height here, to indicate when this deal may be started (implying you could select a value in the future). After the first response, both parties will have signed agreeing that the deal started at that point. This could possibly be used to challenge either party in the event of a stall. This starting block height also gives the miner time to seal and post the commitment on chain. Otherwise a weird condition exists where a client could immediately slash a miner for not having their data stored.</div>
 
-<p>The miner then decides whether or not to accept the deal, and sends back a response:</p>
+<p>The miner then decides whether or not to accept the deal, and sends back a SignedStorageDealResponse:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">State</span> <span class="nx">DealState</span>
 
@@ -392,8 +397,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// SectorCommitMsg is the Cid of the message that was sent to submit
 </span><span class="c1"></span>    <span class="c1">// the sector containing this data to the chain.
 </span><span class="c1"></span>    <span class="nx">SectorCommitMsg</span> <span class="nx">Cid</span>
+<span class="p">}</span>
 
-    <span class="c1">// Signature is a signature from the miner over the response
+<span class="kd">type</span> <span class="nx">SignedStorageDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Response</span> <span class="nx">StorageDealResponse</span>
+
+    <span class="c1">// Signature is a signature from the miner over the cbor encoded response
 </span><span class="c1"></span>    <span class="nx">Signature</span> <span class="nx">Signature</span>
 <span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">HandleStorageDealProposal</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Stream</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">prop</span> <span class="o">:=</span> <span class="nx">CborRpc</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>

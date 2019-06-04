@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -222,11 +221,7 @@ https://github.com/alex-shpak/hugo-book
 <h4 id="before-deal">Before Deal</h4>
 
 <ol>
-<li><strong>Merkle Translation:</strong> The client runs a &lsquo;Local Merkle Translation&rsquo; to generate the storage market hash for the data.
-
-<ul>
-<li>Storage miners reference data by its storage market hash, and not by its standard hash. This step is needed for the client to be able to trust their data was correctly included in the miners sector. See <a href="definitions.md#piece-inclusion-proof">Piece Inclusion Proof</a></li>
-</ul></li>
+<li><strong>Data Preparation:</strong> The client prepares their input data. See <a href="../client-data">client data</a> for more details.</li>
 <li><strong>Miner Selection:</strong> The client looks at asks on the network, and then selects a storage miner to store their data with.
 
 <ul>

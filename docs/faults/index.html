@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -167,7 +166,7 @@ https://github.com/alex-shpak/hugo-book
 <li><strong>Condition:</strong> If any miner posts two blocks satisfying the slashing conditions defined in <a href="./expected-consensus.md">Expected Consensus</a>.</li>
 <li><strong>Reporting:</strong> Anyone may call <code>SlashConsensusFault</code> and pass in the two offending block headers.</li>
 <li><strong>Check:</strong> The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.</li>
-<li><strong>Penalization:</strong> All of the miner&rsquo;s pledge collateral and all of their power is irrevocably slashed.</li>
+<li><strong>Penalization:</strong> All of the miner&rsquo;s pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.</li>
 </ul></li>
 </ul>
 
@@ -181,7 +180,7 @@ https://github.com/alex-shpak/hugo-book
 <li><strong>Reporting:</strong> The miner submits their PoSt as usual, but includes the late submission fee.</li>
 <li><strong>Check:</strong> The chain checks first that the submission is within the <code>generation attack threshold</code>, and then checks that the fee provided matches the required fee for how many blocks late the submission is.</li>
 <li><strong>Penalization:</strong> The miner is penalized proportionally to the delay. Penalizations are enforced by a standard PoSt submission.</li>
-<li><em>Economic penalization</em>: To determine the penalty amount, <code>CalculateLatePenalty(numLate)</code> is called. The miners power is not reduced after the fee submission.</li>
+<li><em>Economic penalization</em>: To determine the penalty amount, <code>ComputeLateFee(minerPower, numLate)</code> is called.</li>
 <li><em>Power penalization</em>: The miners&rsquo; power is not reduced. Note that the current view of the power table is computed with the lookback parameter.
 
 <ul>

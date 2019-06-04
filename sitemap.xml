@@ -33,11 +33,6 @@
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/drgporep-circuit/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>https://filecoin-project.github.io/specs/docs/expected-consensus/</loc>
     <priority>0</priority>
   </url>

@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -213,7 +212,7 @@ https://github.com/alex-shpak/hugo-book
 <li><code>CommRLast : Fr</code>: The Merkle tree root hash of the final replica (output of the last layer).</li>
 <li><code>CommRStar : Fr</code>: A commitment to each <code>l</code> layer&rsquo;s Merkle tree root hash <code>CommR[l]</code> and <code>ReplicaId</code>.</li>
 <li><code>InclusionPath : [LAYERS][]Fr</code>: Inclusion path for the challenged data and replica leaf.</li>
-<li><code>ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr</code>:  Inclusion path for the parents of the corresponding <code>InclusionPath[l][c]</code> .</li>
+<li><code>ParentInclusionPath : [LAYERS][][PARENT_COUNT]Fr</code>:  Inclusion path for the parents of the corresponding <code>InclusionPath[l][c]</code>.</li>
 </ul>
 
 <h5 id="design-notes">Design notes</h5>
@@ -234,23 +233,17 @@ https://github.com/alex-shpak/hugo-book
 <p>Note: Size is <code>LAYERS-1</code> since the commitment to the last layer is <code>CommRLast</code></p>
 
 <ul>
-<li><p><code>DataProof : [LAYERS][][TREE_DEPTH-2]Fr</code>: Merkle tree inclusion proof for the current layer unencoded challenged leaf.</p></li>
+<li><p><code>DataProof : [LAYERS][][TREE_DEPTH]Fr</code>: Merkle tree inclusion proof for the current layer unencoded challenged leaf.</p></li>
 
-<li><p><code>ReplicaProof : [LAYERS][][TREE_DEPTH-2]Fr</code>: Merkle tree inclusion proof for the current layer encoded challenged leaves.</p></li>
+<li><p><code>ReplicaProof : [LAYERS][][TREE_DEPTH]Fr</code>: Merkle tree inclusion proof for the current layer encoded challenged leaves.</p></li>
 
-<li><p><code>ParentProof : [LAYERS][][PARENT_COUNT][TREE_DEPTH-2]Fr</code>: Pedersen hashes of the Merkle inclusion proofs of the parent leaves for each challenged leaf at layer <code>l</code>.</p></li>
+<li><p><code>ParentProof : [LAYERS][][PARENT_COUNT][TREE_DEPTH]Fr</code>: Pedersen hashes of the Merkle inclusion proofs of the parent leaves for each challenged leaf at layer <code>l</code>.</p></li>
 
 <li><p><code>DataValue : [LAYERS][]Fr</code>: Value of the unencoded challenged leaves at layer <code>l</code>.</p></li>
 
 <li><p><code>ReplicaValue : [LAYERS][]Fr</code>: Value of the encoded leaves for each challenged leaf at layer <code>l</code>.</p></li>
 
 <li><p><code>ParentValue : [LAYERS][][PARENT_COUNT]Fr</code>: Value of the parent leaves for each challenged leaf at layer <code>l</code>.</p></li>
-</ul>
-
-<h5 id="design-notes-1">Design notes</h5>
-
-<ul>
-<li><code>DataProof</code>,  <code>ParentProof</code>, <code>ReplicaProof</code>: Size of proof per layer is <code>TREE_DEPTH-2</code> because it excludes (1) the roothash, and (2) the leaf value: (1) the root hash of the proof will be the corresponding unencoded data commitment for the current layer <code>l</code>, (2) the leaf value is the corresponding <code>DataValue</code>, <code>ReplicaValue</code> and <code>ParentValue</code>.</li>
 </ul>
 
 <h4 id="circuit">Circuit</h4>
@@ -392,10 +385,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="#design-notes">Design notes</a></li>
 </ul></li>
-<li><a href="#private-inputs">Private Inputs</a>
-<ul>
-<li><a href="#design-notes-1">Design notes</a></li>
-</ul></li>
+<li><a href="#private-inputs">Private Inputs</a></li>
 <li><a href="#circuit">Circuit</a>
 <ul>
 <li><a href="#high-level">High Level</a></li>

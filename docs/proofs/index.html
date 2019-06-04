@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -181,6 +180,7 @@ sector</em></strong>.</li>
 <li><strong><em>preprocessed data:</em></strong> the result of <strong><em>preprocessing</em></strong> the <strong><em>original data</em></strong>.</li>
 <li><strong><em>preprocessed sector:</em></strong> a concrete representation (on disk or in memory) of a <strong><em>sector&rsquo;s</em></strong> <strong><em>preprocessed data</em></strong>.</li>
 <li><strong><em>SNARK proof:</em></strong> a block of bytes which proves that the creator is in possession of a satisfying assignment to a quadratic arithmetic program (<strong><em>circuit</em></strong>).</li>
+<li><strong><em>Multi-SNARK proof:</em></strong> a block of one or more <strong><em>SNARK proofs</em></strong>, each proving partition of the total set of challenges to be proved.<br /></li>
 <li><strong><em>merkle inclusion proof:</em></strong> a proof (whose format is unspecified here) that a given leaf block is contained within a merkle tree whose root is the <strong><em>commitment</em></strong> associated with the proof.</li>
 <li><strong><em>commitment:</em></strong> an opaque block of data to which a prover &lsquo;commits&rsquo;, enabling subsequent proofs which cannot be validly constructed unless the <strong><em>commitment</em></strong> itself was validly constructed. For example: the output of a suitable pseudorandom collision-resistant hash function may serve as a <strong><em>commitment</em></strong> to the data which is the preimage of that hash. Publication of the <strong><em>commitment</em></strong> proves that the creator was in possession of the preimage at the time the <strong><em>commitment</em></strong> was generated.</li>
 <li><strong><em>prover:</em></strong> the party who generates a proof.</li>
@@ -188,13 +188,13 @@ sector</em></strong>.</li>
 <li><strong><em>sectors count:</em></strong> the number of sectors over which a proof-of-spacetime is performed (<code>POST_SECTORS_COUNT</code>).</li>
 </ul>
 
-<h2 id="proof-of-replication">Proof of Replication</h2>
+<h2 id="filecoin-proof-of-replication">Filecoin Proof of Replication</h2>
 
-<p><strong><em>Proof of Replication</em></strong> generates a unique copy (<strong><em>sealed sector</em></strong>) of a <strong><em>sector&rsquo;s</em></strong> <strong><em>original data</em></strong>, a <strong><em>SNARK proof</em></strong>, and a set of <strong><em>commitments</em></strong> identifying the <strong><em>sealed sector</em></strong> and linking it to the corresponding <strong><em>unsealed sector</em></strong>.</p>
+<p><strong><em>Filecoin Proof of Replication</em></strong> generates a unique copy (<strong><em>sealed sector</em></strong>) of a <strong><em>sector&rsquo;s</em></strong> <strong><em>original data</em></strong>, a <strong><em>Multi-SNARK proof</em></strong>, and a set of <strong><em>commitments</em></strong> identifying the <strong><em>sealed sector</em></strong> and linking it to the corresponding <strong><em>unsealed sector</em></strong>.</p>
 
 <h2 id="seal">Seal</h2>
 
-<p><code>Seal</code> has the side effect of generating a <strong><em>sealed sector</em></strong> from an <strong><em>unsealed sector</em></strong>,  and returns identifying <strong><em>commitments</em></strong> and a <strong><em>SNARK proof</em></strong>. The proof returned is a <strong><em>SNARK proofs</em></strong>.</p>
+<p><code>Seal</code> has the side effect of generating a <strong><em>sealed sector</em></strong> from an <strong><em>unsealed sector</em></strong>,  and returns identifying <strong><em>commitments</em></strong> and a <strong><em>Multi-SNARK proof</em></strong>. The proof returned is a <strong><em>Multi-SNARK proof</em></strong>.</p>
 
 <p>The commitments are used to verify that the correct <strong><em>original data</em></strong> was sealed, and that the correct <strong><em>sealed data</em></strong> is the subject of later <strong><em>Proofs of Space-Time</em></strong>, proving that this data is being stored continuously.</p>
 
@@ -203,16 +203,18 @@ sector</em></strong>.</li>
 <pre><code>Seal
  (
   // request represents a request to seal a sector.
+  partitions     uint64,      // influences the size of the output proof; using less partitions requires more hardware but produces shorter proofs
+  sectorSize     uint64,      // the number of bytes in the sealed sector
+  unsealedPath   string,      // path of unsealed sector (regular file, ramdisk, etc.) from which a unique replica will be created
+  sealedPath     string,      // path to which sealed sector will be written
   proverID       [31]byte,    // uniquely identifies miner
-  sealedAccess   string,      // identifier providing access to sealed sector-access
+  ticket         [32]byte,    // ticket to which miner commits when sealing begins
   sectorID       [31]byte,    // uniquely identifies sector
-  storage        SectorStore, // used to manipulate sectors
-  unsealedAccess string       // identifier providing access to unsealed sector-access
  ) err Error | (
   // response contains the commitments resulting from a successful Seal().
-  commD          [32]byte,                       // data commitment: merkle root of original data
-  commR          [32]byte,                       // replica commitment: merkle root of replicated data [will be removed in future iteration]
-  commRStar      [32]byte,                       // a hash of intermediate layers
+  commD          [32]byte,    // data commitment: merkle root of original data
+  commR          [32]byte,    // replica commitment: merkle root of replicated data [will be removed in future iteration]
+  commRStar      [32]byte,    // a hash of intermediate layers
   proof          []byte, 
  )
 
@@ -226,14 +228,15 @@ sector</em></strong>.</li>
 VerifySeal
  (
   // request represents a request to verify the output of a Seal() operation.
-  commD     [32]byte,                       // returned from Seal
-  commR     [32]byte,                       // returned from Seal [will be removed in future iteration] 
-  commRStar [32]byte,                       // returned from Seal
-  proof     []byte,                         // returned from Seal
-  proverID  [31]byte,                       // uniquely identifies miner
-  sectorID  [31]byte,                       // uniquely identifies sector
+  commD       [32]byte, // returned from Seal
+  commR       [32]byte, // returned from Seal [will be removed in future iteration]
+  commRStar   [32]byte, // returned from Seal
+  proof       []byte,   // returned from Seal
+  proverID    [31]byte, // uniquely identifies miner
+  ticket      [32]byte, // ticket to which miner committed when sealing began
+  sectorID    [31]byte, // uniquely identifies sector
 ) err Error | 
-  IsValid bool                              // true iff the provided proof-of-replication os valid
+  IsValid bool          // true iff the provided proof-of-replication os valid
 
 </code></pre>
 
@@ -244,15 +247,15 @@ VerifySeal
 <pre><code>Unseal
  (
   // request represents a request to unseal a sector.
-  numBytes      uint64,      // number of bytes to unseal (corresponds to contents of unsealed sector-file)
-  outputAccess  string,      // identifier providing access to write unsealed file-bytes
-  proverID      [31]byte,    // uniquely identifies miner
-  sealedAccess  string,      // identifier providing access to sealed sector-file
-  sectorID      [31]byte,    // uniquely identifies sector
-  startOffset   uint64,      // zero-based byte offset in original, unsealed sector-file
-  storage       SectorStore  // used to manipulate sectors
+  sectorSize    uint64,   // the number of bytes in the sealed sector
+  sealedPath    string,   // path from which sealed bytes will be read
+  outputPath    string,   // path to which unsealed bytes will be written (regular file, ramdisk, etc.)
+  proverID      [31]byte, // uniquely identifies miner
+  sectorID      [31]byte, // uniquely identifies sector
+  startOffset   uint64,   // zero-based byte offset in original, unsealed sector-file
+  numBytes      uint64,   // number of bytes to unseal (corresponds to contents of unsealed sector-file)
  ) err Error |
-  NumBytesWritten uint64     // the number of bytes unsealed (and written) by Unseal()
+  NumBytesWritten uint64  // the number of bytes unsealed (and written) by Unseal()
 </code></pre>
 
 <h3 id="security-notes">Security Notes</h3>
@@ -297,7 +300,7 @@ VerifySeal
   commRs        [POST_SECTORS_COUNT][32]byte,        // the commRs provided to GeneratePoSt
   challengeSeed [32]byte,
   faults        []uint64
-  proof         []byte,            // SNARK proof returned by GeneratePoSt 
+  proof         []byte,            // Multi-SNARK proof returned by GeneratePoSt 
  ) err Error | 
   isValid bool                     // true iff the provided Proof of Space-Time is valid
 </code></pre>
@@ -308,31 +311,24 @@ VerifySeal
 
 <h3 id="pieceinclusionproof">PieceInclusionProof</h3>
 
-<p>A <code>PieceInclusionProof</code> contains a merkle inclusion proof for the first and last node
-of a piece. This ensures all &lsquo;edge&rsquo; hashes necessary to generate a complete merkle
-tree are available.</p>
-
-<p>Depending on the position of the nodes, not every hash provided will actually be needed.
-As a space optimization, and at the cost of greater complexity in the encoding, &lsquo;interior&rsquo; nodes
-of either path may be omitted –– provided that the implementation <code>InclusionProof</code> allows for this omission.</p>
+<p>A <code>PieceInclusionProof</code> contains a potentially complex merkle inclusion proof that all leaves included in <code>commP</code> (the piece commitment) are also included in <code>commD</code> (the sector data commitment).</p>
 
 <pre><code>struct PieceInclusionProof {
-    FirstNodeProof  InclusionProof,
-    LastNodeProof   InclusionProof,
+    Position uint,
+    ProofElements [32]byte
 }
 </code></pre>
 
 <h3 id="generatepieceinclusionproofs">GeneratePieceInclusionProofs</h3>
 
-<p><code>GeneratePieceInclusionProofs</code> takes a merkle tree and a slice of piece lengths, and returns
-a vector of <code>PieceInclusionProofs</code> corresponding to the pieces. This assumes that the first
-piece begins at offset 0, and that each piece begins directly after the previous piece ends.
-For this method to work, the piece data used to validate pieces will need to be padded as necessary,
-and pieces will need to be aligned (to 128-byte chunks due to details of <strong><em>preprocessing</em></strong>) when written.</p>
+<p><code>GeneratePieceInclusionProofs</code> takes a merkle tree and a slice of piece start positions and lengths (in nodes), and returns
+a vector of <code>PieceInclusionProofs</code> corresponding to the pieces. For this method to work, the piece data used to validate pieces will need to be padded as necessary,
+and pieces will need to be aligned (to 128-byte chunks due to details of <strong><em>preprocessing</em></strong>) when written. This assumes that pieces have been packed and padded according to the assumptions of the algorithm. For this reason, practical implementations should also provide a function to assist in correct packing of pieces.</p>
 
 <pre><code>GeneratePieceInclusionProofs
  (
   Tree MerkleTree,
+  PieceStarts []uint
   PieceLengths uint,
  ) []PieceInclusionProof
 </code></pre>
@@ -343,22 +339,24 @@ For the resulting proof to be valid, first_node must be &lt;= last_node.</p>
 
 <pre><code>GeneratePieceInclusionProof
  (
-  tree       MerkleTree,
-  firstNode  uint,
-  lastNode   uint,
- ) err Error | proof PieceInclusionProof
+  tree          MerkleTree,
+  firstNode     uint,
+  pieceLength   uint,
+ ) err Error |  proof PieceInclusionProof
 </code></pre>
 
-<p><code>VerifyPieceInclusionProof</code> takes a merkle root and (pre-processed) piece data.
-Iff it returns true, then <code>PieceInclusionProof</code> indeed proves that piece&rsquo;s
-bytes were included in the merkle tree corresponding to root — and at the
-position encoded in the proof.</p>
+<p><code>VerifyPieceInclusionProof</code> takes a sector data commitment (<code>commD</code>), piece commitment (<code>commP</code>), sector size, and piece size.
+Iff it returns true, then <code>PieceInclusionProof</code> indeed proves that all of piece&rsquo;s bytes were included in the merkle tree corresponding
+to <code>commD</code> of a sector of <code>sectorSize</code>. The size inputs are necessary to prevent malicious provers from claiming to store the entire
+piece but actually storing only the piece commitment.</p>
 
 <pre><code>VerifyPieceInclusionProof
  (
-  proof PieceInclusionProof,
-  root  [32]byte,
-  piece []byte
+  proof PieceInclusionProof,  
+  commD  [32]byte,
+  commP [32]byte,
+  sectorSize uint,
+  pieceSize uint,
  ) err Error | IsValid bool // true iff the provided PieceInclusionProof is valid.
 </code></pre>
 
@@ -395,7 +393,7 @@ position encoded in the proof.</p>
 <ul>
 <li><a href="#filecoin-proofs">Filecoin Proofs</a>
 <ul>
-<li><a href="#proof-of-replication">Proof of Replication</a></li>
+<li><a href="#filecoin-proof-of-replication">Filecoin Proof of Replication</a></li>
 <li><a href="#seal">Seal</a>
 <ul>
 <li><a href="#verifyseal">VerifySeal</a></li>

@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -269,7 +268,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">VerifyBlock</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// 1. Verify Signature
 </span><span class="c1"></span>    <span class="nx">pubk</span> <span class="o">:=</span> <span class="nf">GetPublicKey</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Miner</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">pubk</span><span class="p">,</span> <span class="nx">blk</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">BlockSig</span><span class="p">,</span> <span class="nx">pubk</span><span class="p">,</span> <span class="nx">blk</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid block signature&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -278,8 +277,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">GetTime</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;block was generated too far in the future&#34;</span><span class="p">)</span>
     <span class="p">}</span>
-    <span class="c1">// next check that it is appropriately delayed from its parents
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">GetTime</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">minParentTime</span><span class="p">()</span> <span class="o">+</span> <span class="nx">BLOCK_DELAY</span> <span class="p">{</span>
+    <span class="c1">// next check that it is appropriately delayed from its parents including
+</span><span class="c1"></span>    <span class="c1">// null blocks.
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">GetTime</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">minParentTime</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="nx">BLOCK_DELAY</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Tickets</span><span class="p">))</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;block was generated too soon&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -309,17 +309,49 @@ https://github.com/alex-shpak/hugo-book
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;election proof was not a winner&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// 6. Verify StateRoot
-</span><span class="c1"></span>    <span class="nx">state</span> <span class="o">:=</span> <span class="nf">GetParentState</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Parents</span><span class="p">)</span>
-    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">msg</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nx">Messages</span> <span class="p">{</span>
+    <span class="c1">// 6. Verify Message Signatures
+</span><span class="c1"></span>    <span class="nx">messages</span> <span class="o">:=</span> <span class="nf">LoadMessages</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Messages</span><span class="p">)</span>
+    <span class="nx">state</span> <span class="o">:=</span> <span class="nf">GetParentState</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Parents</span><span class="p">)</span>
+
+    <span class="kd">var</span> <span class="nx">blsMessages</span> <span class="p">[]</span><span class="nx">Message</span>
+    <span class="kd">var</span> <span class="nx">blsPubKeys</span> <span class="p">[]</span><span class="nx">PublicKey</span>
+    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">msg</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">messages</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nf">IsBlsMessage</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">blsMessages</span><span class="p">.</span><span class="nb">append</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span>
+            <span class="nx">blsPubKeys</span><span class="p">.</span><span class="nb">append</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nf">LookupPublicKey</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">))</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid message signature in block&#34;</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nf">ValidateBLSSignature</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">BLSAggregate</span><span class="p">,</span> <span class="nx">blsMessages</span><span class="p">,</span> <span class="nx">blsPubKeys</span><span class="p">)</span>
+
+    <span class="c1">// 7. Validate State Transitions
+</span><span class="c1"></span>    <span class="nx">receipts</span> <span class="o">:=</span> <span class="nf">LoadReceipts</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">MessageReceipts</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">msg</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">messages</span> <span class="p">{</span>
         <span class="nx">receipt</span> <span class="o">:=</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">state</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nx">receipt</span> <span class="o">!=</span> <span class="nx">blk</span><span class="p">.</span><span class="nx">MessageReceipts</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">receipt</span> <span class="o">!=</span> <span class="nx">receipts</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">{</span>
             <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;message receipt mismatch&#34;</span><span class="p">)</span>
         <span class="p">}</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="nx">state</span><span class="p">.</span><span class="nf">Cid</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">blk</span><span class="p">.</span><span class="nx">StateRoot</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;state roots mismatch&#34;</span><span class="p">)</span>
     <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">state</span> <span class="nx">StateTree</span><span class="p">)</span> <span class="nf">LookupPublicKey</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">PubKey</span> <span class="p">{</span>
+    <span class="nx">act</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">act</span><span class="p">.</span><span class="nx">Code</span> <span class="o">==</span> <span class="nx">AccountActor</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;only account actors have public keys&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">ast</span> <span class="o">:=</span> <span class="nf">LoadAccountActorState</span><span class="p">(</span><span class="nx">act</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nx">act</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">BLS</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">ExtractBLSPubKey</span><span class="p">(</span><span class="nx">act</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;can only look up public keys for BLS controlled accounts&#34;</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <p>Ticket validation is detailed as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">RandomnessLookback</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="nx">TipSet</span> <span class="p">{</span>
@@ -403,7 +435,7 @@ https://github.com/alex-shpak/hugo-book
 
 <ul>
 <li>the timestamp on the block is not in the future</li>
-<li>the timestamp on the block is at least BLOCK_DELAY higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).</li>
+<li>the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).</li>
 </ul></li>
 <li><code>ParentWeight</code> - As described in <a href="./expected-consensus.md#chain-weighting">Chain Weighting</a>.</li>
 <li><code>ParentState</code> - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
@@ -421,6 +453,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>Select a set of messages from the mempool to include in the block.</li>
 <li>Insert them into a Merkle Tree and take its root.</li>
+<li>Note: Messages with BLS signatures should be included as raw <code>Message</code> types, and not <code>SignedMessage</code>. Their signatures should be gathered up and aggregated for the <code>BLSAggregate</code> field.</li>
 </ul></li>
 <li><code>StateRoot</code> - Apply each chosen message to the <code>ParentState</code> to get this.</li>
 <li><code>ReceiptsRoot</code> - To compute this:
@@ -429,6 +462,7 @@ https://github.com/alex-shpak/hugo-book
 <li>Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.</li>
 <li>Insert them into a Merkle Tree and take its root.</li>
 </ul></li>
+<li><code>BLSAggregate</code> - The aggregated signatures of all messages in the block that used BLS signing.</li>
 <li><code>BlockSig</code> - A signature with the miner&rsquo;s private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.</li>
 </ul>
 

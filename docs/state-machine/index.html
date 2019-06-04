@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -171,6 +170,16 @@ https://github.com/alex-shpak/hugo-book
 <h3 id="state-representation">State Representation</h3>
 
 <p>The <code>global state</code> is modeled as a map of actor <code>ID</code>s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the &lsquo;key&rsquo; being the serialized ID address (every actor has an ID address that can be looked up via the <code>InitActor</code>), and the value is an <a href="data-structures.md#actor"><code>Actor</code></a> object with the actors information. Within each <code>Actor</code> object is a field called <code>state</code> that is an ipld pointer to a graph that can be entirely defined by the actor.</p>
+
+<h3 id="actor-creation">Actor Creation</h3>
+
+<p>There are two mechanisms by which an actor can be created. By explicitly invoking <code>exec</code> on the <code>Init</code> actor, and by sending a message to a <code>Public Key</code> typed <code>Address</code>.</p>
+
+<p>Calling <code>exec</code> to create an actor should generate an Actor address, and register it in the state tree (see <a href="actors.md#init-actor">Init Actor</a> for more details).</p>
+
+<p>Sending a message to a non-existant account via a public key address causes the creation of an account actor for that address. The <code>To</code> address should be placed into the actor storage for later use in validating messages sent from this actor.</p>
+
+<p>This second route for creating an actor is allowed to avoid the necessity of an explicit &lsquo;register account&rsquo; step for creating new accounts.</p>
 
 <h3 id="execution-calling-a-method-on-an-actor">Execution (Calling a method on an Actor)</h3>
 
@@ -285,6 +294,10 @@ as the system has resolvers for them).</p>
 
 <p>To store data, <code>Put</code> is used. Any number of objects may be <code>Put</code>, but only the object whose CID is committed, or objects that are linked to in some way by the committed object will be kept. All other objects are dropped after the method invocation returns. Objects stored via <code>Put</code> are first marshaled to CBOR-IPLD, and then stored, the returned CID is a 32 byte sha2-256 CBOR-IPLD content identifier.</p>
 
+<h3 id="burning-funds">Burning Funds</h3>
+
+<p>In the case that an actor needs to provably burn funds, the funds should be transferred to the &lsquo;Burnt Funds Actor&rsquo; (ID 99).</p>
+
 </article>
 
       
@@ -322,11 +335,13 @@ as the system has resolvers for them).</p>
 <ul>
 <li><a href="#method-invocation">Method Invocation</a></li>
 <li><a href="#state-representation">State Representation</a></li>
+<li><a href="#actor-creation">Actor Creation</a></li>
 <li><a href="#execution-calling-a-method-on-an-actor">Execution (Calling a method on an Actor)</a>
 <ul>
 <li><a href="#receipts">Receipts</a></li>
 <li><a href="#storage">Storage</a></li>
 </ul></li>
+<li><a href="#burning-funds">Burning Funds</a></li>
 </ul></li>
 </ul></li>
 </ul>

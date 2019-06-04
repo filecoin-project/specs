@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -184,19 +183,19 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// TipSets known to be invalid
 </span><span class="c1"></span>    <span class="nx">bad</span> <span class="nx">BadTipSetCache</span>
-    
+
   <span class="c1">// handle to the block sync service
 </span><span class="c1"></span>  <span class="nx">bsync</span> <span class="nx">BlockSync</span>
-    
+
   <span class="c1">//peer set
 </span><span class="c1"></span>  <span class="nx">peerSet</span> <span class="p">[]</span><span class="nx">PeerID</span>
-    
+
   <span class="c1">// peer heads
 </span><span class="c1"></span>  <span class="c1">// Note: clear cache on disconnects
 </span><span class="c1"></span>  <span class="nx">peerHeads</span> <span class="kd">map</span><span class="p">[</span><span class="nx">PeerID</span><span class="p">][]</span><span class="nx">Cid</span>
-  
+
   <span class="nx">trustedPeers</span> <span class="p">[]</span><span class="nx">PeerID</span>
-  <span class="nx">trustedHeads</span> <span class="kd">map</span><span class="p">[</span><span class="nx">PeerId</span><span class="p">][]</span><span class="nx">Cid</span>  
+  <span class="nx">trustedHeads</span> <span class="kd">map</span><span class="p">[</span><span class="nx">PeerId</span><span class="p">][]</span><span class="nx">Cid</span>
 <span class="p">}</span>
 
 <span class="kd">const</span> <span class="nx">BootstrapPeerThreshold</span> <span class="p">=</span> <span class="mi">25</span>
@@ -226,7 +225,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="c1">// not enough peers to sync yet...
 </span><span class="c1"></span>        <span class="k">return</span>
     <span class="p">}</span>
-  
+
       <span class="nx">syncPeers</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">peerSet</span>
       <span class="nx">syncHeads</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">peerHeads</span>
       <span class="k">if</span> <span class="p">(!</span><span class="nx">expanding</span><span class="p">)</span> <span class="p">{</span>
@@ -235,7 +234,7 @@ https://github.com/alex-shpak/hugo-book
       <span class="p">}</span>
       <span class="c1">// Will now get heaviest head from all the heads from our Peerset
 </span><span class="c1"></span>    <span class="nx">selectedHead</span> <span class="o">:=</span> <span class="nf">selectHead</span><span class="p">(</span><span class="nx">syncer</span><span class="p">.</span><span class="nx">peerHeads</span><span class="p">)</span>
-    
+
     <span class="nx">cur</span> <span class="o">:=</span> <span class="nx">selectedHead</span>
     <span class="kd">var</span> <span class="nx">blockSet</span> <span class="nx">BlockSet</span>
     <span class="k">for</span> <span class="nx">head</span><span class="p">.</span><span class="nf">Height</span><span class="p">()</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
@@ -244,23 +243,23 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>        <span class="c1">// not validate any state transitions
 </span><span class="c1"></span>        <span class="nx">blks</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">bsync</span><span class="p">.</span><span class="nf">GetBlocks</span><span class="p">(</span><span class="nx">head</span><span class="p">,</span> <span class="nx">RequestWidth</span><span class="p">)</span>
         <span class="nx">blockSet</span><span class="p">.</span><span class="nf">Insert</span><span class="p">(</span><span class="nx">blks</span><span class="p">)</span>
-            
+
         <span class="nx">head</span> <span class="p">=</span> <span class="nx">blks</span><span class="p">.</span><span class="nf">Last</span><span class="p">().</span><span class="nf">Parents</span><span class="p">()</span>
     <span class="p">}</span>
-        
+
     <span class="c1">// Fetch all the messages for all the blocks in this chain
 </span><span class="c1"></span>    <span class="c1">// There are many ways to make this more efficient. For now, do the dumb thing
 </span><span class="c1"></span>    <span class="nx">blockSet</span><span class="p">.</span><span class="nf">ForEach</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span> <span class="nx">Block</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// FetchMessages should use bitswap to fetch any messages we don&#39;t have locally
 </span><span class="c1"></span>        <span class="nf">FetchMessages</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
     <span class="p">})</span>
-  
+
       <span class="c1">// Ensure that the selectedHead has the right genesis block
 </span><span class="c1"></span>      <span class="c1">// Should be checked for trusted nodes in InitialConnect() and for
 </span><span class="c1"></span>      <span class="c1">// all others in addPeerToSet(), but we leave details up to impl.
 </span><span class="c1"></span>      <span class="nx">selectedGenesis</span> <span class="o">:=</span> <span class="nx">blockSet</span><span class="p">.</span><span class="nf">GetByHeight</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
       <span class="nf">assert</span><span class="p">(</span><span class="nx">selectedGenesis</span> <span class="o">==</span> <span class="nx">genesis</span><span class="p">,</span> <span class="s">&#34;State failure: trying to sync to wrong chain&#34;</span><span class="p">)</span>
-    
+
     <span class="c1">// Now, to validate some state transitions
 </span><span class="c1"></span>    <span class="nx">base</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">genesis</span>
     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">selectedHead</span><span class="p">.</span><span class="nf">Height</span><span class="p">();</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
@@ -271,7 +270,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="k">return</span>
         <span class="p">}</span>
     <span class="p">}</span>
-    
+
     <span class="nx">blockSet</span><span class="p">.</span><span class="nf">PersistTo</span><span class="p">(</span><span class="nx">syncer</span><span class="p">.</span><span class="nx">store</span><span class="p">)</span>
     <span class="nx">syncer</span><span class="p">.</span><span class="nx">head</span> <span class="p">=</span> <span class="nx">bset</span><span class="p">.</span><span class="nf">Head</span><span class="p">()</span>
     <span class="nx">syncer</span><span class="p">.</span><span class="nx">syncMode</span> <span class="p">=</span> <span class="nx">CaughtUp</span>
@@ -282,7 +281,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">sel</span> <span class="o">:=</span> <span class="nx">headsArr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">headsArr</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
         <span class="nx">cur</span> <span class="o">:=</span> <span class="nx">headsArr</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-        
+
         <span class="k">if</span> <span class="nx">cur</span><span class="p">.</span><span class="nf">IsAncestorOf</span><span class="p">(</span><span class="nx">sel</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">continue</span>
         <span class="p">}</span>
@@ -290,7 +289,7 @@ https://github.com/alex-shpak/hugo-book
             <span class="nx">sel</span> <span class="p">=</span> <span class="nx">cur</span>
             <span class="k">continue</span>
         <span class="p">}</span>
-        
+
         <span class="nx">nca</span> <span class="o">:=</span> <span class="nf">NearestCommonAncestor</span><span class="p">(</span><span class="nx">cur</span><span class="p">,</span> <span class="nx">sel</span><span class="p">)</span>
         <span class="k">if</span> <span class="nx">sel</span><span class="p">.</span><span class="nf">Height</span><span class="p">()</span> <span class="o">-</span> <span class="nx">nca</span><span class="p">.</span><span class="nf">Height</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">ForkLengthThreshold</span> <span class="p">{</span>
             <span class="c1">// TODO: handle this better than refusing to sync
@@ -328,7 +327,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">syncer</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">collectChainCaughtUp</span><span class="p">(</span><span class="nx">maybeHead</span> <span class="nx">TipSet</span><span class="p">)</span> <span class="p">(</span><span class="nx">Chain</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// fetch TipSet and messages via bitswap
-</span><span class="c1"></span>    <span class="nx">ts</span> <span class="o">:=</span> <span class="nf">tipsetFromCidOverNet</span><span class="p">(</span><span class="nx">newHead</span><span class="p">)</span> 
+</span><span class="c1"></span>    <span class="nx">ts</span> <span class="o">:=</span> <span class="nf">tipsetFromCidOverNet</span><span class="p">(</span><span class="nx">newHead</span><span class="p">)</span>
 
     <span class="kd">var</span> <span class="nx">chain</span> <span class="nx">Chain</span>
     <span class="k">for</span> <span class="p">{</span>
@@ -340,7 +339,7 @@ https://github.com/alex-shpak/hugo-book
 
         <span class="nx">chain</span><span class="p">.</span><span class="nf">InsertFront</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">{</span> 
+        <span class="k">if</span> <span class="nx">syncer</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="nx">ts</span><span class="p">)</span> <span class="p">{</span>
             <span class="c1">// Store has record of this TipSet.
 </span><span class="c1"></span>            <span class="k">return</span> <span class="nx">chain</span><span class="p">,</span> <span class="kc">nil</span>
         <span class="p">}</span>
@@ -376,7 +375,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">syncer</span> <span class="o">*</span><span class="nx">Syncer</span><span class="p">)</span> <span class="nf">replacePeer</span><span class="p">(</span><span class="nx">peer</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
     <span class="nb">delete</span><span class="p">(</span><span class="nx">syncer</span><span class="p">.</span><span class="nx">PeerSet</span><span class="p">,</span> <span class="nx">peer</span><span class="p">)</span>
     <span class="nb">delete</span><span class="p">(</span><span class="nx">syncer</span><span class="p">.</span><span class="nx">PeerHeads</span><span class="p">,</span> <span class="nx">peer</span><span class="p">)</span>
-            
+
       <span class="nx">newPeer</span> <span class="o">:=</span> <span class="nx">syncer</span><span class="p">.</span><span class="nf">getRandomPeer</span><span class="p">()</span>
       <span class="c1">// addPeerToSet will validate this peer (i.e. check it has right genesis, etc.)
 </span><span class="c1"></span>      <span class="nx">while</span> <span class="p">!</span><span class="nx">syncer</span><span class="p">.</span><span class="nf">addPeerToSet</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
@@ -397,7 +396,7 @@ https://github.com/alex-shpak/hugo-book
       <span class="c1">// verify new peer to check whether to include in peerSet
 </span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">s</span><span class="p">.</span><span class="nx">peerSet</span><span class="p">.</span><span class="nf">contains</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">peerChain</span> <span class="o">:=</span> <span class="nf">sayHello</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span>
-      
+
       <span class="k">if</span> <span class="nx">peerChain</span><span class="p">.</span><span class="nx">GenesisHash</span> <span class="o">==</span> <span class="nx">GENESIS</span> <span class="o">||</span> <span class="nx">trustedPeer</span><span class="p">.</span><span class="nf">isAncestorOf</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">s</span><span class="p">.</span><span class="nx">peerSet</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">peerSet</span><span class="p">,</span> <span class="nx">newPeer</span><span class="p">)</span>
         <span class="nx">s</span><span class="p">.</span><span class="nf">InformNewHead</span><span class="p">(</span><span class="nx">newPeer</span><span class="p">,</span> <span class="nx">trustedChain</span><span class="p">.</span><span class="nx">HeaviestTipSet</span><span class="p">)</span>
@@ -425,7 +424,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>Secure bootstrapping in <code>syncing</code> mode</li>
 <li>How do we handle the lag between the initial head bootstrapped in <code>syncing</code> mode and the network head once the first <code>SyncBootstrap</code> call is complete?  Likely we&rsquo;ll need multiple <code>SyncBootstrap</code> calls.  Should they be parallelized?</li>
-<li>The properties of the chain store implementation have significant impact on the design of the syncing protocol and the syncing protocol&rsquo;s resistance to Denial Of Service (DOS) attacks.  For example if the chain store naively keeps all blocks in storage nodes are more vulnerable to running out of space.  As another example the syncer assumes that the store always contains a punctual ancestor of the heaviest chain. Should the spec grow to include properties of chain storage so that the syncing protocol can guarantee a level of DOS resistance?  Should chain storage be completely up to the implementation?  Should the chain storage spec be a part of the syncing protocol?<br /></li>
+<li>The properties of the chain store implementation have significant impact on the design of the syncing protocol and the syncing protocol&rsquo;s resistance to Denial Of Service (DOS) attacks.  For example if the chain store naively keeps all blocks in storage nodes are more vulnerable to running out of space.  As another example the syncer assumes that the store always contains a punctual ancestor of the heaviest chain. Should the spec grow to include properties of chain storage so that the syncing protocol can guarantee a level of DOS resistance?  Should chain storage be completely up to the implementation?  Should the chain storage spec be a part of the syncing protocol?</li>
 </ul>
 
 </article>

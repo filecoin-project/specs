@@ -71,17 +71,6 @@ Notes  Want to split all repair stuff to separate doc Let&amp;rsquo;s refer to F
     
     <item>
       <title></title>
-      <link>https://filecoin-project.github.io/specs/docs/drgporep-circuit/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://filecoin-project.github.io/specs/docs/drgporep-circuit/</guid>
-      <description>DRGPorep Circuit Design Doc Offline Proof A Prover wants to convince a verifier that they have run the DRGPoRep replication algorithm on some data with Merkle root comm_d and that the Merkle root of the replicated data is comm_r.
-High level description Circuit inputs:
- (Public input) Commitments to the original data and the replica data (Public input) An identifier for the replica (Public input) The binary representation of the position in the Merkle tree of:  the challenged nodes in the original data the challenged nodes in the replica data the parents of the challenged nodes in the replica data  (Aux input) Inclusion proofs for the set of challenged leaves in the original data and the replica data (Aux input) Inclusion proofs for the replica parent leaves of each challenged replica data leaf (Aux input) An identifier for the replica  Outside of circuit checks:</description>
-    </item>
-    
-    <item>
-      <title></title>
       <link>https://filecoin-project.github.io/specs/docs/expected-consensus/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -113,8 +102,8 @@ Fault List Consensus Faults  Duplicate Block Submission Slashing:  Condition: If
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/local-storage/</guid>
-      <description>Filecoin Node Local Storage A Filecoin node stores certain data locally. This section details what exactly gets stored (though exactly how things are stored is not dictated).
-Chain Data Private Keys Sectors Storage Deals ​</description>
+      <description> Filecoin Node Local Storage A Filecoin node stores certain data locally. This section details what exactly gets stored (though exactly how things are stored is not dictated).
+Chain Data Private Keys Sectors Storage Deals </description>
     </item>
     
     <item>

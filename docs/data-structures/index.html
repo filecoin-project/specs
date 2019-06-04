@@ -100,7 +100,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="../../docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -202,6 +201,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// of the root of a sharray of Messages.
 </span><span class="c1"></span>    <span class="nx">Messages</span> <span class="nx">Cid</span>
 
+    <span class="c1">// BLSAggregate is an aggregated BLS signature for all the messages in this block that
+</span><span class="c1"></span>    <span class="c1">// were signed using BLS signatures
+</span><span class="c1"></span>    <span class="nx">BLSAggregate</span> <span class="nx">Signature</span>
+
     <span class="c1">// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 </span><span class="c1"></span>    <span class="c1">// This field is the Cid of the root of a sharray of MessageReceipts.
 </span><span class="c1"></span>    <span class="nx">MessageReceipts</span> <span class="nx">Cid</span>
@@ -209,10 +212,14 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// The block Timestamp is used to enforce a form of block delay by honest miners.
 </span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp stored as an unsigned integer
 </span><span class="c1"></span>    <span class="nx">Timestamp</span> <span class="nx">Timestamp</span>
+
+    <span class="c1">// BlockSig is a signature over the hash of the entire block with the miners
+</span><span class="c1"></span>    <span class="c1">// worker key to ensure that it is not tampered with after creation
+</span><span class="c1"></span>    <span class="nx">BlockSig</span> <span class="nx">Signature</span>
 <span class="p">}</span></code></pre></div>
 <h4 id="sharded-messages-and-receipts">Sharded Messages and Receipts</h4>
 
-<p>The Message and MessageReceipts fields are each Cids of <a href="../sharray">sharray</a> datastructures. The <code>Messages</code> sharray contains the Cids of the messages that are included in the block. The <code>MessageReceipts</code> sharray contains the receipts directly.</p>
+<p>The Message and MessageReceipts fields are each Cids of <a href="../sharray">sharray</a> datastructures. The <code>Messages</code> sharray contains the Cids of the messages that are included in the block. The <code>MessageReceipts</code> sharray contains the receipts directly.</p>
 
 <h2 id="message">Message</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Message</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -249,14 +256,12 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="message-receipt">Message Receipt</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ExitCode</span> <span class="kt">uint8</span>
-
     <span class="nx">Return</span> <span class="p">[]</span><span class="kt">byte</span>
-
     <span class="nx">GasUsed</span> <span class="nx">Integer</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="serialization">Serialization</h3>
 
-<p>Message receipts are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.</p>
+<p>Message receipts are serialized by using the FCS.</p>
 
 <h2 id="actor">Actor</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Actor</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -283,6 +288,8 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="signature">Signature</h2>
 
 <p>All signatures in Filecoin come with a type that signifies which key type was used to create the signature.</p>
+
+<p>For more details on signature creation, see <a href="../signatures">the signatures spec</a>.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Type</span> <span class="kt">int</span>
     <span class="nx">Data</span> <span class="p">[]</span><span class="kt">byte</span>
@@ -300,21 +307,28 @@ https://github.com/alex-shpak/hugo-book
 <tbody>
 <tr>
 <td>Secp256k1</td>
-<td>1</td>
+<td><code>1</code></td>
 </tr>
 
 <tr>
 <td>BLS12-381 ECDSA</td>
-<td>2</td>
+<td><code>2</code></td>
 </tr>
 </tbody>
 </table>
 
 <h3 id="serialization-1">Serialization</h3>
 
-<p><code>&lt;uvarint(Type)&gt;&lt;Data&gt;</code></p>
+<p>In their serialized form the raw bytes (only the <code>Data</code> field) are serialized and then tagged according to the FCS tags, to indicated which signature type they are.</p>
 
-<p>Note: As signatures should always be within wrapper types, length prefixing is not needed here.</p>
+<h2 id="faultset">FaultSet</h2>
+
+<p>FaultSets are used to denote which sectors failed at which block height.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">FaultSet</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Index</span>    <span class="kt">uint64</span>
+    <span class="nx">BitField</span> <span class="nx">BitField</span>
+<span class="p">}</span></code></pre></div>
+<p>The <code>Index</code> field is a block height offset from the start of the miners proving period (in order to make it more compact).</p>
 
 <h1 id="basic-type-encodings">Basic Type Encodings</h1>
 
@@ -340,13 +354,13 @@ https://github.com/alex-shpak/hugo-book
 
 <h4 id="bitfield"><code>BitField</code></h4>
 
-<p>Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.</p>
+<p>Bitfields are a set of bits encoded using a custom run length encoding: rle+.  rle+ is specified below.</p>
 
 <h4 id="sectorset"><code>SectorSet</code></h4>
 
 <p>TODO</p>
 
-<h4 id="faultset"><code>FaultSet</code></h4>
+<h4 id="faultset-1"><code>FaultSet</code></h4>
 
 <p>A fault set is a BitField and a block height, encoding TBD.</p>
 
@@ -356,11 +370,11 @@ https://github.com/alex-shpak/hugo-book
 
 <h4 id="sealproof"><code>SealProof</code></h4>
 
-<p>SealProof is a 384-element array of bytes.</p>
+<p>SealProof is an opaque, dynamically-sized array of bytes.</p>
 
 <h4 id="postproof"><code>PoStProof</code></h4>
 
-<p>PoStProof is a 192-element array of bytes.</p>
+<p>PoStProof is an opaque, dynamically-sized array of bytes.</p>
 
 <h4 id="tokenamount"><code>TokenAmount</code></h4>
 
@@ -437,24 +451,39 @@ https://github.com/alex-shpak/hugo-book
 <thead>
 <tr>
 <th>FCS Type</th>
-<th>tag</th>
+<th>CBOR tag</th>
 </tr>
 </thead>
 
 <tbody>
 <tr>
-<td>block v1</td>
-<td>43</td>
+<td>Block v1</td>
+<td><code>43</code></td>
 </tr>
 
 <tr>
-<td>message v1</td>
-<td>44</td>
+<td>Message v1</td>
+<td><code>44</code></td>
 </tr>
 
 <tr>
-<td>signedMessage v1</td>
-<td>45</td>
+<td>SignedMessage v1</td>
+<td><code>45</code></td>
+</tr>
+
+<tr>
+<td>MessageReceipt v1</td>
+<td><code>46</code></td>
+</tr>
+
+<tr>
+<td>Signature Secp256k1 v1</td>
+<td><code>47</code></td>
+</tr>
+
+<tr>
+<td>Signature BLS12-381 v1</td>
+<td><code>48</code></td>
 </tr>
 </tbody>
 </table>
@@ -537,7 +566,12 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="message-1">Message</h3>
 
-<p>Encoded: <code>d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d46558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f644d706172616d73617265676f6f64</code></p>
+<p>Encoded:</p>
+
+<pre><code>d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d4
+6558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f64
+4d706172616d73617265676f6f64
+</code></pre>
 
 <p>Decoded:</p>
 
@@ -551,7 +585,15 @@ Params: []byte(&quot;paramsaregood&quot;)
 
 <h3 id="block-1">Block</h3>
 
-<p>Encoded: <code>d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f6788080</code></p>
+<p>Encoded:</p>
+
+<pre><code>d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617
+469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a
+5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a1733
+26507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25
+e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678808
+0
+</code></pre>
 
 <p>Decoded:</p>
 
@@ -583,7 +625,8 @@ while keeping the same level of compression for large sets of contiugous bits.</
 <pre><code>    &lt;encoding&gt; ::= &lt;header&gt; &lt;blocks&gt;
       &lt;header&gt; ::= &lt;version&gt; &lt;bit&gt;
      &lt;version&gt; ::= &quot;00&quot;
-      &lt;blocks&gt; ::= &lt;block_single&gt; | &lt;block_short&gt; | &lt;block_long&gt;
+      &lt;blocks&gt; ::= &lt;block&gt; &lt;blocks&gt; | &quot;&quot;
+       &lt;block&gt; ::= &lt;block_single&gt; | &lt;block_short&gt; | &lt;block_long&gt;
 &lt;block_single&gt; ::= &quot;1&quot;
  &lt;block_short&gt; ::= &quot;01&quot; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt;
   &lt;block_long&gt; ::= &quot;00&quot; &lt;unsigned_varint&gt;
@@ -681,6 +724,7 @@ the same encoding, given the same input.</p>
 <li><a href="#type-values"><code>Type</code> Values</a></li>
 <li><a href="#serialization-1">Serialization</a></li>
 </ul></li>
+<li><a href="#faultset">FaultSet</a></li>
 </ul></li>
 <li><a href="#basic-type-encodings">Basic Type Encodings</a>
 <ul>
@@ -694,7 +738,7 @@ the same encoding, given the same input.</p>
 <li><a href="#integer"><code>Integer</code></a></li>
 <li><a href="#bitfield"><code>BitField</code></a></li>
 <li><a href="#sectorset"><code>SectorSet</code></a></li>
-<li><a href="#faultset"><code>FaultSet</code></a></li>
+<li><a href="#faultset-1"><code>FaultSet</code></a></li>
 <li><a href="#blockheader"><code>BlockHeader</code></a></li>
 <li><a href="#sealproof"><code>SealProof</code></a></li>
 <li><a href="#postproof"><code>PoStProof</code></a></li>

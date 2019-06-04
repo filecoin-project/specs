@@ -104,7 +104,6 @@ https://github.com/alex-shpak/hugo-book
 <p><strong>Proofs</strong></p>
 
 <ul>
-<li><a href="./docs/drgporep-circuit/">DrgPoRep</a></li>
 <li><a href="./docs/zigzag-circuit/">ZigZag</a></li>
 </ul>
 
@@ -158,6 +157,10 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="notices warning" ><strong>Warning:</strong> This is the official Filecoin protocol specification. It is a work in progress. While reading, if you notice any discrepancies, or issues, please open an issue on the <a href="https://github.com/filecoin-project/specs">specs repo</a>.</div>
 
+<!-- the below comment is replaced with the pdf link on site builds -->
+
+<p>You can also download the full spec in <a href="./">PDF format</a>.</p>
+
 <p>This collection of pages specify the protocols comprising the Filecoin network. The goal of these specs is to provide sufficient detail that another implementation, written using only this document as reference, can be fully compatible with <code>go-filecoin</code> peers, but this is still a work in progress.</p>
 
 <h2 id="overview">Overview</h2>
@@ -185,7 +188,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="message-transport">Message Transport</h3>
 
-<p>Filecoin uses <a href="https://libp2p.io">libp2p</a> for all network communications. libp2p provides transport-agnostic services for peer discovery, naming, routing, pubsub channels and a distributed record store, and there are full or partial <a href="https://libp2p.io/implementations/">implementations</a> in a number of languages. This spec assumes the use of libp2p and its services and does not specify transport-level details. For more details on the exact wire protocol of libp2p, refer to the <a href="https://github.com/libp2p/specs">libp2p specs</a>.</p>
+<p>Filecoin uses <a href="https://libp2p.io">libp2p</a> for all network communications. libp2p provides transport-agnostic services for peer discovery, naming, routing, pubsub channels and a distributed record store, and there are full or partial <a href="https://libp2p.io/implementations/">implementations</a> in a number of languages. This spec assumes the use of libp2p and its services and does not specify transport-level details. That said, to be at least minimally compatible with other Filecoin nodes, it must support at least the <a href="https://github.com/libp2p/specs/tree/master/mplex">mplex</a> stream multiplexer, and the <a href="TODO, spec in PR">secio</a> encrypted transport protocols. For more details on the exact wire protocol of libp2p, refer to the <a href="https://github.com/libp2p/specs">libp2p specs</a>.</p>
 
 <p>Filecoin uses <a href="https://ipld.io">IPLD</a> for the representation and serialization of the majority of the data in the system. IPLD provides a canonical model for content-addressed data structures, providing a representation of basic data objects and links between them.</p>
 </article>
