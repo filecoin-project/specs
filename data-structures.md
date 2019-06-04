@@ -62,8 +62,8 @@ type Block struct {
 	// The block Timestamp is used to enforce a form of block delay by honest miners.
 	// Unix time UTC timestamp stored as an unsigned integer
 	Timestamp Timestamp
-  
-  	// BlockSig is a signature over the hash of the entire block with the miners
+
+	// BlockSig is a signature over the hash of the entire block with the miners
 	// worker key to ensure that it is not tampered with after creation
 	BlockSig Signature
 }
@@ -118,18 +118,14 @@ The signature is a serialized signature over the serialized base message. For mo
 ```go
 type MessageReceipt struct {
 	ExitCode uint8
-
 	Return []byte
-
 	GasUsed Integer
 }
 ```
 
 ### Serialization
 
-Message receipts are currently serialized simply by CBOR marshaling them, using lower-camel-cased field names.
-
-
+Message receipts are serialized by using the FCS.
 
 ## Actor
 
@@ -164,6 +160,8 @@ The state trie keeps track of all state in Filecoin. It is a map of addresses to
 
 All signatures in Filecoin come with a type that signifies which key type was used to create the signature.
 
+For more details on signature creation, see [the signatures spec](signatures.md).
+
 ```go
 type Signature struct {
 	Type int
@@ -173,18 +171,27 @@ type Signature struct {
 
 ### `Type` Values
 
-| Key Type | Value |
-|-------|----------|
-|  Secp256k1 | 1 |
-| BLS12-381 ECDSA | 2 |
+| Key Type        | Value |
+|-----------------|-------|
+| Secp256k1       | `1`     |
+| BLS12-381 ECDSA | `2`     |
 
 ### Serialization
 
-`<uvarint(Type)><Data>`
+In their serialized form the raw bytes (only the `Data` field) are serialized and then tagged according to the FCS tags, to indicated which signature type they are.
 
-Note: As signatures should always be within wrapper types, length prefixing is not needed here.
+## FaultSet
 
+FaultSets are used to denote which sectors failed at which block height.
 
+```go
+type FaultSet struct {
+	Index    uint64
+	BitField BitField
+}
+```
+
+The `Index` field is a block height offset from the start of the miners proving period (in order to make it more compact).
 
 # Basic Type Encodings
 
@@ -195,9 +202,11 @@ Types that appear in messages or in state must be encoded as described here.
 The public key type is simply an array of bytes. (TODO: discuss specific encoding of key types, for now just calling it bytes is sufficient)
 
 #### `BytesAmount`
+
 BytesAmount is just a re-typed Integer.
 
 #### `PeerID`
+
 PeerID is just the serialized bytes of a libp2p peer ID.
 
 Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/100
@@ -208,7 +217,7 @@ Integers are encoded as LEB128 signed integers.
 
 #### `BitField`
 
-Bitfields are a set of bits. Encoding still TBD, but it needs to be very compact. We can assume that most often, ranges of bits will be set, or not set, and use that to our advantage here. Some form of run length encoding may work well.
+Bitfields are a set of bits encoded using a custom run length encoding: rle+.  rle+ is specified below.
 
 #### `SectorSet`
 
@@ -224,11 +233,11 @@ BlockHeader is a serialized `Block`.
 
 #### `SealProof`
 
-SealProof is a 384-element array of bytes.
+SealProof is an opaque, dynamically-sized array of bytes.
 
 #### `PoStProof`
 
-PoStProof is a 192-element array of bytes.
+PoStProof is an opaque, dynamically-sized array of bytes.
 
 #### `TokenAmount`
 
@@ -321,11 +330,15 @@ if ((shift <size) && (sign bit of byte is set))
 
 Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
 
-| FCS Type | tag  |
-|---|---|
-| block v1 | 43  |
-| message v1 | 44 |
-| signedMessage v1 | 45 |
+| FCS Type               | CBOR tag  |
+|------------------------|-----------|
+| Block v1               | `43`      |
+| Message v1             | `44`      |
+| SignedMessage v1       | `45`      |
+| MessageReceipt v1      | `46`      |
+| Signature Secp256k1 v1 | `47`      |
+| Signature BLS12-381 v1 | `48`      |
+
 
 For example, a message would be encoded as:
 
@@ -370,9 +383,16 @@ Below are some sample vectors for each data type.
 
 ### Message
 
-Encoded: `d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d46558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f644d706172616d73617265676f6f64`
+Encoded:
+
+```
+d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d4
+6558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f64
+4d706172616d73617265676f6f64
+```
 
 Decoded:
+
 ```
 To:     Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
 From:   Address("f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy")
@@ -384,9 +404,19 @@ Params: []byte("paramsaregood")
 
 ### Block
 
-Encoded: `d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f6788080`
+Encoded:
+
+```
+d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617
+469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a
+5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a1733
+26507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25
+e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678808
+0
+```
 
 Decoded:
+
 ```
 Miner:           Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
 Tickets:         [][]byte{"iamaticket"}
@@ -417,7 +447,8 @@ The format can be expressed as the following [BNF](https://en.wikipedia.org/wiki
     <encoding> ::= <header> <blocks>
       <header> ::= <version> <bit>
      <version> ::= "00"
-      <blocks> ::= <block_single> | <block_short> | <block_long>
+      <blocks> ::= <block> <blocks> | ""
+       <block> ::= <block_single> | <block_short> | <block_long>
 <block_single> ::= "1"
  <block_short> ::= "01" <bit> <bit> <bit> <bit>
   <block_long> ::= "00" <unsigned_varint>
