@@ -61,10 +61,10 @@ When `Setp == post_periods_count - 1` this should get called to produce the fina
 - `t = 0..POST_PERIODS_COUNT`:
   - `challenge_seed = ChallengeSeeds[t]`
   - `(challenges, challenged_sectors) = challenge_stream(challenge_seed, post_proofs)`
-  - Assert: `PoSt.Verify(CommRs, challenges, post_proofs[t])**
+  - Assert: `PoSt.Verify(CommRs, challenges, post_proofs[t])`
 
 
-**TODO:** Define `NewChallengeStream` and `challenge_stream**
+**TODO:** Define `NewChallengeStream` and `challenge_stream`
 
 ### Integration with the rest of the system
 
