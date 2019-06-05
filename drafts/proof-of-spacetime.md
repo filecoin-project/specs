@@ -44,15 +44,16 @@ This document descibes
 - `porep_proof = OnlinePoRep.prove(challenges, challenged_sectors, commR, replica)`
 - Store `post_proofs[Step] = post_proof`
 
-#### `ProveFinish(Step, Beacon_t, Public Parameters, Public Inputs, Private Inputs) -> (Proof, Faults)**
-**TODO*: generate the faults
+#### `ProveFinish(Step, Beacon_t, Public Parameters, Public Inputs, Private Inputs) -> (Proof, Faults)`
+
+**TODO**: generate the faults
 
 When `Setp == post_periods_count - 1` this should get called to produce the final proof.
 
 - `ProveStep(Step, Beacon_t, PublicParameters, PublicInputs, PrivateInputs)`
 - Output `(post_proofs, faults)`
 
-#### `Verify(PublicParameters, PublicInputs, Proof, Faults, ChallengeSeeds) -> bool**
+#### `Verify(PublicParameters, PublicInputs, Proof, Faults, ChallengeSeeds) -> bool`
 
 **TODO:** Handle the passed in `Faults`
 
