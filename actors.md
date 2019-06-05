@@ -513,13 +513,13 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	}
 }
 
-func collateralForPower(power BytesAmount) TokenAmount {
+func CollateralForPower(power BytesAmount) TokenAmount {
   availableFil = FakeGlobalMethods.GetAvailableFil()
   totalNetworkPower = StorageMinerActor.GetTotalStorage()
-  numMiners = FakeGlobalMethods.GetTotalNumMiners()
+  numMiners = StorageMarket.GetMinerCount()
   powerCollateral = availableFil * NetworkConstants.POWER_COLLATERAL_PROPORTION * power / totalNetworkPower
   perCapitaCollateral = availableFil * NetworkConstants.PER_CAPITA_COLLATERAL_PROPORTION / numMiners
-  collateralRequired = minerPowerCollateral + minerPerCapitaCollateral
+  collateralRequired = math.Ceil(minerPowerCollateral + minerPerCapitaCollateral)
   return collateralRequired
 }
 ```

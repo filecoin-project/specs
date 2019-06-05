@@ -11,10 +11,10 @@ Pledge collateral serves several functions in Filecoin. It:
 ## Computing Pledge Collateral
 
 The total pledge collateral across all miners is a fixed proportion of available FIL.
-Available FIL is computed as the total amount of FIL that has been mined, plus the total amount of FIL that's been vested.
+Available FIL is computed as the total amount of FIL that has been mined, plus the total amount of FIL that's been vested, minued the amount of FIL which has been burned.
 
 ```go
-availableFil := minedFil + vestedFil
+availableFil := minedFil + vestedFil - burnedFil
 ```
 
 Pledge collateral is subdivided into two kinds: power collateral and per-capita collateral.
