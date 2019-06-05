@@ -486,7 +486,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 
   // Power of the miner after adding this sector
   futurePower = miner.power + miner.SectorSize
-  collateralRequired = collateralForPower(futurePower)
+  collateralRequired = CollateralForPower(futurePower)
 
   if collateralRequired > vm.MyBalance() {
 		Fatal("not enough collateral")
@@ -776,7 +776,9 @@ func DePledge(amt TokenAmount) {
 		return
 	}
 
-	if amt > vm.MyBalance()-miner.ActiveCollateral {
+  collateralRequired = CollateralForPower(miner.power)
+
+	if amt + collateralRequired > vm.MyBalance() {
 		Fatal("Not enough free collateral to withdraw that much")
 	}
 
