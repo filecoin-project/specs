@@ -149,7 +149,7 @@ func VerifyBlock(blk Block) {
 	// 6. Verify ElectionProof
 	randomnessLookbackTipset := RandomnessLookback(blk)
 	lookbackTicket := minTicket(randomnessLookbackTipset)
-	challenge := sha256.Sum(lookbackTicket)
+	challenge := blake2b(lookbackTicket)
 
 	if !ValidateSignature(blk.ElectionProof, pubk, challenge) {
 		Fatal("election proof was not a valid signature of the last ticket")
