@@ -39,8 +39,7 @@ This document descibes
 `ProveStep` is a function that gets called on every time step in which new randomness is available.
 
 - `challenge_seed = Beacon_t`
-- `challenge_stream = NewChallengeStream(PublicParameters)`
-- `(challenges, challenged_sectors) = challenge_stream(challenge_seed, post_proofs)`
+- `(challenges, challenged_sectors) = derive_challenges(challenge_count, challenge_seed)`
 - `porep_proof = OnlinePoRep.prove(challenges, challenged_sectors, commR, replica)`
 - Store `post_proofs[Step] = post_proof`
 
@@ -55,16 +54,63 @@ When `Setp == post_periods_count - 1` this should get called to produce the fina
 
 #### `Verify(PublicParameters, PublicInputs, Proof, Faults, ChallengeSeeds) -> bool`
 
-**TODO:** Handle the passed in `Faults`
+**TODO:** Handle the passed in `Faults**
+**TODO:** Verify integration with challenges and verification
 
-- `challenge_stream = NewChallengeStream(PublicParameters)`
 - `t = 0..POST_PERIODS_COUNT`:
   - `challenge_seed = ChallengeSeeds[t]`
-  - `(challenges, challenged_sectors) = challenge_stream(challenge_seed, post_proofs)`
+  - `(challenges, challenged_sectors) = derive_challenges(challenge_count, challenge_seed)`
+  - Assert: `verify_final_challenge_derivation(challenges, partial_challenge, challenge_seed, challenge_bits)`
   - Assert: `PoSt.Verify(CommRs, challenges, post_proofs[t])`
 
 
-**TODO:** Define `NewChallengeStream` and `challenge_stream`
+### Challenge Stream
+
+In order to reduce verification costs inside the circuit, challenge generation is split into two parts, partial challenge generation, and final challenge generation.
+
+#### `derive_challenges(challenge_count, seed)`
+
+- `partial_challenge = derive_partial_challenge(seed)`
+- `while all_challenges.len() < count`
+  - `(challenges, challenged_sectors)`
+  - `all_challenges.extend(challenges)`
+  - `all_challenged_sectors.push(challenged_sectors)`
+- Output (`all_challenges[0..challenge_count]`, `all_challenged_sectors[0..challenge_count]`)
+
+#### `derive_partial_challenge(seed)`
+
+- `partial_challenge = H(seed | 0)`
+
+#### `derive_final_challenges(partial_challenge, seed, sectors_count, challenge_bits)`
+
+- `mixed = partial_challenge - seed`
+- `mixed_bytes = fr_to_bytes(bits_to_fr(mixed))`
+- `for chunk in mixed_bytes.chunks(challenge_bits)`
+  - `challenge = 0`
+  - `place = 1`
+  - `for bit in chunk`
+    - `if bit`
+      - `challenge += place`
+    - `place = place << 1`
+  - `challenged_sector = ???` **FIXME**
+  - `challenges.push(challenge)`
+  - `challenged_sectors.push(challenged_sectors)`
+- Output `(challenges, challenged_sectors)`
+
+#### `verify_final_challenge_derivation(challenges, partial_challenge, seed, challenge_bits) -> bool`
+
+- `shift_factor = bytes_to_fr(1 << challenge_bits)`
+- `packed = Fr(0)`
+- `for challenge in challenges`
+  - `fr_challenge = bytes_to_fr(challenge)`
+  - `packed = packed * shift_factor`
+  - `packed = packed + fr_challenge`
+- `fr_seed = bytes_to_fr(seed)`
+- `fr_partial = bytes_to_fr(partial_challenge)`
+- `fr_mixed = fr_mixed + packed`
+
+- Output `fr_partial == fr_mixed`
+
 
 ### Integration with the rest of the system
 
