@@ -83,132 +83,27 @@ func (syncer *Syncer) InformNewHead(from PeerID, head TipSet) {
 // SyncBootstrap is used to synchronise your chain when first joining
 // the network, or when rejoining after significant downtime.
 func (syncer *Syncer) SyncBootstrap(bool expanding) {
-    // not enough peers to sync yet...
-    if expanding && len(syncer.peerHeads) < BootstrapPeerThreshold {
-        return
-    }
   
-  	// if not expanding, start with trusted peers
-  	syncPeers := syncer.peerSet
-  	syncHeads := syncer.peerHeads
-  	if (!expanding) {
-    		syncPeers = syncer.trustedPeers
-      	syncHeads = syncer.trustedHeads
-  	}
-  	// Will now get heaviest head from all the heads from our Peerset
-    selectedHead := selectHead(syncer.peerHeads)
-
-    cur := selectedHead
-    var blockSet BlockSet
-    for head.Height() > 0 {
-        // NB: GetBlocks validates that the blocks are in-fact the ones we
-        // requested, and that they are correctly linked to each other. It does
-        // not validate any state transitions
-        blks := syncer.bsync.GetBlocks(head, RequestWidth)
-        blockSet.Insert(blks)
-
-        head = blks.Last().Parents()
-    }
-
-    // Fetch all the messages for all the blocks in this chain
-    // There are many ways to make this more efficient. For now, do the dumb thing
-    blockSet.ForEach(func(b Block) {
-        // FetchMessages should use bitswap to fetch any messages we don't have locally
-        FetchMessages(b)
-    })
-
-  	// Ensure that the selectedHead has the right genesis block
-  	// Should be checked for trusted nodes in InitialConnect() and for
-  	// all others in addPeerToSet(), but we leave details up to impl.
-  	selectedGenesis := blockSet.GetByHeight(0)
-	  assert(selectedGenesis == genesis, "State failure: trying to sync to wrong chain")
-
-    // Now, to validate some state transitions
-    base := syncer.genesis
-    for i := 1; i < selectedHead.Height(); i++ {
-        next := blockSet.GetByHeight(i)
-        if !ValidateTransition(base, next) {
-            // TODO: do something productive here...
-            Error("invalid state transition")
-            return
-        }
-    }
-
-    blockSet.PersistTo(syncer.store)
-    syncer.head = bset.Head()
-    syncer.syncMode = CaughtUp
-}
-
-func selectHead(heads map[PeerID]TipSet) TipSet {
-    headsArr := toArray(heads)
-    sel := headsArr[0]
-    for i := 1; i < len(headsArr); i++ {
-        cur := headsArr[i]
-
-        if cur.IsAncestorOf(sel) {
-            continue
-        }
-        if sel.IsAncestorOf(cur) {
-            sel = cur
-            continue
-        }
-
-        nca := NearestCommonAncestor(cur, sel)
-        if sel.Height() - nca.Height() > ForkLengthThreshold {
-        	// TODO: handle this better than refusing to sync
-        	Fatal("Conflict exists in heads set")
-        }
-
-        if cur.Weight() > sel.Weight() {
-            sel = cur
-        }
-    }
-    return sel
-}
+  0. if in expansion mode, ensure we have enough peers to start syncing up
+  1. if not, use trustedPeers/Heads to sync up to
+  2. round robin through the peers to expand peerset until large enought, then
+  3. get heaviest head from the peers
+  4. ensure it has correct genesis block
+  5. if first connection: validate the blocks from genesis to head
+  	 else validate blocks from own head to head
+  6. validate state transitions across blocks
+	7. switch own head to new head
+  8. move to caught up mode
 
 // SyncCaughtUp is used to stay in sync once caught up to
 // the rest of the network.
 func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
-	chain, err := syncer.collectChainCaughtUp(maybeHead)
-	if err != nil {
-		return err
-	}
 
-	// possibleTs enumerates possible tipsets that are the union
-	// of tipsets from the chain and the store
-	for _, ts := range possibleTs(chain[1:]) {
-		if err := consensus.Validate(ts, store); err != nil {
-			return err
-		}
-		syncer.store.PutTipSet(ts)
-		if consenus.Weight(ts) > consensus.Weight(head) {
-			syncer.head = ts
-		}
-	}
-	return nil
-}
-
-func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
-	// fetch TipSet and messages via bitswap
-	ts := tipsetFromCidOverNet(newHead)
-
-	var chain Chain
-	for {
-		if !consensus.Punctual(ts) {
-			syncer.bad.InvalidateChain(chain)
-			syncer.bad.InvalidateTipSet(ts)
-			return nil, errors.New("TipSet forks too far back from head")
-		}
-
-		chain.InsertFront(ts)
-
-		if syncer.store.Contains(ts) {
-			// Store has record of this TipSet.
-			return chain, nil
-		}
-		parent := ts.ParentCid()
-		ts = tipsetFromCidOverNet(parent)
-		}
+  0. on every incoming new block,
+  1. validate block
+  2. compare block weight to own head weight
+  3. if heavier, switch head
+  	 else discard
 }
 ```
 
@@ -243,37 +138,18 @@ Syncing depends on the validity of a node's peer set. In order to ensure that th
 ```go
 // triggered when a peer disconnects
 func (syncer *Syncer) replacePeer(peer PeerID) {
-    delete(syncer.PeerSet, peer)
-    delete(syncer.PeerHeads, peer)
-
-  	newPeer := syncer.getRandomPeer()
-  	// addPeerToSet will validate this peer (i.e. check it has right genesis, etc.)
-  	while !syncer.addPeerToSet(newPeer) {
-      newPeer = syncer.getRandomPeer(self.ownID)
-  	}
+ 	1. when peer disconnects
+  2. remove from peerSet
+  3. fetch new random peer to add to peerSet instead
 }
 
 func (syncer *Syncer) getRandomPeer(from PeerID) newPeer PeerID {
-  	wantedPeer := generateRandomNodeID()
-    // libp2p's GetClosestPeers gets back k nearest peers, ordered
-    peers := dht.GetClosestPeers(from, wantedPeer)
-	  // We only use the nearest to get a good random peer
-    newPeer := peers[0]
-		return newPeer
-}
-
-func (syncer *Syncer) addPeerToSet(newPeer PeerID) bool {
-  	// verify new peer to check whether to include in peerSet
-    if !s.peerSet.contains(newPeer) {
-      peerChain := sayHello(newPeer)
-
-      if peerChain.GenesisHash == GENESIS || trustedPeer.isAncestorOf(newPeer) {
-        s.peerSet = append(s.peerSet, newPeer)
-        s.InformNewHead(newPeer, trustedChain.HeaviestTipSet)
-        return true
-      }
-    }
-  return false
+  1. fetch a node from DHT querying a random node ID
+	2. pick the closest peer that returns
+  3. if not in peer set,
+  	a. handshake and ensure it uses same genesis block
+  	b. add to peer set
+  4. else, repeat
 }
 ```
 
@@ -287,14 +163,6 @@ Things that affect the chain syncing protocol.
 
 **Chain storage**
 
-<<<<<<< HEAD
 - The current chain syncing protocol requires that the chain store never stores an invalid TipSet. If it does, then chain sync may sync to an invalid chain.
-=======
+
 - The current chain syncing protocol requires that the chain store never stores an invalid TipSet.
-
-# Open Questions
-
-- Secure bootstrapping in `syncing` mode
-- How do we handle the lag between the initial head bootstrapped in `syncing` mode and the network head once the first `SyncBootstrap` call is complete?  Likely we'll need multiple `SyncBootstrap` calls.  Should they be parallelized?
-- The properties of the chain store implementation have significant impact on the design of the syncing protocol and the syncing protocol's resistance to Denial Of Service (DOS) attacks.  For example if the chain store naively keeps all blocks in storage nodes are more vulnerable to running out of space.  As another example the syncer assumes that the store always contains a punctual ancestor of the heaviest chain. Should the spec grow to include properties of chain storage so that the syncing protocol can guarantee a level of DOS resistance?  Should chain storage be completely up to the implementation?  Should the chain storage spec be a part of the syncing protocol?
->>>>>>> 168d0226bae61e0942a65b84f42cd99711c0fe29

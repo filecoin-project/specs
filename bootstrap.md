@@ -92,27 +92,9 @@ We will successively query random IDs round-robinning our trusted nodes as start
 func (s *Syncer) ExpandPeerSet() {
   dht := getDHT()
   
-  // get a random node from each trusted peer until we have 25
-  trustedPeerNum := 0
-  // we'll look for duplicates found sampling the network as a heuristic for interrupting the search if the network is too small
-  dupCounter := 0
-  for len(s.peerSet) < BootstrapPeerThreshold && dupCounter < DupThreshold {
-    trustedPeer := s.trustedPeers[trustedPeerNum]
-   	newPeer := syncer.getRandomPeer(trustedPeer)
-    // adding a peer to the peer set will trigger syncing if our peer set has grown over the threshold
-    if !syncer.addPeerToSet(newPeer) {
-      dupCounter += 1
-    }
-    
-    // round robin
-    trustedPeerNum += 1
-    trustedPeerNum %= len(s.trustedPeers)
-  }
-  
-  // if we've reached the threshold, abandon expansion and sync with trusted heads instead
-  if dupCounter >= DupThreshold {
-    s.SyncBootstrap(false)
-  }
+  0. round robin through trusted peers to get random nodes from the network
+  1. use duplicate nodes as a proxy for network size: if hitting too many duplicates, abandon process
+  2. when hitting peerThrshold, start sync
 }
 ```
 
