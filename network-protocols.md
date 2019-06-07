@@ -16,7 +16,6 @@ This format consists of series of [CBOR](https://tools.ietf.org/html/rfc7049) se
 
 Note: Implementations should limit the maximum number of bytes read during the `ReadCborRPC` call. We suggest 1MB as a sane limit.
 
-# Hello Handshake
 
 > The Hello protocol is used when two filecoin nodes initially connect to each other in order to determine information about the other node.
 
