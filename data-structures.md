@@ -221,7 +221,107 @@ Bitfields are a set of bits encoded using a custom run length encoding: rle+.  r
 
 #### `SectorSet`
 
-TODO
+The `SectorSet` is an integer set implemented with a simple array mapped tree.
+Integer indexes range from 0 to infinity (TODO practical bounds / bounds implied by encoding?).
+The two basic structures in the `SectorSet` are the `Node` and
+the `Pointer`. There is also a `RootNode`.   The `Node` is as follows:
+```go
+type Node struct {
+     Pointers [S]*Pointer
+}
+```
+where `S` is the fixed node width.  `S` is a constant set to `256`.  The `Node`
+is serialized as a cbor array (major type 4) of Pointers.
+
+
+[ipld dag-cbor Cids](https://github.com/ipld/specs/blob/master/Codecs/DAG-CBOR.md#link-format).
+
+The `Pointer` is as follows:
+```go
+type Pointer struct {
+     Value SectorMeta
+     Link Cid
+     
+}
+```
+The `Pointer` is serialized as a cbor object (major type 5). The  `Value`
+is serialized { in some way } with `v` as its object key.  The `SectorMeta`
+type carries all needed sector metadata (TODO, define a type for commD commR
+pair and serialization).  A `Pointer` is conceptually a union type, it can 
+carry a `Link` or a `Value` but never both in a well formed `SectorSet`
+
+The `RootNode` is as follows:
+```go
+type RootNode struct {
+     MaxDepth    uint
+     NodePointer Cid
+}
+```
+The `RootNode` is serialized as a cbor object (major type 5) where `NodePointer`
+is serialized as a Cid and MaxDepth is a cbor unsigned int (major type 0). The
+`NodePointer` field uses `p` as its object key, and the `MaxDepth` field uses
+`d`.
+
+##### Lookup
+
+Lookup takes in an integer sectorID and returns a LeafNode value if this index
+is stored in the SectorSet.  Each node has a `height`, a node's child has a
+`height` one less than its own height and the first node has a `height` of the
+root node's max depth.  Leaf nodes have a height of 1.
+
+At each node the next child is chosen by examining the index and determining
+which ordered subtree the index fits into.  This can be calculated by taking
+the quotient `index / (S)^(h - 1)`.  The index for the recursive search on the
+child node is set to the remainder `index % (S)^(h-1)`
+
+Pseudocode:
+```go
+func (rn *RootNode) Lookup(index int) (v Anything, error) {
+     return recLookup(rn.MaxDepth, index)
+}
+
+func (n *Node) recLookup(curHeight, index int) {
+     childRange := math.Pow(S, curHeight - 1)
+     pointerIndex := index / childRange
+
+     p := n.Pointers[pointerIndex]
+     if curHeight == 1 {
+     	return p.Value
+     }
+     newNode := ipldResolve(p.Link)
+
+     return newNode.recLookup(curHeight - 1, index % childRange)
+}
+```
+
+##### Expand
+
+As the `SectorSet` grows it becomes necessary to expand the tree to insert
+values with higher indexes.  When given an index `b` that exceeds the tree's 
+capacity, the `SectorSet` adds enough parent nodes to the node pointed to by
+the root that the `SectorSet` has capacity for its existing indices and `b`.
+Pointers are then updated in these new nodes so that there is a path from
+the new node with the highest height to the existing node pointed to by root.
+Finally the root node updates to point to the node with highest height.
+
+##### Insert Value
+
+First Expand the tree as needed given the input value.
+
+Now run the Lookup traversal.  If the traversal leads to a node at the max depth
+(height of 1), then set the `Value` field at `index % childRange` to the insert value.
+
+If the traversal needs to resolve a pointer link but that link does not exist,
+then create the remaining necessary nodes, update them to point to a path
+of nodes until reaching the leaf node and set the node's pointer Value at
+`index % childRange` to the insert value.
+
+##### Delete Value
+
+Run the Lookup traversal. If the value is found delete its value from the
+`Pointers` array.  If the `Pointers` array is empty after this deletion then
+update the parent pointer to have a nil link.  Continue checking if parents
+are empty of links and removing until reaching a parent that is not empty.
 
 #### `FaultSet`
 
