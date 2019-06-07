@@ -10,7 +10,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
   - **Condition:** If any miner posts two blocks satisfying the slashing conditions defined in [Expected Consensus](./expected-consensus.md).
   - **Reporting:** Anyone may call `SlashConsensusFault` and pass in the two offending block headers.
   - **Check:** The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.
-  - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed.
+  - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.
 
 ### Market Faults
 
@@ -19,7 +19,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
   - **Reporting:** The miner submits their PoSt as usual, but includes the late submission fee.
   - **Check:** The chain checks first that the submission is within the `generation attack threshold`, and then checks that the fee provided matches the required fee for how many blocks late the submission is.
   - **Penalization:** The miner is penalized proportionally to the delay. Penalizations are enforced by a standard PoSt submission.
-    - *Economic penalization*: To determine the penalty amount, `CalculateLatePenalty(numLate)` is called. The miners power is not reduced after the fee submission.
+    - *Economic penalization*: To determine the penalty amount, `ComputeLateFee(minerPower, numLate)` is called.
     - *Power penalization*: The miners' power is not reduced. Note that the current view of the power table is computed with the lookback parameter.
       - *Why are we accounting the power table with a lookback parameter ?* If we do not use the lookback parameter then, we need to penalize late miners for the duration that they are late. This is tricky to do efficiently. For xample, if miners A, B and C each have 1/3 of the networks power, and C is late in submitting their proofs, then for that duration, A and B should each have effectively half of the networks power (and a 50% chance each of winning the block).
   - TODO: write on the spec exact parameters for PoSt Deadline and Gen Attack threshold

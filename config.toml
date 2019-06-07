@@ -4,7 +4,7 @@ title = "Filecoin Spec"
 canonifyurls = true
 relativeURLs = true
 
-theme = "Book"
+theme = "book"
 pygmentsCodeFences = true
 pygmentsUseClasses = true
 enableGitInfo = true

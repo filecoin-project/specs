@@ -32,13 +32,13 @@ type Syncer struct {
 
 	// TipSets known to be invalid
 	bad BadTipSetCache
-    
+
   // handle to the block sync service
   bsync BlockSync
-    
+
   //peer set
   peerSet []PeerID
-    
+
   // peer heads
   // Note: clear cache on disconnects
   peerHeads map[PeerID][]Cid
@@ -97,7 +97,7 @@ func (syncer *Syncer) SyncBootstrap(bool expanding) {
   	}
   	// Will now get heaviest head from all the heads from our Peerset
     selectedHead := selectHead(syncer.peerHeads)
-    
+
     cur := selectedHead
     var blockSet BlockSet
     for head.Height() > 0 {
@@ -106,23 +106,23 @@ func (syncer *Syncer) SyncBootstrap(bool expanding) {
         // not validate any state transitions
         blks := syncer.bsync.GetBlocks(head, RequestWidth)
         blockSet.Insert(blks)
-            
+
         head = blks.Last().Parents()
     }
-        
+
     // Fetch all the messages for all the blocks in this chain
     // There are many ways to make this more efficient. For now, do the dumb thing
     blockSet.ForEach(func(b Block) {
         // FetchMessages should use bitswap to fetch any messages we don't have locally
         FetchMessages(b)
     })
-  
+
   	// Ensure that the selectedHead has the right genesis block
   	// Should be checked for trusted nodes in InitialConnect() and for
   	// all others in addPeerToSet(), but we leave details up to impl.
   	selectedGenesis := blockSet.GetByHeight(0)
 	  assert(selectedGenesis == genesis, "State failure: trying to sync to wrong chain")
-    
+
     // Now, to validate some state transitions
     base := syncer.genesis
     for i := 1; i < selectedHead.Height(); i++ {
@@ -133,7 +133,7 @@ func (syncer *Syncer) SyncBootstrap(bool expanding) {
             return
         }
     }
-    
+
     blockSet.PersistTo(syncer.store)
     syncer.head = bset.Head()
     syncer.syncMode = CaughtUp
@@ -144,7 +144,7 @@ func selectHead(heads map[PeerID]TipSet) TipSet {
     sel := headsArr[0]
     for i := 1; i < len(headsArr); i++ {
         cur := headsArr[i]
-        
+
         if cur.IsAncestorOf(sel) {
             continue
         }
@@ -152,7 +152,7 @@ func selectHead(heads map[PeerID]TipSet) TipSet {
             sel = cur
             continue
         }
-        
+
         nca := NearestCommonAncestor(cur, sel)
         if sel.Height() - nca.Height() > ForkLengthThreshold {
         	// TODO: handle this better than refusing to sync
@@ -190,7 +190,7 @@ func (syncer *Syncer) SyncCaughtUp(maybeHead TipSet) error {
 
 func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 	// fetch TipSet and messages via bitswap
-	ts := tipsetFromCidOverNet(newHead) 
+	ts := tipsetFromCidOverNet(newHead)
 
 	var chain Chain
 	for {
@@ -202,7 +202,7 @@ func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 
 		chain.InsertFront(ts)
 
-		if syncer.store.Contains(ts) { 
+		if syncer.store.Contains(ts) {
 			// Store has record of this TipSet.
 			return chain, nil
 		}
@@ -245,7 +245,7 @@ Syncing depends on the validity of a node's peer set. In order to ensure that th
 func (syncer *Syncer) replacePeer(peer PeerID) {
     delete(syncer.PeerSet, peer)
     delete(syncer.PeerHeads, peer)
-            
+
   	newPeer := syncer.getRandomPeer()
   	// addPeerToSet will validate this peer (i.e. check it has right genesis, etc.)
   	while !syncer.addPeerToSet(newPeer) {
@@ -266,7 +266,7 @@ func (syncer *Syncer) addPeerToSet(newPeer PeerID) bool {
   	// verify new peer to check whether to include in peerSet
     if !s.peerSet.contains(newPeer) {
       peerChain := sayHello(newPeer)
-      
+
       if peerChain.GenesisHash == GENESIS || trustedPeer.isAncestorOf(newPeer) {
         s.peerSet = append(s.peerSet, newPeer)
         s.InformNewHead(newPeer, trustedChain.HeaviestTipSet)
@@ -287,4 +287,14 @@ Things that affect the chain syncing protocol.
 
 **Chain storage**
 
+<<<<<<< HEAD
 - The current chain syncing protocol requires that the chain store never stores an invalid TipSet. If it does, then chain sync may sync to an invalid chain.
+=======
+- The current chain syncing protocol requires that the chain store never stores an invalid TipSet.
+
+# Open Questions
+
+- Secure bootstrapping in `syncing` mode
+- How do we handle the lag between the initial head bootstrapped in `syncing` mode and the network head once the first `SyncBootstrap` call is complete?  Likely we'll need multiple `SyncBootstrap` calls.  Should they be parallelized?
+- The properties of the chain store implementation have significant impact on the design of the syncing protocol and the syncing protocol's resistance to Denial Of Service (DOS) attacks.  For example if the chain store naively keeps all blocks in storage nodes are more vulnerable to running out of space.  As another example the syncer assumes that the store always contains a punctual ancestor of the heaviest chain. Should the spec grow to include properties of chain storage so that the syncing protocol can guarantee a level of DOS resistance?  Should chain storage be completely up to the implementation?  Should the chain storage spec be a part of the syncing protocol?
+>>>>>>> 168d0226bae61e0942a65b84f42cd99711c0fe29

@@ -24,6 +24,7 @@ If you're just browsing on GitHub, start with [INTRO.md](INTRO.md). But really, 
 the rendered output. It is much easier to read and use.
 
 ## Updates process for specs
+
 For info on how this spec changes, please see [the process doc](process.md).
 
 ## Owners/ Points of Contact
