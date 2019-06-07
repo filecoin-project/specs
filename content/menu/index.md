@@ -14,7 +14,7 @@ headless: true
   * [Block Validation]({{< relref "/docs/validation.md" >}})
 * [Network]({{< relref "/docs/networking.md" >}})
   * [Data Propagation]({{< relref "/docs/data-propagation.md" >}})
-  * [FC specific Protocols]({{< relref "/docs/network-protocols.md" >}})
+  * [Specific Protocols]({{< relref "/docs/network-protocols.md" >}})
 * [Expected Consensus]({{< relref "/docs/expected-consensus.md" >}})
 * [State Machine]({{< relref "/docs/state-machine.md" >}})
   * [Local Storage]({{< relref "/docs/local-storage.md" >}})
