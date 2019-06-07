@@ -71,25 +71,24 @@ Whenever a node hears about a new head, it will sync to it as warranted. `Inform
 // This should be called when connecting to new peers, and additionally
 // when receiving new blocks from the network
 func (syncer *Syncer) InformNewHead(from PeerID, head TipSet) {
-	switch syncer.syncMode {
-	case Bootstrap:
+  
+  if syncMode == Bootstrap:
     // InformNewHead will only get called during PeerSetExpansion during bootstrapping
-		go SyncBootstrap(true)
-	case CaughtUp:
-		go syncer.SyncCaughtUp(blk)
+		SyncBootstrap(expanding = true)
+	else if syncMode == CaughtUp:
+		syncer.SyncCaughtUp(blk)
 	}
 }
 
 // SyncBootstrap is used to synchronise your chain when first joining
 // the network, or when rejoining after significant downtime.
 func (syncer *Syncer) SyncBootstrap(bool expanding) {
-    syncer.syncLock.Lock()
-    defer syncer.syncLock.Unlock()
+    // not enough peers to sync yet...
     if expanding && len(syncer.peerHeads) < BootstrapPeerThreshold {
-        // not enough peers to sync yet...
         return
     }
   
+  	// if not expanding, start with trusted peers
   	syncPeers := syncer.peerSet
   	syncHeads := syncer.peerHeads
   	if (!expanding) {
@@ -208,11 +207,8 @@ func (syncer *Syncer) collectChainCaughtUp(maybeHead TipSet) (Chain, error) {
 			return chain, nil
 		}
 		parent := ts.ParentCid()
-		ts, err = tipsetFromCidOverNet(parent)
-		if err != nil {
-			return nil, err
+		ts = tipsetFromCidOverNet(parent)
 		}
-	}
 }
 ```
 
