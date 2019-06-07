@@ -1,6 +1,6 @@
 # Filecoin Bootstrapping Routine
 
-This spec describes the Filecoin bootstrapping protocol, it must be read along with:
+This spec describes the Filecoin bootstrapping protocol. It describes how nodes build a peer set and catch up to the current chain head when initially connecting to the network, or resuming activity after some time. It must be read along with:
 
 - [Sync](sync.md) on how Filecoin nodes sync with bootstrap nodes to catch up to the chain and stay synced after the initial bootstrapping has occured. The `Syncer` interface and many of the methods used here are defined in the sync spec.
 
@@ -43,7 +43,7 @@ We leave trustless (or fully decentralized) bootstrapping for future work.
 
 A strawman bootstrapping sequence would have nodes use these initial peers to sync up to the canonical chain. However, new connection requests might effecitvely DoS these peers, making the Filecoin network unavailable to new nodes. Therefore, Filecoin bootstrapping seeks to "load-balance" initial requests to ensure the network remains widely available.
 
-We connect to each of these initial peers (via DNS or IP, with a slight preference to IP connections as they are harder to coop) and then initiate the `hello handshake` (see in [network protocols](./network-protocols.md#hello-handshake)), getting back
+We connect to each of these initial peers (via DNS or hard-coded IP, with a slight preference to hard-coded IP connections as they are harder to coop) and then initiate the `hello handshake` (see in [network protocols](./network-protocols.md#hello-handshake)), getting back
 
 ```go
 type HelloMessage struct {
