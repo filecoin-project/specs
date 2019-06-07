@@ -29,11 +29,11 @@ Implementers are encouraged to offer and experiment with more protocols and tran
 
 When a filecoin node connects to the network, it may connect to multiple nodes at once. When a new node connects, it must be greeted with the `HelloMessage` through the hello-handshake protocol first. Only after that message has been sent can other streams be opened. If a node receives a `HelloMessage` with a GenesisBlock it doesn't support, it must immediately close the entire connection to that peer.
 
-If the node learns through that handshake about newer blocks it should request these immediately to sync up their chain.
+If the node learns through that handshake about newer blocks it should use that new information to sync up their chain.
 
 ### Syncing
 
-Whenever a node learns about a new `BlockHead` it should attempt to import the block - let that be through the `HelloMessage` or through the [block pubsub protocol](data-propagation.md#block-propagation). For that it may fetches the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in [Validation](./validation.md) and storing it locally. This mode is known as "syncing". During "syncing" the same node may not mine blocks.
+Whenever a node learns about a new `BlockHead` it should attempt to import the block - let that be through the `HelloMessage` or through the [block pubsub protocol](data-propagation.md#block-propagation). For that it may fetch the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in [Validation](./validation.md) and storing it locally. This mode is known as "syncing". During "syncing" the same node may not mine blocks.
 
 
 
@@ -46,13 +46,13 @@ In order to do that a node must be "bootstrapped" when starting up. At its simpl
 - Robust — able to do so in adversarial networks (so long as honest nodes make up the majority of the network).
 - Consistent — able to reliably get the canonical chain (even given poor latency or state loss in our initial peer set).
 
-The specific bootstrapping method and heuristic - or a mix of them - is left up to the node implementation, but we provide some example ideas of how this could be done and what aspects should be taken into consideration for that.
+The specific bootstrapping method and heuristic - or a mix of them - is left up to the node implementation, but we provide some example ideas of how this could be done and what aspects should be taken into consideration for that, such as relying on both new nodes and new connections to ensure a node is connected to both a reliable and representative slice of the network
 
 ### Trusted bootnodes
 
 As with many other networks, trusted entities - e.g. the Filecoin foundation, large exchanges, good actors in the community, etc - might publish a set of bootnodes one can connect to in order to establish network connections.
 
-Keep in mind that, because these could easily be DoS'ed, a) large set of different entities should be pre-shipped but only a few should be tried at a time b) they might drop connections rather quickly after establishing (and ban that peer for a short period of time) in order to serve more nodes. Thus you want to make sure to send a discovery request over the bootnodes to have nodes to connect to.
+Keep in mind that, because these could easily be DoS'ed, a) large set of different entities should be pre-shipped but only a few should be tried at a time b) they might drop connections rather quickly after establishing (and ban that peer for a short period of time) in order to serve more nodes. Thus you want to make sure to send a discovery request to learn about more peers over the bootnodes to have nodes to connect to.
 
 A node should not attempt to connect to more than 10 bootnodes at a time. And should diversify its set of nodes as quickly as possible.
 
@@ -84,5 +84,5 @@ In this system a node might also only record a strong decrease in reputation but
 
 We also recommend to regularly check the ranking and drop and clear up the lowest 10% of slots, leaving 5% open for incoming connections and fill up the other 5% by connecting to other nodes it can find through peer discovery.
 
-All this to creating a local view of for that node most useful connections to the network. The reputation may be stored permanently and be available between restarts - thus providing a neat bootstrap start list, too. 
+All this to create a local view of for that node most useful connections to the network. The reputation may be stored permanently and be available between restarts - thus providing a neat bootstrap start list, too. 
 
