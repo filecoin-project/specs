@@ -50,7 +50,7 @@ The specific bootstrapping method and heuristic - or a mix of them - is left up 
 
 ### Trusted bootnodes
 
-As with many other networks, trusted entities - the Filecoin foundation, large exchanges, good actors in the community, etc)- might publish a set of bootnodes one can connect to in order to establish network connections.
+As with many other networks, trusted entities - e.g. the Filecoin foundation, large exchanges, good actors in the community, etc - might publish a set of bootnodes one can connect to in order to establish network connections.
 
 Keep in mind that, because these could easily be DoS'ed, a) large set of different entities should be pre-shipped but only a few should be tried at a time b) they might drop connections rather quickly after establishing (and ban that peer for a short period of time) in order to serve more nodes. Thus you want to make sure to send a discovery request over the bootnodes to have nodes to connect to.
 
