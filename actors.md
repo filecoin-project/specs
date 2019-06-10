@@ -191,7 +191,12 @@ func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Addr
 		Fatal("Unsupported sector size")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, msg.Value, sectorSize, pid))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, sectorSize, pid))
+
+	// Send the newly-created miner the FIL sent to the storage market actor by
+	// the miner's owner. The miner will draw collateral from this FIL when
+	// committing sectors to the network.
+	// vm.Send(newminer.Address, msg.Value, "", nil)
 
 	self.Miners.Add(newminer)
 
