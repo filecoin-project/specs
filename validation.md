@@ -6,6 +6,8 @@ Validation is split into two stages, syntactic and semantic. The syntactic stage
 
 A node must decode and perform syntactic validation for every block received before passing it on (e.g. in a lipbp2p pubsub validator). A node must perform semantic validation before accepting the block as an extension to its chain.
 
+### Syntactical Validation
+
 A syntactically valid block:
 
 - must include a well-formed miner address
@@ -17,6 +19,8 @@ A syntactically valid block:
 - must include well-formed state root, messages, and receipts CIDs
 - must include a timestamp not in the future
 
+
+### Semantical Validation
 
 A semantically valid block:
 

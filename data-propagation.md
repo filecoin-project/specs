@@ -2,7 +2,7 @@
 
 The filecoin network needs to broadcast blocks and messages to all peers in the network. This document details how that process works.
 
-Messages and block headers along side the message references are propagated using the [gossipsub libp2p pubsub router](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub). Every full node must implement and run that protocol. All pubsub messages are authenticated and must be validated before being propagated further.
+Messages and block headers along side the message references are propagated using the [gossipsub libp2p pubsub router](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub). Every full node must implement and run that protocol. All pubsub messages are authenticated and must be [syntactically validated](./validation.md#syntactical-validation) before being propagated further.
 
 Further more, every full node must implement and offer the bitswap protocol and provide all Cid Referenced objects, it knows of, through it. This allows any node to fetch missing pieces (e.g. `Message`) from any node it is connected to. However, the node should fan out these requests to multiple nodes and not bombard any single node with too many requests at a time. A node may implement throttling and DDoS protection to prevent such a bombardment.
 
@@ -26,7 +26,7 @@ type BlockMsg struct {
 
 The array of message cids must match the `Messages` field in the block when used to construct a [sharray](sharray.md).
 
-Every `BlockMsg` received must be validated [through the basic check](./validation.md#basic-check) before being propagated again. If validation fails, it must not be propagated.
+Every `BlockMsg` received must be validated [through the syntactical check](./validation.md#syntactical-validation) before being propagated again. If validation fails, it must not be propagated.
 
 
 ## Message Propagation
