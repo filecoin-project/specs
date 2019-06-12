@@ -78,14 +78,11 @@ type BlockHeader struct {
 	// This field is the Cid of the root of a sharray of MessageReceipts.
 	MessageReceipts Cid
 
-<<<<<<< HEAD
 	// The Timestamp is used to enforce a form of block delay by honest miners.
 	// Unix time UTC timestamp stored as an unsigned integer (uint64). To be specific, the
 	// timestamp is seconds since Jan 01 1970 (UTC timezone).
-=======
 	// The block Timestamp is used to enforce a form of block delay by honest miners.
 	// Unix time UTC timestamp (in seconds) stored as an unsigned integer.
->>>>>>> 6841949ccf6ecb50902128233464ce116357d006
 	Timestamp Timestamp
 
 	// BlockSig is a signature over the hash of the entire block with the miners
@@ -105,13 +102,11 @@ As you see in the interface defined above, a typical block header contains many 
 
 ### Sharded Messages and Receipts
 
-<<<<<<< HEAD
 In a block header, the `Messages` and `MessageReceipts` fields are each CIDs that reference [sharray](sharray.md) datastructures. The `Messages` sharray contains the CIDs of the messages that are included in the block. The `MessageReceipts` sharray contains the message receipts directly.
 
 Read more about sharrays in the [sharray spec](sharray.md).
-=======
+
 The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
->>>>>>> 6841949ccf6ecb50902128233464ce116357d006
 
 ## Message
 
