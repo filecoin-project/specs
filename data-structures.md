@@ -40,13 +40,10 @@ type BlockHeader struct {
 	// Miner is the address of the miner actor that mined this block.
 	Miner Address
 
-<<<<<<< HEAD
 	// Tickets are the winning ticket that were submitted with this block. The tickets
 	// array should include all the intervening tickets generated between (but not including) the 
 	// parents' block height and the current block height.
-=======
 	// Tickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
->>>>>>> 6841949ccf6ecb50902128233464ce116357d006
 	Tickets []Ticket
 
 	// ElectionProof is a signature over the final ticket that proves this miner
