@@ -18,6 +18,13 @@ git worktree add -B gh-pages public origin/gh-pages
 echo "Removing existing files"
 rm -rf public/*
 
+echo "Generating PDF"
+name=$(./build-pdf.sh)
+echo $name
+cp "pdf-build/$name" "static/$name"
+msg="You can also download the full spec in [PDF format](.\/$name)."
+sed -i "" "s/<\!\-\- REPLACE_ME_PDF_LINK \-\->/$msg/" INTRO.md
+
 echo "Generating site"
 hugo
 

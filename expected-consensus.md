@@ -68,6 +68,7 @@ func OnBlockReceived(blk Block) {
 ```
 
 Separately, another process is running `Mine` to attempt to generate blocks.
+
 ```go
 func Mine(minerKey PrivateKey) {
 	for r := range rounds { // for each round
@@ -147,6 +148,7 @@ At a high-level, tickets must do the following:
 - Ensure a single drawing per round — derived in part from the above, thereby preventing miners from grinding on tickets (e.g. by repeatedly drawing new tickets in the hopes of winning) within a round.
 
 For tickets in EC, one may use the following:
+
 ```go
 type Ticket struct {
 	// The VDF Result is derived from the prior ticket in the ticket chain
@@ -320,6 +322,8 @@ All valid blocks generated in a round form a `TipSet` that participants will att
 - All blocks in a TipSet have the same number of tickets in their `Tickets` array
 
 The first condition implies that all blocks in a TipSet were mined at the same height (remember that height refers to block height as opposed to ticket round). This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a TipSet bringing these blocks together. The second rule means blocks in a TipSet are mined in a same round.
+
+The blocks in a tipset have no defined order in representation. During state computation, blocks in a tipset are processed in order of block ticket, breaking ties with the block CID bytes.
 
 Due to network propagation delay, it is possible for a miner in round N+1 to omit valid blocks mined at round N from their TipSet. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol.
 
