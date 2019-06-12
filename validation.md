@@ -2,9 +2,23 @@
 
 In order to ensure they are always on the correct latest state of the chain a filecoin full node must accept and process blocks continuously. Blocks are propagated was described in the [Data Propagation](data-propagation.md) document.
 
-For every block received, the node must validate it before executing it or passing it on. Before a node can validate a block, it first must ensure the block is structurally correct by decoding it (see [block](data-structures.md#block)) and ensuring that no field contains any illegal values. After that the node must check the signature of the block, then moves on to validate the block itself.
+Validation is split into two stages, syntactic and semantic. The syntactic stage may be validated without reference to additional data (see [block](data-structures.md#block)). The semantic stage requires access to the chain which the block extends.
 
-A valid block:
+A node must decode and perform syntactic validation for every block received before passing it on (e.g. in a lipbp2p pubsub validator). A node must perform semantic validation before accepting the block as an extension to its chain.
+
+A syntactically valid block:
+
+- must include a well-formed miner address
+- must include at least one well-formed ticket, and if more they form a valid ticket chain
+- must include an election proof which is a valid signature by the miner address of the final ticket
+- must include at least one parent CID
+- must include a positive parent weight
+- must include a positive height
+- must include well-formed state root, messages, and receipts CIDs
+- must include a timestamp not in the future
+
+
+A semantically valid block:
 
 - must only have valid parents in the tipset, meaning
   - that each parent itself must be a valid block
@@ -21,7 +35,7 @@ A valid block:
 
 
 {{% notice info %}}
-Once the block passes validation, it must be added to the local datastore, regardless whether it is understood as the best tip at this point. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching. Blocks a certain distance from the current chain height may be dropped (exact number TBD, but blocks that havent been included after several days may be purged).
+Once the block passes validation, it must be added to the local datastore, regardless whether it is understood as the best tip at this point. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching.
 {{% /notice %}}
 
 {{% notice info %}}

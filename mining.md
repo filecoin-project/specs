@@ -126,37 +126,45 @@ func VerifyBlock(blk Block) {
 	}
 	// next check that it is appropriately delayed from its parents including
 	// null blocks.
-	if blk.GetTime() <= blk.minParentTime() + (BLOCK_DELAY * len(blk.Tickets)) {
+	if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
 		Fatal("block was generated too soon")
 	}
 
-	// 3. Verify ParentWeight
+	// 3. Verify miner has not been slashed and is still valid miner
+	curStorageMarket := LoadStorageMarket(blk.State)
+	if !curStorageMarket.IsMiner(blk.Miner) {
+		Fatal("block miner not valid")
+	}
+
+	// 4. Verify ParentWeight
 	if blk.ParentWeight != ComputeWeight(blk.Parents) {
 		Fatal("invalid parent weight")
 	}
 
-	// 4. Verify Tickets
+	// 5. Verify Tickets
 	if !VerifyTickets(blk) {
 		Fatal("tickets were invalid")
 	}
 
-	// 5. Verify ElectionProof
+	// 6. Verify ElectionProof
 	randomnessLookbackTipset := RandomnessLookback(blk)
 	lookbackTicket := minTicket(randomnessLookbackTipset)
-	challenge := sha256.Sum(lookbackTicket)
+	challenge := blake2b(lookbackTicket)
 
 	if !ValidateSignature(blk.ElectionProof, pubk, challenge) {
 		Fatal("election proof was not a valid signature of the last ticket")
 	}
 
 	powerLookbackTipset := PowerLookback(blk)
-	minerPower := GetPower(powerLookbackTipset.state, blk.Miner)
-	totalPower := GetTotalPower(powerLookbackTipset.state)
+
+	lbStorageMarket := LoadStorageMarket(powerLookbackTipset.state)
+	minerPower := lbStorageMarket.PowerLookup(blk.Miner)
+	totalPower := lbStorageMarket.GetTotalStorage()
 	if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
 		Fatal("election proof was not a winner")
 	}
 
-	// 6. Verify Message Signatures
+	// 7. Verify Message Signatures
 	messages := LoadMessages(blk.Messages)
 	state := GetParentState(blk.Parents)
 
@@ -175,7 +183,7 @@ func VerifyBlock(blk Block) {
 
 	ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys)
 
-	// 7. Validate State Transitions
+	// 8. Validate State Transitions
 	receipts := LoadReceipts(blk.MessageReceipts)
 	for i, msg := range messages {
 		receipt := ApplyMessage(state, msg)
@@ -195,10 +203,10 @@ func (state StateTree) LookupPublicKey(a Address) PubKey {
 	}
 
 	ast := LoadAccountActorState(act)
-  if act.Address.Type == BLS {
-    return ExtractBLSPubKey(act.Address)
-  }
-  Fatal("can only look up public keys for BLS controlled accounts")
+	if act.Address.Type == BLS {
+		return ExtractBLSPubKey(act.Address)
+	}
+	Fatal("can only look up public keys for BLS controlled accounts")
 }
 ```
 
@@ -284,10 +292,8 @@ To create a block, the eligible miner must compute a few fields:
 
 - `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See [ticket generation](./expected-consensus.md#ticket-generation).
 - `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](./expected-consensus.md#ticket-generation).
-- `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp. The Timestamp in the newly created block must satisfy the following conditions:
-  - the timestamp on the block is not in the future
-  - the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
 - `ParentWeight` - As described in [Chain Weighting](./expected-consensus.md#chain-weighting).
+- `Parents` - the CIDs of the parent blocks.
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
   - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
   - For each block in the parent set, ordered by their tickets:
@@ -303,6 +309,9 @@ To create a block, the eligible miner must compute a few fields:
 - `ReceiptsRoot` - To compute this:
   - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
   - Insert them into a Merkle Tree and take its root.
+- `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
+  - the timestamp on the block is not in the future
+  - the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
 - `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
 - `BlockSig` - A signature with the miner's private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
