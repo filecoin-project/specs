@@ -1,6 +1,6 @@
 # Filecoin Network
 
-The filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional filecoin specific protocols as outlined in [Network Protocols](./network-protocols.md).
+The Filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional Filecoin specific protocols as outlined in [Network Protocols](./network-protocols.md).
 
 ## Required Protocols
 
@@ -27,7 +27,7 @@ Implementers are encouraged to offer and experiment with more protocols and tran
 
 ### Establishing connections
 
-When a filecoin node connects to the network, it may connect to multiple nodes at once. When a new node connects, it must be greeted with the `HelloMessage` through the hello-handshake protocol first. Only after that message has been sent can other streams be opened. If a node receives a `HelloMessage` with a GenesisBlock it doesn't support, it must immediately close the entire connection to that peer.
+When a Filecoin node connects to the network, it may connect to multiple nodes at once. When a new node connects, it must be greeted with the `HelloMessage` through the hello-handshake protocol first. Only after that message has been sent can other streams be opened. If a node receives a `HelloMessage` with a GenesisBlock it doesn't support, it must immediately close the entire connection to that peer.
 
 If the node learns through that handshake about newer blocks it should use that new information to sync up their chain.
 
@@ -80,7 +80,7 @@ An example would be that, continuously receive a pubsub message from a node afte
 
 A node attempts to always hold a certain amount of connections ("slots") to the network -- we recommend 25-50 on an on-the-shelf system. Whenever a new node connects, it can check their previously stored reputation or assign a default value and if that reputation is higher than the lowest currently connected nodes, may replace that connection (and thus drop the lowest quality connection) or otherwise refuse to take that connection.
 
-In this system a node might also only record a strong decrease in reputation but not drop a connection to a peer directly even upon a strong violation, because the node may still be more useful than others. It is better to stay connected to a crappy network than to no network. However, this doesn't not free the node from still adhering to the spec itself - it should not forward said violation or its connection might still be rightously dropped. 
+In this system a node might also only record a strong decrease in reputation but not drop a connection to a peer directly even upon a strong violation, because the node may still be more useful than others. It is better to stay connected to a crappy network than to no network. However, this doesn't not free the node from still adhering to the spec itself - it should not forward said violation or its connection might still be righteously dropped. 
 
 We also recommend to regularly check the ranking and drop and clear up the lowest 10% of slots, leaving 5% open for incoming connections and fill up the other 5% by connecting to other nodes it can find through peer discovery.
 
