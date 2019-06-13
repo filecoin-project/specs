@@ -4,46 +4,20 @@ set -e
 short=$(git rev-parse --short HEAD)
 tag=${1-$short}
 
-files=(
-    INTRO.md
-    data-structures.md
-    address.md
-    signatures.md
-    proofs.md
-    validation.md
-    network-protocols.md
-    bootstrap.md
-    data-propagation.md
-    sync.md
-    expected-consensus.md
-    state-machine.md
-    local-storage.md
-    operation.md
-    actors.md
-    mining.md
-    storage-market.md
-    retrieval-market.md
-    payments.md
-    faults.md
-    zigzag-circuit.md
-    zigzap-porep.md
-    definitions.md
-    style.md
-    process.md
-)
+files=$(awk -F "[(/)]" '{ if($2) print $2; }' docs/menu/index.md)
 
 rm -rf .pdfworking
 mkdir -p .pdfworking
 mkdir -p pdf-build
 
-i=0
+cp "./docs/_index.md" "./.pdfworking/0000_start.md"
+
+i=1
 for f in ${files[@]}; do
     printf -v n "%03d" $i
-    cp "./${f}" "./.pdfworking/${n}_${f}"
+    cp "./docs/${f}" "./.pdfworking/${n}_${f}"
     i=$((i + 1))
 done
-
-find ./.pdfworking -type f -exec sed -i "" 's/{{%.*%}}//g' {} \;
 
 pandoc ./.pdfworking/*.md \
     --pdf-engine xelatex \
