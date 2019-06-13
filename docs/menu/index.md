@@ -2,40 +2,40 @@
 headless: true
 ---
 
-[**Overview**]({{< relref "/" >}})
+[**Overview**](/)
 
 **Core**
 
-* [Data Structures]({{< relref "data-structures.md" >}})
+* [Data Structures](data-structures.md)
 * Cryptography
-  * [Address]({{< relref "address.md" >}})
-  * [Signatures]({{< relref "signatures.md" >}})
-  * [Proofs]({{< relref "proofs.md" >}})
-  * [Block Validation]({{< relref "validation.md" >}})
-* [Network]({{< relref "network-protocols.md" >}})
-  * [Bootstrapping]({{< relref "bootstrap.md" >}})
-  * [Data Propagation]({{< relref "data-propagation.md" >}})
-  * [Chain Sync]({{< relref "sync.md" >}})
-* [Expected Consensus]({{< relref "expected-consensus.md" >}})
-* [State Machine]({{< relref "state-machine.md" >}})
-  * [Local Storage]({{< relref "local-storage.md" >}})
-* [Node Operation]({{< relref "operation.md" >}})
+  * [Address](address.md)
+  * [Signatures](signatures.md)
+  * [Proofs](proofs.md)
+  * [Block Validation](validation.md)
+* [Network](network-protocols.md)
+  * [Bootstrapping](bootstrap.md)
+  * [Data Propagation](data-propagation.md)
+  * [Chain Sync](sync.md)
+* [Expected Consensus](expected-consensus.md)
+* [State Machine](state-machine.md)
+  * [Local Storage](local-storage.md)
+* [Node Operation](operation.md)
 
-[**Actors**]({{< relref "actors.md" >}})
+[**Actors**](actors.md)
 
-* [Mining]({{< relref "mining.md" >}})
-* [Storage Market]({{< relref "storage-market.md" >}})
-* [Retrieval Market]({{< relref "retrieval-market.md" >}})
-* [Payments]({{< relref "payments.md" >}})
-* [Faults]({{< relref "faults.md" >}})
+* [Mining](mining.md)
+* [Storage Market](storage-market.md)
+* [Retrieval Market](retrieval-market.md)
+* [Payments](payments.md)
+* [Faults](faults.md)
 
 **Proofs**
 
-* [ZigZag]({{< relref "zigzag-circuit.md" >}})
+* [ZigZag](zigzag-circuit.md)
 
-[**Glossary**]({{< relref "definitions.md" >}})
+[**Glossary**](definitions.md)
 
 **Spec**
 
-* [Style]({{< relref "style.md" >}})
-* [Process]({{< relref "process.md" >}})
+* [Style](style.md)
+* [Process](process.md)
