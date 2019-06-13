@@ -1,3 +1,7 @@
+---
+title: Glossary
+type: "docs"
+---
 # Definitions / Glossary
 
 ## Updates to definitions

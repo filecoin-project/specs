@@ -1,3 +1,8 @@
+---
+title: Sharray
+type: "docs"
+---
+
 # Sharray
 
 > Sharded IPLD Array

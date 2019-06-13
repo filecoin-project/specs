@@ -1,3 +1,8 @@
+---
+title: Filecoin Payments
+type: "docs"
+---
+
 # Payments
 
 ### What are payments

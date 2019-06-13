@@ -1,3 +1,7 @@
+---
+title: Faults
+type: "docs"
+---
 # Faults
 
 A fault is what happens when partcipants in the protocol are behaving incorrectly and that behavior needs to be punished. There are a number of possible faults in the Filecoin protocol, their details are all recorded below.
@@ -7,7 +11,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
 ### Consensus Faults
 
 - **Duplicate Block Submission Slashing:**
-  - **Condition:** If any miner posts two blocks satisfying the slashing conditions defined in [Expected Consensus](./expected-consensus.md).
+  - **Condition:** If any miner posts two blocks satisfying the slashing conditions defined in [Expected Consensus](expected-consensus.md).
   - **Reporting:** Anyone may call `SlashConsensusFault` and pass in the two offending block headers.
   - **Check:** The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.
   - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.

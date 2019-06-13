@@ -1,3 +1,8 @@
+---
+title: Block Validation
+type: "docs"
+---
+
 ## Block Validation
 
 In order to ensure they are always on the correct latest state of the chain a filecoin full node must accept and process blocks continuously. Blocks are propagated was described in the [Data Propagation](data-propagation.md) document.

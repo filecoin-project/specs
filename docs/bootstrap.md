@@ -1,3 +1,7 @@
+---
+title: Filecoin Bootstrapping Routine
+type: "docs"
+---
 # Filecoin Bootstrapping Routine
 
 This spec describes the Filecoin bootstrapping protocol, it must be read along with:
@@ -6,12 +10,12 @@ This spec describes the Filecoin bootstrapping protocol, it must be read along w
 
 For related systems, see:
 
-- [Network Protocols](./network-protocols.md) on how Filecoin nodes can communicate with each other, with for instance, an [initial handshake](./network-protocols.md#hello-handshake), or [block syncing](./network-protocols.md#blocksync).
-- [Operation](./operation.md) on various operations a functional Filecoin node needs to run, like [DHT routing](./operation.md#dht-for-peer-routing.md).
+- [Network Protocols](network-protocols.md) on how Filecoin nodes can communicate with each other, with for instance, an [initial handshake](network-protocols.md#hello-handshake), or [block syncing](network-protocols.md#blocksync).
+- [Operation](operation.md) on various operations a functional Filecoin node needs to run, like [DHT routing](operation.md#dht-for-peer-routing.md).
 
 ## What is bootstrapping in Filecoin?
 
-When a Filecoin node first comes online, it must find the latest head for the chain and then initiate the syncing routine in order to catch up to the chain state and maintain it thereafter as new blocks come in. This is covered in the [sync spec](./sync.md). Bootstrapping is the process through which a node finds the chain's latest head in the first place (thereby enabling it to sync), through other peers in the network.
+When a Filecoin node first comes online, it must find the latest head for the chain and then initiate the syncing routine in order to catch up to the chain state and maintain it thereafter as new blocks come in. This is covered in the [sync spec](sync.md). Bootstrapping is the process through which a node finds the chain's latest head in the first place (thereby enabling it to sync), through other peers in the network.
 
 At its simplest, bootstrapping can be thought of as secure network joining. It must enable a new node to get the latest head/chain that the majority of the network power is mining off and must be both:
 
@@ -25,7 +29,7 @@ The specific bootstrapping heuristic could be left up to the node implementation
 - Peer Set Expansion — ensuring that these peers can serve up the network's canonical head reliably in spite of their individual latencies or non-byzantine state loss.
 
 
-Chain Selection is addressed in the [sync spec](./sync.md).
+Chain Selection is addressed in the [sync spec](sync.md).
 
 We leave trustless initial peer selection as future work.
 
@@ -39,7 +43,7 @@ We leave trustless (or fully decentralized) bootstrapping for future work.
 
 A strawman bootstrapping sequence would have nodes use these initial peers to sync up to the canonical chain. However, new connection requests might effecitvely DoS these peers, making the Filecoin network unavailable to new nodes. Therefore, Filecoin bootstrapping seeks to "load-balance" initial requests to ensure the network remains widely available.
 
-We connect to each of these initial peers and then initiate the `hello handshake` (see in [network protocols](./network-protocols.md#hello-handshake)), getting back
+We connect to each of these initial peers and then initiate the `hello handshake` (see in [network protocols](network-protocols.md#hello-handshake)), getting back
 
 ```go
 type HelloMessage struct {

@@ -1,3 +1,8 @@
+---
+title: Filecoin Retrieval Market
+type: "docs"
+---
+
 # `Retrieval Market` V0
 
 ### What is the `Retrieval Market`

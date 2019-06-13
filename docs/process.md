@@ -1,3 +1,8 @@
+---
+title: Filecoin Spec Process
+type: "docs"
+---
+
 # Filecoin Spec Process (v0)
 
 ## 'Catch Up' Mode

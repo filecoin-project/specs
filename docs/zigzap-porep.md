@@ -1,3 +1,8 @@
+---
+title: Filecoin ZigZag Proof of Replication
+type: "docs"
+---
+
 # Filecoin ZigZag Proof of Replication
 
 ZigZagDrgPorep is a layered PoRep which replicates layer by layer.

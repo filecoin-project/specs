@@ -1,7 +1,6 @@
 ---
-title: Data Structures
+title: Filecoin Data Structures
 type: "docs"
-# slug: "data-structures"
 ---
 # Data Structures
 

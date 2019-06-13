@@ -1,3 +1,8 @@
+---
+title: "Mining"
+type: "docs"
+---
+
 ### What is the Filecoin Mining Process
 
 An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
@@ -90,9 +95,9 @@ Review Discussion Note: Taking all of a miners collateral for going over the dea
 
 ## Mining Blocks
 
-Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [TipSets](./expected-consensus.md#tipsets) seen on the network.
+Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [TipSets](expected-consensus.md#tipsets) seen on the network.
 
-For additional details around how consensus works in Filecoin, see the [expected consensus spec](./expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
+For additional details around how consensus works in Filecoin, see the [expected consensus spec](expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
 ### Receiving Blocks
 
@@ -103,7 +108,7 @@ When receiving blocks from the network (via [block propagation](data-propagation
 
 A miner may sometimes receive blocks belonging to different TipSets (i.e. whose parents are not the same). In that case, they must choose which TipSet to mine on.
 
-Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier TipSet rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see [chain selection](./expected-consensus.md#chain-selection) in the Expected Consensus spec.
+Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier TipSet rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see [chain selection](expected-consensus.md#chain-selection) in the Expected Consensus spec.
 
 ### Block Validation
 
@@ -258,11 +263,11 @@ If all of this lines up, the block is valid. The miner repeats this for all bloc
 
 Once they've ensured all blocks in the heaviest TipSet received were properly mined, they can mine on top of it. If they weren't, the miner may need to ensure the next heaviest `Tipset` was properly mined. This might mean the same `Tipset` with invalid blocks removed, or an altogether different one.
 
-If no valid blocks are received, a miner may mine atop the same `TipSet` running leader election again using the next ticket in the ticket chain, and also generating a [new ticket](./expected-consensus.md#losing-tickets) in the process (see the [expected consensus spec](./expected-consensus.md) for more).
+If no valid blocks are received, a miner may mine atop the same `TipSet` running leader election again using the next ticket in the ticket chain, and also generating a [new ticket](expected-consensus.md#losing-tickets) in the process (see the [expected consensus spec](expected-consensus.md) for more).
 
 ### Ticket Generation
 
-For details of ticket generation, see the [expected consensus spec](./expected-consensus.md#ticket-generation).
+For details of ticket generation, see the [expected consensus spec](expected-consensus.md#ticket-generation).
 
 Ticket generation is the twin process of leader election (i.e. generating `ElectionProof`s). Every ticket scratch (i.e. round of leader election) has the miner generate a new ticket to include in the `Tickets` array of their block.
 
@@ -280,7 +285,7 @@ If the miner hears of no new blocks, they must instead draw a new ticket to scra
 
 Now, rather than generating this new ticket from the smallest ticket from the parent TipSet (as above), the miner will instead use their ticket from the last round, now in the `Tickets` array.
 
-This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner's own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see the [Expected Consensus spec](./expected-consensus.md#chain-selection) for more details).
+This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner's own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see the [Expected Consensus spec](expected-consensus.md#chain-selection) for more details).
 
 The `Tickets` array in the block to be published grows with each round (and a new ticket generated).
 
@@ -290,9 +295,9 @@ Scratching a winning ticket, and armed with a valid `ElectionProof`, a miner can
 
 To create a block, the eligible miner must compute a few fields:
 
-- `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See [ticket generation](./expected-consensus.md#ticket-generation).
-- `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](./expected-consensus.md#ticket-generation).
-- `ParentWeight` - As described in [Chain Weighting](./expected-consensus.md#chain-weighting).
+- `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See [ticket generation](expected-consensus.md#ticket-generation).
+- `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](expected-consensus.md#ticket-generation).
+- `ParentWeight` - As described in [Chain Weighting](expected-consensus.md#chain-weighting).
 - `Parents` - the CIDs of the parent blocks.
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
   - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).

@@ -1,3 +1,8 @@
+---
+title: Filecoing Node Operations
+type: "docs"
+---
+
 # Filecoin Node Operation
 
 Running a Filecoin `full node` requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.

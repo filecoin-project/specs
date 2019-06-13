@@ -1,3 +1,8 @@
+---
+title: Signatures
+type: "docs"
+---
+
 # Signatures
 
 ## What are signatures in Filecoin

@@ -2,9 +2,9 @@
 
 This spec describes the Filecoin sync protocol, for related systems, see:
 
-- [Bootstrapping](./bootstrap.md) which describes how a node builds a peer set in the first place.
-- [Network Protocols](./network-protocols.md) on how Filecoin nodes can communicate with each other, with for instance, an [initial handshake](./network-protocols.md#hello-handshake), or [block syncing](./network-protocols.md#blocksync).
-- [Operation](./operation.md) on various operations a functional Filecoin node needs to run, like [DHT routing](./operation.md#dht-for-peer-routing.md).
+- [Bootstrapping](bootstrap.md) which describes how a node builds a peer set in the first place.
+- [Network Protocols](network-protocols.md) on how Filecoin nodes can communicate with each other, with for instance, an [initial handshake](network-protocols.md#hello-handshake), or [block syncing](network-protocols.md#blocksync).
+- [Operation](operation.md) on various operations a functional Filecoin node needs to run, like [DHT routing](operation.md#dht-for-peer-routing.md).
 
 ## What is chain syncing in Filecoin?
 

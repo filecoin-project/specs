@@ -1,3 +1,8 @@
+---
+title: Filecoin Proofs
+type: "docs"
+---
+
 # Filecoin Proofs
 
 The Filecoin protocol requires a means of generating and verifying the following cryptographic proofs:

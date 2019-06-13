@@ -1,3 +1,7 @@
+---
+title: FIlecoin Client Data Processing
+type: "docs"
+---
 # Filecoin Client Data Processing
 
 Data that clients wish to store must be pre-processed before it can be sent to miners and have a storage deal made for it.

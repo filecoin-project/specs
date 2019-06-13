@@ -1,3 +1,7 @@
+---
+title: Filecoin Data Propagation
+type: "docs"
+---
 # Filecoin Data Propagation
 
 The filecoin network needs to broadcast blocks and messages to all peers in the network. This document details how that process works.
