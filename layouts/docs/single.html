@@ -1,6 +1,6 @@
 {{ define "main" }}
 <article class="markdown">
-  {{ .Content | replaceRE "href=\"([^.]+)\\.md\"" "href=\"../$1\"" | replaceRE "\t" "    " | safeHTML }}
+  {{ .Content | replaceRE "href=\"([^.]+)\\.md#?([^.]?)\"" "href=\"../$1/#$2\"" | replaceRE "\t" "    " | safeHTML }}
 </article>
 {{ end }}
 

@@ -1,3 +1,8 @@
+---
+title: Data Structures
+type: "docs"
+# slug: "data-structures"
+---
 # Data Structures
 
 This document serves as an entry point for understanding all of the data structures in filecoin.

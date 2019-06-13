@@ -3,6 +3,7 @@ languageCode = "en-us"
 title = "Filecoin Spec"
 canonifyurls = true
 relativeURLs = true
+contentDir = "docs"
 
 theme = "book"
 pygmentsCodeFences = true
@@ -21,7 +22,7 @@ BookMenuBundle = "/menu"
 
 # (Optional, default docs) Specify section of content to render as menu
 # You can also set value to "*" to render all sections to menu
-BookSection = "docs"
+# BookSection = "*"
 
 # This value is duplicate of $link-color for making active link highlight in menu bundle mode
 BookMenuBundleActiveLinkColor = "#0b3a53"

@@ -1,3 +1,7 @@
+---
+title: Expected Consensus
+type: "docs"
+---
 # Expected Consensus
 
 This spec describes how to implement the protocol in general, for Filecoin-specific processes, see:
