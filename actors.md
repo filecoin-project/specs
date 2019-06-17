@@ -467,7 +467,7 @@ type StorageMinerActorState struct {
 	## Sectors reported during the last PoSt submission as being 'done'. The collateral
     ## for them is still being held until the next PoSt submission in case early sector
     ## removal penalization is needed.
-    nextDoneSet SectorSet
+    nextDoneSet BitField
 
 	## Deals this miner has been slashed for since the last post submission.
     arbitratedDeals CidSet
