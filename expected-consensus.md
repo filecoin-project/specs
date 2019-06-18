@@ -333,9 +333,15 @@ TODO: ensure 'power' is properly and clearly defined
 
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
 
-The weight at each block is equal to its `ParentWeight`, plus that block's delta weight. Delta
-weight is a constant `V`, plus `X` - a function of the total power in the network as reported in the Power Table.  The exact value for `V` and the magnitude of the power ratio value are
-still to be determined, but for now `V = 10` and `X = log(TotalPower)`.
+The weight at each block is equal to a term P times its `ParentWeight` plus that block's delta weight. Delta
+weight is a constant `V` times the number of blocks included in that TipSet in the given round (can only be calculated in the next round), plus `X` - a function of the total power in the network as reported in the Power Table. P will be equal to some term P_i^P_n and seeks to punish selfish mining.
+
+ The exact value for these parameters remain to be determined, but for now we set:
+
+- `V = 2 * number of blocks in the round`
+- `X = log(TotalPower)`
+- `P_i = .995`
+- `P_n = the number of tickets in this block's Ticket array` if that number is  > 6, 0 otherwise.
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given TipSet should have
