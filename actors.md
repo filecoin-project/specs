@@ -18,6 +18,7 @@ Some state machine actors are 'system' actors that get instantiated in the genes
 | 0    | InitActor          | Network Init            |
 | 1    | AccountActor       | Network Treasury        |
 | 2    | StorageMarketActor | Filecoin Storage Market |
+| 3    | PaymentBrokerActor | Filecoin Payment Broker |
 |  99 | AccountActor | Burnt Funds |
 
 ## Init Actor
