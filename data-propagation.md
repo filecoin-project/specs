@@ -2,13 +2,16 @@
 
 The filecoin network needs to broadcast blocks and messages to all peers in the network. This document details how that process works.
 
-Both blocks and messages are propagated using the gossipsub libp2p pubsub router. The pubsub messages are authenticated. For blocks, the pubsub hop validation function is set to check that the block is valid before re-propagating. For messages, a similar validity check is run, the signature must be valid, and the account in question must have enough funds to cover the actions specified.
+Messages and block headers along side the message references are propagated using the [gossipsub libp2p pubsub router](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub). Every full node must implement and run that protocol. All pubsub messages are authenticated and must be [syntactically validated](./validation.md#syntactical-validation) before being propagated further.
 
-### Links
+Further more, every full node must implement and offer the bitswap protocol and provide all Cid Referenced objects, it knows of, through it. This allows any node to fetch missing pieces (e.g. `Message`) from any node it is connected to. However, the node should fan out these requests to multiple nodes and not bombard any single node with too many requests at a time. A node may implement throttling and DDoS protection to prevent such a bombardment.
 
-- [Gossipsub Spec](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub)
-- [Block Validity Check](mining.md#chain-validation)
-- TODO: Link to message validity check function
+## Bitswap
+
+Run bitswap to fetch and serve data (such as blockdata and messages) to and from other filecoin nodes. This is used to fill in missing bits during block propagation, and also to fetch data during sync.
+
+There is not yet an official spec for bitswap, but [the protobufs](https://github.com/ipfs/go-bitswap/blob/master/message/pb/message.proto) should help in the interim.
+
 
 ## Block Propagation
 
@@ -23,12 +26,15 @@ type BlockMsg struct {
 
 The array of message cids must match the `Messages` field in the block when used to construct a [sharray](sharray.md).
 
-Each Filecoin node sets a 'validation function' for the blocks topic that checks that the block is properly constructed, its ticket is valid, the block signature is valid, the miner is a valid miner, and the block is a child of a known good tipset. (TODO: clarify which of these checks are needed, any slowness here impacts propagation time significantly, this is not a full validity check) If an invalid block is received, the peer it was received from should be marked as potentially bad (TODO: we could blacklist peers who send bad blocks, maybe need support from libp2p for this?)
+Every `BlockMsg` received must be validated [through the syntactical check](./validation.md#syntactical-validation) before being propagated again. If validation fails, it must not be propagated.
 
-TODO: we should likely be smarter here and track which messages we could send along with each block to improve propagation time
 
 ## Message Propagation
 
-Messages are propagated over the libp2p pubsub channel `/fil/messages`. The message is [serialized](data-structures.md#messages) and the raw bytes are sent as the content of the pubsub message.
+Messages are propagated over the libp2p pubsub channel `/fil/messages`. On this channel, every [serialised `Message`](data-structures.md#messages) is announced.
 
-The pubsub validation function for messages checks that the content of each pubsub message on this topic is, first, under the maximum size limit for a message, and then that it is a properly constructed message. (TODO: discuss checking signatures and account balances, some tricky bits that need consideration). If an invalid message is received from a peer, that peer should be marked as potentially bad.
+Upon receiving the message, its validity must be checked: the signature must be valid, and the account in question must have enough funds to cover the actions specified. If the message is not valid it should be dropped and must not be forwarded.
+
+{{% notice todo %}}
+discuss checking signatures and account balances, some tricky bits that need consideration. Does the fund check cause improper dropping? E.g. I have a message sending funds then use the newly constructed account to send funds, as long as the previous wasn't executed the second will be considered "invalid" ... though it won't be at the time of execution.
+{{% /notice %}}

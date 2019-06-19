@@ -6,6 +6,8 @@ Validation is split into two stages, syntactic and semantic. The syntactic stage
 
 A node must decode and perform syntactic validation for every block received before passing it on (e.g. in a lipbp2p pubsub validator). A node must perform semantic validation before accepting the block as an extension to its chain.
 
+### Syntactical Validation
+
 A syntactically valid block:
 
 - must include a well-formed miner address
@@ -17,6 +19,8 @@ A syntactically valid block:
 - must include well-formed state root, messages, and receipts CIDs
 - must include a timestamp not in the future
 
+
+### Semantical Validation
 
 A semantically valid block:
 
@@ -36,4 +40,14 @@ A semantically valid block:
 
 {{% notice info %}}
 Once the block passes validation, it must be added to the local datastore, regardless whether it is understood as the best tip at this point. Future blocks from other miners may be mined on top of it and in that case we will want to have it around to avoid refetching.
+{{% /notice %}}
+
+{{% notice info %}}
+To make certain validation checks simpler, blocks should be indexed by height and by parent set. That way sets of blocks with a given height and common parents may be quickly queried. It may also be useful to compute and cache the resultant aggregate state of blocks in these sets, this saves extra state computation when checking which state root to start a block at when it has multiple parents.
+{{% /notice %}}
+
+### Basic check
+
+{{% notice todo %}}
+clarify which of these checks are needed in order to be allowed to validate and propagate a block. This is probably a sub-set of the above mentioned - and thus this paragraph might be moved there - that should be reasonably quick to check and hard to spoof or get around.
 {{% /notice %}}
