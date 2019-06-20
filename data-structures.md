@@ -486,3 +486,8 @@ a long block.
 
 > **Note:** The encoding is unique, so no matter which algorithm for encoding is used, it should produce
 > the same encoding, given the same input.
+
+##### Bit Numbering
+
+For Filecoin, byte arrays representing RLE+ bitstreams are encoded using [LSB 0](https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering) bit numbering.
+
