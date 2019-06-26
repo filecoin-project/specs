@@ -144,7 +144,7 @@ Derive challenges for each layer (call `derive_challenges()`).
 TODO: define `Challenge` (or find existing definition)
 
 ```go
-func ChallengesForLayer(challenge Challenge, layer Uint) -> Uint {
+func ChallengesForLayer(challenge Challenge, layer Uint) Uint {
 
     switch challenge.Type {
         case Fixed:
@@ -167,32 +167,26 @@ func ChallengesForLayer(challenge Challenge, layer Uint) -> Uint {
 ```
 
 ### Challenge Derivation
-```rust
-pub fn derive_challenges<D: Domain>(
-    challenges: &LayerChallenges,
-    layer: u8,
-    leaves: usize,
-    replica_id: &D,
-    commitment: &D,
-    k: u8,
-) -> Vec<usize> {
-    let n = challenges.challenges_for_layer(layer as usize);
-    (0..n)
-        .map(|i| {
-            let mut bytes = replica_id.into_bytes();
-            let j = ((n * k as usize) + i) as u32;
-            bytes.extend(commitment.into_bytes());
-            bytes.push(layer);
-            bytes.write_u32::<LittleEndian>(j).unwrap();
 
-            let hash = blake2s(bytes.as_slice());
-            let big_challenge = BigUint::from_bytes_le(hash.as_ref());
+TODO: define `Domain` and `LayerChallenges` (or find existing definition)
 
-            // For now, we cannot try to prove the first or last node, so make sure the challenge can never be 0 or leaves - 1.
-            let big_mod_challenge = big_challenge % (leaves - 2);
-            big_mod_challenge.to_usize().unwrap() + 1
-        })
-        .collect()
+```go
+func DeriveChallenges(challenges LayerChallenges, layer Uint, leaves Uint,
+    replica_id Domain, commitment Domain, k Uint) []Uint {
+
+    n := challenges.ChallengesForLayer(layer)
+    var derivedChallenges [n]Uint
+    for i := 0; i < n; i++ {
+        bytes := []byte(replica_id)
+        bytes.append([]byte(commitment));
+        bytes.append(layer);
+        bytes.append(toLittleEndian(n * k + i))
+
+        // For now, we cannot try to prove the first or last node, so make 
+        // sure the challenge can never be 0 or leaves - 1.
+        big_mod_challenge := blake2s(bytes) % (leaves - 2);
+        derivedChallenges[i] = big_mod_challenge + 1
+    }
 }
 ```
 
