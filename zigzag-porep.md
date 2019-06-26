@@ -141,30 +141,29 @@ Derive challenges for each layer (call `derive_challenges()`).
 
 ### Layer Challenge Counts
 
-```rust
-    pub fn challenges_for_layer(&self, layer: usize) -> usize {
-        match self {
-            LayerChallenges::Fixed { count, .. } => *count,
-            LayerChallenges::Tapered {
-                taper,
-                taper_layers,
-                count,
-                layers,
-            } => {
-                assert!(layer < *layers);
-                let l = (layers - 1) - layer;
+TODO: define `Challenge` (or find existing definition)
 
-                let r: f64 = 1.0 - *taper;
-                let t = min(l, *taper_layers);
-                let total_taper = r.powi(t as i32);
+```go
+func ChallengesForLayer(challenge Challenge, layer Uint) -> Uint {
 
-                let calculated = (total_taper * *count as f64).ceil() as usize;
+    switch challenge.Type {
+        case Fixed:
+            return challenge.Count
+        case Tapered:
+            assert(layer < LAYERS)
+            l := (LAYERS - 1) - layer
+            r := 1.0 - TAPER;
+            t := min(l, TAPER_LAYERS)
 
-                // Although implied by the call to `ceil()` above, be explicit that a layer cannot contain 0 challenges.
-                max(1, calculated)
-            }
-        }
+            totalTaper := pow(r, t)
+
+            calculated := ceil(totalTaper * challenge.count)
+
+            // Although implied by the call to `ceil()` above, be explicit
+            // that a layer cannot contain 0 challenges.
+            max(1, calculated)
     }
+}
 ```
 
 ### Challenge Derivation
