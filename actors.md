@@ -554,6 +554,12 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		Fatal("not enough collateral")
 	}
 
+	// ensure that the miner cannot commit more sectors than can be proved with
+	// a single PoSt
+	if miner.Sectors.Size() == MaxNumberSectorsPerMiner() {
+		Fatal("too many sectors")
+	}
+
 	miner.ActiveCollateral += coll
 
 	// Note: There must exist a unique index in the miner's sector set for each
