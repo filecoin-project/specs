@@ -602,7 +602,7 @@ TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
 {{% /notice %}}
 
 ```go
-func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done BitField) {
+func SubmitPost(proofs PoStProof, faults []FaultSet, recovered BitField, done BitField) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
@@ -635,8 +635,8 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Refund(msg.Value - feesRequired)
 	}
 
-	if !CheckPostProofs(miner.SectorSize, proofs, faults) {
-		Fatal("proofs invalid")
+	if !CheckPostProof(miner.SectorSize, proof, faults) {
+		Fatal("proof invalid")
 	}
 
 	// combine all the fault set bitfields, and subtract out the recovered
