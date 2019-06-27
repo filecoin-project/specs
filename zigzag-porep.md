@@ -109,7 +109,7 @@ func RepHash(leaves []node) ([][]node, node) {
 
 For each of `LAYERS` layers, `l`, perform one __*Layer Replication*__, yielding a replica, tree, and commitment (`CommR_<l>`) per layer:
 ```go
-let layer_replicas = [LAYERS][nodes]Uint8
+let layer_replicas = [LAYERS][nodes]uint8
 let layer_trees = [LAYERS]MerkleTree
 let CommRs = []commitment
 
@@ -144,7 +144,7 @@ Derive challenges for each layer (call `derive_challenges()`).
 TODO: define `Challenge` (or find existing definition)
 
 ```go
-func ChallengesForLayer(challenge Challenge, layer Uint) Uint {
+func ChallengesForLayer(challenge Challenge, layer uint) uint {
 
     switch challenge.Type {
         case Fixed:
@@ -171,11 +171,11 @@ func ChallengesForLayer(challenge Challenge, layer Uint) Uint {
 TODO: define `Domain` and `LayerChallenges` (or find existing definition)
 
 ```go
-func DeriveChallenges(challenges LayerChallenges, layer Uint, leaves Uint,
-    replicaId Domain, commitment Domain, k Uint) []Uint {
+func DeriveChallenges(challenges LayerChallenges, layer uint, leaves uint,
+    replicaId Domain, commitment Domain, k uint) []uint {
 
     n := challenges.ChallengesForLayer(layer)
-    var derivedChallenges [n]Uint
+    var derivedChallenges [n]uint
     for i := 0; i < n; i++ {
         bytes := []byte(replicaId)
         bytes.append([]byte(commitment));
@@ -196,7 +196,7 @@ TODO: define `TransformedLayers` (or find existing definition)
 Note: representing the (simpler) sequential replication case.
 
 ```go
-func transformAndReplicateLayers(graph Graph, slothIter Uint,
+func transformAndReplicateLayers(graph Graph, slothIter uint,
     replicaId Domain, data []byte) TransformedLayers {
 
     var taus [LAYERS]Domain
@@ -231,46 +231,111 @@ func transformAndReplicateLayers(graph Graph, slothIter Uint,
 
 ### Graph Structure
 TODO: define `parents()` and `expansion_parents()` and use in `replicate_layer()`.
-```rust
-fn parents(&self, node: usize) -> Vec<usize> {
-    let m = self.base_degree;
+(`parents()` is actually used in `encode()`, should `encode()` be defined in the previous section then?)
+TODO: define `Graph`.
 
-    match node {
+```go
+func baseParents(node uint) (parents [BASE_DEGREE]uint) {
+    switch node {
         // Special case for the first node, it self references.
-        0 => vec![0; m as usize],
         // Special case for the second node, it references only the first one.
-        1 => vec![0; m as usize],
-        _ => {
-            // seed = self.seed | node
-            let mut seed = [0u32; 8];
-            seed[0..7].copy_from_slice(&self.seed);
-            seed[7] = node as u32;
-            let mut rng = ChaChaRng::from_seed(&seed);
+        case 0:
+        case 1:
+            for i := 0; i < BASE_DEGREE; i++ {
+                parents[i] = 0
+            }
+        default:
+            rng := ChaChaRng.from_seed(Graph.seed)
+            // FIXME: Might be an implementation detail worth hiding.
 
-            let mut parents = Vec::with_capacity(m);
-            for k in 0..m {
+            for k := 0; k < BASE_DEGREE; k++ {
                 // iterate over m meta nodes of the ith real node
                 // simulate the edges that we would add from previous graph nodes
                 // if any edge is added from a meta node of jth real node then add edge (j,i)
-                let logi = ((node * m) as f32).log2().floor() as usize;
-                let j = rng.gen::<usize>() % logi;
-                let jj = cmp::min(node * m + k, 1 << (j + 1));
-                let back_dist = rng.gen_range(cmp::max(jj >> 1, 2), jj + 1);
-                let out = (node * m + k - back_dist) / m;
+                logi := floor(log2(node * BASE_DEGREE))
+                j := rng.gen() % logi
+                jj := min(node * BASE_DEGREE + k, 1 << (j + 1))
+                backDist := rng.gen_range(max(jj >> 1, 2), jj + 1)
+                out := (node * BASE_DEGREE + k - backDist) / BASE_DEGREE
 
                 // remove self references and replace with reference to previous node
                 if out == node {
-                    parents.push(node - 1);
+                    parents[i] = node - 1
                 } else {
-                    assert!(out <= node);
-                    parents.push(out);
+                    parents[i] = out;
                 }
             }
 
-            parents.sort_unstable();
+            sort(parents)
+    }
+}
 
-            parents
+func expandedParents(node uint) (parents []uint) {
+    parents := make([]uint, EXPANSION_DEGREE)
+
+    feistelKeys := []uint{1, 2, 3, 4}
+    for i := 0, p := 0; i < EXPANSION_DEGREE; i++ {
+        a := node * EXPANSION_DEGREE + i
+        if Graph.reversed {
+            transformed := feistelInvertPermute(Graph.size * EXPANSION_DEGREE, a, feistelKeys)
+        } else {
+            transformed := feistelPermute(Graph.size * EXPANSION_DEGREE, a, feistelKeys)
         }
+        other := transformed / EXPANSION_DEGREE
+        // Collapse the output in the matrix search space to the row of the corresponding
+        // node (losing the column information, that will be regenerated later when calling
+        // back this function in the `reversed` direction).
+
+        if Graph.reversed {
+            if other > node {
+                parents[p] = other
+                p += 1
+            }
+        } else if other < node {
+            parents[p] = other
+            p += 1
+        }
+}
+
+
+func parents(rawNode uint) (parents [PARENT_COUNT]uint) {
+    baseParents := baseParents(realIndex(rawNode))
+    for i := 0; i < BASE_DEGREE; i++ {
+        parents[i] = realIndex(baseParents[i])
+    }
+
+    // expandedParents takes raw_node
+    expandedParents := expandedParents(rawNode)
+    for i := 0; i < len(expandedParents); i++ {
+        parents[BASE_DEGREE + i] = expandedParents[i]
+    }
+
+    // Pad so all nodes have correct degree.
+    currentLength := BASE_DEGREE + len(expandedParents)
+    for i := 0; i < PARENT_COUNT - currentLength; i++ {
+        if Graph.reversed {
+            parents[currentLength + i] = Graph.size - 1
+        } else {
+            parents[currentLength + i] = 0
+        }
+    }
+    assert(len(parents) == PARENT_COUNT)
+    sort(parents)
+
+    for _, parent := range parents {
+        if Graph.forward {
+            assert(parent <= rawNode)
+        } else {
+            assert(parent >= rawNode)
+        }
+    }
+}
+
+func realIndex(rawNode uint) uint {
+    if Graph.reversed {
+        return Graph.size - 1 - rawNode
+    } else {
+        return rawNode
     }
 }
 ```
