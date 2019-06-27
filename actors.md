@@ -555,8 +555,8 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	}
 
 	// ensure that the miner cannot commit more sectors than can be proved with
-	// a single PoSt
-	if miner.Sectors.Size() == MaxNumberSectorsPerMiner() {
+	// a single PoSt (POST_SECTORS_COUNT)
+	if miner.Sectors.Size() == 16384 {
 		Fatal("too many sectors")
 	}
 
@@ -614,6 +614,7 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered BitField, done Bi
 	if !miner.ValidateFaultSets(faults, recovered, done) {
 		Fatal("fault sets invalid")
 	}
+
 
 	var feesRequired TokenAmount
 
