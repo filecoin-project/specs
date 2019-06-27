@@ -172,12 +172,12 @@ TODO: define `Domain` and `LayerChallenges` (or find existing definition)
 
 ```go
 func DeriveChallenges(challenges LayerChallenges, layer Uint, leaves Uint,
-    replica_id Domain, commitment Domain, k Uint) []Uint {
+    replicaId Domain, commitment Domain, k Uint) []Uint {
 
     n := challenges.ChallengesForLayer(layer)
     var derivedChallenges [n]Uint
     for i := 0; i < n; i++ {
-        bytes := []byte(replica_id)
+        bytes := []byte(replicaId)
         bytes.append([]byte(commitment));
         bytes.append(layer);
         bytes.append(toLittleEndian(n * k + i))
@@ -191,7 +191,43 @@ func DeriveChallenges(challenges LayerChallenges, layer Uint, leaves Uint,
 ```
 
 ### Layer Replication
-TODO: define and use `replicate_layer()`
+TODO: define `TransformedLayers` (or find existing definition)
+
+Note: representing the (simpler) sequential replication case.
+
+```go
+func transformAndReplicateLayers(graph Graph, slothIter Uint,
+    replicaId Domain, data []byte) TransformedLayers {
+
+    var taus [LAYERS]Domain
+    var auxs [LAYERS]Tree
+    var sortedTrees [LAYERS]Tree
+
+    currentGraph := graph
+    for layer := 0; layer <= LAYERS; layer++ {
+        treeData := currentGraph.merkleTree(data)
+        sortedTrees.append(treeData)
+        if layer < LAYERS {
+            encode(currentGraph, slothIter, replicaId, data)
+        }
+        currentGraph = currentGraph.zigzag()
+    }
+
+    previousCommr := nil
+    for _, replicaTree := range sortedTrees {
+        commR := replicaTree.root()
+        if previousCommr != nil {
+            commD := previousCommr
+            tau := (commR, commD)
+            taus.append(tau)
+        }
+        auxs.append(replicaTree);
+        previousCommr = commR
+    }
+
+    return (taus, auxs)
+}
+```
 
 ### Graph Structure
 TODO: define `parents()` and `expansion_parents()` and use in `replicate_layer()`.
