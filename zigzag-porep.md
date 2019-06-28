@@ -297,7 +297,6 @@ func expandedParents(node uint) (parents []uint) {
         }
 }
 
-
 func parents(rawNode uint) (parents [PARENT_COUNT]uint) {
     baseParents := baseParents(realIndex(rawNode))
     for i := 0; i < BASE_DEGREE; i++ {
@@ -337,6 +336,131 @@ func realIndex(rawNode uint) uint {
     } else {
         return rawNode
     }
+}
+```
+
+### ZigZag operation: Feistel
+
+TODO: Add `FEISTEL_ROUNDS` and `FEISTEL_BYTES` (or find its definitions)
+
+```go
+func permute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
+    u := encode(index, keys)
+
+    while u >= numElements {
+        u = encode(u, keys)
+    }
+    // Since we are representing `numElements` using an even number of bits,
+    // that can encode many values above it, so keep repeating the operation
+    // until we land in the permitted range.
+
+    return u
+}
+
+func encode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
+    left, right, rightMask, halfBits := commonSetup(index)
+
+    for _, key := range keys {
+        left, right = right, left ^ feistel(right, key, rightMask)
+    }
+
+    return  (left << halfBits) | right
+}
+
+func commonSetup(index uint) (uint, uint, uint, uint) {
+    numElements := Graph.size * EXPANSION_DEGREE
+    nextPow4 := 4;
+    halfBits := 1
+    while nextPow4 < numElements {
+        nextPow4 *= 4
+        halfBits += 1
+    }
+
+    rightMask = (1 << halfBits) - 1
+    leftMask = rightMask << halfBits
+
+    right := index & rightMask
+    left := (index & leftMask) >> halfBits
+
+    return  (left, right, rightMask, halfBits)
+}
+
+// Round function of the Feistel network: `F(Ri, Ki)`. Joins the `right`
+// piece and the `key`, hashes it and returns the lower `uint32` part of
+// the hash filtered trough the `rightMask`.
+func feistel(right uint, key uint, rightMask uint) uint {
+    var data [FEISTEL_BYTES]uint
+
+    var r uint
+    if FEISTEL_BYTES <= 8 {
+        data[0] = uint8(right >> 24)
+        data[1] = uint8(right >> 16)
+        data[2] = uint8(right >> 8)
+        data[3] = uint8(right)
+
+        data[4] = uint8(key >> 24)
+        data[5] = uint8(key >> 16)
+        data[6] = uint8(key >> 8)
+        data[7] = uint8(key)
+
+        hash := blake2b(data)
+
+        r =   hash[0]) << 24
+            | hash[1]) << 16
+            | hash[2]) << 8
+            | hash[3])
+    } else {
+        data[0]  = uint8(right >> 56)
+        data[1]  = uint8(right >> 48)
+        data[2]  = uint8(right >> 40)
+        data[3]  = uint8(right >> 32)
+        data[4]  = uint8(right >> 24)
+        data[5]  = uint8(right >> 16)
+        data[6]  = uint8(right >> 8)
+        data[7]  = uint8(right)
+
+        data[8]  = uint8(key >> 56)
+        data[9]  = uint8(key >> 48)
+        data[10] = uint8(key >> 40)
+        data[11] = uint8(key >> 32)
+        data[12] = uint8(key >> 24)
+        data[13] = uint8(key >> 16)
+        data[14] = uint8(key >> 8)
+        data[15] = uint8(key)
+
+        hash := blake2b(data)
+
+        r =   hash[0] << 56
+            | hash[1] << 48
+            | hash[2] << 40
+            | hash[3] << 32
+            | hash[4] << 24
+            | hash[5] << 16
+            | hash[6] << 8
+            | hash[7]
+    }
+
+    return r & rightMask
+}
+
+// Inverts the `permute` result to its starting value for the same `key`.
+func invertPermute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
+    u := decode(index, keys)
+
+    while u >= numElements {
+        u = decode(u, keys);
+    }
+    return u
+}
+
+func decode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
+    left, right, rightMask, halfBits := commonSetup(index)
+
+    for _, key := range reversed(keys) {
+        left, right = right ^ feistel(left, keys, rightMask), left
+    }
+
+    return (left << halfBits) | right
 }
 ```
 
