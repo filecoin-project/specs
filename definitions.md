@@ -203,7 +203,7 @@ Repair refers to the processes and protocols by which the Filecoin network ensur
 
 #### Round
 
-A round refers to the period over which a new leader election occurs and a block is generated if a leader is found. Typically this means a new block will be mined at every round, though some rounds may see 0 or multiple blocks generated.
+A round refers to the period over which a new leader election occurs. Typically, an election will find a single leader. If a single leader is found, a single block is generated. If multiple leaders are found, multiple blocks are generated. If no leader is found, no block is generated.
 
 #### SEAL/UNSEAL
 
