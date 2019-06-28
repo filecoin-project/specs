@@ -584,7 +584,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// the last proving period.
 	oldPower := miner.Power
 
-	miner.Power = (miner.ProvingSet.Count() - allFaults.Count()) * miner.SectorSize
+	miner.Power = (miner.ProvingSet.Size() - allFaults.Count()) * miner.SectorSize
 	StorageMarket.UpdateStorage(miner.Power - oldPower)
 
 	miner.ProvingSet = miner.Sectors
