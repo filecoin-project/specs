@@ -71,12 +71,11 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
 </ul></li>
-<li><a href="../../docs/network-protocols/">Network</a>
+<li><a href="../../docs/networking/">Network</a>
 
 <ul>
-<li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
-<li><a href="../../docs/sync/">Chain Sync</a></li>
+<li><a href="../../docs/network-protocols/">Specific Protocols</a></li>
 </ul></li>
 <li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
 <li><a href="../../docs/state-machine/">State Machine</a>
@@ -84,7 +83,6 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="../../docs/local-storage/">Local Storage</a></li>
 </ul></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul>
 
 <p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
@@ -420,6 +418,16 @@ https://github.com/alex-shpak/hugo-book
 <td>4</td>
 <td><code>GetTotalStorage</code></td>
 </tr>
+
+<tr>
+<td>5</td>
+<td><code>PowerLookup</code></td>
+</tr>
+
+<tr>
+<td>6</td>
+<td><code>IsMiner</code></td>
+</tr>
 </tbody>
 </table>
 
@@ -535,6 +543,30 @@ https://github.com/alex-shpak/hugo-book
 <p>Return: BytesAmount</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetTotalStorage</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">TotalStorage</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="powerlookup">PowerLookup</h3>
+
+<p>Parameters:
+- miner Address</p>
+
+<p>Return: BytesAmount</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner not registered with storage market&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">mact</span> <span class="o">:=</span> <span class="nf">LoadMinerActor</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nx">mact</span><span class="p">.</span><span class="nf">GetPower</span><span class="p">()</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="isminer">IsMiner</h3>
+
+<p>Parameters:
+- addr Address</p>
+
+<p>Return: BytesAmount</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">IsMiner</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="storage-miner-actor">Storage Miner Actor</h2>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageMiner</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -685,7 +717,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">self</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">=</span> <span class="nx">message</span><span class="p">.</span><span class="nx">From</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">=</span> <span class="nx">worker</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">PeerID</span> <span class="p">=</span> <span class="nx">pid</span>
-  <span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span> <span class="p">=</span> <span class="nx">sectorSize</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span> <span class="p">=</span> <span class="nx">sectorSize</span>
 <span class="p">}</span></code></pre></div>
 <h3 id="addask">AddAsk</h3>
 
@@ -745,7 +777,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// make sure the miner has enough collateral to add more storage
 </span><span class="c1"></span>    <span class="nx">coll</span> <span class="p">=</span> <span class="nf">CollateralForSector</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nx">coll</span> <span class="p">&lt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="o">-</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">coll</span> <span class="p">&lt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span><span class="o">-</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough collateral&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -801,7 +833,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="c1">// TODO: determine what exactly happens here. Is the miner permanently banned?
 </span><span class="c1"></span>        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Post submission too late&#34;</span><span class="p">)</span>
     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">{</span>
-        <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span><span class="p">,</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span><span class="p">)</span>
+        <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span><span class="p">,</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="o">-</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">recovered</span><span class="p">)</span>
@@ -894,11 +926,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">power</span> <span class="nx">Integer</span><span class="p">,</span> <span class="nx">blocksLate</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: real collateral calculation, obviously
+    <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: real collateral calculation, obviously
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
+    <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
 </span><span class="c1"></span><span class="p">}</span></code></pre></div>
 <h3 id="slashstoragefault">SlashStorageFault</h3>
 
@@ -1011,7 +1043,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="k">return</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">amt</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="o">-</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">amt</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span><span class="o">-</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Not enough free collateral to withdraw that much&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -1483,6 +1515,8 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 <li><a href="#slashconsensusfault">SlashConsensusFault</a></li>
 <li><a href="#updatestorage">UpdateStorage</a></li>
 <li><a href="#gettotalstorage">GetTotalStorage</a></li>
+<li><a href="#powerlookup">PowerLookup</a></li>
+<li><a href="#isminer">IsMiner</a></li>
 </ul></li>
 <li><a href="#storage-miner-actor">Storage Miner Actor</a>
 <ul>

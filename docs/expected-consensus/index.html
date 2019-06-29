@@ -71,12 +71,11 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
 </ul></li>
-<li><a href="../../docs/network-protocols/">Network</a>
+<li><a href="../../docs/networking/">Network</a>
 
 <ul>
-<li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
-<li><a href="../../docs/sync/">Chain Sync</a></li>
+<li><a href="../../docs/network-protocols/">Specific Protocols</a></li>
 </ul></li>
 <li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
 <li><a href="../../docs/state-machine/">State Machine</a>
@@ -84,7 +83,6 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="../../docs/local-storage/">Local Storage</a></li>
 </ul></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul>
 
 <p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
@@ -468,6 +466,8 @@ SampleRandomness: returns the appropriate ticket from round N-K
 </ul>
 
 <p>The first condition implies that all blocks in a TipSet were mined at the same height (remember that height refers to block height as opposed to ticket round). This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a TipSet bringing these blocks together. The second rule means blocks in a TipSet are mined in a same round.</p>
+
+<p>The blocks in a tipset have no defined order in representation. During state computation, blocks in a tipset are processed in order of block ticket, breaking ties with the block CID bytes.</p>
 
 <p>Due to network propagation delay, it is possible for a miner in round N+1 to omit valid blocks mined at round N from their TipSet. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol.</p>
 

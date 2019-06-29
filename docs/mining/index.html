@@ -71,12 +71,11 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
 </ul></li>
-<li><a href="../../docs/network-protocols/">Network</a>
+<li><a href="../../docs/networking/">Network</a>
 
 <ul>
-<li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
-<li><a href="../../docs/sync/">Chain Sync</a></li>
+<li><a href="../../docs/network-protocols/">Specific Protocols</a></li>
 </ul></li>
 <li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
 <li><a href="../../docs/state-machine/">State Machine</a>
@@ -84,7 +83,6 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="../../docs/local-storage/">Local Storage</a></li>
 </ul></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul>
 
 <p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
@@ -279,37 +277,45 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
     <span class="c1">// next check that it is appropriately delayed from its parents including
 </span><span class="c1"></span>    <span class="c1">// null blocks.
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">GetTime</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">minParentTime</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="nx">BLOCK_DELAY</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Tickets</span><span class="p">))</span> <span class="p">{</span>
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">GetTime</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">minParentTime</span><span class="p">()</span><span class="o">+</span><span class="p">(</span><span class="nx">BLOCK_DELAY</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Tickets</span><span class="p">))</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;block was generated too soon&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// 3. Verify ParentWeight
+    <span class="c1">// 3. Verify miner has not been slashed and is still valid miner
+</span><span class="c1"></span>    <span class="nx">curStorageMarket</span> <span class="o">:=</span> <span class="nf">LoadStorageMarket</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">State</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">curStorageMarket</span><span class="p">.</span><span class="nf">IsMiner</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Miner</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;block miner not valid&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 4. Verify ParentWeight
 </span><span class="c1"></span>    <span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nx">ParentWeight</span> <span class="o">!=</span> <span class="nf">ComputeWeight</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Parents</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid parent weight&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// 4. Verify Tickets
+    <span class="c1">// 5. Verify Tickets
 </span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nf">VerifyTickets</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;tickets were invalid&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// 5. Verify ElectionProof
+    <span class="c1">// 6. Verify ElectionProof
 </span><span class="c1"></span>    <span class="nx">randomnessLookbackTipset</span> <span class="o">:=</span> <span class="nf">RandomnessLookback</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span>
     <span class="nx">lookbackTicket</span> <span class="o">:=</span> <span class="nf">minTicket</span><span class="p">(</span><span class="nx">randomnessLookbackTipset</span><span class="p">)</span>
-    <span class="nx">challenge</span> <span class="o">:=</span> <span class="nx">sha256</span><span class="p">.</span><span class="nf">Sum</span><span class="p">(</span><span class="nx">lookbackTicket</span><span class="p">)</span>
+    <span class="nx">challenge</span> <span class="o">:=</span> <span class="nf">blake2b</span><span class="p">(</span><span class="nx">lookbackTicket</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">pubk</span><span class="p">,</span> <span class="nx">challenge</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;election proof was not a valid signature of the last ticket&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="nx">powerLookbackTipset</span> <span class="o">:=</span> <span class="nf">PowerLookback</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span>
-    <span class="nx">minerPower</span> <span class="o">:=</span> <span class="nf">GetPower</span><span class="p">(</span><span class="nx">powerLookbackTipset</span><span class="p">.</span><span class="nx">state</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nx">Miner</span><span class="p">)</span>
-    <span class="nx">totalPower</span> <span class="o">:=</span> <span class="nf">GetTotalPower</span><span class="p">(</span><span class="nx">powerLookbackTipset</span><span class="p">.</span><span class="nx">state</span><span class="p">)</span>
+
+    <span class="nx">lbStorageMarket</span> <span class="o">:=</span> <span class="nf">LoadStorageMarket</span><span class="p">(</span><span class="nx">powerLookbackTipset</span><span class="p">.</span><span class="nx">state</span><span class="p">)</span>
+    <span class="nx">minerPower</span> <span class="o">:=</span> <span class="nx">lbStorageMarket</span><span class="p">.</span><span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Miner</span><span class="p">)</span>
+    <span class="nx">totalPower</span> <span class="o">:=</span> <span class="nx">lbStorageMarket</span><span class="p">.</span><span class="nf">GetTotalStorage</span><span class="p">()</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">IsProofAWinner</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">minerPower</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;election proof was not a winner&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// 6. Verify Message Signatures
+    <span class="c1">// 7. Verify Message Signatures
 </span><span class="c1"></span>    <span class="nx">messages</span> <span class="o">:=</span> <span class="nf">LoadMessages</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Messages</span><span class="p">)</span>
     <span class="nx">state</span> <span class="o">:=</span> <span class="nf">GetParentState</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">Parents</span><span class="p">)</span>
 
@@ -328,7 +334,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">ValidateBLSSignature</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">BLSAggregate</span><span class="p">,</span> <span class="nx">blsMessages</span><span class="p">,</span> <span class="nx">blsPubKeys</span><span class="p">)</span>
 
-    <span class="c1">// 7. Validate State Transitions
+    <span class="c1">// 8. Validate State Transitions
 </span><span class="c1"></span>    <span class="nx">receipts</span> <span class="o">:=</span> <span class="nf">LoadReceipts</span><span class="p">(</span><span class="nx">blk</span><span class="p">.</span><span class="nx">MessageReceipts</span><span class="p">)</span>
     <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">msg</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">messages</span> <span class="p">{</span>
         <span class="nx">receipt</span> <span class="o">:=</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">state</span><span class="p">,</span> <span class="nx">msg</span><span class="p">)</span>
@@ -348,10 +354,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="nx">ast</span> <span class="o">:=</span> <span class="nf">LoadAccountActorState</span><span class="p">(</span><span class="nx">act</span><span class="p">)</span>
-  <span class="k">if</span> <span class="nx">act</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">BLS</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nf">ExtractBLSPubKey</span><span class="p">(</span><span class="nx">act</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
-  <span class="p">}</span>
-  <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;can only look up public keys for BLS controlled accounts&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">act</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nx">Type</span> <span class="o">==</span> <span class="nx">BLS</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nf">ExtractBLSPubKey</span><span class="p">(</span><span class="nx">act</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;can only look up public keys for BLS controlled accounts&#34;</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <p>Ticket validation is detailed as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">RandomnessLookback</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="nx">TipSet</span> <span class="p">{</span>
@@ -431,13 +437,8 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><code>Tickets</code> - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See <a href="./expected-consensus.md#ticket-generation">ticket generation</a>.</li>
 <li><code>ElectionProof</code> - A signature over the final ticket from the <code>Tickets</code> array proving. See <a href="./expected-consensus.md#ticket-generation">ticket generation</a>.</li>
-<li><code>Timestamp</code> - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp. The Timestamp in the newly created block must satisfy the following conditions:
-
-<ul>
-<li>the timestamp on the block is not in the future</li>
-<li>the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).</li>
-</ul></li>
 <li><code>ParentWeight</code> - As described in <a href="./expected-consensus.md#chain-weighting">Chain Weighting</a>.</li>
+<li><code>Parents</code> - the CIDs of the parent blocks.</li>
 <li><code>ParentState</code> - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
 
 <ul>
@@ -461,6 +462,12 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li>Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.</li>
 <li>Insert them into a Merkle Tree and take its root.</li>
+</ul></li>
+<li><code>Timestamp</code> - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
+
+<ul>
+<li>the timestamp on the block is not in the future</li>
+<li>the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).</li>
 </ul></li>
 <li><code>BLSAggregate</code> - The aggregated signatures of all messages in the block that used BLS signing.</li>
 <li><code>BlockSig</code> - A signature with the miner&rsquo;s private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.</li>

@@ -13,11 +13,6 @@
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/bootstrap/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>https://filecoin-project.github.io/specs/docs/data-propagation/</loc>
     <priority>0</priority>
   </url>
@@ -58,7 +53,7 @@
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/operation/</loc>
+    <loc>https://filecoin-project.github.io/specs/docs/networking/</loc>
     <priority>0</priority>
   </url>
   
@@ -99,11 +94,6 @@
   
   <url>
     <loc>https://filecoin-project.github.io/specs/docs/style/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://filecoin-project.github.io/specs/docs/sync/</loc>
     <priority>0</priority>
   </url>
   

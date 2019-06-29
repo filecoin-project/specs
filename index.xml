@@ -30,23 +30,13 @@
     
     <item>
       <title></title>
-      <link>https://filecoin-project.github.io/specs/docs/bootstrap/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://filecoin-project.github.io/specs/docs/bootstrap/</guid>
-      <description>Filecoin Bootstrapping Routine This spec describes the Filecoin bootstrapping protocol, it must be read along with:
- Sync on how Filecoin nodes sync with bootstrap nodes to catch up to the chain and stay synced after the initial bootstrapping has occured. The Syncer interface and many of the methods used here are defined in the sync spec.  For related systems, see:
- Network Protocols on how Filecoin nodes can communicate with each other, with for instance, an initial handshake, or block syncing.</description>
-    </item>
-    
-    <item>
-      <title></title>
       <link>https://filecoin-project.github.io/specs/docs/data-propagation/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/data-propagation/</guid>
       <description>Filecoin Data Propagation The filecoin network needs to broadcast blocks and messages to all peers in the network. This document details how that process works.
-Both blocks and messages are propagated using the gossipsub libp2p pubsub router. The pubsub messages are authenticated. For blocks, the pubsub hop validation function is set to check that the block is valid before re-propagating. For messages, a similar validity check is run, the signature must be valid, and the account in question must have enough funds to cover the actions specified.</description>
+Messages and block headers along side the message references are propagated using the gossipsub libp2p pubsub router. Every full node must implement and run that protocol. All pubsub messages are authenticated and must be syntactically validated before being propagated further.
+Further more, every full node must implement and offer the bitswap protocol and provide all Cid Referenced objects, it knows of, through it.</description>
     </item>
     
     <item>
@@ -121,19 +111,20 @@ Chain Data Private Keys Sectors Storage Deals </description>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/network-protocols/</guid>
-      <description>Filecoin Network Protocols All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.
+      <description>Filecoin Specific Network Protocols All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream as outlined in [networking(./networking.md)
 CBOR RPC Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will use the CBOR RPC protocol format, defined below.
 This format consists of series of CBOR serialized objects.</description>
     </item>
     
     <item>
       <title></title>
-      <link>https://filecoin-project.github.io/specs/docs/operation/</link>
+      <link>https://filecoin-project.github.io/specs/docs/networking/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://filecoin-project.github.io/specs/docs/operation/</guid>
-      <description>Filecoin Node Operation Running a Filecoin full node requires running many different processes and protocols simultaneously. This section describes the set of things you need to do in order to run a fully validating Filecoin node.
-TODO: elaborate on all this, obviously Chain Validation Chain validation is the process by which a node stays up to date with the current state of the blockchain. This Involves: - Listening for new blocks on the blocks pubsub channel (See block propagation) - As new blocks come in, run through the block validation process - Keep track of valid blocks, keep track of the current &amp;lsquo;best&amp;rsquo; block (according to EC rules) - Rebroadcast valid blocks - Note: the actual rebroadcasting is handled by the underlying gossipsub library.</description>
+      <guid>https://filecoin-project.github.io/specs/docs/networking/</guid>
+      <description>Filecoin Network The Filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional Filecoin specific protocols as outlined in Network Protocols.
+Required Protocols Every full node must support the following libp2p protocols:
+ gossipsub (for data announcements) bitswap Filecoin specific Protocols:  Hello Handshake StorageDeal BlockSync   Transports, Streams &amp;amp; Encryption Connections between nodes are end-to-end-encrypted and -authenticated, thus every node has a peerId associated with it.</description>
     </item>
     
     <item>
@@ -217,22 +208,12 @@ Code Blocks Many sections of the spec use go type notation to describe the funct
     
     <item>
       <title></title>
-      <link>https://filecoin-project.github.io/specs/docs/sync/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://filecoin-project.github.io/specs/docs/sync/</guid>
-      <description>Chain Syncing This spec describes the Filecoin sync protocol, for related systems, see:
- Bootstrapping which describes how a node builds a peer set in the first place. Network Protocols on how Filecoin nodes can communicate with each other, with for instance, an initial handshake, or block syncing. Operation on various operations a functional Filecoin node needs to run, like DHT routing.  What is chain syncing in Filecoin? Chain syncing is the process a filecoin node runs to sync its internal chain state with new blocks from the network and new blocks it itself has mined.</description>
-    </item>
-    
-    <item>
-      <title></title>
       <link>https://filecoin-project.github.io/specs/docs/validation/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/validation/</guid>
       <description>Block Validation In order to ensure they are always on the correct latest state of the chain a filecoin full node must accept and process blocks continuously. Blocks are propagated was described in the Data Propagation document.
-For every block received, the node must validate it before executing it or passing it on. Before a node can validate a block, it first must ensure the block is structurally correct by decoding it (see block) and ensuring that no field contains any illegal values.</description>
+Validation is split into two stages, syntactic and semantic. The syntactic stage may be validated without reference to additional data (see block). The semantic stage requires access to the chain which the block extends.</description>
     </item>
     
     <item>

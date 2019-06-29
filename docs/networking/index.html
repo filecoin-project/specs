@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Networking
+  
+ | Filecoin Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.23e4d1e3709b51090814a78569072de166323089d7e859dbabb823c874bdc20d.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="../../css/syntax.css">
+<link href="../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="../../mermaid/mermaid.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav role="navigation">
+<h2 class="book-brand">
+  <a href="https://filecoin-project.github.io/specs/">Filecoin Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fnetworking\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<p><a href="../../"><strong>Overview</strong></a></p>
+
+<p><strong>Core</strong></p>
+
+<ul>
+<li><a href="../../docs/data-structures/">Data Structures</a></li>
+<li>Cryptography
+
+<ul>
+<li><a href="../../docs/address/">Address</a></li>
+<li><a href="../../docs/signatures/">Signatures</a></li>
+<li><a href="../../docs/proofs/">Proofs</a></li>
+<li><a href="../../docs/validation/">Block Validation</a></li>
+</ul></li>
+<li><a href="../../docs/networking/">Network</a>
+
+<ul>
+<li><a href="../../docs/data-propagation/">Data Propagation</a></li>
+<li><a href="../../docs/network-protocols/">Specific Protocols</a></li>
+</ul></li>
+<li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
+<li><a href="../../docs/state-machine/">State Machine</a>
+
+<ul>
+<li><a href="../../docs/local-storage/">Local Storage</a></li>
+</ul></li>
+</ul>
+
+<p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
+
+<ul>
+<li><a href="../../docs/mining/">Mining</a></li>
+<li><a href="../../docs/storage-market/">Storage Market</a></li>
+<li><a href="../../docs/retrieval-market/">Retrieval Market</a></li>
+<li><a href="../../docs/payments/">Payments</a></li>
+<li><a href="../../docs/faults/">Faults</a></li>
+</ul>
+
+<p><strong>Proofs</strong></p>
+
+<ul>
+<li><a href="../../docs/zigzag-circuit/">ZigZag</a></li>
+</ul>
+
+<p><a href="../../docs/definitions/"><strong>Glossary</strong></a></p>
+
+<p><strong>Spec</strong></p>
+
+<ul>
+<li><a href="../../docs/style/">Style</a></li>
+<li><a href="../../docs/process/">Process</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Networking
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+  
+
+<h1 id="filecoin-network">Filecoin Network</h1>
+
+<p>The Filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional Filecoin specific protocols as outlined in <a href="./network-protocols.md">Network Protocols</a>.</p>
+
+<h2 id="required-protocols">Required Protocols</h2>
+
+<p>Every full node must support the following libp2p protocols:</p>
+
+<ul>
+<li><a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">gossipsub</a> (<a href="./data-propagation.md">for data announcements</a>)</li>
+<li><a href="[for data exchange](./data-propagation.md)">bitswap</a></li>
+<li>Filecoin specific Protocols:
+
+<ul>
+<li>Hello Handshake</li>
+<li>StorageDeal</li>
+<li>BlockSync</li>
+</ul></li>
+</ul>
+
+<h2 id="transports-streams-encryption">Transports, Streams &amp; Encryption</h2>
+
+<p>Connections between nodes are end-to-end-encrypted and -authenticated, thus every node has a <code>peerId</code> associated with it.</p>
+
+<p>Filecoin protocols are run as multiple streams over a single connection. Only one connection should exist between two nodes at any time, multiple streams within that connections must be used to exchange different protocols. This is usually handled from within the libp2p stack if configured properly.</p>
+
+<p>This document doesn&rsquo;t make any assumptions on which transports and multiplexing features a particular node offers, however it must at least be able to respond and communicate through mplex channels via a secio transport.</p>
+
+<div class="notices info" >Implementers are encouraged to offer and experiment with more protocols and transports, as long as the above mentioned requirements of ee2e, authentication and muxing are still met. In particular the authors encourage to look into TLS1.3 and QUIC as libp2p protocol/transport layers.</div>
+
+<h3 id="establishing-connections">Establishing connections</h3>
+
+<p>When a Filecoin node connects to the network, it may connect to multiple nodes at once. When a new node connects, it must be greeted with the <code>HelloMessage</code> through the hello-handshake protocol first. Only after that message has been sent can other streams be opened. If a node receives a <code>HelloMessage</code> with a GenesisBlock it doesn&rsquo;t support, it must immediately close the entire connection to that peer.</p>
+
+<p>If the node learns through that handshake about newer blocks it should use that new information to sync up their chain.</p>
+
+<h3 id="syncing">Syncing</h3>
+
+<p>Whenever a node learns about a new <code>BlockHead</code> it should attempt to import the block - let that be through the <code>HelloMessage</code> or through the <a href="data-propagation.md#block-propagation">block pubsub protocol</a>. For that it may fetch the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in <a href="./validation.md">Validation</a> and storing it locally. This mode is known as &ldquo;syncing&rdquo;. During &ldquo;syncing&rdquo; the same node may not mine blocks.</p>
+
+<h2 id="establishing-a-network">Establishing a network</h2>
+
+<p>Every node should aim to establish a set of stable connections to the network in order to stay up to date with latest changes and block propagation - aka to sync - as well as to participate in the processes of the network - e.g. mining.</p>
+
+<p>In order to do that a node must be &ldquo;bootstrapped&rdquo; when starting up. At its simplest, bootstrapping can be thought of as secure network joining. It must enable a new node to get the latest head/chain that the majority of the network power is mining off and must be both:</p>
+
+<ul>
+<li>Robust — able to do so in adversarial networks (so long as honest nodes make up the majority of the network).</li>
+<li>Consistent — able to reliably get the canonical chain (even given poor latency or state loss in our initial peer set).</li>
+</ul>
+
+<p>The specific bootstrapping method and heuristic - or a mix of them - is left up to the node implementation, but we provide some example ideas of how this could be done and what aspects should be taken into consideration for that, such as relying on both new nodes and new connections to ensure a node is connected to both a reliable and representative slice of the network</p>
+
+<h3 id="trusted-bootnodes">Trusted bootnodes</h3>
+
+<p>As with many other networks, trusted entities - e.g. the Filecoin foundation, large exchanges, good actors in the community, etc - might publish a set of bootnodes one can connect to in order to establish network connections.</p>
+
+<p>Keep in mind that, because these could easily be DoS&rsquo;ed, a) large set of different entities should be pre-shipped but only a few should be tried at a time b) they might drop connections rather quickly after establishing (and ban that peer for a short period of time) in order to serve more nodes. Thus you want to make sure to send a discovery request to learn about more peers over the bootnodes to have nodes to connect to.</p>
+
+<p>A node should not attempt to connect to more than 10 bootnodes at a time. And should diversify its set of nodes as quickly as possible.</p>
+
+<h3 id="previously-known-nodes">Previously known nodes</h3>
+
+<p>It is generally preferred that an implementation keeps permanent track of reliable peers and attempts to connect to them upon restart. This can be a simple list of previously established connections or the blow listed ranked reputation list.</p>
+
+<h3 id="peer-discovery-requests">Peer Discovery requests</h3>
+
+<p>At this point the specification does not decide upon any particular peer discovery mechanism but leaves this up for the implementations to decide which ones they want to provide. However, the expectation is that all boot nodes provide some form peer discovery mechanism and publish that information along side the connectivity information. Whether that be BRAHMS or through RandomQueries of KADEMLIA-DHT, any node bootstrapping itself, should attempt to establish streams for peer discovery and may not fail just because their peer declines the given protocol stream.</p>
+
+<p>On the other side, the attempt to establish an unsupported peer-discovery protocol must not - in and of itself - lead to a disconnect, as multiple protocols might be tried. Any protocol may only be tried once on the same connection however.</p>
+
+<h2 id="maintaining-a-stable-network">Maintaining a stable network</h2>
+
+<p>Many aspects of the network topology assume some degree of liveness for filecoin to work. Thus and for it to work most efficiently, we aim for an overall stable network, that still allows for new nodes to join the network without interrupting.</p>
+
+<p>In order to achieve that every node should aim for &ldquo;future usefulness of peers&rdquo; as outline below. However, as a general rule, if a node acts in violation of a <code>must</code> rule, any peer aware of that is totally in their right to drop any connection to the node without further warning. It may also keep a record of these offenses ban the peer from connecting again, if it finds them to continue offending. Such ban may be imposed upon - in increasing order - the peerId, on the IP+Port or finally the IP itself. One must keep in mind that IP addresses still rotate and thus every implementation must add a maximum timeout should they impose a ban on them, while PeerIDs can also be banned indefinitely.</p>
+
+<h3 id="optimise-for-usefulness-of-peers">Optimise for usefulness of peers</h3>
+
+<p>A more sophisticated system to manage a healthy peer set is through optimising for usefulness of that peer to the node. in this system a node tracks all incoming messages and their costs in relation to the value it provided to them and records them as value any particular node provides to it - called &ldquo;reputation&rdquo;. These calculations may also take into account time that passed or whether the other node would have to know about the uselessness of a particular message. Sending a useless message, in this system, is not understood as a hard violation, but as impolite behaviour and can be recorded as such. Thus creating a ranking by usefulness among the peer set.</p>
+
+<p>An example would be that, continuously receive a pubsub message from a node after we&rsquo;ve forwarded it to them prior. This isn&rsquo;t a hard failure, as though they aren&rsquo;t supposed to do that, we can&rsquo;t know if that is because of a faulty implementation or because of network delays queuing their message. However, we&rsquo;d still note this as impolite and for every time this happens deduct from their reputation as it isn&rsquo;t useful to us.</p>
+
+<p>A node attempts to always hold a certain amount of connections (&ldquo;slots&rdquo;) to the network &ndash; we recommend 25-50 on an on-the-shelf system. Whenever a new node connects, it can check their previously stored reputation or assign a default value and if that reputation is higher than the lowest currently connected nodes, may replace that connection (and thus drop the lowest quality connection) or otherwise refuse to take that connection.</p>
+
+<p>In this system a node might also only record a strong decrease in reputation but not drop a connection to a peer directly even upon a strong violation, because the node may still be more useful than others. It is better to stay connected to a crappy network than to no network. However, this doesn&rsquo;t not free the node from still adhering to the spec itself - it should not forward said violation or its connection might still be righteously dropped.</p>
+
+<p>We also recommend to regularly check the ranking and drop and clear up the lowest 10% of slots, leaving 5% open for incoming connections and fill up the other 5% by connecting to other nodes it can find through peer discovery.</p>
+
+<p>All this to create a local view of for that node most useful connections to the network. The reputation may be stored permanently and be available between restarts - thus providing a neat bootstrap start list, too.</p>
+
+</article>
+
+      
+<div class="align-center book-git-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/filecoin-project/specs/commit/05539407bcab66544b3f696d7cd7fec8f7947be8" title='Last modified May 28, 2019 by Benjamin Kampmann' target="_blank" rel="noopener">
+      <img src="../../svg/code-merge.svg" alt="Changed" /> May 28, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/filecoin-project/specs/edit/master/networking.md" target="_blank" rel="noopener">
+      <img src="../../svg/code-fork.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+  
+  <aside class="book-toc fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#filecoin-network">Filecoin Network</a>
+<ul>
+<li><a href="#required-protocols">Required Protocols</a></li>
+<li><a href="#transports-streams-encryption">Transports, Streams &amp; Encryption</a>
+<ul>
+<li><a href="#establishing-connections">Establishing connections</a></li>
+<li><a href="#syncing">Syncing</a></li>
+</ul></li>
+<li><a href="#establishing-a-network">Establishing a network</a>
+<ul>
+<li><a href="#trusted-bootnodes">Trusted bootnodes</a></li>
+<li><a href="#previously-known-nodes">Previously known nodes</a></li>
+<li><a href="#peer-discovery-requests">Peer Discovery requests</a></li>
+</ul></li>
+<li><a href="#maintaining-a-stable-network">Maintaining a stable network</a>
+<ul>
+<li><a href="#optimise-for-usefulness-of-peers">Optimise for usefulness of peers</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

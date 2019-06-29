@@ -71,12 +71,11 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
 </ul></li>
-<li><a href="../../docs/network-protocols/">Network</a>
+<li><a href="../../docs/networking/">Network</a>
 
 <ul>
-<li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
-<li><a href="../../docs/sync/">Chain Sync</a></li>
+<li><a href="../../docs/network-protocols/">Specific Protocols</a></li>
 </ul></li>
 <li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
 <li><a href="../../docs/state-machine/">State Machine</a>
@@ -84,7 +83,6 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="../../docs/local-storage/">Local Storage</a></li>
 </ul></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul>
 
 <p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
@@ -151,9 +149,9 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   
 
-<h1 id="filecoin-network-protocols">Filecoin Network Protocols</h1>
+<h1 id="filecoin-specific-network-protocols">Filecoin Specific Network Protocols</h1>
 
-<p>All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream.</p>
+<p>All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream as outlined in [networking(./networking.md)</p>
 
 <h2 id="cbor-rpc">CBOR RPC</h2>
 
@@ -170,10 +168,8 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Note: Implementations should limit the maximum number of bytes read during the <code>ReadCborRPC</code> call. We suggest 1MB as a sane limit.</p>
 
-<h1 id="hello-handshake-1">Hello Handshake</h1>
-
 <blockquote>
-<p>The Hello protocol is used when two filecoin nodes initially connect to eachother in order to determine information about the other node.</p>
+<p>The Hello protocol is used when two filecoin nodes initially connect to each other in order to determine information about the other node.</p>
 </blockquote>
 
 <p>Whenever a node gets a new connection, it opens a new stream on that connection and &ldquo;says hello&rdquo;. This is done by crafting a <code>HelloMessage</code>, sending it to the other peer using CBOR RPC and finally, closing the stream.</p>
@@ -707,13 +703,10 @@ Block 'b1': [mB, mC, mA]
   <aside class="book-toc fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#filecoin-network-protocols">Filecoin Network Protocols</a>
+<li><a href="#filecoin-specific-network-protocols">Filecoin Specific Network Protocols</a>
 <ul>
 <li><a href="#cbor-rpc">CBOR RPC</a></li>
 <li><a href="#hello-handshake">Hello Handshake</a></li>
-</ul></li>
-<li><a href="#hello-handshake-1">Hello Handshake</a>
-<ul>
 <li><a href="#storage-deal">Storage Deal</a>
 <ul>
 <li><a href="#deal-state-values">Deal State Values</a></li>

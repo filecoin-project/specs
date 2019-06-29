@@ -71,12 +71,11 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/proofs/">Proofs</a></li>
 <li><a href="../../docs/validation/">Block Validation</a></li>
 </ul></li>
-<li><a href="../../docs/network-protocols/">Network</a>
+<li><a href="../../docs/networking/">Network</a>
 
 <ul>
-<li><a href="../../docs/bootstrap/">Bootstrapping</a></li>
 <li><a href="../../docs/data-propagation/">Data Propagation</a></li>
-<li><a href="../../docs/sync/">Chain Sync</a></li>
+<li><a href="../../docs/network-protocols/">Specific Protocols</a></li>
 </ul></li>
 <li><a href="../../docs/expected-consensus/">Expected Consensus</a></li>
 <li><a href="../../docs/state-machine/">State Machine</a>
@@ -84,7 +83,6 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="../../docs/local-storage/">Local Storage</a></li>
 </ul></li>
-<li><a href="../../docs/operation/">Node Operation</a></li>
 </ul>
 
 <p><a href="../../docs/actors/"><strong>Actors</strong></a></p>
@@ -175,16 +173,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Miner is the address of the miner actor that mined this block.
 </span><span class="c1"></span>    <span class="nx">Miner</span> <span class="nx">Address</span>
 
-    <span class="c1">// Tickets are the winning ticket that were submitted with this block.
+    <span class="c1">// Tickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
 </span><span class="c1"></span>    <span class="nx">Tickets</span> <span class="p">[]</span><span class="nx">Ticket</span>
 
     <span class="c1">// ElectionProof is a signature over the final ticket that proves this miner
 </span><span class="c1"></span>    <span class="c1">// is the leader at this round
 </span><span class="c1"></span>    <span class="nx">ElectionProof</span> <span class="nx">Signature</span>
 
-    <span class="c1">// Parents is the set of parents this block was based on. Typically one,
-</span><span class="c1"></span>    <span class="c1">// but can be several in the case where there were multiple winning ticket-
+    <span class="c1">// Parents is an array of distinct CIDs of parents on which this block was based. 
+</span><span class="c1"></span>    <span class="c1">// Typically one, but can be several in the case where there were multiple winning ticket-
 </span><span class="c1"></span>    <span class="c1">// holders for a round.
+</span><span class="c1"></span>    <span class="c1">// The order of parent CIDs is not defined.
 </span><span class="c1"></span>    <span class="nx">Parents</span> <span class="p">[]</span><span class="nx">Cid</span>
 
     <span class="c1">// ParentWeight is the aggregate chain weight of the parent set.
@@ -210,7 +209,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nx">MessageReceipts</span> <span class="nx">Cid</span>
 
     <span class="c1">// The block Timestamp is used to enforce a form of block delay by honest miners.
-</span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp stored as an unsigned integer
+</span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp (in seconds) stored as an unsigned integer.
 </span><span class="c1"></span>    <span class="nx">Timestamp</span> <span class="nx">Timestamp</span>
 
     <span class="c1">// BlockSig is a signature over the hash of the entire block with the miners
