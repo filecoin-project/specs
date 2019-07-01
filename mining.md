@@ -112,7 +112,7 @@ The block structure and serialization is detailed in [the datastructures spec - 
 In order to validate a block coming in from the network at round `N` was well mined a miner must do the following:
 
 ```go
-func VerifyBlock(blk Block) {
+tipsetfunc VerifyBlock(blk Block) {
 	// 1. Verify Signature
 	pubk := GetPublicKey(blk.Miner)
 	if !ValidateSignature(blk.BlockSig, pubk, blk) {

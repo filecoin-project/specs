@@ -14,7 +14,7 @@ TODO: This is a high level overview of how the storage market interacts with com
 
 ## The Market Interface
 
-This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor. For more information about Actors, see TODO.
+This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor, it can be retrieved using a call to `LoadStorageMarket(state CID)`. For more information about Actors, see [the actors spec](./actors.md).
 
 ```go
 type StorageMarket interface {
@@ -33,7 +33,7 @@ type StorageMarket interface {
 	// invalidation of any any all storage they are providing. The caller is rewarded
 	// a small amount to compensate for gas fees (TODO: maybe it should be more?)
 	SlashConsensusFault(blk1, blk2 BlockHeader)
-
+  
 	// SlashStorageFault slashes a storage miner for not submitting their PoSTs within
 	// the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
 	// The slashed miner then loses all of their staked collateral, and also loses all
@@ -44,9 +44,17 @@ type StorageMarket interface {
 	// accounting of the total storage in the storage market.
 	UpdateStorage(delta BytesAmount)
 
+  // PowerLookup returns a given miner's committed storage in the system.
+  // This number is used during leader election and block validation.
+  PowerLookup(miner Address) BytesAmount
+  
+  // Convenience method that simply returns whether a given miner's committed
+  // power is > 0.
+  IsMiner(miner Address) bool
+  
 	// GetTotalStorage returns the total committed storage in the system. This number is
 	// also used as the 'total power' in the system for the purposes of the power table
-	GetTotalStorage() BytesAmount
+	GetTotalStorage() BytesAmount  
 }
 ```
 

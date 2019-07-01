@@ -14,7 +14,6 @@ For most objects referenced by Filecoin, a Content Identifier (CID for short) is
 
 CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
 
-
 ## Block
 
 A block represents an individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and some notion of a 'weight' for deciding which block is the 'best'.
@@ -68,6 +67,167 @@ type Block struct {
 	// worker key to ensure that it is not tampered with after creation
 	BlockSig Signature
 }
+```
+
+## TipSet
+
+A TipSet represents a set of parent blocks referenced by a descendent block in the chain. A block is only valid if its TipSet contains all valid blocks, contains blocks who all reference the same parent TipSet and contain blocks who were all mined in the same round.
+
+Implementations may choose not to create a TipSet data structure, representing its operations in terms of the underlying blocks. For that reason we omit a precise TipSet data structure here.
+
+#### Sharded Messages and Receipts
+
+The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
+
+## Message
+
+```
+type Message struct {
+  To   Address
+  From Address
+
+  // When receiving a message from a user account the nonce in
+  // the message must match the expected nonce in the from actor.
+  // This prevents replay attacks.
+  Nonce Uint64
+
+  Value BigInteger
+
+  GasPrice Integer
+  GasLimit Integer
+
+  Method uint64
+  Params []byte
+}
+type SignedMessage struct {
+  Message   Message
+  Signature Signature
+}
+type MessageReceipt struct {
+  ExitCode uint8
+  Return []byte
+  GasUsed Integer
+}
+type Actor struct {
+  // Code is a pointer to the code object for this actor
+  Code Cid
+
+  // Head is a pointer to the root of this actors state
+  Head Cid
+
+  // Nonce is a counter of the number of messages this actor has sent
+  Nonce Uint64
+
+  // Balance is this actors current balance of filecoin
+  Balance BigInteger
+}
+type Signature struct {
+  Type int
+  Data []byte
+}
+type FaultSet struct {
+  Index    uint64
+  BitField BitField
+}
+do
+{
+  byte = low order 7 bits of value;
+  value >>= 7;
+  if (value != 0) /* more bytes to come */
+    set high order bit of byte;
+  emit byte;
+} while (value != 0);
+
+more = 1;
+negative = (value < 0);
+size = no. of bits in signed integer;
+while(more)
+{
+  byte = low order 7 bits of value;
+  value >>= 7;
+  /* the following is unnecessary if the
+   * implementation of >>= uses an arithmetic rather
+   * than logical shift for a signed left operand
+   */
+  if (negative)
+    /* sign extend */
+    value |= - (1 << (size - 7));
+    /* sign bit of byte is second high order bit (0x40) */
+  if ((value ==  0 && sign bit of byte is clear) ||
+      (value == -1 && sign bit of byte is set))
+     more = 0;
+  else
+    set high order bit of byte;
+  emit byte;
+}
+result = 0;
+shift = 0;
+while(true)
+{
+  byte = next byte in input;
+  result |= (low order 7 bits of byte << shift);
+  if (high order bit of byte == 0)
+    break;
+  shift += 7;
+}
+result = 0;
+shift = 0;
+size = number of bits in signed integer;
+while(true)
+{
+  byte = next byte in input;
+  result |= (low order 7 bits of byte << shift);
+  shift += 7;
+  /* sign bit of byte is second high order bit (0x40) */
+  if (high order bit of byte == 0)
+  break;
+}
+if ((shift <size) && (sign bit of byte is set))
+  /* sign extend */
+  result |= - (1 << shift);
+tag<44>[
+  msg.To,
+  msg.From,
+  msg.Nonce,
+  msg.Value,
+  msg.GasPrice,
+  msg.GasLimit,
+  msg.Method,
+  msg.Params
+]
+d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d4
+6558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f64
+4d706172616d73617265676f6f64
+To:     Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
+From:   Address("f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy")
+Nonce:  uint64(117)
+Value:  BigInt(15000000000)
+Method: string("method")
+Params: []byte("paramsaregood")
+d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617
+469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a
+5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a1733
+26507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25
+e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678808
+0
+Miner:           Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
+Tickets:         [][]byte{"iamaticket"}
+ElectionProof:   []byte("i am an election proof")
+Parents:         []Cid{"zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B"}
+ParentWeight:    NewInt(47978)
+Height:          uint64(1234567)
+StateRoot:       Cid("zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B")
+Messages:        []SignedMessage{}
+MessageReceipts: []MessageReceipt{}
+    <encoding> ::= <header> <blocks>
+      <header> ::= <version> <bit>
+     <version> ::= "00"
+      <blocks> ::= <block> <blocks> | ""
+       <block> ::= <block_single> | <block_short> | <block_long>
+<block_single> ::= "1"
+ <block_short> ::= "01" <bit> <bit> <bit> <bit>
+  <block_long> ::= "00" <unsigned_varint>
+         <bit> ::= "0" | "1"
 ```
 
 #### Sharded Messages and Receipts

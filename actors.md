@@ -152,17 +152,12 @@ type AccountActor struct {
 
 ## Storage Market Actor
 
-The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
+The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton, defined in terms of a particular state in the Filecoin state tree and that lives at a specific well-known address.
 
-```go
-type StorageMarketActor struct {
-	Miners AddressSet
+It can be loaded using a `LoadStorageMarket(state CID) StorageMarket` function.
 
-	// TODO: Determine correct unit of measure. Could be denominated in the
-	// smallest sector size supported by the network.
-	TotalStorage BytesAmount
-}
-```
+For more on the operations it supports, see [the storage market spec](./storage-market.md).
+
 ### Code Cid
 
 `<codec:raw><mhType:identity><"smarket">`
