@@ -34,63 +34,67 @@ Let's say that `A` wants to make such an arrangement with `B`. `A` should create
 
 Lane state can be easily tracked on-chain with a compact bitfield.
 
-```go
+```sh
 type SpendVoucher struct {
-	// Amount is the amount of FIL that this voucher can be redeemed for
-	Amount TokenAmount
+	## The amount of Filecoin that this voucher can be redeemed for.
+	amount TokenAmount
 
-	// Nonce is a number that sets the ordering of vouchers. If you try to redeem
-	// a voucher with an equal or lower nonce, the operation will fail. Nonces are
-	// per lane.
-	Nonce uint64
+	## Number that sets the ordering of vouchers. If you try to redeem
+	## a voucher with an equal or lower nonce, the operation will fail. Nonces are per lane.
+	nonce UInt
 
-	// Lane specifies which 'lane' of the payment channel this voucher is for.
-	// Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
-	Lane uint64
+	## Which 'lane' of the payment channel this voucher is for.
+	## Lanes may be either open or closed, a voucher for a closed lane may not be redeemed.
+	lane UInt
 
-	// Merges specifies a list of lane-nonce pairs that this voucher will close.
-	// This voucher may not be redeemed if any of the lanes specified here are already
-	// closed, or their nonce specified here is lower than the nonce of the lane on-chain.
-	Merges []MergePair
+	## A list of lane-nonce pairs that this voucher will close.
+	## This voucher may not be redeemed if any of the lanes specified here are already
+	## closed, or their nonce specified here is lower than the nonce of the lane on-chain.
+	merges [MergePair]
 
-	TimeLock uint64
+	timeLock UInt
 
-	SecretPreimage []byte
+	secretPreimage Bytes
 
-	RequiredSector []byte
+	requiredSector Bytes
 
-	DataCommitment []byte
+	dataCommitment Bytes
 
-	MinCloseHeight uint64
+	minCloseHeight UInt
+}
 
-	Sig Signature
+type SignedVoucher struct {
+    voucher SpendVoucher
+	signature Signature
 }
 
 type MergePair struct {
-	Lane  uint64
-	Nonce uint64
+	lane  UInt
+	nonce UInt
+}
+```
+
+```sh
+type PaymentChannel struct {
+	from Address
+	to Address
+
+	channelTotal TokenAmount
+	toSend TokenAmount
+
+	closingAt UInt
+	minCloseHeight UInt
+
+	laneStates {UInt:LaneState}
+}
+
+type LaneState struct {
+	nonce UInt
+	redeemed TokenAmount
 }
 ```
 
 ```go
-type PaymentChannel struct {
-	From Address
-	To   Address
-
-	ChannelTotal TokenAmount
-	ToSend       TokenAmount
-
-	ClosingAt      uint64
-	MinCloseHeight uint64
-
-	LaneStates map[uint64]LaneState
-}
-
-type LaneState struct {
-	Nonce    uint64
-	Redeemed TokenAmount
-}
-
 func (paych *PaymentChannel) validateSignature(sv SpendVoucher) {
 	if msg.From == paych.From {
 		ValidateSignature(sv.SerializeNoSig(), sv.Signature, paych.To)
@@ -212,8 +216,6 @@ func (paych *PaymentChannel) Collect() {
 }
 ```
 
-
-
 ### Payment Channel Reconciliation
 
 In a situation where peers A and B  have several different payment channels between them, the scenario may frequently come up where A has multiple payment channel updates from B to apply. Submitting each of these individually would cost a noticeable amount in fees, and put excess unnecessary load on the chain. To remedy this, A can contact B and ask them for a single payment channel update for the combined value of all the updates they have (minus some fee to incent B to actually want to do this). This aggregated update would contain a list of the IDs of the other payment channels that it is superceding so that A cannot also cash out on the originals.
@@ -226,11 +228,10 @@ To accomplish this, we introduce the Payment Reconciliation Protocol.
 
 This is a libp2p service run by all participants wanting to participate in payment reconciliation. When Alice has a set of payments from Bob that she is ready to cash out, Alice can send a `ReconcileRequest` to Bob, containing the following information:
 
-```go
+```sh
 type ReconcileRequest struct {
-	Vouchers []Vouchers
-
-	ReqVal TokenAmount
+	vouchers [Vouchers]
+	reqVal TokenAmount
 }
 ```
 
@@ -238,12 +239,17 @@ The Vouchers should all be valid vouchers from Bob to Alice, on the same payment
 
 Bob receives this request, and checks that all the fields are correct, and then ensures that the difference between ReqVal and the vouchers sum is sufficient (this is a parameter that the client can set).  Then, he sends back a response which either contains the requested voucher, or an error status and message.
 
-```go
+```sh
 type ReconcileResponse struct {
-	Combined Voucher
+	combined Voucher
+	status  Status
+	message optional String
+}
 
-	Status  StatusCode
-	Message string
+## TODO: what are the possible status cases?
+type Status enum {
+    | Success
+    | Failure
 }
 ```
 
