@@ -54,7 +54,7 @@ type StorageMarket interface {
   
 	// GetTotalStorage returns the total committed storage in the system. This number is
 	// also used as the 'total power' in the system for the purposes of the power table
-	GetTotalStorage() BytesAmount  
+	GetTotalStorage() BytesAmount
 }
 ```
 
