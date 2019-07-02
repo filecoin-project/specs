@@ -20,9 +20,9 @@ This comprises the following steps:
  - Replication
  - Proof Generation
  - Circuit Proof Generation
- 
+
  Together, __*Replication*__, __*Proof Generation*__, and __*Circuit Proof Generation*__ constitute the `Seal` operation, as described in [Filecoin Proofs](proofs.md).
- 
+
 ## Hash Functions
 
  *__Filecoin ZigZag Proof of Replication__ as described here is generic over the following hash functions:*
@@ -152,9 +152,11 @@ TODO: define `Challenge` (or find existing definition)
 func ChallengesForLayer(challenge Challenge, layer uint) uint {
 
     switch challenge.Type {
+      // TODO: remove ambiguity, there should not be a "fixed" case
         case Fixed:
             return challenge.Count
         case Tapered:
+      // TODO: current calculation is incorrect and does not match claim6 from Fisch2019, it should look more like: https://observablehq.com/d/bbabac1947b79011#gen_zigzag_taper
             assert(layer < LAYERS)
             l := (LAYERS - 1) - layer
             r := 1.0 - TAPER;
@@ -176,6 +178,7 @@ func ChallengesForLayer(challenge Challenge, layer uint) uint {
 TODO: define `Domain` (for practical purposes a `uint`) and `LayerChallenges` (or find existing definition).
 
 ```go
+// TODO: we should replace the word commitment with the word seed, this will be more interactive porep friendly
 func DeriveChallenges(challenges LayerChallenges, layer uint, leaves uint,
     replicaId Domain, commitment Domain, k uint) []uint {
 
@@ -493,7 +496,7 @@ func feistelDecode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
 
 ## Proof Generation
 
-```
+```go
 let layer_proofs = []
 
 for l in 0..LAYERS {
