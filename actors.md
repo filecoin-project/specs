@@ -474,24 +474,32 @@ type StorageMinerActorState struct {
 
 	## Amount of power this miner has.
     power UInt
+
+    ## List of sectors that this miner was slashed for.
+    slashedSet optional SectorSet
+
+    ## The height at which this miner was slashed at.
+    slashedAt optional BlockHeight
+
+    ## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+    owedStorageCollateral TokenAmount
 }
 
 type StorageMinerActorMethod union {
     | StorageMinerConstructor 0
     | CommitSector 1
     | SubmitPost 2
-    | IncreasePledge 3
-    | SlashStorageFault 4
-    | GetCurrentProvingSet 5
-    | ArbitrateDeal 6
-    | DePledge 7
-    | GetOwner 8
-    | GetWorkerAddr 9
-    | GetPower 10
-    | GetPeerID 11
-    | GetSectorSize 12
-    | UpdatePeerID 13
-    | ChangeWorker 14
+    | SlashStorageFault 3
+    | GetCurrentProvingSet 4
+    | ArbitrateDeal 5
+    | DePledge 6
+    | GetOwner 7
+    | GetWorkerAddr 8
+    | GetPower 9
+    | GetPeerID 10
+    | GetSectorSize 11
+    | UpdatePeerID 12
+    | ChangeWorker 13
 } representation keyed
 ```
 
@@ -742,23 +750,6 @@ func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer
 **Parameters**
 
 ```sh
-## TODO:
-type IncreasePledge struct {
-
-} representation tuple
-```
-
-**Algorithm**
-
-{{% notice todo %}}
-TODO
-{{% /notice %}}
-
-#### `SlashStorageFault`
-
-**Parameters**
-
-```sh
 type SlashStorageFault struct {
     miner Address
 } representation tuple
@@ -768,24 +759,35 @@ type SlashStorageFault struct {
 
 ```go
 func SlashStorageFault() {
+    // You can only be slashed once for missing your PoSt.
 	if self.SlashedAt > 0 {
 		Fatal("miner already slashed")
 	}
 
-	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
+    // Only if the miner is actually late, they can be slashed.
+	if chain.Now() <= self.ProvingPeriodEnd + GenerationAttackTime(self.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
 
-	if miner.ProvingSet.Size() == 0 {
+    // Only a miner who is expected to prove, can be slashed.
+	if self.ProvingSet.Size() == 0 {
 		Fatal("miner is inactive")
 	}
 
-	// Strip miner of their power
+	// Strip the miner of their power.
 	StorageMarketActor.UpdateStorage(-1 * self.Power)
 	self.Power = 0
 
-	// TODO: make this less hand wavey
-	BurnCollateral(self.ConsensusCollateral)
+    self.slashedSet = self.ProvingSet
+    // remove proving set from our sectors
+    self.sectors.Substract(self.slashedSet)
+
+    // clear proving set
+    self.ProvingSet = nil
+
+    self.owedStorageCollateral = StorageMarketActor.StorageCollateralForSize(
+        self.slashedSet.Size() * self.SectorSize
+    )
 
 	self.SlashedAt = CurrentBlockHeight
 }
@@ -827,37 +829,42 @@ type ArbitrateDeal struct {
 **Algorithm**
 
 ```go
-func AbitrateDeal(d Deal) {
-	if !ValidateSignature(d, self.Worker) {
+
+func AbitrateDeal(deal Deal) {
+	if !ValidateSignature(deal, self.Worker) {
 		Fatal("invalid signature on deal")
 	}
 
-	if CurrentBlockHeight < d.StartTime {
+	if CurrentBlockHeight < deal.StartTime {
 		Fatal("Deal not yet started")
 	}
 
-	if d.Expiry < CurrentBlockHeight {
+	if deal.Expiry < CurrentBlockHeight {
 		Fatal("Deal is expired")
 	}
 
-	if !self.NextDoneSet.Has(d.PieceCommitment.Sector) {
+	if !self.NextDoneSet.Has(deal.pieceInclusionProof.sectorID) {
 		Fatal("Deal agreement not broken, or arbitration too late")
 	}
 
-	if self.ArbitratedDeals.Has(d.PieceRef) {
+	if self.ArbitratedDeals.Has(deal.commP) {
 		Fatal("cannot slash miner twice for same deal")
 	}
 
-	pledge, storage := CollateralForDeal(d)
+	storageCollateral := StorageMarketActor.StorageCollateralForSize(deal.size)
 
-	// burn the pledge collateral
-	self.BurnFunds(pledge)
+    if self.owedStorageCollateral < storageCollateral {
+        Fatal("math is hard, and we didnt do it right")
+    }
 
 	// pay the client the storage collateral
-	TransferFunds(d.ClientAddr, storage)
+	VM.TransferFunds(storageCollateral, deal.client)
+
+    // keep track of how much we have payed out
+    self.owedStorageCollateral -= storageCollateral
 
 	// make sure the miner can't be slashed twice for this deal
-	self.ArbitratedDeals.Add(d.PieceRef)
+	self.ArbitratedDeals.Add(deal.commP)
 }
 ```
 
