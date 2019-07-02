@@ -161,7 +161,7 @@ https://github.com/alex-shpak/hugo-book
 <li><strong>Duplicate Block Submission Slashing:</strong>
 
 <ul>
-<li><strong>Condition:</strong> If any miner posts two blocks satisfying the slashing conditions defined in <a href="./expected-consensus.md">Expected Consensus</a>.</li>
+<li><strong>Condition:</strong> If any miner posts two blocks satisfying the slashing conditions defined in <a href="../expected-consensus">Expected Consensus</a>.</li>
 <li><strong>Reporting:</strong> Anyone may call <code>SlashConsensusFault</code> and pass in the two offending block headers.</li>
 <li><strong>Check:</strong> The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.</li>
 <li><strong>Penalization:</strong> All of the miner&rsquo;s pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.</li>

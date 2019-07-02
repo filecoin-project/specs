@@ -186,59 +186,59 @@ https://github.com/alex-shpak/hugo-book
 <p>Let&rsquo;s say that <code>A</code> wants to make such an arrangement with <code>B</code>. <code>A</code> should create the payment channel with enough funds to cover all potential transactions. Then <code>A</code> decides to start the first transaction, so they send a signed voucher for the payment channel on &lsquo;lane 1&rsquo;, for 2 FIL. They can then send more updates on lane 1 as needed. Then, at some point <code>A</code> decides to start another independent transaction to <code>B</code>, so they send a voucher on &lsquo;lane 2&rsquo;. The voucher for lane 2 can be cashed out independently of lane 1. However, <code>B</code> can ask <code>A</code> to &lsquo;reconcile&rsquo; the two payment channels for them into a single update. This update could contain a value, and a list of lanes to close. Cashing out that reconciled update would invalidate the other lanes, meaning <code>B</code> couldnt also cash in those. The single update would be much smaller, and therefore cheaper to close out.</p>
 
 <p>Lane state can be easily tracked on-chain with a compact bitfield.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SpendVoucher</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Amount is the amount of FIL that this voucher can be redeemed for
-</span><span class="c1"></span>    <span class="nx">Amount</span> <span class="nx">TokenAmount</span>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SpendVoucher struct <span class="o">{</span>
+    <span class="c1">## The amount of Filecoin that this voucher can be redeemed for.</span>
+    amount TokenAmount
 
-    <span class="c1">// Nonce is a number that sets the ordering of vouchers. If you try to redeem
-</span><span class="c1"></span>    <span class="c1">// a voucher with an equal or lower nonce, the operation will fail. Nonces are
-</span><span class="c1"></span>    <span class="c1">// per lane.
-</span><span class="c1"></span>    <span class="nx">Nonce</span> <span class="kt">uint64</span>
+    <span class="c1">## Number that sets the ordering of vouchers. If you try to redeem</span>
+    <span class="c1">## a voucher with an equal or lower nonce, the operation will fail. Nonces are per lane.</span>
+    nonce UInt
 
-    <span class="c1">// Lane specifies which &#39;lane&#39; of the payment channel this voucher is for.
-</span><span class="c1"></span>    <span class="c1">// Lanes may be either open or closed, a voucher for a closed lane may not be redeemed
-</span><span class="c1"></span>    <span class="nx">Lane</span> <span class="kt">uint64</span>
+    <span class="c1">## Which &#39;lane&#39; of the payment channel this voucher is for.</span>
+    <span class="c1">## Lanes may be either open or closed, a voucher for a closed lane may not be redeemed.</span>
+    lane UInt
 
-    <span class="c1">// Merges specifies a list of lane-nonce pairs that this voucher will close.
-</span><span class="c1"></span>    <span class="c1">// This voucher may not be redeemed if any of the lanes specified here are already
-</span><span class="c1"></span>    <span class="c1">// closed, or their nonce specified here is lower than the nonce of the lane on-chain.
-</span><span class="c1"></span>    <span class="nx">Merges</span> <span class="p">[]</span><span class="nx">MergePair</span>
+    <span class="c1">## A list of lane-nonce pairs that this voucher will close.</span>
+    <span class="c1">## This voucher may not be redeemed if any of the lanes specified here are already</span>
+    <span class="c1">## closed, or their nonce specified here is lower than the nonce of the lane on-chain.</span>
+    merges <span class="o">[</span>MergePair<span class="o">]</span>
 
-    <span class="nx">TimeLock</span> <span class="kt">uint64</span>
+    timeLock UInt
 
-    <span class="nx">SecretPreimage</span> <span class="p">[]</span><span class="kt">byte</span>
+    secretPreimage Bytes
 
-    <span class="nx">RequiredSector</span> <span class="p">[]</span><span class="kt">byte</span>
+    requiredSector Bytes
 
-    <span class="nx">DataCommitment</span> <span class="p">[]</span><span class="kt">byte</span>
+    dataCommitment Bytes
 
-    <span class="nx">MinCloseHeight</span> <span class="kt">uint64</span>
+    minCloseHeight UInt
+<span class="o">}</span>
 
-    <span class="nx">Sig</span> <span class="nx">Signature</span>
-<span class="p">}</span>
+<span class="nb">type</span> SignedVoucher struct <span class="o">{</span>
+    voucher SpendVoucher
+    signature Signature
+<span class="o">}</span>
 
-<span class="kd">type</span> <span class="nx">MergePair</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Lane</span>  <span class="kt">uint64</span>
-    <span class="nx">Nonce</span> <span class="kt">uint64</span>
-<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PaymentChannel</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">From</span> <span class="nx">Address</span>
-    <span class="nx">To</span>   <span class="nx">Address</span>
+<span class="nb">type</span> MergePair struct <span class="o">{</span>
+    lane  UInt
+    nonce UInt
+<span class="o">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> PaymentChannel struct <span class="o">{</span>
+    from Address
+    to Address
 
-    <span class="nx">ChannelTotal</span> <span class="nx">TokenAmount</span>
-    <span class="nx">ToSend</span>       <span class="nx">TokenAmount</span>
+    channelTotal TokenAmount
+    toSend TokenAmount
 
-    <span class="nx">ClosingAt</span>      <span class="kt">uint64</span>
-    <span class="nx">MinCloseHeight</span> <span class="kt">uint64</span>
+    closingAt UInt
+    minCloseHeight UInt
 
-    <span class="nx">LaneStates</span> <span class="kd">map</span><span class="p">[</span><span class="kt">uint64</span><span class="p">]</span><span class="nx">LaneState</span>
-<span class="p">}</span>
+    laneStates <span class="o">{</span>UInt:LaneState<span class="o">}</span>
+<span class="o">}</span>
 
-<span class="kd">type</span> <span class="nx">LaneState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Nonce</span>    <span class="kt">uint64</span>
-    <span class="nx">Redeemed</span> <span class="nx">TokenAmount</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">paych</span> <span class="o">*</span><span class="nx">PaymentChannel</span><span class="p">)</span> <span class="nf">validateSignature</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">SpendVoucher</span><span class="p">)</span> <span class="p">{</span>
+<span class="nb">type</span> LaneState struct <span class="o">{</span>
+    nonce UInt
+    redeemed TokenAmount
+<span class="o">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">paych</span> <span class="o">*</span><span class="nx">PaymentChannel</span><span class="p">)</span> <span class="nf">validateSignature</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">SpendVoucher</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">==</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">From</span> <span class="p">{</span>
         <span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">sv</span><span class="p">.</span><span class="nf">SerializeNoSig</span><span class="p">(),</span> <span class="nx">sv</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">To</span><span class="p">)</span>
     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">==</span> <span class="nx">paych</span><span class="p">.</span><span class="nx">To</span> <span class="p">{</span>
@@ -368,20 +368,24 @@ https://github.com/alex-shpak/hugo-book
 <p>To accomplish this, we introduce the Payment Reconciliation Protocol.</p>
 
 <p>This is a libp2p service run by all participants wanting to participate in payment reconciliation. When Alice has a set of payments from Bob that she is ready to cash out, Alice can send a <code>ReconcileRequest</code> to Bob, containing the following information:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ReconcileRequest</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Vouchers</span> <span class="p">[]</span><span class="nx">Vouchers</span>
-
-    <span class="nx">ReqVal</span> <span class="nx">TokenAmount</span>
-<span class="p">}</span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ReconcileRequest struct <span class="o">{</span>
+    vouchers <span class="o">[</span>Vouchers<span class="o">]</span>
+    reqVal TokenAmount
+<span class="o">}</span></code></pre></div>
 <p>The Vouchers should all be valid vouchers from Bob to Alice, on the same payment channel, and they should all be ready to be cashed in. <code>ReqVal</code> is a token amount less than or equal to the sum of all the values in the given vouchers. Generally, this value will be between the total sum of the vouchers, and that total sum minus the fees it would cost to submit them all to the chain.</p>
 
 <p>Bob receives this request, and checks that all the fields are correct, and then ensures that the difference between ReqVal and the vouchers sum is sufficient (this is a parameter that the client can set).  Then, he sends back a response which either contains the requested voucher, or an error status and message.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ReconcileResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Combined</span> <span class="nx">Voucher</span>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ReconcileResponse struct <span class="o">{</span>
+    combined Voucher
+    status  Status
+    message optional String
+<span class="o">}</span>
 
-    <span class="nx">Status</span>  <span class="nx">StatusCode</span>
-    <span class="nx">Message</span> <span class="kt">string</span>
-<span class="p">}</span></code></pre></div>
+<span class="c1">## TODO: what are the possible status cases?</span>
+<span class="nb">type</span> Status enum <span class="o">{</span>
+    <span class="p">|</span> Success
+    <span class="p">|</span> Failure
+<span class="o">}</span></code></pre></div>
 <p>Open Questions:</p>
 
 <ul>

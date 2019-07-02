@@ -167,13 +167,13 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="state-representation">State Representation</h3>
 
-<p>The <code>global state</code> is modeled as a map of actor <code>ID</code>s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the &lsquo;key&rsquo; being the serialized ID address (every actor has an ID address that can be looked up via the <code>InitActor</code>), and the value is an <a href="data-structures.md#actor"><code>Actor</code></a> object with the actors information. Within each <code>Actor</code> object is a field called <code>state</code> that is an ipld pointer to a graph that can be entirely defined by the actor.</p>
+<p>The <code>global state</code> is modeled as a map of actor <code>ID</code>s to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the &lsquo;key&rsquo; being the serialized ID address (every actor has an ID address that can be looked up via the <code>InitActor</code>), and the value is an <a href="../data-structures#actor"><code>Actor</code></a> object with the actors information. Within each <code>Actor</code> object is a field called <code>state</code> that is an ipld pointer to a graph that can be entirely defined by the actor.</p>
 
 <h3 id="actor-creation">Actor Creation</h3>
 
 <p>There are two mechanisms by which an actor can be created. By explicitly invoking <code>exec</code> on the <code>Init</code> actor, and by sending a message to a <code>Public Key</code> typed <code>Address</code>.</p>
 
-<p>Calling <code>exec</code> to create an actor should generate an Actor address, and register it in the state tree (see <a href="actors.md#init-actor">Init Actor</a> for more details).</p>
+<p>Calling <code>exec</code> to create an actor should generate an Actor address, and register it in the state tree (see <a href="../actors#init-actor">Init Actor</a> for more details).</p>
 
 <p>Sending a message to a non-existant account via a public key address causes the creation of an account actor for that address. The <code>To</code> address should be placed into the actor storage for later use in validating messages sent from this actor.</p>
 
@@ -260,7 +260,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span></code></pre></div>
 <h4 id="receipts">Receipts</h4>
 
-<p>Every message execution generates a <a href="data-structures.md#message-receipt">receipt</a>. These receipts contain the encoded return value of the method invocation, and an exit code.</p>
+<p>Every message execution generates a <a href="../data-structures#message-receipt">receipt</a>. These receipts contain the encoded return value of the method invocation, and an exit code.</p>
 
 <h4 id="storage">Storage</h4>
 

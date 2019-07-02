@@ -230,10 +230,10 @@ https://github.com/alex-shpak/hugo-book
 
 <h4 id="deal">Deal</h4>
 
-<p>Note: The details of this protocol including formats, datastructures, and algorithms, can be found <a href="network-protocols.md#storage-deal">here</a>.</p>
+<p>Note: The details of this protocol including formats, datastructures, and algorithms, can be found <a href="../network-protocols#storage-deal">here</a>.</p>
 
 <ol>
-<li><p><strong>Storage Deal Staging:</strong> The client now runs the <a href="network-protocols.md#storage-deal">&lsquo;make storage deal&rsquo;</a> protocol, as follows:</p>
+<li><p><strong>Storage Deal Staging:</strong> The client now runs the <a href="../network-protocols#storage-deal">&lsquo;make storage deal&rsquo;</a> protocol, as follows:</p>
 
 <ul>
 <li>The client sends a <code>StorageDealProposal</code> for the piece in question</li>
@@ -246,20 +246,20 @@ https://github.com/alex-shpak/hugo-book
 <li>They stage it into a sector and set the deal state to <code>Staged</code></li>
 </ul></li>
 
-<li><p><strong>Storage Deal Start</strong>: Clients makes sure data is in a <a href="definitions.md#sector">sector</a></p>
+<li><p><strong>Storage Deal Start</strong>: Clients makes sure data is in a <a href="../definitions#sector">sector</a></p>
 
 <ul>
 <li><strong>PieceInclusionProof:</strong> Once the miner seals the sector, they update the PieceInclusionProof in the deal state, which the client then gets the next time they query that state.
 
 <ul>
-<li>The PieceInclusionProof proves that the piece in the deal is contained in a sector whose commitment is on chain. The &lsquo;Merkle Translation&rsquo; hash from earlier is used here. See <a href="proofs.md#piece-inclusion-proof">piece inclusion proof for more details</a></li>
+<li>The PieceInclusionProof proves that the piece in the deal is contained in a sector whose commitment is on chain. The &lsquo;Merkle Translation&rsquo; hash from earlier is used here. See <a href="../proofs#piece-inclusion-proof">piece inclusion proof for more details</a></li>
 </ul></li>
 <li>Note: a client that is not interested in staying online to wait for PieceInclusionProof can leave immediately, however, they run the risk that their files don&rsquo;t actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
 
 <ul>
 <li>Note: In order to provide the piece inclusion proof, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece inclusion proof becomes available.</li>
 </ul></li>
-<li><strong>Mining</strong>: Miner posts <code>seal commitment</code> and associated proof on chain by calling <code>CommitSector</code> and starts running <code>proofs of spacetime</code>. See <a href="mining.md#storage-mining-cycle">storage mining cycle</a> for more details.</li>
+<li><strong>Mining</strong>: Miner posts <code>seal commitment</code> and associated proof on chain by calling <code>CommitSector</code> and starts running <code>proofs of spacetime</code>. See <a href="../mining#storage-mining-cycle">storage mining cycle</a> for more details.</li>
 </ul></li>
 
 <li><p><strong>Storage Deal Abort:</strong> If the miner doesn&rsquo;t provide the PieceInclusionProof, the client can invalidate the payment channel.</p>

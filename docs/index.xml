@@ -45,8 +45,8 @@ Further more, every full node must implement and offer the bitswap protocol and 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/data-structures/</guid>
-      <description>Data Structures This document serves as an entry point for understanding all of the data structures in filecoin.
-Address An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.</description>
+      <description>Data Structures In this document, we give an introduction to each of the protocol data structures and then explain how to encode these data structures for use in other parts of Filecoin (e.g. network protocols and the blockchain).
+Address An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about: - Network this address belongs to - Type of data the address contains - The data itself - Checksum (depending on the type of address)</description>
     </item>
     
     <item>
@@ -65,15 +65,8 @@ Notes  Want to split all repair stuff to separate doc Let&amp;rsquo;s refer to F
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/expected-consensus/</guid>
-      <description>Expected Consensus This spec describes how to implement the protocol in general, for Filecoin-specific processes, see:
- Mining Blocks on how consensus is used. Faults on slashing. Storage Market on how the power table is maintained. Block data structure for details on fields and encoding.  Important Concepts - TipSet
- Weight
- Round
- Height
- Epoch
- Ticket
- ElectionProof
-  Definition: A ticket is used as a source of randomness in EC leader election.</description>
+      <description>Expected Consensus This spec describes how the expected consensus (EC) protocol works in general. To read more about Filecoin-specific processes, see:
+ Mining blocks on how consensus is used in block mining. Faults on slashing. Storage market on how the power table is maintained. Block data structure for details on fields and encoding  Important concepts and definitions Some important concepts relevant to expected consensus are: - TipSet - Weight - Height - Round - Epoch - Ticket - ElectionProof</description>
     </item>
     
     <item>
@@ -111,9 +104,8 @@ Chain Data Private Keys Sectors Storage Deals </description>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://filecoin-project.github.io/specs/docs/network-protocols/</guid>
-      <description>Filecoin Specific Network Protocols All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream as outlined in [networking(./networking.md)
-CBOR RPC Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will use the CBOR RPC protocol format, defined below.
-This format consists of series of CBOR serialized objects.</description>
+      <description>Filecoin Specific Network Protocols All filecoin network protocols are implemented as libp2p protocols. This document will assume that all data is communicated between peers on a libp2p stream as outlined in networking
+Ipld dag-cbor RPC Filecoin uses many pre-existing protocols from ipfs and libp2p, and also implements several new protocols of its own. For these Filecoin specific protocols, we will use the Ipld dag-cbor RPC protocol format, defined below.</description>
     </item>
     
     <item>

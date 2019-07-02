@@ -159,7 +159,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>After successfully calling <code>CreateStorageMiner</code>, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.</p>
 
-<p>For details on the methods on the miner actor, see its entry in the <a href="actors.md#storage-miner-actor">actors spec</a>.</p>
+<p>For details on the methods on the miner actor, see its entry in the <a href="../actors#storage-miner-actor">actors spec</a>.</p>
 
 <h3 id="owner-worker-distinction">Owner Worker distinction</h3>
 
@@ -171,17 +171,17 @@ https://github.com/alex-shpak/hugo-book
 
 <h4 id="step-0-registration">Step 0: Registration</h4>
 
-<p>To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor&rsquo;s <a href="actors.md#createstorageminer"><code>CreateStorageMiner</code></a> method. The call will then create a new miner actor instance and return its address.</p>
+<p>To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor&rsquo;s <a href="../actors#createstorageminer"><code>CreateStorageMiner</code></a> method. The call will then create a new miner actor instance and return its address.</p>
 
-<p>The next step is to place one or more storage market asks on the market. This is done through the storage markets <a href="actors.md#addask"><code>AddAsk</code></a> method. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).</p>
+<p>The next step is to place one or more storage market asks on the market. This is done through the storage markets <a href="../actors#addask"><code>AddAsk</code></a> method. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).</p>
 
-<p>After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on <a href="storage-market.md#deal">deal</a>.</p>
+<p>After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on <a href="../storage-market#deal">deal</a>.</p>
 
-<p>When they have a full sector, they should seal it. This is done by invoking <a href="proofs.md#seal"><code>PoRep.Seal</code></a> on the sector.</p>
+<p>When they have a full sector, they should seal it. This is done by invoking <a href="../proofs#seal"><code>PoRep.Seal</code></a> on the sector.</p>
 
 <h4 id="step-1-commit">Step 1: Commit</h4>
 
-<p>When the miner has completed their first seal, they should post it on-chain using <a href="actors.md#commitsector">CommitSector</a>. If the miner had zero committed sectors prior to this call, this begins their proving period.</p>
+<p>When the miner has completed their first seal, they should post it on-chain using <a href="../actors#commitsector">CommitSector</a>. If the miner had zero committed sectors prior to this call, this begins their proving period.</p>
 
 <p>The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.</p>
 
@@ -204,13 +204,13 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
     <span class="k">return</span> <span class="nf">GenPostSnark</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">sectors</span><span class="p">,</span> <span class="nx">seeds</span><span class="p">,</span> <span class="nx">proofs</span><span class="p">),</span> <span class="nx">faults</span>
 <span class="p">}</span></code></pre></div>
-<p>Note: See <a href="proofs.md#proof-of-space-time">&lsquo;Proof of Space Time&rsquo;</a> for more details.</p>
+<p>Note: See <a href="../proofs#proof-of-space-time">&lsquo;Proof of Space Time&rsquo;</a> for more details.</p>
 
 <p>The proving set remains consistent during the proving period. Any sectors added in the meantime will be included in the next proving set, at the beginning of the next proving period.</p>
 
 <h4 id="step-3-post-submission">Step 3: PoSt Submission</h4>
 
-<p>When the miner has completed their PoSt, they must submit it to the network by calling <a href="actors.md#submitpost">SubmitPoSt</a>. There are two different times that this <em>could</em> be done.</p>
+<p>When the miner has completed their PoSt, they must submit it to the network by calling <a href="../actors#submitpost">SubmitPoSt</a>. There are two different times that this <em>could</em> be done.</p>
 
 <ol>
 <li><strong>Standard Submission</strong>: A standard submission is one that makes it on-chain before the end of the proving period. The length of time it takes to compute the PoSts is set such that there is a grace period between then and the actual end of the proving period, so that the effects of network congestion on typical miner actions is minimized.</li>
@@ -225,7 +225,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="stop-mining">Stop Mining</h3>
 
-<p>In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call <a href="actors.md#depledge"><code>DePledge()</code></a> to retrieve their collateral. <code>DePledge</code> must be called twice, once to start the cooldown, and once again after the cooldown to reclaim the funds. The cooldown period is to allow clients whose files have been dropped by a miner to slash them before they get their money back and get away with it.</p>
+<p>In order to stop mining, a miner must complete all of its storage contracts, and remove them from their proving set during a PoSt submission. A miner may then call <a href="../actors#depledge"><code>DePledge()</code></a> to retrieve their collateral. <code>DePledge</code> must be called twice, once to start the cooldown, and once again after the cooldown to reclaim the funds. The cooldown period is to allow clients whose files have been dropped by a miner to slash them before they get their money back and get away with it.</p>
 
 <h3 id="faults">Faults</h3>
 
@@ -241,9 +241,9 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="mining-blocks">Mining Blocks</h2>
 
-<p>Having registered as a miner, it&rsquo;s time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest <a href="./expected-consensus.md#tipsets">TipSets</a> seen on the network.</p>
+<p>Having registered as a miner, it&rsquo;s time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest <a href="../expected-consensus#tipsets">TipSets</a> seen on the network.</p>
 
-<p>For additional details around how consensus works in Filecoin, see the <a href="./expected-consensus.md">expected consensus spec</a>. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how &ldquo;Tickets&rdquo; should be validated during block validation.</p>
+<p>For additional details around how consensus works in Filecoin, see the <a href="../expected-consensus">expected consensus spec</a>. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how &ldquo;Tickets&rdquo; should be validated during block validation.</p>
 
 <h3 id="receiving-blocks">Receiving Blocks</h3>
 
@@ -256,11 +256,11 @@ https://github.com/alex-shpak/hugo-book
 
 <p>A miner may sometimes receive blocks belonging to different TipSets (i.e. whose parents are not the same). In that case, they must choose which TipSet to mine on.</p>
 
-<p>Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier TipSet rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see <a href="./expected-consensus.md#chain-selection">chain selection</a> in the Expected Consensus spec.</p>
+<p>Chain selection is a crucial component of how the Filecoin blockchain works. Every chain has an associated weight accounting for the number of blocks mined on it and so the power (storage) they track. It is always preferable to mine atop a heavier TipSet rather than a lighter one. While a miner may be foregoing block rewards earned in the past, this lighter chain is likely to be abandoned by other miners forfeiting any block reward earned as miners converge on a final chain. For more on this, see <a href="../expected-consensus#chain-selection">chain selection</a> in the Expected Consensus spec.</p>
 
 <h3 id="block-validation">Block Validation</h3>
 
-<p>The block structure and serialization is detailed in <a href="data-structures.md#block">the datastructures spec - block</a>. Check there for details on fields and types.</p>
+<p>The block structure and serialization is detailed in <a href="../data-structures#block">the datastructures spec - block</a>. Check there for details on fields and types.</p>
 
 <p>In order to validate a block coming in from the network at round <code>N</code> was well mined a miner must do the following:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">VerifyBlock</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="p">{</span>
@@ -402,11 +402,11 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Once they&rsquo;ve ensured all blocks in the heaviest TipSet received were properly mined, they can mine on top of it. If they weren&rsquo;t, the miner may need to ensure the next heaviest <code>Tipset</code> was properly mined. This might mean the same <code>Tipset</code> with invalid blocks removed, or an altogether different one.</p>
 
-<p>If no valid blocks are received, a miner may mine atop the same <code>TipSet</code> running leader election again using the next ticket in the ticket chain, and also generating a <a href="./expected-consensus.md#losing-tickets">new ticket</a> in the process (see the <a href="./expected-consensus.md">expected consensus spec</a> for more).</p>
+<p>If no valid blocks are received, a miner may mine atop the same <code>TipSet</code> running leader election again using the next ticket in the ticket chain, and also generating a <a href="../expected-consensus#losing-tickets">new ticket</a> in the process (see the <a href="expected-consensus.md">expected consensus spec</a> for more).</p>
 
 <h3 id="ticket-generation">Ticket Generation</h3>
 
-<p>For details of ticket generation, see the <a href="./expected-consensus.md#ticket-generation">expected consensus spec</a>.</p>
+<p>For details of ticket generation, see the <a href="../expected-consensus#ticket-generation">expected consensus spec</a>.</p>
 
 <p>Ticket generation is the twin process of leader election (i.e. generating <code>ElectionProof</code>s). Every ticket scratch (i.e. round of leader election) has the miner generate a new ticket to include in the <code>Tickets</code> array of their block.</p>
 
@@ -424,7 +424,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Now, rather than generating this new ticket from the smallest ticket from the parent TipSet (as above), the miner will instead use their ticket from the last round, now in the <code>Tickets</code> array.</p>
 
-<p>This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner&rsquo;s own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see the <a href="./expected-consensus.md#chain-selection">Expected Consensus spec</a> for more details).</p>
+<p>This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner&rsquo;s own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see the <a href="../expected-consensus#chain-selection">Expected Consensus spec</a> for more details).</p>
 
 <p>The <code>Tickets</code> array in the block to be published grows with each round (and a new ticket generated).</p>
 
@@ -435,9 +435,9 @@ https://github.com/alex-shpak/hugo-book
 <p>To create a block, the eligible miner must compute a few fields:</p>
 
 <ul>
-<li><code>Tickets</code> - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See <a href="./expected-consensus.md#ticket-generation">ticket generation</a>.</li>
-<li><code>ElectionProof</code> - A signature over the final ticket from the <code>Tickets</code> array proving. See <a href="./expected-consensus.md#ticket-generation">ticket generation</a>.</li>
-<li><code>ParentWeight</code> - As described in <a href="./expected-consensus.md#chain-weighting">Chain Weighting</a>.</li>
+<li><code>Tickets</code> - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See <a href="../expected-consensus#ticket-generation">ticket generation</a>.</li>
+<li><code>ElectionProof</code> - A signature over the final ticket from the <code>Tickets</code> array proving. See <a href="../expected-consensus#ticket-generation">ticket generation</a>.</li>
+<li><code>ParentWeight</code> - As described in <a href="../expected-consensus#chain-weighting">Chain Weighting</a>.</li>
 <li><code>Parents</code> - the CIDs of the parent blocks.</li>
 <li><code>ParentState</code> - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
 
@@ -481,7 +481,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Now, a set of messages is selected to put into the block. For each message, the miner subtracts <code>msg.GasPrice * msg.GasLimit</code> from the sender&rsquo;s account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain).</p>
 
-<p>They then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value (see <a href="data-structures.md#message-receipt">receipt</a> for more details). Then, they refund the sender in the amount of <code>(msg.GasLimit - GasUsed) * msg.GasPrice</code>. In the event of a message processing error, the remaining gas is refunded to the user, and all other state changes are reverted. (Note: this is a divergence from the way things are done in Ethereum)</p>
+<p>They then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value (see <a href="../data-structures#message-receipt">receipt</a> for more details). Then, they refund the sender in the amount of <code>(msg.GasLimit - GasUsed) * msg.GasPrice</code>. In the event of a message processing error, the remaining gas is refunded to the user, and all other state changes are reverted. (Note: this is a divergence from the way things are done in Ethereum)</p>
 
 <p>Each message should be applied on the resultant state of the previous message execution, unless that message execution failed, in which case all state changes caused by that message are thrown out. The final state tree after this process will be the block&rsquo;s <code>StateRoot</code>.</p>
 

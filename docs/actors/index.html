@@ -153,16 +153,30 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Any implementations of the Filecoin actors must be exactly byte for byte compatible with the go-filecoin actor implementations. The pseudocode below tries to capture the important logic, but capturing all the detail would require embedding exactly the code from go-filecoin, so for now, its simply informative pseudocode. The algorithms below are correct, and all implementations much match it (including go-filecoin), but details omitted from here should be looked for in the go-filecoin code.</p>
 
-<p>This spec describes a set of actors that operate within the <a href="../state-machine">Filecoin State Machine</a>. All types are defined in <a href="data-structures.md#basic-type-encodings">the basic type encoding spec</a>.</p>
+<p>This spec describes a set of actors that operate within the <a href="../state-machine">Filecoin State Machine</a>. All types are defined in <a href="../data-structures#basic-type-encodings">the basic type encoding spec</a>.</p>
 
-<ul>
-<li><a href="#init-actor">Init Actor</a></li>
-<li><a href="#storage-market-actor">Storage Market Actor</a></li>
-<li><a href="#storage-miner-actor">Storage Miner Actor</a></li>
-<li><a href="#payment-channel-broker-actor">Payment Channel Broker Actor</a></li>
-</ul>
+<h2 id="actor-state">Actor State</h2>
 
-<h2 id="built-in-actors">Built In Actors</h2>
+<p>These below used <code>kindeded</code> representation, as the type can be inferred from the context, in which
+they are used (<code>Actor</code> or <code>UnsignedMessage</code>).</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ActorState union <span class="o">{</span>
+    <span class="p">|</span> InitActorState
+    <span class="p">|</span> AccountActorState
+    <span class="p">|</span> StorageMarketActorState
+    <span class="p">|</span> StorageMinerActorState
+    <span class="p">|</span> PaymentChannelBrokerActorState
+    <span class="p">|</span> MultisigActorState
+<span class="o">}</span> representation kinded
+
+<span class="nb">type</span> ActorMethod union <span class="o">{</span>
+    <span class="p">|</span> InitActorMethod
+    <span class="p">|</span> AccountActorMethod
+    <span class="p">|</span> StorageMarketActorMethod
+    <span class="p">|</span> StorageMinerActorMethod
+    <span class="p">|</span> PaymentChannelBrokerActorMethod
+    <span class="p">|</span> MultisigActorMethod
+<span class="o">}</span> representation kinded</code></pre></div>
+<h2 id="system-actors">System Actors</h2>
 
 <p>Some state machine actors are &lsquo;system&rsquo; actors that get instantiated in the genesis block, and have their IDs allocated at that point.</p>
 
@@ -202,76 +216,45 @@ https://github.com/alex-shpak/hugo-book
 </tbody>
 </table>
 
-<h2 id="init-actor">Init Actor</h2>
+<h2 id="built-in-actors">Built In Actors</h2>
+
+<h3 id="init-actor">Init Actor</h3>
+
+<ul>
+<li><strong>Code Cid</strong>: <code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;init&quot;&gt;</code></li>
+</ul>
 
 <p>The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that <code>NextID</code> will initially be set to 100.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">InitActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Mapping from Address to ID, for lookups.
-</span><span class="c1"></span>    <span class="nx">AddressMap</span> <span class="kd">map</span><span class="p">[</span><span class="nx">Address</span><span class="p">]</span><span class="nx">BigInt</span>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> InitActorState struct <span class="o">{</span>
+    addressMap <span class="o">{</span>Address:ID<span class="o">}</span>&lt;Hamt&gt;
+    nextId UInt
+<span class="o">}</span>
 
-    <span class="nx">NextID</span> <span class="nx">BigInt</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="code-cid">Code Cid</h3>
+<span class="nb">type</span> InitActorMethod union <span class="o">{</span>
+    <span class="p">|</span> InitConstructor <span class="m">0</span>
+    <span class="p">|</span> Exec <span class="m">1</span>
+    <span class="p">|</span> GetIdForAddress <span class="m">2</span>
+<span class="o">}</span> representation keyed</code></pre></div>
+<h4 id="constructor"><code>Constructor</code></h4>
 
-<p><code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;init&quot;&gt;</code></p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> InitConstructor struct <span class="o">{</span>
+<span class="o">}</span></code></pre></div>
+<p><strong>Algorithm</strong></p>
 
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Method Name</th>
-</tr>
-</thead>
+<h4 id="exec"><code>Exec</code></h4>
 
-<tbody>
-<tr>
-<td>1</td>
-<td><code>Exec</code></td>
-</tr>
-
-<tr>
-<td>2</td>
-<td><code>GetIdForAddress</code></td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="exec-code-cid-params-param-address"><code>Exec(code Cid, params []Param) Address</code></h3>
-
-<blockquote>
 <p>This method is the core of the <code>Init Actor</code>. It handles instantiating new actors and assigning them their IDs.</p>
-</blockquote>
 
-<h3 id="parameters">Parameters</h3>
-
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td><code>code</code></td>
-<td><code>Cid</code></td>
-<td>A pointer to the location at which the code of the actor to create is stored.</td>
-</tr>
-
-<tr>
-<td><code>params</code></td>
-<td><code>[] Param</code></td>
-<td>The parameters passed to the constructor of the actor.</td>
-</tr>
-</tbody>
-</table>
-
-<p><code>Param</code> is the type representing any valid arugment that can be passed to a function.</p>
-
-<p>TODO: Find a better place for this definition.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">code</span> <span class="nx">Cid</span><span class="p">,</span> <span class="nx">params</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> Exec struct <span class="o">{</span>
+    <span class="c1">## Reference to the location at which the code of the actor to create is stored.</span>
+    code <span class="p">&amp;</span>Code
+    <span class="c1">## Parameters passed to the constructor of the actor.</span>
+    params ActorMethod
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">code</span> <span class="o">&amp;</span><span class="nx">Code</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">ActorMethod</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="c1">// Get the actor ID for this actor.
 </span><span class="c1"></span>    <span class="nx">actorID</span> <span class="p">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">NextID</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">NextID</span><span class="o">++</span>
@@ -289,16 +272,20 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// This generates a unique address for this actor that is stable across message
 </span><span class="c1"></span>    <span class="c1">// reordering
-</span><span class="c1"></span>    <span class="nx">addr</span> <span class="o">:=</span> <span class="nx">VM</span><span class="p">.</span><span class="nf">ComputeActorAddress</span><span class="p">()</span>
+</span><span class="c1"></span>    <span class="c1">// TODO: where do `creator` and `nonce` come from?
+</span><span class="c1"></span>    <span class="nx">addr</span> <span class="o">:=</span> <span class="nx">VM</span><span class="p">.</span><span class="nf">ComputeActorAddress</span><span class="p">(</span><span class="nx">creator</span><span class="p">,</span> <span class="nx">nonce</span><span class="p">)</span>
 
     <span class="c1">// Set up the actor itself
 </span><span class="c1"></span>    <span class="nx">actor</span> <span class="o">:=</span> <span class="nx">Actor</span><span class="p">{</span>
         <span class="nx">Code</span><span class="p">:</span>    <span class="nx">code</span><span class="p">,</span>
         <span class="nx">Balance</span><span class="p">:</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span>
+        <span class="nx">Head</span><span class="p">:</span>    <span class="kc">nil</span><span class="p">,</span>
+        <span class="nx">Nonce</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1">// The call to the actors constructor will set up the initial state
-</span><span class="c1"></span>    <span class="c1">// from the given parameters
+</span><span class="c1"></span>    <span class="c1">// from the given parameters, setting `actor.Head` to a new value when successfull.
+</span><span class="c1"></span>    <span class="c1">// TODO: can constructors fail?
 </span><span class="c1"></span>    <span class="nx">actor</span><span class="p">.</span><span class="nf">Constructor</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span>
 
     <span class="nx">VM</span><span class="p">.</span><span class="nx">GlobalState</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="nx">actorID</span><span class="p">,</span> <span class="nx">actor</span><span class="p">)</span>
@@ -311,137 +298,90 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="nf">IsSingletonActor</span><span class="p">(</span><span class="nx">code</span> <span class="nx">Cid</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">code</span> <span class="o">==</span> <span class="nx">StorageMarketActor</span> <span class="o">||</span> <span class="nx">code</span> <span class="o">==</span> <span class="nx">InitActor</span>
-<span class="p">}</span>
-
-<span class="c1">// TODO: find a better home for this logic
+<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// TODO: find a better home for this logic
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">VM</span> <span class="nx">VM</span><span class="p">)</span> <span class="nf">ComputeActorAddress</span><span class="p">(</span><span class="nx">creator</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">nonce</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nf">NewActorAddress</span><span class="p">(</span><span class="nx">bytes</span><span class="p">.</span><span class="nf">Concat</span><span class="p">(</span><span class="nx">creator</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(),</span> <span class="nx">nonce</span><span class="p">.</span><span class="nf">BigEndianBytes</span><span class="p">()))</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getidforaddress-addr-address-bigint"><code>GetIdForAddress(addr Address) BigInt</code></h3>
+<h4 id="getidforaddress"><code>GetIdForAddress</code></h4>
 
-<blockquote>
 <p>This method allows for fetching the corresponding ID of a given Address</p>
-</blockquote>
 
-<h3 id="parameters-1">Parameters</h3>
-
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td><code>addr</code></td>
-<td><code>Address</code></td>
-<td>The address to lookup</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetIdForAddress</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">BigInt</span> <span class="p">{</span>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">GetIdForAddress</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">addr</span> <span class="nx">Address</span>
+<span class="p">}</span> <span class="nx">representation</span> <span class="nx">tuple</span></code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetIdForAddress</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">UInt</span> <span class="p">{</span>
     <span class="nx">id</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">AddressMap</span><span class="p">[</span><span class="nx">addr</span><span class="p">]</span>
     <span class="k">if</span> <span class="nx">id</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
         <span class="nf">Fault</span><span class="p">(</span><span class="s">&#34;unknown address&#34;</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">id</span>
 <span class="p">}</span></code></pre></div>
-<h2 id="account-actor">Account Actor</h2>
-
-<p>The Account actor is the actor used for normal keypair backed accounts on the filecoin network.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">AccountActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Address contains the public key based address that this account was created with. If unset, this account may not send funds by normal means.
-</span><span class="c1"></span>    <span class="nx">Address</span> <span class="nx">Address</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="code-cid-1">Code Cid</h3>
-
-<p><code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;account&quot;&gt;</code></p>
-
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Method Name</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>1</td>
-<td><code>GetAddress</code></td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="storage-market-actor">Storage Market Actor</h2>
-
-<p>The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageMarketActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Miners</span> <span class="nx">AddressSet</span>
-
-    <span class="c1">// TODO: Determine correct unit of measure. Could be denominated in the
-</span><span class="c1"></span>    <span class="c1">// smallest sector size supported by the network.
-</span><span class="c1"></span>    <span class="nx">TotalStorage</span> <span class="nx">BytesAmount</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="code-cid-2">Code Cid</h3>
-
-<p><code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;smarket&quot;&gt;</code></p>
-
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Method Name</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>1</td>
-<td><code>CreateStorageMiner</code></td>
-</tr>
-
-<tr>
-<td>2</td>
-<td><code>SlashConsensusFault</code></td>
-</tr>
-
-<tr>
-<td>3</td>
-<td><code>UpdateStorage</code></td>
-</tr>
-
-<tr>
-<td>4</td>
-<td><code>GetTotalStorage</code></td>
-</tr>
-
-<tr>
-<td>5</td>
-<td><code>PowerLookup</code></td>
-</tr>
-
-<tr>
-<td>6</td>
-<td><code>IsMiner</code></td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="createstorageminer">CreateStorageMiner</h3>
-
-<p>Parameters:</p>
+<h3 id="account-actor">Account Actor</h3>
 
 <ul>
-<li>worker Address</li>
-<li>sectorSize BytesAmount</li>
-<li>pid PeerID</li>
+<li><strong>Code Cid</strong>: <code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;account&quot;&gt;</code></li>
 </ul>
 
-<p>Return: Address</p>
+<p>The Account actor is the actor used for normal keypair backed accounts on the filecoin network.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> AccountActorState struct <span class="o">{</span>
+    address Address
+<span class="o">}</span>
+
+<span class="nb">type</span> AccountActorMethod union <span class="o">{</span>
+    <span class="p">|</span> AccountConstructor <span class="m">0</span>
+    <span class="p">|</span> GetAddress <span class="m">1</span>
+<span class="o">}</span> representation keyed
+
+<span class="nb">type</span> AccountConstructor struct <span class="o">{</span>
+<span class="o">}</span></code></pre></div>
+<h4 id="getaddress"><code>GetAddress</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetAddress struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetAddress</span><span class="p">()</span> <span class="nx">Address</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">address</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="storage-market-actor">Storage Market Actor</h3>
+
+<ul>
+<li><strong>Code Cid</strong>: <code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;smarket&quot;&gt;</code></li>
+</ul>
+
+<p>The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMarketActorState struct <span class="o">{</span>
+    miners <span class="o">{</span>Address:Null<span class="o">}</span>&lt;Hamt&gt;
+    totalStorage BytesAmount
+<span class="o">}</span>
+
+<span class="nb">type</span> StorageMarketActorMethod union <span class="o">{</span>
+    <span class="p">|</span> StorageMarketConstructor <span class="m">0</span>
+    <span class="p">|</span> CreateStorageMiner <span class="m">1</span>
+    <span class="p">|</span> SlashConsensusFault <span class="m">2</span>
+    <span class="p">|</span> UpdateStorage <span class="m">3</span>
+    <span class="p">|</span> GetTotalStorage <span class="m">4</span>
+    <span class="p">|</span> PowerLookup <span class="m">5</span>
+    <span class="p">|</span> IsMiner <span class="m">6</span>
+<span class="o">}</span> representation keyed</code></pre></div>
+<h4 id="constructor-1"><code>Constructor</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMarketConstructor struct <span class="o">{</span>
+<span class="o">}</span></code></pre></div>
+<p><strong>Algorithm</strong></p>
+
+<h4 id="createstorageminer"><code>CreateStorageMiner</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> CreateStorageMiner struct <span class="o">{</span>
+    worker Address
+    sectorSize BytesAmount
+    peerId PeerId
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">CreateStorageMiner</span><span class="p">(</span><span class="nx">worker</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">SupportedSectorSize</span><span class="p">(</span><span class="nx">sectorSize</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Unsupported sector size&#34;</span><span class="p">)</span>
@@ -453,16 +393,14 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="k">return</span> <span class="nx">newminer</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="slashconsensusfault">SlashConsensusFault</h3>
+<h4 id="slashconsensusfault"><code>SlashConsensusFault</code></h4>
 
-<p>Parameters:</p>
-
-<ul>
-<li>block1 BlockHeader</li>
-<li>block2 BlockHeader</li>
-</ul>
-
-<p>Return: None</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SlashConsensusFault struct <span class="o">{</span>
+    block1 <span class="p">&amp;</span>Block
+    block2 <span class="p">&amp;</span>Block
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">shouldSlash</span><span class="p">(</span><span class="nx">block1</span><span class="p">,</span> <span class="nx">block2</span> <span class="nx">BlockHeader</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="c1">// First slashing condition, blocks have the same ticket round
 </span><span class="c1"></span>    <span class="k">if</span> <span class="nf">sameTicketRound</span><span class="p">(</span><span class="nx">block1</span><span class="p">,</span> <span class="nx">block2</span><span class="p">)</span> <span class="p">{</span>
@@ -518,17 +456,15 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Now delete the miner (maybe this is a bit harsh, but i&#39;m okay with it for now)
 </span><span class="c1"></span>    <span class="nx">miner</span><span class="p">.</span><span class="nf">SelfDestruct</span><span class="p">()</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="updatestorage">UpdateStorage</h3>
+<h4 id="updatestorage"><code>UpdateStorage</code></h4>
 
 <p>UpdateStorage is used to update the global power table.</p>
 
-<p>Parameters:</p>
-
-<ul>
-<li>delta BytesAmount</li>
-</ul>
-
-<p>Return: None</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> UpdateStorage struct <span class="o">{</span>
+    delta BytesAmount
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">UpdateStorage</span><span class="p">(</span><span class="nx">delta</span> <span class="nx">BytesAmount</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;update storage must only be called by a miner actor&#34;</span><span class="p">)</span>
@@ -536,235 +472,145 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">TotalStorage</span> <span class="o">+=</span> <span class="nx">delta</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="gettotalstorage">GetTotalStorage</h3>
+<h4 id="gettotalstorage"><code>GetTotalStorage</code></h4>
 
-<p>Parameters: None</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetTotalStorage struct <span class="o">{</span>
 
-<p>Return: BytesAmount</p>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetTotalStorage</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">TotalStorage</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="powerlookup">PowerLookup</h3>
+<h4 id="powerlookup"><code>PowerLookup</code></h4>
 
-<p>Parameters:
-- miner Address</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> PowerLookup struct <span class="o">{</span>
+    miner Address
+<span class="o">}</span> representation tuple
+<span class="sb">````</span>
 
-<p>Return: BytesAmount</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner not registered with storage market&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
+**Algorithm**
 
-    <span class="nx">mact</span> <span class="o">:=</span> <span class="nf">LoadMinerActor</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
+<span class="sb">```</span>go
+func PowerLookup<span class="o">(</span>miner Address<span class="o">)</span> BytesAmount <span class="o">{</span>
+    <span class="k">if</span> !self.Miners.Has<span class="o">(</span>miner<span class="o">)</span> <span class="o">{</span>
+        Fatal<span class="o">(</span><span class="s2">&#34;miner not registered with storage market&#34;</span><span class="o">)</span>
+    <span class="o">}</span>
 
-    <span class="k">return</span> <span class="nx">mact</span><span class="p">.</span><span class="nf">GetPower</span><span class="p">()</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="isminer">IsMiner</h3>
+    mact :<span class="o">=</span> LoadMinerActor<span class="o">(</span>miner<span class="o">)</span>
 
-<p>Parameters:
-- addr Address</p>
+    <span class="k">return</span> mact.GetPower<span class="o">()</span>
+<span class="o">}</span></code></pre></div>
+<h4 id="isminer"><code>IsMiner</code></h4>
 
-<p>Return: BytesAmount</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> IsMiner struct <span class="o">{</span>
+    addr Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">IsMiner</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Miners</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">miner</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
 <h2 id="storage-miner-actor">Storage Miner Actor</h2>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StorageMiner</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Owner is the address of the account that owns this miner. Income and returned
-</span><span class="c1"></span>    <span class="c1">// collateral are paid to this address. This address is also allowed to change the
-</span><span class="c1"></span>    <span class="c1">// worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">Owner</span> <span class="nx">Address</span>
 
-    <span class="c1">// Worker is the address of the worker account for this miner.
-</span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
-</span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
-</span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">Worker</span> <span class="nx">Address</span>
+<ul>
+<li><strong>Code Cid</strong>: <code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;sminer&quot;&gt;</code></li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMinerActorState struct <span class="o">{</span>
+    <span class="c1">## Account that owns this miner.</span>
+    <span class="c1">## - Income and returned collateral are paid to this address.</span>
+    <span class="c1">## - This address is also allowed to change the worker address for the miner.</span>
+    owner Address
 
-    <span class="c1">// PeerID is the libp2p peer identity that should be used to connect
-</span><span class="c1"></span>    <span class="c1">// to this miner
-</span><span class="c1"></span>    <span class="nx">PeerID</span> <span class="nx">peer</span><span class="p">.</span><span class="nx">ID</span>
+    <span class="c1">## Worker account for this miner.</span>
+    <span class="c1">## This will be the key that is used to sign blocks created by this miner, and</span>
+    <span class="c1">## sign messages sent on behalf of this miner to commit sectors, submit PoSts, and</span>
+    <span class="c1">## other day to day miner activities.</span>
+    worker Address
 
-    <span class="c1">// SectorSize is the amount of space in each sector committed to the network
-</span><span class="c1"></span>    <span class="c1">// by this miner.
-</span><span class="c1"></span>    <span class="nx">SectorSize</span> <span class="nx">BytesAmount</span>
+    <span class="c1">## Libp2p identity that should be used when connecting to this miner.</span>
+    peerId PeerId
 
-    <span class="c1">// ActiveCollateral is the amount of collateral currently committed to live storage
-</span><span class="c1"></span>    <span class="nx">ActiveCollateral</span> <span class="nx">TokenAmount</span>
+    <span class="c1">## Amount of space in each sector committed to the network by this miner.</span>
+    sectorSize BytesAmount
 
-    <span class="c1">// DePledgedCollateral is collateral that is waiting to be withdrawn
-</span><span class="c1"></span>    <span class="nx">DePledgedCollateral</span> <span class="nx">TokenAmount</span>
+    <span class="c1">## Collateral currently committed to live storage.</span>
+    activeCollateral TokenAmount
 
-    <span class="c1">// DePledgeTime is the time at which the depledged collateral may be withdrawn
-</span><span class="c1"></span>    <span class="nx">DePledgeTime</span> <span class="nx">BlockHeight</span>
+    <span class="c1">## Collateral that is waiting to be withdrawn.</span>
+    dePledgedCollateral TokenAmount
 
-    <span class="c1">// Sectors is the set of all sectors this miner has committed
-</span><span class="c1"></span>    <span class="nx">Sectors</span> <span class="nx">SectorSet</span>
+    <span class="c1">## Time at which the depledged collateral may be withdrawn.</span>
+    dePledgeTime BlockHeight
 
-    <span class="c1">// ProvingSet is the set of sectors this miner is currently mining. It is only updated
-</span><span class="c1"></span>    <span class="c1">// when a PoSt is submitted (not as each new sector commitment is added)
-</span><span class="c1"></span>    <span class="nx">ProvingSet</span> <span class="nx">SectorSet</span>
+    <span class="c1">## All sectors this miner has committed.</span>
+    sectors SectorSet
 
-    <span class="c1">// NextDoneSet is a set of sectors reported during the last PoSt submission as
-</span><span class="c1"></span>    <span class="c1">// being &#39;done&#39;. The collateral for them is still being held until the next PoSt
-</span><span class="c1"></span>    <span class="c1">// submission in case early sector removal penalization is needed.
-</span><span class="c1"></span>    <span class="nx">NextDoneSet</span> <span class="nx">SectorSet</span>
+    <span class="c1">## Sectors this miner is currently mining. It is only updated</span>
+    <span class="c1">## when a PoSt is submitted (not as each new sector commitment is added).</span>
+    provingSet SectorSet
 
-    <span class="c1">// ArbitratedDeals is the set of deals this miner has been slashed for since the
-</span><span class="c1"></span>    <span class="c1">// last post submission
-</span><span class="c1"></span>    <span class="nx">ArbitratedDeals</span> <span class="nx">CidSet</span>
+    <span class="c1">## Sectors reported during the last PoSt submission as being &#39;done&#39;. The collateral</span>
+    <span class="c1">## for them is still being held until the next PoSt submission in case early sector</span>
+    <span class="c1">## removal penalization is needed.</span>
+    nextDoneSet SectorSet
 
-    <span class="c1">// Power is the amount of power this miner has
-</span><span class="c1"></span>    <span class="nx">Power</span> <span class="nx">Integer</span>
+    <span class="c1">## Deals this miner has been slashed for since the last post submission.</span>
+    arbitratedDeals CidSet
 
-    <span class="c1">// Asks are the set of active asks this miner has available
-</span><span class="c1"></span>    <span class="nx">Asks</span> <span class="nx">AskSet</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="code-cid-3">Code Cid</h3>
+    <span class="c1">## Amount of power this miner has.</span>
+    power UInt
+<span class="o">}</span>
 
-<p><code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;sminer&quot;&gt;</code></p>
-
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Method Name</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>1</td>
-<td><code>AddAsk</code></td>
-</tr>
-
-<tr>
-<td>2</td>
-<td><code>CommitSector</code></td>
-</tr>
-
-<tr>
-<td>3</td>
-<td><code>SubmitPoSt</code></td>
-</tr>
-
-<tr>
-<td>4</td>
-<td><code>IncreasePledge</code></td>
-</tr>
-
-<tr>
-<td>5</td>
-<td><code>SlashStorageFault</code></td>
-</tr>
-
-<tr>
-<td>6</td>
-<td><code>GetCurrentProvingSet</code></td>
-</tr>
-
-<tr>
-<td>7</td>
-<td><code>ArbitrateDeal</code></td>
-</tr>
-
-<tr>
-<td>8</td>
-<td><code>DePledge</code></td>
-</tr>
-
-<tr>
-<td>9</td>
-<td><code>GetOwner</code></td>
-</tr>
-
-<tr>
-<td>10</td>
-<td><code>GetWorkerAddr</code></td>
-</tr>
-
-<tr>
-<td>11</td>
-<td><code>GetPower</code></td>
-</tr>
-
-<tr>
-<td>12</td>
-<td><code>GetPeerID</code></td>
-</tr>
-
-<tr>
-<td>13</td>
-<td><code>GetSectorSize</code></td>
-</tr>
-
-<tr>
-<td>14</td>
-<td><code>UpdatePeerID</code></td>
-</tr>
-
-<tr>
-<td>15</td>
-<td><code>ChangeWorker</code></td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="constructor">Constructor</h3>
+<span class="nb">type</span> StorageMinerActorMethod union <span class="o">{</span>
+    <span class="p">|</span> StorageMinerConstructor <span class="m">0</span>
+    <span class="p">|</span> CommitSector <span class="m">1</span>
+    <span class="p">|</span> SubmitPost <span class="m">2</span>
+    <span class="p">|</span> IncreasePledge <span class="m">3</span>
+    <span class="p">|</span> SlashStorageFault <span class="m">4</span>
+    <span class="p">|</span> GetCurrentProvingSet <span class="m">5</span>
+    <span class="p">|</span> ArbitrateDeal <span class="m">6</span>
+    <span class="p">|</span> DePledge <span class="m">7</span>
+    <span class="p">|</span> GetOwner <span class="m">8</span>
+    <span class="p">|</span> GetWorkerAddr <span class="m">9</span>
+    <span class="p">|</span> GetPower <span class="m">10</span>
+    <span class="p">|</span> GetPeerID <span class="m">11</span>
+    <span class="p">|</span> GetSectorSize <span class="m">12</span>
+    <span class="p">|</span> UpdatePeerID <span class="m">13</span>
+    <span class="p">|</span> ChangeWorker <span class="m">14</span>
+<span class="o">}</span> representation keyed</code></pre></div>
+<h4 id="constructor-2"><code>Constructor</code></h4>
 
 <p>Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMinerConstructor struct <span class="o">{</span>
+    worker Address
+    sectorSize BytesAmount
+    peerId PeerId
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">StorageMinerActor</span><span class="p">(</span><span class="nx">worker</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">=</span> <span class="nx">message</span><span class="p">.</span><span class="nx">From</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">=</span> <span class="nx">worker</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">PeerID</span> <span class="p">=</span> <span class="nx">pid</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span> <span class="p">=</span> <span class="nx">sectorSize</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="addask">AddAsk</h3>
+<h4 id="commitsector"><code>CommitSector</code></h4>
 
-<p>Parameters:</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> CommitSector struct <span class="o">{</span>
+    sectorId SectorID
+    commD Bytes
+    commR Bytes
+    commRStar Bytes
+    proof SealProof
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 
-<ul>
-<li>price TokenAmount</li>
-<li>ttl Integer</li>
-</ul>
-
-<p>Return: AskID</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AddAsk</span><span class="p">(</span><span class="nx">price</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">ttl</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">AskID</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Asks may only be added via the worker address&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="c1">// Filter out expired asks
-</span><span class="c1"></span>    <span class="nx">self</span><span class="p">.</span><span class="nx">Asks</span><span class="p">.</span><span class="nf">FilterExpired</span><span class="p">()</span>
-
-    <span class="nx">askid</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">NextAskID</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">NextAskID</span><span class="o">++</span>
-
-    <span class="nx">self</span><span class="p">.</span><span class="nx">Asks</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">Ask</span><span class="p">{</span>
-        <span class="nx">Price</span><span class="p">:</span>  <span class="nx">price</span><span class="p">,</span>
-        <span class="nx">Expiry</span><span class="p">:</span> <span class="nx">CurrentBlockHeight</span> <span class="o">+</span> <span class="nx">ttl</span><span class="p">,</span>
-        <span class="nx">ID</span><span class="p">:</span>     <span class="nx">askid</span><span class="p">,</span>
-    <span class="p">})</span>
-
-    <span class="k">return</span> <span class="nx">askid</span>
-<span class="p">}</span></code></pre></div>
-<p>Note: this may be moved off chain soon, don&rsquo;t worry about testing it too heavily.</p>
-
-<h3 id="commitsector">CommitSector</h3>
-
-<p>Parameters:</p>
-
-<ul>
-<li>sectorID SectorID</li>
-<li>commD []byte</li>
-<li>commR []byte</li>
-<li>commRStar []byte</li>
-<li>proof SealProof</li>
-</ul>
-
-<p>Return: None</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">sectorID</span> <span class="nx">SectorID</span><span class="p">,</span> <span class="nx">commD</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">commRStar</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">SealProof</span><span class="p">)</span> <span class="nx">SectorID</span> <span class="p">{</span>
+<div class="notices todo" >TODO: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment</div>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">sectorID</span> <span class="nx">SectorID</span><span class="p">,</span> <span class="nx">commD</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">commRStar</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">SealProof</span><span class="p">)</span> <span class="nx">SectorID</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ValidatePoRep</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">comm</span><span class="p">,</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Worker</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;bad proof!&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -779,6 +625,11 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="k">if</span> <span class="nx">coll</span> <span class="p">&lt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span><span class="o">-</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough collateral&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// ensure that the miner cannot commit more sectors than can be proved with a single PoSt
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="nx">POST_SECTORS_COUNT</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;too many sectors&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="o">+=</span> <span class="nx">coll</span>
@@ -801,20 +652,19 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">+</span> <span class="nf">ProvingPeriodDuration</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="submitpost">SubmitPoSt</h3>
+<h4 id="submitpost"><code>SubmitPoSt</code></h4>
 
-<p>Parameters:</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SubmitPost struct <span class="o">{</span>
+    proofs <span class="o">[</span>PoStProof<span class="o">]</span>
+    faults <span class="o">[</span>FaultSet<span class="o">]</span>
+    recovered Bitfield
+    <span class="k">done</span> Bitfield
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 
-<ul>
-<li>proofs []PoStProof</li>
-<li>faults []FaultSet</li>
-<li>recovered Bitfield</li>
-<li>done Bitfield</li>
-</ul>
-
-<p>Return: None</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// NotYetSpeced: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">SubmitPost</span><span class="p">(</span><span class="nx">proofs</span> <span class="p">[]</span><span class="nx">PoStProof</span><span class="p">,</span> <span class="nx">faults</span> <span class="p">[]</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">recovered</span> <span class="nx">BitField</span><span class="p">,</span> <span class="nx">done</span> <span class="nx">BitField</span><span class="p">)</span> <span class="p">{</span>
+<div class="notices todo" >TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee</div>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SubmitPost</span><span class="p">(</span><span class="nx">proofs</span> <span class="nx">PoStProof</span><span class="p">,</span> <span class="nx">faults</span> <span class="p">[]</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">recovered</span> <span class="nx">BitField</span><span class="p">,</span> <span class="nx">done</span> <span class="nx">BitField</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized to submit post for miner&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -826,6 +676,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="k">if</span> <span class="p">!</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ValidateFaultSets</span><span class="p">(</span><span class="nx">faults</span><span class="p">,</span> <span class="nx">recovered</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;fault sets invalid&#34;</span><span class="p">)</span>
     <span class="p">}</span>
+
 
     <span class="kd">var</span> <span class="nx">feesRequired</span> <span class="nx">TokenAmount</span>
 
@@ -847,8 +698,8 @@ https://github.com/alex-shpak/hugo-book
         <span class="nf">Refund</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="o">-</span> <span class="nx">feesRequired</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">!</span><span class="nf">CheckPostProofs</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">proofs</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;proofs invalid&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">CheckPostProof</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">proof</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;proof invalid&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">// combine all the fault set bitfields, and subtract out the recovered
@@ -872,7 +723,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// the last proving period.
 </span><span class="c1"></span>    <span class="nx">oldPower</span> <span class="o">:=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span>
 
-    <span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span> <span class="p">=</span> <span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span><span class="p">.</span><span class="nf">Count</span><span class="p">()</span> <span class="o">-</span> <span class="nx">allFaults</span><span class="p">.</span><span class="nf">Count</span><span class="p">())</span> <span class="o">*</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span> <span class="p">=</span> <span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">-</span> <span class="nx">allFaults</span><span class="p">.</span><span class="nf">Count</span><span class="p">())</span> <span class="o">*</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span>
     <span class="nx">StorageMarket</span><span class="p">.</span><span class="nf">UpdateStorage</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">Power</span> <span class="o">-</span> <span class="nx">oldPower</span><span class="p">)</span>
 
     <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span> <span class="p">=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span>
@@ -932,15 +783,24 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
 </span><span class="c1"></span><span class="p">}</span></code></pre></div>
-<h3 id="slashstoragefault">SlashStorageFault</h3>
+<h4 id="slashstoragefault"><code>SlashStorageFault</code></h4>
 
-<p>Parameters:</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1">## TODO:</span>
+<span class="nb">type</span> IncreasePledge struct <span class="o">{</span>
 
-<ul>
-<li>miner Address</li>
-</ul>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 
-<p>Return: None</p>
+<div class="notices todo" >TODO</div>
+
+<h4 id="slashstoragefault-1"><code>SlashStorageFault</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SlashStorageFault struct <span class="o">{</span>
+    miner Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SlashStorageFault</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">SlashedAt</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner already slashed&#34;</span><span class="p">)</span>
@@ -963,27 +823,26 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">SlashedAt</span> <span class="p">=</span> <span class="nx">CurrentBlockHeight</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getcurrentprovingset">GetCurrentProvingSet</h3>
+<h4 id="getcurrentprovingset"><code>GetCurrentProvingSet</code></h4>
 
-<p>Parameters: None</p>
-
-<p>Return: <code>[][]byte</code></p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetCurrentProvingSet struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetCurrentProvingSet</span><span class="p">()</span> <span class="p">[][]</span><span class="kt">byte</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingSet</span>
 <span class="p">}</span></code></pre></div>
-<p>Note: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)</p>
+<div class="notices note" ><strong>Note</strong>: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)</div>
 
-<h3 id="arbitratedeal">ArbitrateDeal</h3>
+<h4 id="arbitratedeal"><code>ArbitrateDeal</code></h4>
 
 <p>This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.</p>
 
-<p>Parameters:</p>
-
-<ul>
-<li>deal Deal</li>
-</ul>
-
-<p>Return: None</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ArbitrateDeal struct <span class="o">{</span>
+    deal Deal
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AbitrateDeal</span><span class="p">(</span><span class="nx">d</span> <span class="nx">Deal</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid signature on deal&#34;</span><span class="p">)</span>
@@ -1016,17 +875,15 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// make sure the miner can&#39;t be slashed twice for this deal
 </span><span class="c1"></span>    <span class="nx">self</span><span class="p">.</span><span class="nx">ArbitratedDeals</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">PieceRef</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
-<p>TODO(scaling): This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.</p>
+<div class="notices todo" ><strong>TODO(scaling)</strong>: This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.</div>
 
-<h3 id="depledge">DePledge</h3>
+<h4 id="depledge"><code>DePledge</code></h4>
 
-<p>Parameters:</p>
-
-<ul>
-<li>amt TokenAmount</li>
-</ul>
-
-<p>Return: None</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> DePledge struct <span class="o">{</span>
+    amount TokenAmount
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">DePledge</span><span class="p">(</span><span class="nx">amt</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Worker</span> <span class="o">&amp;&amp;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Not authorized to call DePledge&#34;</span><span class="p">)</span>
@@ -1050,55 +907,58 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">miner</span><span class="p">.</span><span class="nx">DePledgedCollateral</span> <span class="p">=</span> <span class="nx">amt</span>
     <span class="nx">miner</span><span class="p">.</span><span class="nx">DePledgeTime</span> <span class="p">=</span> <span class="nx">CurrentBlockHeight</span> <span class="o">+</span> <span class="nx">DePledgeCooldown</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getowner">GetOwner</h3>
+<h4 id="getowner"><code>GetOwner</code></h4>
 
-<p>Parameters: None</p>
-
-<p>Return: Address</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetOwner struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetOwner</span><span class="p">()</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Owner</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getworkeraddr">GetWorkerAddr</h3>
+<h4 id="getworkeraddr"><code>GetWorkerAddr</code></h4>
 
-<p>Parameters: None</p>
-
-<p>Return: Address</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetWorkerAddr struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetWorkerAddr</span><span class="p">()</span> <span class="nx">Address</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getpower">GetPower</h3>
+<h4 id="getpower"><code>GetPower</code></h4>
 
-<p>Parameters: None</p>
-
-<p>Return: BytesAmount</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetPower struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetPower</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Power</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getpeerid">GetPeerID</h3>
+<h4 id="getpeerid"><code>GetPeerID</code></h4>
 
-<p>Parameters: None</p>
-
-<p>Return: PeerID</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetPeerID struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetPeerID</span><span class="p">()</span> <span class="nx">PeerID</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">PeerID</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="getsectorsize">GetSectorSize</h3>
+<h4 id="getsectorsize"><code>GetSectorSize</code></h4>
 
-<p>Parameters: None</p>
-
-<p>Return: BytesAmount</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetSectorSize struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetSectorSize</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="updatepeerid">UpdatePeerID</h3>
+<h4 id="updatepeerid"><code>UpdatePeerID</code></h4>
 
-<p>Parameters:</p>
-
-<ul>
-<li>pid PeerID</li>
-</ul>
-
-<p>Return: None</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> UpdatePeerID struct <span class="o">{</span>
+    peerId PeerId
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">UpdatePeerID</span><span class="p">(</span><span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;only the mine worker may update the peer ID&#34;</span><span class="p">)</span>
@@ -1106,14 +966,15 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">PeerID</span> <span class="p">=</span> <span class="nx">pid</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="changeworker">ChangeWorker</h3>
+<h4 id="changeworker"><code>ChangeWorker</code></h4>
 
 <p>Changes the worker address. Note that since Sector Commitments take the miners worker key as an input, any sectors sealed with the old key but not yet submitted to the chain will be invalid. All future sectors must be sealed with the new worker key.</p>
 
-<p>Parameters:
-- addr Address</p>
-
-<p>Return: None</p>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ChangeWorker struct <span class="o">{</span>
+    addr Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ChangeWorker</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Owner</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;only the owner can change the worker address&#34;</span><span class="p">)</span>
@@ -1121,11 +982,20 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">=</span> <span class="nx">addr</span>
 <span class="p">}</span></code></pre></div>
-<h2 id="payment-channel-broker-actor">Payment Channel Broker Actor</h2>
+<h3 id="payment-channel-broker-actor">Payment Channel Broker Actor</h3>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> PaymentChannelBrokerActorState struct <span class="o">{</span>
+<span class="o">}</span>
 
+<span class="nb">type</span> PaymentChannelBrokerActorMethod union <span class="o">{</span>
+
+<span class="o">}</span> representation keyed</code></pre></div>
 <p>TODO</p>
 
-<h2 id="multisig-account-actor">Multisig Account Actor</h2>
+<h3 id="multisig-account-actor">Multisig Account Actor</h3>
+
+<ul>
+<li><strong>Code Cid</strong>: <code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;multisig&quot;&gt;</code></li>
+</ul>
 
 <p>A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.</p>
 
@@ -1134,159 +1004,66 @@ doing a multisig transaction invoking the desired method on the contract itself.
 threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
 <p>The <a href="#init-actor">init actor</a> is used to create new instances of the multisig.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> MultisigActorState struct <span class="o">{</span>
+    signers <span class="o">[</span>Address<span class="o">]</span>
+    required UInt
+    nextTxId UInt
+    transactions <span class="o">{</span>UInt:Transaction<span class="o">}</span>
+<span class="o">}</span>
 
-<h3 id="state">State</h3>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Multisig</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Signers</span>  <span class="p">[]</span><span class="nx">Address</span>
-    <span class="nx">Required</span> <span class="kt">uint</span>
+<span class="nb">type</span> MultisigActorMethod union <span class="o">{</span>
+    <span class="p">|</span> MultisigConstructor <span class="m">0</span>
+    <span class="p">|</span> Propose <span class="m">1</span>
+    <span class="p">|</span> Approve <span class="m">2</span>
+    <span class="p">|</span> Cancel <span class="m">3</span>
+    <span class="p">|</span> ClearCompleted <span class="m">4</span>
+    <span class="p">|</span> AddSigner <span class="m">5</span>
+    <span class="p">|</span> RemoveSigner <span class="m">6</span>
+    <span class="p">|</span> SwapSigner <span class="m">7</span>
+    <span class="p">|</span> ChangeRequirement <span class="m">8</span>
+<span class="o">}</span> representation keyed
 
-    <span class="nx">NextTxID</span>     <span class="kt">uint64</span>
-    <span class="nx">Transactions</span> <span class="kd">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="nx">Transaction</span>
-<span class="p">}</span>
+<span class="nb">type</span> Transaction struct <span class="o">{</span>
+    created UInt
+    txID UInt
+    to Address
+    value TokenAmount
+    method <span class="p">&amp;</span>ActorMethod
+    approved <span class="o">[</span>Address<span class="o">]</span>
+    completed Bool
+    canceled Bool
+<span class="o">}</span></code></pre></div>
+<h4 id="constructor-3"><code>Constructor</code></h4>
 
-<span class="kd">type</span> <span class="nx">Transaction</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Created</span>   <span class="kt">uint64</span>
-    <span class="nx">TxID</span>      <span class="kt">uint64</span>
-    <span class="nx">To</span>        <span class="nx">Address</span>
-    <span class="nx">Value</span>     <span class="nx">TokenAmount</span>
-    <span class="nx">Method</span>    <span class="kt">string</span>
-    <span class="nx">Params</span>    <span class="p">[]</span><span class="kt">byte</span>
-    <span class="nx">Approved</span>  <span class="p">[]</span><span class="nx">Address</span>
-    <span class="nx">Completed</span> <span class="kt">bool</span>
-    <span class="nx">Canceled</span>  <span class="kt">bool</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="code-cid-4">Code Cid</h3>
-
-<p><code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;multisig&quot;&gt;</code></p>
-
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Method Name</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>1</td>
-<td><code>Propose</code></td>
-</tr>
-
-<tr>
-<td>2</td>
-<td><code>Approve</code></td>
-</tr>
-
-<tr>
-<td>3</td>
-<td><code>Cancel</code></td>
-</tr>
-
-<tr>
-<td>4</td>
-<td><code>ClearCompleted</code></td>
-</tr>
-
-<tr>
-<td>5</td>
-<td><code>AddSigner</code></td>
-</tr>
-
-<tr>
-<td>6</td>
-<td><code>RemoveSigner</code></td>
-</tr>
-
-<tr>
-<td>7</td>
-<td><code>SwapSigner</code></td>
-</tr>
-
-<tr>
-<td>8</td>
-<td><code>ChangeRequirement</code></td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="constructor-1">Constructor</h3>
-
-<blockquote>
 <p>This method sets up the initial state for the multisig account</p>
-</blockquote>
 
-<h3 id="parameters-2">Parameters</h3>
-
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td><code>signers</code></td>
-<td><code>[]Address</code></td>
-<td>The addresses that will be the signatories of this wallet.</td>
-</tr>
-
-<tr>
-<td><code>required</code></td>
-<td><code>uint</code></td>
-<td>The number of signatories required to perform a transaction.</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Multisig</span><span class="p">(</span><span class="nx">signers</span> <span class="p">[]</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">required</span> <span class="kt">uint</span><span class="p">)</span> <span class="p">{</span>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> MultisigConstructor struct <span class="o">{</span>
+    <span class="c1">## The addresses that will be the signatories of this wallet.</span>
+    signers <span class="o">[</span>Address<span class="o">]</span>
+    <span class="c1">## The number of signatories required to perform a transaction.</span>
+    required UInt
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Multisig</span><span class="p">(</span><span class="nx">signers</span> <span class="p">[</span><span class="nx">Address</span><span class="p">],</span> <span class="nx">required</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Signers</span> <span class="p">=</span> <span class="nx">signers</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Required</span> <span class="p">=</span> <span class="nx">required</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="propose">Propose</h3>
+<h4 id="propose"><code>Propose</code></h4>
 
-<blockquote>
 <p>Propose is used to propose a new transaction to be sent by this multisig. The proposer must be a signer, and the proposal also serves as implicit approval from the proposer. If only a single signature is required, then the transaction is executed immediately.</p>
-</blockquote>
 
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td><code>to</code></td>
-<td><code>Address</code></td>
-<td>The address of the target of the proposed transaction.</td>
-</tr>
-
-<tr>
-<td><code>value</code></td>
-<td><code>TokenAmount</code></td>
-<td>The amount of funds to send with the proposed transaction</td>
-</tr>
-
-<tr>
-<td><code>method</code></td>
-<td><code>string</code></td>
-<td>The method that will be invoked on the proposed transactions target.</td>
-</tr>
-
-<tr>
-<td><code>params</code></td>
-<td><code>[]byte</code></td>
-<td>The parameters that will be passed to the method invocation on the proposed transactions target.</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Propose</span><span class="p">(</span><span class="nx">to</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">params</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="kt">uint64</span> <span class="p">{</span>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> Propose struct <span class="o">{</span>
+    <span class="c1">## The address of the target of the proposed transaction.</span>
+    to Address
+    <span class="c1">## The amount of funds to send with the proposed transaction.</span>
+    value TokenAmount
+    <span class="c1">## The method and parameters that will be invoked on the proposed transactions target.</span>
+    method <span class="p">&amp;</span>ActorMethod
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Propose</span><span class="p">(</span><span class="nx">to</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">String</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">UInt</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nf">isSigner</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -1312,30 +1089,17 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
     <span class="k">return</span> <span class="nx">txid</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="approve">Approve</h3>
+<h4 id="approve"><code>Approve</code></h4>
 
-<blockquote>
 <p>Approve is called by a signer to approve a given transaction. If their approval pushes the approvals for this transaction over the threshold, the transaction is executed.</p>
-</blockquote>
 
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td><code>txid</code></td>
-<td><code>uint64</code></td>
-<td>The ID of the transaction to approve.</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Approve</span><span class="p">(</span><span class="nx">txid</span> <span class="kt">uint64</span><span class="p">)</span> <span class="p">{</span>
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> Approve struct <span class="o">{</span>
+    <span class="c1">## The ID of the transaction to approve.</span>
+    txid UInt
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Approve</span><span class="p">(</span><span class="nx">txid</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nf">isSigner</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -1361,8 +1125,14 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
         <span class="nx">tx</span><span class="p">.</span><span class="nx">Complete</span> <span class="p">=</span> <span class="kc">true</span>
     <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="cancel">Cancel</h3>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Cancel</span><span class="p">(</span><span class="nx">txid</span> <span class="kt">uint64</span><span class="p">)</span> <span class="p">{</span>
+<h4 id="cancel"><code>Cancel</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> Cancel struct <span class="o">{</span>
+    txid UInt
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Cancel</span><span class="p">(</span><span class="nx">txid</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nf">isSigner</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -1382,7 +1152,12 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
     <span class="nx">tx</span><span class="p">.</span><span class="nx">Canceled</span> <span class="p">=</span> <span class="kc">true</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="clearcompleted">ClearCompleted</h3>
+<h4 id="clearcompleted"><code>ClearCompleted</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ClearCompleted struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ClearCompleted</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nf">isSigner</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">)</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized&#34;</span><span class="p">)</span>
@@ -1394,7 +1169,13 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="addsigner">AddSigner</h3>
+<h4 id="addsigner"><code>AddSigner</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> AddSigner struct <span class="o">{</span>
+    signer Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AddSigner</span><span class="p">(</span><span class="nx">signer</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;add signer must be called by wallet itself&#34;</span><span class="p">)</span>
@@ -1405,7 +1186,13 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">Signers</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">signer</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="removesigner">RemoveSigner</h3>
+<h4 id="removesigner"><code>RemoveSigner</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> RemoveSigner struct <span class="o">{</span>
+    signer Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">RemoveSigner</span><span class="p">(</span><span class="nx">signer</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;remove signer must be called by wallet itself&#34;</span><span class="p">)</span>
@@ -1416,8 +1203,15 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">Signers</span><span class="p">.</span><span class="nf">Remove</span><span class="p">(</span><span class="nx">signer</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="swapsigner">SwapSigner</h3>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SwapSigner</span><span class="p">(</span><span class="nx">old</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+<h4 id="swapsigner"><code>SwapSigner</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SwapSigner struct <span class="o">{</span>
+    old Address
+    new Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SwapSigner</span><span class="p">(</span><span class="nx">old</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;swap signer must be called by wallet itself&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -1431,8 +1225,14 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Signers</span><span class="p">.</span><span class="nf">Remove</span><span class="p">(</span><span class="nx">old</span><span class="p">)</span>
     <span class="nx">self</span><span class="p">.</span><span class="nx">Signers</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">new</span><span class="p">)</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="changerequirement">ChangeRequirement</h3>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ChangeRequirement</span><span class="p">(</span><span class="nx">req</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<h4 id="changerequirement"><code>ChangeRequirement</code></h4>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ChangeRequirement struct <span class="o">{</span>
+    requirement UInt
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ChangeRequirement</span><span class="p">(</span><span class="nx">req</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;change requirement must be called by wallet itself&#34;</span><span class="p">)</span>
     <span class="p">}</span>
@@ -1442,7 +1242,7 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 
     <span class="nx">self</span><span class="p">.</span><span class="nx">Required</span> <span class="p">=</span> <span class="nx">req</span>
 <span class="p">}</span></code></pre></div>
-<h3 id="helper-methods">Helper Methods</h3>
+<h2 id="helper-methods">Helper Methods</h2>
 
 <p>The various helper methods called above are defined here.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">isSigner</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
@@ -1452,9 +1252,7 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
         <span class="p">}</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="kc">false</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">getTransaction</span><span class="p">(</span><span class="nx">txid</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Transaction</span> <span class="p">{</span>
+<span class="p">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">getTransaction</span><span class="p">(</span><span class="nx">txid</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">Transaction</span> <span class="p">{</span>
     <span class="nx">tx</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Transactions</span><span class="p">[</span><span class="nx">txid</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;no such transaction&#34;</span><span class="p">)</span>
@@ -1495,65 +1293,66 @@ threshold&rsquo; logic only needs to be implemented once, in one place.</p>
 <ul>
 <li><a href="#filecoin-state-machine-actors">Filecoin State Machine Actors</a>
 <ul>
-<li><a href="#built-in-actors">Built In Actors</a></li>
+<li><a href="#actor-state">Actor State</a></li>
+<li><a href="#system-actors">System Actors</a></li>
+<li><a href="#built-in-actors">Built In Actors</a>
+<ul>
 <li><a href="#init-actor">Init Actor</a>
 <ul>
-<li><a href="#code-cid">Code Cid</a></li>
-<li><a href="#exec-code-cid-params-param-address"><code>Exec(code Cid, params []Param) Address</code></a></li>
-<li><a href="#parameters">Parameters</a></li>
-<li><a href="#getidforaddress-addr-address-bigint"><code>GetIdForAddress(addr Address) BigInt</code></a></li>
-<li><a href="#parameters-1">Parameters</a></li>
+<li><a href="#constructor"><code>Constructor</code></a></li>
+<li><a href="#exec"><code>Exec</code></a></li>
+<li><a href="#getidforaddress"><code>GetIdForAddress</code></a></li>
 </ul></li>
 <li><a href="#account-actor">Account Actor</a>
 <ul>
-<li><a href="#code-cid-1">Code Cid</a></li>
+<li><a href="#getaddress"><code>GetAddress</code></a></li>
 </ul></li>
 <li><a href="#storage-market-actor">Storage Market Actor</a>
 <ul>
-<li><a href="#code-cid-2">Code Cid</a></li>
-<li><a href="#createstorageminer">CreateStorageMiner</a></li>
-<li><a href="#slashconsensusfault">SlashConsensusFault</a></li>
-<li><a href="#updatestorage">UpdateStorage</a></li>
-<li><a href="#gettotalstorage">GetTotalStorage</a></li>
-<li><a href="#powerlookup">PowerLookup</a></li>
-<li><a href="#isminer">IsMiner</a></li>
+<li><a href="#constructor-1"><code>Constructor</code></a></li>
+<li><a href="#createstorageminer"><code>CreateStorageMiner</code></a></li>
+<li><a href="#slashconsensusfault"><code>SlashConsensusFault</code></a></li>
+<li><a href="#updatestorage"><code>UpdateStorage</code></a></li>
+<li><a href="#gettotalstorage"><code>GetTotalStorage</code></a></li>
+<li><a href="#powerlookup"><code>PowerLookup</code></a></li>
+<li><a href="#isminer"><code>IsMiner</code></a></li>
+</ul></li>
 </ul></li>
 <li><a href="#storage-miner-actor">Storage Miner Actor</a>
 <ul>
-<li><a href="#code-cid-3">Code Cid</a></li>
-<li><a href="#constructor">Constructor</a></li>
-<li><a href="#addask">AddAsk</a></li>
-<li><a href="#commitsector">CommitSector</a></li>
-<li><a href="#submitpost">SubmitPoSt</a></li>
-<li><a href="#slashstoragefault">SlashStorageFault</a></li>
-<li><a href="#getcurrentprovingset">GetCurrentProvingSet</a></li>
-<li><a href="#arbitratedeal">ArbitrateDeal</a></li>
-<li><a href="#depledge">DePledge</a></li>
-<li><a href="#getowner">GetOwner</a></li>
-<li><a href="#getworkeraddr">GetWorkerAddr</a></li>
-<li><a href="#getpower">GetPower</a></li>
-<li><a href="#getpeerid">GetPeerID</a></li>
-<li><a href="#getsectorsize">GetSectorSize</a></li>
-<li><a href="#updatepeerid">UpdatePeerID</a></li>
-<li><a href="#changeworker">ChangeWorker</a></li>
+<li>
+<ul>
+<li><a href="#constructor-2"><code>Constructor</code></a></li>
+<li><a href="#commitsector"><code>CommitSector</code></a></li>
+<li><a href="#submitpost"><code>SubmitPoSt</code></a></li>
+<li><a href="#slashstoragefault"><code>SlashStorageFault</code></a></li>
+<li><a href="#slashstoragefault-1"><code>SlashStorageFault</code></a></li>
+<li><a href="#getcurrentprovingset"><code>GetCurrentProvingSet</code></a></li>
+<li><a href="#arbitratedeal"><code>ArbitrateDeal</code></a></li>
+<li><a href="#depledge"><code>DePledge</code></a></li>
+<li><a href="#getowner"><code>GetOwner</code></a></li>
+<li><a href="#getworkeraddr"><code>GetWorkerAddr</code></a></li>
+<li><a href="#getpower"><code>GetPower</code></a></li>
+<li><a href="#getpeerid"><code>GetPeerID</code></a></li>
+<li><a href="#getsectorsize"><code>GetSectorSize</code></a></li>
+<li><a href="#updatepeerid"><code>UpdatePeerID</code></a></li>
+<li><a href="#changeworker"><code>ChangeWorker</code></a></li>
 </ul></li>
 <li><a href="#payment-channel-broker-actor">Payment Channel Broker Actor</a></li>
 <li><a href="#multisig-account-actor">Multisig Account Actor</a>
 <ul>
-<li><a href="#state">State</a></li>
-<li><a href="#code-cid-4">Code Cid</a></li>
-<li><a href="#constructor-1">Constructor</a></li>
-<li><a href="#parameters-2">Parameters</a></li>
-<li><a href="#propose">Propose</a></li>
-<li><a href="#approve">Approve</a></li>
-<li><a href="#cancel">Cancel</a></li>
-<li><a href="#clearcompleted">ClearCompleted</a></li>
-<li><a href="#addsigner">AddSigner</a></li>
-<li><a href="#removesigner">RemoveSigner</a></li>
-<li><a href="#swapsigner">SwapSigner</a></li>
-<li><a href="#changerequirement">ChangeRequirement</a></li>
-<li><a href="#helper-methods">Helper Methods</a></li>
+<li><a href="#constructor-3"><code>Constructor</code></a></li>
+<li><a href="#propose"><code>Propose</code></a></li>
+<li><a href="#approve"><code>Approve</code></a></li>
+<li><a href="#cancel"><code>Cancel</code></a></li>
+<li><a href="#clearcompleted"><code>ClearCompleted</code></a></li>
+<li><a href="#addsigner"><code>AddSigner</code></a></li>
+<li><a href="#removesigner"><code>RemoveSigner</code></a></li>
+<li><a href="#swapsigner"><code>SwapSigner</code></a></li>
+<li><a href="#changerequirement"><code>ChangeRequirement</code></a></li>
 </ul></li>
+</ul></li>
+<li><a href="#helper-methods">Helper Methods</a></li>
 </ul></li>
 </ul>
 </nav>

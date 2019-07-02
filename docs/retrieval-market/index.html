@@ -173,57 +173,63 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="retrieval-v0-libp2p-services">Retrieval V0 <code>libp2p</code> Services</h2>
 
 <p>The v0 <code>retrieval market</code> will initially be implemented as two <code>libp2p</code> services. It will be request response based, where the client who is requesting a file sends a <code>retrieval deal proposal</code> to the miner. The miner chooses whether or not to accept it, sends their response which (if they accept the proposal) includes a <code>signed retrieval deal</code>, followed by the actual requested content, streamed as a series of bitswap block messages, using a pre-order traversal of the dag. Each block should use the <a href="https://github.com/ipfs/go-ipfs/blob/master/exchange/bitswap/message/message.go#L216">bitswap block message format</a>. This way, the client should be able to verify the data incrementally as it receives it. Once the client has received all the data, it should then send a payment channel SpendVoucher of the proposed amount to the miner. This protocol may be easily extended to include payments from the client to the miner every N blocks, but for now we omit that feature.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Ref is the cid of the data to be retrieved
-</span><span class="c1"></span>    <span class="nx">Ref</span> <span class="nx">Cid</span>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> RetDealProposal struct <span class="o">{</span>
+    <span class="c1">## Reference to the data being retrieved.</span>
+    ref Link
 
-    <span class="c1">// Price is the total amount that the client is willing to pay for the
-</span><span class="c1"></span>    <span class="c1">// retrieval of the data
-</span><span class="c1"></span>    <span class="nx">Price</span> <span class="nx">TokenAmount</span>
+    <span class="c1">## The total amount that the client is willing to pay for the retrieval of the data.</span>
+    price TokenAmount
 
-    <span class="c1">// Payment is a payment info from the client to the retrieval miner for the data
-</span><span class="c1"></span>    <span class="nx">Payment</span> <span class="nx">PaymentInfo</span>
-<span class="p">}</span>
+    <span class="c1">## The info from the client to the retrieval miner for the data</span>
+    payment PaymentInfo
+<span class="o">}</span>
 
-<span class="kd">type</span> <span class="nx">ResponseStatus</span> <span class="kt">uint</span>
+<span class="nb">type</span> RetDealResponse union <span class="o">{</span>
+    <span class="p">|</span> AcceptedResponse <span class="m">0</span>
+    <span class="p">|</span> RejectedResponse <span class="m">1</span>
+    <span class="p">|</span> ErrorResponse <span class="m">2</span>
+<span class="o">}</span> representation keyed
 
-<span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">Unset</span> <span class="p">=</span> <span class="nf">ResponseStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
-    <span class="nx">Accepted</span>
-    <span class="nx">Rejected</span>
-    <span class="nx">Error</span>
-<span class="p">)</span>
+<span class="nb">type</span> AcceptedResponse struct <span class="o">{}</span>
+<span class="nb">type</span> RejectedResponse struct <span class="o">{</span>
+    message optional String
+<span class="o">}</span>
 
-<span class="kd">type</span> <span class="nx">RetDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Status</span>  <span class="nx">ResponseStatus</span>
-    <span class="nx">Message</span> <span class="kt">string</span>
-<span class="p">}</span>
+<span class="nb">type</span> ErrorResponse RejectedResponse
 
-<span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Prefix is the cid prefix parameters for this block. It describes how to
-</span><span class="c1"></span>    <span class="c1">// hash the block to verify it matches the expected value.
-</span><span class="c1"></span>    <span class="nx">Prefix</span> <span class="nx">CidPrefix</span>
-    <span class="nx">Data</span>   <span class="p">[]</span><span class="kt">byte</span>
-<span class="p">}</span></code></pre></div>
+<span class="nb">type</span> Block struct <span class="o">{</span>
+    <span class="c1">## Cid prefix parameters for this block. It describes how to</span>
+    <span class="c1">## hash the block to verify it matches the expected value.</span>
+    refix CidPrefix
+    data Bytes
+<span class="o">}</span>
+
+<span class="c1">## Represents all the metadata of a Cid.</span>
+<span class="c1">## It does not contains  any actual content information.</span>
+<span class="nb">type</span> CidPrefix struct <span class="o">{</span>
+    version  UInt
+    codec    UInt
+    mhType   UInt
+    mhLength UInt
+<span class="o">}</span></code></pre></div>
 <p><code>Retrieval miners</code> should also support a query service that allows clients to request pricing information from a miner.</p>
 
 <p>The query should include the CID of the piece that the client is interested in retrieving. The response contains whether or not the miner will serve that data, the price they will accept for it.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RetQuery</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Piece</span> <span class="nx">Cid</span>
-<span class="p">}</span>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> RetQuery struct <span class="o">{</span>
+    <span class="c1">## TODO: what exactly does this link to?</span>
+    piece Link
+<span class="o">}</span>
 
-<span class="kd">type</span> <span class="nx">RetQueryResponse</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Status</span>   <span class="nx">RetQueryStatus</span>
-    <span class="nx">MinPrice</span> <span class="nx">TokenAmount</span>
-<span class="p">}</span>
+<span class="nb">type</span> RetQueryResponse union <span class="o">{</span>
+    <span class="p">|</span> AvailableResponse
+    <span class="p">|</span> UnavailableResponse
+<span class="o">}</span> representation keyed
 
-<span class="kd">type</span> <span class="nx">RetQueryStatus</span> <span class="kt">uint</span>
+<span class="nb">type</span> AvailableResponse struct <span class="o">{</span>
+    minPrice TokenAmount
+<span class="o">}</span>
 
-<span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">Unset</span> <span class="p">=</span> <span class="nf">RetQueryStatus</span><span class="p">(</span><span class="kc">iota</span><span class="p">)</span>
-    <span class="nx">OK</span>
-    <span class="nx">PieceUnavailable</span>
-<span class="p">)</span></code></pre></div>
+<span class="nb">type</span> UnavailableResponse struct <span class="o">{}</span></code></pre></div>
 <h2 id="chain-based-content-routing">Chain Based Content Routing</h2>
 
 <p>For the version 0 protocol. We should implement a small helper service that looks up which miners have a given piece based on deals made in the blockchain. The service should first look the content up in the blockchain (or in some client index) to find the chain address of the miner, then use the lookup service to map that to a <code>libp2p</code> <code>peerID</code> and <code>multiaddr</code>.</p>

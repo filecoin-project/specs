@@ -151,65 +151,67 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="expected-consensus">Expected Consensus</h1>
 
-<p>This spec describes how to implement the protocol in general, for Filecoin-specific processes, see:</p>
+<p>This spec describes how the expected consensus (EC) protocol works in general. To read more about Filecoin-specific processes, see:</p>
 
 <ul>
-<li><a href="mining.md#mining-blocks">Mining Blocks</a> on how consensus is used.</li>
-<li><a href="./faults.md">Faults</a> on slashing.</li>
-<li><a href="./storage-market.md#the-power-table">Storage Market</a> on how the power table is maintained.</li>
-<li><a href="data-structures.md#block">Block data structure</a> for details on fields and encoding.</li>
+<li><a href="../mining#mining-blocks">Mining blocks</a> on how consensus is used in block mining.</li>
+<li><a href="../faults">Faults</a> on slashing.</li>
+<li><a href="../storage-market#the-power-table">Storage market</a> on how the power table is maintained.</li>
+<li><a href="../data-structures#block">Block data structure</a> for details on fields and encoding</li>
 </ul>
 
-<p>Important Concepts
-- TipSet</p>
+<h2 id="important-concepts-and-definitions">Important concepts and definitions</h2>
 
-<ul>
-<li><p>Weight</p></li>
+<p>Some important concepts relevant to expected consensus are:
+- TipSet
+- Weight
+- Height
+- Round
+- Epoch
+- Ticket
+- ElectionProof</p>
 
-<li><p>Round</p></li>
-
-<li><p>Height</p></li>
-
-<li><p>Epoch</p></li>
-
-<li><p>Ticket</p></li>
-
-<li><p>ElectionProof</p></li>
-</ul>
+<p>We define these terms below. In the definitions, we use <code>code ticks</code> to distinguish the undefined terms from the other words in the definitions. Below the definitions, we no longer use code ticks when using these terms.</p>
 
 <div class="definition " >
-  <b>Definition:</b> A <code>ticket</code> is used as a source of randomness in EC leader election. Every block depends on an <code>ElectionProof</code> derived from a ticket. At least one new ticket is produced with every new block.
+  <b>Definition:</b> A <code>TipSet</code> is a set of blocks that have the same parent set and same number of <code>tickets</code>, which implies they will have been mined at the same <code>height</code>. A <code>TipSet</code> can contain multiple blocks if more than one miner successfully mines a block at the same <code>height</code> as another miner. <code>TipSets</code> can contain 1 or more blocks (i.e. null blocks &ndash; defined below in the document &ndash; are not included in <code>TipSets</code>).
 </div>
 
 <div class="definition " >
-  <b>Definition:</b> An <code>ElectionProof</code> is derived from a past ticket and included in every block header. The <code>ElectionProof</code> proves that the miner was eligible to mine a block in that round.
+  <b>Definition:</b> Every mined block has a computed <code>weight</code>. Together, the <code>weights</code> of all the blocks in a branch of the chain determines the cumulative <code>weight</code> of that branch. Expected Consensus is a heaviest chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s <code>weight</code> function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined below in <a href="#chain-weighting">Chain Weighting</a>.
 </div>
 
 <div class="definition " >
-  <b>Definition:</b> A <code>round</code> is the period in which a miner runs leader election to attempt to generate a new block. A new ticket is produced at every round, consequently the duration of a round is currently bounded by the duration of the Verifiable Delay Function run to generate a ticket. Tickets can be counted by round as one will be produced for each round.
+  <b>Definition:</b> <code>Height</code> refers to the number of <code>TipSets</code> that have passed between this <code>TipSet</code> and the genesis block (which starts at block height 0). If a <code>TipSet</code> contains multiple blocks, each block in the TipSet will have the same <code>height</code>.
 </div>
 
 <div class="definition " >
-  <b>Definition:</b> <code>Height</code> refers to the number of <code>TipSets</code> a given block is built upon since genesis (height 0). Multiple blocks in a <code>TipSet</code> will have the same height.
+  <b>Definition:</b> A <code>round</code> is the period in which a miner runs leader election to attempt to generate a new block. Every <code>round</code>, one <code>ticket</code> is produced. Thus, the duration of a round is currently bounded by the duration of the Verifiable Delay Function (VDF) that is run to generate a <code>ticket</code>. Because one <code>ticket</code> is produced per <code>round</code>, the number of <code>tickets</code> is the same as the number of <code>rounds</code> that have passed.
 </div>
 
 <div class="definition " >
-  <b>Definition:</b> An <code>epoch</code> is the period in which a new block is generated. There may be multiple rounds in an epoch.
+  <b>Definition:</b> An <code>epoch</code> is the period in which a new block is generated. There may be multiple <code>rounds</code> in an epoch.
 </div>
 
 <div class="definition " >
-  <b>Definition:</b> A <code>TipSet</code> is a set of blocks with the same parent set, and same number of tickets (which implies they will have been mined at the same height).
+  <b>Definition:</b> A <code>ticket</code> is used as a source of randomness in EC leader election. Every block depends on an <code>ElectionProof</code> derived from a <code>ticket</code>. At least one new <code>ticket</code> is produced with every new block.
 </div>
 
-<p>Expected Consensus is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
+<div class="definition " >
+  <b>Definition:</b> An <code>ElectionProof</code> is derived from a past <code>ticket</code> and is included in every block header. The <code>ElectionProof</code> proves that the miner was eligible to mine a block in that <code>round</code>.
+</div>
+
+<h2 id="algorithm">Algorithm</h2>
+
+<p>Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
 level, it operates by running a leader election every round in which, on expectation, one
-participant may be eligible to submit a block. All valid blocks submitted in a given round form a <code>TipSet</code>. Every block in a TipSet adds weight to its chain. The &lsquo;best&rsquo; chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on this, see <a href="#chain-selection">Chain Selection</a>.</p>
+participant may be eligible to submit a block. All valid blocks submitted in a given round form a <code>TipSet</code>. Every block in a TipSet adds weight to its chain. The &lsquo;best&rsquo; chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see <a href="#chain-selection">Chain Selection</a>.</p>
 
-<p>The basic algorithms are as follows:</p>
+<p>The methods below describe the basic algorithm for EC.</p>
 
-<p>For each block received over the network, <code>OnBlockReceived</code> is called. <code>VerifyBlock</code> is defined in the <a href="mining.md#block-validation">mining spec</a>.</p>
+<p>Every time a block is received, we first verify whether the block is valid (<code>VerifyBlock</code> is defined in the <a href="../mining#block-validation">mining spec</a>.) If the received block is valid, we add it to our TipSet.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">OnBlockReceived</span><span class="p">(</span><span class="nx">blk</span> <span class="nx">Block</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// The exact definition of IsValid depends on the protocol
+    <span class="c1">// The exact definition of VerifyBlock depends on the protocol
 </span><span class="c1"></span>    <span class="c1">// For Filecoin, see mining.md
 </span><span class="c1"></span>    <span class="k">if</span> <span class="nf">VerifyBlock</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">blk</span><span class="p">)</span>
@@ -217,7 +219,7 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
 
     <span class="c1">// Received an invalid block!
 </span><span class="c1"></span><span class="p">}</span></code></pre></div>
-<p>Separately, another process is running <code>Mine</code> to attempt to generate blocks.</p>
+<p>Meanwhile, the mining node runs a mining process to attempt to generate blocks. In <code>Mine</code>, the node identifies the best TipSet in each round and generates a ticket for each round. These inputs are used to see if the miner won the round. If the miner wins the round, she produces a block and broadcasts it. If not, we still maintain the list of tickets that were generated so the miner can try again next round.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Mine</span><span class="p">(</span><span class="nx">minerKey</span> <span class="nx">PrivateKey</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="nx">r</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">rounds</span> <span class="p">{</span> <span class="c1">// for each round
 </span><span class="c1"></span>        <span class="nx">bestTipset</span><span class="p">,</span> <span class="nx">tickets</span> <span class="o">:=</span> <span class="nx">ChainTipsMgr</span><span class="p">.</span><span class="nf">GetBestTipsetAtRound</span><span class="p">(</span><span class="nx">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
@@ -225,7 +227,7 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
         <span class="nx">ticket</span> <span class="o">:=</span> <span class="nf">GenerateTicket</span><span class="p">(</span><span class="nx">minerKey</span><span class="p">,</span> <span class="nx">bestTipset</span><span class="p">)</span>
         <span class="nx">tickets</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">ticket</span><span class="p">)</span>
 
-        <span class="c1">// Generate an election proof and check if we win
+        <span class="c1">// Generate an ElectionProof and check if we win
 </span><span class="c1"></span>        <span class="c1">// Note: even if we don&#39;t win, we want to make a ticket
 </span><span class="c1"></span>        <span class="c1">// in case we need to mine a null round
 </span><span class="c1"></span>        <span class="nx">win</span><span class="p">,</span> <span class="nx">proof</span> <span class="o">:=</span> <span class="nf">CheckIfWinnerAtRound</span><span class="p">(</span><span class="nx">minerKey</span><span class="p">,</span> <span class="nx">r</span><span class="p">,</span> <span class="nx">bestTipset</span><span class="p">)</span>
@@ -238,7 +240,7 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span></code></pre></div>
-<p><code>IsProofAWinner</code> is taken from <a href="mining.md#block-validation">the mining doc</a>.</p>
+<p>To check if the miner won the round, she runs <code>CheckIfWinnerAtRound</code>. In this method, the miner takes her ticket from a prior round (which round to look at is specified  by the lookback parameter), computes an ElectionProof, and returns whether the proof indicates that the miner has won the round. In the pseudocode below, <code>IsProofAWinner</code> is taken from <a href="../mining#block-validation">the mining doc</a>.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="nx">RandomnessLookback</span> <span class="p">=</span> <span class="mi">1</span> <span class="c1">// Also referred to as &#34;K&#34; in many places
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">PowerLookback</span> <span class="p">=</span> <span class="mi">1</span>      <span class="c1">// Also referred to as &#34;L&#34; in many places
 </span><span class="c1"></span>
@@ -257,22 +259,19 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
 
 <p>Note: Validity of blocks beyond appropriate ticket generation (defined below) is defined by the specific protocol using EC. For the Filecoin definition of a valid block, see the <a href="../mining">mining spec</a>.</p>
 
-<p>The basic algorithm can be broken down by looking in turn at its two major components:</p>
-
-<ul>
-<li>Leader Election</li>
-<li>Chain Selection</li>
-</ul>
+<p>The EC algorithm can be better understood by looking at its two major components in more detail:
+- <a href="#secret-leader-election">Leader Election</a>
+- <a href="#chain-selection">Chain Selection</a></p>
 
 <h2 id="secret-leader-election">Secret Leader Election</h2>
 
-<p>Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage <a href="./storage-market.md#the-power-table">power table</a>, where power is equivalent to storage provided through time.</p>
+<p>Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage <a href="../storage-market#the-power-table">power table</a>, where power is equivalent to storage provided through time.</p>
 
-<p>Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin&rsquo;s use of EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness for Leader Election. Every block generated references an <code>ElectionProof</code> derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.</p>
+<p>Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin&rsquo;s EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness inputs for Leader Election. Every block generated references an <code>ElectionProof</code> derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.</p>
 
-<p>In cases in which no winning ticket is found by any miner in a given round (i.e. no block is mined on the network), miners move on to the next ticket in the ticket chain to attempt a new leader election. When this happens, miners should nonetheless generate a new ticket prior to the new leader election, thereby appropriately prolonging the ticket chain (the block chain can never be longer than the ticket chain). This situation is fleshed out in the <a href="#losing-tickets">Losing Tickets</a> section.</p>
+<p>In cases in which no winning ticket is found by any miner in a given round (i.e. no block, or a <code>null block</code>, is mined on the network), miners move on to the next ticket in the ticket chain to attempt a new leader election. Note that a null block is not included in a TipSet, since null blocks are, by definition, not blocks. When this happens, miners should nonetheless generate a new ticket prior to the new leader election, thereby appropriately prolonging the ticket chain (the block chain can never be longer than the ticket chain). This situation is fleshed out in the <a href="#losing-tickets">Losing Tickets</a> section.</p>
 
-<p>In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: <code>Slashing</code>).</p>
+<p>In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: <a href="#slashing"><code>Slashing</code></a>).</p>
 
 <p>TODO: pictures of ticket chain and block chain</p>
 
@@ -291,7 +290,7 @@ participant may be eligible to submit a block. All valid blocks submitted in a g
 <li>Ensure a single drawing per round — derived in part from the above, thereby preventing miners from grinding on tickets (e.g. by repeatedly drawing new tickets in the hopes of winning) within a round.</li>
 </ul>
 
-<p>For tickets in EC, one may use the following:</p>
+<p>We define a Ticket data structure in EC as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// The VDF Result is derived from the prior ticket in the ticket chain
 </span><span class="c1"></span>    <span class="nx">VDFResult</span> <span class="nx">BigInteger</span>
@@ -397,7 +396,7 @@ SampleRandomness: returns the appropriate ticket from round N-K
 
 <p>It is important to note that a miner generates two artifacts: one, a ticket derived from last block&rsquo;s ticket to prove that they have waited the appropriate delay, and two, an election proof derived from the ticket <code>K</code> rounds back used to run leader election.</p>
 
-<p>Typically, either a miner will generate a winning ticket (see <a href="#block-generation">Block Generation</a> or will hear about a new block (or multiple) by the end of a round (and start mining atop the smallest ticket of this new TipSet). The round may also have no successful miners.</p>
+<p>Typically, either a miner will generate a winning ticket (see <a href="#block-generation">Block Generation</a> or will hear about a new block (or multiple) by the end of a round (and start mining atop the smallest ticket of this new TipSet). The round may also have no successful miners, in which we say that a null block (or no block) was produced.</p>
 
 <h3 id="losing-tickets">Losing Tickets</h3>
 
@@ -450,11 +449,11 @@ SampleRandomness: returns the appropriate ticket from round N-K
 
 <h3 id="block-generation">Block Generation</h3>
 
-<p>Once a miner has a winning election proof generated over <code>i</code> rounds and <code>i</code> corresponding tickets, they may create a block. For more on this, see the <a href="./mining.md#block-creation">Mining spec</a>.</p>
+<p>Once a miner has a winning election proof generated over <code>i</code> rounds and <code>i</code> corresponding tickets, they may create a block. For more on this, see the <a href="../mining#block-creation">Mining spec</a>.</p>
 
 <h2 id="chain-selection">Chain Selection</h2>
 
-<p>Just as there can have 0 miners win in a round, multiple miners can be elected in a given round . This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round</p>
+<p>Just as there can have 0 miners win in a round, multiple miners can be elected in a given round. This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round.</p>
 
 <h3 id="tipsets">Tipsets</h3>
 
@@ -501,7 +500,7 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 
 <h3 id="slashing">Slashing</h3>
 
-<p>See the <a href="./faults.md">Faults spec</a> for implementation details.</p>
+<p>See the <a href="../faults">Faults spec</a> for implementation details.</p>
 
 <p>Due to the existence of potential forks, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.</p>
 
@@ -514,7 +513,7 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 <li>While it cannot be proven that a miner omits known blocks from a TipSet in general (i.e. network latency could simply mean the miner did not receive a particular block) in this case it can be proven because a miner must be aware of a block they mined in a previous round.</li>
 </ul>
 
-<p>Any node that detects this occurring should take both block headers, and call <a href="actors.md#slashconsensusfault"><code>storagemarket.SlashConsensusFault</code></a>. The network will then take all of that node&rsquo;s collateral, give a portion of it to
+<p>Any node that detects this occurring should take both block headers, and call <a href="../actors#slashconsensusfault"><code>storagemarket.SlashConsensusFault</code></a>. The network will then take all of that node&rsquo;s collateral, give a portion of it to
 the reporter, and keep the rest.</p>
 
 <p>TODO: It is unclear that rewarding the reporter any more than gas fees is the right thing to do. Needs thought. Tracking issue: <a href="https://github.com/filecoin-project/specs/issues/159">https://github.com/filecoin-project/specs/issues/159</a></p>
@@ -615,6 +614,8 @@ chances that this attack succeeds, erasing the economic advantage sybils created
 <ul>
 <li><a href="#expected-consensus">Expected Consensus</a>
 <ul>
+<li><a href="#important-concepts-and-definitions">Important concepts and definitions</a></li>
+<li><a href="#algorithm">Algorithm</a></li>
 <li><a href="#secret-leader-election">Secret Leader Election</a>
 <ul>
 <li><a href="#tickets">Tickets</a>

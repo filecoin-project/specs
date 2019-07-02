@@ -217,11 +217,11 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="signing-messages">Signing Messages</h2>
 
-<p>To generate a signature for the <a href="data-structures.md#message"><code>Message</code></a> type, first serialize it, then hash the serialized bytes with blake2b-256. Then, take the 32 byte digest output the hash and compute the secp256k1 signature over it.</p>
+<p>To generate a signature for the <a href="../data-structures#message"><code>Message</code></a> type, first serialize it, then hash the serialized bytes with blake2b-256. Then, take the 32 byte digest output the hash and compute the secp256k1 signature over it.</p>
 
 <h3 id="wire-format">Wire Format</h3>
 
-<p>We use standard secp256k1 signature serialization, as described below. For more details on how the Filecoin <code>Signature</code> type is serialized, see the relevant section in <a href="data-structures.md#signature">the data structures spec</a></p>
+<p>We use standard secp256k1 signature serialization, as described below. For more details on how the Filecoin <code>Signature</code> type is serialized, see the relevant section in <a href="../data-structures#signature">the data structures spec</a></p>
 
 <p><strong>Signature</strong></p>
 

@@ -151,15 +151,15 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="filecoin-network">Filecoin Network</h1>
 
-<p>The Filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional Filecoin specific protocols as outlined in <a href="./network-protocols.md">Network Protocols</a>.</p>
+<p>The Filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional Filecoin specific protocols as outlined in <a href="../network-protocols">Network Protocols</a>.</p>
 
 <h2 id="required-protocols">Required Protocols</h2>
 
 <p>Every full node must support the following libp2p protocols:</p>
 
 <ul>
-<li><a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">gossipsub</a> (<a href="./data-propagation.md">for data announcements</a>)</li>
-<li><a href="[for data exchange](./data-propagation.md)">bitswap</a></li>
+<li><a href="https://github.com/libp2p/specs/tree/master/pubsub/gossipsub">gossipsub</a> (<a href="../data-propagation">for data announcements</a>)</li>
+<li><a href="[for data exchange](data-propagation.md)">bitswap</a></li>
 <li>Filecoin specific Protocols:
 
 <ul>
@@ -187,7 +187,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h3 id="syncing">Syncing</h3>
 
-<p>Whenever a node learns about a new <code>BlockHead</code> it should attempt to import the block - let that be through the <code>HelloMessage</code> or through the <a href="data-propagation.md#block-propagation">block pubsub protocol</a>. For that it may fetch the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in <a href="./validation.md">Validation</a> and storing it locally. This mode is known as &ldquo;syncing&rdquo;. During &ldquo;syncing&rdquo; the same node may not mine blocks.</p>
+<p>Whenever a node learns about a new <code>BlockHead</code> it should attempt to import the block - let that be through the <code>HelloMessage</code> or through the <a href="../data-propagation#block-propagation">block pubsub protocol</a>. For that it may fetch the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in <a href="validation.md">Validation</a> and storing it locally. This mode is known as &ldquo;syncing&rdquo;. During &ldquo;syncing&rdquo; the same node may not mine blocks.</p>
 
 <h2 id="establishing-a-network">Establishing a network</h2>
 

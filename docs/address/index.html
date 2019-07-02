@@ -199,22 +199,24 @@ https://github.com/alex-shpak/hugo-book
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 </code></pre></li>
 </ul>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> Address union <span class="o">{</span>
+    <span class="p">|</span> AddressId <span class="m">0</span>
+    <span class="p">|</span> AddressSecp256k1 <span class="m">1</span>
+    <span class="p">|</span> AddressActor <span class="m">2</span>
+    <span class="p">|</span> AddressBLS12_381 <span class="m">3</span>
+<span class="o">}</span> representation byteprefix
 
-<p>An example of a Filecoin address in golang:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Address</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// 0: Mainnet
-</span><span class="c1"></span>    <span class="c1">// 1: Testnet
-</span><span class="c1"></span>    <span class="nx">Network</span> <span class="kt">byte</span>
+<span class="c1">## ID</span>
+<span class="nb">type</span> AddressId UInt
 
-    <span class="c1">// 0: ID
-</span><span class="c1"></span>    <span class="c1">// 1: Blake2b160-Hash of secp256k1 Public Key
-</span><span class="c1"></span>    <span class="c1">// 2: Blake2b160-Hash of Actor creation data
-</span><span class="c1"></span>    <span class="c1">// 3: BLS Public Key
-</span><span class="c1"></span>    <span class="nx">Protocol</span> <span class="kt">byte</span>
+<span class="c1">## Blake2b-160 Hash</span>
+<span class="nb">type</span> AddressSecp256k1 Bytes
 
-    <span class="c1">// raw bytes containing the data associated with protocol
-</span><span class="c1"></span>    <span class="nx">Payload</span> <span class="p">[]</span><span class="kt">byte</span>
-<span class="p">}</span></code></pre></div>
+<span class="c1">## Blake2b-160 Hash</span>
+<span class="nb">type</span> AddressActor Bytes
+
+<span class="c1">## 48 byte PublicKey</span>
+<span class="nb">type</span> AddressBLS12_381 Bytes</code></pre></div>
 <h4 id="network-prefix">Network Prefix</h4>
 
 <p>The <strong>network prefix</strong> is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be <code>f</code> for filecoin mainnet or <code>t</code> for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.</p>
