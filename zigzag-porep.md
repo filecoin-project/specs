@@ -55,6 +55,7 @@ After preprocessing, the data is padded with zero bytes so that the total length
  - `PARENT_COUNT : uint`: Defined as `EXPANSION_DEGREE+BASE_DEGREE`.
  - `GRAPH_SIZE: uint`: Number of nodes in the DRG.
  - `GRAPH_SEED: uint`: Seed used for random number generation in `baseParents`.
+ - `NODE_SIZE: uint`: Size of each node in bytes.
 
 *The following additional public parameters are required:*
 
@@ -196,22 +197,23 @@ func DeriveChallenges(challenges LayerChallenges, layer uint, leaves uint,
 
 ### Layer Replication
 
+TODO: Define `Graph`. We need to decide if this is an object we'll explicitly define or if its properties (e.g., `GRAPH_SIZE`) are just part of the replication parameters and all the functions just refer to the _same_ graphs being manipulated across the entire replication process. (At the moment I've avoided defining a `Graph` structure as in other specs I didn't see any object methods, just standalone functions.)
+
 ```go
-func transformAndReplicateLayers(graph Graph, slothIter uint,
-    replicaId Domain, data []byte) ([]Domain, []Tree) {
+func transformAndReplicateLayers(slothIter uint, replicaId Domain,
+    data []byte) ([]Domain, []Tree) {
 
     var taus [LAYERS]Domain
     var auxs [LAYERS]Tree
     var sortedTrees [LAYERS]Tree
 
-    currentGraph := graph
     for layer := 0; layer <= LAYERS; layer++ {
-        treeData := currentGraph.merkleTree(data)
+        treeData := merkleTree(data)
         sortedTrees.append(treeData)
         if layer < LAYERS {
-            encode(currentGraph, slothIter, replicaId, data)
+            vdeEncode(slothIter, replicaId, data)
         }
-        currentGraph = currentGraph.zigzag()
+        zigzag()
     }
 
     previousCommr := nil
@@ -232,9 +234,33 @@ func transformAndReplicateLayers(graph Graph, slothIter uint,
 
 Note: The function `zigzag` just inverts an internal `bool` that tracks whether the `graphIsReversed()` or not.
 
+```go
+func vdeEncode(slothIter uint, replicaId uint, data []byte) {
+    var parents [PARENT_COUNT]uint
+    for n := 0; n < GRAPH_SIZE; n++ {
+        var node uint
+        if !graphIsReversed() {
+            node = n
+        } else {
+            // If the graph is reversed, traverse in reverse order.
+            node = GRAPH_SIZE - n - 1
+        }
+
+        parents = parents(node)
+
+        key := kdf(replicaId, node, parents, data)
+
+        start := node * NODE_SIZE
+        end := start + NODE_SIZE;
+        nodeData := data[start:end])
+        encoded := slothEncode(key, nodeData, slothIter)
+
+        data[start:end] = encoded
+    }
+}
+```
+
 ### Graph Structure
-TODO: define `parents()` `replicate_layer()`.
-(`parents()` is actually used in `encode()`, should `encode()` be defined in the previous section then?)
 
 ```go
 func baseParents(node uint) (parents [BASE_DEGREE]uint) {
@@ -346,10 +372,10 @@ TODO: Add `FEISTEL_ROUNDS` and `FEISTEL_BYTES` (or find its definitions)
 
 ```go
 func permute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
-    u := encode(index, keys)
+    u := feistelEncode(index, keys)
 
     while u >= numElements {
-        u = encode(u, keys)
+        u = feistelEncode(u, keys)
     }
     // Since we are representing `numElements` using an even number of bits,
     // that can encode many values above it, so keep repeating the operation
@@ -358,7 +384,7 @@ func permute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
     return u
 }
 
-func encode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
+func feistelEncode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
     left, right, rightMask, halfBits := commonSetup(index)
 
     for _, key := range keys {
@@ -446,15 +472,15 @@ func feistel(right uint, key uint, rightMask uint) uint {
 
 // Inverts the `permute` result to its starting value for the same `key`.
 func invertPermute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
-    u := decode(index, keys)
+    u := feistelDecode(index, keys)
 
     while u >= numElements {
-        u = decode(u, keys);
+        u = feistelDecode(u, keys);
     }
     return u
 }
 
-func decode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
+func feistelDecode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
     left, right, rightMask, halfBits := commonSetup(index)
 
     for _, key := range reversed(keys) {
