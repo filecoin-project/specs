@@ -551,10 +551,11 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		Fatal("sector already committed!")
 	}
 
-	// make sure the miner has enough collateral to add more storage
-	coll = CollateralForSector(miner.SectorSize)
+  // Power of the miner after adding this sector
+  futurePower = miner.power + miner.SectorSize
+  collateralRequired = CollateralForPower(futurePower)
 
-	if coll < vm.MyBalance()-miner.ActiveCollateral {
+  if collateralRequired > vm.MyBalance() {
 		Fatal("not enough collateral")
 	}
 
@@ -582,6 +583,16 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		miner.ProvingSet = miner.Sectors
 		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration(miner.SectorSize)
 	}
+}
+
+func CollateralForPower(power BytesAmount) TokenAmount {
+  availableFil = FakeGlobalMethods.GetAvailableFil()
+  totalNetworkPower = StorageMinerActor.GetTotalStorage()
+  numMiners = StorageMarket.GetMinerCount()
+  powerCollateral = availableFil * NetworkConstants.POWER_COLLATERAL_PROPORTION * power / totalNetworkPower
+  perCapitaCollateral = availableFil * NetworkConstants.PER_CAPITA_COLLATERAL_PROPORTION / numMiners
+  collateralRequired = math.Ceil(minerPowerCollateral + minerPerCapitaCollateral)
+  return collateralRequired
 }
 ```
 
@@ -883,7 +894,9 @@ func DePledge(amt TokenAmount) {
 		return
 	}
 
-	if amt > vm.MyBalance()-miner.ActiveCollateral {
+  collateralRequired = CollateralForPower(miner.power)
+
+	if amt + collateralRequired > vm.MyBalance() {
 		Fatal("Not enough free collateral to withdraw that much")
 	}
 
