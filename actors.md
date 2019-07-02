@@ -554,9 +554,8 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		Fatal("not enough collateral")
 	}
 
-	// ensure that the miner cannot commit more sectors than can be proved with
-	// a single PoSt (POST_SECTORS_COUNT)
-	if miner.Sectors.Size() == 16384 {
+	// ensure that the miner cannot commit more sectors than can be proved with a single PoSt
+	if miner.Sectors.Size() >= POST_SECTORS_COUNT {
 		Fatal("too many sectors")
 	}
 
