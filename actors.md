@@ -109,16 +109,20 @@ func Exec(code &Code, params ActorMethod) Address {
 
 	// This generates a unique address for this actor that is stable across message
 	// reordering
-	addr := VM.ComputeActorAddress()
+	// TODO: where do `creator` and `nonce` come from?
+	addr := VM.ComputeActorAddress(creator, nonce)
 
 	// Set up the actor itself
 	actor := Actor{
 		Code:    code,
 		Balance: msg.Value,
+		Head:    nil,
+		Nonce:   0,
 	}
 
 	// The call to the actors constructor will set up the initial state
-	// from the given parameters
+	// from the given parameters, setting `actor.Head` to a new value when successfull.
+	// TODO: can constructors fail?
 	actor.Constructor(params)
 
 	VM.GlobalState.Set(actorID, actor)
