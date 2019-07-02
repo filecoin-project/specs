@@ -524,6 +524,8 @@ HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2
 
 <p>Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it&rsquo;s not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting <em>too much</em> FIL.</p>
 
+<p>TODO: Ensure that if a miner earns a block reward while undercollateralized, then <code>min(blockReward, requiredCollateral-availableBalance)</code> is garnished (transfered to the miner actor instead of the owner).</p>
+
 <h3 id="open-questions">Open Questions</h3>
 
 <ul>

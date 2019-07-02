@@ -620,10 +620,11 @@ func PowerLookup<span class="o">(</span>miner Address<span class="o">)</span> By
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;sector already committed!&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// make sure the miner has enough collateral to add more storage
-</span><span class="c1"></span>    <span class="nx">coll</span> <span class="p">=</span> <span class="nf">CollateralForSector</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
+  <span class="c1">// Power of the miner after adding this sector
+</span><span class="c1"></span>  <span class="nx">futurePower</span> <span class="p">=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">power</span> <span class="o">+</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span>
+  <span class="nx">collateralRequired</span> <span class="p">=</span> <span class="nf">CollateralForPower</span><span class="p">(</span><span class="nx">futurePower</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nx">coll</span> <span class="p">&lt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span><span class="o">-</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="nx">collateralRequired</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough collateral&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
@@ -651,6 +652,16 @@ func PowerLookup<span class="o">(</span>miner Address<span class="o">)</span> By
         <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span> <span class="p">=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span>
         <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">+</span> <span class="nf">ProvingPeriodDuration</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
     <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">CollateralForPower</span><span class="p">(</span><span class="nx">power</span> <span class="nx">BytesAmount</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
+  <span class="nx">availableFil</span> <span class="p">=</span> <span class="nx">FakeGlobalMethods</span><span class="p">.</span><span class="nf">GetAvailableFil</span><span class="p">()</span>
+  <span class="nx">totalNetworkPower</span> <span class="p">=</span> <span class="nx">StorageMinerActor</span><span class="p">.</span><span class="nf">GetTotalStorage</span><span class="p">()</span>
+  <span class="nx">numMiners</span> <span class="p">=</span> <span class="nx">StorageMarket</span><span class="p">.</span><span class="nf">GetMinerCount</span><span class="p">()</span>
+  <span class="nx">powerCollateral</span> <span class="p">=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="nx">NetworkConstants</span><span class="p">.</span><span class="nx">POWER_COLLATERAL_PROPORTION</span> <span class="o">*</span> <span class="nx">power</span> <span class="o">/</span> <span class="nx">totalNetworkPower</span>
+  <span class="nx">perCapitaCollateral</span> <span class="p">=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="nx">NetworkConstants</span><span class="p">.</span><span class="nx">PER_CAPITA_COLLATERAL_PROPORTION</span> <span class="o">/</span> <span class="nx">numMiners</span>
+  <span class="nx">collateralRequired</span> <span class="p">=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nx">minerPowerCollateral</span> <span class="o">+</span> <span class="nx">minerPerCapitaCollateral</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nx">collateralRequired</span>
 <span class="p">}</span></code></pre></div>
 <h4 id="submitpost"><code>SubmitPoSt</code></h4>
 
@@ -900,7 +911,9 @@ func PowerLookup<span class="o">(</span>miner Address<span class="o">)</span> By
         <span class="k">return</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="nx">amt</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span><span class="o">-</span><span class="nx">miner</span><span class="p">.</span><span class="nx">ActiveCollateral</span> <span class="p">{</span>
+  <span class="nx">collateralRequired</span> <span class="p">=</span> <span class="nf">CollateralForPower</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">power</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">amt</span> <span class="o">+</span> <span class="nx">collateralRequired</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="p">{</span>
         <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Not enough free collateral to withdraw that much&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
