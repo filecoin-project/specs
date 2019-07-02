@@ -42,25 +42,27 @@ When encoded to a string a filecoin address contains the following:
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 ```
 
-An example of a Filecoin address in golang:
+```sh
+type Address union {
+    | AddressId 0
+    | AddressSecp256k1 1
+    | AddressActor 2
+    | AddressBLS12_381 3
+} representation byteprefix
 
-```go
-type Address struct {
-	// 0: Mainnet
-	// 1: Testnet
-	Network byte
+## ID
+type AddressId UInt
 
-	// 0: ID
-	// 1: Blake2b160-Hash of secp256k1 Public Key
-	// 2: Blake2b160-Hash of Actor creation data
-	// 3: BLS Public Key
-	Protocol byte
+## Blake2b-160 Hash
+type AddressSecp256k1 Bytes
 
-	// raw bytes containing the data associated with protocol
-	Payload []byte
-}
+## Blake2b-160 Hash
+type AddressActor Bytes
+
+## 48 byte PublicKey
+type AddressBLS12_381 Bytes
+
 ```
-
 #### Network Prefix
 
 The **network prefix** is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be `f` for filecoin mainnet or `t` for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.

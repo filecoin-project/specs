@@ -3,8 +3,8 @@
 This spec describes how to implement the protocol in general, for Filecoin-specific processes, see:
 
 - [Mining Blocks](mining.md#mining-blocks) on how consensus is used.
-- [Faults](./faults.md) on slashing.
-- [Storage Market](./storage-market.md#the-power-table) on how the power table is maintained.
+- [Faults](faults.md) on slashing.
+- [Storage Market](storage-market.md#the-power-table) on how the power table is maintained.
 - [Block data structure](data-structures.md#block) for details on fields and encoding.
 
 Important Concepts
@@ -123,7 +123,7 @@ The basic algorithm can be broken down by looking in turn at its two major compo
 
 ## Secret Leader Election
 
-Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](./storage-market.md#the-power-table), where power is equivalent to storage provided through time.
+Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](storage-market.md#the-power-table), where power is equivalent to storage provided through time.
 
 Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's use of EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness for Leader Election. Every block generated references an `ElectionProof` derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.
 
@@ -308,7 +308,7 @@ This means that valid `ElectionProof`s can be generated from tickets in the midd
 
 ### Block Generation
 
-Once a miner has a winning election proof generated over `i` rounds and `i` corresponding tickets, they may create a block. For more on this, see the [Mining spec](./mining.md#block-creation).
+Once a miner has a winning election proof generated over `i` rounds and `i` corresponding tickets, they may create a block. For more on this, see the [Mining spec](mining.md#block-creation).
 
 ## Chain Selection
 
@@ -357,7 +357,7 @@ The probability that two TipSets with different blocks would have all the same t
 
 ### Slashing
 
-See the [Faults spec](./faults.md) for implementation details.
+See the [Faults spec](faults.md) for implementation details.
 
 Due to the existence of potential forks, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
 

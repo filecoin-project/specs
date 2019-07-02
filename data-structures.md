@@ -1,161 +1,139 @@
 # Data Structures
 
-This document serves as an entry point for understanding all of the data structures in filecoin.
+This document serves as an entry point for the data structures in filecoin.
 
 ## Address
 
-An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.
+An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. It encodes information about the network it belongs to, the type of data it contains, the data itself, and depending on the type, a checksum.
 
-To learn more, take a look at the [address spec](address.md).
-
-## CID
-
-For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a few extra labels to inform applications about how to deserialize the given data. To learn more, take a look at the [CID Spec](https://github.com/ipld/cid).
-
-CIDs are serialized by applying binary multibase encoding, then encoding that as a CBOR byte array with a tag of 42.
-
+The details are described in [address spec](address.md).
 
 ## Block
 
-A block represents an individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and some notion of a 'weight' for deciding which block is the 'best'.
+A block represents the data at individual point in time that the network may achieve consensus on. It contains (via merkle links) the full state of the system, references to the previous state, and the notion of a 'weight' for deciding which block is the 'best'.
 
-```go
-// Block is a block in the blockchain.
+```sh
 type Block struct {
-	// Miner is the address of the miner actor that mined this block.
-	Miner Address
+	## Miner is the address of the miner actor that mined this block.
+	miner Address
 
-	// Tickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
-	Tickets []Ticket
+	## Tickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
+	tickets [Ticket]
 
-	// ElectionProof is a signature over the final ticket that proves this miner
-	// is the leader at this round
-	ElectionProof Signature
+	## ElectionProof is a signature over the final ticket that proves this miner
+	## is the leader at this round
+	electionProof Signature
 
-	// Parents is an array of distinct CIDs of parents on which this block was based. 
-	// Typically one, but can be several in the case where there were multiple winning ticket-
-	// holders for a round.
-	// The order of parent CIDs is not defined.
-	Parents []Cid
+	## Parents is an array of distinct CIDs of parents on which this block was based.
+	## Typically one, but can be several in the case where there were multiple winning ticket-
+	## holders for a round.
+	## The order of parent CIDs is not defined.
+	parents [&Block]
 
-	// ParentWeight is the aggregate chain weight of the parent set.
-	ParentWeight Integer
+	## ParentWeight is the aggregate chain weight of the parent set.
+	parentWeight UInt
 
-	// Height is the chain height of this block.
-	Height Uint64
+	## Height is the chain height of this block.
+	height UInt
 
-	// StateRoot is a cid pointer to the state tree after application of the
-	// transactions state transitions.
-	StateRoot Cid
+	## StateRoot is a cid pointer to the state tree after application of the
+	## transactions state transitions.
+	stateRoot &StateTree
 
-	// Messages is the set of messages included in this block. This field is the Cid
-	// of the root of a sharray of Messages.
-	Messages Cid
+	## Messages is the set of messages included in this block. This field is the Cid
+	## of the root of a sharray of Messages.
+	messages &[&Message]<Sharray>
 
-	// BLSAggregate is an aggregated BLS signature for all the messages in this block that
-	// were signed using BLS signatures
-	BLSAggregate Signature
+	## BLSAggregate is an aggregated BLS signature for all the messages in this block that
+	## were signed using BLS signatures
+	blsAggregate Signature
 
-	// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-	// This field is the Cid of the root of a sharray of MessageReceipts.
-	MessageReceipts Cid
+	## MessageReceipts is a set of receipts matching to the sending of the `Messages`.
+	## This field is the Cid of the root of a sharray of MessageReceipts.
+	messageReceipts &[MessageReceipt]
 
-	// The block Timestamp is used to enforce a form of block delay by honest miners.
-	// Unix time UTC timestamp (in seconds) stored as an unsigned integer.
-	Timestamp Timestamp
+	## The block Timestamp is used to enforce a form of block delay by honest miners.
+	## Unix time UTC timestamp (in seconds) stored as an unsigned integer.
+	timestamp Timestamp
 
-	// BlockSig is a signature over the hash of the entire block with the miners
-	// worker key to ensure that it is not tampered with after creation
-	BlockSig Signature
-}
+	## BlockSig is a signature over the hash of the entire block with the miners
+	## worker key to ensure that it is not tampered with after creation
+	blockSig Signature
+} representation tuple
 ```
-
-#### Sharded Messages and Receipts
-
-The Message and MessageReceipts fields are each Cids of [sharray](sharray.md) datastructures. The `Messages` sharray contains the Cids of the messages that are included in the block. The `MessageReceipts` sharray contains the receipts directly.
 
 ## Message
 
-```go
-type Message struct {
-	To   Address
-	From Address
-
-	// When receiving a message from a user account the nonce in
-	// the message must match the expected nonce in the from actor.
-	// This prevents replay attacks.
-	Nonce Uint64
-
-	Value BigInteger
-
-	GasPrice Integer
-	GasLimit Integer
-
-	Method uint64
-	Params []byte
-}
+```sh
+type Message union {
+    | UnsignedMessage 0
+    | SignedMessage 1
+} representation keyed
 ```
 
-### Parameter Encoding
+```sh
+type UnsignedMessage struct {
+	to   Address
+	from Address
 
-Parameters to methods get encoded as described in the [basic types](#basic-type-encodings) section below, and then put into a CBOR encoded array.
-(TODO: thinking about this, it might make more sense to just have `Params` be an array of things)
+	## When receiving a message from a user account the nonce in the message must match the expected
+    ## nonce in the from actor. This prevents replay attacks.
+	nonce UInt
 
-### Signing
+	value UInt
 
-A signed message is a wrapper type over the base message.
+	gasPrice UInt
+	gasLimit UInt
 
-```go
+	method &ActorMethod
+} representation tuple
+```
+
+```sh
 type SignedMessage struct {
-	Message   Message
-	Signature Signature
-}
+	message   UnsignedMessage
+	signature Signature
+} representation tuple
 ```
 
 The signature is a serialized signature over the serialized base message. For more details on how the signature itself is done, see the [signatures spec](signatures.md).
 
-## Message Receipt
+## State Tree
 
-```go
-type MessageReceipt struct {
-	ExitCode uint8
-	Return []byte
-	GasUsed Integer
-}
+The state tree keeps track of all state in Filecoin. It is a map of addresses to `actors` in the system.
+The `ActorState` is defined in the [actors spec](actors.md).
+
+```sh
+type StateTree map {ID:Actor}<Hamt>
 ```
 
-### Serialization
+## Message Receipt
 
-Message receipts are serialized by using the FCS.
+```sh
+type MessageReceipt struct {
+	exitCode UInt
+	return Bytes
+	gasUsed UInt
+} representation tuple
+```
 
 ## Actor
 
-```go
+```sh
 type Actor struct {
-	// Code is a pointer to the code object for this actor
-	Code Cid
+	## Cid of the code object for this actor.
+	code Cid
 
-	// Head is a pointer to the root of this actors state
-	Head Cid
+	## Reference to the root of this actors state.
+	head &ActorState
 
-	// Nonce is a counter of the number of messages this actor has sent
-	Nonce Uint64
+	## Counter of the number of messages this actor has sent.
+	nonce UInt
 
-	// Balance is this actors current balance of filecoin
-	Balance BigInteger
+	## Current balance of filecoin of this actor.
+	balance UInt
 }
 ```
-
-## State Tree
-
-The state trie keeps track of all state in Filecoin. It is a map of addresses to `actors` in the system. It is implemented using a HAMT.
-
-## HAMT
-
-{{% notice todo %}}
-**TODO**: link to spec for our CHAMP HAMT
-{{% /notice %}}
-
 
 ## Signature
 
@@ -163,271 +141,96 @@ All signatures in Filecoin come with a type that signifies which key type was us
 
 For more details on signature creation, see [the signatures spec](signatures.md).
 
-```go
-type Signature struct {
-	Type int
-	Data []byte
-}
+```sh
+type Signature union {
+	| Secp256k1Signature 0
+	| Bls12_381Signature 1
+} representation byteprefix
+
+type Secp256k1Signature Bytes
+type Bls12_381Signature Bytes
 ```
-
-### `Type` Values
-
-| Key Type        | Value |
-|-----------------|-------|
-| Secp256k1       | `1`     |
-| BLS12-381 ECDSA | `2`     |
-
-### Serialization
-
-In their serialized form the raw bytes (only the `Data` field) are serialized and then tagged according to the FCS tags, to indicated which signature type they are.
 
 ## FaultSet
 
 FaultSets are used to denote which sectors failed at which block height.
 
-```go
+```sh
 type FaultSet struct {
-	Index    uint64
-	BitField BitField
+	index    UInt
+	bitField BitField
 }
 ```
 
-The `Index` field is a block height offset from the start of the miners proving period (in order to make it more compact).
+The `index` field is a block height offset from the start of the miners proving period (in order to make it more compact).
 
-# Basic Type Encodings
 
-Types that appear in messages or in state must be encoded as described here.
+## Basic Types
 
-#### `PublicKey`
+### CID
 
-The public key type is simply an array of bytes. (TODO: discuss specific encoding of key types, for now just calling it bytes is sufficient)
+For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a extra labels to inform applications about how to deserialize the given data. [CID Spec](https://github.com/ipld/cid) contains the detailed spec.
 
-#### `BytesAmount`
+### Timestamp
+
+```sh
+type Timestamp UInt
+```
+
+### PublicKey
+
+The public key type is simply an array of bytes.
+
+```sh
+type PublicKey Bytes
+```
+
+### BytesAmount
 
 BytesAmount is just a re-typed Integer.
+```sh
+type BytesAmount UInt
+```
 
-#### `PeerID`
+### PeerId
 
-PeerID is just the serialized bytes of a libp2p peer ID.
+The serialized bytes of a libp2p peer ID.
 
 Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/100
 
-#### `Integer`
+```sh
+type PeerId Bytes
+```
 
-Integers are encoded as LEB128 signed integers.
+### Bitfield
 
-#### `BitField`
+Bitfields are a set encoded using a custom run length encoding: RLE+.
 
-Bitfields are a set of bits encoded using a custom run length encoding: rle+.  rle+ is specified below.
+```sh
+type Bitfield Bytes
+```
 
-#### `SectorSet`
+### SectorSet
 
-TODO
+{{% notice todo %}}
+Define me
+{{% /notice %}}
 
-#### `FaultSet`
 
-A fault set is a BitField and a block height, encoding TBD.
-
-#### `BlockHeader`
-
-BlockHeader is a serialized `Block`.
-
-#### `SealProof`
+### SealProof
 
 SealProof is an opaque, dynamically-sized array of bytes.
 
-#### `PoStProof`
+### PoStProof
 
 PoStProof is an opaque, dynamically-sized array of bytes.
 
-#### `TokenAmount`
+### TokenAmount
 
-TokenAmount is a re-typed Integer.
+A type to represent an amount of filecoin tokens.
 
-
-
-## LEB128 Encoding Reference
-
-
-This is taken from the Dwarf Standard 4, Appendix C
-
-#### Encode unsigned LEB128
-
-```c
-do
-{
-  byte = low order 7 bits of value;
-  value >>= 7;
-  if (value != 0) /* more bytes to come */
-    set high order bit of byte;
-  emit byte;
-} while (value != 0);
-
-```
-
-#### Encode signed LEB128
-
-```c
-more = 1;
-negative = (value < 0);
-size = no. of bits in signed integer;
-while(more)
-{
-  byte = low order 7 bits of value;
-  value >>= 7;
-  /* the following is unnecessary if the
-   * implementation of >>= uses an arithmetic rather
-   * than logical shift for a signed left operand
-   */
-  if (negative)
-    /* sign extend */
-    value |= - (1 << (size - 7));
-    /* sign bit of byte is second high order bit (0x40) */
-  if ((value ==  0 && sign bit of byte is clear) ||
-      (value == -1 && sign bit of byte is set))
-     more = 0;
-  else
-    set high order bit of byte;
-  emit byte;
-}
-```
-
-#### Decode unsigned LEB128
-
-```c
-result = 0;
-shift = 0;
-while(true)
-{
-  byte = next byte in input;
-  result |= (low order 7 bits of byte << shift);
-  if (high order bit of byte == 0)
-    break;
-  shift += 7;
-}
-```
-
-#### Decode signed LEB128
-
-```c
-result = 0;
-shift = 0;
-size = number of bits in signed integer;
-while(true)
-{
-  byte = next byte in input;
-  result |= (low order 7 bits of byte << shift);
-  shift += 7;
-  /* sign bit of byte is second high order bit (0x40) */
-  if (high order bit of byte == 0)
-  break;
-}
-if ((shift <size) && (sign bit of byte is set))
-  /* sign extend */
-  result |= - (1 << shift);
-```
-
-# Filecoin Compact Serialization
-
-Datastructures in Filecoin are encoded as compactly as is reasonable. At a high level, each object is converted into an ordered array of its fields (ordered by their appearance in the struct declaration), then CBOR marshaled, and prepended with an object type tag.
-
-| FCS Type               | CBOR tag  |
-|------------------------|-----------|
-| Block v1               | `43`      |
-| Message v1             | `44`      |
-| SignedMessage v1       | `45`      |
-| MessageReceipt v1      | `46`      |
-| Signature Secp256k1 v1 | `47`      |
-| Signature BLS12-381 v1 | `48`      |
-
-
-For example, a message would be encoded as:
-
-```
-tag<44>[
-  msg.To,
-  msg.From,
-  msg.Nonce,
-  msg.Value,
-  msg.GasPrice,
-  msg.GasLimit,
-  msg.Method,
-  msg.Params
-]
-```
-
-Each individual type should be encoded as specified:
-
-| type | encoding |
-| --- | ---- |
-| Uint64 | CBOR major type 0 |
-| BigInteger | [CBOR bignum](https://tools.ietf.org/html/rfc7049#section-2.4.2) |
-| Address | CBOR major type 2 |
-| Uint8 | CBOR Major type 0 |
-| []byte | CBOR Major type 2 |
-| string | CBOR Major type 3 |
-| bool | [CBOR Major type 7, value 20/21](https://tools.ietf.org/html/rfc7049#section-2.3) |
-
-## Encoding Considerations
-
-Objects should be encoded using [canonical CBOR](https://tools.ietf.org/html/rfc7049#section-3.9), and decoders should operate in [strict mode](https://tools.ietf.org/html/rfc7049#section-3.10).  The maximum size of an FCS Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
-
-Additionally, CBOR Major type 5 is not used. If an FCS object contains it, that object is invalid.
-
-## IPLD Considerations
-
-Cids for FCS objects should use the FCS multicodec (`0x1f`), and should use a blake2b-256 multihash.
-
-## Vectors
-
-Below are some sample vectors for each data type.
-
-### Message
-
-Encoded:
-
-```
-d82c865501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c6285501b882619d4
-6558f3d9e316d11b48dcf211327026a1875c245037e11d600666d6574686f64
-4d706172616d73617265676f6f64
-```
-
-Decoded:
-
-```
-To:     Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
-From:   Address("f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy")
-Nonce:  uint64(117)
-Value:  BigInt(15000000000)
-Method: string("method")
-Params: []byte("paramsaregood")
-```
-
-### Block
-
-Encoded:
-
-```
-d82b895501fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628814a69616d617
-469636b6574566920616d20616e20656c656374696f6e2070726f6f6681d82a
-5827000171a0e40220ce25e43084e66e5a92f8c3066c00c0eb540ac2f2a1733
-26507908da06b96f678c242bb6a1a0012d687d82a5827000171a0e40220ce25
-e43084e66e5a92f8c3066c00c0eb540ac2f2a173326507908da06b96f678808
-0
-```
-
-Decoded:
-
-```
-Miner:           Address("f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy")
-Tickets:         [][]byte{"iamaticket"}
-ElectionProof:   []byte("i am an election proof")
-Parents:         []Cid{"zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B"}
-ParentWeight:    NewInt(47978)
-Height:          uint64(1234567)
-StateRoot:       Cid("zDPWYqFD5abn4FyknPm1PibXdJ2kwRNVPDabKyzfdXVJGjnDuq4B")
-Messages:        []SignedMessage{}
-MessageReceipts: []MessageReceipt{}
+```sh
+type TokenAmount UInt
 ```
 
 ## RLE+ Bitset Encoding
@@ -491,3 +294,8 @@ a long block.
 
 For Filecoin, byte arrays representing RLE+ bitstreams are encoded using [LSB 0](https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering) bit numbering.
 
+
+## Other Considerations
+
+- The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
+- Hashes should use a blake2b-256 multihash.
