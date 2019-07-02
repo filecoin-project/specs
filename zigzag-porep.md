@@ -1,4 +1,4 @@
-# Filecoin ZigZag Proof of Replication
+# Proof-of-Replication in Filecoin
 
 
 Filecoin Proof-of-Replication (PoRep) 
@@ -7,7 +7,7 @@ This spec describes the specific Proof-of-Replication used in Filecoin called *Z
 
 ZigZag has been presented by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).
 
-## Overview
+## Introduction
 
 ### Background on Proof-of-Replication
 *Proof-of-Replication* enables a prover *P* to convince a verifier *V* that *P* is storing a replica *R*, a physically independent copy of some data *D*, unique to *P*. The scheme is defined by a tuple of polynomial time algorithms (_Setup_, Replication, _Prove_, _Verify_). The assumption is that generation of a replica after _Replicate_  must be difficult (if not impossible) to generate.
