@@ -558,6 +558,11 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		Fatal("not enough collateral")
 	}
 
+	// ensure that the miner cannot commit more sectors than can be proved with a single PoSt
+	if miner.Sectors.Size() >= POST_SECTORS_COUNT {
+		Fatal("too many sectors")
+	}
+
 	miner.ActiveCollateral += coll
 
 	// Note: There must exist a unique index in the miner's sector set for each
@@ -600,7 +605,7 @@ TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
 {{% /notice %}}
 
 ```go
-func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done BitField) {
+func SubmitPost(proofs PoStProof, faults []FaultSet, recovered BitField, done BitField) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
@@ -612,6 +617,7 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	if !miner.ValidateFaultSets(faults, recovered, done) {
 		Fatal("fault sets invalid")
 	}
+
 
 	var feesRequired TokenAmount
 
@@ -633,8 +639,8 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Refund(msg.Value - feesRequired)
 	}
 
-	if !CheckPostProofs(miner.SectorSize, proofs, faults) {
-		Fatal("proofs invalid")
+	if !CheckPostProof(miner.SectorSize, proof, faults) {
+		Fatal("proof invalid")
 	}
 
 	// combine all the fault set bitfields, and subtract out the recovered
