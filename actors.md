@@ -4,12 +4,32 @@ Any implementations of the Filecoin actors must be exactly byte for byte compati
 
 This spec describes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
 
-- [Init Actor](#init-actor)
-- [Storage Market Actor](#storage-market-actor)
-- [Storage Miner Actor](#storage-miner-actor)
-- [Payment Channel Broker Actor](#payment-channel-broker-actor)
+## Actor State
 
-## Built In Actors
+These below used `kindeded` representation, as the type can be inferred from the context, in which
+they are used (`Actor` or `UnsignedMessage`).
+
+```sh
+type ActorState union {
+    | InitActorState
+    | AccountActorState
+    | StorageMarketActorState
+    | StorageMinerActorState
+    | PaymentChannelBrokerActorState
+    | MultisigActorState
+} representation kinded
+
+type ActorMethod union {
+    | InitActorMethod
+    | AccountActorMethod
+    | StorageMarketActorMethod
+    | StorageMinerActorMethod
+    | PaymentChannelBrokerActorMethod
+    | MultisigActorMethod
+} representation kinded
+```
+
+## System Actors
 
 Some state machine actors are 'system' actors that get instantiated in the genesis block, and have their IDs allocated at that point.
 
@@ -18,50 +38,60 @@ Some state machine actors are 'system' actors that get instantiated in the genes
 | 0    | InitActor          | Network Init            |
 | 1    | AccountActor       | Network Treasury        |
 | 2    | StorageMarketActor | Filecoin Storage Market |
-|  99 | AccountActor | Burnt Funds |
+| 99   | AccountActor       | Burnt Funds             |
 
-## Init Actor
+## Built In Actors
+
+### Init Actor
+
+- **Code Cid**: `<codec:raw><mhType:identity><"init">`
 
 The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that `NextID` will initially be set to 100.
 
-```go
-type InitActor struct {
-	// Mapping from Address to ID, for lookups.
-	AddressMap map[Address]BigInt
-
-	NextID BigInt
+```sh
+type InitActorState struct {
+    addressMap {Address:ID}<Hamt>
+    nextId UInt
 }
+
+type InitActorMethod union {
+    | InitConstructor 0
+    | Exec 1
+    | GetIdForAddress 2
+} representation keyed
 ```
 
-### Code Cid
+#### `Constructor`
 
-`<codec:raw><mhType:identity><"init">`
+**Parameters**
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1  | `Exec`     |
-| 2 | `GetIdForAddress` |
+```sh
+type InitConstructor struct {
+}
 
-### `Exec(code Cid, params []Param) Address`
+```
 
->  This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
+**Algorithm**
 
-### Parameters
+#### `Exec`
 
-| Name     | Type       | Description                                                  |
-| -------- | ---------- | ------------------------------------------------------------ |
-| `code`   | `Cid`      | A pointer to the location at which the code of the actor to create is stored. |
-| `params` | `[] Param` | The parameters passed to the constructor of the actor.       |
+This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
 
+**Parameters**
 
+```sh
+type Exec struct {
+    ## Reference to the location at which the code of the actor to create is stored.
+    code &Code
+    ## Parameters passed to the constructor of the actor.
+    params ActorMethod
+} representation tuple
+```
 
-`Param` is the type representing any valid arugment that can be passed to a function.
-
-TODO: Find a better place for this definition.
-
+**Algorithm**
 
 ```go
-func Exec(code Cid, params []byte) Address {
+func Exec(code &Code, params ActorMethod) Address {
 	// Get the actor ID for this actor.
 	actorID = self.NextID
 	self.NextID++
@@ -102,27 +132,31 @@ func Exec(code Cid, params []byte) Address {
 func IsSingletonActor(code Cid) bool {
 	return code == StorageMarketActor || code == InitActor
 }
+```
 
+```go
 // TODO: find a better home for this logic
 func (VM VM) ComputeActorAddress(creator Address, nonce Integer) Address {
 	return NewActorAddress(bytes.Concat(creator.Bytes(), nonce.BigEndianBytes()))
 }
 ```
 
-### `GetIdForAddress(addr Address) BigInt`
+#### `GetIdForAddress`
 
-> This method allows for fetching the corresponding ID of a given Address
+This method allows for fetching the corresponding ID of a given Address
 
-### Parameters
-
-| Name   | Type      | Description           |
-| ------ | --------- | --------------------- |
-| `addr` | `Address` | The address to lookup |
-
-
+**Parameters**
 
 ```go
-func GetIdForAddress(addr Address) BigInt {
+type GetIdForAddress struct {
+    addr Address
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func GetIdForAddress(addr Address) UInt {
 	id := self.AddressMap[addr]
 	if id == nil {
 		Fault("unknown address")
@@ -131,61 +165,90 @@ func GetIdForAddress(addr Address) BigInt {
 }
 ```
 
-## Account Actor
+### Account Actor
+
+- **Code Cid**: `<codec:raw><mhType:identity><"account">`
 
 The Account actor is the actor used for normal keypair backed accounts on the filecoin network.
 
-```go
-type AccountActor struct {
-	// Address contains the public key based address that this account was created with. If unset, this account may not send funds by normal means.
-	Address Address
+```sh
+type AccountActorState struct {
+    address Address
+}
+
+type AccountActorMethod union {
+    | AccountConstructor 0
+    | GetAddress 1
+} representation keyed
+
+type AccountConstructor struct {
 }
 ```
 
-### Code Cid
+#### `GetAddress`
 
-`<codec:raw><mhType:identity><"account">`
+**Parameters**
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1  | `GetAddress` |
+```sh
+type GetAddress struct {
+} representation tuple
+```
 
-## Storage Market Actor
+**Algorithm**
+
+```go
+func GetAddress() Address {
+    return self.address
+}
+```
+
+### Storage Market Actor
+
+* **Code Cid**: `<codec:raw><mhType:identity><"smarket">`
 
 The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
 
-```go
-type StorageMarketActor struct {
-	Miners AddressSet
+```sh
+type StorageMarketActorState struct {
+    miners {Address:Null}<Hamt>
+    totalStorage BytesAmount
+}
 
-	// TODO: Determine correct unit of measure. Could be denominated in the
-	// smallest sector size supported by the network.
-	TotalStorage BytesAmount
+type StorageMarketActorMethod union {
+    | StorageMarketConstructor 0
+    | CreateStorageMiner 1
+    | SlashConsensusFault 2
+    | UpdateStorage 3
+    | GetTotalStorage 4
+    | PowerLookup 5
+    | IsMiner 6
+} representation keyed
+```
+
+#### `Constructor`
+
+**Parameters**
+
+```sh
+type StorageMarketConstructor struct {
 }
 ```
-### Code Cid
 
-`<codec:raw><mhType:identity><"smarket">`
+**Algorithm**
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1   | `CreateStorageMiner`     |
-| 2 | `SlashConsensusFault` |
-| 3 | `UpdateStorage` |
-| 4 | `GetTotalStorage` |
-| 5 |  `PowerLookup` |
-| 6 | `IsMiner` |
+#### `CreateStorageMiner`
 
+**Parameters**
 
-### CreateStorageMiner
+```sh
+type CreateStorageMiner struct {
+    worker Address
+    sectorSize BytesAmount
+    peerId PeerId
+} representation tuple
+```
 
-Parameters:
-
-- worker Address
-- sectorSize BytesAmount
-- pid PeerID
-
-Return: Address
+**Algorithm**
 
 ```go
 func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Address {
@@ -201,14 +264,18 @@ func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Addr
 }
 ```
 
-### SlashConsensusFault
+#### `SlashConsensusFault`
 
-Parameters:
+**Parameters**
 
-- block1 BlockHeader
-- block2 BlockHeader
+```sh
+type SlashConsensusFault struct {
+    block1 &Block
+    block2 &Block
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
 func shouldSlash(block1, block2 BlockHeader) bool {
@@ -268,15 +335,20 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 }
 ```
 
-### UpdateStorage
+#### `UpdateStorage`
 
 UpdateStorage is used to update the global power table.
 
-Parameters:
+**Parameters**
 
-- delta BytesAmount
+```sh
+type UpdateStorage struct {
+    delta BytesAmount
+} representation tuple
 
-Return: None
+```
+
+**Algorithm**
 
 ```go
 func UpdateStorage(delta BytesAmount) {
@@ -288,11 +360,17 @@ func UpdateStorage(delta BytesAmount) {
 }
 ```
 
-### GetTotalStorage
+#### `GetTotalStorage`
 
-Parameters: None
+**Parameters**
 
-Return: BytesAmount
+```sh
+type GetTotalStorage struct {
+
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetTotalStorage() BytesAmount {
@@ -300,12 +378,17 @@ func GetTotalStorage() BytesAmount {
 }
 ```
 
-### PowerLookup
+#### `PowerLookup`
 
-Parameters:
-- miner Address
+**Parameters**
 
-Return: BytesAmount
+```sh
+type PowerLookup struct {
+    miner Address
+} representation tuple
+````
+
+**Algorithm**
 
 ```go
 func PowerLookup(miner Address) BytesAmount {
@@ -319,12 +402,18 @@ func PowerLookup(miner Address) BytesAmount {
 }
 ```
 
-### IsMiner
+#### `IsMiner`
 
-Parameters:
-- addr Address
 
-Return: BytesAmount
+**Parameters**
+
+```sh
+type IsMiner struct {
+    addr Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func IsMiner(addr Address) bool {
@@ -334,85 +423,89 @@ func IsMiner(addr Address) bool {
 
 ## Storage Miner Actor
 
-```go
-type StorageMiner struct {
-	// Owner is the address of the account that owns this miner. Income and returned
-	// collateral are paid to this address. This address is also allowed to change the
-	// worker address for the miner.
-	Owner Address
+* **Code Cid**: `<codec:raw><mhType:identity><"sminer">`
 
-	// Worker is the address of the worker account for this miner.
-	// This will be the key that is used to sign blocks created by this miner, and
-	// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
-	// other day to day miner activities.
-	Worker Address
+```sh
+type StorageMinerActorState struct {
+	## Account that owns this miner.
+    ## - Income and returned collateral are paid to this address.
+    ## - This address is also allowed to change the worker address for the miner.
+    owner Address
 
-	// PeerID is the libp2p peer identity that should be used to connect
-	// to this miner
-	PeerID peer.ID
+	## Worker account for this miner.
+	## This will be the key that is used to sign blocks created by this miner, and
+	## sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+	## other day to day miner activities.
+    worker Address
 
-	// SectorSize is the amount of space in each sector committed to the network
-	// by this miner.
-	SectorSize BytesAmount
+    ## Libp2p identity that should be used when connecting to this miner.
+    peerId PeerId
 
-	// ActiveCollateral is the amount of collateral currently committed to live storage
-	ActiveCollateral TokenAmount
+    ## Amount of space in each sector committed to the network by this miner.
+    sectorSize BytesAmount
 
-	// DePledgedCollateral is collateral that is waiting to be withdrawn
-	DePledgedCollateral TokenAmount
+	## Collateral currently committed to live storage.
+    activeCollateral TokenAmount
 
-	// DePledgeTime is the time at which the depledged collateral may be withdrawn
-	DePledgeTime BlockHeight
+    ## Collateral that is waiting to be withdrawn.
+    dePledgedCollateral TokenAmount
 
-	// Sectors is the set of all sectors this miner has committed
-	Sectors SectorSet
+	## Time at which the depledged collateral may be withdrawn.
+    dePledgeTime BlockHeight
 
-	// ProvingSet is the set of sectors this miner is currently mining. It is only updated
-	// when a PoSt is submitted (not as each new sector commitment is added)
-	ProvingSet SectorSet
+	## All sectors this miner has committed.
+    sectors SectorSet
 
-	// NextDoneSet is a set of sectors reported during the last PoSt submission as
-	// being 'done'. The collateral for them is still being held until the next PoSt
-	// submission in case early sector removal penalization is needed.
-	NextDoneSet SectorSet
+	## Sectors this miner is currently mining. It is only updated
+	## when a PoSt is submitted (not as each new sector commitment is added).
+    provingSet SectorSet
 
-	// ArbitratedDeals is the set of deals this miner has been slashed for since the
-	// last post submission
-	ArbitratedDeals CidSet
+	## Sectors reported during the last PoSt submission as being 'done'. The collateral
+    ## for them is still being held until the next PoSt submission in case early sector
+    ## removal penalization is needed.
+    nextDoneSet SectorSet
 
-	// Power is the amount of power this miner has
-	Power Integer
+	## Deals this miner has been slashed for since the last post submission.
+    arbitratedDeals CidSet
 
-	// Asks are the set of active asks this miner has available
-	Asks AskSet
+	## Amount of power this miner has.
+    power UInt
 }
+
+type StorageMinerActorMethod union {
+    | StorageMinerConstructor 0
+    | CommitSector 1
+    | SubmitPost 2
+    | IncreasePledge 3
+    | SlashStorageFault 4
+    | GetCurrentProvingSet 5
+    | ArbitrateDeal 6
+    | DePledge 7
+    | GetOwner 8
+    | GetWorkerAddr 9
+    | GetPower 10
+    | GetPeerID 11
+    | GetSectorSize 12
+    | UpdatePeerID 13
+    | ChangeWorker 14
+} representation keyed
 ```
 
-### Code Cid
-
-`<codec:raw><mhType:identity><"sminer">`
-
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1   | `AddAsk`     |
-| 2 | `CommitSector` |
-| 3 | `SubmitPoSt` |
-| 4 | `IncreasePledge` |
-| 5 | `SlashStorageFault` |
-| 6 | `GetCurrentProvingSet` |
-| 7 | `ArbitrateDeal` |
-| 8 | `DePledge` |
-| 9 | `GetOwner` |
-| 10 | `GetWorkerAddr` |
-| 11 | `GetPower` |
-| 12 | `GetPeerID` |
-| 13 | `GetSectorSize` |
-| 14 | `UpdatePeerID` |
-| 15 |  `ChangeWorker` |
-
-### Constructor
+#### `Constructor`
 
 Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.
+
+**Parameters**
+
+```sh
+type StorageMinerConstructor struct {
+    worker Address
+    sectorSize BytesAmount
+    peerId PeerId
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
@@ -423,57 +516,27 @@ func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
 }
 ```
 
+#### `CommitSector`
 
-### AddAsk
+**Parameters**
 
-Parameters:
-
-- price TokenAmount
-- ttl Integer
-
-Return: AskID
-
-```go
-func AddAsk(price TokenAmount, ttl Integer) AskID {
-	if msg.From != self.Worker {
-		Fatal("Asks may only be added via the worker address")
-	}
-
-	// Filter out expired asks
-	self.Asks.FilterExpired()
-
-	askid := self.NextAskID
-	self.NextAskID++
-
-	self.Asks.Append(Ask{
-		Price:  price,
-		Expiry: CurrentBlockHeight + ttl,
-		ID:     askid,
-	})
-
-	return askid
-}
+```sh
+type CommitSector struct {
+    sectorId SectorID
+    commD Bytes
+    commR Bytes
+    commRStar Bytes
+    proof SealProof
+} representation tuple
 ```
 
-Note: this may be moved off chain soon, don't worry about testing it too heavily.
+**Algorithm**
 
-
-
-### CommitSector
-
-Parameters:
-
-- sectorID SectorID
-- commD []byte
-- commR []byte
-- commRStar []byte
-- proof SealProof
-
-Return: None
-
+{{% notice todo %}}
+TODO: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
+{{% /notice %}}
 
 ```go
-// NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
 func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealProof) SectorID {
 	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.Worker, proof) {
 		Fatal("bad proof!")
@@ -513,19 +576,26 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 }
 ```
 
-### SubmitPoSt
+#### `SubmitPoSt`
 
-Parameters:
+**Parameters**
 
-- proofs []PoStProof
-- faults []FaultSet
-- recovered Bitfield
-- done Bitfield
+```sh
+type SubmitPost struct {
+    proofs [PoStProof]
+    faults [FaultSet]
+    recovered Bitfield
+    done Bitfield
+} representation tuple
+```
 
-Return: None
+**Algorithm**
+
+{{% notice todo %}}
+TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
+{{% /notice %}}
 
 ```go
-// NotYetSpeced: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
 func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done BitField) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
@@ -646,13 +716,34 @@ func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer
 }
 ```
 
-### SlashStorageFault
+#### `SlashStorageFault`
 
-Parameters:
+**Parameters**
 
-- miner Address
+```sh
+## TODO:
+type IncreasePledge struct {
 
-Return: None
+} representation tuple
+```
+
+**Algorithm**
+
+{{% notice todo %}}
+TODO
+{{% /notice %}}
+
+#### `SlashStorageFault`
+
+**Parameters**
+
+```sh
+type SlashStorageFault struct {
+    miner Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func SlashStorageFault() {
@@ -679,11 +770,16 @@ func SlashStorageFault() {
 }
 ```
 
-### GetCurrentProvingSet
+#### `GetCurrentProvingSet`
 
-Parameters: None
+**Parameters**
 
-Return: `[][]byte`
+```sh
+type GetCurrentProvingSet struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetCurrentProvingSet() [][]byte {
@@ -691,17 +787,23 @@ func GetCurrentProvingSet() [][]byte {
 }
 ```
 
-Note: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)
+{{%notice note %}}
+**Note**: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)
+{{% /notice %}}
 
-### ArbitrateDeal
+#### `ArbitrateDeal`
 
 This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.
 
-Parameters:
+**Parameters**
 
-- deal Deal
+```sh
+type ArbitrateDeal struct {
+    deal Deal
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
 func AbitrateDeal(d Deal) {
@@ -738,15 +840,21 @@ func AbitrateDeal(d Deal) {
 }
 ```
 
-TODO(scaling): This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.
+{{% notice todo %}}
+**TODO(scaling)**: This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.
+{{% /notice %}}
 
-### DePledge
+#### `DePledge`
 
-Parameters:
+**Parameters**
 
-- amt TokenAmount
+```sh
+type DePledge struct {
+    amount TokenAmount
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
 func DePledge(amt TokenAmount) {
@@ -774,11 +882,15 @@ func DePledge(amt TokenAmount) {
 }
 ```
 
-### GetOwner
+#### `GetOwner`
 
-Parameters: None
+**Parameters**
+```sh
+type GetOwner struct {
+} representation tuple
+```
 
-Return: Address
+**Algorithm**
 
 ```go
 func GetOwner() Address {
@@ -786,11 +898,16 @@ func GetOwner() Address {
 }
 ```
 
-### GetWorkerAddr
+#### `GetWorkerAddr`
 
-Parameters: None
+**Parameters**
 
-Return: Address
+```sh
+type GetWorkerAddr struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetWorkerAddr() Address {
@@ -798,11 +915,16 @@ func GetWorkerAddr() Address {
 }
 ```
 
-### GetPower
+#### `GetPower`
 
-Parameters: None
+**Parameters**
 
-Return: BytesAmount
+```sh
+type GetPower struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetPower() BytesAmount {
@@ -810,11 +932,16 @@ func GetPower() BytesAmount {
 }
 ```
 
-### GetPeerID
+#### `GetPeerID`
 
-Parameters: None
+**Parameters**
 
-Return: PeerID
+```sh
+type GetPeerID struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetPeerID() PeerID {
@@ -822,11 +949,16 @@ func GetPeerID() PeerID {
 }
 ```
 
-### GetSectorSize
+#### `GetSectorSize`
 
-Parameters: None
+**Parameters**
 
-Return: BytesAmount
+```sh
+type GetSectorSize struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetSectorSize() BytesAmount {
@@ -834,13 +966,17 @@ func GetSectorSize() BytesAmount {
 }
 ```
 
-### UpdatePeerID
+#### `UpdatePeerID`
 
-Parameters:
+**Parameters**
 
-- pid PeerID
+```sh
+type UpdatePeerID struct {
+    peerId PeerId
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
 func UpdatePeerID(pid PeerID) {
@@ -852,14 +988,19 @@ func UpdatePeerID(pid PeerID) {
 }
 ```
 
-### ChangeWorker
+#### `ChangeWorker`
 
 Changes the worker address. Note that since Sector Commitments take the miners worker key as an input, any sectors sealed with the old key but not yet submitted to the chain will be invalid. All future sectors must be sealed with the new worker key.
 
-Parameters:
-- addr Address
+**Parameters**
 
-Return: None
+```sh
+type ChangeWorker struct {
+    addr Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func ChangeWorker(addr Address) {
@@ -871,11 +1012,23 @@ func ChangeWorker(addr Address) {
 }
 ```
 
-## Payment Channel Broker Actor
+### Payment Channel Broker Actor
+
+```sh
+type PaymentChannelBrokerActorState struct {
+}
+
+type PaymentChannelBrokerActorMethod union {
+
+} representation keyed
+
+```
 
 TODO
 
-## Multisig Account Actor
+### Multisig Account Actor
+
+- **Code Cid**: `<codec:raw><mhType:identity><"multisig">`
 
 A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
 
@@ -885,78 +1038,84 @@ threshold' logic only needs to be implemented once, in one place.
 
 The [init actor](#init-actor) is used to create new instances of the multisig.
 
-### State
-
-```go
-type Multisig struct {
-	Signers  []Address
-	Required uint
-
-	NextTxID     uint64
-	Transactions map[int]Transaction
+```sh
+type MultisigActorState struct {
+    signers [Address]
+    required UInt
+    nextTxId UInt
+    transactions {UInt:Transaction}
 }
 
+type MultisigActorMethod union {
+    | MultisigConstructor 0
+    | Propose 1
+    | Approve 2
+    | Cancel 3
+    | ClearCompleted 4
+    | AddSigner 5
+    | RemoveSigner 6
+    | SwapSigner 7
+    | ChangeRequirement 8
+} representation keyed
+
 type Transaction struct {
-	Created   uint64
-	TxID      uint64
-	To        Address
-	Value     TokenAmount
-	Method    string
-	Params    []byte
-	Approved  []Address
-	Completed bool
-	Canceled  bool
+    created UInt
+    txID UInt
+    to Address
+    value TokenAmount
+    method &ActorMethod
+    approved [Address]
+    completed Bool
+    canceled Bool
 }
 ```
 
-### Code Cid
+#### `Constructor`
 
-`<codec:raw><mhType:identity><"multisig">`
+This method sets up the initial state for the multisig account
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1   | `Propose`     |
-| 2 | `Approve` |
-| 3 | `Cancel` |
-| 4 | `ClearCompleted` |
-| 5 | `AddSigner` |
-| 6 | `RemoveSigner` |
-| 7 | `SwapSigner` |
-| 8 | `ChangeRequirement` |
+**Parameters**
 
-### Constructor
+```sh
+type MultisigConstructor struct {
+    ## The addresses that will be the signatories of this wallet.
+    signers [Address]
+    ## The number of signatories required to perform a transaction.
+    required UInt
+} representation tuple
+```
 
->  This method sets up the initial state for the multisig account
-
-### Parameters
-
-| Name     | Type       | Description                                         |
-| -------- | ---------- | ------------------------------------------------------------ |
-| `signers`   | `[]Address`      | The addresses that will be the signatories of this wallet. |
-| `required` | `uint` | The number of signatories required to perform a transaction.       |
+**Algorithm**
 
 ```go
-func Multisig(signers []Address, required uint) {
+func Multisig(signers [Address], required UInt) {
 	self.Signers = signers
 	self.Required = required
 }
 ```
 
+#### `Propose`
+
+Propose is used to propose a new transaction to be sent by this multisig. The proposer must be a signer, and the proposal also serves as implicit approval from the proposer. If only a single signature is required, then the transaction is executed immediately.
+
+**Parameters**
 
 
-### Propose
+```sh
+type Propose struct {
+    ## The address of the target of the proposed transaction.
+    to Address
+    ## The amount of funds to send with the proposed transaction.
+    value TokenAmount
+    ## The method and parameters that will be invoked on the proposed transactions target.
+    method &ActorMethod
+} representation tuple
+```
 
-> Propose is used to propose a new transaction to be sent by this multisig. The proposer must be a signer, and the proposal also serves as implicit approval from the proposer. If only a single signature is required, then the transaction is executed immediately.
-
-| Name     | Type       | Description  |
-| --- | --- | --- |
-| `to` |  `Address` | The address of the target of the proposed transaction. |
-|  `value` | `TokenAmount` | The amount of funds to send with the proposed transaction |
-|  `method` | `string` | The method that will be invoked on the proposed transactions target. |
-| `params` | `[]byte` | The parameters that will be passed to the method invocation on the proposed transactions target. |
+**Algorithm**
 
 ```go
-func Propose(to Address, value TokenAmount, method string, params []byte) uint64 {
+func Propose(to Address, value TokenAmount, method String, params Bytes) UInt {
 	if !isSigner(msg.From) {
 		Fatal("not authorized")
 	}
@@ -984,17 +1143,23 @@ func Propose(to Address, value TokenAmount, method string, params []byte) uint64
 }
 ```
 
-### Approve
+#### `Approve`
 
-> Approve is called by a signer to approve a given transaction. If their approval pushes the approvals for this transaction over the threshold, the transaction is executed.
+Approve is called by a signer to approve a given transaction. If their approval pushes the approvals for this transaction over the threshold, the transaction is executed.
 
-| Name     | Type       | Description  |
-| --- | --- | --- |
-| `txid` |  `uint64` | The ID of the transaction to approve. |
+**Parameters**
 
+```sh
+type Approve struct {
+    ## The ID of the transaction to approve.
+    txid UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func Approve(txid uint64) {
+func Approve(txid UInt) {
 	if !self.isSigner(msg.From) {
 		Fatal("not authorized")
 	}
@@ -1022,10 +1187,20 @@ func Approve(txid uint64) {
 }
 ```
 
-### Cancel
+#### `Cancel`
+
+**Parameters**
+
+```sh
+type Cancel struct {
+    txid UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func Cancel(txid uint64) {
+func Cancel(txid UInt) {
 	if !self.isSigner(msg.From) {
 		Fatal("not authorized")
 	}
@@ -1047,7 +1222,16 @@ func Cancel(txid uint64) {
 }
 ```
 
-### ClearCompleted
+#### `ClearCompleted`
+
+**Parameters**
+
+```sh
+type ClearCompleted struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func ClearCompleted() {
@@ -1063,7 +1247,17 @@ func ClearCompleted() {
 }
 ```
 
-### AddSigner
+#### `AddSigner`
+
+**Parameters**
+
+```sh
+type AddSigner struct {
+    signer Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func AddSigner(signer Address) {
@@ -1078,7 +1272,17 @@ func AddSigner(signer Address) {
 }
 ```
 
-### RemoveSigner
+#### `RemoveSigner`
+
+**Parameters**
+
+```sh
+type RemoveSigner struct {
+    signer Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func RemoveSigner(signer Address) {
@@ -1093,10 +1297,21 @@ func RemoveSigner(signer Address) {
 }
 ```
 
-### SwapSigner
+#### `SwapSigner`
+
+**Parameters**
+
+```sh
+type SwapSigner struct {
+    old Address
+    new Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func SwapSigner(old, new Address) {
+func SwapSigner(old Address, new Address) {
 	if msg.From != self.Address {
 		Fatal("swap signer must be called by wallet itself")
 	}
@@ -1112,10 +1327,20 @@ func SwapSigner(old, new Address) {
 }
 ```
 
-### ChangeRequirement
+#### `ChangeRequirement`
+
+**Parameters**
+
+```sh
+type ChangeRequirement struct {
+    requirement UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func ChangeRequirement(req int) {
+func ChangeRequirement(req UInt) {
 	if msg.From != self.Address {
 		Fatal("change requirement must be called by wallet itself")
 	}
@@ -1127,7 +1352,7 @@ func ChangeRequirement(req int) {
 }
 ```
 
-### Helper Methods
+## Helper Methods
 
 The various helper methods called above are defined here.
 
@@ -1140,8 +1365,10 @@ func isSigner(a Address) bool {
 	}
 	return false
 }
+```
 
-func getTransaction(txid int) Transaction {
+```go
+func getTransaction(txid UInt) Transaction {
 	tx, ok := self.Transactions[txid]
 	if !ok {
 		Fatal("no such transaction")
