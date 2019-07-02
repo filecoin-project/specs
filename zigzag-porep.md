@@ -48,16 +48,18 @@ After preprocessing, the data is padded with zero bytes so that the total length
 
 *The following public parameters are shared with the ZigZag circuit proof:*
 
- - `LAYERS : UInt`: Number of DRG layers.
- - `EXPANSION_DEGREE: UInt`: Degree of each bipartite expander graph to extend dependencies between layers.
- - `BASE_DEGREE: UInt`: Degree of each Depth Robust Graph.
- - `TREE_DEPTH: UInt`: Depth of the Merkle tree. Note, this is (log_2(Size of original data in bytes/32 bytes per leaf)).
- - `PARENT_COUNT : UInt`: Defined as `EXPANSION_DEGREE+BASE_DEGREE`.
+ - `LAYERS : uint`: Number of DRG layers.
+ - `EXPANSION_DEGREE: uint`: Degree of each bipartite expander graph to extend dependencies between layers.
+ - `BASE_DEGREE: uint`: Degree of each Depth Robust Graph.
+ - `TREE_DEPTH: uint`: Depth of the Merkle tree. Note, this is (log_2(Size of original data in bytes/32 bytes per leaf)).
+ - `PARENT_COUNT : uint`: Defined as `EXPANSION_DEGREE+BASE_DEGREE`.
+ - `GRAPH_SIZE: uint`: Number of nodes in the DRG.
+ - `GRAPH_SEED: uint`: Seed used for random number generation in `baseParents`.
 
 *The following additional public parameters are required:*
 
  - `TAPER` : Float: Fraction of each layer's challenges by which to reduce next-lowest layer's challenge count.
- - `TAPER_LAYERS`: UInt: Number of layers 
+ - `TAPER_LAYERS`: uint: Number of layers
  `Data` is a byte array initialized to the content of __*unsealed sector*__ and will be mutated in-place by the replication process.
 
 Replication proceeds as follows:
@@ -108,6 +110,7 @@ func RepHash(leaves []node) ([][]node, node) {
 ```
 
 For each of `LAYERS` layers, `l`, perform one __*Layer Replication*__, yielding a replica, tree, and commitment (`CommR_<l>`) per layer:
+
 ```go
 let layer_replicas = [LAYERS][nodes]uint8
 let layer_trees = [LAYERS]MerkleTree
@@ -121,21 +124,22 @@ for l in 0..layers {
 	layer = layer_replica
 }
 ```
+
 The replicated data is the output of the final __*Layer Replication*__,`layer_replicas[layers-1]`.
 Set `CommRLast` to be  `CommR_<Layers>`.
 Set `CommRStar` to be `CommRHash(ReplicaID || CommR_0 || CommR_<i> || ... || CommRLast)`.
+
 ```go
 Replica := layer_replicas[layers - 1]
 CommRLast :- CommRs[layers-1]
 CommRStar := CommRHash(replicaID, ...CommRs)
-
 ```
 
 ## Proof Generation
 
 ### Challenge Generation
 
-Calculate `LAYER_CHALLENGES : [LAYERS]UInt`: Number of challenges per layer. (This will be passed to the ZigZag circuit proof.)
+Calculate `LAYER_CHALLENGES : [LAYERS]uint`: Number of challenges per layer. (This will be passed to the ZigZag circuit proof.)
 
 Derive challenges for each layer (call `derive_challenges()`).
 
@@ -168,7 +172,7 @@ func ChallengesForLayer(challenge Challenge, layer uint) uint {
 
 ### Challenge Derivation
 
-TODO: define `Domain` and `LayerChallenges` (or find existing definition)
+TODO: define `Domain` (for practical purposes a `uint`) and `LayerChallenges` (or find existing definition).
 
 ```go
 func DeriveChallenges(challenges LayerChallenges, layer uint, leaves uint,
@@ -191,13 +195,10 @@ func DeriveChallenges(challenges LayerChallenges, layer uint, leaves uint,
 ```
 
 ### Layer Replication
-TODO: define `TransformedLayers` (or find existing definition)
-
-Note: representing the (simpler) sequential replication case.
 
 ```go
 func transformAndReplicateLayers(graph Graph, slothIter uint,
-    replicaId Domain, data []byte) TransformedLayers {
+    replicaId Domain, data []byte) ([]Domain, []Tree) {
 
     var taus [LAYERS]Domain
     var auxs [LAYERS]Tree
@@ -229,10 +230,11 @@ func transformAndReplicateLayers(graph Graph, slothIter uint,
 }
 ```
 
+Note: The function `zigzag` just inverts an internal `bool` that tracks whether the `graphIsReversed()` or not.
+
 ### Graph Structure
-TODO: define `parents()` and `expansion_parents()` and use in `replicate_layer()`.
+TODO: define `parents()` `replicate_layer()`.
 (`parents()` is actually used in `encode()`, should `encode()` be defined in the previous section then?)
-TODO: define `Graph`.
 
 ```go
 func baseParents(node uint) (parents [BASE_DEGREE]uint) {
@@ -245,8 +247,7 @@ func baseParents(node uint) (parents [BASE_DEGREE]uint) {
                 parents[i] = 0
             }
         default:
-            rng := ChaChaRng.from_seed(Graph.seed)
-            // FIXME: Might be an implementation detail worth hiding.
+            rng := ChaChaRng.from_seed(GRAPH_SEED)
 
             for k := 0; k < BASE_DEGREE; k++ {
                 // iterate over m meta nodes of the ith real node
@@ -276,17 +277,17 @@ func expandedParents(node uint) (parents []uint) {
     feistelKeys := []uint{1, 2, 3, 4}
     for i := 0, p := 0; i < EXPANSION_DEGREE; i++ {
         a := node * EXPANSION_DEGREE + i
-        if Graph.reversed {
-            transformed := feistelInvertPermute(Graph.size * EXPANSION_DEGREE, a, feistelKeys)
+        if graphIsReversed() {
+            transformed := feistelInvertPermute(GRAPH_SIZE * EXPANSION_DEGREE, a, feistelKeys)
         } else {
-            transformed := feistelPermute(Graph.size * EXPANSION_DEGREE, a, feistelKeys)
+            transformed := feistelPermute(GRAPH_SIZE * EXPANSION_DEGREE, a, feistelKeys)
         }
         other := transformed / EXPANSION_DEGREE
         // Collapse the output in the matrix search space to the row of the corresponding
         // node (losing the column information, that will be regenerated later when calling
         // back this function in the `reversed` direction).
 
-        if Graph.reversed {
+        if graphIsReversed() {
             if other > node {
                 parents[p] = other
                 p += 1
@@ -312,8 +313,8 @@ func parents(rawNode uint) (parents [PARENT_COUNT]uint) {
     // Pad so all nodes have correct degree.
     currentLength := BASE_DEGREE + len(expandedParents)
     for i := 0; i < PARENT_COUNT - currentLength; i++ {
-        if Graph.reversed {
-            parents[currentLength + i] = Graph.size - 1
+        if graphIsReversed() {
+            parents[currentLength + i] = GRAPH_SIZE - 1
         } else {
             parents[currentLength + i] = 0
         }
@@ -322,17 +323,17 @@ func parents(rawNode uint) (parents [PARENT_COUNT]uint) {
     sort(parents)
 
     for _, parent := range parents {
-        if Graph.forward {
-            assert(parent <= rawNode)
-        } else {
+        if graphIsReversed() {
             assert(parent >= rawNode)
+        } else {
+            assert(parent <= rawNode)
         }
     }
 }
 
 func realIndex(rawNode uint) uint {
-    if Graph.reversed {
-        return Graph.size - 1 - rawNode
+    if graphIsReversed() {
+        return GRAPH_SIZE - 1 - rawNode
     } else {
         return rawNode
     }
@@ -368,7 +369,7 @@ func encode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
 }
 
 func commonSetup(index uint) (uint, uint, uint, uint) {
-    numElements := Graph.size * EXPANSION_DEGREE
+    numElements := GRAPH_SIZE * EXPANSION_DEGREE
     nextPow4 := 4;
     halfBits := 1
     while nextPow4 < numElements {
