@@ -30,6 +30,7 @@ headless: true
 **Proofs**
 
 * [ZigZag]({{< relref "/docs/zigzag-circuit.md" >}})
+* [PoRep]({{< relref "/docs/zigzag-porep.md" >}})
 
 [**Glossary**]({{< relref "/docs/definitions.md" >}})
 

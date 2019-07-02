@@ -48,7 +48,7 @@ A piece commitment (`CommP`) is a commitment to a file that a client wants to st
 
 ### CommP
 
-`CommP` is the root hash of a piece that a clients wants to store in Filecoin and it is generated on using `RepHash` on some raw data that respects the Storage Formats. 
+`CommP` is the root hash of a piece that a clients wants to store in Filecoin and it is generated on using `RepHash` (as described in TODO) on some raw data that respects the Storage Formats. 
 
 ### RepHash
 
