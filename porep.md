@@ -1,10 +1,28 @@
-# ZigZag: Offline PoRep Circuit Spec
+# Filecoin Proofs
 
-ZigZag is the Proof of Replication used in Filecoin. The prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
+Filecoin Storage Miners collect new clients' data in a sector, run a slow encoding process (called `Seal`) and generate a proof (`SealProof`) that the encoding was generated correctly.
+
+A *Proof-of-Replication* proves that a Storage Miner is dedicating unique dedicated storage for each *sector*.
+
+PoRep provides two guarantees to Filecoin: (1) *space-hardness*: Storage Miners cannot lie about the amount of space they are dedicating to Filecoin in order to gain more power in the consensus; (2) *replication*: Storage Miners are dedicating unique storage for each copy of their clients data. 
+
+# Filecoin Proof-of-Replication (PoRep) 
+
+This spec describes the specific Proof-of-Replication used in Filecoin called *ZigZag*. 
 
 ZigZag has been presented by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).
 
 #### ZigZag Overview
+
+The prover encodes the raw data into a replica and commits to it. A PoRep proves that the commitment to the replica is a valid commitment of the encoded original data. After receiving some random challenges, the prover generates a proof.
+
+Generating a `SealProof` in Filecoin from raw data requires the following steps:
+
+- Storage Encoding
+- Replication
+- Proof Generation
+
+##### Layers
 
 ZigZag PoRep is based on layering DRG graphs `LAYERS` times. The data represented in each DRG layer is the data encoded in the previous layer. The final layer is the replica (which in Filecoin terms is the sealed sector).
 
@@ -26,6 +44,24 @@ This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRSta
   - If there is an equality, create a constraint
   - otherwise, execute the function
 - **Inclusion path**: Binary representation of the Merkle tree path that must be proven packed into a single `Fr` element.
+
+## Preliminaries
+
+### Hash Functions
+
+*Note: __Filecoin ZigZag Proof of Replication__ as described here is generic over the following hash functions:*
+
+- KDFHash: a hash function with 32-byte digest size: default is Blake2s
+- CommRHash: a hash function with 32-byte digest size: default is Blake2s
+- RepCompress: a hash function with 32-byte digest size: default is pedersen hashing over jubjub curve.
+
+
+
+## Step 1: Data preparation
+
+The raw data (also called ***unsealed sector***) must respect a precise format called "Storage Encoding Format" (described in [Filecoin Client Data Processing](client-data.md#storage-encoding-format))
+
+T
 
 ## Offline PoRep circuit
 
