@@ -231,10 +231,15 @@ type Bitfield Bytes
 
 ### SectorSet
 
-{{% notice todo %}}
-Define me
-{{% /notice %}}
+```sh
+type SectorSet {UInt:SectorMetaData}<AMT>
 
+type SectorMetaData struct {
+    ## TODO: define these fields
+}
+```
+
+The `AMT` format can be found [here](https://github.com/ipld/specs/pull/137).
 
 ### SealProof
 
