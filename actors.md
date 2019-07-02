@@ -1035,19 +1035,177 @@ func ChangeWorker(addr Address) {
 }
 ```
 
-### Payment Channel Broker Actor
+### Payment Channel Actor
 
-```sh
-type PaymentChannelBrokerActorState struct {
-}
+- **Code Cid:** `<codec:raw><mhType:identity><"paych">`
 
-type PaymentChannelBrokerActorMethod union {
+The payment channel actor manages the on-chain state of a point to point payment channel.
 
-} representation keyed
+```go
+type PaymentChannel struct {
+	From Address
+	To   Address
 
+	ChannelTotal TokenAmount
+	ToSend       TokenAmount
+
+	ClosingAt      Uint
+	MinCloseHeight Uint
+
+	LaneStates {Uint:LaneState}
+} representation tuple
+
+type PaymentChannelMethod union {
+  | PaymentChannelConstructor 0
+  | UpdateChannelState 1
+  | Close 2
+  | Collect 3
+} representation kinded
 ```
 
-TODO
+
+#### UpdateChannelState
+
+**Parameters**
+
+```sh
+type UpdateChannelState struct {
+  sv SignedVoucher
+  secret Bytes
+  pip PieceInclusionProof
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
+	if !self.validateSignature(sv) {
+		Fatal("Signature Invalid")
+	}
+
+	if chain.Now() < sv.TimeLock {
+		Fatal("cannot use this voucher yet!")
+	}
+
+	if sv.SecretPreimage != nil {
+		if Hash(secret) != sv.SecretPreimage {
+			Fatal("Incorrect secret!")
+		}
+	}
+
+	if sv.DataCommitment != nil {
+		// Checks that the piece inclusion proof is valid, and that the referenced sector
+		// is correctly being stored
+		if !ValidateInclusion(pip, sv.DataCommitment) {
+			Fatal("PieceInclusionProof was invalid")
+		}
+	}
+
+	if sv.RequiredSector != nil {
+		miner, found := GetMiner(msg.From)
+		if !found {
+			Fatal("Redeemer is not a miner")
+		}
+
+		if !miner.HasSector(sv.RequiredSector) {
+			Fatal("miner does not have sector, cannot redeem payment")
+		}
+	}
+
+	ls := self.LaneStates[sv.Lane]
+	if ls.Closed {
+		Fatal("cannot redeem a voucher on a closed lane")
+	}
+
+	if ls.Nonce > sv.Nonce {
+		Fatal("voucher has an outdated nonce, cannot redeem")
+	}
+
+	var mergeValue TokenAmount
+	for _, merge := range sv.Merges {
+		ols := self.LaneStates[merge.Lane]
+
+		if ols.Nonce >= merge.Nonce {
+			Fatal("merge in voucher has outdated nonce, cannot redeem")
+		}
+
+		mergeValue += ols.Redeemed
+		ols.Nonce = merge.Nonce
+	}
+
+	ls.Nonce = sv.Nonce
+	balanceDelta = sv.Amount - (mergeValue + ls.Redeemed)
+	ls.Redeemed = sv.Amount
+
+	newSendBalance = self.ToSend + balanceDelta
+	if newSendBalance < 0 {
+		// TODO: is this impossible?
+		Fatal("voucher would leave channel balance negative")
+	}
+
+	if newSendBalance > self.ChannelTotal {
+		Fatal("not enough funds in channel to cover voucher")
+	}
+
+	self.ToSend = newSendBalance
+
+	if sv.MinCloseHeight != 0 {
+		if self.ClosingAt < sv.MinCloseHeight {
+			self.ClosingAt = sv.MinCloseHeight
+		}
+		if self.MinCloseHeight < sv.MinCloseHeight {
+			self.MinCloseHeight = sv.MinCloseHeight
+		}
+	}
+}
+```
+
+#### Close
+
+**Parameters**
+
+None
+
+**Algorithm**
+
+```go
+func Close() {
+	if msg.From != self.From && msg.From != self.To {
+		Fatal("not authorized to close channel")
+	}
+	if self.ClosingAt != 0 {
+		Fatal("Channel already closing")
+	}
+
+	self.ClosingAt = chain.Now() + ChannelClosingDelay
+	if self.ClosingAt < self.MinCloseHeight {
+		self.ClosingAt = self.MinCloseHeight
+	}
+}
+```
+
+#### Collect
+
+**Parameters**
+
+None
+
+**Algorithm**
+
+```go
+func Collect() {
+	if self.ClosingAt == 0 {
+		Fatal("payment channel not closing or closed")
+	}
+
+	if chain.Now() < self.ClosingAt {
+		Fatal("Payment channel not yet closed")
+	}
+	Transfer(self.ChannelTotal-self.ToSend, self.From)
+	Transfer(self.ToSend, self.To)
+}
+```
 
 ### Multisig Account Actor
 
