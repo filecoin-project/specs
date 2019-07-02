@@ -1,6 +1,6 @@
 # Data Structures
 
-This document serves as an entry point for understanding the data structures in Filecoin. In this document, we give an introduction to each of the protocol data structures (linking to more detailed data structure specs in some places) and then explain how to encode these data structures for use in other parts of Filecoin such as the network protocols and the blockchain.
+In this document, we give an introduction to each of the protocol data structures and then explain how to encode these data structures for use in other parts of Filecoin (e.g. network protocols and the blockchain).
 
 ## Address
 
