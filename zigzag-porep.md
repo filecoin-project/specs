@@ -97,6 +97,7 @@ We have describe three hash functions:
   - `KDFHash`: a hash function with 32-byte digest size: default is Blake2s-256
   - `CommRHash`: a hash function with 32-byte digest size: default is Blake2s-256
   - `RepCompress`: a hash function with 32-byte digest size: default is Pedersen Hashing over the Jubjub curve.
+  - `RepHash`: described below
 
 #### RepHash
 
@@ -516,6 +517,8 @@ Overview:
 - Proof Generation
 - Circuit Proof Generation
 
+TODO: write a single algorithm which includes the spec below
+
 ### Challenge Derivation
 
 This is the Fiat-Shamir transform that turns the interactive Proof-of-Replication into non-interactive in the Random Oracle model.
@@ -551,7 +554,7 @@ Calculate `LAYER_CHALLENGES : [LAYERS]uint`: Number of challenges per layer. (Th
 
 Derive challenges for each layer (call `DeriveChallenges()`).
 
-### Proof Generation
+### Witness Generation
 
 ```go
 let layer_proofs = []
@@ -585,6 +588,6 @@ return layer_proofs, CommRstar, CommRLast
 
 TODO: reconcile outputs of non-circuit proof with inputs to circuit proof.
 
-### Circuit Proof Generation
+### SNARK Proof Generation
 
 See [# ZigZag: Offline PoRep Circuit Spec](zigzag-circuit.md) for details of Circuit Proof Generation.
