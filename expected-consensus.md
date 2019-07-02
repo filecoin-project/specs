@@ -47,7 +47,7 @@ A `ticket` is used as a source of randomness in EC leader election. Every block 
  An `ElectionProof` is derived from a past `ticket` and is included in every block header. The `ElectionProof` proves that the miner was eligible to mine a block in that `round`.
  {{% /definition %}}
 
-## Basic algorithm
+## Algorithm
 Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
 level, it operates by running a leader election every round in which, on expectation, one
 participant may be eligible to submit a block. All valid blocks submitted in a given round form a `TipSet`. Every block in a TipSet adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](#chain-selection).
@@ -116,7 +116,7 @@ TODO: get accurate estimates for K and L, potentially merge both to a single par
 
 Note: Validity of blocks beyond appropriate ticket generation (defined below) is defined by the specific protocol using EC. For the Filecoin definition of a valid block, see the [mining spec](mining.md).
 
-This basic algorithm can be broken down by looking in turn at its two major components:
+The EC algorithm can be better understood by looking at its two major components in more detail:
 - Leader Election
 - Chain Selection
 
