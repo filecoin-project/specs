@@ -24,7 +24,7 @@ We define these terms below. In the definitions, we use `code ticks` to distingu
  {{% /definition %}}
 
 {{% definition %}}
-TODO: Define `Weight`
+Every mined block has a computed `weight`. Together, the `weights` of all the blocks in a branch of the chain determines the cumulative `weight` of that branch. Expected Consensus is a heaviest chain protocol, where chain selection is done on the basis of an explicit weighting function. Filecoin’s `weight` function currently seeks to incentivize collaboration amongst miners as well as the addition of storage to the network. The specific weighting function is defined below in [Chain Weighting](#chain-weighting).
 {{% /definition %}}
 
 {{% definition %}}
@@ -117,8 +117,8 @@ TODO: get accurate estimates for K and L, potentially merge both to a single par
 Note: Validity of blocks beyond appropriate ticket generation (defined below) is defined by the specific protocol using EC. For the Filecoin definition of a valid block, see the [mining spec](mining.md).
 
 The EC algorithm can be better understood by looking at its two major components in more detail:
-- Leader Election
-- Chain Selection
+- [Leader Election](#secret-leader-election)
+- [Chain Selection](#chain-selection)
 
 ## Secret Leader Election
 

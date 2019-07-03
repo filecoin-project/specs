@@ -109,16 +109,20 @@ func Exec(code &Code, params ActorMethod) Address {
 
 	// This generates a unique address for this actor that is stable across message
 	// reordering
-	addr := VM.ComputeActorAddress()
+	// TODO: where do `creator` and `nonce` come from?
+	addr := VM.ComputeActorAddress(creator, nonce)
 
 	// Set up the actor itself
 	actor := Actor{
 		Code:    code,
 		Balance: msg.Value,
+		Head:    nil,
+		Nonce:   0,
 	}
 
 	// The call to the actors constructor will set up the initial state
-	// from the given parameters
+	// from the given parameters, setting `actor.Head` to a new value when successfull.
+	// TODO: can constructors fail?
 	actor.Constructor(params)
 
 	VM.GlobalState.Set(actorID, actor)
@@ -222,6 +226,7 @@ type StorageMarketActorMethod union {
     | GetTotalStorage 4
     | PowerLookup 5
     | IsMiner 6
+    | StorageCollateralForSize 7
 } representation keyed
 ```
 
@@ -404,7 +409,6 @@ func PowerLookup(miner Address) BytesAmount {
 
 #### `IsMiner`
 
-
 **Parameters**
 
 ```sh
@@ -418,6 +422,25 @@ type IsMiner struct {
 ```go
 func IsMiner(addr Address) bool {
 	return self.Miners.Has(miner)
+}
+```
+
+#### `StorageCollateralForSize`
+
+
+**Parameters**
+
+```sh
+type StorageCollateralForSize struct {
+    size UInt
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func StorageCollateralforSize(size UInt) TokenAmount {
+	// TODO:
 }
 ```
 
@@ -463,31 +486,39 @@ type StorageMinerActorState struct {
 	## Sectors reported during the last PoSt submission as being 'done'. The collateral
     ## for them is still being held until the next PoSt submission in case early sector
     ## removal penalization is needed.
-    nextDoneSet SectorSet
+    nextDoneSet BitField
 
 	## Deals this miner has been slashed for since the last post submission.
     arbitratedDeals CidSet
 
 	## Amount of power this miner has.
     power UInt
+
+    ## List of sectors that this miner was slashed for.
+    slashedSet optional SectorSet
+
+    ## The height at which this miner was slashed at.
+    slashedAt optional BlockHeight
+
+    ## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+    owedStorageCollateral TokenAmount
 }
 
 type StorageMinerActorMethod union {
     | StorageMinerConstructor 0
     | CommitSector 1
     | SubmitPost 2
-    | IncreasePledge 3
-    | SlashStorageFault 4
-    | GetCurrentProvingSet 5
-    | ArbitrateDeal 6
-    | DePledge 7
-    | GetOwner 8
-    | GetWorkerAddr 9
-    | GetPower 10
-    | GetPeerID 11
-    | GetSectorSize 12
-    | UpdatePeerID 13
-    | ChangeWorker 14
+    | SlashStorageFault 3
+    | GetCurrentProvingSet 4
+    | ArbitrateDeal 5
+    | DePledge 6
+    | GetOwner 7
+    | GetWorkerAddr 8
+    | GetPower 9
+    | GetPeerID 10
+    | GetSectorSize 11
+    | UpdatePeerID 12
+    | ChangeWorker 13
 } representation keyed
 ```
 
@@ -547,11 +578,17 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		Fatal("sector already committed!")
 	}
 
-	// make sure the miner has enough collateral to add more storage
-	coll = CollateralForSector(miner.SectorSize)
+  // Power of the miner after adding this sector
+  futurePower = miner.power + miner.SectorSize
+  collateralRequired = CollateralForPower(futurePower)
 
-	if coll < vm.MyBalance()-miner.ActiveCollateral {
+  if collateralRequired > vm.MyBalance() {
 		Fatal("not enough collateral")
+	}
+
+	// ensure that the miner cannot commit more sectors than can be proved with a single PoSt
+	if miner.Sectors.Size() >= POST_SECTORS_COUNT {
+		Fatal("too many sectors")
 	}
 
 	miner.ActiveCollateral += coll
@@ -574,6 +611,16 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration(miner.SectorSize)
 	}
 }
+
+func CollateralForPower(power BytesAmount) TokenAmount {
+  availableFil = FakeGlobalMethods.GetAvailableFil()
+  totalNetworkPower = StorageMinerActor.GetTotalStorage()
+  numMiners = StorageMarket.GetMinerCount()
+  powerCollateral = availableFil * NetworkConstants.POWER_COLLATERAL_PROPORTION * power / totalNetworkPower
+  perCapitaCollateral = availableFil * NetworkConstants.PER_CAPITA_COLLATERAL_PROPORTION / numMiners
+  collateralRequired = math.Ceil(minerPowerCollateral + minerPerCapitaCollateral)
+  return collateralRequired
+}
 ```
 
 #### `SubmitPoSt`
@@ -582,7 +629,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 
 ```sh
 type SubmitPost struct {
-    proofs [PoStProof]
+    proofs PoStProof
     faults [FaultSet]
     recovered Bitfield
     done Bitfield
@@ -596,7 +643,7 @@ TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
 {{% /notice %}}
 
 ```go
-func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done BitField) {
+func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bitfield) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
@@ -609,11 +656,12 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Fatal("fault sets invalid")
 	}
 
-	var feesRequired TokenAmount
+	feesRequired := 0
 
 	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
-		// TODO: determine what exactly happens here. Is the miner permanently banned?
-		Fatal("Post submission too late")
+        // slashing ourselves
+        SlashStorageFault(self)
+        return
 	} else if chain.Now() > miner.ProvingPeriodEnd {
 		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
 	}
@@ -629,8 +677,8 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Refund(msg.Value - feesRequired)
 	}
 
-	if !CheckPostProofs(miner.SectorSize, proofs, faults) {
-		Fatal("proofs invalid")
+	if !CheckPostProof(miner.SectorSize, proof, faults) {
+		Fatal("proof invalid")
 	}
 
 	// combine all the fault set bitfields, and subtract out the recovered
@@ -654,14 +702,12 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// the last proving period.
 	oldPower := miner.Power
 
-	miner.Power = (miner.ProvingSet.Count() - allFaults.Count()) * miner.SectorSize
+	miner.Power = (miner.ProvingSet.Size() - allFaults.Count()) * miner.SectorSize
 	StorageMarket.UpdateStorage(miner.Power - oldPower)
 
 	miner.ProvingSet = miner.Sectors
 
-	// NEEDS REVIEW: early submission of PoSts may give the miner extra time for
-	// their next PoSt, which could compound. Does the beacon reseeding for Posts
-	// address this well enough?
+    // Updating proving period given a fixed schedule, independent of late submissions.
 	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
 
 	// update next done set
@@ -721,23 +767,6 @@ func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer
 **Parameters**
 
 ```sh
-## TODO:
-type IncreasePledge struct {
-
-} representation tuple
-```
-
-**Algorithm**
-
-{{% notice todo %}}
-TODO
-{{% /notice %}}
-
-#### `SlashStorageFault`
-
-**Parameters**
-
-```sh
 type SlashStorageFault struct {
     miner Address
 } representation tuple
@@ -745,26 +774,66 @@ type SlashStorageFault struct {
 
 **Algorithm**
 
+
+## late submission and resubmission
+
+- If After provingPeriodEnd
+  - post submission now requires paying pay late submission fee
+    - (fixed cost, dependent on the total storage size)
+  - [implicit] loose all power, can be explicitly slashed for
+  - post submission returns your power immediately
+- If After `GenerationAttackTimeout` (<< 1 proving period)
+  - .... nothing changes atm
+- If After `PoStTimeout` (< 1 proving period)
+  - [explicit - slashStorageFault] loose all storage collateral
+  - clients can arbitrate deals with the miner now
+  - post submission now requires paying both late fee + lost storage collateral
+  - the valid post submission returns your power immediately
+- If After `SectorFailureTimeout` (> 1 proving period)
+  - [explicit - slashStorageFault] loose all sectors
+     - [implicit] resets proving period, as they need to resubmit all sectors after this
+  - there is now no way to reintroduce the sectors, unless they are resubmitted, etc
+  - power can not be recovered anymore
+
+- If [miner] does not call postsubmit
+
+
+Notes:
+- Should post submission only return your power, after the following proving period, when after the generation attack timeout
+- Is one proving period enough time for abitration of faulty deals for a client?
+
 ```go
 func SlashStorageFault() {
+    // You can only be slashed once for missing your PoSt.
 	if self.SlashedAt > 0 {
 		Fatal("miner already slashed")
 	}
 
-	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
+    // Only if the miner is actually late, they can be slashed.
+
+	if chain.Now() <= self.ProvingPeriodEnd + GenerationAttackTime(self.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
 
-	if miner.ProvingSet.Size() == 0 {
+    // Only a miner who is expected to prove, can be slashed.
+	if self.ProvingSet.Size() == 0 {
 		Fatal("miner is inactive")
 	}
 
-	// Strip miner of their power
+	// Strip the miner of their power.
 	StorageMarketActor.UpdateStorage(-1 * self.Power)
 	self.Power = 0
 
-	// TODO: make this less hand wavey
-	BurnCollateral(self.ConsensusCollateral)
+    self.slashedSet = self.ProvingSet
+    // remove proving set from our sectors
+    self.sectors.Substract(self.slashedSet)
+
+    // clear proving set
+    self.ProvingSet = nil
+
+    self.owedStorageCollateral = StorageMarketActor.StorageCollateralForSize(
+        self.slashedSet.Size() * self.SectorSize
+    )
 
 	self.SlashedAt = CurrentBlockHeight
 }
@@ -806,37 +875,45 @@ type ArbitrateDeal struct {
 **Algorithm**
 
 ```go
-func AbitrateDeal(d Deal) {
-	if !ValidateSignature(d, self.Worker) {
+func AbitrateDeal(deal Deal) {
+	if !VM.ValidateSignature(deal, self.Worker) {
 		Fatal("invalid signature on deal")
 	}
 
-	if CurrentBlockHeight < d.StartTime {
+	if VM.CurrentBlockHeight() < deal.StartTime {
 		Fatal("Deal not yet started")
 	}
 
-	if d.Expiry < CurrentBlockHeight {
+	if deal.Expiry < VM.CurrentBlockHeight() {
 		Fatal("Deal is expired")
 	}
 
-	if !self.NextDoneSet.Has(d.PieceCommitment.Sector) {
+	if !self.NextDoneSet.Has(deal.pieceInclusionProof.sectorID) {
 		Fatal("Deal agreement not broken, or arbitration too late")
 	}
 
-	if self.ArbitratedDeals.Has(d.PieceRef) {
+	if self.ArbitratedDeals.Has(deal.commP) {
 		Fatal("cannot slash miner twice for same deal")
 	}
 
-	pledge, storage := CollateralForDeal(d)
+    if !deal.pieceInclusionProof.Verify(deal.commP, deal.size) {
+        Fatal("invalid piece inclusion proof or size")
+    }
 
-	// burn the pledge collateral
-	self.BurnFunds(pledge)
+	storageCollateral := StorageMarketActor.StorageCollateralForSize(deal.size)
+
+    if self.owedStorageCollateral < storageCollateral {
+        Fatal("math is hard, and we didnt do it right")
+    }
 
 	// pay the client the storage collateral
-	TransferFunds(d.ClientAddr, storage)
+	VM.TransferFunds(storageCollateral, deal.client)
+
+    // keep track of how much we have payed out
+    self.owedStorageCollateral -= storageCollateral
 
 	// make sure the miner can't be slashed twice for this deal
-	self.ArbitratedDeals.Add(d.PieceRef)
+	self.ArbitratedDeals.Add(deal.commP)
 }
 ```
 
@@ -873,7 +950,9 @@ func DePledge(amt TokenAmount) {
 		return
 	}
 
-	if amt > vm.MyBalance()-miner.ActiveCollateral {
+  collateralRequired = CollateralForPower(miner.power)
+
+	if amt + collateralRequired > vm.MyBalance() {
 		Fatal("Not enough free collateral to withdraw that much")
 	}
 
@@ -1012,19 +1091,199 @@ func ChangeWorker(addr Address) {
 }
 ```
 
-### Payment Channel Broker Actor
+### Payment Channel Actor
+
+- **Code Cid:** `<codec:raw><mhType:identity><"paych">`
+
+The payment channel actor manages the on-chain state of a point to point payment channel.
 
 ```sh
-type PaymentChannelBrokerActorState struct {
-}
+type PaymentChannel struct {
+	from Address
+	to   Address
 
-type PaymentChannelBrokerActorMethod union {
+	channelTotal TokenAmount
+	toSend       TokenAmount
 
+	closingAt      UInt
+	minCloseHeight UInt
+
+	laneStates {UInt:LaneState}
+} representation tuple
+
+type PaymentChannelMethod union {
+  | PaymentChannelConstructor 0
+  | UpdateChannelState 1
+  | Close 2
+  | Collect 3
 } representation keyed
-
 ```
 
-TODO
+#### `Constructor`
+
+**Parameters**
+
+```sh
+type PaymentChannelConstructor struct {
+}
+```
+
+**Algorithm**
+
+{{% notice todo %}}
+
+TODO: Define me
+
+{{% /notice %}}
+
+#### `UpdateChannelState`
+
+**Parameters**
+
+```sh
+type UpdateChannelState struct {
+  sv SignedVoucher
+  secret Bytes
+  pip PieceInclusionProof
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
+	if !self.validateSignature(sv) {
+		Fatal("Signature Invalid")
+	}
+
+	if chain.Now() < sv.TimeLock {
+		Fatal("cannot use this voucher yet!")
+	}
+
+	if sv.SecretPreimage != nil {
+		if Hash(secret) != sv.SecretPreimage {
+			Fatal("Incorrect secret!")
+		}
+	}
+
+	if sv.DataCommitment != nil {
+		// Checks that the piece inclusion proof is valid, and that the referenced sector
+		// is correctly being stored
+		if !ValidateInclusion(pip, sv.DataCommitment) {
+			Fatal("PieceInclusionProof was invalid")
+		}
+	}
+
+	if sv.RequiredSector != nil {
+		miner, found := GetMiner(msg.From)
+		if !found {
+			Fatal("Redeemer is not a miner")
+		}
+
+		if !miner.HasSector(sv.RequiredSector) {
+			Fatal("miner does not have sector, cannot redeem payment")
+		}
+	}
+
+	ls := self.LaneStates[sv.Lane]
+	if ls.Closed {
+		Fatal("cannot redeem a voucher on a closed lane")
+	}
+
+	if ls.Nonce > sv.Nonce {
+		Fatal("voucher has an outdated nonce, cannot redeem")
+	}
+
+	var mergeValue TokenAmount
+	for _, merge := range sv.Merges {
+		ols := self.LaneStates[merge.Lane]
+
+		if ols.Nonce >= merge.Nonce {
+			Fatal("merge in voucher has outdated nonce, cannot redeem")
+		}
+
+		mergeValue += ols.Redeemed
+		ols.Nonce = merge.Nonce
+	}
+
+	ls.Nonce = sv.Nonce
+	balanceDelta = sv.Amount - (mergeValue + ls.Redeemed)
+	ls.Redeemed = sv.Amount
+
+	newSendBalance = self.ToSend + balanceDelta
+	if newSendBalance < 0 {
+		// TODO: is this impossible?
+		Fatal("voucher would leave channel balance negative")
+	}
+
+	if newSendBalance > self.ChannelTotal {
+		Fatal("not enough funds in channel to cover voucher")
+	}
+
+	self.ToSend = newSendBalance
+
+	if sv.MinCloseHeight != 0 {
+		if self.ClosingAt < sv.MinCloseHeight {
+			self.ClosingAt = sv.MinCloseHeight
+		}
+		if self.MinCloseHeight < sv.MinCloseHeight {
+			self.MinCloseHeight = sv.MinCloseHeight
+		}
+	}
+}
+```
+
+#### `Close`
+
+**Parameters**
+
+```sh
+type Close struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func Close() {
+	if msg.From != self.From && msg.From != self.To {
+		Fatal("not authorized to close channel")
+	}
+	if self.ClosingAt != 0 {
+		Fatal("Channel already closing")
+	}
+
+	self.ClosingAt = chain.Now() + ChannelClosingDelay
+	if self.ClosingAt < self.MinCloseHeight {
+		self.ClosingAt = self.MinCloseHeight
+	}
+}
+```
+
+#### `Collect`
+
+**Parameters**
+
+```sh
+type Collect struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func Collect() {
+	if self.ClosingAt == 0 {
+		Fatal("payment channel not closing or closed")
+	}
+
+	if chain.Now() < self.ClosingAt {
+		Fatal("Payment channel not yet closed")
+	}
+	Transfer(self.ChannelTotal-self.ToSend, self.From)
+	Transfer(self.ToSend, self.To)
+}
+```
 
 ### Multisig Account Actor
 
