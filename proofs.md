@@ -67,7 +67,7 @@ Seal
   commD          [32]byte,    // data commitment: merkle root of original data
   commR          [32]byte,    // replica commitment: merkle root of replicated data [will be removed in future iteration]
   commRStar      [32]byte,    // a hash of intermediate layers
-  proof          []byte, 
+  proof          []byte,
  )
 
 ```
@@ -87,7 +87,7 @@ VerifySeal
   proverID    [31]byte, // uniquely identifies miner
   ticket      [32]byte, // ticket to which miner committed when sealing began
   sectorID    [31]byte, // uniquely identifies sector
-) err Error | 
+) err Error |
   IsValid bool          // true iff the provided proof-of-replication os valid
 
 ```
@@ -139,7 +139,7 @@ GeneratePoSt
   challengeSeed  [32]byte,    // a pseudo-random value to be used in challenge generation
 ) err Error | (
   // response contains PoST proof and any faults that may have occurred.
-  faults        []uint64,    // faults encountered while proving (by index of associated commR in the input) 
+  faults        []uint64,    // faults encountered while proving (by index of associated commR in the input)
   proof         []byte
 )
 ```
@@ -211,7 +211,7 @@ piece but actually storing only the piece commitment.
 ```
 VerifyPieceInclusionProof
  (
-  proof PieceInclusionProof,  
+  proof PieceInclusionProof,
   commD  [32]byte,
   commP [32]byte,
   sectorSize uint,
