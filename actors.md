@@ -226,6 +226,7 @@ type StorageMarketActorMethod union {
     | GetTotalStorage 4
     | PowerLookup 5
     | IsMiner 6
+    | StorageCollateralForSize 7
 } representation keyed
 ```
 
@@ -408,7 +409,6 @@ func PowerLookup(miner Address) BytesAmount {
 
 #### `IsMiner`
 
-
 **Parameters**
 
 ```sh
@@ -422,6 +422,25 @@ type IsMiner struct {
 ```go
 func IsMiner(addr Address) bool {
 	return self.Miners.Has(miner)
+}
+```
+
+#### `StorageCollateralForSize`
+
+
+**Parameters**
+
+```sh
+type StorageCollateralForSize struct {
+    size UInt
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func StorageCollateralforSize(size UInt) TokenAmount {
+	// TODO:
 }
 ```
 
@@ -610,7 +629,7 @@ func CollateralForPower(power BytesAmount) TokenAmount {
 
 ```sh
 type SubmitPost struct {
-    proofs [PoStProof]
+    proofs PoStProof
     faults [FaultSet]
     recovered Bitfield
     done Bitfield
@@ -624,7 +643,7 @@ TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
 {{% /notice %}}
 
 ```go
-func SubmitPost(proofs PoStProof, faults []FaultSet, recovered BitField, done BitField) {
+func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bitfield) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
@@ -829,17 +848,16 @@ type ArbitrateDeal struct {
 **Algorithm**
 
 ```go
-
 func AbitrateDeal(deal Deal) {
-	if !ValidateSignature(deal, self.Worker) {
+	if !VM.ValidateSignature(deal, self.Worker) {
 		Fatal("invalid signature on deal")
 	}
 
-	if CurrentBlockHeight < deal.StartTime {
+	if VM.CurrentBlockHeight() < deal.StartTime {
 		Fatal("Deal not yet started")
 	}
 
-	if deal.Expiry < CurrentBlockHeight {
+	if deal.Expiry < VM.CurrentBlockHeight() {
 		Fatal("Deal is expired")
 	}
 
@@ -850,6 +868,10 @@ func AbitrateDeal(deal Deal) {
 	if self.ArbitratedDeals.Has(deal.commP) {
 		Fatal("cannot slash miner twice for same deal")
 	}
+
+    if !deal.pieceInclusionProof.Verify(deal.commP, deal.size) {
+        Fatal("invalid piece inclusion proof or size")
+    }
 
 	storageCollateral := StorageMarketActor.StorageCollateralForSize(deal.size)
 
