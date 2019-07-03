@@ -226,6 +226,7 @@ type StorageMarketActorMethod union {
     | GetTotalStorage 4
     | PowerLookup 5
     | IsMiner 6
+    | StorageCollateralForSize 7
 } representation keyed
 ```
 
@@ -408,7 +409,6 @@ func PowerLookup(miner Address) BytesAmount {
 
 #### `IsMiner`
 
-
 **Parameters**
 
 ```sh
@@ -422,6 +422,25 @@ type IsMiner struct {
 ```go
 func IsMiner(addr Address) bool {
 	return self.Miners.Has(miner)
+}
+```
+
+#### `StorageCollateralForSize`
+
+
+**Parameters**
+
+```sh
+type StorageCollateralForSize struct {
+    size UInt
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func StorageCollateralforSize(size UInt) TokenAmount {
+	// TODO:
 }
 ```
 
@@ -474,24 +493,32 @@ type StorageMinerActorState struct {
 
 	## Amount of power this miner has.
     power UInt
+
+    ## List of sectors that this miner was slashed for.
+    slashedSet optional SectorSet
+
+    ## The height at which this miner was slashed at.
+    slashedAt optional BlockHeight
+
+    ## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+    owedStorageCollateral TokenAmount
 }
 
 type StorageMinerActorMethod union {
     | StorageMinerConstructor 0
     | CommitSector 1
     | SubmitPost 2
-    | IncreasePledge 3
-    | SlashStorageFault 4
-    | GetCurrentProvingSet 5
-    | ArbitrateDeal 6
-    | DePledge 7
-    | GetOwner 8
-    | GetWorkerAddr 9
-    | GetPower 10
-    | GetPeerID 11
-    | GetSectorSize 12
-    | UpdatePeerID 13
-    | ChangeWorker 14
+    | SlashStorageFault 3
+    | GetCurrentProvingSet 4
+    | ArbitrateDeal 5
+    | DePledge 6
+    | GetOwner 7
+    | GetWorkerAddr 8
+    | GetPower 9
+    | GetPeerID 10
+    | GetSectorSize 11
+    | UpdatePeerID 12
+    | ChangeWorker 13
 } representation keyed
 ```
 
@@ -602,7 +629,7 @@ func CollateralForPower(power BytesAmount) TokenAmount {
 
 ```sh
 type SubmitPost struct {
-    proofs [PoStProof]
+    proofs PoStProof
     faults [FaultSet]
     recovered Bitfield
     done Bitfield
@@ -616,7 +643,7 @@ TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
 {{% /notice %}}
 
 ```go
-func SubmitPost(proofs PoStProof, faults []FaultSet, recovered BitField, done BitField) {
+func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bitfield) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
@@ -629,12 +656,12 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered BitField, done Bi
 		Fatal("fault sets invalid")
 	}
 
-
-	var feesRequired TokenAmount
+	feesRequired := 0
 
 	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
-		// TODO: determine what exactly happens here. Is the miner permanently banned?
-		Fatal("Post submission too late")
+        // slashing ourselves
+        SlashStorageFault(self)
+        return
 	} else if chain.Now() > miner.ProvingPeriodEnd {
 		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
 	}
@@ -680,9 +707,7 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered BitField, done Bi
 
 	miner.ProvingSet = miner.Sectors
 
-	// NEEDS REVIEW: early submission of PoSts may give the miner extra time for
-	// their next PoSt, which could compound. Does the beacon reseeding for Posts
-	// address this well enough?
+    // Updating proving period given a fixed schedule, independent of late submissions.
 	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
 
 	// update next done set
@@ -742,23 +767,6 @@ func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer
 **Parameters**
 
 ```sh
-## TODO:
-type IncreasePledge struct {
-
-} representation tuple
-```
-
-**Algorithm**
-
-{{% notice todo %}}
-TODO
-{{% /notice %}}
-
-#### `SlashStorageFault`
-
-**Parameters**
-
-```sh
 type SlashStorageFault struct {
     miner Address
 } representation tuple
@@ -766,26 +774,66 @@ type SlashStorageFault struct {
 
 **Algorithm**
 
+
+## late submission and resubmission
+
+- If After provingPeriodEnd
+  - post submission now requires paying pay late submission fee
+    - (fixed cost, dependent on the total storage size)
+  - [implicit] loose all power, can be explicitly slashed for
+  - post submission returns your power immediately
+- If After `GenerationAttackTimeout` (<< 1 proving period)
+  - .... nothing changes atm
+- If After `PoStTimeout` (< 1 proving period)
+  - [explicit - slashStorageFault] loose all storage collateral
+  - clients can arbitrate deals with the miner now
+  - post submission now requires paying both late fee + lost storage collateral
+  - the valid post submission returns your power immediately
+- If After `SectorFailureTimeout` (> 1 proving period)
+  - [explicit - slashStorageFault] loose all sectors
+     - [implicit] resets proving period, as they need to resubmit all sectors after this
+  - there is now no way to reintroduce the sectors, unless they are resubmitted, etc
+  - power can not be recovered anymore
+
+- If [miner] does not call postsubmit
+
+
+Notes:
+- Should post submission only return your power, after the following proving period, when after the generation attack timeout
+- Is one proving period enough time for abitration of faulty deals for a client?
+
 ```go
 func SlashStorageFault() {
+    // You can only be slashed once for missing your PoSt.
 	if self.SlashedAt > 0 {
 		Fatal("miner already slashed")
 	}
 
-	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
+    // Only if the miner is actually late, they can be slashed.
+
+	if chain.Now() <= self.ProvingPeriodEnd + GenerationAttackTime(self.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
 
-	if miner.ProvingSet.Size() == 0 {
+    // Only a miner who is expected to prove, can be slashed.
+	if self.ProvingSet.Size() == 0 {
 		Fatal("miner is inactive")
 	}
 
-	// Strip miner of their power
+	// Strip the miner of their power.
 	StorageMarketActor.UpdateStorage(-1 * self.Power)
 	self.Power = 0
 
-	// TODO: make this less hand wavey
-	BurnCollateral(self.ConsensusCollateral)
+    self.slashedSet = self.ProvingSet
+    // remove proving set from our sectors
+    self.sectors.Substract(self.slashedSet)
+
+    // clear proving set
+    self.ProvingSet = nil
+
+    self.owedStorageCollateral = StorageMarketActor.StorageCollateralForSize(
+        self.slashedSet.Size() * self.SectorSize
+    )
 
 	self.SlashedAt = CurrentBlockHeight
 }
@@ -827,37 +875,45 @@ type ArbitrateDeal struct {
 **Algorithm**
 
 ```go
-func AbitrateDeal(d Deal) {
-	if !ValidateSignature(d, self.Worker) {
+func AbitrateDeal(deal Deal) {
+	if !VM.ValidateSignature(deal, self.Worker) {
 		Fatal("invalid signature on deal")
 	}
 
-	if CurrentBlockHeight < d.StartTime {
+	if VM.CurrentBlockHeight() < deal.StartTime {
 		Fatal("Deal not yet started")
 	}
 
-	if d.Expiry < CurrentBlockHeight {
+	if deal.Expiry < VM.CurrentBlockHeight() {
 		Fatal("Deal is expired")
 	}
 
-	if !self.NextDoneSet.Has(d.PieceCommitment.Sector) {
+	if !self.NextDoneSet.Has(deal.pieceInclusionProof.sectorID) {
 		Fatal("Deal agreement not broken, or arbitration too late")
 	}
 
-	if self.ArbitratedDeals.Has(d.PieceRef) {
+	if self.ArbitratedDeals.Has(deal.commP) {
 		Fatal("cannot slash miner twice for same deal")
 	}
 
-	pledge, storage := CollateralForDeal(d)
+    if !deal.pieceInclusionProof.Verify(deal.commP, deal.size) {
+        Fatal("invalid piece inclusion proof or size")
+    }
 
-	// burn the pledge collateral
-	self.BurnFunds(pledge)
+	storageCollateral := StorageMarketActor.StorageCollateralForSize(deal.size)
+
+    if self.owedStorageCollateral < storageCollateral {
+        Fatal("math is hard, and we didnt do it right")
+    }
 
 	// pay the client the storage collateral
-	TransferFunds(d.ClientAddr, storage)
+	VM.TransferFunds(storageCollateral, deal.client)
+
+    // keep track of how much we have payed out
+    self.owedStorageCollateral -= storageCollateral
 
 	// make sure the miner can't be slashed twice for this deal
-	self.ArbitratedDeals.Add(d.PieceRef)
+	self.ArbitratedDeals.Add(deal.commP)
 }
 ```
 

@@ -15,23 +15,21 @@ There is not yet an official spec for bitswap, but [the protobufs](https://githu
 
 ## Block Propagation
 
-Blocks are propagated over the libp2p pubsub channel `/fil/blocks`. The following structure is filled out with the appropriate information, serialized (with CBOR-RPC), and sent over the wire:
+Blocks are propagated over the libp2p pubsub channel `/fil/blocks`. The following structure is filled out with the appropriate information, serialized (with IPLD), and sent over the wire:
 
-```go
-type BlockMsg struct {
-  Header Block
-  Messages []Cid
+```sh
+type BlockMessage struct {
+  header BlockHeader
+  messages {UInt:&SignedMessage}<Sharray>
 }
 ```
 
-The array of message cids must match the `Messages` field in the block when used to construct a [sharray](sharray.md).
-
-Every `BlockMsg` received must be validated [through the syntactical check](./validation.md#syntactical-validation) before being propagated again. If validation fails, it must not be propagated.
+Every `BlockMessage` received must be validated [through the syntactical check](validation.md#syntactical-validation) before being propagated again. If validation fails, it must not be propagated.
 
 
 ## Message Propagation
 
-Messages are propagated over the libp2p pubsub channel `/fil/messages`. On this channel, every [serialised `Message`](data-structures.md#messages) is announced.
+Messages are propagated over the libp2p pubsub channel `/fil/messages`. On this channel, every [serialised `SignedMessage`](data-structures.md#messages) is announced.
 
 Upon receiving the message, its validity must be checked: the signature must be valid, and the account in question must have enough funds to cover the actions specified. If the message is not valid it should be dropped and must not be forwarded.
 
