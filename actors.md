@@ -324,13 +324,32 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 		Fatal("blocks do not prove a slashable offense")
 	}
 
+	if !self.Miners.Has(msg.From) {
+		Fatal("slash collateral must only be called by a miner actor")
+	}
+
 	miner := AuthorOf(block1)
 
-	// TODO: Some of the slashed collateral should be paid to the slasher
+	// Check if miner has been slashed
+	if !self.Miners.Has(miner) {
+		Fatal("miner has been slashed")
+	}
 
 	// Burn all of the miners collateral
-	miner.BurnCollateral()
+	const slashedCollateral = self.GetCollateral(miner)
+	self.SetCollateral(miner, 0)
 
+	// Some of the slashed collateral should be paid to the slasher
+	// growthRate determines how fast the slasher share of slashed collateral will increase as block elapses
+	// TODO parameter selection on growthRate and initialShare
+	// Current growthRate results in slasherShare reaches 1 after 30 blocks
+	const blockElapsed = VM.CurrentBlockHeight() - block1.Height
+	const growthRate = 1.26
+	const initialShare = 0.001
+	const slasherShare = Min(Pow(initialShare, growthRate), 1.0)
+	self.SetCollateral(msg.From, self.GetCollateral(msg.From) + slasherShare * slashedCollateral)
+	self.BurnCollateral((1.0 - slasherShare) * slashedCollateral)
+	
 	// Remove the miner from the list of network miners
 	self.Miners.Remove(miner)
 	self.UpdateStorage(-1 * miner.Power)
