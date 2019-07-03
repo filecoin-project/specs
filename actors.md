@@ -645,7 +645,7 @@ type SubmitPost struct {
 **Algorithm**
 
 {{% notice todo %}}
-TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
+TODO: GenerationAttackTime
 {{% /notice %}}
 
 ```go
@@ -664,15 +664,15 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 
 	feesRequired := 0
 
-	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
+	if chain.Now() > self.ProvingPeriodEnd+GenerationAttackTime(self.SectorSize) {
         // slashing ourselves
         SlashStorageFault(self)
         return
-	} else if chain.Now() > miner.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
+	} else if chain.Now() > self.ProvingPeriodEnd {
+		feesRequired += ComputeLateFee(miner.power, chain.Now()-self.provingPeriodEnd)
 	}
 
-	feesRequired += ComputeTemporarySectorFailureFee(miner.SectorSize, recovered)
+	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
 
 	if msg.Value < feesRequired {
 		Fatal("not enough funds to pay post submission fees")
@@ -680,7 +680,7 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 
 	// we want to ensure that the miner can submit more fees than required, just in case
 	if msg.Value > feesRequired {
-		Refund(msg.Value - feesRequired)
+		TransferFunds(msg.From, msg.Value - feesRequired)
 	}
 
 	if !CheckPostProof(miner.SectorSize, proof, faults) {
@@ -692,13 +692,13 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 	permLostSet = allFaults.Subtract(recovered)
 
 	// adjust collateral for 'done' sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
+	miner.ActiveCollateral -= CollateralForPower(miner.SectorSize * miner.NextDoneSet.Size())
 
 	// penalize collateral for lost sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, permLostSet)
+	miner.ActiveCollateral -= CollateralForPower(miner.SectorSize * permLostSet.Size())
 
 	// burn funds for fees and collateral penalization
-	BurnFunds(miner, CollateralForSectors(miner.SectorSize, permLostSet)+feesRequired)
+	self.BurnFunds(CollateralForSize(self.SectorSize * permLostSet.Size())+feesRequired)
 
 	// update sector sets and proving set
 	miner.Sectors.Subtract(done)
@@ -754,8 +754,6 @@ func ValidateFaultSets(faults []FaultSet, recovered, done BitField) bool {
 }
 
 func ProvingPeriodDuration(sectorSize uint64) Integer {
-	// TODO: eventually, this needs to be different for different sector sizes
-	// The research team should give us concrete numbers
 	return 24 * 60 * 60 * 2 // number of blocks in one day
 }
 
@@ -1286,8 +1284,8 @@ func Collect() {
 	if chain.Now() < self.ClosingAt {
 		Fatal("Payment channel not yet closed")
 	}
-	Transfer(self.ChannelTotal-self.ToSend, self.From)
-	Transfer(self.ToSend, self.To)
+	TransferFunds(self.From, self.ChannelTotal-self.ToSend)
+	TransferFunds(self.To, self.ToSend)
 }
 ```
 
@@ -1640,5 +1638,21 @@ func getTransaction(txid UInt) Transaction {
 	}
 
 	return tx
+}
+```
+
+```go
+func AggregateBitfields(faults []FaultSet) Bitfield {
+  var out Bitfield
+  for _, f := range faults {
+    out = out.Union(f.bitField)
+  }
+  return out
+}
+```
+
+```go
+func BurnFunds(amt TokenAmount) {
+  TransferFunds(BurntFundsAddress, amt)
 }
 ```
