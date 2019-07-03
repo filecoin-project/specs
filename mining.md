@@ -380,10 +380,6 @@ Other nodes will receive these blocks and form a TipSet out of the eligible bloc
 
 Thus, each of the miners who produced a block in the TipSet will receive a block reward. There will be no lockup. These rewards can be spent immediately. 
 
-{{% notice info %}}
-Note: Although block rewards can be spent immediately, transactions are not considered "finalized" in Filecoin until a certain number of blocks have been mined. Our current recommended confirmation time is 600 blocks, which works out to \~5 hours. Unlike in other blockchains, after \~600 blocks have passed, you can be almost 100% sure that your transaction will not be reversed.
-{{% /notice %}}
-
 Messages in Filecoin also have an associated transaction fee (based on the gas costs of executing the message). In the case where multiple winning miners included the same message in their blocks, only the first miner will be paid this transaction fee. The first miner is the miner with the lowest ticket value (sorted lexicographically). More details on message execution can be found in the [State Machine spec](state-machine.md#execution-calling-a-method-on-an-actor).
 
 ### Open Questions
