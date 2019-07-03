@@ -656,12 +656,12 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 		Fatal("fault sets invalid")
 	}
 
-
-	var feesRequired TokenAmount
+	feesRequired := 0
 
 	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
-		// TODO: determine what exactly happens here. Is the miner permanently banned?
-		Fatal("Post submission too late")
+        // slashing ourselves
+        SlashStorageFault(self)
+        return
 	} else if chain.Now() > miner.ProvingPeriodEnd {
 		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
 	}
@@ -707,9 +707,7 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 
 	miner.ProvingSet = miner.Sectors
 
-	// NEEDS REVIEW: early submission of PoSts may give the miner extra time for
-	// their next PoSt, which could compound. Does the beacon reseeding for Posts
-	// address this well enough?
+    // Updating proving period given a fixed schedule, independent of late submissions.
 	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
 
 	// update next done set
@@ -776,6 +774,34 @@ type SlashStorageFault struct {
 
 **Algorithm**
 
+
+## late submission and resubmission
+
+- If After provingPeriodEnd
+  - post submission now requires paying pay late submission fee
+    - (fixed cost, dependent on the total storage size)
+  - [implicit] loose all power, can be explicitly slashed for
+  - post submission returns your power immediately
+- If After `GenerationAttackTimeout` (<< 1 proving period)
+  - .... nothing changes atm
+- If After `PoStTimeout` (< 1 proving period)
+  - [explicit - slashStorageFault] loose all storage collateral
+  - clients can arbitrate deals with the miner now
+  - post submission now requires paying both late fee + lost storage collateral
+  - the valid post submission returns your power immediately
+- If After `SectorFailureTimeout` (> 1 proving period)
+  - [explicit - slashStorageFault] loose all sectors
+     - [implicit] resets proving period, as they need to resubmit all sectors after this
+  - there is now no way to reintroduce the sectors, unless they are resubmitted, etc
+  - power can not be recovered anymore
+
+- If [miner] does not call postsubmit
+
+
+Notes:
+- Should post submission only return your power, after the following proving period, when after the generation attack timeout
+- Is one proving period enough time for abitration of faulty deals for a client?
+
 ```go
 func SlashStorageFault() {
     // You can only be slashed once for missing your PoSt.
@@ -784,6 +810,7 @@ func SlashStorageFault() {
 	}
 
     // Only if the miner is actually late, they can be slashed.
+
 	if chain.Now() <= self.ProvingPeriodEnd + GenerationAttackTime(self.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
