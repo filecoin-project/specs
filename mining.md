@@ -372,6 +372,8 @@ HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2 = 6,307,200 blocks
 
 Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it's not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting *too much* FIL.
 
+TODO: Ensure that if a miner earns a block reward while undercollateralized, then `min(blockReward, requiredCollateral-availableBalance)` is garnished (transfered to the miner actor instead of the owner).
+
 ### Notes on Block Reward Application
 
 As mentioned above, every round, a miner checks to see if they have been selected as the leader for that particular round (see [Secret Leader Election](expected-consensus.md#secret-leader-election) in the Expected Consensus spec for more detail). Thus, it is possible that multiple miners may be selected as winners in a given round, and thus, that there will be multiple blocks with the same parents that are produced at the same block height (forming a TipSet). Each of the winning miners will apply the block reward directly to their actor's state in their state tree. 
