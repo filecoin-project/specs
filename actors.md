@@ -1041,18 +1041,18 @@ func ChangeWorker(addr Address) {
 
 The payment channel actor manages the on-chain state of a point to point payment channel.
 
-```go
+```sh
 type PaymentChannel struct {
-	From Address
-	To   Address
+	from Address
+	to   Address
 
-	ChannelTotal TokenAmount
-	ToSend       TokenAmount
+	channelTotal TokenAmount
+	toSend       TokenAmount
 
-	ClosingAt      Uint
-	MinCloseHeight Uint
+	closingAt      UInt
+	minCloseHeight UInt
 
-	LaneStates {Uint:LaneState}
+	laneStates {UInt:LaneState}
 } representation tuple
 
 type PaymentChannelMethod union {
@@ -1060,11 +1060,27 @@ type PaymentChannelMethod union {
   | UpdateChannelState 1
   | Close 2
   | Collect 3
-} representation kinded
+} representation keyed
 ```
 
+#### `Constructor`
 
-#### UpdateChannelState
+**Parameters**
+
+```sh
+type PaymentChannelConstructor struct {
+}
+```
+
+**Algorithm**
+
+{{% notice todo %}}
+
+TODO: Define me
+
+{{% /notice %}}
+
+#### `UpdateChannelState`
 
 **Parameters**
 
@@ -1161,11 +1177,14 @@ func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof
 }
 ```
 
-#### Close
+#### `Close`
 
 **Parameters**
 
-None
+```sh
+type Close struct {
+} representation tuple
+```
 
 **Algorithm**
 
@@ -1185,11 +1204,14 @@ func Close() {
 }
 ```
 
-#### Collect
+#### `Collect`
 
 **Parameters**
 
-None
+```sh
+type Collect struct {
+} representation tuple
+```
 
 **Algorithm**
 
