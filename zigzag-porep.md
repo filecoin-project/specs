@@ -57,7 +57,7 @@ A ZigZag proof consists of a set of challenged DRG nodes (both encoded and unenc
 
 The SNARK circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRStar`, that the prover knew the correct replicated data at each layer.
 
-### ZigZag in Filecoin
+### Proof-of-Replication in Filecoin
 
 Proof-of-Replication proves that a Storage Miner is dedicating unique dedicated storage for each ***sector***. Filecoin Storage Miners collect new clients' data in a sector, run a slow encoding process (called `Seal`) and generate a proof (`SealProof`) that the encoding was generated correctly.
 
@@ -78,22 +78,26 @@ The following public parameters are used in the ZigZag Replication and Proof Gen
 
 TODO: the Appendix should explain why we picked those values
 
-|name|type|description|value|
-|--|--|--|--:|
+
+| name | type | description | value |
+| --- | --- | --- | ---: |
 | `SECTOR_SIZE` | `uint` | Number of nodes in the DRG. | `64GiB` |
 | `LAYERS` | `uint` | Number of Depth Robust Graphs stacked layers. | `10` |
 | `BASE_DEGREE` | `uint` | In-Degree of each Depth Robust Graph. | `5` |
-| `EXPANSION_DEGREE` | `uint` | Degree of each Bipartite Expander Graph to extend dependencies between layers. |`8`|
+| `EXPANSION_DEGREE` | `uint` | Degree of each Bipartite Expander Graph to extend dependencies between layers. | `8` |
 | `GRAPH_SEED` |  `uint` | Seed used for random number generation in `baseParents`. | `TODO` |
 | `NODE_SIZE` | `uint` | Size of each node in bytes.| `32B` |
 
+
 The following constants are computed from the public parameters:
 
-|name|type|description|computation|value|
-|--|--|--|--:|---|
+
+| name | type | description | computation | value |
+| --- | --- | --- | ---: | ---- |
 | `PARENTS_COUNT` | `uint` | Total number of parent nodes |`EXPANSION_DEGREE + BASE_DEGREE` | `13` |
 | `GRAPH_SIZE` | `uint` | Number of nodes in the graph  | `SECTOR_SIZE / NODE_SIZE` | `2,147,483,648` |
 | `TREE_DEPTH` | `uint` | Height of the Merkle Tree of a sector | `LOG_2(GRAPH_SIZE)` | `31` |
+
 
 The following additional public parameters are required:
 
