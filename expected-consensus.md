@@ -1,6 +1,6 @@
-# Expected Consensus
+#  Expected Consensus
 
-Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol that outputs a single leader most of the time. At a high level, EC operates by running a leader election every round in which we mathematically expect one participant will be entitled to submit a block. Additionally, EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their entitlement (we call this proof an `Election Proof`). However, some of the time more than one winner may be entitled to submit a block. When this occurs, the resulting winning blocks form a `TipSet`. Every block in a TipSet adds `weight` to its chain. The *best* chain is the one with the highest `weight`, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on this, see [Chain Selection](#chain-selection). These concepts will be specified in this document.
+Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol that outputs a single leader most of the time. At a high level, EC operates by running a leader election every round in which we mathematically expect one participant will be elected to submit a block. Additionally, EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an `Election Proof`). However, more than one winner may be elected to submit a block. When this occurs, the resulting winning blocks form a `TipSet`. Every block in a TipSet adds `weight` to its chain. The *best* chain is the one with the highest `weight`, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on this, see [Chain Selection](#chain-selection). These concepts will be specified in this document.
 
 The basic protocol can be broken down into its two major components:
 
@@ -43,7 +43,7 @@ The following data-structures will be represented on-chain
 - Height
 
 
-`VDF` - A special function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined [here](https://eprint.iacr.org/2018/601). A VDF will receive {set of public parameters (similar to [these](https://eprint.iacr.org/2018/712.pdf)), seed} and output {proof of correctness, output value}.
+`VDF` - A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined [here](https://eprint.iacr.org/2018/601). A VDF will receive {set of public parameters (similar to [these](https://eprint.iacr.org/2018/712.pdf)), seed} and output {proof of correctness, output value}.
 
 ```text
 {proof, value} <—- VDF(public parameters, seed)

@@ -28,9 +28,9 @@ type Block struct {
 	// Tickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
 	Tickets []Ticket
 
-	// ElectionProof is a signature over the final ticket that proves this miner
+	// ElectionProof is computed from the final ticket and proves this miner
 	// is the leader at this round
-	ElectionProof Signature
+	ElectionProof ElectionProof
 
 	// Parents is an array of distinct CIDs of parents on which this block was based. 
 	// Typically one, but can be several in the case where there were multiple winning ticket-
