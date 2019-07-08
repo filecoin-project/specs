@@ -336,8 +336,10 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 	}
 
 	// Burn all of the miners collateral
-	const slashedCollateral = self.GetCollateral(miner)
-	self.SetCollateral(miner, 0)
+	// const slashedCollateral = self.GetCollateral(miner)
+	const slashedCollateral = miner.Balance
+	// self.SetCollateral(miner, 0)
+	miner.Balance = 0.0
 
 	// Some of the slashed collateral should be paid to the slasher
 	// growthRate determines how fast the slasher share of slashed collateral will increase as block elapses
@@ -347,7 +349,8 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 	const growthRate = 1.26
 	const initialShare = 0.001
 	const slasherShare = Min(Pow(initialShare, growthRate), 1.0)
-	self.SetCollateral(msg.From, self.GetCollateral(msg.From) + slasherShare * slashedCollateral)
+	// self.SetCollateral(msg.From, self.GetCollateral(msg.From) + slasherShare * slashedCollateral)
+	msg.From.Balance = msg.From.Balance + slasherShare * slashedCollateral
 	self.BurnCollateral((1.0 - slasherShare) * slashedCollateral)
 	
 	// Remove the miner from the list of network miners
