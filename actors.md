@@ -639,7 +639,7 @@ type SubmitPost struct {
 **Algorithm**
 
 {{% notice todo %}}
-TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
+TODO: ValidateFaultSets, GenerationAttackTime
 {{% /notice %}}
 
 ```go
@@ -663,7 +663,7 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
         SlashStorageFault(self)
         return
 	} else if chain.Now() > miner.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
+		feesRequired += ComputeLateSubmissionFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
 	}
 
 	feesRequired += ComputeTemporarySectorFailureFee(miner.SectorSize, recovered)
@@ -753,7 +753,7 @@ func ProvingPeriodDuration(sectorSize uint64) Integer {
 	return 24 * 60 * 60 * 2 // number of blocks in one day
 }
 
-func ComputeLateFee(power Integer, blocksLate Integer) TokenAmount {
+func ComputeLateSubmissionFee(power Integer, blocksLate Integer) TokenAmount {
 	return 4 // TODO: real collateral calculation, obviously
 }
 

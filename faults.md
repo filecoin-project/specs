@@ -18,10 +18,11 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
 **Definitions**
 
 - `PoStProvingPeriod: UInt = 24 * 60 * 60 / 30 = 2880` (1 day, given `30s` block time)
-- `PoStTimeout: UInt = PoStProvingPeriod - 10  `
-- `SectorFailureTimout: UInt = 5 * PoStProvingPeriod`
-- `ComputeLateSubmissionFee(size: UInt) TokenAmount = ?` TODO: define this
+- `PoStTimeout: UInt` (less than 1 ProvingPeriod)
+- `SectorFailureTimout: UInt` (more than 1 Proving Period)
+- `ComputeLateSubmissionFee(size: UInt) TokenAmount = ?`
 
+TODO: define the above constants
 
 #### PoSt Late Submission
 
