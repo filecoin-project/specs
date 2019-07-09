@@ -1,10 +1,10 @@
-# Filecoin Proofs
+# Proofs
 
 ## Overview
 
-The Filecoin protocol uses cryptographic proofs to ensure the two following features:
+The Filecoin protocol uses cryptographic proofs to ensure the two following guarantees:
 
-- **Storage Based Consensus**: Miners' power in the consensus is proportional to their amount of storage. Miner increase their power by collecting users' data in sectors
+- **Storage Based Consensus**: Miners' power in the consensus is proportional to their amount of storage. Miner increase their power by proving that they are dedicating unique storage to the network.
 - **Verifiable Storage Market**: Miners must be proving that they are dedicating unique physical space for each copy of the clients data through a period of time.
 
 We briefly describe the three main Filecoin proofs:
@@ -43,7 +43,7 @@ Throughout this document, the following definitions are used:
 
 __*Filecoin Proof of Replication*__ generates a unique copy (__*sealed sector*__) of a __*sector's*__ __*original data*__, a __*Multi-SNARK proof*__, and a set of __*commitments*__ identifying the __*sealed sector*__ and linking it to the corresponding __*unsealed sector*__.
 
-### PoRep.Seal
+### Seal
 
 `Seal` has the side effect of generating a __*sealed sector*__ from an __*unsealed sector*__,  and returns identifying __*commitments*__ and a __*Multi-SNARK proof*__. The proof returned is a __*Multi-SNARK proof*__.
 
@@ -72,7 +72,7 @@ Seal
 
 ```
 
-### PoRep.VerifySeal
+### VerifySeal
 
 `VerifySeal` is the functional counterpart to `Seal`'s proof component. It takes all of `Seal's` outputs, along with those of Seal's inputs which are required to uniquely identify the created __*sealed sector*__. This allows a __*verifier*__ to determine whether a given proof is valid.  All inputs are required because verification requires sufficient context to determine not only that a proof is *valid* but also that the proof indeed corresponds to what it purports to prove.
 
