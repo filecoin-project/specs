@@ -519,6 +519,8 @@ type StorageMinerActorMethod union {
     | GetSectorSize 11
     | UpdatePeerID 12
     | ChangeWorker 13
+    | IsSlashed 14
+    | IsLate 15
 } representation keyed
 ```
 

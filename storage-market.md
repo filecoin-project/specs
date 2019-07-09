@@ -70,7 +70,7 @@ This section describes the flow required to store a single piece with a single s
 
 #### Before Deal
 
-1. **Data Preparation:** The client prepares their input data. See [client data](client-data.md) for more details.
+1. **Data Preparation:** The client prepares their input data. See [client data](client-data.md) for more details.
 2. **Miner Selection:** The client looks at asks on the network, and then selects a storage miner to store their data with.
    - Note: this is currently a manual process.
 3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with. All payments between clients and storage providers use payment channels.
@@ -118,6 +118,27 @@ TODO: 'complete' isnt really the right word here, as it implies that the deal is
 The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table, instead, there is a 'total power' exported by the storage market actor, and each individual miner reports its power through their actor.
 
 TODO: rephrase the above to make it clear that power is updated only on PoSt submission and when slashed.
+
+To check the power of a given miner, use the following:
+
+```go
+func GetMinersPowerAt(ts TipSet, m Address) Integer {
+  curState := GetStateTree(ts)
+  miner := curState.GetMiner(m)
+  if miner.IsSlashed() || miner.IsLate() {
+    return 0
+  }
+  
+  lookbackTipset := WalkBack(ts, PowerLookback)
+  lbState := GetStateTree(lookbackTipset)
+  
+  sm := lbState.GetStorageMarket()
+  
+  return sm.PowerLookup(m)
+}
+```
+
+
 
 
 ### Power Updates
