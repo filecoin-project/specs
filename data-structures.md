@@ -105,6 +105,8 @@ type UnsignedMessage struct {
 	gasLimit UInt
 
 	method Uint
+	
+	## Serialized parameters to the method
 	params Bytes
 } representation tuple
 ```
