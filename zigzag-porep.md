@@ -37,7 +37,7 @@ sequenceDiagram
 
 **Encoding using DRGs**. By positioning data blocks into nodes in the DRG, we sequentially encode each node in the graph using its encoded parents. The depth robustness property of these graphs ensure that this process is not likely to be parallelizable.
 
-**Layering DRGs**. ZigZag repeates this encoding by layering DRG graphs `LAYERS` times. The data represented in each DRG layer is the data encoded in the previous layer. We connect different layers using Bipartite Expander Graphs and at each layer, we reverse the graph edges with a technique which we call zigzag. The combination of DRGs, expander graphs and zigzag guarantee the security property of PoRep. The final encoded layer is the final replica
+**Layering DRGs**. ZigZag repeates this encoding by layering DRG graphs `LAYERS` times. The data represented in each DRG layer is the data encoded in the previous layer. We connect different layers using Bipartite Expander Graphs and at each layer, we reverse the graph edges with a technique which we call zigzag. The combination of DRGs, expander graphs and zigzag guarantee the security property of PoRep. The final encoded layer is the final replica.
 
 **Generating ZigZag proofs**. Given the following public parameters:
 
@@ -98,8 +98,8 @@ The following constants are computed from the public parameters:
 
 The following additional public parameters are required:
 
-- `TAPER` : Float: Fraction of each layer's challenges by which to reduce next-lowest layer's challenge count.
-- `TAPER_LAYERS`: uint: Number of layers
+- `TAPER` : `Float`: Fraction of each layer's challenges by which to reduce next-lowest layer's challenge count.
+- `TAPER_LAYERS`: `uint`: Number of layers
   `Data` is a byte array initialized to the content of __*unsealed sector*__ and will be mutated in-place by the replication process.
 
 ### Hash Functions
