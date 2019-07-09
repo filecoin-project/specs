@@ -1,7 +1,4 @@
-# Proof-of-Replication in Filecoin
-
-
-Filecoin Proof-of-Replication (PoRep) 
+# Proof-of-Replication
 
 This spec describes the specific Proof-of-Replication used in Filecoin called *ZigZag*. 
 
@@ -38,7 +35,7 @@ sequenceDiagram
 
 *ZigZag* is a specific Proof-of-Replication construction that we use in Filecoin. ZigZag has been designed by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).  In high level, ZigZag ensures that the *Replicate* step is a slow non-parallelizable sequential process by using some special type of graphs called Depth Robust Graphs (we refer to as "DRG").
 
-**Encoding using DRGs**. By positioning data blocks into nodes in the DRG, we sequentially encode each node in the graph using its encoded parents. DRG graphs ensure that this process is not likely to be parallelizable.
+**Encoding using DRGs**. By positioning data blocks into nodes in the DRG, we sequentially encode each node in the graph using its encoded parents. The depth robustness property of these graphs ensure that this process is not likely to be parallelizable.
 
 **Layering DRGs**. ZigZag repeates this encoding by layering DRG graphs `LAYERS` times. The data represented in each DRG layer is the data encoded in the previous layer. We connect different layers using Bipartite Expander Graphs and at each layer, we reverse the graph edges with a technique which we call zigzag. The combination of DRGs, expander graphs and zigzag guarantee the security property of PoRep. The final encoded layer is the final replica
 
@@ -57,7 +54,7 @@ A ZigZag proof consists of a set of challenged DRG nodes (both encoded and unenc
 
 The SNARK circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRStar`, that the prover knew the correct replicated data at each layer.
 
-### Proof-of-Replication in Filecoin
+### PoRep in Filecoin
 
 Proof-of-Replication proves that a Storage Miner is dedicating unique dedicated storage for each ***sector***. Filecoin Storage Miners collect new clients' data in a sector, run a slow encoding process (called `Seal`) and generate a proof (`SealProof`) that the encoding was generated correctly.
 
@@ -118,9 +115,9 @@ We have describe three hash functions:
 
 #### RepHash
 
-Merkle-tree based hash function used to generate commitments to sealed sectors, unsealed sectors, piece commitments and intermediate stepds of the Proof-of-Replication. The tree is a binary balanced Merkle-tree. The leaves of the Merkle tree are pairs of adjacent nodes.
+`RepHash` is Merkle-tree based hash function used to generate commitments to sealed sectors, unsealed sectors, piece commitments and intermediate stepds of the Proof-of-Replication. The tree is a binary balanced Merkle-tree. The leaves of the Merkle tree are pairs of adjacent nodes.
 
-`RepHash` inputs must respect a valid Storage Format.
+`RepHash` inputs MUST respect a valid Storage Format.
 
 ```go
 type node [32]uint8
@@ -158,20 +155,105 @@ func RepHash(leaves []node) ([][]node, node) {
 
 ### ZigZag Graph
 
-The ZigZag graph is divided in `LAYERS` layers. At each layer there is a Depth Robust Graphs (DRG) used to encode the unsealed sector (or the sector encoded in the previous layer). 
+The slow sequential encoding required is enforced by the depth robusness property of the ZigZag graph. 
 
-A ZigZag graph has three compontents: stacked DRG graphs, Bipartite Expander graphs connecting multiple DRG layers, and a technique to invert edges of DRG graphs at every layer.
+**Encoding with ZigZag**: The data from a sector (of size `SECTOR_SIZE`) is divided in `NODE_SIZE` nodes (for a total of `GRAPH_SIZE` nodes) and arranged in a directed acyclic graph. The structure of the graph is used to encode the data sequentially: in order to encode a node, its parents must be encoded (see the "Layer Replication" section below). We repeat this process for `LAYERS` layers, where the input to a next layer is the output of the previous one.
 
-#### DRG Graph
+**Generating the ZigZag graph**: The ZigZag graph is divided in `LAYERS` layers. Each layer is a directed acyclic graph and it combines a Depth Robust Graph (DRG) and a Bipartite Expander graph. 
 
-The properties of DRG graphs guarantee that the sector has been encoded with a slow, non-parallelizable process. Every layer of ZigZag uses the same DRG. The DRG must be generated from the `GRAPH_SEED` using a BucketSample algorithm originally presented in [FBGB18](https://web.stanford.edu/~bfisch/porep_short.pdf).
+We provide an algorithm (`ZigZag`) which computes the parents of a node. In high level, the parents of a node are computed by combining two algorithms: some parents (`BASE_DEGREE` of them) are computed via the `BucketSample` algorithm, others (`EXPANSION_DEGREE` of them) are computer via the `Chung` algorithm.In addition, every odd layer performs the "ZigZag" technique which reverts some edges and inverts some nodes.
 
-We use the `BucketSample` algorithm that is based on DRSample ([ABH17](https://acmccs.github.io/papers/p1001-alwenA.pdf)) and described in [FBGB18](https://web.stanford.edu/~bfisch/porep_short.pdf) and generates a directed acyclic graph of in-degree `BASE_DEGREE`.
+#### `ZigZag`: ZigZag Graph algorithm 
+
+Overview: on even layers, compute the DRG and the Bipartite Expander parents using respectively `BucketSample` and `ChungExpander`, on odd layers, compute the inverted DRG parents (using `BucketSample` on the inverted node: `GRAPH_SIZE - node - 1` and inverting the resulting parents `GRAPH_SIZE - parent -1` for each parent) and the reverted Biparate Expander parents (by reverting the edges)
+
+##### Inputs
+
+| name    | description                                       | Type   |
+| ------- | ------------------------------------------------- | ------ |
+| `node`  | The node for which the parents are being computed | `uint` |
+| `layer` | The layer of the ZigZag graph                     | `uint` |
+
+##### Outputs
+
+| name      | description                                 | Type                  |
+| --------- | ------------------------------------------- | --------------------- |
+| `parents` | The parents of node `node` on layer `layer` | `[PARENTS_COUNT]uint` |
+
+##### Algorithm
+
+- If the `layer` is even:
+  - Compute `drgParents = BucketSample(node)`
+  - Compute `expanderParents = ChungExpander(node)`
+  - Set `parents` to be the concatenation of `drgParents` and `expanderParents`
+
+- If the `layer` is odd:
+  - Invert the `node`: `inverted_node = GRAPH_SIZE - inverted_node - 1`
+  - Compute the inverted DRG parents `invertedDRGParents`:
+    - Compute `drgParents = BucketSample(n)`
+    - For each `parent` in `drgParents`:
+      - `invertedDRGParents.push(GRAPH_SIZE - parent - 1)`
+  - Compute the reversed Expander parents: `reversedExpanderParents`:
+    - Compute `reversedExpanderParents = InverseChungExpander(node)`
+  - Set `parents` to be the concatenation of `invertedDrgParents` and `reversedExpanderParents`
+
+##### Pseudocode
+
+We provide below a more succinct representation of the algorithm:
+
+```
+func ZigZag(node uint, layer uint) {
+
+  if layer % 2 == 0 {
+  	// On even layers
+  	let drgParents = BucketSample(node)
+  	let expanderParents = ChungExpander(node)
+  	return concat(drgParents, expanderParents)
+  } else {
+    // On odd layers
+  	
+  	// Inverting DRG parents
+    let inverted_node = GRAPH_SIZE - node - 1
+  	let drgParents = BucketSample(inverted_node)
+  	let invertedDrgParents = []
+  	for i in 0..drgParents.len() {
+      invertedDrgParents.push(GRAPH_SIZE - drgParents[i] - 1)
+  	}
+  	// Reverting ChungExpander
+		let reversedExpanderParents = ReversedChungExpander(node)
+  	return concat(invertedDrgParents, reversedExpanderParents)
+  }
+}
+```
+
+##### Tests
+
+- Each `parent` in `parents` MUST not be greater than `GRAPH_SIZE-1` and lower than `0`
+- If `layer` is even:
+  - Each `parent` in `parents` MUST be greater than `node` 
+    - EXCEPT: if `node` is `0`, then all parents MUST be `0`
+- if `layer` is odd:
+  - Each `parent` in `parents` MUST be less than `node` 
+    - EXCEPT: if `node` is `GRAPH_SIZE-1`, then all parents MUST be `GRAPH_SIZE-1`
+
+##### Time-space tradeoff
+
+Computing the parents using both `BucketSample` and `ChungExpander` (and `Reverse`) for every layer can be an expensive operation, however, this can be avoided by caching the parents. It is important to note that all the odd layers and all the even layers have the same structure.
+
+#### `BucketSample`: Depth Robust Graphs algorithm
+
+This section describes how to compute the "base parents" of the ZigZag graph, which is the equivalent of computing the parents of a Depth Robust Graph.
+
+The properties of DRG graphs guarantee that a sector has been encoded with a slow, non-parallelizable process. We use the `BucketSample` algorithm that is based on DRSample ([ABH17](https://acmccs.github.io/papers/p1001-alwenA.pdf)) and described in [FBGB18](https://web.stanford.edu/~bfisch/porep_short.pdf) and generates a directed acyclic graph of in-degree `BASE_DEGREE`.
+
+`BucketSample` DRG graphs are random graphs that can be deterministically generated from a seed; different seed lead with high probability to different graphs. In ZigZag, we use the same seed `GRAPH_SEED` for each layer of the ZigZag graph such that they are all based on the same DRG graph.
 
 The parents of any node can be locally computed without computing the entire graph. We call the parents of a node calculated in this way *base parents*.
 
+##### Pseudocode
+
 ```go
-func baseParents(node uint) (parents [BASE_DEGREE]uint) {
+func BucketSample(node uint) (parents [BASE_DEGREE]uint) {
     switch node {
         // Special case for the first node, it self references.
         // Special case for the second node, it references only the first one.
@@ -206,36 +288,49 @@ func baseParents(node uint) (parents [BASE_DEGREE]uint) {
 }
 ```
 
-#### Bipartite Expander Graph
+#### `ChungExpander`: Bipartite Expander Graphs
+
+TODO: explain why we link nodes in the current layer
+
+Every node in a layer has `EXPANSION_DEGREE` parents that are generated via the following algorithm. 
 
 ```go
-func expandedParents(node uint) (parents []uint) {
-    parents := make([]uint, EXPANSION_DEGREE)
+func ChungExpander(node uint) (parents []uint) {
+	parents := make([]uint, EXPANSION_DEGREE)
 
-    feistelKeys := []uint{1, 2, 3, 4}
-    for i := 0, p := 0; i < EXPANSION_DEGREE; i++ {
-        a := node * EXPANSION_DEGREE + i
-        if graphIsReversed() {
-            transformed := feistelInvertPermute(GRAPH_SIZE * EXPANSION_DEGREE, a, feistelKeys)
-        } else {
-            transformed := feistelPermute(GRAPH_SIZE * EXPANSION_DEGREE, a, feistelKeys)
-        }
-        other := transformed / EXPANSION_DEGREE
-        // Collapse the output in the matrix search space to the row of the corresponding
-        // node (losing the column information, that will be regenerated later when calling
-        // back this function in the `reversed` direction).
+	feistelKeys := []uint{1, 2, 3, 4} // TODO
+  
+	for i := 0, p := 0; i < EXPANSION_DEGREE; i++ {
+		a := node * EXPANSION_DEGREE + i
+    transformed := feistelPermute(GRAPH_SIZE * EXPANSION_DEGREE, a, feistelKeys)
+    other := transformed / EXPANSION_DEGREE
+    if other < node {
+      parents[p] = other
+      p += 1
+    }
+  }
+}
 
-        if graphIsReversed() {
-            if other > node {
-                parents[p] = other
-                p += 1
-            }
-        } else if other < node {
-            parents[p] = other
-            p += 1
-        }
+func ReverseChungExpander(node uint) (parents []uint) {
+	parents := make([]uint, EXPANSION_DEGREE)
+
+	feistelKeys := []uint{1, 2, 3, 4} // TODO
+  
+	for i := 0, p := 0; i < EXPANSION_DEGREE; i++ {
+		a := node * EXPANSION_DEGREE + i
+    transformed := invertFeistelPermute(GRAPH_SIZE * EXPANSION_DEGREE, a, feistelKeys)
+    other := transformed / EXPANSION_DEGREE
+    if other > node {
+      parents[p] = other
+      p += 1
+    }
+  }
 }
 ```
+
+##### Time-Space tradeoff
+
+Computing these parents can be expensive (especially due to the hashing required by the Feistel algorithm). A miner can trade this computation by storing the expansion parents and the reversed expansion parents.
 
 ##### Feistel construction
 
@@ -254,6 +349,18 @@ func permute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
 
     return u
 }
+
+// Inverts the `permute` result to its starting value for the same `key`.
+func invertPermute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
+    u := feistelDecode(index, keys)
+
+    while u >= numElements {
+        u = feistelDecode(u, keys);
+    }
+    return u
+}
+
+
 
 func feistelEncode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
     left, right, rightMask, halfBits := commonSetup(index)
@@ -339,16 +446,6 @@ func feistel(right uint, key uint, rightMask uint) uint {
     }
 
     return r & rightMask
-}
-
-// Inverts the `permute` result to its starting value for the same `key`.
-func invertPermute(numElements uint, index uint, keys [FEISTEL_ROUNDS]uint) uint {
-    u := feistelDecode(index, keys)
-
-    while u >= numElements {
-        u = feistelDecode(u, keys);
-    }
-    return u
 }
 
 func feistelDecode(index uint, keys [FEISTEL_ROUNDS]uint) uint {
