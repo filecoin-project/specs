@@ -23,58 +23,40 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
 - `ComputeLateSubmissionFee(size: UInt) TokenAmount = ?` TODO: define this
 
 
-
 #### PoSt Late Submission
 
 - **After `ProvingPeriodEnd`:**
-  
   - **Condition**: If the miner posts their PoSt after the proving period ends, but before `PoStTimeout`
-  
   - **Reporting:** The miner submits their PoSt as usual, but includes the `LateSubmissionFee`.
-  
-  - **Penalization:** 
-    
+  - **Penalization:**
     - *Economic penalization*: To determine the penalty amount, `ComputeLateSubmissionFee(minerPower)` is called.
-    - *Power penalization*: The miners' power is reduced to `0`. 
-    
-  - **Recovery**: 
-  
+    - *Power penalization*: The miners' power is reduced to `0`.
+  - **Recovery**:
     - **Conditions for Recovery:**
       - the submission is within the `PoStTimeout`,
       - the fee provided matches the required `LateSubmissionFee` for the miner
-  
     - *Economic*: There is no recovery of the late submission fee.
     - *Power*: The miners' power is reset matching the submitted PoSt.
-  
 - **After `PoStTimeout`:**
-
   - **Condition**: If the miner posts their PoSt after the proving period ends, but before `SectorFailureTimeout`
-
   - **Reporting:** The miner submits their PoSt as usual, but includes the `LateSubmissionFee + Lost Storage Collateral`.
-
-  - **Penalization:** 
-
+  - **Penalization:**
     - *Economic penalization*: To determine the penalty amount, `ComputeLateSubmissionFee(minerPower)` is called, in addition all storage collateral is lost for the sectors in current `ProvingSet`
-    - *Power penalization*: The miners' power is reduced to `0`. 
-
-  - **Recovery**: 
-
+    - *Power penalization*: The miners' power is reduced to `0`.
+  - **Recovery**:
     - **Conditions for Recovery:**
       - the submission is within the `SectorFailureTimeout`,
       - the fee provided matches the required `LateSubmissionFee` for the miner and the required storage collateral
-
     - *Economic*: There is no recovery of the fees.
     - *Power*: The miners' power is reset matching the submitted PoSt.
-
 - **After `SectorFailureTimeout`:**
-
-  - **Condition**: If the miner posts their PoSt after the proving period ends.
+  - **Condition**: If the miner posts their PoSt after the proving period ends, or not at all.
   - **Reporting:** The same as "Unreported storage fault slashing"
-  - **Penalization:** 
+  - **Penalization:**
     - *Economic penalization*: All storage collateral is lost.
-    - *Power penalization*: The miners' power is reduced to `0`. 
-  - **Recovery**: 
-    - Only resubmission of the sectors can lead to recovery
+    - *Power penalization*: The miners' power is reduced to `0`.
+  - **Recovery**:
+    - Only resubmission of the sectors can lead to recovery.
 
 #### Unreported storage fault slashing
 
