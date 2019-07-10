@@ -1,13 +1,13 @@
 # Filecoin Network
 
-The Filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional Filecoin specific protocols as outlined in [Network Protocols](./network-protocols.md).
+The Filecoin network is built using libp2p building blocks, as transports and protocols, as well as some additional Filecoin specific protocols as outlined in [Network Protocols](network-protocols.md).
 
 ## Required Protocols
 
 Every full node must support the following libp2p protocols:
 
- - [gossipsub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) ([for data announcements](./data-propagation.md))
- - [bitswap] ([for data exchange](./data-propagation.md))
+ - [gossipsub](https://github.com/libp2p/specs/tree/master/pubsub/gossipsub) ([for data announcements](data-propagation.md))
+ - [bitswap] ([for data exchange](data-propagation.md))
  - Filecoin specific Protocols:
    - Hello Handshake
    - StorageDeal
@@ -33,7 +33,7 @@ If the node learns through that handshake about newer blocks it should use that 
 
 ### Syncing
 
-Whenever a node learns about a new `BlockHead` it should attempt to import the block - let that be through the `HelloMessage` or through the [block pubsub protocol](data-propagation.md#block-propagation). For that it may fetch the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in [Validation](./validation.md) and storing it locally. This mode is known as "syncing". During "syncing" the same node may not mine blocks.
+Whenever a node learns about a new `BlockHead` it should attempt to import the block - let that be through the `HelloMessage` or through the [block pubsub protocol](data-propagation.md#block-propagation). For that it may fetch the ancestors of that block through bitswap until it is fully caught up. Importing in this context refers to the node confirming that the block is valid, as described in [Validation](validation.md) and storing it locally. This mode is known as "syncing". During "syncing" the same node may not mine blocks.
 
 
 
@@ -80,9 +80,8 @@ An example would be that, continuously receive a pubsub message from a node afte
 
 A node attempts to always hold a certain amount of connections ("slots") to the network -- we recommend 25-50 on an on-the-shelf system. Whenever a new node connects, it can check their previously stored reputation or assign a default value and if that reputation is higher than the lowest currently connected nodes, may replace that connection (and thus drop the lowest quality connection) or otherwise refuse to take that connection.
 
-In this system a node might also only record a strong decrease in reputation but not drop a connection to a peer directly even upon a strong violation, because the node may still be more useful than others. It is better to stay connected to a crappy network than to no network. However, this doesn't not free the node from still adhering to the spec itself - it should not forward said violation or its connection might still be righteously dropped. 
+In this system a node might also only record a strong decrease in reputation but not drop a connection to a peer directly even upon a strong violation, because the node may still be more useful than others. It is better to stay connected to a crappy network than to no network. However, this doesn't not free the node from still adhering to the spec itself - it should not forward said violation or its connection might still be righteously dropped.
 
 We also recommend to regularly check the ranking and drop and clear up the lowest 10% of slots, leaving 5% open for incoming connections and fill up the other 5% by connecting to other nodes it can find through peer discovery.
 
-All this to create a local view of for that node most useful connections to the network. The reputation may be stored permanently and be available between restarts - thus providing a neat bootstrap start list, too. 
-
+All this to create a local view of for that node most useful connections to the network. The reputation may be stored permanently and be available between restarts - thus providing a neat bootstrap start list, too.

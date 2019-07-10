@@ -1,128 +1,71 @@
 #  Expected Consensus
 
-Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol that outputs a single leader most of the time. At a high level, EC operates by running a leader election every round in which we mathematically expect one participant will be elected to submit a block. Additionally, EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an `Election Proof`). However, more than one winner may be elected to submit a block. When this occurs, the resulting winning blocks form a `TipSet`. Every block in a TipSet adds `weight` to its chain. The *best* chain is the one with the highest `weight`, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on this, see [Chain Selection](#chain-selection). These concepts will be specified in this document.
+**This spec describes how the expected consensus (EC) protocol works in general. To read more about Filecoin-specific processes, see:**
 
-The basic protocol can be broken down into its two major components:
-
-- Secret Leader Election ([link](#Secret-Leader-Election))
-- Chain Selection ([link](#Chain-Selection))
-
-The following data-structures will be represented on-chain
-
-- `ticket`
-- `ElectionProof`
-- [TODO] Add data to this list
-
-**This spec describes how to implement the high-level EC protocol. The following Filecoin specific processes can be found elsewhere:**
-
-- [Mining Blocks](https://github.com/filecoin-project/specs/blob/master/mining.md#mining-blocks) on how consensus is used.
+- [Mining Blocks](https://github.com/filecoin-project/specs/blob/master/mining.md#mining-blocks) on how consensus is used in block mining.
 - [Faults](https://github.com/filecoin-project/specs/blob/master/faults.md) on slashing.
-- [Storage Market](https://github.com/filecoin-project/specs/blob/master/storage-market.md#the-power-table) on how the `power table` is created and maintained.
+- [Storage market](https://github.com/filecoin-project/specs/blob/master/storage-market.md#the-power-table) on how the `power table` is created and maintained.
 - [Block data structure](https://github.com/filecoin-project/specs/blob/master/data-structures.md#block) for details on fields and encoding.
 
-## Important Concepts
+## Important concepts and definitions
+Some important concepts relevant to expected consensus are:
+- [Verifiable Delay Function (VDF)](./definitions.md#vdf)
+- [Verifiable Random Function (VRF)](./defintions.md#vrf)
+- [TipSet](./definitions.md#tipset)
+- [Height](./definitions.md#height)
+- [Weight](./definitions.md#weight)
+- [Round](./definitions.md#round) -- In the realm of EC, it is worth noting that a new ticket is produced at every round, consequently the duration of a round is currently bounded by the duration of the Verifiable Delay Function run to generate a ticket.
+- [Power Fraction](./definitions.md#power-fraction)
+- [ElectionProof](./definitions.md#electionproof)
 
-- Verifiable Delay Function (VDF)
+## Algorithm
 
-- Verifiable Random Function (VRF)
+Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
+level, it operates by running a leader election every round in which, on expectation, one
+participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an `Election Proof`). All valid blocks submitted in a given round form a `TipSet`. Every block in a TipSet adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](#chain-selection).
 
-- Round
+The methods below describe the basic algorithm for EC.
 
-- Epoch
-
-- Ticket
-
-- Ticket Chain
-
-- Power Fraction
-
-- ElectionProof
-
-- TipSet
-
-- Height
-
-
-`VDF` - A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined [here](https://eprint.iacr.org/2018/601). A VDF will receive {set of public parameters (similar to [these](https://eprint.iacr.org/2018/712.pdf)), seed} and output {proof of correctness, output value}.
-
-```text
-{proof, value} <—- VDF(public parameters, seed)
-```
-
-`VRF` - A verifiable random function that receives {Secret Key (SK), seed} and outputs {proof of correctness, output value}. VRFs must yield a proof of correctness and a unique & efficiently verifiable output.
-
-```text
-{proof, value} <-- VRF(SK, seed)
-```
-
-A `round` is the period in which a miner runs leader election to attempt to generate a new block. A new ticket is produced at every round, consequently the duration of a round is currently bounded by the duration of the Verifiable Delay Function run to generate a ticket. Tickets can be counted by round as one will be produced for each round.
-
-An `epoch` is the period in which a new block is generated. There may be multiple rounds in an epoch.
-
-A `Ticket` is used as a source of randomness in EC leader election derived from a `VDF`. At least one new ticket is produced with every new block. Tickets may also be thought of as a verifiable commitment to a fork in the Filecoin blockchain. Tickets are used to cryptographically generate a "lottery ticket" that will inform a miner if they have won a leader election or not. Tickets are also used to ensure liveness and ensure synchronicity. Ticket creation will be described [here](#Ticket-generation).
-
-The `Ticket Chain` is a sequence of tickets that have a verifiable commitment to each other. In other words, the ticket chain is a chain of tickets t_i and t_j such that i < j and t_i was used to generate t_j. When a fork occurs in Filecoin, the fork with the most tickets in its ticket chain is selected. Blocks with the same number of tickets in their ticket chains are said to have the same `weight`.
-
-A miner's `Power Fraction` is their ratio of miner power over total Filecoin power. Given a miner's power s_i and the total amount of storage in the filecoin network S, a miner's power fraction p_r is s_i normalized for S. In other words, a miner's power fraction is p_f = s_i/S.
-
-An `ElectionProof` is derived from a past ticket and included in every block header. The `ElectionProof` proves that the miner was eligible to mine a block in that round.
-
-A `TipSet` is a set of blocks with the same ancestor blocks, and same number of tickets (which implies they will have been mined at the same height). Recall that EC can result in multiple leaders thus there may be more than one winning block at round. In other words, a TipSet is the set of winning blocks with the same block parents (parent set) and same number of tickets in their respective ticket chains.
-
-`Height` refers to the number of `TipSets` a given block is built upon since genesis (height 0). Multiple blocks in a `TipSet` will have the same height.
-
-### Visual description of important concepts
-
-These diagrams should be replaced
-
-![alt text](https://raw.githubusercontent.com/bvohaska/diagrams/master/TipSetsDiagramComprehensive.png "Miners i and j have won the leader election")
-
-## Functional description of EC
-
-- `OnBlockReceived` to receive a block
-- `Mine` to attempt to mine a block
-- `IsProofAWinner` to check if you have a winning `Election Proof`
-
-For each block received over the network, `OnBlockReceived` is called. `VerifyBlock` is defined in the [mining spec](mining.md#block-validation).
+Every time a block is received, we first verify whether the block is valid (`VerifyBlock` is defined in the [mining spec](mining.md#block-validation).) If the received block is valid, we add it to our TipSet.
 
 ```go
+// Called when a block is received by this node
 func OnBlockReceived(blk Block) {
-  // The exact definition of IsValid depends on the protocol
-  // For Filecoin, see mining.md
-  if VerifyBlock(blk) {
-    ChainTipsMgr.Add(blk)
-  }
-
+	// The exact definition of VerifyBlock depends on the protocol
+	// For Filecoin, see mining.md
+	if VerifyBlock(blk) {
+		ChainTipsMgr.Add(blk)
+	}
   // Received an invalid block!
 }
 ```
 
-Separately, another process is running `Mine` to attempt to generate blocks.
+Meanwhile, the mining node runs a mining process to attempt to generate blocks. In `Mine`, the node identifies the best TipSet in each round and generates a ticket for each round. These inputs are used to see if the miner won the round. If the miner wins the round, she produces a block and broadcasts it. If not, we still maintain the list of tickets that were generated so the miner can try again next round.
 
 ```go
 func Mine(minerKey PrivateKey) {
-  for r := range rounds { // for each round
-    bestTipset, tickets := ChainTipsMgr.GetBestTipsetAtRound(r - 1)
+	for r := range rounds { // for each round
+		bestTipset, tickets := ChainTipsMgr.GetBestTipsetAtRound(r - 1)
 
-    ticket := GenerateTicket(minerKey, bestTipset)
-    tickets.Append(ticket)
+		ticket := GenerateTicket(minerKey, bestTipset)
+		tickets.Append(ticket)
 
-    // Generate an election proof and check if we win
-    // Note: even if we don't win, we want to make a ticket
-    // in case we need to mine a null round
-    win, proof := CheckIfWinnerAtRound(minerKey, r, bestTipset)
-    if win {
-      GenerateAndBroadcastBlock(bestTipset, tickets, proof)
-    } else {
-      // Even if we don't win, add our ticket to the tracker in
-      // case we need to mine on it later.
-      ChainTipsMgr.AddFailedTicket(bestTipset, tickets)
-    }
-  }
+		// Generate an ElectionProof and check if we win
+		// Note: even if we don't win, we want to make a ticket
+		// in case we need to mine a null round
+		win, proof := CheckIfWinnerAtRound(minerKey, r, bestTipset)
+		if win {
+			GenerateAndBroadcastBlock(bestTipset, tickets, proof)
+		} else {
+			// Even if we don't win, add our ticket to the tracker in
+			// case we need to mine on it later.
+			ChainTipsMgr.AddFailedTicket(bestTipset, tickets)
+		}
+	}
 }
 ```
 
-`IsProofAWinner` is taken from [the mining doc](mining.md#block-validation).
+To check if the miner won the round, she runs `CheckIfWinnerAtRound`. In this method, the miner takes her ticket from a prior round (which round to look at is specified  by the lookback parameter), computes an ElectionProof, and returns whether the proof indicates that the miner has won the round. In the pseudocode below, `IsProofAWinner` is taken from [the mining doc](mining.md#block-validation).
 
 ```go
 const RandomnessLookback = 1 // Also referred to as "K" in many places
@@ -141,19 +84,21 @@ func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool,
 }
 ```
 
-TODO: get accurate estimates for K and L, potentially merge both to a single param.
-
 Note: Validity of blocks beyond appropriate ticket generation (defined below) is defined by the specific protocol using EC. For the Filecoin definition of a valid block, see the [mining spec](mining.md).
+
+The EC algorithm can be better understood by looking at its two major components in more detail:
+- [Leader Election](#secret-leader-election)
+- [Chain Selection](#chain-selection)
 
 ## Secret Leader Election
 
-Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](./storage-market.md#the-power-table), where power is equivalent to storage provided through time.
+Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](storage-market.md#the-power-table), where power is equivalent to storage provided through time.
 
-Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's use of EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness for Leader Election. Every block generated references an `ElectionProof` derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.
+Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness inputs for Leader Election. Every block generated references an `ElectionProof` derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.
 
-In cases in which no winning ticket is found by any miner in a given round (i.e. no block is mined on the network), miners move on to the next ticket in the ticket chain to attempt a new leader election. When this happens, miners should nonetheless generate a new ticket prior to the new leader election, thereby appropriately prolonging the ticket chain (the block chain can never be longer than the ticket chain). This situation is fleshed out in the [Losing Tickets](#losing-tickets) section.
+In cases in which no winning ticket is found by any miner in a given round (i.e. no block, or a `null block`, is mined on the network), miners move on to the next ticket in the ticket chain to attempt a new leader election. Note that a null block is not included in a TipSet, since null blocks are, by definition, not blocks. When this happens, miners should nonetheless generate a new ticket prior to the new leader election, thereby appropriately prolonging the ticket chain (the block chain can never be longer than the ticket chain). This situation is fleshed out in the [Losing Tickets](#losing-tickets) section.
 
-In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: `Slashing`).
+In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: [`Slashing`](#slashing)).
 
 TODO: pictures of ticket chain and block chain
 
@@ -171,25 +116,9 @@ At a high-level, tickets must do the following:
 - Ensure a single drawing per round — derived in part from the above, thereby preventing miners from grinding on tickets (e.g. by repeatedly drawing new tickets in the hopes of winning) within a round.
 
 ```text
-ticket = {proof_vdf, value_vdf, Sign_sk(value)} where (proof, value) <-- VDF(SK, x) for some seed x
+ticket = {TODO} where (proof, value) <-- VDF(SK, x) for some seed x
 ```
-
-For tickets in EC, one may use the following:
-
-```go
-type Ticket struct {
-
-  // The VDF Result is derived from the prior ticket in the ticket chain
-  VDFResult BigInteger
-
-  // The VDF proves a delay between tickets generated
-  VDFProof BigInteger
-
-  // This signature is generated by the miner's keypair run on the VDFResult
-  // It is the value that will be used to generate future tickets or ElectionProofs
-  Signature Signature
-}
-```
+You can find the Ticket data structure [here](./data-structures.md#tickets).
 
 In practice, EC defines two different fields within a block:
 
@@ -255,7 +184,8 @@ Output: T, W
   iii. pi, v <-- VDF(H(l))
   iv. T <-- Sig(pi, v)
 2. Generate an ElectionProof = W
-  i. W <-- VRF(SK, T)
+  i. T_o <-- DrawMinTicket(L round back)
+  ii. W <-- VRF(SK, T_o)
 3. Return: T, W
 ```
 
@@ -273,22 +203,22 @@ The process is as follows:
 At round N:
 
 ```text
-Input: Power Table, T_N, W, Map
-Output: WIN or LOST
+Input: Power Table, T_N, W, Map (deterministic function mapping a number to the range between 0 and 1)
+Output: 1 or 0
 
 1. Determine total mining power = P
 2. Determine one's power fraction = p_f
 3. Determine if W is a winning lottery ticket
   i. y <-- Map(pp,W) : {0,1}^n <-- pp x W
   ii. If y < p_f then W is a winning lottery ticket
-    Return WIN
-  iii. If y > p_f then W is not a winning lottery ticket and output LOST
-    Return LOST
+    Return 1
+  iii. If y > p_f then W is not a winning lottery ticket
+    Return 0
 ```
 
 It is important to note that a miner generates two artifacts: one, a ticket derived from last block's ticket to prove that they have waited the appropriate delay, and two, an election proof derived from the ticket `K` rounds back used to run leader election.
 
-Typically, either a miner will generate a winning ticket (see [Block Generation](#block-generation) or will hear about a new block (or multiple) by the end of a round (and start mining atop the smallest ticket of this new TipSet). The round may also have no successful miners.
+Typically, either a miner will generate a winning ticket (see [Block Generation](#block-generation) or will hear about a new block (or multiple) by the end of a round (and start mining atop the smallest ticket of this new TipSet). The round may also have no successful miners, in which we say that a null block (or no block) was produced.
 
 ### Losing Tickets
 
@@ -343,11 +273,11 @@ This means that valid `ElectionProof`s can be generated from tickets in the midd
 
 ### Block Generation
 
-Once a miner has a winning election proof generated over `i` rounds and `i` corresponding tickets, they may create a block. For more on this, see the [Mining spec](./mining.md#block-creation).
+Once a miner has a winning election proof generated over `i` rounds and `i` corresponding tickets, they may create a block. For more on this, see the [Mining spec](mining.md#block-creation).
 
 ## Chain Selection
 
-Just as there can have 0 miners win in a round, multiple miners can be elected in a given round . This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round
+Just as there can be 0 miners win in a round, multiple miners can be elected in a given round. This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round.
 
 ### Tipsets
 
@@ -392,7 +322,7 @@ The probability that two TipSets with different blocks would have all the same t
 
 ### Slashing
 
-See the [Faults spec](./faults.md) for implementation details.
+See the [Faults spec](faults.md) for implementation details.
 
 Due to the existence of potential forks, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
 
@@ -408,33 +338,7 @@ the reporter, and keep the rest.
 
 TODO: It is unclear that rewarding the reporter any more than gas fees is the right thing to do. Needs thought. Tracking issue: https://github.com/filecoin-project/specs/issues/159
 
-Note: One may wonder what prevents miners from simply breaking up their power into multiple un-linkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. We call this the "whyru slashing" attack.
-
-TODO: Discuss with @zenground0 to ensure the below should not be removed
-
-```
-An attacker with 30% of the power has a 30% chance of mining a block at any given moment.
-During a fork, an attacker would have a 30% chance of winning _on each fork_, meaning
-they could continue to mine on both forks, except for 30% of the time they win, they
-will win on both chains and have to forgo publishing one of the blocks to avoid being
-slashed. This means that the miner loses 30% of their expected rewards, but is still
-able to mine on both chains.
-
-Now, if the miner instead controls two miners each with 15% of the total power in
-the network, they still have a 30% chance of winning on each fork (using both sybils),
-but they drop the probability of mining with the same miner at the same time on both
-chains down to 15% of their winnings (meaning they have to forgo 15% of their
-‘successfully’ mined blocks). This continues on down, 3 identities is 10%, 4 is 7.6%,
-5 is 6% and so on. So at the end of the day, the miner can mine on both chains with
-only a minimal loss in potential proceeds.
-
-The above assumes that every election is an independent random process (even across forks).
-However, using a lookback parameter for seed sampling, the independent lottery drawing
-becomes a global lottery for all forks originating after the lookback (where the
-randomness was drawn). That is to say, given a common random seed and public key, each
-sybil will either win on all forks, or lose on all forks. This greatly decreases the
-chances that this attack succeeds, erasing the economic advantage sybils created.
-```
+Note: One may wonder what prevents miners from simply breaking up their power into multiple un-linkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. Read more about this [here](https://github.com/filecoin-project/consensus/issues/32).
 
 ### ChainTipsManager
 
@@ -466,8 +370,6 @@ func AddFailedTicket(parent Tipset, t Ticket)
 ## Open Questions
 
 - Parameter K, Parameter L
-- Checkpointing Strategy
-- Block confirmation time
 - When selecting between two forks of equal weight, one strategy might be to select the 'Tipset' with the lowest number of linked tickets for a given block height and weight.
 - Should there be a minimum power required to participate in the consensus process?
 - How long should 'valid' candidate blocks be kept around? Essentially the question is: when is finality?
