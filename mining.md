@@ -380,7 +380,7 @@ As mentioned above, every round, a miner checks to see if they have been selecte
 
 Other nodes will receive these blocks and form a TipSet out of the eligible blocks (those that have the same parents and are at the same block height). These nodes will then validate the TipSet. The full procedure for how to verify a TipSet can be found above in [Block Validation](#block-validation). To validate TipSet state, the validating node will, for each block in the TipSet, first apply the block reward value directly to the mining node's account and then apply the messages contained in the block.
 
-Thus, each of the miners who produced a block in the TipSet will receive a block reward. There will be no lockup. These rewards can be spent immediately. 
+Thus, each of the miners who produced a block in the TipSet will receive a block reward. There will be no lockup imposed as a network-wide parameter, though it is assumed some clients will choose to set their own freezing period based on their own security needs (and Filecoin's confirmation time). In cases this does not happen, these rewards can be spent immediately. 
 
 Messages in Filecoin also have an associated transaction fee (based on the gas costs of executing the message). In the case where multiple winning miners included the same message in their blocks, only the first miner will be paid this transaction fee. The first miner is the miner with the lowest ticket value (sorted lexicographically). More details on message execution can be found in the [State Machine spec](state-machine.md#execution-calling-a-method-on-an-actor).
 
