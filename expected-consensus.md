@@ -1,22 +1,22 @@
-#  Expected Consensus
+# Expected Consensus
 
 **This spec describes how the expected consensus (EC) protocol works in general. To read more about Filecoin-specific processes, see:**
 
-- [Mining Blocks](https://github.com/filecoin-project/specs/blob/master/mining.md#mining-blocks) on how consensus is used in block mining.
-- [Faults](https://github.com/filecoin-project/specs/blob/master/faults.md) on slashing.
-- [Storage market](https://github.com/filecoin-project/specs/blob/master/storage-market.md#the-power-table) on how the `power table` is created and maintained.
-- [Block data structure](https://github.com/filecoin-project/specs/blob/master/data-structures.md#block) for details on fields and encoding.
+- [Mining Blocks](mining.md#mining-blocks) on how consensus is used in block mining.
+- [Faults](faults.md) on slashing.
+- [Storage market](storage-market.md#the-power-table) on how the `power table` is created and maintained.
+- [Block data structure](data-structures.md#block) for details on fields and encoding.
 
 ## Important concepts and definitions
 Some important concepts relevant to expected consensus are:
-- [Verifiable Delay Function (VDF)](./definitions.md#vdf)
-- [Verifiable Random Function (VRF)](./defintions.md#vrf)
-- [TipSet](./definitions.md#tipset)
-- [Height](./definitions.md#height)
-- [Weight](./definitions.md#weight)
-- [Round](./definitions.md#round) -- In the realm of EC, it is worth noting that a new ticket is produced at every round, consequently the duration of a round is currently bounded by the duration of the Verifiable Delay Function run to generate a ticket.
-- [Power Fraction](./definitions.md#power-fraction)
-- [ElectionProof](./definitions.md#electionproof)
+- [Verifiable Delay Function (VDF)](definitions.md#vdf)
+- [Verifiable Random Function (VRF)](defintions.md#vrf)
+- [TipSet](definitions.md#tipset)
+- [Height](definitions.md#height)
+- [Weight](definitions.md#weight)
+- [Round](definitions.md#round) -- In the realm of EC, it is worth noting that a new ticket is produced at every round, consequently the duration of a round is currently bounded by the duration of the Verifiable Delay Function run to generate a ticket.
+- [Power Fraction](definitions.md#power-fraction)
+- [ElectionProof](definitions.md#electionproof)
 
 ## Algorithm
 
@@ -118,7 +118,7 @@ At a high-level, tickets must do the following:
 ```text
 ticket = {TODO} where (proof, value) <-- VDF(SK, x) for some seed x
 ```
-You can find the Ticket data structure [here](./data-structures.md#tickets).
+You can find the Ticket data structure [here](data-structures.md#tickets).
 
 In practice, EC defines two different fields within a block:
 
