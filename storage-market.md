@@ -14,7 +14,7 @@ TODO: This is a high level overview of how the storage market interacts with com
 
 ## The Market Interface
 
-This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor, it can be retrieved from the state tree. For more information about Actors, see [the actors spec](./actors.md).
+This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor, it can be retrieved from the state tree. For more information about Actors, see [the actors spec](actors.md).
 
 ```go
 type StorageMarket interface {
