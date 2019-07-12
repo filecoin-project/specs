@@ -105,7 +105,7 @@ The Generation Attack Threshold is equal to the Polling Time + some Grace Period
 
 #### GHOST
 
-GHOST is an acronym for `Greedy Heaviest Observable SubTree`, a class of blockchain structures in which multiple blocks can validly be included in the chain at any given height or round. GHOSTy protocols produce blockDAGs rather than blockchains and use a weighting function for fork selection, rather than simply picking the longest chain.
+[GHOST](https://eprint.iacr.org/2013/881.pdf) is an acronym for `Greedy Heaviest Observable SubTree`, a class of blockchain structures in which multiple blocks can validly be included in the chain at any given height or round. GHOSTy protocols produce blockDAGs rather than blockchains and use a weighting function for fork selection, rather than simply picking the longest chain.
 
 #### Height
 
@@ -217,7 +217,7 @@ Repair refers to the processes and protocols by which the Filecoin network ensur
 
 #### Round
 
-A round refers to the period over which a new leader election occurs and a block is generated if a leader is found. Typically this means a new block will be mined at every round, though 
+A round refers to the period over which a new leader election occurs and a block is generated if a leader is found. Typically this means a new block will be mined at every round, though.
 
 A `round` is the period in which a miner runs leader election to attempt to generate a new block. It may succeed, or zero or multiple blocks may be generated instead in that round. Every `round`, one `ticket` is produced. Thus, the duration of a round is currently bounded by the duration of the Verifiable Delay Function (VDF) that is run to generate a `ticket`. Because one `ticket` is produced per `round`, the number of `tickets` is the same as the number of `rounds` that have passed.
 
@@ -249,11 +249,11 @@ In the context of:
 
 #### Ticket
 
-A `ticket` is used as a source of randomness in EC leader election. Every block depends on an `ElectionProof` derived from a `ticket`. At least one new `ticket` is produced with every new block. Ticket creation will be described [here](./expected-consensus.md#Ticket-generation).
+A `ticket` is used as a source of randomness in EC leader election. Every block depends on an `ElectionProof` derived from a `ticket`. At least one new `ticket` is produced with every new block. Ticket creation is described [here](./expected-consensus.md#Ticket-generation).
 
 #### TipSet
 
- A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block at the same `height` as another miner. `TipSets` contain 1 or more blocks (i.e. null blocks are not included in `TipSets`).
+ A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block in the same `round` as another miner.
 
 #### Verifiable
 
@@ -261,7 +261,7 @@ Something that is verifiable can be checked for correctness by a third party.
 
 #### VDF
 
-A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined [here](https://eprint.iacr.org/2018/601). A VDF will receive {set of public parameters (similar to [these](https://eprint.iacr.org/2018/712.pdf)), seed} and output {proof of correctness, output value}.
+A verifiable function that guarantees a time delay given some hardware assumptions and a small set of requirements. These requirements are efficient proof verification, random output, and strong sequentiality. Verifiable delay functions are formally defined by [\[BBBF]](https://eprint.iacr.org/2018/601).
 
 ```text
 {proof, value} <—- VDF(public parameters, seed)
