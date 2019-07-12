@@ -136,7 +136,10 @@ type UnsignedMessage struct {
 	gasPrice UInt
 	gasLimit UInt
 
-	method &ActorMethod
+	method Uint
+	
+	## Serialized parameters to the method
+	params Bytes
 } representation tuple
 ```
 
