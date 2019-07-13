@@ -253,7 +253,7 @@ A `ticket` is used as a source of randomness in EC leader election. Every block 
 
 #### TipSet
 
- A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block in the same `round` as another miner.
+ A `TipSet` is a set of blocks that have the same parent set and same number of `tickets` in their `t`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block in the same `round` as another miner.
 
 #### Verifiable
 
