@@ -679,7 +679,7 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bi
 		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
 
-	if !CheckPostProof(miner.SectorSize, proof, faults) {
+	if !VerifyPost(self.SectorSize, self.provingSet, proof, faults) {
 		Fatal("proof invalid")
 	}
 
