@@ -53,7 +53,7 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR) (PoStProof, FaultSet)
 
     for n in 0..POST_CHALLENGES_COUNT {
         attempt := 0
-        'inner: for {
+        while inclusionProof[n] == nil {
             challenge := DerivePoStChallenge(seed, n, faults, attempt)
             sector := challenge % sectorSize
             // check if we landed in a previously marked faulty sector
@@ -71,7 +71,6 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR) (PoStProof, FaultSet)
             } else {
                 // no fault, move on to the next challenge
                 inclusionProofs[n] = inclusionProof
-                break 'inner
             }
         }
     }
@@ -119,7 +118,7 @@ func DerivePoStChallenges(sectorSize BytesAmount, seed []byte, faults FaultSet) 
 
     for n in 0..POST_CHALLENGES_COUNT {
         attempt := 0
-        'inner: for {
+        while challenges[n] == nil {
             challenge := DerivePoStChallenge(seed, n, faults, attempt)
 
             // check if we landed in a faulty sector
@@ -127,7 +126,6 @@ func DerivePoStChallenges(sectorSize BytesAmount, seed []byte, faults FaultSet) 
             if !faults.Contains(sector) {
                 // Valid challenge
                 challenges[n] = challenge
-                break 'inner
             }
             // invalid challenge, regenerate
             attempt += 1
@@ -197,4 +195,3 @@ for c in range POST_CHALLENGES_COUNT {
 #### Verification of PoSt proof
 
 - SNARK proof check: **Check** that given the SNARK proof and the public inputs, the SNARK verification outputs true
-- Challenges check: rederive the challenges, based on the seed, and check that they are equal.
