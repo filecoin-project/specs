@@ -632,7 +632,7 @@ func CollateralForPower(power BytesAmount) TokenAmount {
 ```sh
 type SubmitPost struct {
     proofs PoStProof
-    faults [FaultSet]
+    faults FaultSet
     recovered Bitfield
     done Bitfield
 } representation tuple
@@ -653,7 +653,6 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bi
 	// ensure recovered is a subset of the combined fault sets, and that done
 	// does not intersect with either, and that all sets only reference sectors
 	// that currently exist
-	allFaults = AggregateBitfields(faults)
 	if !miner.ValidateFaultSets(faults, recovered, done) {
 		Fatal("fault sets invalid")
 	}
@@ -686,7 +685,7 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bi
 
 	// combine all the fault set bitfields, and subtract out the recovered
 	// ones to get the set of sectors permanently lost
-	permLostSet = allFaults.Subtract(recovered)
+	permLostSet = faults.Subtract(recovered)
 
 	// burn funds for fees and collateral penalization
 	self.BurnFunds(CollateralForSize(self.SectorSize*permLostSet.Size()) + feesRequired)
@@ -699,7 +698,7 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bi
 	// the last proving period.
 	oldPower := miner.Power
 
-	miner.Power = (miner.ProvingSet.Size() - allFaults.Count()) * miner.SectorSize
+	miner.Power = (miner.ProvingSet.Size() - faults.Count()) * miner.SectorSize
 	StorageMarket.UpdateStorage(miner.Power - oldPower)
 
 	miner.ProvingSet = miner.Sectors

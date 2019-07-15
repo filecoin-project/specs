@@ -42,29 +42,17 @@ TODO: sectors need to be globally unique. This can be done either by having the 
 
 #### Step 2: Proving Storage (PoSt creation)
 
-At the beginning of their proving period, miners collect the proving set (the set of all live sealed sectors on the chain at this point), and then call `ProveStorage`. This process will take the entire proving period to complete.
 
 ```go
 func ProveStorage(sectorSize BytesAmount, sectors []commR, startTime BlockHeight) (PoStProof, FaultSet) {
     seed := GetRandFromBlock(startTime + POST_CHALLENGE_TIME)
-    GeneratePoSt(sectors, seed)
+    GeneratePoSt(sectorSize, sectors, seed)
 }
 ```
 
 Note: See ['Proof of Space Time'](proofs.md#proof-of-space-time) for more details.
 
 The proving set remains consistent during the proving period. Any sectors added in the meantime will be included in the next proving set, at the beginning of the next proving period.
-
-```go
-// Verify a given PoSt.
-func VerifyPost(sectorSize BytesAmount, sectors []commR, startTime BlockHeight, proof PoStProof, faults FaultSet) bool {
-    seed := GetRandFromBlock(startTime + POST_CHALLENGE_TIME)
-    challenges := DerivePoStChallenges(seed, faults)
-
-    // Verify Snark
-    VerifyPoStSnark(sectorSize, sectors, proof, faults, challenges)
-}
-```
 
 #### Step 3: PoSt Submission
 

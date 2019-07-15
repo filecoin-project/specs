@@ -40,10 +40,11 @@ TODO: Add post submission to the diagram.
 #### Generation
 
 ```go
-func GeneratePoSt(sectorSize BytesAmount, sectors []commR) (PoStProof, FaultSet) {
+func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte) (PoStProof, FaultSet) {
     // Generate the Merkle Inclusion Proofs + Faults
 
     inclusionProofs := []
+    challenges := []
     faults := NewFaultSet()
 
     for n in 0..POST_CHALLENGES_COUNT {
@@ -57,6 +58,7 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR) (PoStProof, FaultSet)
                 continue
             }
 
+            // Leaf index of the selected sector
             challenge_value = challenge / sectorSize
             inclusionProof, isFault := GenerateMerkleInclusionProof(sector, challenge_value)
             if isFault {
@@ -66,13 +68,12 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR) (PoStProof, FaultSet)
             } else {
                 // no fault, move on to the next challenge
                 inclusionProofs[n] = inclusionProof
+                challenges[n] = challenge
             }
         }
     }
 
     // Generate the snark
-    challenges := DerivePoStChallenges(sectorSize, seed, faults)
-
     snark_proof := GeneratePoStSnark(sectorSize, challenges, sectors, inclusionProofs)
 
     proof := PoStProof {
@@ -131,10 +132,11 @@ func DerivePoStChallenges(sectorSize BytesAmount, seed []byte, faults FaultSet) 
 }
 
 // Derive a single challenge for PoSt.
-func DerivePoStChallenge(seed []byte, n Uint, attempt Uint) []byte {
+func DerivePoStChallenge(seed []byte, n Uint, attempt Uint) Uint {
     n_bytes := WriteUintToLittleEndian(n)
     data := concat(seed, n_bytes, WriteUintToLittleEndian(attempt))
     challenge := blake2b(data)
+    ReadUintLittleEndain(challenge)
 }
 ```
 
@@ -154,7 +156,7 @@ func DerivePoStChallenge(seed []byte, n Uint, attempt Uint) []byte {
 
 *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
 
-- `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashe of all CommRs
+- `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashes of all CommRs.
 - `InclusionPaths: [POST_CHALLENGES_COUNT]Fr`: Inclusion paths for the replica leafs. (Binary packed bools)
 
 {{% notice todo %}}
