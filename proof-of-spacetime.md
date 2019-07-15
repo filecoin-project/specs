@@ -1,18 +1,14 @@
 ## Proof-of-Spacetime
 
-This document descibes Rational-PoSt, the Proof of Spacetime used in Filecoin.
-
+This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 ## Rational PoSt
 
 ### Definitions
 
-- **PoSt Proving Period**: The time interval in which a PoSt has to be submitted.
-- **POST_CHALLENGE_TIME**: The time offset at which the actual work of generating the PoSt should be started. This is some delta befre the end of the `Proving Period`, and as such less then a single `Proving Period`.
-
-- start = height x
-- challenge time = height x + y
-- on post submission: verify that challenge comes from block(x + y)
+- **POST_PROVING_PERIOD**: The time interval in which a PoSt has to be submitted.
+- **POST_CHALLENGE_TIME**: The time offset at which the actual work of generating the PoSt should be started. This is some delta before the end of the `Proving Period`, and as such less then a single `Proving Period`.
+- **POST_MAX_SECTORS_COUNT**: The maximum number of sectors that can be proven using a single PoSt.
 
 ### Execution Flow
 
@@ -36,7 +32,6 @@ This document descibes Rational-PoSt, the Proof of Spacetime used in Filecoin.
 ```
 
 TODO: Add post submission to the diagram.
-
 
 
 
