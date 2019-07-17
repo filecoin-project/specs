@@ -19,14 +19,6 @@ type ActorState union {
     | MultisigActorState
 } representation kinded
 
-type ActorMethod union {
-    | InitActorMethod
-    | AccountActorMethod
-    | StorageMarketActorMethod
-    | StorageMinerActorMethod
-    | PaymentChannelBrokerActorMethod
-    | MultisigActorMethod
-} representation kinded
 ```
 
 ## System Actors
@@ -53,13 +45,15 @@ type InitActorState struct {
     addressMap {Address:ID}<Hamt>
     nextId UInt
 }
-
-type InitActorMethod union {
-    | InitConstructor 0
-    | Exec 1
-    | GetIdForAddress 2
-} representation keyed
 ```
+
+#### Methods
+
+| Name | Method ID |
+|--------|-------------|
+| `Constructor` | 0 |
+| `Exec` | 1 |
+| `GetIdForAddress` | 2 |
 
 #### `Constructor`
 
@@ -179,12 +173,16 @@ The Account actor is the actor used for normal keypair backed accounts on the fi
 type AccountActorState struct {
     address Address
 }
+```
 
-type AccountActorMethod union {
-    | AccountConstructor 0
-    | GetAddress 1
-} representation keyed
+#### Methods
 
+| Name | Method ID |
+|--------|-------------|
+| `AccountConstructor` | 0 |
+| `GetAddress` | 1 |
+
+```
 type AccountConstructor struct {
 }
 ```
@@ -217,26 +215,27 @@ type StorageMarketActorState struct {
     miners {Address:Null}<Hamt>
     totalStorage BytesAmount
 }
-
-type StorageMarketActorMethod union {
-    | StorageMarketConstructor 0
-    | CreateStorageMiner 1
-    | SlashConsensusFault 2
-    | UpdateStorage 3
-    | GetTotalStorage 4
-    | PowerLookup 5
-    | IsMiner 6
-    | StorageCollateralForSize 7
-} representation keyed
 ```
+
+#### Methods
+
+| Name | Method ID |
+|--------|-------------|
+| `StorageMarketConstructor` | 0 |
+| `CreateStorageMiner` | 1 |
+| `SlashConsensusFault` | 2 |
+| `UpdateStorage` | 3 |
+| `GetTotalStorage` | 4 |
+| `PowerLookup` | 5 |
+| `IsMiner` | 6 |
+| `StorageCollateralForSize` | 7 |
 
 #### `Constructor`
 
 **Parameters**
 
 ```sh
-type StorageMarketConstructor struct {
-}
+type StorageMarketConstructor struct {}
 ```
 
 **Algorithm**
@@ -509,26 +508,28 @@ type MinerInfo struct {
     sectorSize BytesAmount
 
 }
-
-type StorageMinerActorMethod union {
-    | StorageMinerConstructor 0
-    | CommitSector 1
-    | SubmitPost 2
-    | SlashStorageFault 3
-    | GetCurrentProvingSet 4
-    | ArbitrateDeal 5
-    | DePledge 6
-    | GetOwner 7
-    | GetWorkerAddr 8
-    | GetPower 9
-    | GetPeerID 10
-    | GetSectorSize 11
-    | UpdatePeerID 12
-    | ChangeWorker 13
-    | IsSlashed 14
-    | IsLate 15
-} representation keyed
 ```
+
+#### Methods
+
+| Name | Method ID |
+|--------|-------------|
+| `StorageMinerConstructor` | 0 |
+| `CommitSector` | 1 |
+| `SubmitPost` | 2 |
+| `SlashStorageFault` | 3 |
+| `GetCurrentProvingSet` | 4 |
+| `ArbitrateDeal` | 5 |
+| `DePledge` | 6 |
+| `GetOwner` | 7 |
+| `GetWorkerAddr` | 8 |
+| `GetPower` | 9 |
+| `GetPeerID` | 10 |
+| `GetSectorSize` | 11 |
+| `UpdatePeerID` | 12 |
+| `ChangeWorker` | 13 |
+| `IsSlashed` |  14 |
+| `IsLate` | 15 |
 
 #### `Constructor`
 
@@ -1111,14 +1112,16 @@ type PaymentChannel struct {
 
 	laneStates {UInt:LaneState}
 } representation tuple
-
-type PaymentChannelMethod union {
-  | PaymentChannelConstructor 0
-  | UpdateChannelState 1
-  | Close 2
-  | Collect 3
-} representation keyed
 ```
+
+#### Methods
+
+| Name | Method ID |
+|--------|-------------|
+| `PaymentChannelConstructor` | 0 |
+| `UpdateChannelState` | 1 |
+| `Close` | 2 |
+| `Collect` | 3 |
 
 #### `Constructor`
 
@@ -1306,18 +1309,6 @@ type MultisigActorState struct {
     transactions {UInt:Transaction}
 }
 
-type MultisigActorMethod union {
-    | MultisigConstructor 0
-    | Propose 1
-    | Approve 2
-    | Cancel 3
-    | ClearCompleted 4
-    | AddSigner 5
-    | RemoveSigner 6
-    | SwapSigner 7
-    | ChangeRequirement 8
-} representation keyed
-
 type Transaction struct {
     created UInt
     txID UInt
@@ -1329,6 +1320,21 @@ type Transaction struct {
     canceled Bool
 }
 ```
+
+#### Methods
+
+| Name | Method ID |
+|--------|-------------|
+| `MultisigConstructor` | 0 |
+| `Propose` | 1 |
+| `Approve` | 2 |
+| `Cancel` | 3 |
+| `ClearCompleted` | 4 |
+| `AddSigner` | 5 |
+| `RemoveSigner` | 6 |
+| `SwapSigner` | 7 |
+| `ChangeRequirement` | 8 |
+
 
 #### `Constructor`
 
