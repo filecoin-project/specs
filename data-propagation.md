@@ -20,7 +20,7 @@ Blocks are propagated over the libp2p pubsub channel `/fil/blocks`. The followin
 ```sh
 type BlockMessage struct {
   header BlockHeader
-  messages []SignedMessage
+  messages []&SignedMessage
 }
 ```
 
