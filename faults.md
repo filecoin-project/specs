@@ -12,7 +12,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
   - **Check:** The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.
   - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their pledge collateral.
 
-### Market Faults
+### Storage Faults
 
 
 **Definitions**
@@ -56,7 +56,7 @@ TODO: define the above constants
   - *Note*: we could *require* the method be called, as part of the consensus rules (this gets complicated though). In this case, there is a DoS attack where if I make a large number of miners each with a single sector, and fail them all at the same time, the next block miner will be forced to do a very large amount of work. This would either need an extended 'gas limit', or some other method to avoid too long validation times.
   - **Check:** The chain checks that the miners last PoSt submission was before the start of their current proving period, and that the current block is after the generation attack threshold for their current proving period.
   - **Penalization:**
-    - *Economic penalization*: Miner loses all storage collateral.
+    - *Economic penalization*: Miner loses all pledge and storage collateral.
     - *Power penalization*: The miners' power is reduced to `0`.
   - **Recovery**: Only resubmission of the sectors can lead to recovery.
   - *Note*: If a miner is in this state, where they have failed to submit a PoST, any block they attempt to mine will be invalid, even if the election function selects them. (the election function should probably be made to never select them)
@@ -68,17 +68,16 @@ TODO: define the above constants
 - **Reporting:** The miner can specify some sectors that they failed to prove during the proving period.
   - *Note*: These faults are output by the `ProveStorage` routine, and are posted on-chain when posting the proof. This occurs when the miner (for example) has a disk failure, or other local data corruption.
 - **Check:** The chain checks that the proof verifies with the missing sectors.
-- **Penalization:** The miner is penalized for storage collateral and power proportional to the number of missing sectors. The sectors are also removed from the miners proving set.
-  - TODO: should the storage collateral lost here be proportional to the remaining time?
+- **Penalization:** The miner is penalized pledge collateral, storage collateral and power proportional to the number of missing sectors. The sectors are also removed from the miners proving set.
 - **Recovery**:
-  - Faulty sectors have to resubmitted
+  - The faulted sectors must be re-submitted as if there were new sectors. 
 - *Note*: In the case where a miner is temporarily unable to prove some of their data, they can simply wait for the temporary unavailability to recover, and then continue proving, submitting the proofs a bit late if necessary (paying appropriate fees, as described above).
 
 
 #### Breach of contract dispute
 
-- **Condition:** A client who has stored data with a miner, and the miner removes the sector containing that data before the end of the agreed upon time period.
+- **Condition:** A client who has stored data with a miner, and the miner removes the sector containing that data before the end of the agreed upon time period. This removal can happen through a reported storage fault, or through the miner simply marking the sector as 'done' in their PoSt submission.
 - **Reporting:** The client invokes `ArbitrateDeal` on the offending miner actor with a signed deal from that miner for the storage in question. Note: the reporting must happen within one proving period of the miner removing the storage erroneously.
 - **Check:** The chain checks that the deal was correctly signed by the miner in question, that the deal has not yet expired, and that the sector referenced by the deal is no longer in the miners proving set.
-- **Penalization:** The miner is penalized an amount proportional to the incorrectly removed sector. This penalty is taken from their storage collateral .
+- **Penalization:** The miner is penalized an amount proportional to the incorrectly removed sector. This penalty is taken from their storage collateral.
 - *Note*: This implies that miners cannot re-seal data into different sectors. We could come up with a protocol where the client gives the miner explicit consent to re-seal, but that is more complicated and can be done later.
