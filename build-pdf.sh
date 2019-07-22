@@ -26,7 +26,7 @@ files=(
     payments.md
     faults.md
     zigzag-circuit.md
-    zigzap-porep.md
+    zigzag-porep.md
     definitions.md
     style.md
     process.md

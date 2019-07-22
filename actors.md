@@ -256,12 +256,12 @@ type CreateStorageMiner struct {
 **Algorithm**
 
 ```go
-func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Address {
+func CreateStorageMiner(worker Address, owner Address, sectorSize BytesAmount, pid PeerID) Address {
 	if !SupportedSectorSize(sectorSize) {
 		Fatal("Unsupported sector size")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(worker, owner, pledge, sectorSize, pid))
 
 	self.Miners.Add(newminer)
 
@@ -531,6 +531,7 @@ Along with the call, the actor must be created with exactly enough filecoin for 
 ```sh
 type StorageMinerConstructor struct {
     worker Address
+    owner Address
     sectorSize BytesAmount
     peerId PeerId
 } representation tuple
@@ -539,11 +540,14 @@ type StorageMinerConstructor struct {
 **Algorithm**
 
 ```go
-func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
-	self.Owner = message.From
+func StorageMinerActor(worker Address, owner Address, sectorSize BytesAmount, pid PeerID) {
+	self.Owner = owner
 	self.Worker = worker
 	self.PeerID = pid
 	self.SectorSize = sectorSize
+  
+  self.Sectors = EmptySectorSet()
+  self.ProvingSet = EmptySectorSet()
 }
 ```
 

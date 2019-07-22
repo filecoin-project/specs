@@ -1,25 +1,19 @@
-# Filecoin Client Data Processing
+# Client Data Processing
 
-Data that clients wish to store must be pre-processed before it can be sent to miners and have a storage deal made for it.
+This document describes two formats:
 
-This processing is comprised of two top-level pieces:
+- **Transfer format**
+- **Storage format**
 
-1. **Transfer Encoding**
-2. **Storage Encoding**
+## Transfer formats
 
-Transfer Encoding is a pre-processing for the file to allow it to be transferred over the network more easily. Both for the initial transfer to the storage miner, and for later retrievals. This mechanism can be done in any way that is supported by the client and the miner (alternative strategies may be implemented).
+The transfer format is the format to transfer a file over the network. This format SHALL be used for the initial transfer (from clients to storage miners) and for later retrievals (from storage miners to the clients).
 
-Storage Encoding is a pre-processing for the file that allows the Filecoin storage market and proofs to reference the data. Filecoin operates on a special type of merkle tree generated with a function we call `RepHash`. The root hash of this merkle tree is called the `Piece Commitment` or `CommP` and is included in the deal when it is proposed to a miner.
-
-The next sections will go into some additional detail on how each of these encodings works.
-
-## Transfer Encoding
-
-Transfer Encoding may be computed in a variety of ways, as long as it is supported by both the client and miner involved. Here, we document the `unixfsv1` transfer encoding.
+The default transfer format is `unixfsv1`. Cliens MAY agree to use other formats of their preference.
 
 ### `unixfsv1`
 
-The default transfer encoding is Unixfsv1 with the following parameters:
+The default transfer format is Unixfsv1 with the following parameters:
 
 - Chunking: Fixed, 1MB
 - Leaf Format: Raw
@@ -27,45 +21,30 @@ The default transfer encoding is Unixfsv1 with the following parameters:
 
 For details on how UnixfsV1 works, see its spec [here](https://github.com/ipfs/specs/tree/master/unixfs).
 
-## Storage Encoding
+## Storage Formats
 
-Storage Encoding is computed by building a merkle tree out of the data using `RepHash`.
+The Storage Format MUST be use for generating Filecoin proofs and hashing sectors data. 
 
-Inputs to `RepHash` must first be preprocessed then padded.
+The current required storage format is `paddedfr32v1`.
 
-__*Preprocessing*__ adds two zero bits after every 254 bits of original data, yielding a sequence of 32-byte blocks, each of which contains two zeroes in the most-significant bits, when interpreted as a little-endian number. That is, for each block, `0x11000000 & block[31] == 0`.
+### `paddedfr32v1`
 
-Next, __*piece padding*__ is added: blocks of 32 zero bytes are added so that the total number of blocks (including __*piece padding*__) is a power of two.
+A correctly formatted `paddedfr32v1` data must have:
 
-`RepHash` constructs a binary merkle tree from the resulting blocks, designated as the *leaves* — by applying the __*RepHash Compression Function*__, `RepCompress`, to adjacent pairs of leaves. The final result is the merkle root of the constructed tree.
+- **Fr32 Padding**: Every 32 bytes blocks MUST contain two zeroes in the most significant bits (every 254 bits must be followed by 2 zeroes if interpreted as little-endian number). That is, for each block, `0x11000000 & block[31] == 0`.
+- **Piece Padding**: blocks of 32 zero bytes MUST be added so that the total number of blocks (including *piece padding*) is a power of two.
 
-```go
-type node [32]uint8
+**Why do we need a special Storage Encoding Format?** In the Filecoin proofs we do operations in an arithmetic field of size `p`, where `p` is a prime of size `2^255`, hence the size of the data blocks must be smaller than `p`. We cautiously decide to have data blocks of size 254 to avoid possible overflows (data blocks numerical representation is bigger than `p`). 
 
-// Create and return the root of a binary merkle tree.
-// len(leaves) must be a power of 2.
-func RepHash(leaves node) node {
-	currentRow := leaves
-	for height := 0; len(currentRow) > 1; height += 1 {
-		var nextRow []node
 
-		for i := 0; i < len(row)/2; i += 2 {
-			left := row[i]
-			right := row[i+1]
 
-			// NOTE: Depending on choice of RepCompress, heightPart may be trimmed to fewer than 8 bits.
-			heightPart := []uint8{height}
+## Piece Commitment
 
-			input1 := append(heightPart, left...)
-			input := append(input1, right...)
-			hashed = RepCompress(input)
-			nextRow = append(nextRow, hashed)
-		}
+TODO: check if this section is not already repeated
 
-		currentRow = nextRow
-	}
+A piece commitment (`CommP`) is a commitment to a file that a client wants to store in Filecoin. A client MUST store `CommP` in order to check the integrity of a stored file for future retreaval and MUST include it in the deal when proposing it to a miner.
 
-	return currentRow[0]
-}
+### CommP
 
-```
+`CommP` is the root hash of a piece that a clients wants to store in Filecoin and it is generated on using `RepHash` (as described in TODO) on some raw data that respects the Storage Formats. 
+

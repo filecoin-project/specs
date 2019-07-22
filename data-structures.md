@@ -81,6 +81,15 @@ type BlockHeader struct {
 } representation tuple
 ```
 
+## VRF Personalization
+
+We define VDF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. [Ticket](#ticket) and [ElectionProof](#electionproof)).
+
+| Type          | Prefix |
+| ------------- | ------ |
+| Ticket        | `0x01` |
+| ElectionProof | `0x02` |
+
 ## Ticket
 
 A ticket is a shared random value stapled to a particular block in the chain. Every miner must produce a new ticket each time they run a leader election attempt. In that sense, every new block produced will have one or more associated tickets (in the case the block took multiple leader election attempts to produce).

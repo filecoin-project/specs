@@ -42,6 +42,9 @@ type VMContext interface {
 	// Storage provides access to the VM storage layer
 	Storage() Storage
 
+	// Origin is the address of the account that initiated the top level invocation
+	Origin() Address
+
 	// Send allows the current execution context to invoke methods on other actors in the system
 	Send(to Address, method string, value AttoFIL, params []interface{}) ([][]byte, uint8, error)
 
