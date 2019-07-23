@@ -329,8 +329,6 @@ Due to network propagation delay, it is possible for a miner in round N+1 to omi
 
 ### Chain Weighting
 
-TODO: ensure 'power' is properly and clearly defined
-
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
 
 The weight at each block is equal to its `ParentWeight` plus that block's delta weight. Delta
@@ -338,7 +336,13 @@ weight is a term P times the sum of a constant `V` times the number of blocks in
 
 `Weight = ParentWeight + P(V*NumBlocksMinedInThisRound + X)`
 
- The exact value for these parameters remain to be determined, but for now we set:
+The weight should be rounded down to its fourth decimal at each height (i.e. each time it is recalculated).
+
+```sh
+Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
+```
+
+ The exact value for these parameters remain to be determined, but for illustration, we can set:
 
 - `V = 2 * number of blocks in the round`
 - `X = log(TotalPower in Power Table l blocks back)`
