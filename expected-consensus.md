@@ -284,13 +284,13 @@ The parameter L, used above to generate an `ElectionProof` must be chosen such t
 
 This means that L must be such that power changes for a given miner are eventually reflected in their likelihood of mining a block, as determined by the use of the [storage market actor](actors.md#storage-market-actor)'s `GetTotalStorage` and `PowerLookup` methods, outlined [above](#checking-election-results).
 
-To retrieve the appropriate state of the `storage market actor` at the height at which they submitted their last valid PoSt. That is height `miner.ProvingPeriodEnd - miner.ProvingPeriod`.
+To retrieve the appropriate state of the `storage market actor` at the height at which they submitted their before-last valid PoSt: that way, it accounts for storage which was proven again, i.e. which can be known not to have been dropped. That is height `miner.ProvingPeriodEnd - 2*miner.ProvingPeriod`.
 
 To illustrate this, an example:
 
-Miner M1 submits a PoST at height 10, and has proving period 30. Their `provingPeriodEnd` will be 40, and M1 can submit a new PoST at height X, for X in (10, 40]. Their next `provingPeriodEnd` will be X + 30. Let's assume X is 39.
+Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 10, another at height 39. Their next `provingPeriodEnd` will be 69, but M1 can submit a new PoST at height X, for X in (39, 69]. Let's assume X is 67.
 
-At height Y in (10, 39], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 10; at height 40, M1 will use the storage market from height 39.
+At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 10; at height 68, M1 will use the storage market from height 39.
 
 ### Block Generation
 
