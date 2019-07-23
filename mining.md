@@ -1,6 +1,6 @@
 ### What is the Filecoin Mining Process
 
-An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
+An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
 
 Any block proposer must be a storage miner, but storage miners can avoid performing the block proposer tasks, however in this way, they will be losing out on block rewards and transaction fees.
 
@@ -109,7 +109,7 @@ Chain selection is a crucial component of how the Filecoin blockchain works. Eve
 
 The block structure and serialization is detailed in [the datastructures spec - block](data-structures.md#block). Check there for details on fields and types.
 
-In order to validate a block coming in from the network at round `N` was well mined a miner must do the following:
+In order to validate a block coming in from the network at height `N` was well mined a miner must do the following:
 
 ```go
 func VerifyBlock(blk Block) {
@@ -278,7 +278,7 @@ If a miner fails to generate a valid `ElectionProof` using their lookback ticket
 
 If the miner hears of no new blocks, they must instead draw a new ticket to scratch in order to try leader election again (as other miners will). In order to do so, they must generate a new ticket once more.
 
-Now, rather than generating this new ticket from the smallest ticket from the parent TipSet (as above), the miner will instead use their ticket from the last round, now in the `Tickets` array.
+Now, rather than generating this new ticket from the smallest ticket from the parent TipSet (as above), the miner will instead use their ticket from the last height, now in the `Tickets` array.
 
 This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner's own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see [Chain Selection](expected-consensus.md#chain-selection) for more details).
 

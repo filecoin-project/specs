@@ -67,17 +67,13 @@ See [Filecoin Proofs](proofs.md)
 
 #### Election Proof
 
-An `ElectionProof` is derived from a past `ticket` and is included in every block header. The `ElectionProof` proves that the miner was eligible to mine a block in that `round`.
+An `ElectionProof` is derived from a past `ticket` and is included in every block header. The `ElectionProof` proves that the miner was eligible to mine a block at that `height`.
 
 #### Erasure coding
 
 Erasure coding is a strategy through which messages can be lengthened so as to be made recoverable in spite of errors.
 
 See [Wikipedia](https://en.wikipedia.org/wiki/Erasure_code)
-
-#### Epoch
-
-An `epoch` is the period in which a new block is generated. There may be multiple `rounds` in an epoch.
 
 #### Fault
 
@@ -109,7 +105,11 @@ The Generation Attack Threshold is equal to the Polling Time + some Grace Period
 
 #### Height
 
-`Height` refers to the number of `TipSets` that have passed between this `TipSet` and the genesis block (which starts at block height 0). If a `TipSet` contains multiple blocks, each block in the TipSet will have the same `height`.
+`Height` and `round` are synonymous and used interchangeably in this spec.
+
+`Height` refers to the number of tickets generated between this `TipSet` and the genesis block (height 0), counting only a single ticket per TipSet. If a `TipSet` contains multiple blocks, each block in the TipSet will have the same `height`.
+
+Put another way, there is a new `round` of leader election attempts at each `height`. Typically, such an attempt will find a single leader. If a single leader is found, that leader can generate a single block. If multiple leaders are found, they can each generate multiple blocks in the given round. If no leader is found, no block is generated (but a ticket is).
 
 #### Leader
 
@@ -217,9 +217,7 @@ Repair refers to the processes and protocols by which the Filecoin network ensur
 
 #### Round
 
-A round refers to the period over which a new leader election occurs and a block is generated if a leader is found. Typically this means a new block will be mined at every round, though.
-
-A `round` is the period in which a miner runs leader election to attempt to generate a new block. It may succeed, or zero or multiple blocks may be generated instead in that round. Every `round`, one `ticket` is produced. Thus, the duration of a round is currently bounded by the duration of the Verifiable Delay Function (VDF) that is run to generate a `ticket`. Because one `ticket` is produced per `round`, the number of `tickets` is the same as the number of `rounds` that have passed.
+See `Height` for definition. They are synonymous.
 
 #### SEAL/UNSEAL
 
@@ -253,7 +251,7 @@ A `ticket` is used as a source of randomness in EC leader election. Every block 
 
 #### TipSet
 
- A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block in the same `round` as another miner.
+ A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block at the same `height` as another miner.
 
 #### Verifiable
 

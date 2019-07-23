@@ -12,9 +12,8 @@ Some important concepts relevant to expected consensus are:
 - [Verifiable Delay Function (VDF)](definitions.md#vdf)
 - [Verifiable Random Function (VRF)](defintions.md#vrf)
 - [TipSet](definitions.md#tipset)
-- [Height](definitions.md#height)
+- [Height](definitions.md#height) -- In the realm of EC, it is worth noting that a new ticket must be produced at every height, consequently the duration of a round is bounded by the duration of the Verifiable Delay Function run to generate a ticket.
 - [Weight](definitions.md#weight)
-- [Round](definitions.md#round) -- In the realm of EC, it is worth noting that a new ticket is produced at every round, consequently the duration of a round is currently bounded by the duration of the Verifiable Delay Function run to generate a ticket.
 - [Power Fraction](definitions.md#power-fraction)
 - [ElectionProof](definitions.md#electionproof)
 
@@ -286,7 +285,7 @@ All valid blocks generated in a round form a `TipSet` that participants will att
 - All blocks in a TipSet have the same parent TipSet
 - All blocks in a TipSet have the same number of tickets in their `Tickets` array
 
-The first condition implies that all blocks in a TipSet were mined at the same height (remember that height refers to block height as opposed to ticket round). This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a TipSet bringing these blocks together. The second rule means blocks in a TipSet are mined in a same round.
+These conditions imply that all blocks in a TipSet were mined at the same height. This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a TipSet bringing these blocks together. The second rule means blocks in a TipSet are mined in a same round.
 
 The blocks in a tipset have no defined order in representation. During state computation, blocks in a tipset are processed in order of block ticket, breaking ties with the block CID bytes.
 
@@ -369,9 +368,5 @@ func AddFailedTicket(parent Tipset, t Ticket)
 
 ## Open Questions
 
-- Parameter K, Parameter L
-- When selecting between two forks of equal weight, one strategy might be to select the 'Tipset' with the lowest number of linked tickets for a given block height and weight.
 - Should there be a minimum power required to participate in the consensus process?
-- How long should 'valid' candidate blocks be kept around? Essentially the question is: when is finality?
-- How should block rewards be assigned in the expected consensus setting?
 - VDF difficulty adjustment
