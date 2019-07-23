@@ -161,9 +161,13 @@ A piece is a portion of a file that gets fitted into a sector.
 
 Security Parameter. Polling time is the time between two online PoReps in a PoSt proof.
 
+#### Power
+
+See `Power Fraction`.
+
 #### Power Fraction
 
-A miner's `Power Fraction` is the ratio of their committed storage over Filecoin's committed storage. It is used in leader election.
+A miner's `Power Fraction` or `Power` is the ratio of their committed storage over Filecoin's committed storage. It is used in leader election.
 
 ####  Power table
 
