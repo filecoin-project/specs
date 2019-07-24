@@ -69,7 +69,7 @@ To check if the miner won the round, she runs `CheckIfWinnerAtRound`. In this me
 
 ```go
 const RandomnessLookback = 1 // Also referred to as "K" in many places
-const PowerLookback          // Also referred to as "L" in many places
+PowerLookback                // Per miner param, also referred to as "L" in many places
 
 func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool, ElectionProof) {
   lbt := ChainTipsMgr.TicketFromRound(parentTipset, n-RandomnessLookback)
@@ -243,20 +243,21 @@ Output: 1 or 0
 2. Draw parentTicket from K blocks back (see ticket creation above for example) 
 3. Run it through VRF and get determinstic output
 	i.   # take the VDFOutput of that ticket as input, specified for the appropriate operation type
-				input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
+		input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
 	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-				newEP.VRFProof <-- ECVRF_prove(SK, input)
+		newEP.VRFProof <-- ECVRF_prove(SK, input)
 	iii. # draw a deterministic, pseudorandom output from this
-				VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
+		VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
 3. Determine if the miner drew a winning lottery ticket
 	i.  # Map the VRFOutput onto [0,1], with HashLen of 32 Bytes using sha264
-  			scratchValue <-- VRFOutput / {1}^HashLen
+  		scratchValue <-- VRFOutput / {1}^HashLen
     ii. # Compare the miner's scratchValue to the miner's power fraction
-  	
-  If scratchValue <= p_f then parentTicket is a winning lottery ticket
-    Return newEP
-    iii. If scratchValue > p_f then parentTicket is not a winning lottery ticket
-        Return 0
+        # winning ticket
+        if scratchValue <= p_f
+            return newEP
+        # otherwise parentTicket is not a winning lottery ticket
+        else 
+            Return 0
 ```
 
 If the miner scratches a winning ticket in this round, it can use newEP, along with a newTicket to generate and publish a new block (see [Block Generation](#block-generation)). Otherwise, it waits to hear of another block generated in this round.
