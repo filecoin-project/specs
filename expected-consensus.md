@@ -40,7 +40,7 @@ func OnBlockReceived(blk Block) {
 }
 ```
 
-Meanwhile, the mining node runs a mining process to attempt to generate blocks. In `Mine`, the node identifies the best TipSet in each round and generates a ticket for each round. These inputs are used to see if the miner won the round. If the miner wins the round, she produces a block and broadcasts it. If not, we still maintain the list of tickets that were generated so the miner can try again next round.
+Meanwhile, the mining node runs a mining process to attempt to generate blocks. In `Mine`, the node identifies the best TipSet in each round and generates a ticket from it. In parallel, it uses a past ticket to try and generate a valid `ElectionProof` thereby enabling it to mine a new block. If no valid `ElectionProof` is produced, the miner mines a new ticket atop their old one and tries again at a new height.
 
 ```go
 func Mine(minerKey PrivateKey) {
@@ -65,20 +65,21 @@ func Mine(minerKey PrivateKey) {
 }
 ```
 
-To check if the miner won the round, she runs `CheckIfWinnerAtRound`. In this method, the miner takes her ticket from a prior round (which round to look at is specified  by the lookback parameter), computes an ElectionProof, and returns whether the proof indicates that the miner has won the round. In the pseudocode below, `IsProofAWinner` is taken from [the mining doc](mining.md#block-validation).
+To check if the miner won the round, she runs `CheckIfWinnerAtRound`. In this method, the miner takes their ticket from a prior round (which round to look at is specified by the randomness lookback parameter), computes an ElectionProof, and returns whether the proof indicates that the miner has won the round. In the pseudocode below, `IsProofAWinner` is taken from [the mining doc](mining.md#block-validation).
 
 ```go
 const RandomnessLookback = 1 // Also referred to as "K" in many places
-const PowerLookback = 1      // Also referred to as "L" in many places
+const PowerLookback          // Also referred to as "L" in many places
 
 func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool, ElectionProof) {
   lbt := ChainTipsMgr.TicketFromRound(parentTipset, n-RandomnessLookback)
 
   eproof := ComputeElectionProof(lbt, key)
 
-  tipset := ChainTipsMgr.TipsetFromRound(n - PowerLookback)
-  minerPower := GetPower(tipset.state, key.Public())
-  totalPower := GetTotalPower(tipset.state)
+  minerTipset := ChainTipsMgr.TipsetFromRound(n - PowerLookback)
+  totalTipset := ChainTipsMgr.TipsetFromRound(n - 1)
+  minerPower := GetPower(minerTipset.state, key.Public())
+  totalPower := GetTotalPower(totalTipset.state)
 
   return IsProofAWinner(eproof, minerPower, totalPower), eproof
 }
@@ -144,9 +145,9 @@ the prior block, or "losing" tickets generated in this epoch.
 This is done by generating an 'ElectionProof' derived from a ticket sampled K rounds
 back.
 
-But why the lookback?
+But why the randomness lookback?
 
-The lookback helps turn independent lotteries (ticket drawings from a block one round back)
+The randomness lookback helps turn independent lotteries (ticket drawings from a block one round back)
 into a global lottery instead. Rather than having a distinct chance of winning or losing
 for each potential fork in a given round, a miner will either win on all or lose on all
 forks descended from the block in which the ticket is sampled.
@@ -154,7 +155,7 @@ forks descended from the block in which the ticket is sampled.
 This is useful as it reduces opportunities for grinding, across forks or sybil identities.
 
 However this introduces a tradeoff:
-- The lookback means that a miner can know K rounds in advance that they will win,
+- The randomness lookback means that a miner can know K rounds in advance that they will win,
 decreasing the cost of running a targeted attack (given they have local predictability).
 - It means electionProofs are stored separately from new tickets on a block, taking up
 more space on-chain.
@@ -188,22 +189,22 @@ Output: newTicket
 	i. newTicket <-- New()
 1. Draw prior ticket
 	i. 	 # take the last ticket for each parent 'Tickets' array
-				lastTickets <-- map(parentTickets, fun(x): x.last)
+			lastTickets <-- map(parentTickets, fun(x): x.last)
 	ii.  # sort these tickets 
   			sortedTickets <-- Sort(lastTickets)
-  iii. # draw the smallest ticket
+    iii. # draw the smallest ticket
   			parentTicket <-- min(sortedTickets)
 2. Run it through VRF and get determinstic output
 	i.   # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
-				input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
+			input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
 	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-				newTicket.VRFProof <-- ECVRF_prove(SK, input)
+			newTicket.VRFProof <-- ECVRF_prove(SK, input)
 	iii. # draw a deterministic output from this
-				VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
+			VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
 3. Run that deterministic output through a VDF
-  i.  # run eval with our VDF and its evaluation k on VRFOutput
+    i.  # run eval with our VDF and its evaluation k on VRFOutput
   			y, pi <-- Eval(ek, VRFOutput)
-  ii. # Store the output and proof in our ticket
+    ii. # Store the output and proof in our ticket
   			newTicket.VDFOutput <-- y
   			newTicket.VDFProof 	<-- pi
 4. Return the new ticket
@@ -213,7 +214,7 @@ Output: newTicket
 
 Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see [election validation](mining.md#election-validation).
 
-To do so, the miner will use tickets from K blocks back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power (their committed storage relative to the network's total storage) L blocks back, they determine whether they are eligible to mine.
+To do so, the miner will use tickets from K blocks back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power (their committed storage relative to the network's total storage) L rounds back (using total network power as of 1 round back to account for recent power changes), they determine whether they are eligible to mine.
 
 Succinctly, the process of crafting a new `ElectionProof` in round `N` is as follows. We use:
 
@@ -231,12 +232,13 @@ Output: 1 or 0
 0. Prepare new election proof
 	i. newEP <-- New()
 1. Determine the miner's power fraction
-	i. 	# Determine total storage L rounds back
-  		S <-- storageMarket(N-L)
-  		p_n <-- S.GetTotalStorage()
-  ii. # Determine own power L rounds back
-  		p_m <-- S.PowerLookup(self)
-  iii. # Get power fraction
+	i. 	# Determine total storage 1 round back
+  		S_n <-- storageMarket(N-1)
+  		p_n <-- S_n.GetTotalStorage()
+    ii. # Determine own power L rounds back
+        S_m <-- storageMarket(N-L)
+  		p_m <-- S_m.PowerLookup(self)
+    iii. # Get power fraction
   		p_f <-- p_m/p_n
 2. Draw parentTicket from K blocks back (see ticket creation above for example) 
 3. Run it through VRF and get determinstic output
@@ -249,12 +251,12 @@ Output: 1 or 0
 3. Determine if the miner drew a winning lottery ticket
 	i.  # Map the VRFOutput onto [0,1], with HashLen of 32 Bytes using sha264
   			scratchValue <-- VRFOutput / {1}^HashLen
-  ii. # Compare the miner's scratchValue to the miner's power fraction
+    ii. # Compare the miner's scratchValue to the miner's power fraction
   	
   If scratchValue <= p_f then parentTicket is a winning lottery ticket
     Return newEP
-  iii. If scratchValue > p_f then parentTicket is not a winning lottery ticket
-    Return 0
+    iii. If scratchValue > p_f then parentTicket is not a winning lottery ticket
+        Return 0
 ```
 
 If the miner scratches a winning ticket in this round, it can use newEP, along with a newTicket to generate and publish a new block (see [Block Generation](#block-generation)). Otherwise, it waits to hear of another block generated in this round.
@@ -263,7 +265,7 @@ It is important to note that every block contains two artifacts: one, a ticket d
 
 #### Losing Tickets
 
-In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their power in the table `N-(L-1)` blocks back. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
+In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their power in the table `N-(L-1)` rounds back. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
 
 In addition to each attempted `ElectionProof` generation, the miner will need to extend the ticket chain by generating another new ticket. They use the ticket they generated in the prior round, rather than the prior block's (as is normally used). This proves appropriate delay (given that finding a winning Ticket has taken multiple rounds).
 
@@ -278,7 +280,7 @@ New blocks (with multiple tickets) will have a few key properties:
 
 This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array.
 
-#### Getting an actual value for L, the power table lookback
+#### Getting a value for L, the power table lookback
 
 The parameter L, used above to generate an `ElectionProof` must be chosen such that the portion of blocks a given miner generates (and so the block rewards they earn) is proportional to their `Power Fraction` over time.
 
@@ -286,11 +288,13 @@ This means that L must be such that power changes for a given miner are eventual
 
 To retrieve the appropriate state of the `storage market actor` at the height at which they submitted their before-last valid PoSt: that way, it accounts for storage which was proven again, i.e. which can be known not to have been dropped. That is height `miner.ProvingPeriodEnd - 2*miner.ProvingPeriod`.
 
+This power is then compared to the total network power 1 height back.
+
 To illustrate this, an example:
 
 Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 10, another at height 39. Their next `provingPeriodEnd` will be 69, but M1 can submit a new PoST at height X, for X in (39, 69]. Let's assume X is 67.
 
-At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 10; at height 68, M1 will use the storage market from height 39.
+At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 10 for their own power (and an actor from Y-1 for total network power); at height 68, M1 will use the storage market actor from height 39 for their own power, and the storage market actor from height 67 for total power.
 
 ### Block Generation
 
@@ -357,7 +361,7 @@ the reporter, and keep the rest.
 
 TODO: It is unclear that rewarding the reporter any more than gas fees is the right thing to do. Needs thought. Tracking issue: https://github.com/filecoin-project/specs/issues/159
 
-Note: One may wonder what prevents miners from simply breaking up their power into multiple un-linkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. Read more about this [here](https://github.com/filecoin-project/consensus/issues/32).
+Note: One may wonder what prevents miners from simply breaking up their power into multiple unlinkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. Read more about this [here](https://github.com/filecoin-project/consensus/issues/32).
 
 ### ChainTipsManager
 
