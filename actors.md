@@ -519,6 +519,7 @@ type MinerInfo struct {
 | `ChangeWorker` | 14 |
 | `IsSlashed` |  15 |
 | `IsLate` | 16 |
+| `VerifyPieceInclusion` | 17 |
 
 #### `Constructor`
 
@@ -1121,6 +1122,46 @@ func IsSlashed() (bool) {
 }
 ```
 
+#### `VerifyPieceInclusion`
+
+Verifies a storage market payment channel voucher's 'Extra' data.
+
+**Parameters**
+
+```sh
+type PaymentVerfy struct {
+    Extra StorageVoucherData
+    Proof Bytes
+} representation tuple
+
+type StorageVoucherData struct {
+    DataCommitment Bytes
+    RequiredSector Bytes
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func VerifyPieceInclusion(extra StorageVoucherData, proof []byte) {
+	if extra.DataCommitment != nil {
+		if !ValidateInclusion(proof, extra.DataCommitment) {
+      Fatal("piece inclusion proof was invalid")
+    }
+    return
+	}
+
+  if extra.RequiredSector != nil {
+    if !self.HasSector(extra.RequiredSector) {
+      Fatal("miner does not have required sector")
+    }
+    return
+  }
+
+  Fatal("voucher data contained neither data commitment or required sector")
+}
+```
+
 ### Payment Channel Actor
 
 - **Code Cid:** `<codec:raw><mhType:identity><"paych">`
@@ -1139,7 +1180,23 @@ type PaymentChannel struct {
 	minCloseHeight UInt
 
 	laneStates {UInt:LaneState}
+
+	verifActor Address
+	verifMethod Uint
 } representation tuple
+
+type SpendVoucher struct {
+  TimeLock BlockHeight
+  SecretPreimage Bytes
+  Extra Bytes
+}
+
+type PaymentChannelMethod union {
+  | PaymentChannelConstructor 0
+  | UpdateChannelState 1
+  | Close 2
+  | Collect 3
+} representation keyed
 ```
 
 #### Methods
@@ -1157,6 +1214,9 @@ type PaymentChannel struct {
 
 ```sh
 type PaymentChannelConstructor struct {
+  to Address
+  verifActor Address
+  verifMethod Uint
 }
 ```
 
@@ -1176,14 +1236,14 @@ TODO: Define me
 type UpdateChannelState struct {
   sv SignedVoucher
   secret Bytes
-  pip PieceInclusionProof
+  proof Bytes
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
+func UpdateChannelState(sv SpendVoucher, secret []byte, proof []byte) {
 	if !self.validateSignature(sv) {
 		Fatal("Signature Invalid")
 	}
@@ -1198,23 +1258,11 @@ func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof
 		}
 	}
 
-	if sv.DataCommitment != nil {
-		// Checks that the piece inclusion proof is valid, and that the referenced sector
-		// is correctly being stored
-		if !ValidateInclusion(pip, sv.DataCommitment) {
-			Fatal("PieceInclusionProof was invalid")
-		}
-	}
-
-	if sv.RequiredSector != nil {
-		miner, found := GetMiner(msg.From)
-		if !found {
-			Fatal("Redeemer is not a miner")
-		}
-
-		if !miner.HasSector(sv.RequiredSector) {
-			Fatal("miner does not have sector, cannot redeem payment")
-		}
+	if sv.Extra != nil {
+    ret := vmctx.Send(self.verifActor, self.verifMethod, sv.Extra, proof)
+    if ret != 0 {
+      Fatal("spend voucher verification failed")
+    }
 	}
 
 	ls := self.LaneStates[sv.Lane]
