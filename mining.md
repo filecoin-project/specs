@@ -259,7 +259,7 @@ Output: 0, 1
 		i. 	electionProof <-- block.electionProof
 1. Ensure the miner was not slashed since L.
 		i. # Fetch the latest state and the miner
-			S <-- storageMarket(N-1)
+			S <-- storageMarket(N)
 			M <-- storageMinerActor(PK)
 		ii. # Check for a reported fault
 			if !S.IsMiner(PK)
@@ -269,11 +269,11 @@ Output: 0, 1
 				return 0
 2. Determine the miner's power fraction
 		i. 	# Determine total storage 1 round back
-  			S_n <-- storageMarket(N-1)
+  			S_n <-- storageMarket(N)
 	  		p_n <-- S_n.GetTotalStorage()
-		ii. # Determine miner's power L round´s back
+		ii. # Determine miner's power at last valid PoSt submission
   			miner <-- block.miner
-  			S_m <-- storageMarket(N-L)
+  			S_m <-- storageMarket(miner.provingPeriodEnd - provingPeriodDuration(miner.SectorSize)
 	  		p_m <-- S_m.PowerLookup(miner)
 		iii. # Get power fraction
   			p_f <-- p_m/p_n

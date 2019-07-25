@@ -69,19 +69,19 @@ To check if the miner won the round, she runs `CheckIfWinnerAtRound`. In this me
 
 ```go
 const RandomnessLookback = 1 // Also referred to as "K" in many places
-PowerLookback                // Per miner param, also referred to as "L" in many places
 
 func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool, ElectionProof) {
   lbt := ChainTipsMgr.TicketFromRound(parentTipset, n-RandomnessLookback)
 
   eproof := ComputeElectionProof(lbt, key)
 
-  minerTipset := ChainTipsMgr.TipsetFromRound(n - PowerLookback)
-  totalTipset := ChainTipsMgr.TipsetFromRound(n - 1)
-  minerPower := GetPower(minerTipset.state, key.Public())
-  totalPower := GetTotalPower(totalTipset.state)
+  minerPower := GetPower(miner)
+  totalPower := state.GetTotalPower()
 
-  return IsProofAWinner(eproof, minerPower, totalPower), eproof
+  if IsProofAWinner(eproof, minerPower, totalPower)
+    return eproof
+  else
+    return 0
 }
 ```
 
@@ -214,7 +214,7 @@ Output: newTicket
 
 Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see [election validation](mining.md#election-validation).
 
-To do so, the miner will use tickets from K blocks back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power (their committed storage relative to the network's total storage) L rounds back (using total network power as of 1 round back to account for recent power changes), they determine whether they are eligible to mine.
+To do so, the miner will use tickets from K blocks back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power, they determine whether they are eligible to mine. A user's `power` is defined as the ratio of the amount of storage they proved as of their last PoSt submission to the total storage in the network as of the current block.
 
 Succinctly, the process of crafting a new `ElectionProof` in round `N` is as follows. We use:
 
@@ -226,17 +226,18 @@ Succinctly, the process of crafting a new `ElectionProof` in round `N` is as fol
 At round N:
 
 ```text
-Input: parentTickets from N-K, miner's public key PK, miner's secret key SK, the Storage Market actor S, a public parameter L
+Input: parentTickets from N-K, miner's public key PK, miner's secret key SK, the Storage Market actor S
 Output: 1 or 0
 
 0. Prepare new election proof
 	i. newEP <-- New()
 1. Determine the miner's power fraction
 	i. 	# Determine total storage 1 round back
-  		S_n <-- storageMarket(N-1)
+  		S_n <-- storageMarket(N)
   		p_n <-- S_n.GetTotalStorage()
-    ii. # Determine own power L rounds back
-        S_m <-- storageMarket(N-L)
+    ii. # Determine own power as of last submitted PoSt
+        appropriateHeight <-- self.ProvingPeriodEnd - ProvingPeriodDuration(self.SectorSize)
+        S_m <-- storageMarket(appropriateHeight)
   		p_m <-- S_m.PowerLookup(self)
     iii. # Get power fraction
   		p_f <-- p_m/p_n
@@ -281,21 +282,21 @@ New blocks (with multiple tickets) will have a few key properties:
 
 This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array.
 
-#### Getting a value for L, the power table lookback
+#### A note on miners' 'power fraction'
 
-The parameter L, used above to generate an `ElectionProof` must be chosen such that the portion of blocks a given miner generates (and so the block rewards they earn) is proportional to their `Power Fraction` over time.
+The portion of blocks a given miner generates (and so the block rewards they earn) is proportional to their `Power Fraction` over time.
 
-This means that L must be such that power changes for a given miner are eventually reflected in their likelihood of mining a block, as determined by the use of the [storage market actor](actors.md#storage-market-actor)'s `GetTotalStorage` and `PowerLookup` methods, outlined [above](#checking-election-results).
+This means miners should not be able to mine using power they have not yet proven. Conversly, it is acceptable for miners to mine with a slight delay between their proving storage and that proven storage being reflected in leader election. This is reflected in the height at which the [storage market actor](actors.md#storage-market-actor)'s `GetTotalStorage` and `PowerLookup` methods are called, as outlined [above](#checking-election-results).
 
-To retrieve the appropriate state of the `storage market actor` at the height at which they submitted their before-last valid PoSt: that way, it accounts for storage which was proven again, i.e. which can be known not to have been dropped. That is height `miner.ProvingPeriodEnd - 2*miner.ProvingPeriod`.
+The miner retrieves the appropriate state of the `storage market actor` at the height at which they submitted their last valid PoSt: that way, they account for storage which was already proven valid, i.e. they are mining with the power they had in their last proving period. That is the miner will get their own power at height `miner.ProvingPeriodEnd - miner.ProvingPeriod`.
 
-This power is then compared to the total network power 1 height back.
+This power is then compared to the total network power at the current height, in order to account for recent power changes from other miners (and so all miners attempting to mine in this round share 100% of the power).
 
 To illustrate this, an example:
 
-Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 10, another at height 39. Their next `provingPeriodEnd` will be 69, but M1 can submit a new PoST at height X, for X in (39, 69]. Let's assume X is 67.
+Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 39. Their next `provingPeriodEnd` will be 69, but M1 can submit a new PoST at any height X, for X in (39, 69]. Let's assume X is 67.
 
-At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 10 for their own power (and an actor from Y-1 for total network power); at height 68, M1 will use the storage market actor from height 39 for their own power, and the storage market actor from height 67 for total power.
+At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 39 for their own power (and an actor from Y for total network power); at height 68, M1 will use the storage market actor from height 67 for their own power, and the storage market actor from height 68 for total power and so on.
 
 ### Block Generation
 

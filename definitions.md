@@ -167,17 +167,11 @@ See `Power Fraction`.
 
 #### Power Fraction
 
-A miner's `Power Fraction` or `Power` is the ratio of their committed storage over Filecoin's committed storage. It is used in leader election.
+A miner's `Power Fraction` or `Power` is the ratio of their committed storage as of their last PoST submission over Filecoin's total committed storage as of the current block. It is used in leader election.
 
 ####  Power table
 
 The power table is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
-
-#### Power table lookback
-
-Security parameter. A number of rounds to sample back from when determining miner `power` for use in leader election. A higher number can help secure the system by making potential attacks more costly (as power must be maintained for longer to take effect), but also makes mining more costly for the same reason.
-
-Also referred to as `L` in consensus settings. 
 
 #### Protocol
 
