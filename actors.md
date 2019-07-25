@@ -1185,10 +1185,28 @@ type PaymentChannel struct {
 	verifMethod Uint
 } representation tuple
 
-type SpendVoucher struct {
+type SignedVoucher struct {
   TimeLock BlockHeight
   SecretPreimage Bytes
   Extra Bytes
+  Lane Uint
+  Nonce Uint
+  Merges []Merge
+  Amount TokenAmount
+  MinCloseHeight Uint
+
+  Signature Signature
+}
+
+type Merge struct {
+  Lane Uint
+  Nonce Uint
+}
+
+type LaneState struct {
+  Closed bool
+  Redeemed TokenAmount
+  Nonce Uint
 }
 
 type PaymentChannelMethod union {
@@ -1243,7 +1261,7 @@ type UpdateChannelState struct {
 **Algorithm**
 
 ```go
-func UpdateChannelState(sv SpendVoucher, secret []byte, proof []byte) {
+func UpdateChannelState(sv SignedVoucher, secret []byte, proof []byte) {
 	if !self.validateSignature(sv) {
 		Fatal("Signature Invalid")
 	}
@@ -1276,8 +1294,11 @@ func UpdateChannelState(sv SpendVoucher, secret []byte, proof []byte) {
 
 	var mergeValue TokenAmount
 	for _, merge := range sv.Merges {
-		ols := self.LaneStates[merge.Lane]
+    if merge.Lane == sv.Lane {
+      Fatal("voucher cannot merge its own lane")
+    }
 
+		ols := self.LaneStates[merge.Lane]
 		if ols.Nonce >= merge.Nonce {
 			Fatal("merge in voucher has outdated nonce, cannot redeem")
 		}
@@ -1311,6 +1332,10 @@ func UpdateChannelState(sv SpendVoucher, secret []byte, proof []byte) {
 		}
 	}
 }
+
+func Hash(b []byte) []byte {
+  return blake2b.Sum(b)
+}
 ```
 
 #### `Close`
@@ -1325,6 +1350,8 @@ type Close struct {
 **Algorithm**
 
 ```go
+const ChannelClosingDelay = 6 * 60 * 2 // six hours
+
 func Close() {
 	if msg.From != self.From && msg.From != self.To {
 		Fatal("not authorized to close channel")
@@ -1360,8 +1387,11 @@ func Collect() {
 	if chain.Now() < self.ClosingAt {
 		Fatal("Payment channel not yet closed")
 	}
+
 	TransferFunds(self.From, self.ChannelTotal-self.ToSend)
 	TransferFunds(self.To, self.ToSend)
+  self.ToSend = 0
+  self.ChannelTotal = 0
 }
 ```
 
