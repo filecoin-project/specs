@@ -105,6 +105,7 @@ Unseal
   outputPath    string,   // path to which unsealed bytes will be written (regular file, ramdisk, etc.)
   proverID      [31]byte, // uniquely identifies miner
   sectorID      [31]byte, // uniquely identifies sector
+  ticket        [32]byte, // ticket to which miner committed when sealing began
   startOffset   uint64,   // zero-based byte offset in original, unsealed sector-file
   numBytes      uint64,   // number of bytes to unseal (corresponds to contents of unsealed sector-file)
  ) err Error |
