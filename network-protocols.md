@@ -81,7 +81,7 @@ type StorageDealProposal struct {
 	totalPrice TokenAmount
 
 	## Duration is how long the file should be stored for
-	Duration Int
+	Duration NumBlocks
 
 	## A reference to the mechanism that the proposer will use to pay the miner. It should be
     ## verifiable by the miner using on-chain information.
