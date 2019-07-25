@@ -232,7 +232,7 @@ Output: 1 or 0
 0. Prepare new election proof
 	i. newEP <-- New()
 1. Determine the miner's power fraction
-	i. 	# Determine total storage 1 round back
+	i. 	# Determine total storage this round
   		S_n <-- storageMarket(N)
   		p_n <-- S_n.GetTotalStorage()
     ii. # Determine own power as of last submitted PoSt

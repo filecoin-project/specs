@@ -268,7 +268,7 @@ Output: 0, 1
 			if M.ProvingPeriodEnd < N
 				return 0
 2. Determine the miner's power fraction
-		i. 	# Determine total storage 1 round back
+		i. 	# Determine total storage this round
   			S_n <-- storageMarket(N)
 	  		p_n <-- S_n.GetTotalStorage()
 		ii. # Determine miner's power at last valid PoSt submission
