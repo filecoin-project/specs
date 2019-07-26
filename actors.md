@@ -1092,6 +1092,45 @@ func ChangeWorker(addr Address) {
 }
 ```
 
+#### `IsLate`
+
+IsLate checks whether the miner has submitted their PoSt on time (i.e. not after ProvingPeriodEnd).
+
+**Parameters**
+
+```sh
+type IsLate struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func IsLate() (bool) {
+    return self.provingPeriodEnd < VM.CurrentBlockHeight()
+}
+```
+
+#### `IsSlashed`
+
+Checks whether the miner has been slashed and not recovered. Note that if the miner is slashed and recovers, this will return False: it checks current state rather than historical occurence.
+
+**Parameters**
+
+```sh
+type IsSlashed struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func IsSlashed() (bool) {
+    # SlashedAt is reset on recovery
+    return self.SlashedAt > 0
+}
+```
+
 ### Payment Channel Actor
 
 - **Code Cid:** `<codec:raw><mhType:identity><"paych">`

@@ -136,19 +136,6 @@ func GetMinersPowerAt(ts TipSet, m Address) Integer {
 }
 ```
 
-```go
-func IsLate() (bool) {
-    return self.provingPeriodEnd < VM.CurrentBlockHeight()
-}
-```
-
-```go
-func IsSlashed() (bool) {
-    return self.SlashedAt > 0
-}
-```
-
-
 ### Power Updates
 
 Whenever a new [PoSt](proofs.md) or [Fault](faults.md) makes it on chain, the storage market updates the underlying power values appropriately.
