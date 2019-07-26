@@ -10,16 +10,13 @@ headless: true
 * Cryptography
   * [Address]({{< relref "/docs/address.md" >}})
   * [Signatures]({{< relref "/docs/signatures.md" >}})
-  * [Proofs]({{< relref "/docs/proofs.md" >}})
   * [Block Validation]({{< relref "/docs/validation.md" >}})
-* [Network]({{< relref "/docs/network-protocols.md" >}})
-  * [Bootstrapping]({{< relref "/docs/bootstrap.md" >}})
+* [Network]({{< relref "/docs/networking.md" >}})
   * [Data Propagation]({{< relref "/docs/data-propagation.md" >}})
-  * [Chain Sync]({{< relref "/docs/sync.md" >}})
+  * [Specific Protocols]({{< relref "/docs/network-protocols.md" >}})
 * [Expected Consensus]({{< relref "/docs/expected-consensus.md" >}})
 * [State Machine]({{< relref "/docs/state-machine.md" >}})
   * [Local Storage]({{< relref "/docs/local-storage.md" >}})
-* [Node Operation]({{< relref "/docs/operation.md" >}})
 
 [**Actors**]({{< relref "/docs/actors.md" >}})
 
@@ -29,9 +26,10 @@ headless: true
 * [Payments]({{< relref "/docs/payments.md" >}})
 * [Faults]({{< relref "/docs/faults.md" >}})
 
-**Proofs**
+[**Proofs**]({{< relref "/docs/proofs.md" >}})
 
-* [ZigZag]({{< relref "/docs/zigzag-circuit.md" >}})
+* [Proof-of-Replication]({{< relref "/docs/zigzag-porep.md" >}})
+  * [Circuit]({{< relref "/docs/zigzag-circuit.md" >}})
 
 [**Glossary**]({{< relref "/docs/definitions.md" >}})
 
