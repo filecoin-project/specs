@@ -282,33 +282,29 @@ type SlashConsensusFault struct {
 **Algorithm**
 
 ```go
-func shouldSlash(block1, block2 BlockHeader) bool {
+func shouldSlash(block1, block2 BlockHeader, block1Parents TipSet) bool {
 	// First slashing condition, blocks have the same ticket round
 	if sameTicketRound(block1, block2) {
 		return true
 	}
 
-	// Second slashing condition, miner ignored own block when mining
-	// Case A: block2 could have been in block1's parent set but is not
-	block1ParentTipSet := parentOf(block1)
-	if !block1Parent.contains(block2) &&
-		block1ParentTipSet.Height == block2.Height &&
-		block1ParentTipSet.ParentCids == block2.ParentCids {
-		return true
-	}
-
-	// Case B: block1 could have been in block2's parent set but is not
-	block2ParentTipSet := parentOf(block2)
-	if !block2Parent.contains(block1) &&
-		block2ParentTipSet.Height == block1.Height &&
-		block2ParentTipSet.ParentCids == block1.ParentCids {
+	// Second slashing condition, miner ignored own block when mining.
+	// block2 could have been in block1's parent set but is not
+	// verify that block1's parents don't contain block2
+	if block1Parents.Cids == block1.ParentCids &&
+		!block1Parents.contains(block2) &&
+		block1Parents.Height == block2.Height &&
+		block1Parents.ParentCids == block2.ParentCids {
 		return true
 	}
 
 	return false
 }
 
-func SlashConsensusFault(block1, block2 BlockHeader) {
+// Precondition: if submitting a type (2) consensus fault (see expected-consensus.md)
+// then the order of the first two arguments must match the type (2) fault definition
+// for the fault to be correctly registered.
+func SlashConsensusFault(block1, block2 BlockHeader, block1Parents TipSet) {
 	if !ValidateSignature(block1.Signature) || !ValidSignature(block2.Signature) {
 		Fatal("invalid blocks")
 	}
@@ -319,7 +315,7 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 
 	// see the "Consensus Faults" section of the faults spec (faults.md)
 	// for details on these slashing conditions.
-	if !shouldSlash(block1, block2) {
+	if !shouldSlash(block1, block2, block1Parents) {
 		Fatal("blocks do not prove a slashable offense")
 	}
 
