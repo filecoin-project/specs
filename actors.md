@@ -91,7 +91,7 @@ type Exec struct {
 **Algorithm**
 
 ```go
-func Exec(code &Code, params ActorMethod) Address {
+func Exec(code Code, params ActorMethod) Address {
 	// Get the actor ID for this actor.
 	actorID = self.NextID
 	self.NextID++
@@ -151,7 +151,7 @@ This method allows for fetching the corresponding ID of a given Address
 
 **Parameters**
 
-```go
+```sh
 type GetIdForAddress struct {
     addr Address
 } representation tuple
@@ -202,7 +202,7 @@ type GetAddress struct {
 
 ```go
 func GetAddress() Address {
-    return self.address
+	return self.address
 }
 ```
 
@@ -391,7 +391,7 @@ func GetTotalStorage() BytesAmount {
 type PowerLookup struct {
     miner Address
 } representation tuple
-````
+```
 
 **Algorithm**
 
@@ -450,6 +450,47 @@ func StorageCollateralforSize(size UInt) TokenAmount {
 
 ```sh
 type StorageMinerActorState struct {
+  ## contains mostly static info about this miner
+  info &MinerInfo
+
+
+    ## Collateral that is waiting to be withdrawn.
+    dePledgedCollateral TokenAmount
+
+	## Time at which the depledged collateral may be withdrawn.
+    dePledgeTime BlockHeight
+
+	## All sectors this miner has committed.
+    sectors &SectorSet
+
+	## Sectors this miner is currently mining. It is only updated
+	## when a PoSt is submitted (not as each new sector commitment is added).
+    provingSet &SectorSet
+
+	## Sectors reported during the last PoSt submission as being 'done'. The collateral
+    ## for them is still being held until the next PoSt submission in case early sector
+    ## removal penalization is needed.
+    nextDoneSet BitField
+
+	## Deals this miner has been slashed for since the last post submission.
+    arbitratedDeals {Cid:Null}
+
+	## Amount of power this miner has.
+    power UInt
+
+    ## List of sectors that this miner was slashed for.
+    slashedSet optional &SectorSet
+
+    ## The height at which this miner was slashed at.
+    slashedAt optional BlockHeight
+
+    ## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+    owedStorageCollateral TokenAmount
+
+    provingPeriodEnd BlockHeight
+}
+
+type MinerInfo struct {
 	## Account that owns this miner.
     ## - Income and returned collateral are paid to this address.
     ## - This address is also allowed to change the worker address for the miner.
@@ -467,41 +508,6 @@ type StorageMinerActorState struct {
     ## Amount of space in each sector committed to the network by this miner.
     sectorSize BytesAmount
 
-	## Collateral currently committed to live storage.
-    activeCollateral TokenAmount
-
-    ## Collateral that is waiting to be withdrawn.
-    dePledgedCollateral TokenAmount
-
-	## Time at which the depledged collateral may be withdrawn.
-    dePledgeTime BlockHeight
-
-	## All sectors this miner has committed.
-    sectors SectorSet
-
-	## Sectors this miner is currently mining. It is only updated
-	## when a PoSt is submitted (not as each new sector commitment is added).
-    provingSet SectorSet
-
-	## Sectors reported during the last PoSt submission as being 'done'. The collateral
-    ## for them is still being held until the next PoSt submission in case early sector
-    ## removal penalization is needed.
-    nextDoneSet BitField
-
-	## Deals this miner has been slashed for since the last post submission.
-    arbitratedDeals CidSet
-
-	## Amount of power this miner has.
-    power UInt
-
-    ## List of sectors that this miner was slashed for.
-    slashedSet optional SectorSet
-
-    ## The height at which this miner was slashed at.
-    slashedAt optional BlockHeight
-
-    ## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
-    owedStorageCollateral TokenAmount
 }
 
 type StorageMinerActorMethod union {
@@ -519,6 +525,8 @@ type StorageMinerActorMethod union {
     | GetSectorSize 11
     | UpdatePeerID 12
     | ChangeWorker 13
+    | IsSlashed 14
+    | IsLate 15
 } representation keyed
 ```
 
@@ -541,13 +549,13 @@ type StorageMinerConstructor struct {
 
 ```go
 func StorageMinerActor(worker Address, owner Address, sectorSize BytesAmount, pid PeerID) {
-	self.Owner = owner
-	self.Worker = worker
-	self.PeerID = pid
-	self.SectorSize = sectorSize
-  
-  self.Sectors = EmptySectorSet()
-  self.ProvingSet = EmptySectorSet()
+	self.info.owner = message.From
+	self.info.worker = worker
+	self.info.peerID = pid
+	self.info.sectorSize = sectorSize
+
+	self.sectors = EmptySectorSet()
+	self.provingSet = EmptySectorSet()
 }
 ```
 
@@ -573,20 +581,20 @@ TODO: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
 
 ```go
 func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealProof) SectorID {
-	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.Worker, proof) {
+	if !self.ValidatePoRep(self.info.sectorSize, comm, self.info.worker, proof) {
 		Fatal("bad proof!")
 	}
 
 	// make sure the miner isnt trying to submit a pre-existing sector
-	if !miner.EnsureSectorIsUnique(comm) {
+	if !self.EnsureSectorIsUnique(comm) {
 		Fatal("sector already committed!")
 	}
 
-  // Power of the miner after adding this sector
-  futurePower = miner.power + miner.SectorSize
-  collateralRequired = CollateralForPower(futurePower)
+	// Power of the miner after adding this sector
+	futurePower = self.power + self.info.sectorSize
+	collateralRequired = CollateralForSize(futurePower)
 
-  if collateralRequired > vm.MyBalance() {
+	if collateralRequired > vm.MyBalance() {
 		Fatal("not enough collateral")
 	}
 
@@ -594,8 +602,6 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 	if miner.Sectors.Size() >= POST_SECTORS_COUNT {
 		Fatal("too many sectors")
 	}
-
-	miner.ActiveCollateral += coll
 
 	// Note: There must exist a unique index in the miner's sector set for each
 	// sector ID. The `faults`, `recovered`, and `done` parameters of the
@@ -617,13 +623,13 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 }
 
 func CollateralForPower(power BytesAmount) TokenAmount {
-  availableFil = FakeGlobalMethods.GetAvailableFil()
-  totalNetworkPower = StorageMinerActor.GetTotalStorage()
-  numMiners = StorageMarket.GetMinerCount()
-  powerCollateral = availableFil * NetworkConstants.POWER_COLLATERAL_PROPORTION * power / totalNetworkPower
-  perCapitaCollateral = availableFil * NetworkConstants.PER_CAPITA_COLLATERAL_PROPORTION / numMiners
-  collateralRequired = math.Ceil(minerPowerCollateral + minerPerCapitaCollateral)
-  return collateralRequired
+	availableFil = FakeGlobalMethods.GetAvailableFil()
+	totalNetworkPower = StorageMinerActor.GetTotalStorage()
+	numMiners = StorageMarket.GetMinerCount()
+	powerCollateral = availableFil * NetworkConstants.POWER_COLLATERAL_PROPORTION * power / totalNetworkPower
+	perCapitaCollateral = availableFil * NetworkConstants.PER_CAPITA_COLLATERAL_PROPORTION / numMiners
+	collateralRequired = math.Ceil(minerPowerCollateral + minerPerCapitaCollateral)
+	return collateralRequired
 }
 ```
 
@@ -643,11 +649,11 @@ type SubmitPost struct {
 **Algorithm**
 
 {{% notice todo %}}
-TODO: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
+TODO: GenerationAttackTime
 {{% /notice %}}
 
 ```go
-func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bitfield) {
+func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bitfield) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
@@ -662,15 +668,15 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 
 	feesRequired := 0
 
-	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
-        // slashing ourselves
-        SlashStorageFault(self)
-        return
-	} else if chain.Now() > miner.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
+	if chain.Now() > self.ProvingPeriodEnd+GenerationAttackTime(self.SectorSize) {
+		// slashing ourselves
+		SlashStorageFault(self)
+		return
+	} else if chain.Now() > self.ProvingPeriodEnd {
+		feesRequired += ComputeLateFee(miner.power, chain.Now()-self.provingPeriodEnd)
 	}
 
-	feesRequired += ComputeTemporarySectorFailureFee(miner.SectorSize, recovered)
+	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
 
 	if msg.Value < feesRequired {
 		Fatal("not enough funds to pay post submission fees")
@@ -678,7 +684,7 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 
 	// we want to ensure that the miner can submit more fees than required, just in case
 	if msg.Value > feesRequired {
-		Refund(msg.Value - feesRequired)
+		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
 
 	if !CheckPostProof(miner.SectorSize, proof, faults) {
@@ -689,14 +695,8 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 	// ones to get the set of sectors permanently lost
 	permLostSet = allFaults.Subtract(recovered)
 
-	// adjust collateral for 'done' sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
-
-	// penalize collateral for lost sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, permLostSet)
-
 	// burn funds for fees and collateral penalization
-	BurnFunds(miner, CollateralForSectors(miner.SectorSize, permLostSet)+feesRequired)
+	self.BurnFunds(CollateralForSize(self.SectorSize*permLostSet.Size()) + feesRequired)
 
 	// update sector sets and proving set
 	miner.Sectors.Subtract(done)
@@ -711,7 +711,7 @@ func SubmitPost(proofs PoStProof, faults [FaultSet], recovered Bitfield, done Bi
 
 	miner.ProvingSet = miner.Sectors
 
-    // Updating proving period given a fixed schedule, independent of late submissions.
+	// Updating proving period given a fixed schedule, independent of late submissions.
 	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
 
 	// update next done set
@@ -752,8 +752,6 @@ func ValidateFaultSets(faults []FaultSet, recovered, done BitField) bool {
 }
 
 func ProvingPeriodDuration(sectorSize uint64) Integer {
-	// TODO: eventually, this needs to be different for different sector sizes
-	// The research team should give us concrete numbers
 	return 24 * 60 * 60 * 2 // number of blocks in one day
 }
 
@@ -808,18 +806,17 @@ Notes:
 
 ```go
 func SlashStorageFault() {
-    // You can only be slashed once for missing your PoSt.
+	// You can only be slashed once for missing your PoSt.
 	if self.SlashedAt > 0 {
 		Fatal("miner already slashed")
 	}
 
-    // Only if the miner is actually late, they can be slashed.
-
-	if chain.Now() <= self.ProvingPeriodEnd + GenerationAttackTime(self.SectorSize) {
+	// Only if the miner is actually late, they can be slashed.
+	if chain.Now() <= self.ProvingPeriodEnd+GenerationAttackTime(self.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
 
-    // Only a miner who is expected to prove, can be slashed.
+	// Only a miner who is expected to prove, can be slashed.
 	if self.ProvingSet.Size() == 0 {
 		Fatal("miner is inactive")
 	}
@@ -828,16 +825,16 @@ func SlashStorageFault() {
 	StorageMarketActor.UpdateStorage(-1 * self.Power)
 	self.Power = 0
 
-    self.slashedSet = self.ProvingSet
-    // remove proving set from our sectors
-    self.sectors.Substract(self.slashedSet)
+	self.slashedSet = self.ProvingSet
+	// remove proving set from our sectors
+	self.sectors.Substract(self.slashedSet)
 
-    // clear proving set
-    self.ProvingSet = nil
+	// clear proving set
+	self.ProvingSet = nil
 
-    self.owedStorageCollateral = StorageMarketActor.StorageCollateralForSize(
-        self.slashedSet.Size() * self.SectorSize
-    )
+	self.owedStorageCollateral = StorageMarketActor.StorageCollateralForSize(
+		self.slashedSet.Size() * self.SectorSize,
+	)
 
 	self.SlashedAt = CurrentBlockHeight
 }
@@ -900,21 +897,21 @@ func AbitrateDeal(deal Deal) {
 		Fatal("cannot slash miner twice for same deal")
 	}
 
-    if !deal.pieceInclusionProof.Verify(deal.commP, deal.size) {
-        Fatal("invalid piece inclusion proof or size")
-    }
+	if !deal.pieceInclusionProof.Verify(deal.commP, deal.size) {
+		Fatal("invalid piece inclusion proof or size")
+	}
 
 	storageCollateral := StorageMarketActor.StorageCollateralForSize(deal.size)
 
-    if self.owedStorageCollateral < storageCollateral {
-        Fatal("math is hard, and we didnt do it right")
-    }
+	if self.owedStorageCollateral < storageCollateral {
+		Fatal("math is hard, and we didnt do it right")
+	}
 
 	// pay the client the storage collateral
 	VM.TransferFunds(storageCollateral, deal.client)
 
-    // keep track of how much we have payed out
-    self.owedStorageCollateral -= storageCollateral
+	// keep track of how much we have payed out
+	self.owedStorageCollateral -= storageCollateral
 
 	// make sure the miner can't be slashed twice for this deal
 	self.ArbitratedDeals.Add(deal.commP)
@@ -939,29 +936,29 @@ type DePledge struct {
 
 ```go
 func DePledge(amt TokenAmount) {
-	if msg.From != miner.Worker && msg.From != miner.Owner {
+	if msg.From != self.info.Worker && msg.From != self.info.owner {
 		Fatal("Not authorized to call DePledge")
 	}
 
-	if miner.DePledgeTime > 0 {
-		if miner.DePledgeTime > CurrentBlockHeight {
+	if self.DePledgeTime > 0 {
+		if self.DePledgeTime > VM.CurrentBlockHeight() {
 			Fatal("too early to withdraw collateral")
 		}
 
-		TransferFunds(miner.Owner, miner.DePledgedCollateral)
-		miner.DePledgeTime = 0
-		miner.DePledgedCollateral = 0
+		TransferFunds(self.info.owner, self.DePledgedCollateral)
+		self.DePledgeTime = 0
+		self.DePledgedCollateral = 0
 		return
 	}
 
-  collateralRequired = CollateralForPower(miner.power)
+	collateralRequired = CollateralForPower(self.power)
 
-	if amt + collateralRequired > vm.MyBalance() {
+	if amt+collateralRequired > vm.MyBalance() {
 		Fatal("Not enough free collateral to withdraw that much")
 	}
 
-	miner.DePledgedCollateral = amt
-	miner.DePledgeTime = CurrentBlockHeight + DePledgeCooldown
+	self.DePledgedCollateral = amt
+	self.DePledgeTime = CurrentBlockHeight + DePledgeCooldown
 }
 ```
 
@@ -977,7 +974,7 @@ type GetOwner struct {
 
 ```go
 func GetOwner() Address {
-	return self.Owner
+	return self.info.owner
 }
 ```
 
@@ -994,7 +991,7 @@ type GetWorkerAddr struct {
 
 ```go
 func GetWorkerAddr() Address {
-	return self.Worker
+	return self.info.worker
 }
 ```
 
@@ -1011,7 +1008,7 @@ type GetPower struct {
 
 ```go
 func GetPower() BytesAmount {
-	return self.Power
+	return self.power
 }
 ```
 
@@ -1028,7 +1025,7 @@ type GetPeerID struct {
 
 ```go
 func GetPeerID() PeerID {
-	return self.PeerID
+	return self.info.peerID
 }
 ```
 
@@ -1045,7 +1042,7 @@ type GetSectorSize struct {
 
 ```go
 func GetSectorSize() BytesAmount {
-	return self.SectorSize
+	return self.info.sectorSize
 }
 ```
 
@@ -1063,11 +1060,11 @@ type UpdatePeerID struct {
 
 ```go
 func UpdatePeerID(pid PeerID) {
-	if msg.From != self.Worker {
+	if msg.From != self.info.worker {
 		Fatal("only the mine worker may update the peer ID")
 	}
 
-	self.PeerID = pid
+	self.info.peerID = pid
 }
 ```
 
@@ -1087,11 +1084,11 @@ type ChangeWorker struct {
 
 ```go
 func ChangeWorker(addr Address) {
-	if msg.From != self.Owner {
+	if msg.From != self.info.owner {
 		Fatal("only the owner can change the worker address")
 	}
 
-	self.Worker = addr
+	self.info.worker = addr
 }
 ```
 
@@ -1284,8 +1281,8 @@ func Collect() {
 	if chain.Now() < self.ClosingAt {
 		Fatal("Payment channel not yet closed")
 	}
-	Transfer(self.ChannelTotal-self.ToSend, self.From)
-	Transfer(self.ToSend, self.To)
+	TransferFunds(self.From, self.ChannelTotal-self.ToSend)
+	TransferFunds(self.To, self.ToSend)
 }
 ```
 
@@ -1351,7 +1348,7 @@ type MultisigConstructor struct {
 **Algorithm**
 
 ```go
-func Multisig(signers [Address], required UInt) {
+func Multisig(signers []Address, required UInt) {
 	self.Signers = signers
 	self.Required = required
 }
@@ -1638,5 +1635,21 @@ func getTransaction(txid UInt) Transaction {
 	}
 
 	return tx
+}
+```
+
+```go
+func AggregateBitfields(faults []FaultSet) Bitfield {
+	var out Bitfield
+	for _, f := range faults {
+		out = out.Union(f.bitField)
+	}
+	return out
+}
+```
+
+```go
+func BurnFunds(amt TokenAmount) {
+	TransferFunds(BurntFundsAddress, amt)
 }
 ```

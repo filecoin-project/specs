@@ -79,9 +79,9 @@ func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool,
   totalPower := state.GetTotalPower()
 
   if IsProofAWinner(eproof, minerPower, totalPower)
-    return eproof
+    return True, eproof
   else
-    return 0
+    return False, None
 }
 ```
 
@@ -223,6 +223,8 @@ Succinctly, the process of crafting a new `ElectionProof` in round `N` is as fol
   - Secp256k1 for our curve
   - Note that the operation type in step 3.1 is not strictly necessary, but is used to distinguish this use of the VRF from that which generates tickets.
 
+Note: We draw the miner power from the prior round. This means that if a miner wins a block on their ProvingPeriodEnd even if they have not yet resubmitted a PoSt, they retain their power (until the next round).
+
 At round N:
 
 ```text
@@ -233,12 +235,10 @@ Output: 1 or 0
 	i. newEP <-- New()
 1. Determine the miner's power fraction
 	i. 	# Determine total storage this round
-  		S_n <-- storageMarket(N)
-  		p_n <-- S_n.GetTotalStorage()
-    ii. # Determine own power as of last submitted PoSt
-        appropriateHeight <-- self.ProvingPeriodEnd - ProvingPeriodDuration(self.SectorSize)
-        S_m <-- storageMarket(appropriateHeight)
-  		p_m <-- S_m.PowerLookup(self)
+  		S <-- storageMarket(N)
+  		p_n <-- S.GetTotalStorage()
+    ii. # Determine own power at prior tipSet
+        p_m <-- GetMinersPowerAt(N-1, self.PK)
     iii. # Get power fraction
   		p_f <-- p_m/p_n
 2. Draw parentTicket from K blocks back (see ticket creation above for example) 

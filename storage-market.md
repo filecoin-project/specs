@@ -68,7 +68,7 @@ This section describes the flow required to store a single piece with a single s
 
 #### Before Deal
 
-1. **Data Preparation:** The client prepares their input data. See [client data](client-data.md) for more details.
+1. **Data Preparation:** The client prepares their input data. See [client data](client-data.md) for more details.
 2. **Miner Selection:** The client looks at asks on the network, and then selects a storage miner to store their data with.
    - Note: this is currently a manual process.
 3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with. All payments between clients and storage providers use payment channels.
@@ -115,6 +115,41 @@ TODO: 'complete' isnt really the right word here, as it implies that the deal is
 
 The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table (though the concept is conceptually helpful), instead, the [storage market actor](actors.md#storage-market-actor) exports the `GetTotalStorage` and `PowerLookup`  methods which can be used to lookup total network power and a miner's power, respectively. 
 Each individual miner reports its power through their actor.
+
+To check the power of a given miner, use the following:
+
+```go
+func GetMinersPowerAt(ts TipSet, m Address) Integer {
+  curState := GetStateTree(ts)
+  miner := curState.GetMiner(m)
+  if miner.IsSlashed() || miner.IsLate() {
+    return 0
+  }
+  
+  # lookback to the last valid PoSt put up by the miner
+  lookbackTipset := WalkBack(ts, miner.provingPeriodEnd - provingPeriodDuration(miner.SectorSize))
+  lbState := GetStateTree(lookbackTipset)
+  
+  sm := lbState.GetStorageMarket()
+  
+  return sm.PowerLookup(m)
+}
+```
+
+```go
+func IsLate() (bool) {
+    return self.provingPeriodEnd < VM.CurrentBlockHeight()
+}
+```
+
+```go
+func IsSlashed() (bool) {
+    return self.SlashedAt > 0
+}
+```
+
+
+### Power Updates
 
 Whenever a new [PoSt](proofs.md) or [Fault](faults.md) makes it on chain, the storage market updates the underlying power values appropriately.
 

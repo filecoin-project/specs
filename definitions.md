@@ -167,7 +167,7 @@ See `Power Fraction`.
 
 #### Power Fraction
 
-A miner's `Power Fraction` or `Power` is the ratio of their committed storage as of their last PoST submission over Filecoin's total committed storage as of the current block. It is used in leader election.
+A miner's `Power Fraction` or `Power` is the ratio of their committed storage as of their last PoSt submission over Filecoin's total committed storage as of the current block. It is used in leader election.
 
 ####  Power table
 

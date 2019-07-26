@@ -36,6 +36,7 @@ When the miner has completed their first seal, they should post it on-chain usin
 The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.
 
 During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next proving period starts.
+For example, if a miner currently PoSts for 10 sectors, and commits to 20 more sectors. The next PoSt they submit (i.e. the one they're currently proving) will be for 10 sectors again, the subsequent one will be for 30.
 
 TODO: sectors need to be globally unique. This can be done either by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain is checked against on each submission. As the system moves towards sector aggregation, the latter option will become unworkable, so more thought needs to go into how that proof statement could work.
 
@@ -124,34 +125,31 @@ func VerifyBlock(blk Block) {
 	if blk.GetTime() > time.Now() {
 		Fatal("block was generated too far in the future")
 	}
+
 	// next check that it is appropriately delayed from its parents including
 	// null blocks.
 	if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
 		Fatal("block was generated too soon")
 	}
 
-	// 3. Verify miner has not been slashed and is still valid miner
-	curStorageMarket := LoadStorageMarket(blk.State)
-	if !curStorageMarket.IsMiner(blk.Miner) && !blk.Miner.ProvingPeriodEnd <= blk.height {
-		Fatal("block miner not valid")
-	}
-
-	// 4. Verify ParentWeight
+	// 3. Verify ParentWeight
 	if blk.ParentWeight != ComputeWeight(blk.Parents) {
 		Fatal("invalid parent weight")
 	}
 
-	// 5. Verify Tickets
+	// 4. Verify Tickets
 	if !VerifyTickets(blk) {
 		Fatal("tickets were invalid")
 	}
 
-	// 6. Verify ElectionProof
+	// 5. Verify ElectionProof
+	// Note that this step must explicitly check that the
+	// miner has not been slashed and is still valid miner
 	if !VerifyElectionProof(blk) {
 		Fatal("election was invalid")
 	}
 
-	// 7. Verify Message Signatures
+	// 6. Verify Message Signatures
 	messages := LoadMessages(blk.Messages)
 	state := GetParentState(blk.Parents)
 
@@ -170,7 +168,7 @@ func VerifyBlock(blk Block) {
 
 	ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys)
 
-	// 8. Validate State Transitions
+	// 7. Validate State Transitions
 	receipts := LoadReceipts(blk.MessageReceipts)
 	for i, msg := range messages {
 		receipt := ApplyMessage(state, msg)
@@ -255,27 +253,19 @@ Succinctly, the process of verifying a block's election proof at round N, is as 
 Input: received block, storage market actor S, miner's public key PK, a public parameter K
 Output: 0, 1
 
-0. Get the election proof 
+0. Get the election proof, total power, miner power
 		i. 	electionProof <-- block.electionProof
-1. Ensure the miner was not slashed since L.
-		i. # Fetch the latest state and the miner
+		ii. # get total market power
 			S <-- storageMarket(N)
-			M <-- storageMinerActor(PK)
-		ii. # Check for a reported fault
-			if !S.IsMiner(PK)
-				return 0
-		iii. # Check for an unreported storage fault
-			if M.ProvingPeriodEnd < N
+			p_n <-- S.GetTotalStorage()
+		iii. # get miner power
+			p_m <-- GetMinersPowerAt(N, PK)
+1. Ensure the miner was not slashed or late: in that case, their power would be 0 and can just abort.
+		i. # Check for a reported fault or late submission
+			if p_m == 0
 				return 0
 2. Determine the miner's power fraction
-		i. 	# Determine total storage this round
-  			S_n <-- storageMarket(N)
-	  		p_n <-- S_n.GetTotalStorage()
-		ii. # Determine miner's power at last valid PoSt submission
-  			miner <-- block.miner
-  			S_m <-- storageMarket(miner.provingPeriodEnd - provingPeriodDuration(miner.SectorSize)
-	  		p_m <-- S_m.PowerLookup(miner)
-		iii. # Get power fraction
+		i. # Get power fraction
   			p_f <-- p_m/p_n
 3. Get the appropriate ticket from the ticket chain
 		i. 	# Get the tipset K rounds back
@@ -302,10 +292,7 @@ Output: 0, 1
 		return 1
 ```
 
-Note: For clarity we explicit what may happen when a miner fails to submit a PoSt:
-- If they are currently late to submit a PoSt, 1.iii above is triggered and they will not mine.
-- If they are late to submit a PoSt and are slashed/reported for it, then they will be taken out of the power table (at least temporarily) and 1.ii will be triggered.
-- If they are late to submit a PoSt but the fault was unreported before they finally submitted it, then they can resume mining normally (they got lucky).
+Note: For clarity we explicit what may happen when a miner fails to submit a PoSt, if they are currently late to submit a PoSt or have been slashed, they will have no power.
 
 ### Ticket Generation
 
