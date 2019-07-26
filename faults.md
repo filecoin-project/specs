@@ -7,14 +7,14 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
 ### Consensus Faults
 
 - **Duplicate Block Submission Slashing:**
-  - **Condition:** If any miner posts two blocks satisfying the slashing conditions defined in [Expected Consensus](./expected-consensus.md).
+  - **Condition:** If any miner posts two blocks satisfying the slashing conditions defined in [Expected Consensus](expected-consensus.md).
   - **Reporting:** Anyone may call `SlashConsensusFault` and pass in the two offending block headers.
   - **Check:** The chain checks that both blocks are valid, correctly signed by the same miner, and satisfy the consensus slashing conditions.
   - **Penalization:** All of the miner's pledge collateral and all of their power is irrevocably slashed. This miner can never again produce blocks, even if they attempt to repost their collateral.
 
 ### Market Faults
 
-- **Late submission penalty:** 
+- **Late submission penalty:**
   - **Condition**: If the miner posts their PoSt after the proving period ends, but before the generation attack threshold.
   - **Reporting:** The miner submits their PoSt as usual, but includes the late submission fee.
   - **Check:** The chain checks first that the submission is within the `generation attack threshold`, and then checks that the fee provided matches the required fee for how many blocks late the submission is.
@@ -24,17 +24,17 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
       - *Why are we accounting the power table with a lookback parameter ?* If we do not use the lookback parameter then, we need to penalize late miners for the duration that they are late. This is tricky to do efficiently. For xample, if miners A, B and C each have 1/3 of the networks power, and C is late in submitting their proofs, then for that duration, A and B should each have effectively half of the networks power (and a 50% chance each of winning the block).
   - TODO: write on the spec exact parameters for PoSt Deadline and Gen Attack threshold
 - **Unreported storage fault slashing:**
-  - **Condition:** If the miner does not submit their PoSt by the `generation attack threshold`. 
+  - **Condition:** If the miner does not submit their PoSt by the `generation attack threshold`.
   - **Reporting:** The miner can be slashed by anyone else in the network who calls `SlashStorageFaults`. We expect miners to report these faults.
     - Future design note: moving forward, we should either compensate the caller, or require this
     - Note: we could *require* the method be called, as part of the consensus rules (this gets complicated though). In this case, there is a DoS attack where if I make a large number of miners each with a single sector, and fail them all at the same time, the next block miner will be forced to do a very large amount of work. This would either need an extended 'gas limit', or some other method to avoid too long validation times.
   - **Check:** The chain checks that the miners last PoSt submission was before the start of their current proving period, and that the current block is after the generation attack threshold for their current proving period.
   - **Penalization:** Penalizations are enforced by `SlashStorageFault` on the `storage market` actor.
     - *Economic Penalization*: Miner loses all collateral.
-    - *Power Penalization*: Miner loses all power. 
+    - *Power Penalization*: Miner loses all power.
     - Note: If a miner is in this state, where they have failed to submit a PoST, any block they attempt to mine will be invalid, even if the election function selects them. (the election function should probably be made to never select them)
     - Future design note: There is a way to tolerate Internet connection faults. A miner runs an Emergency PoSt which does not take challenges from the chain, if the miner gets reconnected before the VDF attack time (based on Amax), then, they can submit the Emergency PoSt and get pay a late penalization fee.
-- **Reported storage fault penalty:** 
+- **Reported storage fault penalty:**
   - **Condition:** The miner submits their PoSt with a non-empty set of 'missing sectors'.
   - **Reporting:** The miner can specify some sectors that they failed to prove during the proving period.
     - Note: These faults are output by the `ProveStorage` routine, and are posted on-chain when posting the proof. This occurs when the miner (for example) has a disk failure, or other local data corruption.

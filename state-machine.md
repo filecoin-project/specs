@@ -30,7 +30,7 @@ This second route for creating an actor is allowed to avoid the necessity of an 
 
 ### Execution (Calling a method on an Actor)
 
-Message execution currently relies entirely on 'built-in' code, with a common external interface. The method and actor to call it on are specified in the `Method` and `To` fields of a message, respectively. Method parameters are encoded and put into the `Params` field of a message. The encoding is a cbor array of each of the types individually encoded. The individual encodings for each type are as follows.
+Message execution currently relies entirely on 'built-in' code, with a common external interface. The method and actor to call it on are specified in the `Method` and `To` fields of a message, respectively. Method parameters are encoded and put into the `Params` field of a message. The encoding is technically actor dependent, but for all built-in Filecoin actors it is the dag-cbor ipld encoding of the parameters struct for each method defined in [the actors doc](actors.md).
 
 These functions are given, as input, an `ExecutionContext` containing useful information for their execution.
 
@@ -41,6 +41,9 @@ type VMContext interface {
 
 	// Storage provides access to the VM storage layer
 	Storage() Storage
+
+	// Origin is the address of the account that initiated the top level invocation
+	Origin() Address
 
 	// Send allows the current execution context to invoke methods on other actors in the system
 	Send(to Address, method string, value AttoFIL, params []interface{}) ([][]byte, uint8, error)

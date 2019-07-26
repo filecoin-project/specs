@@ -21,62 +21,68 @@ The main components are as follows:
 
 The v0 `retrieval market` will initially be implemented as two `libp2p` services. It will be request response based, where the client who is requesting a file sends a `retrieval deal proposal` to the miner. The miner chooses whether or not to accept it, sends their response which (if they accept the proposal) includes a `signed retrieval deal`, followed by the actual requested content, streamed as a series of bitswap block messages, using a pre-order traversal of the dag. Each block should use the [bitswap block message format](https://github.com/ipfs/go-ipfs/blob/master/exchange/bitswap/message/message.go#L216). This way, the client should be able to verify the data incrementally as it receives it. Once the client has received all the data, it should then send a payment channel SpendVoucher of the proposed amount to the miner. This protocol may be easily extended to include payments from the client to the miner every N blocks, but for now we omit that feature.
 
-```go
+```sh
 type RetDealProposal struct {
-	// Ref is the cid of the data to be retrieved
-	Ref Cid
+	## Reference to the data being retrieved.
+	ref Link
 
-	// Price is the total amount that the client is willing to pay for the
-	// retrieval of the data
-	Price TokenAmount
+	## The total amount that the client is willing to pay for the retrieval of the data.
+	price TokenAmount
 
-	// Payment is a payment info from the client to the retrieval miner for the data
-	Payment PaymentInfo
+	## The info from the client to the retrieval miner for the data
+	payment PaymentInfo
 }
 
-type ResponseStatus uint
+type RetDealResponse union {
+    | AcceptedResponse 0
+    | RejectedResponse 1
+    | ErrorResponse 2
+} representation keyed
 
-const (
-	Unset = ResponseStatus(iota)
-	Accepted
-	Rejected
-	Error
-)
-
-type RetDealResponse struct {
-	Status  ResponseStatus
-	Message string
+type AcceptedResponse struct {}
+type RejectedResponse struct {
+    message optional String
 }
+
+type ErrorResponse RejectedResponse
 
 type Block struct {
-	// Prefix is the cid prefix parameters for this block. It describes how to
-	// hash the block to verify it matches the expected value.
-	Prefix CidPrefix
-	Data   []byte
+	## Cid prefix parameters for this block. It describes how to
+	## hash the block to verify it matches the expected value.
+	refix CidPrefix
+	data Bytes
+}
+
+## Represents all the metadata of a Cid.
+## It does not contains  any actual content information.
+type CidPrefix struct {
+	version  UInt
+	codec    UInt
+	mhType   UInt
+	mhLength UInt
 }
 ```
 
-`Retrieval miners` should also support a query service that allows clients to request pricing information from a miner. 
+`Retrieval miners` should also support a query service that allows clients to request pricing information from a miner.
 
-The query should include the CID of the piece that the client is interested in retrieving. The response contains whether or not the miner will serve that data, the price they will accept for it. 
+The query should include the CID of the piece that the client is interested in retrieving. The response contains whether or not the miner will serve that data, the price they will accept for it.
 
-```go
+```sh
 type RetQuery struct {
-	Piece Cid
+    ## TODO: what exactly does this link to?
+	piece Link
 }
 
-type RetQueryResponse struct {
-	Status   RetQueryStatus
-	MinPrice TokenAmount
+type RetQueryResponse union {
+    | AvailableResponse
+    | UnavailableResponse
+} representation keyed
+
+type AvailableResponse struct {
+	minPrice TokenAmount
 }
 
-type RetQueryStatus uint
-
-const (
-	Unset = RetQueryStatus(iota)
-	OK
-	PieceUnavailable
-)
+type UnavailableResponse struct {}
 ```
 
 ## Chain Based Content Routing
