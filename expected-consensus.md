@@ -14,9 +14,8 @@ Some important concepts relevant to expected consensus are:
 - [TipSet](definitions.md#tipset)
 - [Ticket](definitions.md#ticket)
 - [Ticket Chain](defintions.md#ticket-chain)
-- [Height](definitions.md#height)
+- [Height](definitions.md#height) -- In the realm of EC, it is worth noting that a new ticket must be produced at every height, consequently the duration of a round is bounded by the duration of the Verifiable Delay Function run to generate a ticket.
 - [Weight](definitions.md#weight)
-- [Round](definitions.md#round) -- In the realm of EC, it is worth noting that a new ticket is produced at every round, consequently the duration of a round is currently bounded by the duration of the Verifiable Delay Function run to generate a ticket.
 - [Power Fraction](definitions.md#power-fraction)
 - [ElectionProof](definitions.md#electionproof)
 
@@ -33,11 +32,11 @@ Every time a block is received, we first verify whether the block is valid (`Ver
 ```go
 // Called when a block is received by this node
 func OnBlockReceived(blk Block) {
-	// The exact definition of VerifyBlock depends on the protocol
-	// For Filecoin, see mining.md
-	if VerifyBlock(blk) {
-		ChainTipsMgr.Add(blk)
-	}
+    // The exact definition of VerifyBlock depends on the protocol
+    // For Filecoin, see mining.md
+    if VerifyBlock(blk) {
+        ChainTipsMgr.Add(blk)
+    }
   // Received an invalid block!
 }
 ```
@@ -46,24 +45,24 @@ Meanwhile, the mining node runs a mining process to attempt to generate blocks. 
 
 ```go
 func Mine(minerKey PrivateKey) {
-	for r := range rounds { // for each round
-		bestTipset, tickets := ChainTipsMgr.GetBestTipsetAtRound(r - 1)
+    for r := range rounds { // for each round
+        bestTipset, tickets := ChainTipsMgr.GetBestTipsetAtRound(r - 1)
 
-		ticket := GenerateTicket(minerKey, bestTipset)
-		tickets.Append(ticket)
+        ticket := GenerateTicket(minerKey, bestTipset)
+        tickets.Append(ticket)
 
-		// Generate an ElectionProof and check if we win
-		// Note: even if we don't win, we want to make a ticket
-		// in case we need to mine a null round
-		win, proof := CheckIfWinnerAtRound(minerKey, r, bestTipset)
-		if win {
-			GenerateAndBroadcastBlock(bestTipset, tickets, proof)
-		} else {
-			// Even if we don't win, add our ticket to the tracker in
-			// case we need to mine on it later.
-			ChainTipsMgr.AddFailedTicket(bestTipset, tickets)
-		}
-	}
+        // Generate an ElectionProof and check if we win
+        // Note: even if we don't win, we want to make a ticket
+        // in case we need to mine a null round
+        win, proof := CheckIfWinnerAtRound(minerKey, r, bestTipset)
+        if win {
+            GenerateAndBroadcastBlock(bestTipset, tickets, proof)
+        } else {
+            // Even if we don't win, add our ticket to the tracker in
+            // case we need to mine on it later.
+            ChainTipsMgr.AddFailedTicket(bestTipset, tickets)
+        }
+    }
 }
 ```
 
@@ -99,7 +98,7 @@ Expected Consensus is a consensus protocol that works by electing a miner from a
 
 Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness inputs for Leader Election. Every block generated references an `ElectionProof` derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.
 
-In cases in which no winning ticket is found by any miner in a given round (i.e. no block, or a `null block`, is mined on the network), miners move on to the next ticket in the ticket chain to attempt a new leader election. Note that a null block is not included in a TipSet, since null blocks are, by definition, not blocks. When this happens, miners should nonetheless generate a new ticket prior to the new leader election, thereby appropriately prolonging the ticket chain (the block chain can never be longer than the ticket chain). This situation is fleshed out in the [Losing Tickets](#losing-tickets) section.
+In cases in which no winning ticket is found by any miner in a given round (i.e. no block is mined on the network at that height), miners move on to the next ticket in the ticket chain to attempt a new leader election. When this happens, miners should nonetheless generate a new ticket prior to the new leader election, thereby appropriately prolonging the ticket chain (the block chain can never be longer than the ticket chain). This situation is fleshed out in the [Losing Tickets](#losing-tickets) section.
 
 In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: [`Slashing`](#slashing)).
 
@@ -125,7 +124,7 @@ You can find the Ticket data structure [here](data-structures.md#tickets).
 
 In practice, EC defines two different fields within a block:
 
-- A `Tickets` array — this stores new tickets generated during this epoch, or block generation attempt. It proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` rounds. See [Ticket generation](#ticket-generation).
+- A `Tickets` array — this stores new tickets generated during this block generation attempt. It proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` rounds. See [Ticket generation](#ticket-generation).
 - An `ElectionProof` — this stores a proof that a given miner scratched a winning lottery ticket using the appropriate ticket `K` rounds back. It proves that the leader was elected in this round. See [Checking election results](#checking-election-results).
 
 On expectation, the `Tickets` array will contain a single ticket. For cases in which it contains more than one, see [Losing Tickets](#losing-tickets).
@@ -135,12 +134,12 @@ On the two uses of tickets.
 
 Tickets serve two main purposes.
 
-1) As a proof that blocks were appropriately delayed. This both prevents miners grinding through tickets in a given epoch and a winner rushing the protocol by publishing
+1) As a proof that blocks were appropriately delayed. This both prevents miners grinding through tickets and a winner rushing the protocol by publishing
 blocks as fast as possible (thereby penalizing poorly connected miners).
 
 This is a result of a new ticket being generated by the miner for every leader election
-attempt (using a ticket from the past). This ticket is generated using the ticket from
-the prior block, or "losing" tickets generated in this epoch.
+attempt (using a ticket from the past). This ticket is generated using the ticket generated at the last height (either
+from the prior block, or the prior "losing" ticket).
 
 2) As a source of randomness used to prove that a leader was correctly elected.
 
@@ -191,25 +190,25 @@ Input: parentTickets at round N-1, miner's private key SK
 Output: newTicket
 
 0. Prepare new ticket
-	i. newTicket <-- New()
+    i. newTicket <-- New()
 1. Draw prior ticket
-	i. 	 # take the last ticket for each parent 'Tickets' array
-			lastTickets <-- map(parentTickets, fun(x): x.last)
+    i. # take the last ticket for each parent 'Tickets' array
+        lastTickets <-- map(parentTickets, fun(x): x.last)
     ii. # draw the smallest ticket
-  			parentTicket <-- min(sortedTickets)
+        parentTicket <-- min(sortedTickets)
 2. Run it through VRF and get determinstic output
-	i.   # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
-			input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
-	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-			newTicket.VRFProof <-- ECVRF_prove(SK, input)
-	iii. # draw a deterministic output from this
-			VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
+    i. # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
+            input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
+    ii. # run it through the VRF and store the VRFProof in the new ticket
+            newTicket.VRFProof <-- ECVRF_prove(SK, input)
+    iii. # draw a deterministic output from this
+            VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
 3. Run that deterministic output through a VDF
-    i.  # run eval with our VDF and its evaluation k on VRFOutput
-  			y, pi <-- VDF_eval(ek, VRFOutput)
+    i. # run eval with our VDF and its evaluation k on VRFOutput
+            y, pi <-- VDF_eval(ek, VRFOutput)
     ii. # Store the output and proof in our ticket
-  			newTicket.VDFOutput <-- y
-  			newTicket.VDFProof 	<-- pi
+            newTicket.VDFOutput <-- y
+            newTicket.VDFProof  <-- pi
 4. Return the new ticket
 ```
 
@@ -234,27 +233,27 @@ Input: parentTickets from N-K, miner's public key PK, miner's secret key SK, the
 Output: 1 or 0
 
 0. Prepare new election proof
-	i. newEP <-- New()
+    i. newEP <-- New()
 1. Determine the miner's power fraction
-	i. 	# Determine total storage this round
-  		S <-- storageMarket(N)
-  		p_n <-- S.GetTotalStorage()
+    i. # Determine total storage this round
+        S <-- storageMarket(N)
+        p_n <-- S.GetTotalStorage()
     ii. # Determine own power at prior tipSet
         p_m <-- GetMinersPowerAt(N-1, self.PK)
     iii. # Get power fraction
-  		p_f <-- p_m/p_n
+        p_f <-- p_m/p_n
 2. Draw parentTicket from K blocks back (see ticket creation above for example, using 1 block back) 
 3. Run it through VRF and get determinstic output
-	i.   # take the VDFOutput of that ticket as input, specified for the appropriate operation type
-		input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
-	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-		newEP.VRFProof <-- ECVRF_prove(SK, input)
-	iii. # draw a deterministic, pseudorandom output from this
-		VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
+    i. # take the VDFOutput of that ticket as input, specified for the appropriate operation type
+        input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
+    ii. # run it through the VRF and store the VRFProof in the new ticket
+        newEP.VRFProof <-- ECVRF_prove(SK, input)
+    iii. # draw a deterministic, pseudorandom output from this
+        VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
 3. Determine if the miner drew a winning lottery ticket
     # Conceptually we are mapping the pseudorandom, deterministic VRFOutput onto [0,1] by dividing by 2^HashLen (64 Bytes using Sha256) and comparing that to the miner's power (portion of network storage).
     # In practice, we actually multiply the power fraction by 2^HashLen for comparison with the ticket value in order to avoid dealing with floats.
-	i.  # Map the miner's power onto [0, 2^HashLen] (64 Bytes using sha256)
+    i.  # Map the miner's power onto [0, 2^HashLen] (64 Bytes using sha256)
         normalized_power <-- p_f * 2^HashLen
     ii. # Compare the miner's power fraction to the value of the ticket drawn: more power means win more often.
         # winning ticket
@@ -317,7 +316,7 @@ All valid blocks generated in a round form a `TipSet` that participants will att
 - All blocks in a TipSet have the same parent TipSet
 - All blocks in a TipSet have the same number of tickets in their `Tickets` array
 
-The first condition implies that all blocks in a TipSet were mined at the same height (remember that height refers to block height as opposed to ticket round). This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a TipSet bringing these blocks together. The second rule means blocks in a TipSet are mined in a same round.
+These conditions imply that all blocks in a TipSet were mined at the same height. This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a TipSet bringing these blocks together. The second rule means blocks in a TipSet are mined in a same round.
 
 The blocks in a tipset have no defined order in representation. During state computation, blocks in a tipset are processed in order of block ticket, breaking ties with the block CID bytes.
 
@@ -379,15 +378,15 @@ The Chain Tips Manager is responsible for tracking all live tips of the Filecoin
 // Returns the ticket that is at round 'r' in the chain behind 'head'
 func TicketFromRound(head Tipset, r Round) {}
 
-// Returns the tipset that contains round r (Note: multiple rounds may exist within a single // tipset due to null blocks)
+// Returns the tipset that contains round r (Note: multiple rounds' worth of tickets may exist within a single block due to losing tickets being added to the eventually successfully generated block)
 func TipsetFromRound(head Tipset, r Round) {}
 
-// GetBestTipset returns the best known tipset. If the 'best' tipset hasnt changed, then this
-// will return the previous best tipset and the null block we mined on top of it.
+// GetBestTipset returns the best known tipset. If the 'best' tipset hasn't changed, then this
+// will return the previous best tipset.
 func GetBestTipset()
 
-// Adds the failed ticket to the chaintips manager so that null blocks can be mined on top of
-func AddFailedTicket(parent Tipset, t Ticket)
+// Adds the losing ticket to the chaintips manager so that blocks can be mined on top of it
+func AddLosingTicket(parent Tipset, t Ticket)
 ```
 
 ## Implementation Notes
@@ -395,6 +394,5 @@ func AddFailedTicket(parent Tipset, t Ticket)
 - When selecting messages from the mempool to include in the block, be aware that other miners may also generate blocks during this round, and to maximize fee earnings it may be best to select some messages at random (second in a duplicate earns no fees).
 
 ## Open Questions
-
 - Parameter K
 - VDF difficulty adjustment
