@@ -4,12 +4,24 @@ Any implementations of the Filecoin actors must be exactly byte for byte compati
 
 This spec describes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
 
-- [Init Actor](#init-actor)
-- [Storage Market Actor](#storage-market-actor)
-- [Storage Miner Actor](#storage-miner-actor)
-- [Payment Channel Broker Actor](#payment-channel-broker-actor)
+## Actor State
 
-## Built In Actors
+These below used `kindeded` representation, as the type can be inferred from the context, in which
+they are used (`Actor` or `UnsignedMessage`).
+
+```sh
+type ActorState union {
+    | InitActorState
+    | AccountActorState
+    | StorageMarketActorState
+    | StorageMinerActorState
+    | PaymentChannelBrokerActorState
+    | MultisigActorState
+} representation kinded
+
+```
+
+## System Actors
 
 Some state machine actors are 'system' actors that get instantiated in the genesis block, and have their IDs allocated at that point.
 
@@ -18,50 +30,62 @@ Some state machine actors are 'system' actors that get instantiated in the genes
 | 0    | InitActor          | Network Init            |
 | 1    | AccountActor       | Network Treasury        |
 | 2    | StorageMarketActor | Filecoin Storage Market |
-|  99 | AccountActor | Burnt Funds |
+| 99   | AccountActor       | Burnt Funds             |
 
-## Init Actor
+## Built In Actors
+
+### Init Actor
+
+- **Code Cid**: `<codec:raw><mhType:identity><"init">`
 
 The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that `NextID` will initially be set to 100.
 
-```go
-type InitActor struct {
-	// Mapping from Address to ID, for lookups.
-	AddressMap map[Address]BigInt
-
-	NextID BigInt
+```sh
+type InitActorState struct {
+    addressMap {Address:ID}<Hamt>
+    nextId UInt
 }
 ```
 
-### Code Cid
+#### Methods
 
-`<codec:raw><mhType:identity><"init">`
+| Name | Method ID |
+|--------|-------------|
+| `Constructor` | 0 |
+| `Exec` | 1 |
+| `GetIdForAddress` | 2 |
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1  | `Exec`     |
-| 2 | `GetIdForAddress` |
+#### `Constructor`
 
-### `Exec(code Cid, params []Param) Address`
+**Parameters**
 
->  This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
+```sh
+type InitConstructor struct {
+}
 
-### Parameters
+```
 
-| Name     | Type       | Description                                                  |
-| -------- | ---------- | ------------------------------------------------------------ |
-| `code`   | `Cid`      | A pointer to the location at which the code of the actor to create is stored. |
-| `params` | `[] Param` | The parameters passed to the constructor of the actor.       |
+**Algorithm**
 
+#### `Exec`
 
+This method is the core of the `Init Actor`. It handles instantiating new actors and assigning them their IDs.
 
-`Param` is the type representing any valid arugment that can be passed to a function.
+**Parameters**
 
-TODO: Find a better place for this definition.
+```sh
+type Exec struct {
+    ## Reference to the location at which the code of the actor to create is stored.
+    code &Code
+    ## Parameters passed to the constructor of the actor.
+    params ActorMethod
+} representation tuple
+```
 
+**Algorithm**
 
 ```go
-func Exec(code Cid, params []byte) Address {
+func Exec(code Code, params ActorMethod) Address {
 	// Get the actor ID for this actor.
 	actorID = self.NextID
 	self.NextID++
@@ -79,16 +103,20 @@ func Exec(code Cid, params []byte) Address {
 
 	// This generates a unique address for this actor that is stable across message
 	// reordering
-	addr := VM.ComputeActorAddress()
+	// TODO: where do `creator` and `nonce` come from?
+	addr := VM.ComputeActorAddress(creator, nonce)
 
 	// Set up the actor itself
 	actor := Actor{
 		Code:    code,
 		Balance: msg.Value,
+		Head:    nil,
+		Nonce:   0,
 	}
 
 	// The call to the actors constructor will set up the initial state
-	// from the given parameters
+	// from the given parameters, setting `actor.Head` to a new value when successfull.
+	// TODO: can constructors fail?
 	actor.Constructor(params)
 
 	VM.GlobalState.Set(actorID, actor)
@@ -102,27 +130,31 @@ func Exec(code Cid, params []byte) Address {
 func IsSingletonActor(code Cid) bool {
 	return code == StorageMarketActor || code == InitActor
 }
+```
 
+```go
 // TODO: find a better home for this logic
 func (VM VM) ComputeActorAddress(creator Address, nonce Integer) Address {
 	return NewActorAddress(bytes.Concat(creator.Bytes(), nonce.BigEndianBytes()))
 }
 ```
 
-### `GetIdForAddress(addr Address) BigInt`
+#### `GetIdForAddress`
 
-> This method allows for fetching the corresponding ID of a given Address
+This method allows for fetching the corresponding ID of a given Address
 
-### Parameters
+**Parameters**
 
-| Name   | Type      | Description           |
-| ------ | --------- | --------------------- |
-| `addr` | `Address` | The address to lookup |
+```sh
+type GetIdForAddress struct {
+    addr Address
+} representation tuple
+```
 
-
+**Algorithm**
 
 ```go
-func GetIdForAddress(addr Address) BigInt {
+func GetIdForAddress(addr Address) UInt {
 	id := self.AddressMap[addr]
 	if id == nil {
 		Fault("unknown address")
@@ -131,69 +163,104 @@ func GetIdForAddress(addr Address) BigInt {
 }
 ```
 
-## Account Actor
+### Account Actor
+
+- **Code Cid**: `<codec:raw><mhType:identity><"account">`
 
 The Account actor is the actor used for normal keypair backed accounts on the filecoin network.
 
-```go
-type AccountActor struct {
-	// Address contains the public key based address that this account was created with. If unset, this account may not send funds by normal means.
-	Address Address
+```sh
+type AccountActorState struct {
+    address Address
 }
 ```
 
-### Code Cid
+#### Methods
 
-`<codec:raw><mhType:identity><"account">`
+| Name | Method ID |
+|--------|-------------|
+| `AccountConstructor` | 0 |
+| `GetAddress` | 1 |
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1  | `GetAddress` |
+```
+type AccountConstructor struct {
+}
+```
 
-## Storage Market Actor
+#### `GetAddress`
+
+**Parameters**
+
+```sh
+type GetAddress struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func GetAddress() Address {
+	return self.address
+}
+```
+
+### Storage Market Actor
+
+* **Code Cid**: `<codec:raw><mhType:identity><"smarket">`
 
 The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
 
-```go
-type StorageMarketActor struct {
-	Miners AddressSet
-
-	// TODO: Determine correct unit of measure. Could be denominated in the
-	// smallest sector size supported by the network.
-	TotalStorage BytesAmount
+```sh
+type StorageMarketActorState struct {
+    miners {Address:Null}<Hamt>
+    totalStorage BytesAmount
 }
 ```
-### Code Cid
 
-`<codec:raw><mhType:identity><"smarket">`
+#### Methods
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1   | `CreateStorageMiner`     |
-| 2 | `SlashConsensusFault` |
-| 3 | `UpdateStorage` |
-| 4 | `GetTotalStorage` |
-| 5 |  `PowerLookup` |
-| 6 | `IsMiner` |
+| Name | Method ID |
+|--------|-------------|
+| `StorageMarketConstructor` | 0 |
+| `CreateStorageMiner` | 1 |
+| `SlashConsensusFault` | 2 |
+| `UpdateStorage` | 3 |
+| `GetTotalStorage` | 4 |
+| `PowerLookup` | 5 |
+| `IsMiner` | 6 |
+| `StorageCollateralForSize` | 7 |
 
+#### `Constructor`
 
-### CreateStorageMiner
+**Parameters**
 
-Parameters:
+```sh
+type StorageMarketConstructor struct {}
+```
 
-- worker Address
-- sectorSize BytesAmount
-- pid PeerID
+**Algorithm**
 
-Return: Address
+#### `CreateStorageMiner`
+
+**Parameters**
+
+```sh
+type CreateStorageMiner struct {
+    worker Address
+    sectorSize BytesAmount
+    peerId PeerId
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Address {
+func CreateStorageMiner(worker Address, owner Address, sectorSize BytesAmount, pid PeerID) Address {
 	if !SupportedSectorSize(sectorSize) {
 		Fatal("Unsupported sector size")
 	}
 
-	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(pubkey, pledge, sectorSize, pid))
+	newminer := InitActor.Exec(MinerActorCodeCid, EncodeParams(worker, owner, pledge, sectorSize, pid))
 
 	self.Miners.Add(newminer)
 
@@ -201,14 +268,18 @@ func CreateStorageMiner(worker Address, sectorSize BytesAmount, pid PeerID) Addr
 }
 ```
 
-### SlashConsensusFault
+#### `SlashConsensusFault`
 
-Parameters:
+**Parameters**
 
-- block1 BlockHeader
-- block2 BlockHeader
+```sh
+type SlashConsensusFault struct {
+    block1 &Block
+    block2 &Block
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
 func shouldSlash(block1, block2 BlockHeader) bool {
@@ -268,15 +339,20 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 }
 ```
 
-### UpdateStorage
+#### `UpdateStorage`
 
 UpdateStorage is used to update the global power table.
 
-Parameters:
+**Parameters**
 
-- delta BytesAmount
+```sh
+type UpdateStorage struct {
+    delta BytesAmount
+} representation tuple
 
-Return: None
+```
+
+**Algorithm**
 
 ```go
 func UpdateStorage(delta BytesAmount) {
@@ -288,11 +364,17 @@ func UpdateStorage(delta BytesAmount) {
 }
 ```
 
-### GetTotalStorage
+#### `GetTotalStorage`
 
-Parameters: None
+**Parameters**
 
-Return: BytesAmount
+```sh
+type GetTotalStorage struct {
+
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetTotalStorage() BytesAmount {
@@ -300,12 +382,17 @@ func GetTotalStorage() BytesAmount {
 }
 ```
 
-### PowerLookup
+#### `PowerLookup`
 
-Parameters:
-- miner Address
+**Parameters**
 
-Return: BytesAmount
+```sh
+type PowerLookup struct {
+    miner Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func PowerLookup(miner Address) BytesAmount {
@@ -319,12 +406,17 @@ func PowerLookup(miner Address) BytesAmount {
 }
 ```
 
-### IsMiner
+#### `IsMiner`
 
-Parameters:
-- addr Address
+**Parameters**
 
-Return: BytesAmount
+```sh
+type IsMiner struct {
+    addr Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func IsMiner(addr Address) bool {
@@ -332,166 +424,185 @@ func IsMiner(addr Address) bool {
 }
 ```
 
-## Storage Miner Actor
+#### `StorageCollateralForSize`
+
+
+**Parameters**
+
+```sh
+type StorageCollateralForSize struct {
+    size UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-type StorageMiner struct {
-	// Owner is the address of the account that owns this miner. Income and returned
-	// collateral are paid to this address. This address is also allowed to change the
-	// worker address for the miner.
-	Owner Address
-
-	// Worker is the address of the worker account for this miner.
-	// This will be the key that is used to sign blocks created by this miner, and
-	// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
-	// other day to day miner activities.
-	Worker Address
-
-	// PeerID is the libp2p peer identity that should be used to connect
-	// to this miner
-	PeerID peer.ID
-
-	// SectorSize is the amount of space in each sector committed to the network
-	// by this miner.
-	SectorSize BytesAmount
-
-	// ActiveCollateral is the amount of collateral currently committed to live storage
-	ActiveCollateral TokenAmount
-
-	// DePledgedCollateral is collateral that is waiting to be withdrawn
-	DePledgedCollateral TokenAmount
-
-	// DePledgeTime is the time at which the depledged collateral may be withdrawn
-	DePledgeTime BlockHeight
-
-	// Sectors is the set of all sectors this miner has committed
-	Sectors SectorSet
-
-	// ProvingSet is the set of sectors this miner is currently mining. It is only updated
-	// when a PoSt is submitted (not as each new sector commitment is added)
-	ProvingSet SectorSet
-
-	// NextDoneSet is a set of sectors reported during the last PoSt submission as
-	// being 'done'. The collateral for them is still being held until the next PoSt
-	// submission in case early sector removal penalization is needed.
-	NextDoneSet SectorSet
-
-	// ArbitratedDeals is the set of deals this miner has been slashed for since the
-	// last post submission
-	ArbitratedDeals CidSet
-
-	// Power is the amount of power this miner has
-	Power Integer
-
-	// Asks are the set of active asks this miner has available
-	Asks AskSet
+func StorageCollateralforSize(size UInt) TokenAmount {
+	// TODO:
 }
 ```
 
-### Code Cid
+## Storage Miner Actor
 
-`<codec:raw><mhType:identity><"sminer">`
+* **Code Cid**: `<codec:raw><mhType:identity><"sminer">`
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1   | `AddAsk`     |
-| 2 | `CommitSector` |
-| 3 | `SubmitPoSt` |
-| 4 | `IncreasePledge` |
-| 5 | `SlashStorageFault` |
-| 6 | `GetCurrentProvingSet` |
-| 7 | `ArbitrateDeal` |
-| 8 | `DePledge` |
-| 9 | `GetOwner` |
-| 10 | `GetWorkerAddr` |
-| 11 | `GetPower` |
-| 12 | `GetPeerID` |
-| 13 | `GetSectorSize` |
-| 14 | `UpdatePeerID` |
-| 15 |  `ChangeWorker` |
+```sh
+type StorageMinerActorState struct {
+  ## contains mostly static info about this miner
+  info &MinerInfo
 
-### Constructor
+
+    ## Collateral that is waiting to be withdrawn.
+    dePledgedCollateral TokenAmount
+
+	## Time at which the depledged collateral may be withdrawn.
+    dePledgeTime BlockHeight
+
+	## All sectors this miner has committed.
+    sectors &SectorSet
+
+	## Sectors this miner is currently mining. It is only updated
+	## when a PoSt is submitted (not as each new sector commitment is added).
+    provingSet &SectorSet
+
+	## Sectors reported during the last PoSt submission as being 'done'. The collateral
+    ## for them is still being held until the next PoSt submission in case early sector
+    ## removal penalization is needed.
+    nextDoneSet BitField
+
+	## Deals this miner has been slashed for since the last post submission.
+    arbitratedDeals {Cid:Null}
+
+	## Amount of power this miner has.
+    power UInt
+
+    ## List of sectors that this miner was slashed for.
+    slashedSet optional &SectorSet
+
+    ## The height at which this miner was slashed at.
+    slashedAt optional BlockHeight
+
+    ## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+    owedStorageCollateral TokenAmount
+
+    provingPeriodEnd BlockHeight
+}
+
+type MinerInfo struct {
+	## Account that owns this miner.
+    ## - Income and returned collateral are paid to this address.
+    ## - This address is also allowed to change the worker address for the miner.
+    owner Address
+
+	## Worker account for this miner.
+	## This will be the key that is used to sign blocks created by this miner, and
+	## sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+	## other day to day miner activities.
+    worker Address
+
+    ## Libp2p identity that should be used when connecting to this miner.
+    peerId PeerId
+
+    ## Amount of space in each sector committed to the network by this miner.
+    sectorSize BytesAmount
+
+}
+```
+
+#### Methods
+
+| Name | Method ID |
+|--------|-------------|
+| `StorageMinerConstructor` | 0 |
+| `CommitSector` | 1 |
+| `SubmitPost` | 2 |
+| `SlashStorageFault` | 3 |
+| `GetCurrentProvingSet` | 4 |
+| `ArbitrateDeal` | 5 |
+| `DePledge` | 6 |
+| `GetOwner` | 7 |
+| `GetWorkerAddr` | 8 |
+| `GetPower` | 9 |
+| `GetPeerID` | 10 |
+| `GetSectorSize` | 11 |
+| `UpdatePeerID` | 12 |
+| `ChangeWorker` | 13 |
+| `IsSlashed` |  14 |
+| `IsLate` | 15 |
+
+#### `Constructor`
 
 Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.
 
+**Parameters**
+
+```sh
+type StorageMinerConstructor struct {
+    worker Address
+    owner Address
+    sectorSize BytesAmount
+    peerId PeerId
+} representation tuple
+```
+
+**Algorithm**
+
 ```go
-func StorageMinerActor(worker Address, sectorSize BytesAmount, pid PeerID) {
-	self.Owner = message.From
-	self.Worker = worker
-	self.PeerID = pid
-	self.SectorSize = sectorSize
+func StorageMinerActor(worker Address, owner Address, sectorSize BytesAmount, pid PeerID) {
+	self.info.owner = message.From
+	self.info.worker = worker
+	self.info.peerID = pid
+	self.info.sectorSize = sectorSize
+
+	self.sectors = EmptySectorSet()
+	self.provingSet = EmptySectorSet()
 }
 ```
 
+#### `CommitSector`
 
-### AddAsk
+**Parameters**
 
-Parameters:
-
-- price TokenAmount
-- ttl Integer
-
-Return: AskID
-
-```go
-func AddAsk(price TokenAmount, ttl Integer) AskID {
-	if msg.From != self.Worker {
-		Fatal("Asks may only be added via the worker address")
-	}
-
-	// Filter out expired asks
-	self.Asks.FilterExpired()
-
-	askid := self.NextAskID
-	self.NextAskID++
-
-	self.Asks.Append(Ask{
-		Price:  price,
-		Expiry: CurrentBlockHeight + ttl,
-		ID:     askid,
-	})
-
-	return askid
-}
+```sh
+type CommitSector struct {
+    sectorId SectorID
+    commD Bytes
+    commR Bytes
+    commRStar Bytes
+    proof SealProof
+} representation tuple
 ```
 
-Note: this may be moved off chain soon, don't worry about testing it too heavily.
+**Algorithm**
 
-
-
-### CommitSector
-
-Parameters:
-
-- sectorID SectorID
-- commD []byte
-- commR []byte
-- commRStar []byte
-- proof SealProof
-
-Return: None
-
+{{% notice todo %}}
+TODO: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
+{{% /notice %}}
 
 ```go
-// NotYetSpeced: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment
 func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealProof) SectorID {
-	if !miner.ValidatePoRep(miner.SectorSize, comm, miner.Worker, proof) {
+	if !self.ValidatePoRep(self.info.sectorSize, comm, self.info.worker, proof) {
 		Fatal("bad proof!")
 	}
 
 	// make sure the miner isnt trying to submit a pre-existing sector
-	if !miner.EnsureSectorIsUnique(comm) {
+	if !self.EnsureSectorIsUnique(comm) {
 		Fatal("sector already committed!")
 	}
 
-	// make sure the miner has enough collateral to add more storage
-	coll = CollateralForSector(miner.SectorSize)
+	// Power of the miner after adding this sector
+	futurePower = self.power + self.info.sectorSize
+	collateralRequired = CollateralForSize(futurePower)
 
-	if coll < vm.MyBalance()-miner.ActiveCollateral {
+	if collateralRequired > vm.MyBalance() {
 		Fatal("not enough collateral")
 	}
 
-	miner.ActiveCollateral += coll
+	// ensure that the miner cannot commit more sectors than can be proved with a single PoSt
+	if miner.Sectors.Size() >= POST_SECTORS_COUNT {
+		Fatal("too many sectors")
+	}
 
 	// Note: There must exist a unique index in the miner's sector set for each
 	// sector ID. The `faults`, `recovered`, and `done` parameters of the
@@ -511,22 +622,39 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		miner.ProvingPeriodEnd = chain.Now() + ProvingPeriodDuration(miner.SectorSize)
 	}
 }
+
+func CollateralForPower(power BytesAmount) TokenAmount {
+	availableFil = FakeGlobalMethods.GetAvailableFil()
+	totalNetworkPower = StorageMinerActor.GetTotalStorage()
+	numMiners = StorageMarket.GetMinerCount()
+	powerCollateral = availableFil * NetworkConstants.POWER_COLLATERAL_PROPORTION * power / totalNetworkPower
+	perCapitaCollateral = availableFil * NetworkConstants.PER_CAPITA_COLLATERAL_PROPORTION / numMiners
+	collateralRequired = math.Ceil(minerPowerCollateral + minerPerCapitaCollateral)
+	return collateralRequired
+}
 ```
 
-### SubmitPoSt
+#### `SubmitPoSt`
 
-Parameters:
+**Parameters**
 
-- proofs []PoStProof
-- faults []FaultSet
-- recovered Bitfield
-- done Bitfield
+```sh
+type SubmitPost struct {
+    proofs PoStProof
+    faults [FaultSet]
+    recovered Bitfield
+    done Bitfield
+} representation tuple
+```
 
-Return: None
+**Algorithm**
+
+{{% notice todo %}}
+TODO: GenerationAttackTime
+{{% /notice %}}
 
 ```go
-// NotYetSpeced: ValidateFaultSets, GenerationAttackTime, ComputeLateFee
-func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done BitField) {
+func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bitfield) {
 	if msg.From != miner.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
@@ -539,16 +667,17 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 		Fatal("fault sets invalid")
 	}
 
-	var feesRequired TokenAmount
+	feesRequired := 0
 
-	if chain.Now() > miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
-		// TODO: determine what exactly happens here. Is the miner permanently banned?
-		Fatal("Post submission too late")
-	} else if chain.Now() > miner.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(miner.Power, chain.Now()-miner.ProvingPeriodEnd)
+	if chain.Now() > self.ProvingPeriodEnd+GenerationAttackTime(self.SectorSize) {
+		// slashing ourselves
+		SlashStorageFault(self)
+		return
+	} else if chain.Now() > self.ProvingPeriodEnd {
+		feesRequired += ComputeLateFee(miner.power, chain.Now()-self.provingPeriodEnd)
 	}
 
-	feesRequired += ComputeTemporarySectorFailureFee(miner.SectorSize, recovered)
+	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
 
 	if msg.Value < feesRequired {
 		Fatal("not enough funds to pay post submission fees")
@@ -556,25 +685,19 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 
 	// we want to ensure that the miner can submit more fees than required, just in case
 	if msg.Value > feesRequired {
-		Refund(msg.Value - feesRequired)
+		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
 
-	if !CheckPostProofs(miner.SectorSize, proofs, faults) {
-		Fatal("proofs invalid")
+	if !CheckPostProof(miner.SectorSize, proof, faults) {
+		Fatal("proof invalid")
 	}
 
 	// combine all the fault set bitfields, and subtract out the recovered
 	// ones to get the set of sectors permanently lost
 	permLostSet = allFaults.Subtract(recovered)
 
-	// adjust collateral for 'done' sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, miner.NextDoneSet)
-
-	// penalize collateral for lost sectors
-	miner.ActiveCollateral -= CollateralForSectors(miner.SectorSize, permLostSet)
-
 	// burn funds for fees and collateral penalization
-	BurnFunds(miner, CollateralForSectors(miner.SectorSize, permLostSet)+feesRequired)
+	self.BurnFunds(CollateralForSize(self.SectorSize*permLostSet.Size()) + feesRequired)
 
 	// update sector sets and proving set
 	miner.Sectors.Subtract(done)
@@ -584,14 +707,12 @@ func SubmitPost(proofs []PoStProof, faults []FaultSet, recovered BitField, done 
 	// the last proving period.
 	oldPower := miner.Power
 
-	miner.Power = (miner.ProvingSet.Count() - allFaults.Count()) * miner.SectorSize
+	miner.Power = (miner.ProvingSet.Size() - allFaults.Count()) * miner.SectorSize
 	StorageMarket.UpdateStorage(miner.Power - oldPower)
 
 	miner.ProvingSet = miner.Sectors
 
-	// NEEDS REVIEW: early submission of PoSts may give the miner extra time for
-	// their next PoSt, which could compound. Does the beacon reseeding for Posts
-	// address this well enough?
+	// Updating proving period given a fixed schedule, independent of late submissions.
 	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
 
 	// update next done set
@@ -632,8 +753,6 @@ func ValidateFaultSets(faults []FaultSet, recovered, done BitField) bool {
 }
 
 func ProvingPeriodDuration(sectorSize uint64) Integer {
-	// TODO: eventually, this needs to be different for different sector sizes
-	// The research team should give us concrete numbers
 	return 24 * 60 * 60 * 2 // number of blocks in one day
 }
 
@@ -646,44 +765,92 @@ func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer
 }
 ```
 
-### SlashStorageFault
+#### `SlashStorageFault`
 
-Parameters:
+**Parameters**
 
-- miner Address
+```sh
+type SlashStorageFault struct {
+    miner Address
+} representation tuple
+```
 
-Return: None
+**Algorithm**
+
+
+## late submission and resubmission
+
+- If After provingPeriodEnd
+  - post submission now requires paying pay late submission fee
+    - (fixed cost, dependent on the total storage size)
+  - [implicit] loose all power, can be explicitly slashed for
+  - post submission returns your power immediately
+- If After `GenerationAttackTimeout` (<< 1 proving period)
+  - .... nothing changes atm
+- If After `PoStTimeout` (< 1 proving period)
+  - [explicit - slashStorageFault] loose all storage collateral
+  - clients can arbitrate deals with the miner now
+  - post submission now requires paying both late fee + lost storage collateral
+  - the valid post submission returns your power immediately
+- If After `SectorFailureTimeout` (> 1 proving period)
+  - [explicit - slashStorageFault] loose all sectors
+     - [implicit] resets proving period, as they need to resubmit all sectors after this
+  - there is now no way to reintroduce the sectors, unless they are resubmitted, etc
+  - power can not be recovered anymore
+
+- If [miner] does not call postsubmit
+
+
+Notes:
+- Should post submission only return your power, after the following proving period, when after the generation attack timeout
+- Is one proving period enough time for abitration of faulty deals for a client?
 
 ```go
 func SlashStorageFault() {
+	// You can only be slashed once for missing your PoSt.
 	if self.SlashedAt > 0 {
 		Fatal("miner already slashed")
 	}
 
-	if chain.Now() <= miner.ProvingPeriodEnd+GenerationAttackTime(miner.SectorSize) {
+	// Only if the miner is actually late, they can be slashed.
+	if chain.Now() <= self.ProvingPeriodEnd+GenerationAttackTime(self.SectorSize) {
 		Fatal("miner is not yet tardy")
 	}
 
-	if miner.ProvingSet.Size() == 0 {
+	// Only a miner who is expected to prove, can be slashed.
+	if self.ProvingSet.Size() == 0 {
 		Fatal("miner is inactive")
 	}
 
-	// Strip miner of their power
+	// Strip the miner of their power.
 	StorageMarketActor.UpdateStorage(-1 * self.Power)
 	self.Power = 0
 
-	// TODO: make this less hand wavey
-	BurnCollateral(self.ConsensusCollateral)
+	self.slashedSet = self.ProvingSet
+	// remove proving set from our sectors
+	self.sectors.Substract(self.slashedSet)
+
+	// clear proving set
+	self.ProvingSet = nil
+
+	self.owedStorageCollateral = StorageMarketActor.StorageCollateralForSize(
+		self.slashedSet.Size() * self.SectorSize,
+	)
 
 	self.SlashedAt = CurrentBlockHeight
 }
 ```
 
-### GetCurrentProvingSet
+#### `GetCurrentProvingSet`
 
-Parameters: None
+**Parameters**
 
-Return: `[][]byte`
+```sh
+type GetCurrentProvingSet struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetCurrentProvingSet() [][]byte {
@@ -691,191 +858,479 @@ func GetCurrentProvingSet() [][]byte {
 }
 ```
 
-Note: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)
+{{%notice note %}}
+**Note**: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)
+{{% /notice %}}
 
-### ArbitrateDeal
+#### `ArbitrateDeal`
 
 This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.
 
-Parameters:
+**Parameters**
 
-- deal Deal
+```sh
+type ArbitrateDeal struct {
+    deal Deal
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
-func AbitrateDeal(d Deal) {
-	if !ValidateSignature(d, self.Worker) {
+func AbitrateDeal(deal Deal) {
+	if !VM.ValidateSignature(deal, self.Worker) {
 		Fatal("invalid signature on deal")
 	}
 
-	if CurrentBlockHeight < d.StartTime {
+	if VM.CurrentBlockHeight() < deal.StartTime {
 		Fatal("Deal not yet started")
 	}
 
-	if d.Expiry < CurrentBlockHeight {
+	if deal.Expiry < VM.CurrentBlockHeight() {
 		Fatal("Deal is expired")
 	}
 
-	if !self.NextDoneSet.Has(d.PieceCommitment.Sector) {
+	if !self.NextDoneSet.Has(deal.pieceInclusionProof.sectorID) {
 		Fatal("Deal agreement not broken, or arbitration too late")
 	}
 
-	if self.ArbitratedDeals.Has(d.PieceRef) {
+	if self.ArbitratedDeals.Has(deal.commP) {
 		Fatal("cannot slash miner twice for same deal")
 	}
 
-	pledge, storage := CollateralForDeal(d)
+	if !deal.pieceInclusionProof.Verify(deal.commP, deal.size) {
+		Fatal("invalid piece inclusion proof or size")
+	}
 
-	// burn the pledge collateral
-	self.BurnFunds(pledge)
+	storageCollateral := StorageMarketActor.StorageCollateralForSize(deal.size)
+
+	if self.owedStorageCollateral < storageCollateral {
+		Fatal("math is hard, and we didnt do it right")
+	}
 
 	// pay the client the storage collateral
-	TransferFunds(d.ClientAddr, storage)
+	VM.TransferFunds(storageCollateral, deal.client)
+
+	// keep track of how much we have payed out
+	self.owedStorageCollateral -= storageCollateral
 
 	// make sure the miner can't be slashed twice for this deal
-	self.ArbitratedDeals.Add(d.PieceRef)
+	self.ArbitratedDeals.Add(deal.commP)
 }
 ```
 
-TODO(scaling): This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.
+{{% notice todo %}}
+**TODO(scaling)**: This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.
+{{% /notice %}}
 
-### DePledge
+#### `DePledge`
 
-Parameters:
+**Parameters**
 
-- amt TokenAmount
+```sh
+type DePledge struct {
+    amount TokenAmount
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
 func DePledge(amt TokenAmount) {
-	if msg.From != miner.Worker && msg.From != miner.Owner {
+	if msg.From != self.info.Worker && msg.From != self.info.owner {
 		Fatal("Not authorized to call DePledge")
 	}
 
-	if miner.DePledgeTime > 0 {
-		if miner.DePledgeTime > CurrentBlockHeight {
+	if self.DePledgeTime > 0 {
+		if self.DePledgeTime > VM.CurrentBlockHeight() {
 			Fatal("too early to withdraw collateral")
 		}
 
-		TransferFunds(miner.Owner, miner.DePledgedCollateral)
-		miner.DePledgeTime = 0
-		miner.DePledgedCollateral = 0
+		TransferFunds(self.info.owner, self.DePledgedCollateral)
+		self.DePledgeTime = 0
+		self.DePledgedCollateral = 0
 		return
 	}
 
-	if amt > vm.MyBalance()-miner.ActiveCollateral {
+	collateralRequired = CollateralForPower(self.power)
+
+	if amt+collateralRequired > vm.MyBalance() {
 		Fatal("Not enough free collateral to withdraw that much")
 	}
 
-	miner.DePledgedCollateral = amt
-	miner.DePledgeTime = CurrentBlockHeight + DePledgeCooldown
+	self.DePledgedCollateral = amt
+	self.DePledgeTime = CurrentBlockHeight + DePledgeCooldown
 }
 ```
 
-### GetOwner
+#### `GetOwner`
 
-Parameters: None
+**Parameters**
+```sh
+type GetOwner struct {
+} representation tuple
+```
 
-Return: Address
+**Algorithm**
 
 ```go
 func GetOwner() Address {
-	return self.Owner
+	return self.info.owner
 }
 ```
 
-### GetWorkerAddr
+#### `GetWorkerAddr`
 
-Parameters: None
+**Parameters**
 
-Return: Address
+```sh
+type GetWorkerAddr struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetWorkerAddr() Address {
-	return self.Worker
+	return self.info.worker
 }
 ```
 
-### GetPower
+#### `GetPower`
 
-Parameters: None
+**Parameters**
 
-Return: BytesAmount
+```sh
+type GetPower struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetPower() BytesAmount {
-	return self.Power
+	return self.power
 }
 ```
 
-### GetPeerID
+#### `GetPeerID`
 
-Parameters: None
+**Parameters**
 
-Return: PeerID
+```sh
+type GetPeerID struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetPeerID() PeerID {
-	return self.PeerID
+	return self.info.peerID
 }
 ```
 
-### GetSectorSize
+#### `GetSectorSize`
 
-Parameters: None
+**Parameters**
 
-Return: BytesAmount
+```sh
+type GetSectorSize struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func GetSectorSize() BytesAmount {
-	return self.SectorSize
+	return self.info.sectorSize
 }
 ```
 
-### UpdatePeerID
+#### `UpdatePeerID`
 
-Parameters:
+**Parameters**
 
-- pid PeerID
+```sh
+type UpdatePeerID struct {
+    peerId PeerId
+} representation tuple
+```
 
-Return: None
+**Algorithm**
 
 ```go
 func UpdatePeerID(pid PeerID) {
-	if msg.From != self.Worker {
+	if msg.From != self.info.worker {
 		Fatal("only the mine worker may update the peer ID")
 	}
 
-	self.PeerID = pid
+	self.info.peerID = pid
 }
 ```
 
-### ChangeWorker
+#### `ChangeWorker`
 
 Changes the worker address. Note that since Sector Commitments take the miners worker key as an input, any sectors sealed with the old key but not yet submitted to the chain will be invalid. All future sectors must be sealed with the new worker key.
 
-Parameters:
-- addr Address
+**Parameters**
 
-Return: None
+```sh
+type ChangeWorker struct {
+    addr Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func ChangeWorker(addr Address) {
-	if msg.From != self.Owner {
+	if msg.From != self.info.owner {
 		Fatal("only the owner can change the worker address")
 	}
 
-	self.Worker = addr
+	self.info.worker = addr
 }
 ```
 
-## Payment Channel Broker Actor
+#### `IsLate`
 
-TODO
+IsLate checks whether the miner has submitted their PoSt on time (i.e. not after ProvingPeriodEnd).
 
-## Multisig Account Actor
+**Parameters**
+
+```sh
+type IsLate struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func IsLate() (bool) {
+    return self.provingPeriodEnd < VM.CurrentBlockHeight()
+}
+```
+
+#### `IsSlashed`
+
+Checks whether the miner has been slashed and not recovered. Note that if the miner is slashed and recovers, this will return False: it checks current state rather than historical occurence.
+
+**Parameters**
+
+```sh
+type IsSlashed struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func IsSlashed() (bool) {
+    # SlashedAt is reset on recovery
+    return self.SlashedAt > 0
+}
+```
+
+### Payment Channel Actor
+
+- **Code Cid:** `<codec:raw><mhType:identity><"paych">`
+
+The payment channel actor manages the on-chain state of a point to point payment channel.
+
+```sh
+type PaymentChannel struct {
+	from Address
+	to   Address
+
+	channelTotal TokenAmount
+	toSend       TokenAmount
+
+	closingAt      UInt
+	minCloseHeight UInt
+
+	laneStates {UInt:LaneState}
+} representation tuple
+```
+
+#### Methods
+
+| Name | Method ID |
+|--------|-------------|
+| `PaymentChannelConstructor` | 0 |
+| `UpdateChannelState` | 1 |
+| `Close` | 2 |
+| `Collect` | 3 |
+
+#### `Constructor`
+
+**Parameters**
+
+```sh
+type PaymentChannelConstructor struct {
+}
+```
+
+**Algorithm**
+
+{{% notice todo %}}
+
+TODO: Define me
+
+{{% /notice %}}
+
+#### `UpdateChannelState`
+
+**Parameters**
+
+```sh
+type UpdateChannelState struct {
+  sv SignedVoucher
+  secret Bytes
+  pip PieceInclusionProof
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
+	if !self.validateSignature(sv) {
+		Fatal("Signature Invalid")
+	}
+
+	if chain.Now() < sv.TimeLock {
+		Fatal("cannot use this voucher yet!")
+	}
+
+	if sv.SecretPreimage != nil {
+		if Hash(secret) != sv.SecretPreimage {
+			Fatal("Incorrect secret!")
+		}
+	}
+
+	if sv.DataCommitment != nil {
+		// Checks that the piece inclusion proof is valid, and that the referenced sector
+		// is correctly being stored
+		if !ValidateInclusion(pip, sv.DataCommitment) {
+			Fatal("PieceInclusionProof was invalid")
+		}
+	}
+
+	if sv.RequiredSector != nil {
+		miner, found := GetMiner(msg.From)
+		if !found {
+			Fatal("Redeemer is not a miner")
+		}
+
+		if !miner.HasSector(sv.RequiredSector) {
+			Fatal("miner does not have sector, cannot redeem payment")
+		}
+	}
+
+	ls := self.LaneStates[sv.Lane]
+	if ls.Closed {
+		Fatal("cannot redeem a voucher on a closed lane")
+	}
+
+	if ls.Nonce > sv.Nonce {
+		Fatal("voucher has an outdated nonce, cannot redeem")
+	}
+
+	var mergeValue TokenAmount
+	for _, merge := range sv.Merges {
+		ols := self.LaneStates[merge.Lane]
+
+		if ols.Nonce >= merge.Nonce {
+			Fatal("merge in voucher has outdated nonce, cannot redeem")
+		}
+
+		mergeValue += ols.Redeemed
+		ols.Nonce = merge.Nonce
+	}
+
+	ls.Nonce = sv.Nonce
+	balanceDelta = sv.Amount - (mergeValue + ls.Redeemed)
+	ls.Redeemed = sv.Amount
+
+	newSendBalance = self.ToSend + balanceDelta
+	if newSendBalance < 0 {
+		// TODO: is this impossible?
+		Fatal("voucher would leave channel balance negative")
+	}
+
+	if newSendBalance > self.ChannelTotal {
+		Fatal("not enough funds in channel to cover voucher")
+	}
+
+	self.ToSend = newSendBalance
+
+	if sv.MinCloseHeight != 0 {
+		if self.ClosingAt < sv.MinCloseHeight {
+			self.ClosingAt = sv.MinCloseHeight
+		}
+		if self.MinCloseHeight < sv.MinCloseHeight {
+			self.MinCloseHeight = sv.MinCloseHeight
+		}
+	}
+}
+```
+
+#### `Close`
+
+**Parameters**
+
+```sh
+type Close struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func Close() {
+	if msg.From != self.From && msg.From != self.To {
+		Fatal("not authorized to close channel")
+	}
+	if self.ClosingAt != 0 {
+		Fatal("Channel already closing")
+	}
+
+	self.ClosingAt = chain.Now() + ChannelClosingDelay
+	if self.ClosingAt < self.MinCloseHeight {
+		self.ClosingAt = self.MinCloseHeight
+	}
+}
+```
+
+#### `Collect`
+
+**Parameters**
+
+```sh
+type Collect struct {
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func Collect() {
+	if self.ClosingAt == 0 {
+		Fatal("payment channel not closing or closed")
+	}
+
+	if chain.Now() < self.ClosingAt {
+		Fatal("Payment channel not yet closed")
+	}
+	TransferFunds(self.From, self.ChannelTotal-self.ToSend)
+	TransferFunds(self.To, self.ToSend)
+}
+```
+
+### Multisig Account Actor
+
+- **Code Cid**: `<codec:raw><mhType:identity><"multisig">`
 
 A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
 
@@ -885,78 +1340,87 @@ threshold' logic only needs to be implemented once, in one place.
 
 The [init actor](#init-actor) is used to create new instances of the multisig.
 
-### State
-
-```go
-type Multisig struct {
-	Signers  []Address
-	Required uint
-
-	NextTxID     uint64
-	Transactions map[int]Transaction
+```sh
+type MultisigActorState struct {
+    signers [Address]
+    required UInt
+    nextTxId UInt
+    transactions {UInt:Transaction}
 }
 
 type Transaction struct {
-	Created   uint64
-	TxID      uint64
-	To        Address
-	Value     TokenAmount
-	Method    string
-	Params    []byte
-	Approved  []Address
-	Completed bool
-	Canceled  bool
+    created UInt
+    txID UInt
+    to Address
+    value TokenAmount
+    method &ActorMethod
+    approved [Address]
+    completed Bool
+    canceled Bool
 }
 ```
 
-### Code Cid
+#### Methods
 
-`<codec:raw><mhType:identity><"multisig">`
+| Name | Method ID |
+|--------|-------------|
+| `MultisigConstructor` | 0 |
+| `Propose` | 1 |
+| `Approve` | 2 |
+| `Cancel` | 3 |
+| `ClearCompleted` | 4 |
+| `AddSigner` | 5 |
+| `RemoveSigner` | 6 |
+| `SwapSigner` | 7 |
+| `ChangeRequirement` | 8 |
 
-| Index     | Method Name       |
-| -------- | ---------- |
-| 1   | `Propose`     |
-| 2 | `Approve` |
-| 3 | `Cancel` |
-| 4 | `ClearCompleted` |
-| 5 | `AddSigner` |
-| 6 | `RemoveSigner` |
-| 7 | `SwapSigner` |
-| 8 | `ChangeRequirement` |
 
-### Constructor
+#### `Constructor`
 
->  This method sets up the initial state for the multisig account
+This method sets up the initial state for the multisig account
 
-### Parameters
+**Parameters**
 
-| Name     | Type       | Description                                         |
-| -------- | ---------- | ------------------------------------------------------------ |
-| `signers`   | `[]Address`      | The addresses that will be the signatories of this wallet. |
-| `required` | `uint` | The number of signatories required to perform a transaction.       |
+```sh
+type MultisigConstructor struct {
+    ## The addresses that will be the signatories of this wallet.
+    signers [Address]
+    ## The number of signatories required to perform a transaction.
+    required UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func Multisig(signers []Address, required uint) {
+func Multisig(signers []Address, required UInt) {
 	self.Signers = signers
 	self.Required = required
 }
 ```
 
+#### `Propose`
+
+Propose is used to propose a new transaction to be sent by this multisig. The proposer must be a signer, and the proposal also serves as implicit approval from the proposer. If only a single signature is required, then the transaction is executed immediately.
+
+**Parameters**
 
 
-### Propose
+```sh
+type Propose struct {
+    ## The address of the target of the proposed transaction.
+    to Address
+    ## The amount of funds to send with the proposed transaction.
+    value TokenAmount
+    ## The method and parameters that will be invoked on the proposed transactions target.
+    method &ActorMethod
+} representation tuple
+```
 
-> Propose is used to propose a new transaction to be sent by this multisig. The proposer must be a signer, and the proposal also serves as implicit approval from the proposer. If only a single signature is required, then the transaction is executed immediately.
-
-| Name     | Type       | Description  |
-| --- | --- | --- |
-| `to` |  `Address` | The address of the target of the proposed transaction. |
-|  `value` | `TokenAmount` | The amount of funds to send with the proposed transaction |
-|  `method` | `string` | The method that will be invoked on the proposed transactions target. |
-| `params` | `[]byte` | The parameters that will be passed to the method invocation on the proposed transactions target. |
+**Algorithm**
 
 ```go
-func Propose(to Address, value TokenAmount, method string, params []byte) uint64 {
+func Propose(to Address, value TokenAmount, method String, params Bytes) UInt {
 	if !isSigner(msg.From) {
 		Fatal("not authorized")
 	}
@@ -984,17 +1448,23 @@ func Propose(to Address, value TokenAmount, method string, params []byte) uint64
 }
 ```
 
-### Approve
+#### `Approve`
 
-> Approve is called by a signer to approve a given transaction. If their approval pushes the approvals for this transaction over the threshold, the transaction is executed.
+Approve is called by a signer to approve a given transaction. If their approval pushes the approvals for this transaction over the threshold, the transaction is executed.
 
-| Name     | Type       | Description  |
-| --- | --- | --- |
-| `txid` |  `uint64` | The ID of the transaction to approve. |
+**Parameters**
 
+```sh
+type Approve struct {
+    ## The ID of the transaction to approve.
+    txid UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func Approve(txid uint64) {
+func Approve(txid UInt) {
 	if !self.isSigner(msg.From) {
 		Fatal("not authorized")
 	}
@@ -1022,10 +1492,20 @@ func Approve(txid uint64) {
 }
 ```
 
-### Cancel
+#### `Cancel`
+
+**Parameters**
+
+```sh
+type Cancel struct {
+    txid UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func Cancel(txid uint64) {
+func Cancel(txid UInt) {
 	if !self.isSigner(msg.From) {
 		Fatal("not authorized")
 	}
@@ -1047,7 +1527,16 @@ func Cancel(txid uint64) {
 }
 ```
 
-### ClearCompleted
+#### `ClearCompleted`
+
+**Parameters**
+
+```sh
+type ClearCompleted struct {
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func ClearCompleted() {
@@ -1063,7 +1552,17 @@ func ClearCompleted() {
 }
 ```
 
-### AddSigner
+#### `AddSigner`
+
+**Parameters**
+
+```sh
+type AddSigner struct {
+    signer Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func AddSigner(signer Address) {
@@ -1078,7 +1577,17 @@ func AddSigner(signer Address) {
 }
 ```
 
-### RemoveSigner
+#### `RemoveSigner`
+
+**Parameters**
+
+```sh
+type RemoveSigner struct {
+    signer Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
 func RemoveSigner(signer Address) {
@@ -1093,10 +1602,21 @@ func RemoveSigner(signer Address) {
 }
 ```
 
-### SwapSigner
+#### `SwapSigner`
+
+**Parameters**
+
+```sh
+type SwapSigner struct {
+    old Address
+    new Address
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func SwapSigner(old, new Address) {
+func SwapSigner(old Address, new Address) {
 	if msg.From != self.Address {
 		Fatal("swap signer must be called by wallet itself")
 	}
@@ -1112,10 +1632,20 @@ func SwapSigner(old, new Address) {
 }
 ```
 
-### ChangeRequirement
+#### `ChangeRequirement`
+
+**Parameters**
+
+```sh
+type ChangeRequirement struct {
+    requirement UInt
+} representation tuple
+```
+
+**Algorithm**
 
 ```go
-func ChangeRequirement(req int) {
+func ChangeRequirement(req UInt) {
 	if msg.From != self.Address {
 		Fatal("change requirement must be called by wallet itself")
 	}
@@ -1127,7 +1657,7 @@ func ChangeRequirement(req int) {
 }
 ```
 
-### Helper Methods
+## Helper Methods
 
 The various helper methods called above are defined here.
 
@@ -1140,13 +1670,31 @@ func isSigner(a Address) bool {
 	}
 	return false
 }
+```
 
-func getTransaction(txid int) Transaction {
+```go
+func getTransaction(txid UInt) Transaction {
 	tx, ok := self.Transactions[txid]
 	if !ok {
 		Fatal("no such transaction")
 	}
 
 	return tx
+}
+```
+
+```go
+func AggregateBitfields(faults []FaultSet) Bitfield {
+	var out Bitfield
+	for _, f := range faults {
+		out = out.Union(f.bitField)
+	}
+	return out
+}
+```
+
+```go
+func BurnFunds(amt TokenAmount) {
+	TransferFunds(BurntFundsAddress, amt)
 }
 ```
