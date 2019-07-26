@@ -33,7 +33,7 @@ type StorageMarket interface {
 	// invalidation of any any all storage they are providing. The caller is rewarded
 	// a small amount to compensate for gas fees (TODO: maybe it should be more?)
 	SlashConsensusFault(blk1, blk2 BlockHeader)
-  
+
 	// SlashStorageFault slashes a storage miner for not submitting their PoSTs within
 	// the correct [time window](#TODO-link-to-faulty-submission). This may be called by anyone who detects the faulty behavior.
 	// The slashed miner then loses all of their staked collateral, and also loses all
@@ -43,7 +43,7 @@ type StorageMarket interface {
 	// UpdateStorage is called by a miner to adjust the storage market actors
 	// accounting of the total storage in the storage market.
 	UpdateStorage(delta BytesAmount)
-  
+
 	// GetTotalStorage returns the total committed storage in the system. This number is
 	// also used as the 'total power' in the system for the purposes of the power table
 	GetTotalStorage() BytesAmount
