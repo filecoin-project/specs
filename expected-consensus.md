@@ -12,6 +12,8 @@ Some important concepts relevant to expected consensus are:
 - [Verifiable Delay Function (VDF)](definitions.md#vdf)
 - [Verifiable Random Function (VRF)](defintions.md#vrf)
 - [TipSet](definitions.md#tipset)
+- [Ticket](definitions.md#ticket)
+- [Ticket Chain](defintions.md#ticket-chain)
 - [Height](definitions.md#height) -- In the realm of EC, it is worth noting that a new ticket must be produced at every height, consequently the duration of a round is bounded by the duration of the Verifiable Delay Function run to generate a ticket.
 - [Weight](definitions.md#weight)
 - [Power Fraction](definitions.md#power-fraction)
@@ -30,11 +32,11 @@ Every time a block is received, we first verify whether the block is valid (`Ver
 ```go
 // Called when a block is received by this node
 func OnBlockReceived(blk Block) {
-	// The exact definition of VerifyBlock depends on the protocol
-	// For Filecoin, see mining.md
-	if VerifyBlock(blk) {
-		ChainTipsMgr.Add(blk)
-	}
+    // The exact definition of VerifyBlock depends on the protocol
+    // For Filecoin, see mining.md
+    if VerifyBlock(blk) {
+        ChainTipsMgr.Add(blk)
+    }
   // Received an invalid block!
 }
 ```
@@ -43,24 +45,24 @@ Meanwhile, the mining node runs a mining process to attempt to generate blocks. 
 
 ```go
 func Mine(minerKey PrivateKey) {
-	for r := range rounds { // for each round
-		bestTipset, tickets := ChainTipsMgr.GetBestTipsetAtRound(r - 1)
+    for r := range rounds { // for each round
+        bestTipset, tickets := ChainTipsMgr.GetBestTipsetAtRound(r - 1)
 
-		ticket := GenerateTicket(minerKey, bestTipset)
-		tickets.Append(ticket)
+        ticket := GenerateTicket(minerKey, bestTipset)
+        tickets.Append(ticket)
 
-		// Generate an ElectionProof and check if we win
-		// Note: even if we don't win, we want to make a ticket
-		// in case we need to mine a null round
-		win, proof := CheckIfWinnerAtRound(minerKey, r, bestTipset)
-		if win {
-			GenerateAndBroadcastBlock(bestTipset, tickets, proof)
-		} else {
-			// Even if we don't win, add our ticket to the tracker in
-			// case we need to mine on it later.
-			ChainTipsMgr.AddFailedTicket(bestTipset, tickets)
-		}
-	}
+        // Generate an ElectionProof and check if we win
+        // Note: even if we don't win, we want to make a ticket
+        // in case we need to mine a null round
+        win, proof := CheckIfWinnerAtRound(minerKey, r, bestTipset)
+        if win {
+            GenerateAndBroadcastBlock(bestTipset, tickets, proof)
+        } else {
+            // Even if we don't win, add our ticket to the tracker in
+            // case we need to mine on it later.
+            ChainTipsMgr.AddFailedTicket(bestTipset, tickets)
+        }
+    }
 }
 ```
 
@@ -141,8 +143,8 @@ from the prior block, or the prior "losing" ticket).
 
 2) As a source of randomness used to prove that a leader was correctly elected.
 
-This is done by generating an 'ElectionProof' derived from a ticket sampled K rounds
-back.
+This is done by generating an 'ElectionProof' derived from the ticket sampled K rounds
+back in the ticket chain.
 
 But why the randomness lookback?
 
@@ -173,6 +175,7 @@ The miner runs the prior ticket through a Verifiable Random Function (VRF) to ge
 The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
 The VDF approximates clock synchrony for miners, thereby ensuring miners have waited an appropriate delay ahead of drawing a new ticket. It ensures network liveness, allowing miners to run a new election if no winner is found in a given round.
 Finally, it establishes a lower-bound delay between production of new blocks at different heights. This helps ensure fairness, in that miners with lesser connectivity are not penalized and have a chance to produce blocks.
+A default value for the VDF delay could be 30 seconds, given estimated network propagation times.
 
 Succinctly, the process of crafting a new `Ticket` in round `N` is as follows. We use:
 
@@ -187,25 +190,25 @@ Input: parentTickets at round N-1, miner's private key SK
 Output: newTicket
 
 0. Prepare new ticket
-	i. newTicket <-- New()
+    i. newTicket <-- New()
 1. Draw prior ticket
-	i. 	 # take the last ticket for each parent 'Tickets' array
-			lastTickets <-- map(parentTickets, fun(x): x.last)
+    i. # take the last ticket for each parent 'Tickets' array
+        lastTickets <-- map(parentTickets, fun(x): x.last)
     ii. # draw the smallest ticket
-  			parentTicket <-- min(sortedTickets)
+        parentTicket <-- min(sortedTickets)
 2. Run it through VRF and get determinstic output
-	i.   # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
-			input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
-	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-			newTicket.VRFProof <-- ECVRF_prove(SK, input)
-	iii. # draw a deterministic output from this
-			VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
+    i. # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
+            input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
+    ii. # run it through the VRF and store the VRFProof in the new ticket
+            newTicket.VRFProof <-- ECVRF_prove(SK, input)
+    iii. # draw a deterministic output from this
+            VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
 3. Run that deterministic output through a VDF
-    i.  # run eval with our VDF and its evaluation k on VRFOutput
-  			y, pi <-- VDF_eval(ek, VRFOutput)
+    i. # run eval with our VDF and its evaluation k on VRFOutput
+            y, pi <-- VDF_eval(ek, VRFOutput)
     ii. # Store the output and proof in our ticket
-  			newTicket.VDFOutput <-- y
-  			newTicket.VDFProof 	<-- pi
+            newTicket.VDFOutput <-- y
+            newTicket.VDFProof  <-- pi
 4. Return the new ticket
 ```
 
@@ -230,27 +233,27 @@ Input: parentTickets from N-K, miner's public key PK, miner's secret key SK, the
 Output: 1 or 0
 
 0. Prepare new election proof
-	i. newEP <-- New()
+    i. newEP <-- New()
 1. Determine the miner's power fraction
-	i. 	# Determine total storage this round
-  		S <-- storageMarket(N)
-  		p_n <-- S.GetTotalStorage()
+    i. # Determine total storage this round
+        S <-- storageMarket(N)
+        p_n <-- S.GetTotalStorage()
     ii. # Determine own power at prior tipSet
         p_m <-- GetMinersPowerAt(N-1, self.PK)
     iii. # Get power fraction
-  		p_f <-- p_m/p_n
+        p_f <-- p_m/p_n
 2. Draw parentTicket from K blocks back (see ticket creation above for example, using 1 block back) 
 3. Run it through VRF and get determinstic output
-	i.   # take the VDFOutput of that ticket as input, specified for the appropriate operation type
-		input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
-	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-		newEP.VRFProof <-- ECVRF_prove(SK, input)
-	iii. # draw a deterministic, pseudorandom output from this
-		VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
+    i. # take the VDFOutput of that ticket as input, specified for the appropriate operation type
+        input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
+    ii. # run it through the VRF and store the VRFProof in the new ticket
+        newEP.VRFProof <-- ECVRF_prove(SK, input)
+    iii. # draw a deterministic, pseudorandom output from this
+        VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
 3. Determine if the miner drew a winning lottery ticket
     # Conceptually we are mapping the pseudorandom, deterministic VRFOutput onto [0,1] by dividing by 2^HashLen (64 Bytes using Sha256) and comparing that to the miner's power (portion of network storage).
     # In practice, we actually multiply the power fraction by 2^HashLen for comparison with the ticket value in order to avoid dealing with floats.
-	i.  # Map the miner's power onto [0, 2^HashLen] (64 Bytes using sha256)
+    i.  # Map the miner's power onto [0, 2^HashLen] (64 Bytes using sha256)
         normalized_power <-- p_f * 2^HashLen
     ii. # Compare the miner's power fraction to the value of the ticket drawn: more power means win more often.
         # winning ticket

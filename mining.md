@@ -46,16 +46,16 @@ At the beginning of their proving period, miners collect the proving set (the se
 
 ```go
 func ProveStorage(sectorSize BytesAmount, sectors []commR, startTime BlockHeight) (PoSTProof, []FaultSet) {
-	var proofs []Proofs
-	var seeds []Seed
-	var faults []FaultSet
-	for t := 0; t < ProvingPeriod; t += ReseedPeriod {
-		seeds = append(seeds, GetSeedFromBlock(startTime+t))
-		proof, faultset := GenPost(sectors, seeds[t], vdfParams)
-		proofs = append(proofs, proof)
-		faults = append(faults, faultset)
-	}
-	return GenPostSnark(sectorSize, sectors, seeds, proofs), faults
+    var proofs []Proofs
+    var seeds []Seed
+    var faults []FaultSet
+    for t := 0; t < ProvingPeriod; t += ReseedPeriod {
+        seeds = append(seeds, GetSeedFromBlock(startTime+t))
+        proof, faultset := GenPost(sectors, seeds[t], vdfParams)
+        proofs = append(proofs, proof)
+        faults = append(faults, faultset)
+    }
+    return GenPostSnark(sectorSize, sectors, seeds, proofs), faults
 }
 ```
 
@@ -114,83 +114,83 @@ In order to validate a block coming in from the network at height `N` was well m
 
 ```go
 func VerifyBlock(blk Block) {
-	// 1. Verify Signature
-	pubk := GetPublicKey(blk.Miner)
-	if !ValidateSignature(blk.BlockSig, pubk, blk) {
-		Fatal("invalid block signature")
-	}
+    // 1. Verify Signature
+    pubk := GetPublicKey(blk.Miner)
+    if !ValidateSignature(blk.BlockSig, pubk, blk) {
+        Fatal("invalid block signature")
+    }
 
-	// 2. Verify Timestamp
-	// first check that it is not in the future
-	if blk.GetTime() > time.Now() {
-		Fatal("block was generated too far in the future")
-	}
-	// next check that it is appropriately delayed from its parents including
-	// all tickets.
-	if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
-		Fatal("block was generated too soon")
-	}
+    // 2. Verify Timestamp
+    // first check that it is not in the future
+    if blk.GetTime() > time.Now() {
+        Fatal("block was generated too far in the future")
+    }
+    // next check that it is appropriately delayed from its parents including
+    // all tickets.
+    if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
+        Fatal("block was generated too soon")
+    }
 
-	// 3. Verify ParentWeight
-	if blk.ParentWeight != ComputeWeight(blk.Parents) {
-		Fatal("invalid parent weight")
-	}
+    // 3. Verify ParentWeight
+    if blk.ParentWeight != ComputeWeight(blk.Parents) {
+        Fatal("invalid parent weight")
+    }
 
-	// 4. Verify Tickets
-	if !VerifyTickets(blk) {
-		Fatal("tickets were invalid")
-	}
+    // 4. Verify Tickets
+    if !VerifyTickets(blk) {
+        Fatal("tickets were invalid")
+    }
 
-	// 5. Verify ElectionProof
-	// Note that this step must explicitly check that the
-	// miner has not been slashed and is still valid miner
-	if !VerifyElectionProof(blk) {
-		Fatal("election was invalid")
-	}
+    // 5. Verify ElectionProof
+    // Note that this step must explicitly check that the
+    // miner has not been slashed and is still valid miner
+    if !VerifyElectionProof(blk) {
+        Fatal("election was invalid")
+    }
 
-	// 6. Verify Message Signatures
-	messages := LoadMessages(blk.Messages)
-	state := GetParentState(blk.Parents)
+    // 6. Verify Message Signatures
+    messages := LoadMessages(blk.Messages)
+    state := GetParentState(blk.Parents)
 
-	var blsMessages []Message
-	var blsPubKeys []PublicKey
-	for i, msg := range messages {
-		if IsBlsMessage(msg) {
-			blsMessages.append(msg)
-			blsPubKeys.append(state.LookupPublicKey(msg.From))
-		} else {
-			if !ValidateSignature(msg) {
-				Fatal("invalid message signature in block")
-			}
-		}
-	}
+    var blsMessages []Message
+    var blsPubKeys []PublicKey
+    for i, msg := range messages {
+        if IsBlsMessage(msg) {
+            blsMessages.append(msg)
+            blsPubKeys.append(state.LookupPublicKey(msg.From))
+        } else {
+            if !ValidateSignature(msg) {
+                Fatal("invalid message signature in block")
+            }
+        }
+    }
 
-	ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys)
+    ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys)
 
-	// 7. Validate State Transitions
-	receipts := LoadReceipts(blk.MessageReceipts)
-	for i, msg := range messages {
-		receipt := ApplyMessage(state, msg)
-		if receipt != receipts[i] {
-			Fatal("message receipt mismatch")
-		}
-	}
-	if state.Cid() != blk.StateRoot {
-		Fatal("state roots mismatch")
-	}
+    // 7. Validate State Transitions
+    receipts := LoadReceipts(blk.MessageReceipts)
+    for i, msg := range messages {
+        receipt := ApplyMessage(state, msg)
+        if receipt != receipts[i] {
+            Fatal("message receipt mismatch")
+        }
+    }
+    if state.Cid() != blk.StateRoot {
+        Fatal("state roots mismatch")
+    }
 }
 
 func (state StateTree) LookupPublicKey(a Address) PubKey {
-	act := state.GetActor(a)
-	if !act.Code == AccountActor {
-		Fatal("only account actors have public keys")
-	}
+    act := state.GetActor(a)
+    if !act.Code == AccountActor {
+        Fatal("only account actors have public keys")
+    }
 
-	ast := LoadAccountActorState(act)
-	if act.Address.Type == BLS {
-		return ExtractBLSPubKey(act.Address)
-	}
-	Fatal("can only look up public keys for BLS controlled accounts")
+    ast := LoadAccountActorState(act)
+    if act.Address.Type == BLS {
+        return ExtractBLSPubKey(act.Address)
+    }
+    Fatal("can only look up public keys for BLS controlled accounts")
 }
 ```
 
@@ -212,30 +212,30 @@ Input: received block, storage market actor S, miner's public key PK, a public V
 Output: 0, 1
 
 0. Get the tickets
-	i. tickets <-- block.tickets	
+    i. tickets <-- block.tickets
 For each ticket, idx: tickets
 1. Verify its VRF Proof
-	i.	# get the appropriate parent
-		if idx == 0:
-			# the first was derived from the prior block's last ticket
-			parent = parentBlock.lastTicket
-		else:
-			parent = tickets[idx - 1]
-	ii. # generate the VRFInput
-		input <-- VRFPersonalization.Ticket | parent.VDFOutput
-	iii. # verify the VRF
-		VRFState <-- ECVRF_Verify(PK, ticket.VRFProof, input)
-		if VRFState == "INVALID":
-			return 0
+    i. # get the appropriate parent
+        if idx == 0:
+            # the first was derived from the prior block's last ticket
+            parent = parentBlock.lastTicket
+        else:
+            parent = tickets[idx - 1]
+    ii. # generate the VRFInput
+        input <-- VRFPersonalization.Ticket | parent.VDFOutput
+    iii. # verify the VRF
+        VRFState <-- ECVRF_Verify(PK, ticket.VRFProof, input)
+        if VRFState == "INVALID":
+            return 0
 2. Verify its VDF Proof
-	i. # generate the VDF input
-		VRFOutput <-- ECVRF_proof_to_hash(ticket.VRFProof)
- 	ii. # verify
- 		VDFState <-- VDF_verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
- 		if VDFState == "NO":
- 			return 0
+    i. # generate the VDF input
+        VRFOutput <-- ECVRF_proof_to_hash(ticket.VRFProof)
+    ii. # verify
+        VDFState <-- VDF_verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
+        if VDFState == "NO":
+            return 0
 3. Return results
-	return 1
+    return 1
 ```
 
 Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner.
@@ -253,42 +253,42 @@ Input: received block, storage market actor S, miner's public key PK, a public p
 Output: 0, 1
 
 0. Get the election proof, total power, miner power
-		i. 	electionProof <-- block.electionProof
-		ii. # get total market power
-			S <-- storageMarket(N)
-			p_n <-- S.GetTotalStorage()
-		iii. # get miner power
-			p_m <-- GetMinersPowerAt(N, PK)
+        i. electionProof <-- block.electionProof
+        ii. # get total market power
+            S <-- storageMarket(N)
+            p_n <-- S.GetTotalStorage()
+        iii. # get miner power
+            p_m <-- GetMinersPowerAt(N, PK)
 1. Ensure the miner was not slashed or late: in that case, their power would be 0 and can just abort.
-		i. # Check for a reported fault or late submission
-			if p_m == 0
-				return 0
+        i. # Check for a reported fault or late submission
+            if p_m == 0
+                return 0
 2. Determine the miner's power fraction
-		i. # Get power fraction
-  			p_f <-- p_m/p_n
+        i. # Get power fraction
+              p_f <-- p_m/p_n
 3. Ensure that the scratched ticket is a winner
-		i.	# get the deterministic output from the election proof
-			VRFOutput <-- ECVRF_proof_to_hash(electionProof.VRFProof)
-		ii. # map p_f onto [0, 2^HashLen]
-			normalized_power <-- p_f * 2^HashLen
-	  	iii. # Compare the miner's scratchValue to the miner's normalized power fraction
-  			if readLittleEndian(VRFOutput) > normalized_power:
-    			return 0
+        i. # get the deterministic output from the election proof
+            VRFOutput <-- ECVRF_proof_to_hash(electionProof.VRFProof)
+        ii. # map p_f onto [0, 2^HashLen]
+            normalized_power <-- p_f * 2^HashLen
+          iii. # Compare the miner's scratchValue to the miner's normalized power fraction
+              if readLittleEndian(VRFOutput) > normalized_power:
+                return 0
 4. Get the appropriate ticket from the ticket chain
-		i. 	# Get the tipset K rounds back
-			appropriateTipset <-- lookback(K)
-		ii. # Take its min ticket (already validated)
-			scratchedTicket <-- appropriateTipset.minTicket()
+        i. # Get the tipset K rounds back
+            appropriateTipset <-- lookback(K)
+        ii. # Take its min ticket (already validated)
+            scratchedTicket <-- appropriateTipset.minTicket()
 5. Verify Election Proof validity
-		i. 	# generate the VRFInput from the scratched ticket
-			input <-- VRFPersonalization.ElectionProof | scratchedTicket.VDFOutput
-		ii. # Check that the election proof was correctly generated by the miner
-    		# using the appropriate ticket
-    		VRFState <-- ECVRF_Verify(miner.PK, electionProof.VRFProof, input)
-			if VRFState == "INVALID":
-				return 0
+        i. # generate the VRFInput from the scratched ticket
+            input <-- VRFPersonalization.ElectionProof | scratchedTicket.VDFOutput
+        ii. # Check that the election proof was correctly generated by the miner
+            # using the appropriate ticket
+            VRFState <-- ECVRF_Verify(miner.PK, electionProof.VRFProof, input)
+            if VRFState == "INVALID":
+                return 0
 5. Everything checks out, it's a valid election proof
-		return 1
+        return 1
 ```
 
 ### Ticket Generation
@@ -303,8 +303,8 @@ At any height `H`, there are three possible situations:
 - The miner is eligible to mine a block: they produce their block and form a TipSet with it and other blocks received in this round (if there are any), and resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block but has received blocks: they form a TipSet with them and resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block and has received no blocks: they run leader election again, using:
-	- their losing ticket from the last leader election to produce a new ticket (the `Tickets` array in the block to be published grows with each new ticket generated).
-	- the ticket `H + 1 - K` blocks back to attempt to generate an `ElectionProof`.
+    - their losing ticket from the last leader election to produce a new ticket (the `Tickets` array in the block to be published grows with each new ticket generated).
+    - the ticket `H + 1 - K` blocks back to attempt to generate an `ElectionProof`.
 
 This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network.
 
@@ -313,24 +313,24 @@ Let's illustrate this with an example.
 Miner M is mining at Height H.
 Heaviest tipset at H-1 is {B0} 
 - New Round:
-	- M produces a ticket at H, from B0's ticket (the min ticket at H-1)
-	- M draws the ticket from height H-K to generate an ElectionProof
-	- That ElectionProof is invalid
-	- M has not heard about other blocks on the network.
+    - M produces a ticket at H, from B0's ticket (the min ticket at H-1)
+    - M draws the ticket from height H-K to generate an ElectionProof
+    - That ElectionProof is invalid
+    - M has not heard about other blocks on the network.
 - New Round:
-	- M produces a ticket at H + 1 using the ticket produced at H last round.
-	- M draws a ticket from height H+1-K to generate an ElectionProof
-	- That ElectionProof is valid
-	- M generates a block B1
-	- M has received blocks B2, B3 from the network with the same parents and same height.
-	- M forms a tipset {B1, B2, B3}
+    - M produces a ticket at H + 1 using the ticket produced at H last round.
+    - M draws a ticket from height H+1-K to generate an ElectionProof
+    - That ElectionProof is valid
+    - M generates a block B1
+    - M has received blocks B2, B3 from the network with the same parents and same height.
+    - M forms a tipset {B1, B2, B3}
 - Finding the new min ticket/extending the ticket chain:
-	- M compares the final tickets in {B1,B2,B3} (each has two tickets in their `Tickets` array). B2 has the smallest final ticket. B2 should be used to extend the ticket chain, conceptually.
+    - M compares the final tickets in {B1,B2,B3} (each has two tickets in their `Tickets` array). B2 has the smallest final ticket. B2 should be used to extend the ticket chain, conceptually.
 - New Round:
-	- M produces a new ticket at H + 2 using B2's final ticket (the min final ticket in {B1, B2, B3})
-	- M draws a ticket from H+2-K to generate an ElectionProof
-	- That ElectionProof is invalid
-	- M has received B4 from the network, mined atop {B1,B2,B3}
+    - M produces a new ticket at H + 2 using B2's final ticket (the min final ticket in {B1, B2, B3})
+    - M draws a ticket from H+2-K to generate an ElectionProof
+    - That ElectionProof is invalid
+    - M has received B4 from the network, mined atop {B1,B2,B3}
 - New Round with M mining atop B4
 
 Anytime a miner receives new blocks, it should evaluate which is the heaviest TipSet it knows about and mine atop it.

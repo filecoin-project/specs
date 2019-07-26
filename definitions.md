@@ -243,6 +243,10 @@ In the context of:
 
 A `ticket` is used as a source of randomness in EC leader election. Every block depends on an `ElectionProof` derived from a `ticket`. At least one new `ticket` is produced with every new block. Ticket creation is described [here](./expected-consensus.md#Ticket-generation).
 
+#### Ticket Chain
+
+Each chain in Filecoin can be associated to a given `ticket chain`. The `ticket chain` is assembled by taking the tickets (usually one) contained by the block with the smallest final ticket in each of the chain's `TipSet`s.
+
 Ticket comparison is done by interpreting the tickets' Bytes as unsigned integers (little endian representation).
 
 #### TipSet
