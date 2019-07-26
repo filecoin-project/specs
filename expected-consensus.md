@@ -279,7 +279,7 @@ The length of repeated losing tickets in the ticket chain (equivalent to the len
 New blocks (with multiple tickets) will have a few key properties:
 
 - All tickets in the `Tickets` array are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
-- The `ElectionProof` was correctly generated from the ticket `K-|Tickets|-1` (with `|Tickets|` the length of the `Tickets` array) rounds back.
+- The `ElectionProof` was correctly generated from the ticket `K-|Tickets|` (with `|Tickets|` the length of the `Tickets` array) rounds back.
 
 This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array.
 

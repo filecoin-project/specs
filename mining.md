@@ -199,13 +199,13 @@ If all of this lines up, the block is valid. The miner repeats this for all bloc
 
 Once they've ensured all blocks in the heaviest TipSet received were properly mined, they can mine on top of it. If they weren't, the miner may need to ensure the next heaviest `Tipset` was properly mined. This might mean the same `Tipset` with invalid blocks removed, or an altogether different one.
 
-If no valid blocks are received, a miner may mine atop the same `TipSet` running leader election again using the next ticket in the ticket chain, and also generating a [new ticket](expected-consensus.md#losing-tickets) in the process (see the [expected consensus spec](expected-consensus.md) for more).
+If no valid blocks are received, a miner may run leader election again (see [ticket generation](expected-consensus.md#ticket-generation)).
 
 ### Ticket Validation
 
 For ticket generation, see [ticket generation](expected-consensus.md#ticket-generation).
 
-A ticket can be verified to have been generated in the appropriate number of rounds by looking at the `Tickets` array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array. Note that this has implications on block size, and client memory requirements, though on expectation, the `Tickets` array should only contain one Ticket.
+A ticket can be verified to have been generated in the appropriate number of rounds by looking at the `Tickets` array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array (or in the prior block if the array is empty). Note that this has implications on block size, and client memory requirements, though on expectation, the `Tickets` array should only contain one Ticket. Put another way, each Ticket should be generated from the prior one in the ticket-chain.
 
 Succinctly, the process of verifying a block's tickets is as follows.
 ```text
@@ -214,16 +214,16 @@ Output: 0, 1
 
 0. Get the tickets
 	i. tickets <-- block.tickets	
-For each ticket in the 'Tickets' array
+For each ticket, idx: tickets
 1. Verify its VRF Proof
 	i.	# get the appropriate parent
-		if ticket == tickets[0]:
+		if idx == 0:
 			# the first was derived from the prior block's last ticket
-			parent = block.ParentBlocks.minTicket
+			parent = parentBlock.lastTicket
 		else:
-			parent = ticket[idx - 1]
+			parent = tickets[idx - 1]
 	ii. # generate the VRFInput
-		input <-- parent.VDFOutput | "t"
+		input <-- VRFPersonalization.Ticket | parent.VDFOutput
 	iii. # verify the VRF
 		VRFState <-- ECVRF_Verify(PK, ticket.VRFProof, input)
 		if VRFState == "INVALID":
@@ -232,14 +232,14 @@ For each ticket in the 'Tickets' array
 	i. # generate the VDF input
 		VRFOutput <-- ECVRF_proof_to_hash(ticket.VRFProof)
  	ii. # verify
- 		VDFState <-- Verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
+ 		VDFState <-- VDF_verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
  		if VDFState == "NO":
  			return 0
 3. Return results
 	return 1
 ```
 
-Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
+Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner.
 
 ### Election Validation
 
@@ -267,22 +267,22 @@ Output: 0, 1
 2. Determine the miner's power fraction
 		i. # Get power fraction
   			p_f <-- p_m/p_n
-3. Get the appropriate ticket from the ticket chain
-		i. 	# Get the tipset K rounds back
-				appropriateTipset <-- lookback(K)
-		ii. # Take its min ticket (already validated)
-				scratchedTicket <-- appropriateTipset.minTicket()
-4. Ensure that the scratched ticket is a winner
+3. Ensure that the scratched ticket is a winner
 		i.	# get the deterministic output from the election proof
 			VRFOutput <-- ECVRF_proof_to_hash(electionProof.VRFProof)
-		ii. # map the VRFOutput onto [0,1]
-  			scratchValue <-- VRFOutput / {1}^HashLen
-	  	iii. # Compare the miner's scratchValue to the miner's power fraction
-  			if scratchValue > p_f:
+		ii. # map p_f onto [0, 2^HashLen]
+			normalized_power <-- p_f * 2^HashLen
+	  	iii. # Compare the miner's scratchValue to the miner's normalized power fraction
+  			if readLittleEndian(VRFOutput) > normalized_power:
     			return 0
-5. If winning ticket, verify Election Proof validity
+4. Get the appropriate ticket from the ticket chain
+		i. 	# Get the tipset K rounds back
+			appropriateTipset <-- lookback(K)
+		ii. # Take its min ticket (already validated)
+			scratchedTicket <-- appropriateTipset.minTicket()
+5. Verify Election Proof validity
 		i. 	# generate the VRFInput from the scratched ticket
-			input <-- scratchedTicket.VDFOutput | "e"
+			input <-- VRFPersonalization.ElectionProof | scratchedTicket.VDFOutput
 		ii. # Check that the election proof was correctly generated by the miner
     		# using the appropriate ticket
     		VRFState <-- ECVRF_Verify(miner.PK, electionProof.VRFProof, input)
@@ -292,23 +292,49 @@ Output: 0, 1
 		return 1
 ```
 
-Note: For clarity we explicit what may happen when a miner fails to submit a PoSt, if they are currently late to submit a PoSt or have been slashed, they will have no power.
-
 ### Ticket Generation
 
 For details of ticket generation, see the [expected consensus spec](expected-consensus.md#ticket-generation).
 
-New tickets are generated using the smallest ticket from the parent TipSet at height `H` and added to the `Tickets` array. Generating a new ticket will take some amount of time (as imposed by the VDF in Expected Consensus).
+New tickets are generated using the last ticket in the ticket-chain. Generating a new ticket will take some amount of time (as imposed by the VDF in Expected Consensus).
 
 Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block (see [block creation](#block-creation)).
 
-They then assemble a new TipSet using any valid blocks they heard about while generating the ticket  (likely of height `H+1`) and mine atop the smallest ticket in that new TipSet.
+There are now three possible situations:
+- The miner is eligible to mine a block: they produce their block and form a TipSet with it and other blocks received in this round (if there are any), and resume mining at the next height.
+- The miner is not eligible to mine a block but has received blocks: they form a TipSet with them and resume mining at the next height.
+- The miner is not eligible to mine a block and has received no blocks: they run leader election again, using:
+	- their losing ticket from the last leader election to produce a new ticket (the `Tickets` array in the block to be published grows with each new ticket generated).
+	- the ticket `K-1` blocks back to attempt to generate an `ElectionProof`.
 
-If a miner fails to generate a valid `ElectionProof` using their lookback ticket, they will likely hear about other blocks being mined on the network at height `H+1` and can thus assemble a new TipSet to mine off of with these blocks (as above). If the miner hears of no new blocks, they must instead draw a new ticket to scratch in order to try leader election again (as other miners will).
+This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network.
 
-This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner's own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see [Chain Selection](expected-consensus.md#chain-selection) for more details).
+Let's illustrate this with an example.
 
-The `Tickets` array in the block to be published grows with each round (and a new ticket generated).
+Miner M is mining at Height H.
+Heaviest tipset at H-1 is {B0} 
+- New Round:
+	- M produces a ticket at H, from B0's ticket (the min ticket at H-1)
+	- M draws the ticket from height H-K to generate an ElectionProof
+	- That ElectionProof is invalid
+	- M has not heard about other blocks on the network.
+- New Round:
+	- M produces a ticket at H + 1 using the ticket produced at H last round.
+	- M draws a ticket from height H+1-K to generate an ElectionProof
+	- That ElectionProof is valid
+	- M generates a block B1
+	- M has received blocks B2, B3 from the network with the same parents and same height.
+	- M forms a tipset {B1, B2, B3}
+- Finding the new min ticket/extending the ticket chain:
+	- M compares the final tickets in {B1,B2,B3} (each has two tickets in their `Tickets` array). B2 has the smallest final ticket. B2 should be used to extend the ticket chain, conceptually.
+- New Round:
+	- M produces a new ticket at H + 2 using B2's final ticket (the min final ticket in {B1, B2, B3})
+	- M draws a ticket from H+2-K to generate an ElectionProof
+	- That ElectionProof is invalid
+	- M has received B4 from the network, mined atop {B1,B2,B3}
+- New Round with M mining atop B4
+
+Anytime a miner receives new blocks, it should evaluate which is the heaviest TipSet it knows about and mine atop it.
 
 ### Block Creation
 
