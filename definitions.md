@@ -249,6 +249,8 @@ In the context of:
 
 A `ticket` is used as a source of randomness in EC leader election. Every block depends on an `ElectionProof` derived from a `ticket`. At least one new `ticket` is produced with every new block. Ticket creation is described [here](./expected-consensus.md#Ticket-generation).
 
+Ticket comparison is done by interpreting the tickets' Bytes as unsigned integers (little endian representation).
+
 #### TipSet
 
 A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block in the same `round` as another miner.

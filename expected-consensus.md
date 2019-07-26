@@ -171,7 +171,9 @@ TODO: pictures of TipSet ticket drawing
 
 The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output. This output is then used as input into a Verifiable Delay Function (VDF), with the VRFProof, VDFProof and VDFOutput generating a new ticket for future use. 
 
-The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance). The VDF approximates clock synchrony for miners, thereby ensuring miners have waited an appropriate delay ahead of drawing a new ticket. It also establishes a lower-bound delay between production of new blocks at different heights. This helps ensure fairness, in that miners with lesser connectivity are not penalized and have a chance to produce blocks.
+The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
+The VDF approximates clock synchrony for miners, thereby ensuring miners have waited an appropriate delay ahead of drawing a new ticket. It ensures network liveness, allowing miners to run a new election if no winner is found in a given round.
+Finally, it establishes a lower-bound delay between production of new blocks at different heights. This helps ensure fairness, in that miners with lesser connectivity are not penalized and have a chance to produce blocks.
 
 Succinctly, the process of crafting a new `Ticket` in round `N` is as follows. We use:
 
@@ -190,9 +192,7 @@ Output: newTicket
 1. Draw prior ticket
 	i. 	 # take the last ticket for each parent 'Tickets' array
 			lastTickets <-- map(parentTickets, fun(x): x.last)
-	ii.  # sort these tickets 
-  			sortedTickets <-- Sort(lastTickets)
-    iii. # draw the smallest ticket
+    ii. # draw the smallest ticket
   			parentTicket <-- min(sortedTickets)
 2. Run it through VRF and get determinstic output
 	i.   # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
@@ -203,14 +203,14 @@ Output: newTicket
 			VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
 3. Run that deterministic output through a VDF
     i.  # run eval with our VDF and its evaluation k on VRFOutput
-  			y, pi <-- Eval(ek, VRFOutput)
+  			y, pi <-- VDF_eval(ek, VRFOutput)
     ii. # Store the output and proof in our ticket
   			newTicket.VDFOutput <-- y
   			newTicket.VDFProof 	<-- pi
 4. Return the new ticket
 ```
 
-### Checking election results
+### Running a leader election
 
 Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see [election validation](mining.md#election-validation).
 
@@ -221,7 +221,6 @@ Succinctly, the process of crafting a new `ElectionProof` in round `N` is as fol
 - The ECVRF algorithm (must yield a pseudorandom, deterministic output) from [Goldberg et al. Section 5](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10), with:
   - Sha256 for our hashing function
   - Secp256k1 for our curve
-  - Note that the operation type in step 3.1 is not strictly necessary, but is used to distinguish this use of the VRF from that which generates tickets.
 
 Note: We draw the miner power from the prior round. This means that if a miner wins a block on their ProvingPeriodEnd even if they have not yet resubmitted a PoSt, they retain their power (until the next round).
 
@@ -241,7 +240,7 @@ Output: 1 or 0
         p_m <-- GetMinersPowerAt(N-1, self.PK)
     iii. # Get power fraction
   		p_f <-- p_m/p_n
-2. Draw parentTicket from K blocks back (see ticket creation above for example) 
+2. Draw parentTicket from K blocks back (see ticket creation above for example, using 1 block back) 
 3. Run it through VRF and get determinstic output
 	i.   # take the VDFOutput of that ticket as input, specified for the appropriate operation type
 		input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
@@ -250,11 +249,13 @@ Output: 1 or 0
 	iii. # draw a deterministic, pseudorandom output from this
 		VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
 3. Determine if the miner drew a winning lottery ticket
-	i.  # Map the VRFOutput onto [0,1], with HashLen of 32 Bytes using sha264
-  		scratchValue <-- VRFOutput / {1}^HashLen
-    ii. # Compare the miner's scratchValue to the miner's power fraction
+    # Conceptually we are mapping the pseudorandom, deterministic VRFOutput onto [0,1] by dividing by 2^HashLen (64 Bytes using Sha256) and comparing that to the miner's power (portion of network storage).
+    # In practice, we actually multiply the power fraction by 2^HashLen for comparison with the ticket value in order to avoid dealing with floats.
+	i.  # Map the miner's power onto [0, 2^HashLen] (64 Bytes using sha256)
+        normalized_power <-- p_f * 2^HashLen
+    ii. # Compare the miner's power fraction to the value of the ticket drawn: more power means win more often.
         # winning ticket
-        if scratchValue <= p_f
+        if readLittleEndian(VRFOutput) <= normalized_power
             return newEP
         # otherwise parentTicket is not a winning lottery ticket
         else 
@@ -267,13 +268,13 @@ It is important to note that every block contains two artifacts: one, a ticket d
 
 #### Losing Tickets
 
-In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their power in the table `N-(L-1)` rounds back. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
+In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their current power fraction. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
 
 In addition to each attempted `ElectionProof` generation, the miner will need to extend the ticket chain by generating another new ticket. They use the ticket they generated in the prior round, rather than the prior block's (as is normally used). This proves appropriate delay (given that finding a winning Ticket has taken multiple rounds).
 
 Thus, each time it is discovered that nobody has won in a given round, every miner should append a new ticket to their would-be block's `Ticket` array. This continues until some miner finds a winning ticket (see below), ensuring that the ticket chain remains at least as long as the block chain.
 
-The length of repeated losing tickets in the ticket chain (equivalent to the length of generated tickets referenced by a single block, or the length of the `Tickets` array) decreases exponentially in the number of repeated losing tickets (see more [here](https://github.com/filecoin-project/go-filecoin/pull/1516)). In the unlikely case the number of losing tickets drawn by miners grows larger than the randomness lookback `K` (i.e. if a miner runs out of existing tickets on the ticket chain for use as randomness), a miner should proceed as usual using new tickets generated in this epoch for randomness. This has no impact on the protocol safety/validity.
+The length of repeated losing tickets in the ticket chain (equivalent to the length of generated tickets referenced by a single block, or the length of the `Tickets` array) decreases exponentially in the number of repeated losing tickets. In the unlikely case the number of losing tickets drawn by miners grows larger than the randomness lookback `K` (i.e. if a miner runs out of existing tickets on the ticket chain for use as randomness), a miner should proceed as usual using new tickets generated in this epoch for randomness. This has no impact on the protocol safety/validity.
 
 New blocks (with multiple tickets) will have a few key properties:
 
