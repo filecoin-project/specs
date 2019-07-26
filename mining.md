@@ -122,7 +122,7 @@ func VerifyBlock(blk Block) {
 	// 2. Verify Timestamp
   	// first check that it is not in the future 
   	// allowing for some small grace period to deal with small asynchrony
-  	// a potential default for ALLOWABLE_CLOCK_DRIFT could be 12*blockTime (as in BTC)
+  	// a potential default for ALLOWABLE_CLOCK_DRIFT could be 2/3*blockTime
   	if blk.GetTime() > networkTime() + ALLOWABLE_CLOCK_DRIFT {
 		Fatal("block was generated too far in the future")
 	}
