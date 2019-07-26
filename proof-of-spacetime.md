@@ -8,7 +8,6 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 - **POST_PROVING_PERIOD**: The time interval in which a PoSt has to be submitted.
 - **POST_CHALLENGE_TIME**: The time offset at which the actual work of generating the PoSt should be started. This is some delta before the end of the `Proving Period`, and as such less then a single `Proving Period`.
-- **POST_MAX_SECTORS_COUNT**: The maximum number of sectors that can be proven using a single PoSt.
 
 ### Execution Flow
 
@@ -34,43 +33,36 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 TODO: Add post submission to the diagram.
 
 
-
 ### High Level API
+
+#### Fault Detection
+
+Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to post an up to date `AddFaults` message to the chain. When recovering any faults, they need to submit a `RecoverFaults` message. The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
+
+TODO: Is it okay to add a fault and recover from it in the same proving period?
 
 #### Generation
 
 ```go
-func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte) (PoStProof, FaultSet) {
+func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults FaultSet) PoStProof {
     // Generate the Merkle Inclusion Proofs + Faults
 
     inclusionProofs := []
-    challenges := []
-    faults := NewFaultSet()
+    challenges := DerivePoStChallenges(sectorSize, seed, faults)
 
     for n in 0..POST_CHALLENGES_COUNT {
-        attempt := 0
-        while inclusionProof[n] == nil {
-            challenge := DerivePoStChallenge(seed, n, faults, attempt)
-            sector := challenge % sectorSize
-            // check if we landed in a previously marked faulty sector
-            if !faults.Contains(sector) {
-                attempt += 1
-                continue
-            }
+        challenge := challenges[n]
+        sector := challenge % sectorSize
 
-            // Leaf index of the selected sector
-            challenge_value = challenge / sectorSize
-            inclusionProof, isFault := GenerateMerkleInclusionProof(sector, challenge_value)
-            if isFault {
-                // faulty sector, generate a new challenge
-                faults.Add(sector)
-                attempt += 1
-            } else {
-                // no fault, move on to the next challenge
-                inclusionProofs[n] = inclusionProof
-                challenges[n] = challenge
-            }
+        // Leaf index of the selected sector
+        challenge_value = challenge / sectorSize
+        inclusionProof, isFault := GenerateMerkleInclusionProof(sector, challenge_value)
+        if isFault {
+            // faulty sector, need to post a fault to the chain and try to recover from it
+            return Fatal("Detected late fault")
         }
+
+        inclusionProofs[n] = inclusionProof
     }
 
     // Generate the snark
@@ -150,7 +142,6 @@ func DerivePoStChallenge(seed []byte, n Uint, attempt Uint) Uint {
 - `POST_CHALLENGES_COUNT: UInt`: Number of challenges.
 - `POST_TREE_DEPTH: UInt`: Depth of the Merkle tree. Note, this is `(log_2(Size of original data in bytes/32 bytes per leaf))`.
 - `SECTOR_SIZE: UInt`:
-- `MAX_SECTORS_COUNT`: maximum number of sectors that can be proven with a single post
 
 #### Public Inputs
 
