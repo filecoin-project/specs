@@ -334,7 +334,6 @@ Heaviest tipset at H-1 is {B0}
 - New Round with M mining atop B4
 
 Anytime a miner receives new blocks, it should evaluate which is the heaviest TipSet it knows about and mine atop it.
->>>>>>> ca3f93b3497b870b513332d3cfee381b7590e993
 
 ### Block Creation
 
