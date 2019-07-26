@@ -36,6 +36,7 @@ When the miner has completed their first seal, they should post it on-chain usin
 The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.
 
 During this period, the miner may also commit to new sectors, but they will not be included in proofs of space time until the next proving period starts.
+For example, if a miner currently PoSts for 10 sectors, and commits to 20 more sectors. The next PoSt they submit (i.e. the one they're currently proving) will be for 10 sectors again, the subsequent one will be for 30.
 
 TODO: sectors need to be globally unique. This can be done either by having the seal proof prove the sector is unique to this miner in some way, or by having a giant global map on-chain is checked against on each submission. As the system moves towards sector aggregation, the latter option will become unworkable, so more thought needs to go into how that proof statement could work.
 
@@ -124,46 +125,30 @@ func VerifyBlock(blk Block) {
 	if blk.GetTime() > time.Now() {
 		Fatal("block was generated too far in the future")
 	}
-	// next check that it is appropriately delayed from its parents.
+	// next check that it is appropriately delayed from its parents including
+	// all tickets.
 	if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
 		Fatal("block was generated too soon")
 	}
 
-	// 3. Verify miner has not been slashed and is still valid miner
-	curStorageMarket := LoadStorageMarket(blk.State)
-	if !curStorageMarket.IsMiner(blk.Miner) {
-		Fatal("block miner not valid")
-	}
-
-	// 4. Verify ParentWeight
+	// 3. Verify ParentWeight
 	if blk.ParentWeight != ComputeWeight(blk.Parents) {
 		Fatal("invalid parent weight")
 	}
 
-	// 5. Verify Tickets
+	// 4. Verify Tickets
 	if !VerifyTickets(blk) {
 		Fatal("tickets were invalid")
 	}
 
-	// 6. Verify ElectionProof
-	randomnessLookbackTipset := RandomnessLookback(blk)
-	lookbackTicket := minTicket(randomnessLookbackTipset)
-	challenge := blake2b(lookbackTicket)
-
-	if !ValidateSignature(blk.ElectionProof, pubk, challenge) {
-		Fatal("election proof was not a valid signature of the last ticket")
+	// 5. Verify ElectionProof
+	// Note that this step must explicitly check that the
+	// miner has not been slashed and is still valid miner
+	if !VerifyElectionProof(blk) {
+		Fatal("election was invalid")
 	}
 
-	powerLookbackTipset := PowerLookback(blk)
-
-	lbStorageMarket := LoadStorageMarket(powerLookbackTipset.state)
-	minerPower := lbStorageMarket.PowerLookup(blk.Miner)
-	totalPower := lbStorageMarket.GetTotalStorage()
-	if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
-		Fatal("election proof was not a winner")
-	}
-
-	// 7. Verify Message Signatures
+	// 6. Verify Message Signatures
 	messages := LoadMessages(blk.Messages)
 	state := GetParentState(blk.Parents)
 
@@ -182,7 +167,7 @@ func VerifyBlock(blk Block) {
 
 	ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys)
 
-	// 8. Validate State Transitions
+	// 7. Validate State Transitions
 	receipts := LoadReceipts(blk.MessageReceipts)
 	for i, msg := range messages {
 		receipt := ApplyMessage(state, msg)
@@ -209,79 +194,147 @@ func (state StateTree) LookupPublicKey(a Address) PubKey {
 }
 ```
 
-Ticket validation is detailed as follows:
-
-```go
-func RandomnessLookback(blk Block) TipSet {
-	return chain.GetAncestorTipset(blk, K)
-}
-
-func PowerLookback(blk Block) TipSet {
-	return chain.GetAncestorTipset(blk, L)
-}
-
-func IsProofAWinner(p ElectionProof, minersPower, totalPower Integer) bool {
-	return Integer.FromBytes(sha256.Sum(p))*totalPower < minersPower*2^32
-}
-
-func VerifyTickets(b Block) error {
-	// Start with the `Tickets` array
-	// get the smallest ticket from the blocks parent tipset
-	parTicket := GetSmallestTicket(b.Parents)
-
-	// Verify each ticket in the chain of tickets. There will be one ticket
-	// plus one ticket for each failed election attempt.
-	for _, ticket := range b.Tickets {
-		challenge := sha256.Sum(parTicket.Signature)
-
-		// Check VDF
-		if !VerifyVDF(ticket.VDFProof, ticket.VDFResult, challenge) {
-			return "VDF was not run properly"
-		}
-
-		// Check VRF
-		pubk := getPublicKeyForMiner(b.Miner)
-		if !VerifySignature(ticket.Signature, pubk, ticket.VDFResult) {
-			return "Ticket was not a valid signature over the parent ticket"
-		}
-		// in case mining this block generated multiple tickets
-		parTicket = ticket
-	}
-
-	return nil
-}
-```
-
-
 If all of this lines up, the block is valid. The miner repeats this for all blocks in a TipSet, and for all TipSets formed from incoming blocks.
 
 Once they've ensured all blocks in the heaviest TipSet received were properly mined, they can mine on top of it. If they weren't, the miner may need to ensure the next heaviest `Tipset` was properly mined. This might mean the same `Tipset` with invalid blocks removed, or an altogether different one.
 
-If no valid blocks are received, a miner may mine atop the same `TipSet` running leader election again using the next ticket in the ticket chain, and also generating a [new ticket](expected-consensus.md#losing-tickets) in the process (see the [expected consensus spec](expected-consensus.md) for more).
+If no valid blocks are received, a miner may run leader election again (see [ticket generation](expected-consensus.md#ticket-generation)).
+
+### Ticket Validation
+
+For ticket generation, see [ticket generation](expected-consensus.md#ticket-generation).
+
+A ticket can be verified to have been generated in the appropriate number of rounds by looking at the `Tickets` array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array (or in the prior block if the array is empty). Note that this has implications on block size, and client memory requirements, though on expectation, the `Tickets` array should only contain one Ticket. Put another way, each Ticket should be generated from the prior one in the ticket-chain.
+
+Succinctly, the process of verifying a block's tickets is as follows.
+```text
+Input: received block, storage market actor S, miner's public key PK, a public VDF validation key vk
+Output: 0, 1
+
+0. Get the tickets
+	i. tickets <-- block.tickets	
+For each ticket, idx: tickets
+1. Verify its VRF Proof
+	i.	# get the appropriate parent
+		if idx == 0:
+			# the first was derived from the prior block's last ticket
+			parent = parentBlock.lastTicket
+		else:
+			parent = tickets[idx - 1]
+	ii. # generate the VRFInput
+		input <-- VRFPersonalization.Ticket | parent.VDFOutput
+	iii. # verify the VRF
+		VRFState <-- ECVRF_Verify(PK, ticket.VRFProof, input)
+		if VRFState == "INVALID":
+			return 0
+2. Verify its VDF Proof
+	i. # generate the VDF input
+		VRFOutput <-- ECVRF_proof_to_hash(ticket.VRFProof)
+ 	ii. # verify
+ 		VDFState <-- VDF_verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
+ 		if VDFState == "NO":
+ 			return 0
+3. Return results
+	return 1
+```
+
+Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner.
+
+### Election Validation
+
+For election proof generation, see [checking election results](expected-consensus.md#checking-election-results).
+
+In order to determine that the mined block was generated by an elegible miner, one must check its `ElectionProof`. 
+
+Succinctly, the process of verifying a block's election proof at round N, is as follows.
+
+```text
+Input: received block, storage market actor S, miner's public key PK, a public parameter K
+Output: 0, 1
+
+0. Get the election proof, total power, miner power
+		i. 	electionProof <-- block.electionProof
+		ii. # get total market power
+			S <-- storageMarket(N)
+			p_n <-- S.GetTotalStorage()
+		iii. # get miner power
+			p_m <-- GetMinersPowerAt(N, PK)
+1. Ensure the miner was not slashed or late: in that case, their power would be 0 and can just abort.
+		i. # Check for a reported fault or late submission
+			if p_m == 0
+				return 0
+2. Determine the miner's power fraction
+		i. # Get power fraction
+  			p_f <-- p_m/p_n
+3. Ensure that the scratched ticket is a winner
+		i.	# get the deterministic output from the election proof
+			VRFOutput <-- ECVRF_proof_to_hash(electionProof.VRFProof)
+		ii. # map p_f onto [0, 2^HashLen]
+			normalized_power <-- p_f * 2^HashLen
+	  	iii. # Compare the miner's scratchValue to the miner's normalized power fraction
+  			if readLittleEndian(VRFOutput) > normalized_power:
+    			return 0
+4. Get the appropriate ticket from the ticket chain
+		i. 	# Get the tipset K rounds back
+			appropriateTipset <-- lookback(K)
+		ii. # Take its min ticket (already validated)
+			scratchedTicket <-- appropriateTipset.minTicket()
+5. Verify Election Proof validity
+		i. 	# generate the VRFInput from the scratched ticket
+			input <-- VRFPersonalization.ElectionProof | scratchedTicket.VDFOutput
+		ii. # Check that the election proof was correctly generated by the miner
+    		# using the appropriate ticket
+    		VRFState <-- ECVRF_Verify(miner.PK, electionProof.VRFProof, input)
+			if VRFState == "INVALID":
+				return 0
+5. Everything checks out, it's a valid election proof
+		return 1
+```
 
 ### Ticket Generation
 
 For details of ticket generation, see the [expected consensus spec](expected-consensus.md#ticket-generation).
 
-Ticket generation is the twin process of leader election (i.e. generating `ElectionProof`s). Every ticket scratch (i.e. round of leader election) has the miner generate a new ticket to include in the `Tickets` array of their block.
+New tickets are generated using the last ticket in the ticket-chain. Generating a new ticket will take some amount of time (as imposed by the VDF in Expected Consensus).
 
-New tickets are generated using the smallest ticket from the parent TipSet at height `H` and added to the `Tickets` array. Generating a new ticket will take some amount of time (as imposed by the VDF in Expected Consensus).
+Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block (see [block creation](#block-creation)).
 
-Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block.
+At any height `H`, there are three possible situations:
+- The miner is eligible to mine a block: they produce their block and form a TipSet with it and other blocks received in this round (if there are any), and resume mining at the next height `H+1`.
+- The miner is not eligible to mine a block but has received blocks: they form a TipSet with them and resume mining at the next height `H+1`.
+- The miner is not eligible to mine a block and has received no blocks: they run leader election again, using:
+	- their losing ticket from the last leader election to produce a new ticket (the `Tickets` array in the block to be published grows with each new ticket generated).
+	- the ticket `H + 1 - K` blocks back to attempt to generate an `ElectionProof`.
 
-If the lookback ticket yields a valid `ElectionProof`, the miner publishes their block (see [block creation](#block-creation)) including the new ticket and earns a block reward. They then assemble a new TipSet using any valid blocks they heard about while generating the ticket  (likely of height `H+1`) and mine atop the smallest ticket in that new TipSet.
+This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network.
 
-### Scratching a losing ticket
+Let's illustrate this with an example.
 
-If a miner fails to generate a valid `ElectionProof` using their lookback ticket, they may not yet publish a new block at height `H+1`. The miner will likely hear about other blocks being mined on the network at height `H+1` and can thus assemble a new TipSet to mine off of with these blocks (as above).
+Miner M is mining at Height H.
+Heaviest tipset at H-1 is {B0} 
+- New Round:
+	- M produces a ticket at H, from B0's ticket (the min ticket at H-1)
+	- M draws the ticket from height H-K to generate an ElectionProof
+	- That ElectionProof is invalid
+	- M has not heard about other blocks on the network.
+- New Round:
+	- M produces a ticket at H + 1 using the ticket produced at H last round.
+	- M draws a ticket from height H+1-K to generate an ElectionProof
+	- That ElectionProof is valid
+	- M generates a block B1
+	- M has received blocks B2, B3 from the network with the same parents and same height.
+	- M forms a tipset {B1, B2, B3}
+- Finding the new min ticket/extending the ticket chain:
+	- M compares the final tickets in {B1,B2,B3} (each has two tickets in their `Tickets` array). B2 has the smallest final ticket. B2 should be used to extend the ticket chain, conceptually.
+- New Round:
+	- M produces a new ticket at H + 2 using B2's final ticket (the min final ticket in {B1, B2, B3})
+	- M draws a ticket from H+2-K to generate an ElectionProof
+	- That ElectionProof is invalid
+	- M has received B4 from the network, mined atop {B1,B2,B3}
+- New Round with M mining atop B4
 
-If the miner hears of no new blocks, they must instead draw a new ticket to scratch in order to try leader election again (as other miners will). In order to do so, they must generate a new ticket once more.
-
-Now, rather than generating this new ticket from the smallest ticket from the parent TipSet (as above), the miner will instead use their ticket from the last height, now in the `Tickets` array.
-
-This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network. If a new TipSet comes in from the network, and it is heavier chain than the miner's own, they should abandon their process to mine atop this new block. Due to the way chain selection works in filecoin, a chain with more blocks will be preferred (see [Chain Selection](expected-consensus.md#chain-selection) for more details).
-
-The `Tickets` array in the block to be published grows with each round (and a new ticket generated).
+Anytime a miner receives new blocks, it should evaluate which is the heaviest TipSet it knows about and mine atop it.
+>>>>>>> ca3f93b3497b870b513332d3cfee381b7590e993
 
 ### Block Creation
 
@@ -290,7 +343,7 @@ Scratching a winning ticket, and armed with a valid `ElectionProof`, a miner can
 To create a block, the eligible miner must compute a few fields:
 
 - `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See [ticket generation](expected-consensus.md#ticket-generation).
-- `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [ticket generation](expected-consensus.md#ticket-generation).
+- `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [checking election results](expected-consensus.md#checking-election-results).
 - `ParentWeight` - As described in [Chain Weighting](expected-consensus.md#chain-weighting).
 - `Parents` - the CIDs of the parent blocks.
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
