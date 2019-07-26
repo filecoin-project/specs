@@ -107,7 +107,7 @@ The Generation Attack Threshold is equal to the Polling Time + some Grace Period
 
 `Height` and `round` are synonymous and used interchangeably in this spec.
 
-`Height` refers to the number of tickets generated between this `TipSet` and the genesis block (height 0), counting only a single ticket per TipSet.
+`Height` refers to the number of tickets generated between this `TipSet` and the genesis block (height 0), counting only the tickets of a single block per TipSet.
 
 If a `TipSet` contains multiple blocks, each block in the TipSet will have the same `height`. Put another way, there is a new `round` of leader election attempts at each `height`. Typically, such an attempt will find a single leader. If a single leader is found, that leader can generate a single block. If multiple leaders are found, they can each generate multiple blocks in the given round. If no leader is found, no block is generated (but a ticket is).
 
