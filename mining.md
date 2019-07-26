@@ -305,7 +305,7 @@ At any height `H`, there are three possible situations:
 - The miner is not eligible to mine a block but has received blocks: they form a TipSet with them and resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block and has received no blocks: they run leader election again, using:
 	- their losing ticket from the last leader election to produce a new ticket (the `Tickets` array in the block to be published grows with each new ticket generated).
-	- the ticket `H + 1 - K` blocks back to attempt to generate an `ElectionProof`.
+	- the ticket `H + 1 - K` rounds back to attempt to generate an `ElectionProof`.
 
 This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network.
 
