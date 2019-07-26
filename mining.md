@@ -114,6 +114,7 @@ In order to validate a block coming in from the network at height `N` was well m
 
 ```go
 func VerifyBlock(blk Block) {
+
     // 1. Verify Signature
     pubk := GetPublicKey(blk.Miner)
     if !ValidateSignature(blk.BlockSig, pubk, blk) {
@@ -121,12 +122,14 @@ func VerifyBlock(blk Block) {
     }
 
     // 2. Verify Timestamp
-    // first check that it is not in the future
-    if blk.GetTime() > time.Now() {
+    // first check that it is not in the future 
+    // allowing for some small grace period to deal with small asynchrony
+    // a potential default for ALLOWABLE_CLOCK_DRIFT could be 2/3*blockTime
+    if blk.GetTime() > networkTime() + ALLOWABLE_CLOCK_DRIFT {
         Fatal("block was generated too far in the future")
     }
     // next check that it is appropriately delayed from its parents including
-    // all tickets.
+    // null blocks.
     if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
         Fatal("block was generated too soon")
     }
@@ -143,7 +146,8 @@ func VerifyBlock(blk Block) {
 
     // 5. Verify ElectionProof
     // Note that this step must explicitly check that the
-    // miner has not been slashed and is still valid miner
+    // miner has not been slashed or is not late to submitting a PoSt
+    // i.e. that this is still a valid miner
     if !VerifyElectionProof(blk) {
         Fatal("election was invalid")
     }
@@ -361,8 +365,9 @@ To create a block, the eligible miner must compute a few fields:
   - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
   - Insert them into a Merkle Tree and take its root.
 - `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
-  - the timestamp on the block is not in the future
+  - the timestamp on the block is not in the future (with ALLOWABLE_CLOCK_DRIFT grace to account for relative asynchrony)
   - the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
+  - We also recommend the use of a networkTime() function to be booted on node launch and run every so frequently to call on a networked time service (e.g. ntp) and ensure relative synchrony with the rest of the network.
 - `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
 - `BlockSig` - A signature with the miner's private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
