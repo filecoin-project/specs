@@ -146,7 +146,8 @@ func VerifyBlock(blk Block) {
 
     // 5. Verify ElectionProof
     // Note that this step must explicitly check that the
-    // miner has not been slashed and is still valid miner
+    // miner has not been slashed or is not late to submitting a PoSt
+    // i.e. that this is still a valid miner
     if !VerifyElectionProof(blk) {
         Fatal("election was invalid")
     }
