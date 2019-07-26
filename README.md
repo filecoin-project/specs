@@ -27,8 +27,17 @@ the rendered output. It is much easier to read and use.
 
 For info on how this spec changes, please see [the process doc](process.md).
 
+## Questions on the spec?
+
+Issues are a great way to ask these questions. In general, your issue is much more likely to get a response
+if you tag an interested party in your question. Some folks you may consider tagging (based on subject):
+- [@whyrusleeping](https://github.com/whyrusleeping) - node behavior, storage market, networking behavior, protocol stewardship (upgrading, versioning, governance, etc)
+- [@dignifiedquire](https://github.com/dignifiedquire) - PoSTs, proofs, data structures
+- [@nicola](https://github.com/nicola) - PoSTs, proofs
+- [@pooja](https://github.com/pooja) - protocol stewardship, project status
+- [@henri](https://github.com/sternhenri) - chain sync, consensus
+
 ## Owners/ Points of Contact
 
 - [@whyrusleeping](https://github.com/whyrusleeping)
 - [@dignifiedquire](https://github.com/dignifiedquire)
-- [@bvohaska](https://github.com/bvohaska)
