@@ -14,7 +14,7 @@ TODO: This is a high level overview of how the storage market interacts with com
 
 ## The Market Interface
 
-This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor, it can be retrieved from the state tree. For more information about Actors, see [the actors spec](actors.md).
+This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor. For more information about Actors, see [actors.md](actors.md).
 
 ```go
 type StorageMarket interface {
@@ -57,8 +57,6 @@ The Filecoin storage market operates as follows. Miners providing storage submit
 
 ### Market Datastructures
 
-TODO: This storage-market.md doc should try to describe the high level interfaces of the storage market, details about storage and specific method behavior should go in a separate place where we talk about individual system actors.
-
 The storage market contains the following data:
 
 - StorageMiners - The storage market keeps track of the set of the addresses of all storage miners in the storage market. All miners referenced here were created by the storage market via the `CreateStorageMiner` method.
@@ -70,7 +68,7 @@ This section describes the flow required to store a single piece with a single s
 
 #### Before Deal
 
-1. **Data Preparation:** The client prepares their input data. See [client data](client-data.md) for more details.
+1. **Data Preparation:** The client prepares their input data. See [client data](client-data.md) for more details.
 2. **Miner Selection:** The client looks at asks on the network, and then selects a storage miner to store their data with.
    - Note: this is currently a manual process.
 3. **Payment Channel Setup:** The client calls [`Payment.Setup`](#payments) with the piece and the funds they are going to pay the miner with. All payments between clients and storage providers use payment channels.
@@ -115,16 +113,34 @@ TODO: 'complete' isnt really the right word here, as it implies that the deal is
 
 ## The Power Table
 
-The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table, instead, there is a 'total power' exported by the storage market actor, and each individual miner reports its power through their actor.
+The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table (though the concept is conceptually helpful), instead, the [storage market actor](actors.md#storage-market-actor) exports the `GetTotalStorage` and `PowerLookup`  methods which can be used to lookup total network power and a miner's power, respectively. 
+Each individual miner reports its power through their actor.
 
-TODO: rephrase the above to make it clear that power is updated only on PoSt submission and when slashed.
+To check the power of a given miner, use the following:
 
+```go
+func GetMinersPowerAt(ts TipSet, m Address) Integer {
+  curState := GetStateTree(ts)
+  miner := curState.GetMiner(m)
+  if miner.IsSlashed() || miner.IsLate() {
+    return 0
+  }
+  
+  # lookback to the last valid PoSt put up by the miner
+  lookbackTipset := WalkBack(ts, miner.provingPeriodEnd - provingPeriodDuration(miner.SectorSize))
+  lbState := GetStateTree(lookbackTipset)
+  
+  sm := lbState.GetStorageMarket()
+  
+  return sm.PowerLookup(m)
+}
+```
 
 ### Power Updates
 
-A miners power is updated only when they submit a valid PoSt to the chain, or if they are slashed.
+Whenever a new [PoSt](proofs.md) or [Fault](faults.md) makes it on chain, the storage market updates the underlying power values appropriately.
 
-TODO: link to methods for post submission and slashing.
+Specifically, a miner's power is initialized/maintained when they [submit a valid PoSt](actors.md#submitPoSt) to the chain, and decreases if they are slashed (for a [storage fault](actors.md#slashStorageFault) or a [consensus fault](actors.md#slashConsensusFault)).
 
 Power is deducted when miners remove sectors by reporting the sector 'missing' or 'done' in a PoSt.
 
