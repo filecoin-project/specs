@@ -216,7 +216,7 @@ Output: newTicket
 
 Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see [election validation](mining.md#election-validation).
 
-To do so, the miner will use tickets from K blocks back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power, they determine whether they are eligible to mine. A user's `power` is defined as the ratio of the amount of storage they proved as of their last PoSt submission to the total storage in the network as of the current block.
+To do so, the miner will use tickets from K rounds back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power, they determine whether they are eligible to mine. A user's `power` is defined as the ratio of the amount of storage they proved as of their last PoSt submission to the total storage in the network as of the current block.
 
 Succinctly, the process of crafting a new `ElectionProof` in round `N` is as follows. We use:
 
@@ -241,7 +241,7 @@ Output: 1 or 0
     ii. # Determine own power at prior tipSet
         p_m <-- GetMinersPowerAt(N-1, self.PK)
     iii. # Get power fraction
-        p_f <-- p_m/p_n
+  		p_f <-- p_m/p_n
 2. Draw parentTicket from K blocks back (see ticket creation above for example, using 1 block back) 
 3. Run it through VRF and get determinstic output
     i. # take the VDFOutput of that ticket as input, specified for the appropriate operation type
@@ -326,9 +326,23 @@ Due to network propagation delay, it is possible for a miner in round N+1 to omi
 
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
 
-The weight at each block is equal to its `ParentWeight`, plus that block's delta weight. Delta
-weight is a constant `V`, plus `X` - a function of the total power in the network as reported in the Power Table.  The exact value for `V` and the magnitude of the power ratio value are
-still to be determined, but for now `V = 10` and `X = log(TotalPower)`.
+The weight at each block is equal to its `ParentWeight` plus that block's delta weight. Delta
+weight is a term P times the sum of a constant `V` times the number of blocks included in that TipSet in the given round (can only be calculated in the next round), and `X` - a function of the total power in the network as reported in the Power Table. P will be equal to some term P_i^P_n and seeks to punish selfish mining. So we have:
+
+`Weight = ParentWeight + P(V*NumBlocksMinedInThisRound + X)`
+
+The weight should be rounded down to its fourth decimal at each height (i.e. each time it is recalculated).
+
+```sh
+Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
+```
+
+ The exact value for these parameters remain to be determined, but for illustration, we can set:
+
+- `V = 2 * number of blocks in the round`
+- `X = log(TotalPower in Power Table)`
+- `P_i = .87`
+- `P_n = the number of tickets in this block's Ticket array` if that number is  >= 3, 0 otherwise.
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given TipSet should have
