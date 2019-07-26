@@ -242,7 +242,8 @@ See more on [Expected Consensus](expected-consensus.md) and [PoSTs](proofs.md).
 
 #### TipSet
 
-A collection of blocks mined by different miners, each an elected leader of a given epoch. All tip sets have the same parent-set and epoch number (height). TODO add picture.
+A collection of blocks mined by different miners, each an elected leader of a given epoch. All tipSets have the same parents and height.
+TODO add picture.
 
 #### Verifiable
 

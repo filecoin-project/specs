@@ -43,14 +43,6 @@ type StorageMarket interface {
 	// UpdateStorage is called by a miner to adjust the storage market actors
 	// accounting of the total storage in the storage market.
 	UpdateStorage(delta BytesAmount)
-
-  // PowerLookup returns a given miner's committed storage in the system.
-  // This number is used during leader election and block validation.
-  PowerLookup(miner Address) BytesAmount
-  
-  // Convenience method that simply returns whether a given miner's committed
-  // power is > 0.
-  IsMiner(miner Address) bool
   
 	// GetTotalStorage returns the total committed storage in the system. This number is
 	// also used as the 'total power' in the system for the purposes of the power table
