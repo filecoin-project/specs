@@ -40,7 +40,7 @@ func OnBlockReceived(blk Block) {
 }
 ```
 
-Meanwhile, the mining node runs a mining process to attempt to generate blocks. In `Mine`, the node identifies the best TipSet in each round and generates a ticket for each round. These inputs are used to see if the miner won the round. If the miner wins the round, she produces a block and broadcasts it. If not, we still maintain the list of tickets that were generated so the miner can try again next round.
+Meanwhile, the mining node runs a mining process to attempt to generate blocks. In `Mine`, the node identifies the best TipSet in each round and generates a ticket from it. In parallel, it uses a past ticket to try and generate a valid `ElectionProof` thereby enabling it to mine a new block. If no valid `ElectionProof` is produced, the miner mines a new ticket atop their old one and tries again at a new height.
 
 ```go
 func Mine(minerKey PrivateKey) {
@@ -65,22 +65,23 @@ func Mine(minerKey PrivateKey) {
 }
 ```
 
-To check if the miner won the round, she runs `CheckIfWinnerAtRound`. In this method, the miner takes her ticket from a prior round (which round to look at is specified  by the lookback parameter), computes an ElectionProof, and returns whether the proof indicates that the miner has won the round. In the pseudocode below, `IsProofAWinner` is taken from [the mining doc](mining.md#block-validation).
+To check if the miner won the round, she runs `CheckIfWinnerAtRound`. In this method, the miner takes their ticket from a prior round (which round to look at is specified by the randomness lookback parameter), computes an ElectionProof, and returns whether the proof indicates that the miner has won the round. In the pseudocode below, `IsProofAWinner` is taken from [the mining doc](mining.md#block-validation).
 
 ```go
 const RandomnessLookback = 1 // Also referred to as "K" in many places
-const PowerLookback = 1      // Also referred to as "L" in many places
 
 func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool, ElectionProof) {
   lbt := ChainTipsMgr.TicketFromRound(parentTipset, n-RandomnessLookback)
 
   eproof := ComputeElectionProof(lbt, key)
 
-  tipset := ChainTipsMgr.TipsetFromRound(n - PowerLookback)
-  minerPower := GetPower(tipset.state, key.Public())
-  totalPower := GetTotalPower(tipset.state)
+  minerPower := GetPower(miner)
+  totalPower := state.GetTotalPower()
 
-  return IsProofAWinner(eproof, minerPower, totalPower), eproof
+  if IsProofAWinner(eproof, minerPower, totalPower)
+    return True, eproof
+  else
+    return False, None
 }
 ```
 
@@ -144,9 +145,9 @@ the prior block, or "losing" tickets generated in this epoch.
 This is done by generating an 'ElectionProof' derived from a ticket sampled K rounds
 back.
 
-But why the lookback?
+But why the randomness lookback?
 
-The lookback helps turn independent lotteries (ticket drawings from a block one round back)
+The randomness lookback helps turn independent lotteries (ticket drawings from a block one round back)
 into a global lottery instead. Rather than having a distinct chance of winning or losing
 for each potential fork in a given round, a miner will either win on all or lose on all
 forks descended from the block in which the ticket is sampled.
@@ -154,7 +155,7 @@ forks descended from the block in which the ticket is sampled.
 This is useful as it reduces opportunities for grinding, across forks or sybil identities.
 
 However this introduces a tradeoff:
-- The lookback means that a miner can know K rounds in advance that they will win,
+- The randomness lookback means that a miner can know K rounds in advance that they will win,
 decreasing the cost of running a targeted attack (given they have local predictability).
 - It means electionProofs are stored separately from new tickets on a block, taking up
 more space on-chain.
@@ -188,32 +189,32 @@ Output: newTicket
 	i. newTicket <-- New()
 1. Draw prior ticket
 	i. 	 # take the last ticket for each parent 'Tickets' array
-				lastTickets <-- map(parentTickets, fun(x): x.last)
+			lastTickets <-- map(parentTickets, fun(x): x.last)
 	ii.  # sort these tickets 
   			sortedTickets <-- Sort(lastTickets)
-  iii. # draw the smallest ticket
+    iii. # draw the smallest ticket
   			parentTicket <-- min(sortedTickets)
 2. Run it through VRF and get determinstic output
 	i.   # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
-				input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
+			input <-- VRFPersonalization.Ticket | parentTicket.VDFOutput
 	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-				newTicket.VRFProof <-- ECVRF_prove(SK, input)
+			newTicket.VRFProof <-- ECVRF_prove(SK, input)
 	iii. # draw a deterministic output from this
-				VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
+			VRFOutput <-- ECVRF_proof_to_hash(newTicket.VRFProof)
 3. Run that deterministic output through a VDF
-  i.  # run eval with our VDF and its evaluation k on VRFOutput
+    i.  # run eval with our VDF and its evaluation k on VRFOutput
   			y, pi <-- Eval(ek, VRFOutput)
-  ii. # Store the output and proof in our ticket
+    ii. # Store the output and proof in our ticket
   			newTicket.VDFOutput <-- y
   			newTicket.VDFProof 	<-- pi
 4. Return the new ticket
 ```
 
-#### Checking election results
+### Checking election results
 
 Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see [election validation](mining.md#election-validation).
 
-To do so, the miner will use tickets from K blocks back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power (their committed storage relative to the network's total storage) L blocks back, they determine whether they are eligible to mine.
+To do so, the miner will use tickets from K blocks back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power, they determine whether they are eligible to mine. A user's `power` is defined as the ratio of the amount of storage they proved as of their last PoSt submission to the total storage in the network as of the current block.
 
 Succinctly, the process of crafting a new `ElectionProof` in round `N` is as follows. We use:
 
@@ -222,88 +223,53 @@ Succinctly, the process of crafting a new `ElectionProof` in round `N` is as fol
   - Secp256k1 for our curve
   - Note that the operation type in step 3.1 is not strictly necessary, but is used to distinguish this use of the VRF from that which generates tickets.
 
+Note: We draw the miner power from the prior round. This means that if a miner wins a block on their ProvingPeriodEnd even if they have not yet resubmitted a PoSt, they retain their power (until the next round).
+
 At round N:
 
 ```text
-Input: parentTickets from N-K, miner's public key PK, miner's secret key SK, the Storage Market actor S, a public parameter L
+Input: parentTickets from N-K, miner's public key PK, miner's secret key SK, the Storage Market actor S
 Output: 1 or 0
 
 0. Prepare new election proof
 	i. newEP <-- New()
 1. Determine the miner's power fraction
-	i. 	# Determine total storage L rounds back
-  		S <-- storageMarket(N-L)
+	i. 	# Determine total storage this round
+  		S <-- storageMarket(N)
   		p_n <-- S.GetTotalStorage()
-  ii. # Determine own power L rounds back
-  		p_m <-- S.PowerLookup(self)
-  iii. # Get power fraction
+    ii. # Determine own power at prior tipSet
+        p_m <-- GetMinersPowerAt(N-1, self.PK)
+    iii. # Get power fraction
   		p_f <-- p_m/p_n
 2. Draw parentTicket from K blocks back (see ticket creation above for example) 
 3. Run it through VRF and get determinstic output
 	i.   # take the VDFOutput of that ticket as input, specified for the appropriate operation type
-				input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
+		input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
 	ii.	 # run it through the VRF and store the VRFProof in the new ticket
-				newEP.VRFProof <-- ECVRF_prove(SK, input)
+		newEP.VRFProof <-- ECVRF_prove(SK, input)
 	iii. # draw a deterministic, pseudorandom output from this
-				VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
+		VRFOutput <-- ECVRF_proof_to_hash(newEP.VRFProof)
 3. Determine if the miner drew a winning lottery ticket
 	i.  # Map the VRFOutput onto [0,1], with HashLen of 32 Bytes using sha264
-  			scratchValue <-- VRFOutput / {1}^HashLen
-  ii. # Compare the miner's scratchValue to the miner's power fraction
-  	
-  If scratchValue <= p_f then parentTicket is a winning lottery ticket
-    Return newEP
-  iii. If scratchValue > p_f then parentTicket is not a winning lottery ticket
-    Return 0
+  		scratchValue <-- VRFOutput / {1}^HashLen
+    ii. # Compare the miner's scratchValue to the miner's power fraction
+        # winning ticket
+        if scratchValue <= p_f
+            return newEP
+        # otherwise parentTicket is not a winning lottery ticket
+        else 
+            Return 0
 ```
 
 If the miner scratches a winning ticket in this round, it can use newEP, along with a newTicket to generate and publish a new block (see [Block Generation](#block-generation)). Otherwise, it waits to hear of another block generated in this round.
 
 It is important to note that every block contains two artifacts: one, a ticket derived from last block's ticket to prove that they have waited the appropriate delay, and two, an election proof derived from the ticket `K` rounds back used to run leader election.
 
-### Losing Tickets
+#### Losing Tickets
 
-In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their power in the table `N-(L-1)` blocks back. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
+In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their power in the table `N-(L-1)` rounds back. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
 
-<<<<<<< HEAD
 In addition to each attempted `ElectionProof` generation, the miner will need to extend the ticket chain by generating another new ticket. They use the ticket they generated in the prior round, rather than the prior block's (as is normally used). This proves appropriate delay (given that finding a winning Ticket has taken multiple rounds).
-=======
-In addition to each attempted `ElectionProof` generation, the miner will need to extend the ticket chain by generating a new ticket. They use the ticket they generated in the prior round, rather than the prior block's (as is normally used). This proves appropriate delay (given that finding a winning Ticket has taken multiple rounds). Thus, each time it is discovered that nobody has won in a given round, every miner should use their previously generated ticket to repeat the ticket generation process, appending said ticket to their would-be block's `Ticket` array. This continues until some miner finds a winning ticket (see below), ensuring that the ticket chain remains at least as long as the block chain.
-
-As was stated above, in the case where there are multiple tickets to choose from at round `N-K` (i.e. if the TipSet eventually created has multiple blocks), miners should attempt to generate their `ElectionProof` from the ticket generated by the block with the smallest final ticket (i.e. not necessarily the smallest ticket generated at that round). Put another way, the block in a TipSet with the smallest final ticket prolongs the valid ticket chain.
-
-TODO: Add a diagram to illustrate this
-
-The VDF ensures fairness by enforcing that miners cannot grind through repeated losing tickets (see more [here](https://github.com/filecoin-project/research/issues/31)) and that a miner cannot "rush" the protocol by outputting a block before others have had a chance to (e.g. geographically disadvantaged miners). The VDF delay is currently to 30 seconds, given estimated network propagation times.
-
-Thus, our full ticket generation algorithm (reprised from [Ticket Generation](#ticket-generation)) is roughly (ticket handling is simplified in the pseudocode below for legibility):
-
-```go
-// Ticket is created as an array, with the initial ticket
-// coming from the parent TipSet.
-var Tickets []Ticket
-oldTicket := sort(parentTickets)[0]
-newTicket := VRF(VDF(H(oldTicket)))
-electionProof := VRF(H(ticketFromRound(curRound - K)))
-
-Tickets = append(Tickets, newTicket)
-
-// If the current ticket isn't a winner and the block isn't found by another miner,
-// derive a ticket from the last ticket
-for !IsProofAWinner(electionProof) && !blockFound() {
-  newTicket = VRF(VDF(H(newTicket)))
-  newElectionProof = Sig(H(ticketFromRound(curRound - K)))
-  Tickets = append(Tickets, newTicket)
-  curRound += 1
-}
-
-// if the process yields a winning ticket, mine and put out a block
-// containing the ticket array
-if winning(electionProof) {
-	mineBlock(electionProof, Tickets)
-}
-```
->>>>>>> 797bc176980ebb65e9ed5090e36abd0a573e430a
 
 Thus, each time it is discovered that nobody has won in a given round, every miner should append a new ticket to their would-be block's `Ticket` array. This continues until some miner finds a winning ticket (see below), ensuring that the ticket chain remains at least as long as the block chain.
 
@@ -315,6 +281,22 @@ New blocks (with multiple tickets) will have a few key properties:
 - The `ElectionProof` was correctly generated from the ticket `K-|Tickets|-1` (with `|Tickets|` the length of the `Tickets` array) rounds back.
 
 This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array.
+
+#### A note on miners' 'power fraction'
+
+The portion of blocks a given miner generates (and so the block rewards they earn) is proportional to their `Power Fraction` over time.
+
+This means miners should not be able to mine using power they have not yet proven. Conversly, it is acceptable for miners to mine with a slight delay between their proving storage and that proven storage being reflected in leader election. This is reflected in the height at which the [storage market actor](actors.md#storage-market-actor)'s `GetTotalStorage` and `PowerLookup` methods are called, as outlined [above](#checking-election-results).
+
+The miner retrieves the appropriate state of the `storage market actor` at the height at which they submitted their last valid PoSt: that way, they account for storage which was already proven valid, i.e. they are mining with the power they had in their last proving period. That is the miner will get their own power at height `miner.ProvingPeriodEnd - miner.ProvingPeriod`.
+
+This power is then compared to the total network power at the current height, in order to account for recent power changes from other miners (and so all miners attempting to mine in this round share 100% of the power).
+
+To illustrate this, an example:
+
+Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 39. Their next `provingPeriodEnd` will be 69, but M1 can submit a new PoST at any height X, for X in (39, 69]. Let's assume X is 67.
+
+At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 39 for their own power (and an actor from Y for total network power); at height 68, M1 will use the storage market actor from height 67 for their own power, and the storage market actor from height 68 for total power and so on.
 
 ### Block Generation
 
@@ -338,8 +320,6 @@ The blocks in a tipset have no defined order in representation. During state com
 Due to network propagation delay, it is possible for a miner in round N+1 to omit valid blocks mined at round N from their TipSet. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol.
 
 ### Chain Weighting
-
-TODO: ensure 'power' is properly and clearly defined
 
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
 
@@ -383,7 +363,7 @@ the reporter, and keep the rest.
 
 TODO: It is unclear that rewarding the reporter any more than gas fees is the right thing to do. Needs thought. Tracking issue: https://github.com/filecoin-project/specs/issues/159
 
-Note: One may wonder what prevents miners from simply breaking up their power into multiple un-linkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. Read more about this [here](https://github.com/filecoin-project/consensus/issues/32).
+Note: One may wonder what prevents miners from simply breaking up their power into multiple unlinkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. Read more about this [here](https://github.com/filecoin-project/consensus/issues/32).
 
 ### ChainTipsManager
 
@@ -406,13 +386,11 @@ func GetBestTipset()
 func AddFailedTicket(parent Tipset, t Ticket)
 ```
 
-
-
 ## Implementation Notes
 
 - When selecting messages from the mempool to include in the block, be aware that other miners may also generate blocks during this round, and to maximize fee earnings it may be best to select some messages at random (second in a duplicate earns no fees).
 
 ## Open Questions
 
-- Parameter K, Parameter L
+- Parameter K
 - VDF difficulty adjustment
