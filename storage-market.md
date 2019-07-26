@@ -14,7 +14,7 @@ TODO: This is a high level overview of how the storage market interacts with com
 
 ## The Market Interface
 
-This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor. For more information about Actors, see TODO.
+This interface, written using Go type notation, defines the set of methods that are callable on the storage market actor. The storage market actor is a built-in network actor. For more information about Actors, see [actors.md](actors.md).
 
 ```go
 type StorageMarket interface {
@@ -56,8 +56,6 @@ type StorageMarket interface {
 The Filecoin storage market operates as follows. Miners providing storage submit ask orders, asking for a certain price for their available storage space, and clients with files to store look through the asks and select a miner they wish to use. Clients negotiate directly with the storage miner that owns that ask, off-chain. Storage is priced in terms of Filecoin per byte per block (note: we may change the units here).
 
 ### Market Datastructures
-
-TODO: This storage-market.md doc should try to describe the high level interfaces of the storage market, details about storage and specific method behavior should go in a separate place where we talk about individual system actors.
 
 The storage market contains the following data:
 
@@ -115,9 +113,8 @@ TODO: 'complete' isnt really the right word here, as it implies that the deal is
 
 ## The Power Table
 
-The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table, instead, there is a 'total power' exported by the storage market actor, and each individual miner reports its power through their actor.
-
-TODO: rephrase the above to make it clear that power is updated only on PoSt submission and when slashed.
+The `power table` is exported by the storage market for use by consensus. There isn't actually a concrete object that is the power table (though the concept is conceptually helpful), instead, the [storage market actor](actors.md#storage-market-actor) exports the `GetTotalStorage` and `PowerLookup`  methods which can be used to lookup total network power and a miner's power, respectively. 
+Each individual miner reports its power through their actor.
 
 To check the power of a given miner, use the following:
 
@@ -129,7 +126,8 @@ func GetMinersPowerAt(ts TipSet, m Address) Integer {
     return 0
   }
   
-  lookbackTipset := WalkBack(ts, PowerLookback)
+  # lookback to the last valid PoSt put up by the miner
+  lookbackTipset := WalkBack(ts, miner.provingPeriodEnd - provingPeriodDuration(miner.SectorSize))
   lbState := GetStateTree(lookbackTipset)
   
   sm := lbState.GetStorageMarket()
@@ -138,14 +136,11 @@ func GetMinersPowerAt(ts TipSet, m Address) Integer {
 }
 ```
 
-
-
-
 ### Power Updates
 
-A miners power is updated only when they submit a valid PoSt to the chain, or if they are slashed.
+Whenever a new [PoSt](proofs.md) or [Fault](faults.md) makes it on chain, the storage market updates the underlying power values appropriately.
 
-TODO: link to methods for post submission and slashing.
+Specifically, a miner's power is initialized/maintained when they [submit a valid PoSt](actors.md#submitPoSt) to the chain, and decreases if they are slashed (for a [storage fault](actors.md#slashStorageFault) or a [consensus fault](actors.md#slashConsensusFault)).
 
 Power is deducted when miners remove sectors by reporting the sector 'missing' or 'done' in a PoSt.
 

@@ -161,19 +161,17 @@ A piece is a portion of a file that gets fitted into a sector.
 
 Security Parameter. Polling time is the time between two online PoReps in a PoSt proof.
 
+#### Power
+
+See `Power Fraction`.
+
 #### Power Fraction
 
-A miner's `Power Fraction` is the ratio of their committed storage over Filecoin's committed storage. It is used in leader election.
+A miner's `Power Fraction` or `Power` is the ratio of their committed storage as of their last PoSt submission over Filecoin's total committed storage as of the current block. It is used in leader election.
 
 ####  Power table
 
 The power table is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
-
-#### Power table lookback
-
-Security parameter. A number of rounds to sample back from when determining miner `power` for use in leader election. A higher number can help secure the system by making potential attacks more costly (as power must be maintained for longer to take effect), but also makes mining more costly for the same reason.
-
-Also referred to as `L` in consensus settings. 
 
 #### Protocol
 
@@ -251,9 +249,11 @@ In the context of:
 
 A `ticket` is used as a source of randomness in EC leader election. Every block depends on an `ElectionProof` derived from a `ticket`. At least one new `ticket` is produced with every new block. Ticket creation is described [here](./expected-consensus.md#Ticket-generation).
 
+Ticket comparison is done by interpreting the tickets' Bytes as unsigned integers (little endian representation).
+
 #### TipSet
 
- A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block in the same `round` as another miner.
+A `TipSet` is a set of blocks that have the same parent set and same number of `tickets`, which implies they will have been mined at the same `height`. A `TipSet` can contain multiple blocks if more than one miner successfully mines a block in the same `round` as another miner.
 
 #### Verifiable
 
