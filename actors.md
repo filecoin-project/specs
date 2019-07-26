@@ -74,7 +74,7 @@ type Exec struct {
 **Algorithm**
 
 ```go
-func Exec(code Code, params ActorMethod) Address {
+func Exec(code Cid, params ActorMethod) Address {
 	// Get the actor ID for this actor.
 	actorID = self.NextID
 	self.NextID++
@@ -583,7 +583,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 
 	// Power of the miner after adding this sector
 	futurePower = self.power + self.info.sectorSize
-	collateralRequired = CollateralForSize(futurePower)
+	collateralRequired = CollateralForPower(futurePower)
 
 	if collateralRequired > vm.MyBalance() {
 		Fatal("not enough collateral")
@@ -664,7 +664,7 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bi
 		SlashStorageFault(self)
 		return
 	} else if chain.Now() > self.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(miner.power, chain.Now()-self.provingPeriodEnd)
+		feesRequired += ComputeLateFee(self.power, chain.Now()-self.provingPeriodEnd)
 	}
 
 	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
@@ -1129,7 +1129,7 @@ Verifies a storage market payment channel voucher's 'Extra' data.
 **Parameters**
 
 ```sh
-type PaymentVerfy struct {
+type PaymentVerify struct {
     Extra StorageVoucherData
     Proof Bytes
 } representation tuple
@@ -1146,19 +1146,19 @@ type StorageVoucherData struct {
 func VerifyPieceInclusion(extra StorageVoucherData, proof []byte) {
 	if extra.DataCommitment != nil {
 		if !ValidateInclusion(proof, extra.DataCommitment) {
-      Fatal("piece inclusion proof was invalid")
-    }
-    return
+			Fatal("piece inclusion proof was invalid")
+		}
+		return
 	}
 
-  if extra.RequiredSector != nil {
-    if !self.HasSector(extra.RequiredSector) {
-      Fatal("miner does not have required sector")
-    }
-    return
-  }
+	if extra.RequiredSector != nil {
+		if !self.HasSector(extra.RequiredSector) {
+			Fatal("miner does not have required sector")
+		}
+		return
+	}
 
-  Fatal("voucher data contained neither data commitment or required sector")
+	Fatal("voucher data contained neither data commitment or required sector")
 }
 ```
 
@@ -1277,10 +1277,10 @@ func UpdateChannelState(sv SignedVoucher, secret []byte, proof []byte) {
 	}
 
 	if sv.Extra != nil {
-    ret := vmctx.Send(self.verifActor, self.verifMethod, sv.Extra, proof)
-    if ret != 0 {
-      Fatal("spend voucher verification failed")
-    }
+		ret := vmctx.Send(self.verifActor, self.verifMethod, sv.Extra, proof)
+		if ret != 0 {
+			Fatal("spend voucher verification failed")
+		}
 	}
 
 	ls := self.LaneStates[sv.Lane]
@@ -1294,9 +1294,9 @@ func UpdateChannelState(sv SignedVoucher, secret []byte, proof []byte) {
 
 	var mergeValue TokenAmount
 	for _, merge := range sv.Merges {
-    if merge.Lane == sv.Lane {
-      Fatal("voucher cannot merge its own lane")
-    }
+		if merge.Lane == sv.Lane {
+			Fatal("voucher cannot merge its own lane")
+		}
 
 		ols := self.LaneStates[merge.Lane]
 		if ols.Nonce >= merge.Nonce {
@@ -1334,7 +1334,7 @@ func UpdateChannelState(sv SignedVoucher, secret []byte, proof []byte) {
 }
 
 func Hash(b []byte) []byte {
-  return blake2b.Sum(b)
+	return blake2b.Sum(b)
 }
 ```
 
