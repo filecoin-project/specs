@@ -81,6 +81,13 @@ type BlockHeader struct {
 } representation tuple
 ```
 
+## TipSet
+
+For more on TipSets, see [the Expected Consensus spec](expected-consensus.md#tipsets). Implementations may choose not to create a TipSet data structure, instead representing its operations in terms of the underlying blocks.
+
+```sh
+type TipSet [&BlockHeader]
+
 ## VRF Personalization
 
 We define VDF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. [Ticket](#ticket) and [ElectionProof](#electionproof)).
