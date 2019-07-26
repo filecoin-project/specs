@@ -1,6 +1,6 @@
 ### What is the Filecoin Mining Process
 
-An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block for each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
+An active participant in the filecoin consensus process is a storage miner and expected consensus block proposer. They are responsible for storing data for the filecoin network and also for driving the filecoin consensus process. Miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
 
 Any block proposer must be a storage miner, but storage miners can avoid performing the block proposer tasks, however in this way, they will be losing out on block rewards and transaction fees.
 
@@ -110,7 +110,7 @@ Chain selection is a crucial component of how the Filecoin blockchain works. Eve
 
 The block structure and serialization is detailed in [the datastructures spec - block](data-structures.md#block). Check there for details on fields and types.
 
-In order to validate a block coming in from the network at round `N` was well mined a miner must do the following:
+In order to validate a block coming in from the network at height `N` was well mined a miner must do the following:
 
 ```go
 func VerifyBlock(blk Block) {
@@ -125,9 +125,8 @@ func VerifyBlock(blk Block) {
 	if blk.GetTime() > time.Now() {
 		Fatal("block was generated too far in the future")
 	}
-
 	// next check that it is appropriately delayed from its parents including
-	// null blocks.
+	// all tickets.
 	if blk.GetTime() <= blk.minParentTime()+(BLOCK_DELAY*len(blk.Tickets)) {
 		Fatal("block was generated too soon")
 	}
