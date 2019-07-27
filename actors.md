@@ -324,34 +324,30 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 		Fatal("blocks do not prove a slashable offense")
 	}
 
-	if !self.Miners.Has(msg.From) {
-		Fatal("slash collateral must only be called by a miner actor")
-	}
-
 	miner := AuthorOf(block1)
 
 	// Check if miner has been slashed
+	// miner should be removed upon consensus fault slashing
 	if !self.Miners.Has(miner) {
 		Fatal("miner has been slashed")
 	}
 
-	// Burn all of the miners collateral
-	// const slashedCollateral = self.GetCollateral(miner)
-	const slashedCollateral = miner.Balance
-	// self.SetCollateral(miner, 0)
-	miner.Balance = 0.0
+	// Burn miner pledge collateral
+	// TODO determine amount to slash if not the entire balance
+	const minerPledgeCollateral = PledgeCollateralForPower(miner.Power)
+	const slashedCollateral = consensusFaultSlashAmount(minerPledgeCollateral)
 
 	// Some of the slashed collateral should be paid to the slasher
-	// growthRate determines how fast the slasher share of slashed collateral will increase as block elapses
-	// TODO parameter selection on growthRate and initialShare
-	// Current growthRate results in slasherShare reaches 1 after 30 blocks
+	// GROWTH_RATE determines how fast the slasher share of slashed collateral will increase as block elapses
+	// current GROWTH_RATE results in SLASHER_SHARE reaches 1 after 30 blocks
+	// TODO: parameter selection on GROWTH_RATE and INITIAL_SHARE
+	// TODO: define arithmetic precision and rounding for this operation
 	const blockElapsed = VM.CurrentBlockHeight() - block1.Height
-	const growthRate = 1.26
-	const initialShare = 0.001
-	const slasherShare = Min(Pow(initialShare, growthRate), 1.0)
-	// self.SetCollateral(msg.From, self.GetCollateral(msg.From) + slasherShare * slashedCollateral)
-	msg.From.Balance = msg.From.Balance + slasherShare * slashedCollateral
-	self.BurnCollateral((1.0 - slasherShare) * slashedCollateral)
+	const GROWTH_RATE = 1.26
+	const INITIAL_SHARE = 0.001
+	const SLASHER_SHARE = Min(Pow(INITIAL_SHARE, GROWTH_RATE), 1.0)
+	VM.TransferFunds(SLASHER_SHARE * slashedCollateral, msg.From)
+	self.BurnFunds((1.0 - SLASHER_SHARE) * slashedCollateral)
 	
 	// Remove the miner from the list of network miners
 	self.Miners.Remove(miner)
