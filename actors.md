@@ -334,8 +334,11 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 
 	// Burn miner pledge collateral
 	// TODO determine amount to slash if not the entire balance
-	const minerPledgeCollateral = PledgeCollateralForPower(miner.Power)
-	const slashedCollateral = consensusFaultSlashAmount(minerPledgeCollateral)
+	// Tentatively, consensus fault should slash all pledge collateral
+	// only the balance is slashed if balance is less than collateral
+	// consensusFaultSlashAmount can return the Min for now
+	const requiredPledgeCollateral = PledgeCollateralForPower(miner.Power)
+	const slashedCollateral = consensusFaultSlashAmount(requiredPledgeCollateral, miner.Balance)
 
 	// Some of the slashed collateral should be paid to the slasher
 	// GROWTH_RATE determines how fast the slasher share of slashed collateral will increase as block elapses
