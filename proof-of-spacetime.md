@@ -52,10 +52,10 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults F
 
     for n in 0..POST_CHALLENGES_COUNT {
         challenge := challenges[n]
-        sector := challenge % sectorSize
+        sector := challenge % len(sectors)
 
         // Leaf index of the selected sector
-        challenge_value = challenge / sectorSize
+        challenge_value = challenge % sectorSize
         inclusionProof, isFault := GenerateMerkleInclusionProof(sector, challenge_value)
         if isFault {
             // faulty sector, need to post a fault to the chain and try to recover from it
@@ -82,9 +82,16 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults F
 ```go
 func VerifyPoSt(sectorSize BytesAmount, sectors []commR, seed []byte, proof PoStProof, faults FaultSet) bool {
     challenges := DerivePoStChallenges(sectorSize, seed, faults)
+    sectorsSorted := []
+
+    // Match up commitments with challenges
+    for i in 0..challenges {
+        sector = challenges[i] % len(sectors)
+        sectorsSorted[i] = sectors[sector]
+    }
 
     // Verify snark
-    VerifyPoStSnark(sectorSize, challenges, sectors)
+    VerifyPoStSnark(sectorSize, challenges, sectorsSorted)
 }
 ```
 
@@ -101,7 +108,7 @@ type PoStProof struct {
 
 ```go
 // Derive the full set of challenges for PoSt.
-func DerivePoStChallenges(sectorSize BytesAmount, seed []byte, faults FaultSet) [POST_CHALLENGES_COUNT][]byte {
+func DerivePoStChallenges(sectorCount: Uint, seed []byte, faults FaultSet) [POST_CHALLENGES_COUNT]Uint {
     challenges := []
 
     for n in 0..POST_CHALLENGES_COUNT {
@@ -110,7 +117,7 @@ func DerivePoStChallenges(sectorSize BytesAmount, seed []byte, faults FaultSet) 
             challenge := DerivePoStChallenge(seed, n, faults, attempt)
 
             // check if we landed in a faulty sector
-            sector := challenge % sectorSize
+            sector := challenge % sectorCount
             if !faults.Contains(sector) {
                 // Valid challenge
                 challenges[n] = challenge
@@ -149,11 +156,6 @@ func DerivePoStChallenge(seed []byte, n Uint, attempt Uint) Uint {
 
 - `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashes of all CommRs.
 - `InclusionPaths: [POST_CHALLENGES_COUNT]Fr`: Inclusion paths for the replica leafs. (Binary packed bools)
-
-{{% notice todo %}}
-**Todo**: `CommRs` should be optimized, by combining them into a single merkle tree, with a single root `CommA`.
-Benchmark this first before commiting.
-{{% /notice %}}
 
 #### Private Inputs
 
