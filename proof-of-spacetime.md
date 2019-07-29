@@ -48,6 +48,7 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults F
     // Generate the Merkle Inclusion Proofs + Faults
 
     inclusionProofs := []
+	sectorsSorted := []
     challenges := DerivePoStChallenges(sectorSize, seed, faults)
 
     for n in 0..POST_CHALLENGES_COUNT {
@@ -63,10 +64,11 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults F
         }
 
         inclusionProofs[n] = inclusionProof
+		sectorsSorted[i] = sectors[sector]
     }
-
+	
     // Generate the snark
-    snark_proof := GeneratePoStSnark(sectorSize, challenges, sectors, inclusionProofs)
+    snark_proof := GeneratePoStSnark(sectorSize, challenges, sectorsSorted, inclusionProofs)
 
     proof := PoStProof {
         snark: snark_proof
