@@ -200,7 +200,7 @@ func (state StateTree) LookupPublicKey(a Address) PubKey {
 func GetRandFromBlock(blk) []byte {
 	randomnessLookbackTipset := RandomnessLookback(blk)
 	lookbackTicket := minTicket(randomnessLookbackTipset)
-	blake2b(lookbackTicket)
+	return blake2b(lookbackTicket)
 }
 ```
 
