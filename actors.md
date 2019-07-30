@@ -1345,6 +1345,9 @@ type MultisigActorState struct {
     signers [Address]
     required UInt
     nextTxId UInt
+    initialBalance UInt
+    startingBlock UInt
+    unlockDuration UInt
     transactions {UInt:Transaction}
 }
 
@@ -1387,15 +1390,20 @@ type MultisigConstructor struct {
     signers [Address]
     ## The number of signatories required to perform a transaction.
     required UInt
+  	## Unlock time (in blocks) of initial filecoin balance of this wallet. Unlocking is linear.
+  	unlockDuration UInt
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func Multisig(signers []Address, required UInt) {
+func Multisig(signers []Address, required UInt, unlockDuration UInt) {
 	self.Signers = signers
 	self.Required = required
+  self.initialBalance = msg.Value
+  self.unlockDuration = unlockDuration
+  self.startingBlock = VM.CurrentBlockHeight()
 }
 ```
 
@@ -1440,6 +1448,9 @@ func Propose(to Address, value TokenAmount, method String, params Bytes) UInt {
 	self.Transactions.Append(tx)
 
 	if self.Required == 1 {
+    if !self.canSpend(value) {
+      Fatal("transaction amount exceeds available")
+    }
 		vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
 		tx.Complete = true
 	}
@@ -1486,6 +1497,9 @@ func Approve(txid UInt) {
 	tx.Approved.Append(msg.From)
 
 	if len(tx.Approved) >= self.Required {
+    if !self.canSpend(tx.Value) {
+      Fatal("transaction amount exceeds available")
+    }
 		Send(tx.To, tx.Value, tx.Method, tx.Params)
 		tx.Complete = true
 	}
@@ -1696,5 +1710,15 @@ func AggregateBitfields(faults []FaultSet) Bitfield {
 ```go
 func BurnFunds(amt TokenAmount) {
 	TransferFunds(BurntFundsAddress, amt)
+}
+```
+
+```go
+func canSpend(amt TokenAmount) bool {
+  if self.unlockDuration == 0 {
+    return true
+  }
+  var MinAllowableBalance = (self.initialBalance / self.unlockDuration) * (VM.CurrentBlockHeight() - self.startingBlock)
+  return MinAllowableBalance >= (vm.MyBalance() - amt)
 }
 ```
