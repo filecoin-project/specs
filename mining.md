@@ -44,13 +44,13 @@ TODO: sectors need to be globally unique. This can be done either by having the 
 
 
 ```go
-func ProveStorage(sectorSize BytesAmount, sectors []commR, startTime BlockHeight) (PoStProof, FaultSet) {
+func ProveStorage(sectorSize BytesAmount, sectors []commR, faults FaultSet) PoStProof {
     seed := GetRandFromBlock(startTime + POST_CHALLENGE_TIME)
-    GeneratePoSt(sectorSize, sectors, seed)
+    GeneratePoSt(sectorSize, sectors, seed, faults)
 }
 ```
 
-Note: See ['Proof of Space Time'](proofs.md#proof-of-space-time) for more details.
+Note: See ['Proof of Space Time'](proof-of-spacetime.md) for more details.
 
 The proving set remains consistent during the proving period. Any sectors added in the meantime will be included in the next proving set, at the beginning of the next proving period.
 

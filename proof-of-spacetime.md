@@ -43,6 +43,13 @@ TODO: Is it okay to add a fault and recover from it in the same proving period?
 
 #### Generation
 
+## Proof-of-Spacetime algorithms
+
+
+### GeneratePost
+
+`GeneratePoSt` generates a __*Proof of Spacetime*__ over all  __*sealed sectors*__ of a single miner— identified by their `commR` commitments. This is accomplished by performing a series of merkle inclusion proofs (__*Proofs of Retrievability*__). Each proof is of a challenged node in a challenged sector. The challenges are generated pseudo-randomly, based on the provided `seed`. At each time step, a number of __*Proofs of Retrievability*__ are performed.
+
 ```go
 func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults FaultSet) PoStProof {
     // Generate the Merkle Inclusion Proofs + Faults
@@ -66,7 +73,7 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults F
         inclusionProofs[n] = inclusionProof
 		sectorsSorted[i] = sectors[sector]
     }
-	
+
     // Generate the snark
     snark_proof := GeneratePoStSnark(sectorSize, challenges, sectorsSorted, inclusionProofs)
 
@@ -80,6 +87,7 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults F
 
 #### Verification
 
+`VerifyPoSt` is the functional counterpart to `GeneratePoSt`. It takes all of `GeneratePoSt`'s output, along with those of `GeneratePost`'s inputs required to identify the claimed proof. All inputs are required because verification requires sufficient context to determine not only that a proof is valid but also that the proof indeed corresponds to what it purports to prove.
 
 ```go
 func VerifyPoSt(sectorSize BytesAmount, sectors []commR, seed []byte, proof PoStProof, faults FaultSet) bool {
