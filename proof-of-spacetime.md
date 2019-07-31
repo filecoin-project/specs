@@ -22,7 +22,8 @@ At the beginning of a new proving period all faults are reset, and if they persi
 `GeneratePoSt` generates a __*Proof of Spacetime*__ over all  __*sealed sectors*__ of a single miner— identified by their `commR` commitments. This is accomplished by performing a series of merkle inclusion proofs (__*Proofs of Retrievability*__). Each proof is of a challenged node in a challenged sector. The challenges are generated pseudo-randomly, based on the provided `seed`. At each time step, a number of __*Proofs of Retrievability*__ are performed.
 
 ```go
-func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed Seed, faults FaultSet) PoStProof {
+// Generate a new PoSt.
+func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults FaultSet) PoStProof {
     // Generate the Merkle Inclusion Proofs + Faults
 
     inclusionProofs := []
@@ -57,7 +58,8 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed Seed, faults Fau
 `VerifyPoSt` is the functional counterpart to `GeneratePoSt`. It takes all of `GeneratePoSt`'s output, along with those of `GeneratePost`'s inputs required to identify the claimed proof. All inputs are required because verification requires sufficient context to determine not only that a proof is valid but also that the proof indeed corresponds to what it purports to prove.
 
 ```go
-func VerifyPoSt(sectorSize BytesAmount, sectors []commR, seed Seed, proof PoStProof, faults FaultSet) bool {
+// Verify a PoSt.
+func VerifyPoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, proof PoStProof, faults FaultSet) bool {
     challenges := DerivePoStChallenges(seed, faults, sectorSize, len(sectors))
     sectorsSorted := []
 
@@ -149,15 +151,15 @@ func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, secto
 
 *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
 
-- `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashes of all CommRs.
-- `InclusionPaths: [POST_CHALLENGES_COUNT]Fr`: Inclusion paths for the replica leafs. (Binary packed bools)
+- `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashes of all CommRs, ordered to match the inclusion paths and challenge order.
+- `InclusionPaths: [POST_CHALLENGES_COUNT]Fr`: Inclusion paths for the replica leafs, ordered to match the `CommRs` and challenge order. (Binary packed bools)
 
 #### Private Inputs
 
 *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
-- `InclusionProofs: [POST_CHALLENGES_COUNT][TREE_DEPTH]Fr`: Merkle tree inclusion proofs.
-- `InclusionValues: [POST_CHALLENGES_COUNT]Fr`: Value of the encoded leaves for each challenge.
+- `InclusionProofs: [POST_CHALLENGES_COUNT][TREE_DEPTH]Fr`: Merkle tree inclusion proofs, ordered to match the challenge orderd.
+- `InclusionValues: [POST_CHALLENGES_COUNT]Fr`: Value of the encoded leaves for each challenge, ordered to match challenge order.
 
 
 #### Circuit
