@@ -1440,7 +1440,7 @@ func Propose(to Address, value TokenAmount, method String, params Bytes) UInt {
 	self.Transactions.Append(tx)
 
 	if self.Required == 1 {
-		tx.RetCode := vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
+		tx.RetCode = vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
 		tx.Complete = true
 	}
 
@@ -1566,7 +1566,7 @@ type AddSigner struct {
 **Algorithm**
 
 ```go
-func AddSigner(signer Address, incraseReq bool) {
+func AddSigner(signer Address, increaseReq bool) {
 	if msg.From != self.Address {
 		Fatal("add signer must be called by wallet itself")
 	}
