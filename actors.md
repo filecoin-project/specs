@@ -1662,7 +1662,7 @@ func ChangeRequirement(req UInt) {
 		Fatal("requirement must be at least 1")
 	}
 	if req > len(self.Signers) {
-		Fatal("requirement must be less than nuber of signers")
+		Fatal("requirement must be less than number of signers")
 	}
 
 	self.Required = req
