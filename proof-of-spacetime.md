@@ -9,62 +9,29 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 - **POST_PROVING_PERIOD**: The time interval in which a PoSt has to be submitted.
 - **POST_CHALLENGE_TIME**: The time offset at which the actual work of generating the PoSt should be started. This is some delta before the end of the `Proving Period`, and as such less then a single `Proving Period`.
 
-### Execution Flow
-
-```
-    ■──────────────────────── Proving Period ─────────────────────────■
-
-
-    ▲───────────────────────────────────────────────────▲─────────────▲
-    │                                                   │             │
-    │                                                   │             │
-    │                                                   │             │
-┌───────┐                                     ┌──────────────────┐┌───────┐
-│ Start │                                     │ Generation Start ││  End  │
-└───────┘                                     └──────────────────┘└───────┘
-                                                        ▲
-
-                                                        │
-                                                                       ┌ ─ ─ ─ ─ ─ ─ ─ ─ ┐
-                                                        └ ─ ─ ─ ─ ─ ─ ─ Randomness Input
-                                                                       └ ─ ─ ─ ─ ─ ─ ─ ─ ┘
-```
-
-TODO: Add post submission to the diagram.
-
-
 ### High Level API
 
 #### Fault Detection
 
-Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to post an up to date `AddFaults` message to the chain. When recovering any faults, they need to submit a `RecoverFaults` message. The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
+Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to post an up to date `AddFaults` message to the chain. The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
 
-TODO: Is it okay to add a fault and recover from it in the same proving period?
+At the beginning of a new proving period all faults are reset, and if they persist the miner needs to resubmit an `AddFaults` message.
 
 #### Generation
-
-## Proof-of-Spacetime algorithms
-
-
-### GeneratePost
 
 `GeneratePoSt` generates a __*Proof of Spacetime*__ over all  __*sealed sectors*__ of a single miner— identified by their `commR` commitments. This is accomplished by performing a series of merkle inclusion proofs (__*Proofs of Retrievability*__). Each proof is of a challenged node in a challenged sector. The challenges are generated pseudo-randomly, based on the provided `seed`. At each time step, a number of __*Proofs of Retrievability*__ are performed.
 
 ```go
-func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults FaultSet) PoStProof {
+func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed Seed, faults FaultSet) PoStProof {
     // Generate the Merkle Inclusion Proofs + Faults
 
     inclusionProofs := []
 	sectorsSorted := []
-    challenges := DerivePoStChallenges(sectorSize, seed, faults)
+    challenges := DerivePoStChallenges(seed, faults, sectorSize, len(sectors))
 
-    for n in 0..POST_CHALLENGES_COUNT {
-        challenge := challenges[n]
-        sector := challenge % len(sectors)
-
+    for challenge in challenges {
         // Leaf index of the selected sector
-        challenge_value = challenge % sectorSize
-        inclusionProof, isFault := GenerateMerkleInclusionProof(sector, challenge_value)
+        inclusionProof, isFault := GenerateMerkleInclusionProof(challenge.Sector, challenge.Leaf)
         if isFault {
             // faulty sector, need to post a fault to the chain and try to recover from it
             return Fatal("Detected late fault")
@@ -90,14 +57,13 @@ func GeneratePoSt(sectorSize BytesAmount, sectors []commR, seed []byte, faults F
 `VerifyPoSt` is the functional counterpart to `GeneratePoSt`. It takes all of `GeneratePoSt`'s output, along with those of `GeneratePost`'s inputs required to identify the claimed proof. All inputs are required because verification requires sufficient context to determine not only that a proof is valid but also that the proof indeed corresponds to what it purports to prove.
 
 ```go
-func VerifyPoSt(sectorSize BytesAmount, sectors []commR, seed []byte, proof PoStProof, faults FaultSet) bool {
-    challenges := DerivePoStChallenges(sectorSize, seed, faults)
+func VerifyPoSt(sectorSize BytesAmount, sectors []commR, seed Seed, proof PoStProof, faults FaultSet) bool {
+    challenges := DerivePoStChallenges(seed, faults, sectorSize, len(sectors))
     sectorsSorted := []
 
     // Match up commitments with challenges
-    for i in 0..challenges {
-        sector = challenges[i] % len(sectors)
-        sectorsSorted[i] = sectors[sector]
+    for challenge in challenges {
+        sectorsSorted[i] = sectors[challenge.Sector]
     }
 
     // Verify snark
@@ -109,8 +75,21 @@ func VerifyPoSt(sectorSize BytesAmount, sectors []commR, seed []byte, proof PoSt
 #### Types
 
 ```go
+// The final proof stored on chain.
 type PoStProof struct {
     snark []byte
+}
+```
+
+```go
+// The random challenge seed, provided by the chain.
+Seed [32]byte
+```
+
+```go
+type Challenge struct {
+    Sector Uint
+    Leaf Uint
 }
 ```
 
@@ -118,17 +97,16 @@ type PoStProof struct {
 
 ```go
 // Derive the full set of challenges for PoSt.
-func DerivePoStChallenges(sectorCount: Uint, seed []byte, faults FaultSet) [POST_CHALLENGES_COUNT]Uint {
+func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize: Uint, sectorCount: Uint) [POST_CHALLENGES_COUNT]Challenge {
     challenges := []
 
     for n in 0..POST_CHALLENGES_COUNT {
         attempt := 0
         while challenges[n] == nil {
-            challenge := DerivePoStChallenge(seed, n, faults, attempt)
+            challenge := DerivePoStChallenge(seed, n, faults, attempt, sectorSize, sectorCount)
 
             // check if we landed in a faulty sector
-            sector := challenge % sectorCount
-            if !faults.Contains(sector) {
+            if !faults.Contains(challenge.Sector) {
                 // Valid challenge
                 challenges[n] = challenge
             }
@@ -141,11 +119,18 @@ func DerivePoStChallenges(sectorCount: Uint, seed []byte, faults FaultSet) [POST
 }
 
 // Derive a single challenge for PoSt.
-func DerivePoStChallenge(seed []byte, n Uint, attempt Uint) Uint {
+func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sectorCount: Uint) Challenge {
     n_bytes := WriteUintToLittleEndian(n)
     data := concat(seed, n_bytes, WriteUintToLittleEndian(attempt))
-    challenge := blake2b(data)
-    ReadUintLittleEndain(challenge)
+    challenge_bytes := blake2b(data)
+
+    sector_challenge := ReadUintLittleEndian(challenge_bytes[0..8])
+    leaf_challenge := ReadUintLittleEndian(challenge_bytes[8..16])
+
+    Challenge {
+        Sector: sector_challenge % sectorCount,
+        Leaf: leaf_challenge % (sectorSize / NODE_SIZE),
+    }
 }
 ```
 
