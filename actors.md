@@ -1349,7 +1349,6 @@ type MultisigActorState struct {
 }
 
 type Transaction struct {
-    created UInt
     txID UInt
     to Address
     value TokenAmount
@@ -1357,6 +1356,7 @@ type Transaction struct {
     approved [Address]
     completed Bool
     canceled Bool
+    retcode UInt
 }
 ```
 
@@ -1440,7 +1440,7 @@ func Propose(to Address, value TokenAmount, method String, params Bytes) UInt {
 	self.Transactions.Append(tx)
 
 	if self.Required == 1 {
-		vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
+		tx.RetCode = vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
 		tx.Complete = true
 	}
 
@@ -1486,7 +1486,7 @@ func Approve(txid UInt) {
 	tx.Approved.Append(msg.From)
 
 	if len(tx.Approved) >= self.Required {
-		Send(tx.To, tx.Value, tx.Method, tx.Params)
+		tx.RetCode = Send(tx.To, tx.Value, tx.Method, tx.Params)
 		tx.Complete = true
 	}
 }
@@ -1559,18 +1559,22 @@ func ClearCompleted() {
 ```sh
 type AddSigner struct {
     signer Address
+    increaseReq bool
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func AddSigner(signer Address) {
+func AddSigner(signer Address, increaseReq bool) {
 	if msg.From != self.Address {
 		Fatal("add signer must be called by wallet itself")
 	}
 	if self.isSigner(signer) {
 		Fatal("new address is already a signer")
+	}
+	if increaseReq {
+		self.Required = self.Required + 1
 	}
 
 	self.Signers.Append(signer)
@@ -1584,18 +1588,23 @@ func AddSigner(signer Address) {
 ```sh
 type RemoveSigner struct {
     signer Address
+    decreaseReq bool
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func RemoveSigner(signer Address) {
+func RemoveSigner(signer Address, decreaseReq bool) {
 	if msg.From != self.Address {
 		Fatal("remove signer must be called by wallet itself")
 	}
 	if !self.isSigner(signer) {
 		Fatal("given address was not a signer")
+	}
+	if decreaseReq || len(self.Signers)-1 < self.Required {
+		// Reduce Required outherwise the wallet is locked out
+		self.Required = self.Required - 1
 	}
 
 	self.Signers.Remove(signer)
@@ -1651,6 +1660,9 @@ func ChangeRequirement(req UInt) {
 	}
 	if req < 1 {
 		Fatal("requirement must be at least 1")
+	}
+	if req > len(self.Signers) {
+		Fatal("requirement must be less than number of signers")
 	}
 
 	self.Required = req
