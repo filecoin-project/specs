@@ -45,8 +45,8 @@ TODO: sectors need to be globally unique. This can be done either by having the 
 
 ```go
 func ProveStorage(sectorSize BytesAmount, sectors []commR, faults FaultSet) PoStProof {
-    seed := GetRandFromBlock(startTime + POST_CHALLENGE_TIME)
-    GeneratePoSt(sectorSize, sectors, seed, faults)
+    seed := GetRandFromBlock(miner.ProvingPeriodStart + ProvingPeriodDuratoin(sectorSize) + POST_CHALLENGE_TIME)
+    return GeneratePoSt(sectorSize, sectors, seed, faults)
 }
 ```
 

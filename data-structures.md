@@ -301,7 +301,7 @@ type Bitfield Bytes
 A sector set stores a mapping of sector IDs to the respective `commR`s.
 
 ```sh
-type SectorSet map{Uint:Bytes}
+type SectorSet map{SectorID:Bytes}
 ```
 
 {{% notice todo %}}

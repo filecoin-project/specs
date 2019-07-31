@@ -53,17 +53,13 @@ func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults F
         }
 
         inclusionProofs[n] = inclusionProof
-		sectorsSorted[i] = sectors[sector]
+		sectorsSorted[i] = sectors[challenge.Sector]
     }
 
     // Generate the snark
     snark_proof := GeneratePoStSnark(sectorSize, challenges, sectorsSorted, inclusionProofs)
 
-    proof := PoStProof {
-        snark: snark_proof
-    }
-
-    return proof, faults
+    return snark_proof
 }
 ```
 
@@ -83,19 +79,12 @@ func VerifyPoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, proof PoSt
     }
 
     // Verify snark
-    VerifyPoStSnark(sectorSize, challenges, sectorsSorted)
+    return VerifyPoStSnark(sectorSize, challenges, sectorsSorted)
 }
 ```
 
 
 #### Types
-
-```go
-// The final proof stored on chain.
-type PoStProof struct {
-    snark []byte
-}
-```
 
 ```go
 // The random challenge seed, provided by the chain.
@@ -113,11 +102,11 @@ type Challenge struct {
 
 ```go
 // Derive the full set of challenges for PoSt.
-func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize: Uint, sectorCount: Uint) [POST_CHALLENGES_COUNT]Challenge {
+func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sectorCount Uint) [POST_CHALLENGES_COUNT]Challenge {
     challenges := []
 
     for n in 0..POST_CHALLENGES_COUNT {
-        attempt := 0
+        attemptedSectors := {SectorID:bool}
         while challenges[n] == nil {
             challenge := DerivePoStChallenge(seed, n, faults, attempt, sectorSize, sectorCount)
 
@@ -126,8 +115,13 @@ func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize: Uint, sectorCo
                 // Valid challenge
                 challenges[n] = challenge
             }
+
             // invalid challenge, regenerate
-            attempt += 1
+            attemptedSectors[challenge.Sector] = true
+
+            if len(attemptedSectors) >= sectorCount {
+                Fatal("All sectors are faulty")
+            }
         }
     }
 
@@ -135,7 +129,7 @@ func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize: Uint, sectorCo
 }
 
 // Derive a single challenge for PoSt.
-func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sectorCount: Uint) Challenge {
+func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sectorCount Uint) Challenge {
     n_bytes := WriteUintToLittleEndian(n)
     data := concat(seed, n_bytes, WriteUintToLittleEndian(attempt))
     challenge_bytes := blake2b(data)
@@ -143,7 +137,7 @@ func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, secto
     sector_challenge := ReadUintLittleEndian(challenge_bytes[0..8])
     leaf_challenge := ReadUintLittleEndian(challenge_bytes[8..16])
 
-    Challenge {
+    return Challenge {
         Sector: sector_challenge % sectorCount,
         Leaf: leaf_challenge % (sectorSize / NODE_SIZE),
     }
@@ -159,20 +153,20 @@ func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, secto
 
 - `POST_CHALLENGES_COUNT: UInt`: Number of challenges.
 - `POST_TREE_DEPTH: UInt`: Depth of the Merkle tree. Note, this is `(log_2(Size of original data in bytes/32 bytes per leaf))`.
-- `SECTOR_SIZE: UInt`:
+- `SECTOR_SIZE: UInt`: The size of a single sector in bytes.
 
 #### Public Inputs
 
 *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
 
-- `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashes of all CommRs, ordered to match the inclusion paths and challenge order.
+- `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashes of all replicas, ordered to match the inclusion paths and challenge order.
 - `InclusionPaths: [POST_CHALLENGES_COUNT]Fr`: Inclusion paths for the replica leafs, ordered to match the `CommRs` and challenge order. (Binary packed bools)
 
 #### Private Inputs
 
 *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
-- `InclusionProofs: [POST_CHALLENGES_COUNT][TREE_DEPTH]Fr`: Merkle tree inclusion proofs, ordered to match the challenge orderd.
+- `InclusionProofs: [POST_CHALLENGES_COUNT][TREE_DEPTH]Fr`: Merkle tree inclusion proofs, ordered to match the challenge order.
 - `InclusionValues: [POST_CHALLENGES_COUNT]Fr`: Value of the encoded leaves for each challenge, ordered to match challenge order.
 
 
@@ -189,7 +183,7 @@ In high level, we do 1 check:
 ```go
 for c in range POST_CHALLENGES_COUNT {
   // Inclusion Proofs Checks
-  assert(MerkleTreeVerify(CommRs[c], InclusionPath[c], IncludionProof[c], InclusionValue[c]))
+  assert(MerkleTreeVerify(CommRs[c], InclusionPath[c], InclusionProof[c], InclusionValue[c]))
 }
 ```
 
