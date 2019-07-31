@@ -6,20 +6,9 @@ This spec describes a set of actors that operate within the [Filecoin State Mach
 
 ## Actor State
 
-These below used `kindeded` representation, as the type can be inferred from the context, in which
-they are used (`Actor` or `UnsignedMessage`).
-
-```sh
-type ActorState union {
-    | InitActorState
-    | AccountActorState
-    | StorageMarketActorState
-    | StorageMinerActorState
-    | PaymentChannelBrokerActorState
-    | MultisigActorState
-} representation kinded
-
-```
+Each actor type defines their own structure for storing their state. We
+represent each with an IPLD schema at the beginning of each actor section in
+this document.
 
 ## System Actors
 
