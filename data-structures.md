@@ -87,6 +87,7 @@ For more on TipSets, see [the Expected Consensus spec](expected-consensus.md#tip
 
 ```sh
 type TipSet [&BlockHeader]
+```
 
 ## VRF Personalization
 
@@ -153,7 +154,7 @@ type UnsignedMessage struct {
 	from Address
 
 	## When receiving a message from a user account the nonce in the message must match the expected
-    ## nonce in the from actor. This prevents replay attacks.
+	## nonce in the from actor. This prevents replay attacks.
 	nonce UInt
 
 	value UInt
