@@ -1588,20 +1588,21 @@ func AddSigner(signer Address, increaseReq bool) {
 ```sh
 type RemoveSigner struct {
     signer Address
+    decreaseReq bool
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func RemoveSigner(signer Address) {
+func RemoveSigner(signer Address, decreaseReq bool) {
 	if msg.From != self.Address {
 		Fatal("remove signer must be called by wallet itself")
 	}
 	if !self.isSigner(signer) {
 		Fatal("given address was not a signer")
 	}
-	if len(self.Signers)-1 < self.Required {
+	if decreaseReq || len(self.Signers)-1 < self.Required {
 		// Reduce Required outherwise the wallet is locked out
 		self.Required = self.Required - 1
 	}
