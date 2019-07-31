@@ -6,16 +6,30 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 ### Definitions
 
-- **POST_PROVING_PERIOD**: The time interval in which a PoSt has to be submitted.
-- **POST_CHALLENGE_TIME**: The time offset at which the actual work of generating the PoSt should be started. This is some delta before the end of the `Proving Period`, and as such less then a single `Proving Period`.
+| Name | Value |Description |
+|------|-------|------------|
+| `POST_PROVING_PERIOD` | `2880` blocks  (~24h) | The time interval in which a PoSt has to be submitted. |
+| `POST_CHALLENGE_TIME` | `240` blocks (~2h) | The time offset at which the actual work of generating the PoSt should be started. This is some delta before the end of the `Proving Period`, and as such less then a single `Proving Period`. |
+
+{{% notice todo %}}
+**TODO**: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.
+{{% /notice %}}
 
 ### High Level API
 
 #### Fault Detection
 
-Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to post an up to date `AddFaults` message to the chain. The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
+Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to submit the known `faults` using the `AddFaults` message to the chain.
+The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
 
 At the beginning of a new proving period all faults are reset, and if they persist the miner needs to resubmit an `AddFaults` message.
+
+If the miner knows that the sectors are permanently lost, they can submit them as part of the `doneSet`, to ensure they are removed from the proving set.
+
+
+{{% notice todo %}}
+**TODO**: The penalization for faults is not clear yet.
+{{% /notice %}}
 
 #### Generation
 

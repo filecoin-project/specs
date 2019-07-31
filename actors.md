@@ -677,8 +677,6 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 		Fatal("proof invalid")
 	}
 
-    // power is removed for the faults
-    miner.Sectors.Subtract(faultSet)
     // clear fault set
     self.faultSet = EmptySectorSet()
 
