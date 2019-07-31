@@ -374,14 +374,14 @@ To create a block, the eligible miner must compute a few fields:
     - Insert each of the secp `SignedMessage`s into a sharray 
   - Create a `TxMeta` object and fill each of its fields as follows:
     - `blsMsgs`: the root cid of the bls messages sharray
-    - `blsAggregate`: the aggregated bls signature
     - `secpMsgs`: the root cid of the secp messages sharray
   - The cid of this `TxMeta` object should be used to fill the `MsgRoot` field of the block header.
+- `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
 - `StateRoot` - Apply each chosen message to the `ParentState` to get this.
   - Note: first apply bls messages in the order that they appear in the blsMsgs sharray, then apply secp messages in the order that they appear in the secpMsgs sharray.
 - `ReceiptsRoot` - To compute this:
-  - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
-  - Insert them into a Merkle Tree and take its root.
+  - Apply the set of messages to the parent state as described above, collecting invocation receipts as this happens.
+  - Insert them into a sharray and take its root.
 - `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
   - the timestamp on the block is not in the future (with ALLOWABLE_CLOCK_DRIFT grace to account for relative asynchrony)
   - the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
