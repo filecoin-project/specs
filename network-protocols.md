@@ -330,8 +330,11 @@ type BlockSyncResponse struct {
 
 type TipSetBundle struct {
   blocks [Blocks]
-  messages [Message]
-  MsgIncludes [[UInt]]
+  secpMsgs [SignedMessage]
+  secpMsgIncludes [[UInt]]
+
+  blsMsgs [Message]
+  blsMsgIncludes [[Uint]]
 }
 
 type Status enum {
@@ -354,8 +357,8 @@ The TipSetBundle
 
 ```
 Blocks: [b0, b1]
-Messages: [mA, mB, mC, mD]
-MsgIncludes: [[0, 1, 3], [1, 2, 0]]
+secpMsgs: [mA, mB, mC, mD]
+secpMsgIncludes: [[0, 1, 3], [1, 2, 0]]
 ```
 
 corresponds to:

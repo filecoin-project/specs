@@ -60,8 +60,8 @@ type BlockHeader struct {
 	stateRoot &StateTree
 
 	## Messages is the set of messages included in this block. This field is the Cid
-	## of the root of a sharray of Messages.
-	messages &[&Message]<Sharray>
+	## of the TxMeta object that contains the bls and secp signed message trees
+	messages &TxMeta
 
 	## BLSAggregate is an aggregated BLS signature for all the messages in this block that
 	## were signed using BLS signatures
@@ -78,6 +78,13 @@ type BlockHeader struct {
 	## BlockSig is a signature over the hash of the entire block with the miners
 	## worker key to ensure that it is not tampered with after creation
 	blockSig Signature
+} representation tuple
+
+type TxMeta struct {
+  blsMsgs &[&Message]<Sharray>
+
+
+	secpMsgs &[&SignedMessage]<Sharray>
 } representation tuple
 ```
 
