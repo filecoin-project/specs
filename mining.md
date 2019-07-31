@@ -165,10 +165,10 @@ func VerifyBlock(blk Block) {
       Fatal("aggregated bls signature failed to validate")
     }
 
-    secpMessages := LoadMessages(bls.Messages.secpMsgs)
-    for i, msg := range secpMessages {
+    secpkMessages := LoadMessages(bls.Messages.secpkMessages)
+    for i, msg := range secpkMessages {
       if !ValidateSignature(msg) {
-        Fatal("secp message %d had invalid signature", i)
+        Fatal("secpk message %d had invalid signature", i)
       }
     }
 
@@ -180,7 +180,7 @@ func VerifyBlock(blk Block) {
             Fatal("message receipt mismatch")
         }
     }
-    for i, msg := range secpMessages {
+    for i, msg := range secpkMessages {
       receipt := ApplyMessage(state, msg.Message)
       if receipt != receipts[i + len(blsMessages)] {
         Fatal("message receipt mismatch")
@@ -366,19 +366,19 @@ To create a block, the eligible miner must compute a few fields:
     - TODO: define message conflicts in the state-machine doc, and link to it from here
 - `MsgRoot` - To compute this:
   - Select a set of messages from the mempool to include in the block.
-  - Separate the messages into BLS signed messages and secp signed messages
+  - Separate the messages into BLS signed messages and secpk signed messages
   - For the BLS messages:
     - Strip the signatures off of the messages, and insert all the bare `Message`s for them into a sharray.
     - Aggregate all of the bls signatures into a single signature and use this to fill out the `BLSAggregate` field
-  - For the secp messages:
-    - Insert each of the secp `SignedMessage`s into a sharray 
+  - For the secpk messages:
+    - Insert each of the secpk `SignedMessage`s into a sharray 
   - Create a `TxMeta` object and fill each of its fields as follows:
-    - `blsMsgs`: the root cid of the bls messages sharray
-    - `secpMsgs`: the root cid of the secp messages sharray
+    - `blsMessages`: the root cid of the bls messages sharray
+    - `secpkMessages`: the root cid of the secp messages sharray
   - The cid of this `TxMeta` object should be used to fill the `MsgRoot` field of the block header.
 - `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
 - `StateRoot` - Apply each chosen message to the `ParentState` to get this.
-  - Note: first apply bls messages in the order that they appear in the blsMsgs sharray, then apply secp messages in the order that they appear in the secpMsgs sharray.
+  - Note: first apply bls messages in the order that they appear in the blsMsgs sharray, then apply secpk messages in the order that they appear in the secpkMessages sharray.
 - `ReceiptsRoot` - To compute this:
   - Apply the set of messages to the parent state as described above, collecting invocation receipts as this happens.
   - Insert them into a sharray and take its root.
