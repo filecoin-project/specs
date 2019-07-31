@@ -14,7 +14,6 @@ The client proposes the cadence of the earnings for a deal by creating `SignedVo
 
 After the block defined in each `SignedVoucher` is passed, the Storage Miner could claim the earning by updating the payment channel calling `UpdateChannelState` on the `PaymentChannel` actor for a particular `SignedVoucher`. This call passes if the Storage Miner is still storing the piece in sector and if the Storage Miner is not late in their PoSt submission and if the time specified in the `SignedVoucher` has passed.
 
-(TODO: working on a multi-lane payment channel construction that should make this all pretty easy, only requiring a single on-chain channel construction between each client and storage miner).
 
 ## Payment Channels
 
