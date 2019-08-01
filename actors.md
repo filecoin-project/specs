@@ -455,7 +455,7 @@ type StorageMinerActorState struct {
 	## when a PoSt is submitted (not as each new sector commitment is added).
     provingSet &SectorSet
 
-    ## Current self reported faults.
+    ## Faulty sectors reported since last SubmitPost.
     faultSet BitField
 
 	## Sectors reported during the last PoSt submission as being 'done'. The collateral
