@@ -20,6 +20,8 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 #### Fault Detection
 
 Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to submit the known `faults` using the `AddFaults` message to the chain.
+Only faults which have been reported at challenge time, will be accounted for. If any other faults have occured the miner can not submit a valid PoSt for this proving period.
+
 The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
 
 At the beginning of a new proving period all faults are reset, and if they persist the miner needs to resubmit an `AddFaults` message.
@@ -44,7 +46,9 @@ func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults F
 	sectorsSorted := []
     challenges := DerivePoStChallenges(seed, faults, sectorSize, len(sectors))
 
-    for challenge in challenges {
+    for i := 0; i < len(challenges); i++ {
+        challenge := challenges[i]
+
         // Leaf index of the selected sector
         inclusionProof, isFault := GenerateMerkleInclusionProof(challenge.Sector, challenge.Leaf)
         if isFault {
@@ -74,7 +78,8 @@ func VerifyPoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, proof PoSt
     sectorsSorted := []
 
     // Match up commitments with challenges
-    for challenge in challenges {
+    for i := 0; i < len(challenges); i++ {
+        challenge := challenges[i]
         sectorsSorted[i] = sectors[challenge.Sector]
     }
 
@@ -105,7 +110,7 @@ type Challenge struct {
 func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sectorCount Uint) [POST_CHALLENGES_COUNT]Challenge {
     challenges := []
 
-    for n in 0..POST_CHALLENGES_COUNT {
+    for n := 0; n < POST_CHALLENGES_COUNT; n++ {
         attemptedSectors := {SectorID:bool}
         while challenges[n] == nil {
             challenge := DerivePoStChallenge(seed, n, faults, attempt, sectorSize, sectorCount)

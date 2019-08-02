@@ -42,10 +42,13 @@ TODO: sectors need to be globally unique. This can be done either by having the 
 
 #### Step 2: Proving Storage (PoSt creation)
 
-
 ```go
-func ProveStorage(sectorSize BytesAmount, sectors []commR, faults FaultSet) PoStProof {
-    seed := GetRandFromBlock(miner.ProvingPeriodStart + ProvingPeriodDuratoin(sectorSize) + POST_CHALLENGE_TIME)
+func ProveStorage(sectorSize BytesAmount, sectors []commR) PoStProof {
+    challengeBlockHeight := miner.ProvingPeriodStart + ProvingPeriodDuratoin(sectorSize) - POST_CHALLENGE_TIME
+
+    // Faults to be used are the currentFaultSet for the miner.
+    faults := miner.currentFaultSet
+    seed := GetRandFromBlock(challengeBlockHeight)
     return GeneratePoSt(sectorSize, sectors, seed, faults)
 }
 ```

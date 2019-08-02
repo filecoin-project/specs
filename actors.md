@@ -455,8 +455,11 @@ type StorageMinerActorState struct {
 	## when a PoSt is submitted (not as each new sector commitment is added).
     provingSet &SectorSet
 
-    ## Faulty sectors reported since last SubmitPost.
-    faultSet BitField
+    ## Faulty sectors reported since last SubmitPost, up to the current PoSt challenge time.
+    currentFaultSet BitField
+
+    ## Faults for the next round of PoSt.
+    nextFaultSet BitField
 
 	## Sectors reported during the last PoSt submission as being 'done'. The collateral
     ## for them is still being held until the next PoSt submission in case early sector
@@ -651,7 +654,7 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 		SlashStorageFault(self)
 		return
 	} else if chain.Now() > self.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(self.power, chain.Now()-self.provingPeriodEnd)
+		feesRequired += ComputeLateFee(self.power, chain.Now() - self.provingPeriodEnd)
 	}
 
 	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
@@ -666,34 +669,35 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 	}
 
     seed := GetRandFromBlock(self.ProvingPeriodStart + ProvingPeriodDuration(self.SectorSize) - POST_CHALLENGE_TIME)
-    faultSet := self.faultSet
+    faultSet := self.currentFaultSet
 
 	if !VerifyPoSt(self.SectorSize, self.provingSet, seed, proof, faultSet) {
 		Fatal("proof invalid")
 	}
 
-    // clear fault set
-    self.faultSet = EmptySectorSet()
+    // The next fault set becomes the current one
+    self.currentFaultSet = self.nextFaultSet
+    self.nextFaultSet = EmptySectorSet()
 
     // TODO: penalize for faults
 
 	// Remove doneSet from the current sectors
-	miner.Sectors.Subtract(doneSet)
+	self.Sectors.Subtract(doneSet)
 
 	// Update miner power to the amount of data actually proved during the last proving period.
-	oldPower := miner.Power
+	oldPower := self.Power
 
-	miner.Power = (miner.ProvingSet.Size() - faultSet.Count()) * miner.SectorSize
-	StorageMarket.UpdateStorage(miner.Power - oldPower)
+	self.Power = (self.ProvingSet.Size() - faultSet.Count()) * self.SectorSize
+	StorageMarket.UpdateStorage(self.Power - oldPower)
 
-	miner.ProvingSet = miner.Sectors
+	self.ProvingSet = self.Sectors
 
 	// Updating proving period given a fixed schedule, independent of late submissions.
-	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
+	self.ProvingPeriodEnd = self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
 
 	// update next done set
-	miner.NextDoneSet = done
-	miner.ArbitratedDeals.Clear()
+	self.NextDoneSet = done
+	self.ArbitratedDeals.Clear()
 }
 
 func ProvingPeriodDuration(sectorSize uint64) Integer {
@@ -1121,7 +1125,7 @@ func PaymentVerifyInclusion(extra BigInt, proof Bytes) {
 **Parameters**
 
 ```sh
-type SubmitPost struct {
+type AddFaults struct {
     faults FaultSet
 } representation tuple
 ```
@@ -1130,7 +1134,15 @@ type SubmitPost struct {
 
 ```go
 func AddFaults(faults FaultSet) {
-    self.faultSet = Merge(self.faultSet, faults)
+    let challengeBlockHeight = self.ProvingPeriodStart + ProvingPeriodDuration(self.SectorSize) - POST_CHALLENGE_TIME
+
+    if VM.CurrentBlockHeight() < challengeBlockHeight {
+        // Up to the challenge time new faults can be added.
+        self.currentFaultSet = Merge(self.nextFaultSet, faults)
+    } else {
+        // After that they are only accounted for in the next proving period
+        self.nextFaultSet = Merge(self.nextFaultSet, faults)
+    }
 }
 ```
 
