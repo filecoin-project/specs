@@ -108,19 +108,12 @@ type PaymentInfo struct {
 	## The address of the payment channel actor that will be used to facilitate payments.
 	payChActor Address
 
-	## Owner of the payment channel.
-	payer Address
-
-	## ID of the specific channel the client will use to pay the miner. It must already
-    ## have sufficient funds locked up.
-	channel ChannelID
-
 	## Reference to the message used to create the payment channel. This allows the miner to wait until the
-	## channel is accepted on chain.
+	## channel is accepted on chain. (optional)
 	channelMessage &Message
 
-	## Set of payments from the client to the miner that can be cashed out contingent on the agreed
-    ## upon data being provably within a live sector in the miners control on-chain.
+  ## Set of payments from the client to the miner that can be cashed out contingent on the agreed
+  ## upon data being provably within a live sector in the miners control on-chain.
 	vouchers [SignedVoucher]
 }
 ```
