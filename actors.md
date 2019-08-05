@@ -519,7 +519,7 @@ type MinerInfo struct {
 | `ChangeWorker` | 14 |
 | `IsSlashed` |  15 |
 | `IsLate` | 16 |
-| `VerifyPieceInclusion` | 17 |
+| `PaymentVerify` | 17 |
 
 #### `Constructor`
 
@@ -1122,7 +1122,7 @@ func IsSlashed() (bool) {
 }
 ```
 
-#### `VerifyPieceInclusion`
+#### `PaymentVerify`
 
 Verifies a storage market payment channel voucher's 'Extra' data.
 
@@ -1143,9 +1143,9 @@ type StorageVoucherData struct {
 **Algorithm**
 
 ```go
-func VerifyPieceInclusion(extra StorageVoucherData, proof []byte) {
+func PaymentVerify(extra StorageVoucherData, proof PieceInclusionProof) {
 	if extra.DataCommitment != nil {
-		if !ValidateInclusion(proof, extra.DataCommitment) {
+		if !self.ValidateInclusion(proof, extra.DataCommitment) {
 			Fatal("piece inclusion proof was invalid")
 		}
 		return
@@ -1159,6 +1159,14 @@ func VerifyPieceInclusion(extra StorageVoucherData, proof []byte) {
 	}
 
 	Fatal("voucher data contained neither data commitment or required sector")
+}
+
+func ValidateInclusion(pip PieceInclusionProof, dataCommitment Bytes) bool {
+  if !self.HasSector(pip.SectorID) {
+    Fatal("miner does not have sector referenced by piece inclusion proof")
+  }
+
+  return ValidatePIP(pip, dataCommitment)
 }
 ```
 
@@ -1180,15 +1188,12 @@ type PaymentChannel struct {
 	minCloseHeight UInt
 
 	laneStates {UInt:LaneState}
-
-	verifActor Address
-	verifMethod Uint
 } representation tuple
 
 type SignedVoucher struct {
   TimeLock BlockHeight
   SecretPreimage Bytes
-  Extra Bytes
+  Extra ModVerifyParams
   Lane Uint
   Nonce Uint
   Merges []Merge
@@ -1196,6 +1201,12 @@ type SignedVoucher struct {
   MinCloseHeight Uint
 
   Signature Signature
+}
+
+type ModVerifyParams struct {
+  Actor Address
+  Method Uint
+  Data Bytes
 }
 
 type Merge struct {
@@ -1233,8 +1244,6 @@ type PaymentChannelMethod union {
 ```sh
 type PaymentChannelConstructor struct {
   to Address
-  verifActor Address
-  verifMethod Uint
 }
 ```
 
@@ -1277,7 +1286,7 @@ func UpdateChannelState(sv SignedVoucher, secret []byte, proof []byte) {
 	}
 
 	if sv.Extra != nil {
-		ret := vmctx.Send(self.verifActor, self.verifMethod, sv.Extra, proof)
+		ret := vmctx.Send(sv.Extra.Actor, sv.Extra.Method, sv.Extra.Data, proof)
 		if ret != 0 {
 			Fatal("spend voucher verification failed")
 		}
