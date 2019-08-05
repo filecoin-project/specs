@@ -40,9 +40,9 @@ type InitActorState struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `Constructor` | 0 |
-| `Exec` | 1 |
-| `GetIdForAddress` | 2 |
+| `Constructor` | 1 |
+| `Exec` | 2 |
+| `GetIdForAddress` | 3 |
 
 #### `Constructor`
 
@@ -168,8 +168,8 @@ type AccountActorState struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `AccountConstructor` | 0 |
-| `GetAddress` | 1 |
+| `AccountConstructor` | 1 |
+| `GetAddress` | 2 |
 
 ```
 type AccountConstructor struct {
@@ -210,14 +210,14 @@ type StorageMarketActorState struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `StorageMarketConstructor` | 0 |
-| `CreateStorageMiner` | 1 |
-| `SlashConsensusFault` | 2 |
-| `UpdateStorage` | 3 |
-| `GetTotalStorage` | 4 |
-| `PowerLookup` | 5 |
-| `IsMiner` | 6 |
-| `StorageCollateralForSize` | 7 |
+| `StorageMarketConstructor` | 1 |
+| `CreateStorageMiner` | 2 |
+| `SlashConsensusFault` | 3 |
+| `UpdateStorage` | 4 |
+| `GetTotalStorage` | 5 |
+| `PowerLookup` | 6 |
+| `IsMiner` | 7 |
+| `StorageCollateralForSize` | 8 |
 
 #### `Constructor`
 
@@ -503,22 +503,22 @@ type MinerInfo struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `StorageMinerConstructor` | 0 |
-| `CommitSector` | 1 |
-| `SubmitPost` | 2 |
-| `SlashStorageFault` | 3 |
-| `GetCurrentProvingSet` | 4 |
-| `ArbitrateDeal` | 5 |
-| `DePledge` | 6 |
-| `GetOwner` | 7 |
-| `GetWorkerAddr` | 8 |
-| `GetPower` | 9 |
-| `GetPeerID` | 10 |
-| `GetSectorSize` | 11 |
-| `UpdatePeerID` | 12 |
-| `ChangeWorker` | 13 |
-| `IsSlashed` |  14 |
-| `IsLate` | 15 |
+| `StorageMinerConstructor` | 1 |
+| `CommitSector` | 2 |
+| `SubmitPost` | 3 |
+| `SlashStorageFault` | 4 |
+| `GetCurrentProvingSet` | 5 |
+| `ArbitrateDeal` | 6 |
+| `DePledge` | 7 |
+| `GetOwner` | 8 |
+| `GetWorkerAddr` | 9 |
+| `GetPower` | 10 |
+| `GetPeerID` | 11 |
+| `GetSectorSize` | 12 |
+| `UpdatePeerID` | 13 |
+| `ChangeWorker` | 14 |
+| `IsSlashed` |  15 |
+| `IsLate` | 16 |
 
 #### `Constructor`
 
@@ -1146,10 +1146,10 @@ type PaymentChannel struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `PaymentChannelConstructor` | 0 |
-| `UpdateChannelState` | 1 |
-| `Close` | 2 |
-| `Collect` | 3 |
+| `Constructor` | 1 |
+| `UpdateChannelState` | 2 |
+| `Close` | 3 |
+| `Collect` | 4 |
 
 #### `Constructor`
 
@@ -1353,15 +1353,15 @@ type Transaction struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `MultisigConstructor` | 0 |
-| `Propose` | 1 |
-| `Approve` | 2 |
-| `Cancel` | 3 |
-| `ClearCompleted` | 4 |
-| `AddSigner` | 5 |
-| `RemoveSigner` | 6 |
-| `SwapSigner` | 7 |
-| `ChangeRequirement` | 8 |
+| `MultisigConstructor` | 1 |
+| `Propose` | 2 |
+| `Approve` | 3 |
+| `Cancel` | 4 |
+| `ClearCompleted` | 5 |
+| `AddSigner` | 6 |
+| `RemoveSigner` | 7 |
+| `SwapSigner` | 8 |
+| `ChangeRequirement` | 9 |
 
 
 #### `Constructor`
