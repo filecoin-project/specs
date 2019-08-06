@@ -341,6 +341,8 @@ type Status enum {
     | GoAway 202
     ## Internal error occured.
     | InternalError 203
+    ## Request was bad
+    | BadRequest 204
 }
 ```
 
