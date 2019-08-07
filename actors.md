@@ -1134,11 +1134,11 @@ type AddFaults struct {
 
 ```go
 func AddFaults(faults FaultSet) {
-    let challengeBlockHeight = self.ProvingPeriodEnd - POST_CHALLENGE_TIME
+    challengeBlockHeight := self.ProvingPeriodEnd - POST_CHALLENGE_TIME
 
     if VM.CurrentBlockHeight() < challengeBlockHeight {
         // Up to the challenge time new faults can be added.
-        self.currentFaultSet = Merge(self.nextFaultSet, faults)
+        self.currentFaultSet = Merge(self.currentFaultSet, faults)
     } else {
         // After that they are only accounted for in the next proving period
         self.nextFaultSet = Merge(self.nextFaultSet, faults)
