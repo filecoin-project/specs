@@ -668,7 +668,7 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
 
-    seed := GetRandFromBlock(self.ProvingPeriodStart + ProvingPeriodDuration(self.SectorSize) - POST_CHALLENGE_TIME)
+    seed := GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
     faultSet := self.currentFaultSet
 
 	if !VerifyPoSt(self.SectorSize, self.provingSet, seed, proof, faultSet) {
@@ -1134,7 +1134,7 @@ type AddFaults struct {
 
 ```go
 func AddFaults(faults FaultSet) {
-    let challengeBlockHeight = self.ProvingPeriodStart + ProvingPeriodDuration(self.SectorSize) - POST_CHALLENGE_TIME
+    let challengeBlockHeight = self.ProvingPeriodEnd - POST_CHALLENGE_TIME
 
     if VM.CurrentBlockHeight() < challengeBlockHeight {
         // Up to the challenge time new faults can be added.

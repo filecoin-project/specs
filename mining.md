@@ -44,7 +44,7 @@ TODO: sectors need to be globally unique. This can be done either by having the 
 
 ```go
 func ProveStorage(sectorSize BytesAmount, sectors []commR) PoStProof {
-    challengeBlockHeight := miner.ProvingPeriodStart + ProvingPeriodDuratoin(sectorSize) - POST_CHALLENGE_TIME
+    challengeBlockHeight := miner.ProvingPeriodEnd - POST_CHALLENGE_TIME
 
     // Faults to be used are the currentFaultSet for the miner.
     faults := miner.currentFaultSet
@@ -116,7 +116,7 @@ func VerifyBlock(blk Block) {
     }
 
     // 2. Verify Timestamp
-    // first check that it is not in the future 
+    // first check that it is not in the future
     // allowing for some small grace period to deal with small asynchrony
     // a potential default for ALLOWABLE_CLOCK_DRIFT could be 2/3*blockTime
     if blk.GetTime() > networkTime() + ALLOWABLE_CLOCK_DRIFT {
@@ -201,9 +201,8 @@ func (state StateTree) LookupPublicKey(a Address) PubKey {
 
 // Get the canonical randomness from a block.
 func GetRandFromBlock(blk) []byte {
-	randomnessLookbackTipset := RandomnessLookback(blk)
-	lookbackTicket := minTicket(randomnessLookbackTipset)
-	return blake2b(lookbackTicket)
+	ticket := minTicket(blk)
+	return blake2b(ticket)
 }
 ```
 
@@ -372,7 +371,7 @@ To create a block, the eligible miner must compute a few fields:
     - Strip the signatures off of the messages, and insert all the bare `Message`s for them into a sharray.
     - Aggregate all of the bls signatures into a single signature and use this to fill out the `BLSAggregate` field
   - For the secpk messages:
-    - Insert each of the secpk `SignedMessage`s into a sharray 
+    - Insert each of the secpk `SignedMessage`s into a sharray
   - Create a `TxMeta` object and fill each of its fields as follows:
     - `blsMessages`: the root cid of the bls messages sharray
     - `secpkMessages`: the root cid of the secp messages sharray
