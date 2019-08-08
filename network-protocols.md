@@ -173,17 +173,30 @@ type AcceptedParams RejectedParams
 type FailedParams RejectedParams
 type StagedParams RejectedParams
 
+type ProofInfo struct {
+    sectorID uint64
+
+    ## Various commitments (can be empty depending on Deal State)
+    commD Bytes
+    commR Bytes
+    commRStar Bytes
+
+    ## A reference to the message that was sent to submit the sector containing this data to the chain.
+    commitmentMessage &Message
+
+    ## The proof needed to convince the client that the miner has sealed the data into a sector.
+    ## Note: the miner doesnt necessarily have to have committed the sector at this point
+    ## they just need to have staged it into a sector, and be committed to putting it at
+    ## that place in the sector.
+    pieceInclusionProof PieceInclusionProof
+}
+
 type SealingParams struct {
-	## The proof needed to convince the client that the miner has sealed the data into a sector.
-	## Note: the miner doesnt necessarily have to have committed the sector at this point
-	## they just need to have staged it into a sector, and be committed to putting it at
-	## that place in the sector.
-	pieceInclusionProof PieceInclusionProof
+    proofInfo ProofInfo
 }
 
 type CompleteParams struct {
-	## A reference to the message that was sent to submit the sector containing this data to the chain.
-	sectorCommitMessage &Message
+    proofInfo ProofInfo
 }
 ```
 
