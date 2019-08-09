@@ -1181,7 +1181,6 @@ type PaymentChannel struct {
 	from Address
 	to   Address
 
-	channelTotal TokenAmount
 	toSend       TokenAmount
 
 	closingAt      UInt
@@ -1326,7 +1325,7 @@ func UpdateChannelState(sv SignedVoucher, secret []byte, proof []byte) {
 		Fatal("voucher would leave channel balance negative")
 	}
 
-	if newSendBalance > self.ChannelTotal {
+	if newSendBalance > self.Balance {
 		Fatal("not enough funds in channel to cover voucher")
 	}
 
@@ -1397,10 +1396,9 @@ func Collect() {
 		Fatal("Payment channel not yet closed")
 	}
 
-	TransferFunds(self.From, self.ChannelTotal-self.ToSend)
+	TransferFunds(self.From, self.Balance-self.ToSend)
 	TransferFunds(self.To, self.ToSend)
   self.ToSend = 0
-  self.ChannelTotal = 0
 }
 ```
 
