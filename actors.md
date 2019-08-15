@@ -519,7 +519,8 @@ type MinerInfo struct {
 | `ChangeWorker` | 14 |
 | `IsSlashed` |  15 |
 | `IsLate` | 16 |
-| `PaymentVerify` | 17 |
+| `PaymentVerifyInclusion` | 17 |
+| `PaymentVerifySector` | 18 |
 
 #### `Constructor`
 
@@ -1122,51 +1123,71 @@ func IsSlashed() (bool) {
 }
 ```
 
-#### `PaymentVerify`
+#### `PaymentVerifyInclusion`
 
-Verifies a storage market payment channel voucher's 'Extra' data.
+Verifies a storage market payment channel voucher's 'Extra' data by validating piece inclusion proof.
 
 **Parameters**
 
 ```sh
 type PaymentVerify struct {
-    Extra StorageVoucherData
+    Extra Bytes
     Proof Bytes
 } representation tuple
 
-type StorageVoucherData struct {
-    DataCommitment Bytes
-    RequiredSector Bytes
+type PieceInclusionVoucherData struct {
+    CommP Bytes
+    PieceSize BigInt
+} representation tuple
+
+type InclusionProof struct {
+    Sector BigInt // for CommD, also verifies the sector is in sector set
+    Proof  Bytes
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func PaymentVerify(extra StorageVoucherData, proof PieceInclusionProof) {
-	if extra.DataCommitment != nil {
-		if !self.ValidateInclusion(proof, extra.DataCommitment) {
-			Fatal("piece inclusion proof was invalid")
-		}
-		return
-	}
-
-	if extra.RequiredSector != nil {
-		if !self.HasSector(extra.RequiredSector) {
-			Fatal("miner does not have required sector")
-		}
-		return
-	}
-
-	Fatal("voucher data contained neither data commitment or required sector")
-}
-
-func ValidateInclusion(pip PieceInclusionProof, dataCommitment Bytes) bool {
-  if !self.HasSector(pip.SectorID) {
-    Fatal("miner does not have sector referenced by piece inclusion proof")
+func PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) {
+  has, commD := self.GetSector(proof.Sector)
+  if !has {
+    Fatal("miner does not have required sector")
   }
+  
+  return ValidatePIP(self.SectorSize, extra.PieceSize, extra.CommP, commD, proof.Proof)
+}
+```
 
-  return ValidatePIP(pip, dataCommitment)
+
+#### `PaymentVerifySector`
+
+Verifies a storage market payment channel voucher's 'Extra' data by checking for presence of a specified sector in miner's sector set.
+
+Miners should prefer payment vouchers with this method used for validation over `PaymentVerifyInclusion`, because posting them to the chain will be much cheaper.
+
+Clients should only create such vouchers after verifying that miners have related sectors in their sector set, and after checking piece inclusion proof.
+
+Miners can incentivize clients to produce such vouchers by applying small 'discount' to amount of token clients have to pay.
+
+**Parameters**
+
+```sh
+type PaymentVerify struct {
+    Extra Bytes
+    Proof Bytes
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func PaymentVerifyInclusion(extra BigInt, proof Bytes) {
+  if len(proof) > 0 {
+    Fatal("unexpected proof bytes")
+  }
+  
+  return self.HasSector(extra)
 }
 ```
 
