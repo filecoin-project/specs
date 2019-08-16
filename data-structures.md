@@ -319,6 +319,14 @@ A type to represent an amount of filecoin tokens.
 type TokenAmount UInt
 ```
 
+### SectorID
+
+Uniquely identifies a miner's sector.
+
+```sh
+type SectorID uint64
+```
+
 ## RLE+ Bitset Encoding
 
 RLE+ is a lossless compression format based on [RLE](https://en.wikipedia.org/wiki/Run-length_encoding).
