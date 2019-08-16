@@ -1,0 +1,163 @@
+
+## from Multiformats and IPLD
+type Multihash Bytes
+type Multiaddr Bytes
+type CID Bytes
+
+## TLV is a Type-Length-Value object. It follows the following repr:
+## <varint-type><varint-length-of-value-in-bytes><value>
+type TLV struct {
+  Type   UVarint ## following the multicodec (or another) table
+  Length UVarint ## in bytes
+  Value  Bytes
+}
+
+## signing artifacts
+type SigPrivateKey Bytes ## signing key
+type SigPublicKey Bytes ## sig verification key
+type Signature TLV ## ?? TODO: ask @warpfork
+
+## Varint is a variable integer encoded with ...
+type Varint Bytes
+type UVarint Bytes
+
+## TokenAmount is an amount of tokens.
+## It can be positive or negative.
+type TokenAmount Varint
+
+## FILTokenAmt is an amount of Filecoin tokens
+type FILAmount TokenAmount
+
+## FILAddress represents the address of an account on Filecoin
+type FILAddress Bytes
+
+## UnixTime is a unix epoch timestamp, expressed as a varint.
+type UnixTime Varint
+
+## Time is a value that encodes a timestamp.
+## It is measured in UnixNanoTime.
+type Time UnixNanoTime
+
+## RLEpBitfield represents an RLE+ encoded bitfield
+type RLEpBitfield Bytes
+
+## FaultSet denotes which sectors failed at which block height.
+type FaultSet struct {
+    Index    UVarint
+    BitField RLEpBitfield
+}
+
+## StateTree keeps track of all Filecoin VM execution.
+## It is a map of FILAddresses to Actors in the system.
+## The ActorState is defined in the actors spec.
+type StateTree map {FILAddress:Actor}<Hamt>
+
+# type StateTree struct {
+#
+#   ## Actors is a map of FILAddresses to Actors in the system.
+#   Actors &{FILAddress:Actor}<Hamt>
+#
+#   ## Sectors is a table with information about Filecoin sectors.
+#   ## This table is constructed from information inside Actors
+#   Sectors &{SectorID:SectorInfo}<Hamt>
+#
+#   ## ... other network info.
+# }
+
+
+## Message
+type Message union {
+    | UnsignedMessage 0
+    | SignedMessage 1
+} representation keyed
+
+type UnsignedMessage struct {
+    FromAddr FILAddress
+    ToAddr   FILAddress
+
+    ## When receiving a message from a user account the nonce in the message must match the expected
+    ## nonce in the from actor. This prevents replay attacks.
+    Nonce UVarint
+
+    ## Value is measured in FilTokenAmount
+    Value FILAmount
+
+    GasPrice FILAmount
+    GasLimit FILAmount
+
+    Method &ActorMethod
+} representation tuple
+
+type SignedMessage struct {
+    message   UnsignedMessage
+    signature Signature
+} representation tuple
+
+
+## BlockHeader is the  metadata
+##
+## A BlockHeader is verifiable on its own, with the last StateTree but without the rest of the Block,
+## in the following ways:
+## - MinerAddress can be validated against current StateTree
+## - ConsensusTickets can be validated
+## - ConsensusElectionProof can be validated
+## - Parents can be checked
+## - BlockSignature can be verified
+## - ParentWeight can be calculated and verified
+## - BlockHeight can be checked against the height of the parents
+## - Timestamp can be checked to be greater than the parents' timestamp, by around one block time,
+##   and smaller than the current time.
+##
+## The following requires having and processing (executing) the messages
+## - Messages can be checked by verifying the messages hash correctly to the value.
+## - MessageAggregateSig can be checked by verifying the messages sign correctly
+## - MessageReceipts can only be checked by executing the messages
+## - StateRoot is the result of the execution of the messages, and can only be verified by executing them
+type BlockHeader struct {
+    ## Miner is the address of the miner actor that mined this block.
+    MinerAddress FILAddress
+
+    ## SPCTickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
+    SPCTickets [Ticket]
+
+    ## SPCProof is a signature over the final ticket that proves this miner
+    ## is the leader at this round
+    SPCProof Signature
+
+    ## Parents is an array of distinct CIDs of parents on which this block was based.
+    ## Typically one, but can be several in the case where there were multiple winning ticket-
+    ## holders for a round.
+    ## The order of parent CIDs is not defined.
+    Parents [&Block]
+
+    ## ParentWeight is the aggregate chain weight of the parent set.
+    ParentWeight UInt
+
+    ## BlockHeight is the chain height of this block.
+    BlockHeight UInt
+
+    ## StateRoot is a cid pointer to the state tree after application of the
+    ## transactions state transitions.
+    StateRoot &StateTree
+
+    ## Messages is the set of messages included in this block. This field is the Cid
+    ## of the root of a sharray of Messages.
+    Messages &[&Message]<Sharray>
+
+    ## MessageAgsig is an aggregated BLS signature for all the messages in this block that
+    ## were signed using BLS signatures
+    MessageAgsig Signature
+
+    ## MessageReceipts is a set of receipts matching to the sending of the `Messages`.
+    ## This field is the Cid of the root of a sharray of MessageReceipts.
+    MessageReceipts &[MessageReceipt]
+
+    ## The block Timestamp is used to enforce a form of block delay by honest miners.
+    ## Unix time UTC timestamp (in seconds) stored as an unsigned integer.
+    Timestamp Timestamp
+
+    ## BlockSig is a signature over the hash of the entire block with the miners
+    ## worker key to ensure that it is not tampered with after creation
+    BlockSig Signature
+} representation tuple
+
