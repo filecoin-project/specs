@@ -1522,10 +1522,10 @@ func Propose(to Address, value TokenAmount, method String, params Bytes) UInt {
 	self.Transactions.Append(tx)
 
 	if self.Required == 1 {
-		if !self.canSpend(value) {
+		if !self.canSpend(tx.value) {
 			Fatal("transaction amount exceeds available")
 		}
-		tx.RetCode = vm.Send(tx.To, tx.Value, tx.Method, tx.Params) 
+		tx.RetCode = vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
 		tx.Complete = true
 	}
 
