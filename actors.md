@@ -1571,14 +1571,10 @@ func Approve(txid UInt) {
 	tx.Approved.Append(msg.From)
 
 	if len(tx.Approved) >= self.Required {
-<<<<<<< HEAD
 		if !self.canSpend(tx.Value) {
 			Fatal("transaction amount exceeds available")
 		}
-		Send(tx.To, tx.Value, tx.Method, tx.Params)
-=======
 		tx.RetCode = Send(tx.To, tx.Value, tx.Method, tx.Params)
->>>>>>> master
 		tx.Complete = true
 	}
 }
