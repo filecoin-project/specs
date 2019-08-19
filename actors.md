@@ -6,20 +6,9 @@ This spec describes a set of actors that operate within the [Filecoin State Mach
 
 ## Actor State
 
-These below used `kindeded` representation, as the type can be inferred from the context, in which
-they are used (`Actor` or `UnsignedMessage`).
-
-```sh
-type ActorState union {
-    | InitActorState
-    | AccountActorState
-    | StorageMarketActorState
-    | StorageMinerActorState
-    | PaymentChannelBrokerActorState
-    | MultisigActorState
-} representation kinded
-
-```
+Each actor type defines their own structure for storing their state. We
+represent each with an IPLD schema at the beginning of each actor section in
+this document.
 
 ## System Actors
 
@@ -51,9 +40,9 @@ type InitActorState struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `Constructor` | 0 |
-| `Exec` | 1 |
-| `GetIdForAddress` | 2 |
+| `Constructor` | 1 |
+| `Exec` | 2 |
+| `GetIdForAddress` | 3 |
 
 #### `Constructor`
 
@@ -85,7 +74,7 @@ type Exec struct {
 **Algorithm**
 
 ```go
-func Exec(code Code, params ActorMethod) Address {
+func Exec(code Cid, params ActorMethod) Address {
 	// Get the actor ID for this actor.
 	actorID = self.NextID
 	self.NextID++
@@ -179,8 +168,8 @@ type AccountActorState struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `AccountConstructor` | 0 |
-| `GetAddress` | 1 |
+| `AccountConstructor` | 1 |
+| `GetAddress` | 2 |
 
 ```
 type AccountConstructor struct {
@@ -221,14 +210,14 @@ type StorageMarketActorState struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `StorageMarketConstructor` | 0 |
-| `CreateStorageMiner` | 1 |
-| `SlashConsensusFault` | 2 |
-| `UpdateStorage` | 3 |
-| `GetTotalStorage` | 4 |
-| `PowerLookup` | 5 |
-| `IsMiner` | 6 |
-| `StorageCollateralForSize` | 7 |
+| `StorageMarketConstructor` | 1 |
+| `CreateStorageMiner` | 2 |
+| `SlashConsensusFault` | 3 |
+| `UpdateStorage` | 4 |
+| `GetTotalStorage` | 5 |
+| `PowerLookup` | 6 |
+| `IsMiner` | 7 |
+| `StorageCollateralForSize` | 8 |
 
 #### `Constructor`
 
@@ -514,22 +503,23 @@ type MinerInfo struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `StorageMinerConstructor` | 0 |
-| `CommitSector` | 1 |
-| `SubmitPost` | 2 |
-| `SlashStorageFault` | 3 |
-| `GetCurrentProvingSet` | 4 |
-| `ArbitrateDeal` | 5 |
-| `DePledge` | 6 |
-| `GetOwner` | 7 |
-| `GetWorkerAddr` | 8 |
-| `GetPower` | 9 |
-| `GetPeerID` | 10 |
-| `GetSectorSize` | 11 |
-| `UpdatePeerID` | 12 |
-| `ChangeWorker` | 13 |
-| `IsSlashed` |  14 |
-| `IsLate` | 15 |
+| `StorageMinerConstructor` | 1 |
+| `CommitSector` | 2 |
+| `SubmitPost` | 3 |
+| `SlashStorageFault` | 4 |
+| `GetCurrentProvingSet` | 5 |
+| `ArbitrateDeal` | 6 |
+| `DePledge` | 7 |
+| `GetOwner` | 8 |
+| `GetWorkerAddr` | 9 |
+| `GetPower` | 10 |
+| `GetPeerID` | 11 |
+| `GetSectorSize` | 12 |
+| `UpdatePeerID` | 13 |
+| `ChangeWorker` | 14 |
+| `IsSlashed` |  15 |
+| `IsLate` | 16 |
+| `PaymentVerify` | 17 |
 
 #### `Constructor`
 
@@ -593,7 +583,7 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 
 	// Power of the miner after adding this sector
 	futurePower = self.power + self.info.sectorSize
-	collateralRequired = CollateralForSize(futurePower)
+	collateralRequired = CollateralForPower(futurePower)
 
 	if collateralRequired > vm.MyBalance() {
 		Fatal("not enough collateral")
@@ -674,7 +664,7 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bi
 		SlashStorageFault(self)
 		return
 	} else if chain.Now() > self.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(miner.power, chain.Now()-self.provingPeriodEnd)
+		feesRequired += ComputeLateFee(self.power, chain.Now()-self.provingPeriodEnd)
 	}
 
 	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
@@ -1132,6 +1122,54 @@ func IsSlashed() (bool) {
 }
 ```
 
+#### `PaymentVerify`
+
+Verifies a storage market payment channel voucher's 'Extra' data.
+
+**Parameters**
+
+```sh
+type PaymentVerify struct {
+    Extra StorageVoucherData
+    Proof Bytes
+} representation tuple
+
+type StorageVoucherData struct {
+    DataCommitment Bytes
+    RequiredSector Bytes
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func PaymentVerify(extra StorageVoucherData, proof PieceInclusionProof) {
+	if extra.DataCommitment != nil {
+		if !self.ValidateInclusion(proof, extra.DataCommitment) {
+			Fatal("piece inclusion proof was invalid")
+		}
+		return
+	}
+
+	if extra.RequiredSector != nil {
+		if !self.HasSector(extra.RequiredSector) {
+			Fatal("miner does not have required sector")
+		}
+		return
+	}
+
+	Fatal("voucher data contained neither data commitment or required sector")
+}
+
+func ValidateInclusion(pip PieceInclusionProof, dataCommitment Bytes) bool {
+  if !self.HasSector(pip.SectorID) {
+    Fatal("miner does not have sector referenced by piece inclusion proof")
+  }
+
+  return ValidatePIP(pip, dataCommitment)
+}
+```
+
 ### Payment Channel Actor
 
 - **Code Cid:** `<codec:raw><mhType:identity><"paych">`
@@ -1143,7 +1181,6 @@ type PaymentChannel struct {
 	from Address
 	to   Address
 
-	channelTotal TokenAmount
 	toSend       TokenAmount
 
 	closingAt      UInt
@@ -1151,16 +1188,53 @@ type PaymentChannel struct {
 
 	laneStates {UInt:LaneState}
 } representation tuple
+
+type SignedVoucher struct {
+  TimeLock BlockHeight
+  SecretPreimage Bytes
+  Extra ModVerifyParams
+  Lane Uint
+  Nonce Uint
+  Merges []Merge
+  Amount TokenAmount
+  MinCloseHeight Uint
+
+  Signature Signature
+}
+
+type ModVerifyParams struct {
+  Actor Address
+  Method Uint
+  Data Bytes
+}
+
+type Merge struct {
+  Lane Uint
+  Nonce Uint
+}
+
+type LaneState struct {
+  Closed bool
+  Redeemed TokenAmount
+  Nonce Uint
+}
+
+type PaymentChannelMethod union {
+  | PaymentChannelConstructor 0
+  | UpdateChannelState 1
+  | Close 2
+  | Collect 3
+} representation keyed
 ```
 
 #### Methods
 
 | Name | Method ID |
 |--------|-------------|
-| `PaymentChannelConstructor` | 0 |
-| `UpdateChannelState` | 1 |
-| `Close` | 2 |
-| `Collect` | 3 |
+| `Constructor` | 1 |
+| `UpdateChannelState` | 2 |
+| `Close` | 3 |
+| `Collect` | 4 |
 
 #### `Constructor`
 
@@ -1168,6 +1242,7 @@ type PaymentChannel struct {
 
 ```sh
 type PaymentChannelConstructor struct {
+  to Address
 }
 ```
 
@@ -1187,14 +1262,14 @@ TODO: Define me
 type UpdateChannelState struct {
   sv SignedVoucher
   secret Bytes
-  pip PieceInclusionProof
+  proof Bytes
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof) {
+func UpdateChannelState(sv SignedVoucher, secret []byte, proof []byte) {
 	if !self.validateSignature(sv) {
 		Fatal("Signature Invalid")
 	}
@@ -1209,22 +1284,10 @@ func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof
 		}
 	}
 
-	if sv.DataCommitment != nil {
-		// Checks that the piece inclusion proof is valid, and that the referenced sector
-		// is correctly being stored
-		if !ValidateInclusion(pip, sv.DataCommitment) {
-			Fatal("PieceInclusionProof was invalid")
-		}
-	}
-
-	if sv.RequiredSector != nil {
-		miner, found := GetMiner(msg.From)
-		if !found {
-			Fatal("Redeemer is not a miner")
-		}
-
-		if !miner.HasSector(sv.RequiredSector) {
-			Fatal("miner does not have sector, cannot redeem payment")
+	if sv.Extra != nil {
+		ret := vmctx.Send(sv.Extra.Actor, sv.Extra.Method, sv.Extra.Data, proof)
+		if ret != 0 {
+			Fatal("spend voucher verification failed")
 		}
 	}
 
@@ -1239,8 +1302,11 @@ func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof
 
 	var mergeValue TokenAmount
 	for _, merge := range sv.Merges {
-		ols := self.LaneStates[merge.Lane]
+		if merge.Lane == sv.Lane {
+			Fatal("voucher cannot merge its own lane")
+		}
 
+		ols := self.LaneStates[merge.Lane]
 		if ols.Nonce >= merge.Nonce {
 			Fatal("merge in voucher has outdated nonce, cannot redeem")
 		}
@@ -1259,20 +1325,24 @@ func UpdateChannelState(sv SpendVoucher, secret []byte, pip *PieceInclusionProof
 		Fatal("voucher would leave channel balance negative")
 	}
 
-	if newSendBalance > self.ChannelTotal {
+	if newSendBalance > self.Balance {
 		Fatal("not enough funds in channel to cover voucher")
 	}
 
 	self.ToSend = newSendBalance
 
 	if sv.MinCloseHeight != 0 {
-		if self.ClosingAt < sv.MinCloseHeight {
+		if self.ClosingAt != 0 && self.ClosingAt < sv.MinCloseHeight {
 			self.ClosingAt = sv.MinCloseHeight
 		}
 		if self.MinCloseHeight < sv.MinCloseHeight {
 			self.MinCloseHeight = sv.MinCloseHeight
 		}
 	}
+}
+
+func Hash(b []byte) []byte {
+	return blake2b.Sum(b)
 }
 ```
 
@@ -1288,6 +1358,8 @@ type Close struct {
 **Algorithm**
 
 ```go
+const ChannelClosingDelay = 6 * 60 * 2 // six hours
+
 func Close() {
 	if msg.From != self.From && msg.From != self.To {
 		Fatal("not authorized to close channel")
@@ -1323,8 +1395,10 @@ func Collect() {
 	if chain.Now() < self.ClosingAt {
 		Fatal("Payment channel not yet closed")
 	}
-	TransferFunds(self.From, self.ChannelTotal-self.ToSend)
+
+	TransferFunds(self.From, self.Balance-self.ToSend)
 	TransferFunds(self.To, self.ToSend)
+  self.ToSend = 0
 }
 ```
 
@@ -1352,7 +1426,6 @@ type MultisigActorState struct {
 }
 
 type Transaction struct {
-    created UInt
     txID UInt
     to Address
     value TokenAmount
@@ -1360,6 +1433,7 @@ type Transaction struct {
     approved [Address]
     completed Bool
     canceled Bool
+    retcode UInt
 }
 ```
 
@@ -1367,15 +1441,15 @@ type Transaction struct {
 
 | Name | Method ID |
 |--------|-------------|
-| `MultisigConstructor` | 0 |
-| `Propose` | 1 |
-| `Approve` | 2 |
-| `Cancel` | 3 |
-| `ClearCompleted` | 4 |
-| `AddSigner` | 5 |
-| `RemoveSigner` | 6 |
-| `SwapSigner` | 7 |
-| `ChangeRequirement` | 8 |
+| `MultisigConstructor` | 1 |
+| `Propose` | 2 |
+| `Approve` | 3 |
+| `Cancel` | 4 |
+| `ClearCompleted` | 5 |
+| `AddSigner` | 6 |
+| `RemoveSigner` | 7 |
+| `SwapSigner` | 8 |
+| `ChangeRequirement` | 9 |
 
 
 #### `Constructor`
@@ -1451,7 +1525,7 @@ func Propose(to Address, value TokenAmount, method String, params Bytes) UInt {
 		if !self.canSpend(value) {
 			Fatal("transaction amount exceeds available")
 		}
-		vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
+		tx.RetCode = vm.Send(tx.To, tx.Value, tx.Method, tx.Params) 
 		tx.Complete = true
 	}
 
@@ -1497,10 +1571,14 @@ func Approve(txid UInt) {
 	tx.Approved.Append(msg.From)
 
 	if len(tx.Approved) >= self.Required {
+<<<<<<< HEAD
 		if !self.canSpend(tx.Value) {
 			Fatal("transaction amount exceeds available")
 		}
 		Send(tx.To, tx.Value, tx.Method, tx.Params)
+=======
+		tx.RetCode = Send(tx.To, tx.Value, tx.Method, tx.Params)
+>>>>>>> master
 		tx.Complete = true
 	}
 }
@@ -1573,18 +1651,22 @@ func ClearCompleted() {
 ```sh
 type AddSigner struct {
     signer Address
+    increaseReq bool
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func AddSigner(signer Address) {
+func AddSigner(signer Address, increaseReq bool) {
 	if msg.From != self.Address {
 		Fatal("add signer must be called by wallet itself")
 	}
 	if self.isSigner(signer) {
 		Fatal("new address is already a signer")
+	}
+	if increaseReq {
+		self.Required = self.Required + 1
 	}
 
 	self.Signers.Append(signer)
@@ -1598,18 +1680,23 @@ func AddSigner(signer Address) {
 ```sh
 type RemoveSigner struct {
     signer Address
+    decreaseReq bool
 } representation tuple
 ```
 
 **Algorithm**
 
 ```go
-func RemoveSigner(signer Address) {
+func RemoveSigner(signer Address, decreaseReq bool) {
 	if msg.From != self.Address {
 		Fatal("remove signer must be called by wallet itself")
 	}
 	if !self.isSigner(signer) {
 		Fatal("given address was not a signer")
+	}
+	if decreaseReq || len(self.Signers)-1 < self.Required {
+		// Reduce Required outherwise the wallet is locked out
+		self.Required = self.Required - 1
 	}
 
 	self.Signers.Remove(signer)
@@ -1665,6 +1752,9 @@ func ChangeRequirement(req UInt) {
 	}
 	if req < 1 {
 		Fatal("requirement must be at least 1")
+	}
+	if req > len(self.Signers) {
+		Fatal("requirement must be less than number of signers")
 	}
 
 	self.Required = req

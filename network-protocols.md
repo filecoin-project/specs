@@ -108,19 +108,12 @@ type PaymentInfo struct {
 	## The address of the payment channel actor that will be used to facilitate payments.
 	payChActor Address
 
-	## Owner of the payment channel.
-	payer Address
-
-	## ID of the specific channel the client will use to pay the miner. It must already
-    ## have sufficient funds locked up.
-	channel ChannelID
-
 	## Reference to the message used to create the payment channel. This allows the miner to wait until the
-	## channel is accepted on chain.
+	## channel is accepted on chain. (optional)
 	channelMessage &Message
 
-	## Set of payments from the client to the miner that can be cashed out contingent on the agreed
-    ## upon data being provably within a live sector in the miners control on-chain.
+  ## Set of payments from the client to the miner that can be cashed out contingent on the agreed
+  ## upon data being provably within a live sector in the miners control on-chain.
 	vouchers [SignedVoucher]
 }
 ```
@@ -330,8 +323,11 @@ type BlockSyncResponse struct {
 
 type TipSetBundle struct {
   blocks [Blocks]
-  messages [Message]
-  MsgIncludes [[UInt]]
+  secpMsgs [SignedMessage]
+  secpMsgIncludes [[UInt]]
+
+  blsMsgs [Message]
+  blsMsgIncludes [[Uint]]
 }
 
 type Status enum {
@@ -345,6 +341,8 @@ type Status enum {
     | GoAway 202
     ## Internal error occured.
     | InternalError 203
+    ## Request was bad
+    | BadRequest 204
 }
 ```
 
@@ -354,8 +352,8 @@ The TipSetBundle
 
 ```
 Blocks: [b0, b1]
-Messages: [mA, mB, mC, mD]
-MsgIncludes: [[0, 1, 3], [1, 2, 0]]
+secpMsgs: [mA, mB, mC, mD]
+secpMsgIncludes: [[0, 1, 3], [1, 2, 0]]
 ```
 
 corresponds to:

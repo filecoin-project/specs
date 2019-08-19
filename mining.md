@@ -153,32 +153,40 @@ func VerifyBlock(blk Block) {
     }
 
     // 6. Verify Message Signatures
-    messages := LoadMessages(blk.Messages)
     state := GetParentState(blk.Parents)
+    blsMessages := LoadMessages(blk.Messages.blsMsgs)
 
-    var blsMessages []Message
     var blsPubKeys []PublicKey
-    for i, msg := range messages {
-        if IsBlsMessage(msg) {
-            blsMessages.append(msg)
-            blsPubKeys.append(state.LookupPublicKey(msg.From))
-        } else {
-            if !ValidateSignature(msg) {
-                Fatal("invalid message signature in block")
-            }
-        }
+    for _, msg := range blsMessages {
+          blsPubKeys.append(state.LookupPublicKey(msg.From))
     }
 
-    ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys)
+    if !ValidateBLSSignature(blk.BLSAggregate, blsMessages, blsPubKeys) {
+      Fatal("aggregated bls signature failed to validate")
+    }
+
+    secpkMessages := LoadMessages(bls.Messages.secpkMessages)
+    for i, msg := range secpkMessages {
+      if !ValidateSignature(msg) {
+        Fatal("secpk message %d had invalid signature", i)
+      }
+    }
 
     // 7. Validate State Transitions
     receipts := LoadReceipts(blk.MessageReceipts)
-    for i, msg := range messages {
+    for i, msg := range blsMessages {
         receipt := ApplyMessage(state, msg)
         if receipt != receipts[i] {
             Fatal("message receipt mismatch")
         }
     }
+    for i, msg := range secpkMessages {
+      receipt := ApplyMessage(state, msg.Message)
+      if receipt != receipts[i + len(blsMessages)] {
+        Fatal("message receipt mismatch")
+      }
+    }
+
     if state.Cid() != blk.StateRoot {
         Fatal("state roots mismatch")
     }
@@ -358,17 +366,26 @@ To create a block, the eligible miner must compute a few fields:
     - TODO: define message conflicts in the state-machine doc, and link to it from here
 - `MsgRoot` - To compute this:
   - Select a set of messages from the mempool to include in the block.
-  - Insert them into a Merkle Tree and take its root.
-    - Note: Messages with BLS signatures should be included as raw `Message` types, and not `SignedMessage`. Their signatures should be gathered up and aggregated for the `BLSAggregate` field.
+  - Separate the messages into BLS signed messages and secpk signed messages
+  - For the BLS messages:
+    - Strip the signatures off of the messages, and insert all the bare `Message`s for them into a sharray.
+    - Aggregate all of the bls signatures into a single signature and use this to fill out the `BLSAggregate` field
+  - For the secpk messages:
+    - Insert each of the secpk `SignedMessage`s into a sharray 
+  - Create a `TxMeta` object and fill each of its fields as follows:
+    - `blsMessages`: the root cid of the bls messages sharray
+    - `secpkMessages`: the root cid of the secp messages sharray
+  - The cid of this `TxMeta` object should be used to fill the `MsgRoot` field of the block header.
+- `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
 - `StateRoot` - Apply each chosen message to the `ParentState` to get this.
+  - Note: first apply bls messages in the order that they appear in the blsMsgs sharray, then apply secpk messages in the order that they appear in the secpkMessages sharray.
 - `ReceiptsRoot` - To compute this:
-  - Apply the set of messages selected above to the parent state, collecting invocation receipts as this happens.
-  - Insert them into a Merkle Tree and take its root.
+  - Apply the set of messages to the parent state as described above, collecting invocation receipts as this happens.
+  - Insert them into a sharray and take its root.
 - `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
   - the timestamp on the block is not in the future (with ALLOWABLE_CLOCK_DRIFT grace to account for relative asynchrony)
   - the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
   - We also recommend the use of a networkTime() function to be booted on node launch and run every so frequently to call on a networked time service (e.g. ntp) and ensure relative synchrony with the rest of the network.
-- `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
 - `BlockSig` - A signature with the miner's private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
 An eligible miner can start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.

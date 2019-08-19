@@ -8,7 +8,12 @@
 
 ## Miners Claiming Earnings
 
-Storage miners get paid entirely through payment channels. Payment from a client to a storage miner comes in the form of a set of channel updates that get created when proposing the deal. These updates are each time-locked, and can only be cashed out if the storage miner has not been slashed for the storage that is being paid for. (TODO: working on a multi-lane payment channel construction that should make this all pretty easy, only requiring a single on-chain channel construction between each client and storage miner).
+Storage Miners claim their Storage Market earnings via payment channels.
+
+The client proposes the cadence of the earnings for a deal by creating `SignedVoucher`-s. Each vouchers specify how often Storage Miners can claim earnings and how much each earning should be, more precisely, each voucher has some tokens assigned and can be redeemed only at a particular block height. The vouchers are part of the `PaymentInfo` included in the `StorageDealProposal`. When receiving a proposal, a Storage Miner can review and accept these terms by completing the deal protocol.
+
+After the block defined in each `SignedVoucher` is passed, the Storage Miner could claim the earning by updating the payment channel calling `UpdateChannelState` on the `PaymentChannel` actor for a particular `SignedVoucher`. This call passes if the Storage Miner is still storing the piece in sector and if the Storage Miner is not late in their PoSt submission and if the time specified in the `SignedVoucher` has passed.
+
 
 ## Payment Channels
 
