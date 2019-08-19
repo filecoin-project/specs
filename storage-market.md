@@ -93,7 +93,7 @@ Note: The details of this protocol including formats, datastructures, and algori
 2. **Storage Deal Start**: Clients makes sure data is in a [sector](definitions.md#sector)
 
     - **PieceInclusionProof:** Once the miner seals the sector, they update the PieceInclusionProof in the deal state, which the client then gets the next time they query that state.
-     - The PieceInclusionProof proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
+     - The PieceInclusionProof proves that the piece in the deal is contained in a sector whose commitment is on chain. The `commP` hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
     -  Note: a client that is not interested in staying online to wait for PieceInclusionProof can leave immediately, however, they run the risk that their files don't actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
      - Note: In order to provide the piece inclusion proof, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece inclusion proof becomes available.
    - **Mining**: Miner posts `seal commitment` and associated proof on chain by calling `CommitSector` and starts running `proofs of spacetime`. See [storage mining cycle](mining.md#storage-mining-cycle) for more details.

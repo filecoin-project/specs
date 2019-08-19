@@ -167,7 +167,7 @@ VerifyPoSt
 
 ### PieceInclusionProof
 
-A `PieceInclusionProof` contains a potentially complex merkle inclusion proof that all leaves included in `commP` (the piece commitment) are also included in `commD` (the sector data commitment).
+A `PieceInclusionProof` contains a potentially complex Merkle inclusion proof that all leaves included in `commP` (the piece commitment) are also included in `commD` (the sector data commitment).
 
 ```
 struct PieceInclusionProof {
@@ -179,21 +179,18 @@ struct PieceInclusionProof {
 ### GeneratePieceInclusionProofs
 
 `GeneratePieceInclusionProofs` takes a merkle tree and a slice of piece start positions and lengths (in nodes), and returns
-a vector of `PieceInclusionProofs` corresponding to the pieces. For this method to work, the piece data used to validate pieces will need to be padded as necessary,
-and pieces will need to be aligned (to 128-byte chunks due to details of __*preprocessing*__) when written. This assumes that pieces have been packed and padded according to the assumptions of the algorithm. For this reason, practical implementations should also provide a function to assist in correct packing of pieces.
+a vector of `PieceInclusionProofs` corresponding to the pieces. For this method to work, the piece data used to validate pieces will need to be padded as necessary, and pieces will need to be aligned (to 128-byte chunks, after padding, due to details of __*preprocessing*__) when written. This assumes that pieces have been packed and padded according to the assumptions of the algorithm. For this reason, practical implementations should also provide a function to assist in correct packing of pieces. All pieces will be zero-padded such that the total length of the piece is a multiple of 127 bytes before preprocessing and a multiple of 128 bytes after pre-processing.
 
 ```
 GeneratePieceInclusionProofs
  (
   Tree MerkleTree,
   PieceStarts []uint
-  PieceLengths uint,
+  PieceLengths []uint,
  ) []PieceInclusionProof
 ```
 
-`GeneratePieceInclusionProof` takes a merkle tree and the index positions of the first and last nodes
-of the piece whose inclusion should be proved. It returns a corresponding `PieceInclusionProof`.
-For the resulting proof to be valid, first_node must be <= last_node.
+`GeneratePieceInclusionProofs` takes a merkle tree, an array of the index positions of the first nodes of the pieces, and an array of the corresponding piece lengths. It returns an array of `PieceInclusionProof`s corresponding to the supplied start/length pairs — each of which specifies a piece as a sequence of leaves (`[start..start+length]`) of `Tree`.
 
 ```
 GeneratePieceInclusionProof
@@ -204,10 +201,18 @@ GeneratePieceInclusionProof
  ) err Error |  proof PieceInclusionProof
 ```
 
+
+The structure of a `PieceInclusionProof` is determined by the start position and length of the piece to be proved. (Note that if `start + length` is greater than the number of leaves in `Tree`, and no `PieceInclusionProof` can be generated since these parameters do not specify a valid piece.)
+
+The form of a `PieceInclusionProof` is as follows:
+ - The piece's position within the tree must be specified. This, combined with the length provided during verification completely determines the shape of the proof.
+ - The remainder of the proof is a series of `ProofElements`, whose order is interpreted by the proof algorithm and is not (yet: TODO) specified here. The significance of the provided `ProofElements` is described by their role in the verification algorithm below.
+ 
+
 `VerifyPieceInclusionProof` takes a sector data commitment (`commD`), piece commitment (`commP`), sector size, and piece size.
 Iff it returns true, then `PieceInclusionProof` indeed proves that all of piece's bytes were included in the merkle tree corresponding
 to `commD` of a sector of `sectorSize`. The size inputs are necessary to prevent malicious provers from claiming to store the entire
-piece but actually storing only the piece commitment. 
+piece but actually storing only the piece commitment.
 
 ```
 VerifyPieceInclusionProof
@@ -219,3 +224,27 @@ VerifyPieceInclusionProof
   pieceSize uint,
  ) err Error | IsValid bool // true iff the provided PieceInclusionProof is valid.
 ```
+
+The abstract verification algorithm is described below. Only the algorithm for an __*aligned `PieceInclusionProof`*__ is fully specified here. [TODO: provide details fully specifying the ordering of `ProofElements` in the general case.]
+
+A `PieceInclusionProof` includes a start position and a sequence of `ProofElements`. Verification of a `PieceInclusionProof` is with respect to a given `commP`, `commD`, sector size, and piece size.
+
+Piece size and start position are used, as in proof generation, to determine the shape of the proof. This shape fully determines the inputs to and order of applications of `RepCompress` which constitute the proof.
+
+Proof verification is as follows:
+ - A `ProofElement` is a 32-byte value which will be supplied as either the left or right input to `RepCompress` (along with an appropriate height) to combine with a complementary (right or left) `ProofElement` already known to the verifier.
+  - Each time `RepCompress` is called on a pair of known `ProofElements`, a new `ProofElement` is considered to be known to the verifier.
+  - Initially, the verifier knows only of two `ProofElements`, `commP` (the Piece Commitment) and `commD` (the Data Commitment).
+  - The proof proceeds in two stages:
+    1. Zero or more __*candidate `ProofElements`*__ are proved to hash to `commP` through subsequent applications of `RepCompress`. Only after `commP` has been constructed from a set of __*candidate `ProofElements`*__ do those `ProofElements` become __*eligible*__ for use in the second phase of the proof. (Because `RepCompress` takes height as an input, only `ProofElements` from the same height in either the piece or data tree's can be combined. The output of `RepCompress` is always a `ProofElement` with height one greater than that of its two inputs.)
+      - `commP` itself is by definition always __*eligible*__ for use in the second proof phase.
+      - An __*aligned `PieceInclusionProof`*__ is one whose `start` index is a power of 2, and for which *either* its piece's length is a power of 2 *or* the piece was zero-padded with **Piece Padding** when packed in a sector. In these cases, `commP` exists as a node in the data tree, and a minimal-size `PieceInclusionProof` can be generated. 
+      - In the case of an __*aligned `PieceInclusionProof`*__, zero candidate `ProofElements` are required. (This means that `commP` is the *only* __*eligible `ProofElement`*__.)
+    2. Provided `ProofElements` are added to the set of __*eligible `ProofElements`*__ by successive application of `RepCompress`, as in the first phase.
+      - When `commD` is produced by application of an __*eligible `ProofElement`*__ and a `ProofElement` provided by the proof, the proof is considered complete.
+      - If all __*eligible `ProofElement`s*__ have been used as inputs to `RepCompress` and are dependencies of the final construction of `commD`, then the proof is considered to be valid.
+ 
+ NOTE: in the case of an __*aligned `PieceInclusionProof`*__ the `ProofElements` take the form of a standard Merkle inclusion proof proving that `commP` is contained in a sub-tree of the data tree whose root is `commD`. Because `commP`'s position within the data tree is fully specified by the tree's height and the piece's start position and length, the verifier can deterministically combine each successive `ProofElement` with the result of the previous `RepCompress` operation as either a right or left input to the next `RepCompress` operation. In this sense, an __*aligned `PieceInclusionProof`*__ is simply a Merkle inclusion proof that `commP` is a constituent of `commD`'s merkle tree *and* that it is located at the appropriate height for it to also be the root of a (piece) tree with `length` leaves.
+
+In the non-aligned case, the principle is similar. However, in this case, `commP` does *not* occur as a node in `commD`'s Merkle tree. This is because the original piece has been packed out-of-order to minimize alignment padding in the sector (at the cost of a larger `PieceInclusionProof`). Because `commP` does not exist as the root of a data sub-tree, it is necessary first to prove that the root of every sub-tree into which the original piece has been decomposed (when reordering) *is* indeed present in the data tree. Once each __*candidate `ProofElement`*__ has been proved to be an actual constituent of `commP`, it must also be shown that this __*eligible `ProofElement`*__ is *also* a constituent of `commD`. 
+ 
