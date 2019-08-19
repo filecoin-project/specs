@@ -21,7 +21,7 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 #### Fault Detection
 
-Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to submit the known `faults` using the `AddFaults` message to the chain.
+Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to submit the known `faults`, before the PoSt challenge begins. (Using the `AddFaults` message to the chain).
 Only faults which have been reported at challenge time, will be accounted for. If any other faults have occured the miner can not submit a valid PoSt for this proving period.
 
 The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
