@@ -327,6 +327,17 @@ Uniquely identifies a miner's sector.
 type SectorID uint64
 ```
 
+Note: The [`Seal`][seal-link] and [`VerifySeal`][verify-seal-link] proofs
+operations accept a sector id encoded as a 31-byte array. To transform from an
+unsigned, 64-bit sector id-integer, convert the number to its little-endian byte
+representation and then zero-pad to 31-bytes.
+
+Example:
+
+```
+uint64(1025) -> [1 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+```
+
 ## RLE+ Bitset Encoding
 
 RLE+ is a lossless compression format based on [RLE](https://en.wikipedia.org/wiki/Run-length_encoding).
@@ -393,3 +404,6 @@ For Filecoin, byte arrays representing RLE+ bitstreams are encoded using [LSB 0]
 
 - The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
 - Hashes should use a blake2b-256 multihash.
+
+[seal-link]: https://github.com/filecoin-project/specs/blob/master/proofs.md#seal
+[verify-seal-link]: https://github.com/filecoin-project/specs/blob/master/proofs.md#verifyseal
