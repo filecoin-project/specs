@@ -4,6 +4,8 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 ## Rational PoSt
 
+
+
 ### Definitions
 
 | Name | Value |Description |
@@ -28,9 +30,21 @@ At the beginning of a new proving period all faults are reset, and if they persi
 
 If the miner knows that the sectors are permanently lost, they can submit them as part of the `doneSet`, to ensure they are removed from the proving set.
 
+{{% notice note %}}
+**Note**: It is important that all faults are known (i.e submitted to the chain) prior to challenge generation, because otherwise it would be possible to know the challenge set, before the actual challenge time. This would allow a miner to report only faults on challenged sectors, with a gurantee that other faulty sectors would not be detected.
+{{% /notice %}}
+
 
 {{% notice todo %}}
 **TODO**: The penalization for faults is not clear yet.
+{{% /notice %}}
+
+#### Fault Penalization
+
+Each reported fault carries a penality with it.
+
+{{% notice todo %}}
+**TODO**: Define the exact penality structure for this.
 {{% /notice %}}
 
 #### Generation
