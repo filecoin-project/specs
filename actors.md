@@ -1574,7 +1574,7 @@ func Approve(txid UInt) {
 		if !self.canSpend(tx.Value) {
 			Fatal("transaction amount exceeds available")
 		}
-		tx.RetCode = Send(tx.To, tx.Value, tx.Method, tx.Params)
+		tx.RetCode = vm.Send(tx.To, tx.Value, tx.Method, tx.Params)
 		tx.Complete = true
 	}
 }
