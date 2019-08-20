@@ -648,8 +648,12 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 	}
 
 	feesRequired := 0
+    nextProvingPeriodEnd := self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
 
-	if chain.Now() > self.ProvingPeriodEnd {
+    // TODO: rework fault handling, for now anything later than 2 proving periods is invalid
+    if chain.now() > nextProvingPeriodEnd {
+        Fatal("PoSt submited too late")
+	} else if chain.Now() > self.ProvingPeriodEnd {
 		feesRequired += ComputeLateFee(self.power, chain.Now() - self.provingPeriodEnd)
 	}
 
@@ -663,8 +667,6 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 	if msg.Value > feesRequired {
 		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
-
-    nextProvingPeriodEnd := self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
 
     var seed
     if chain.Now() < self.ProvingPeriodEnd {
