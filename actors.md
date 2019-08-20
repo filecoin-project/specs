@@ -649,11 +649,7 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 
 	feesRequired := 0
 
-	if chain.Now() > self.ProvingPeriodEnd+GenerationAttackTime(self.SectorSize) {
-		// slashing ourselves
-		SlashStorageFault(self)
-		return
-	} else if chain.Now() > self.ProvingPeriodEnd {
+	if chain.Now() > self.ProvingPeriodEnd {
 		feesRequired += ComputeLateFee(self.power, chain.Now() - self.provingPeriodEnd)
 	}
 
@@ -668,7 +664,17 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
 
-    seed := GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
+    nextProvingPeriodEnd := self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
+
+    var seed
+    if chain.Now() < self.ProvingPeriodEnd {
+      // good case, submitted in time
+      seed = GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
+    } else {
+      // bad case, submitted late, need to take new proving period end as reference
+      seed = GetRandFromBlock(nextPovingPeriodEnd - POST_CHALLENGE_TIME)
+    }
+
     faultSet := self.currentFaultSet
 
 	if !VerifyPoSt(self.SectorSize, self.provingSet, seed, proof, faultSet) {
@@ -693,7 +699,7 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 	self.ProvingSet = self.Sectors
 
 	// Updating proving period given a fixed schedule, independent of late submissions.
-	self.ProvingPeriodEnd = self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
+	self.ProvingPeriodEnd = nextProvingPeriodEnd
 
 	// update next done set
 	self.NextDoneSet = done
