@@ -40,15 +40,6 @@ Throughout this document, the following definitions are used:
 - __*sectors count:*__ the number of sectors over which a proof-of-spacetime is performed (`POST_SECTORS_COUNT`, `16 PiB / 64 GiB = 262144`).
 
 
-The `SectorID` defined by the chain is a`u64`, which gets encoded as a 31-byte array for the purpose of proofs. This transform consists of encoding the number to its little-endian byte representation and then zero-pad to 31-bytes.
-
-Example:
-
-```
-uint64(1025) -> [1 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-```
-
-
 
 ## Proof-of-Replication Algorithms
 
@@ -72,7 +63,7 @@ Seal
   sealedPath     string,      // path to which sealed sector will be written
   proverID       [31]byte,    // uniquely identifies miner
   ticket         [32]byte,    // ticket to which miner commits when sealing begins
-  sectorID       [31]byte,    // uniquely identifies sector
+  sectorID       uint64,    // uniquely identifies sector
  ) err Error | (
   // response contains the commitments resulting from a successful Seal().
   commD          [32]byte,    // data commitment: merkle root of original data
@@ -97,7 +88,7 @@ VerifySeal
   proof       []byte,   // returned from Seal
   proverID    [31]byte, // uniquely identifies miner
   ticket      [32]byte, // ticket to which miner committed when sealing began
-  sectorID    [31]byte, // uniquely identifies sector
+  sectorID    uint64, // uniquely identifies sector
 ) err Error |
   IsValid bool          // true iff the provided proof-of-replication os valid
 
@@ -115,7 +106,7 @@ Unseal
   sealedPath    string,   // path from which sealed bytes will be read
   outputPath    string,   // path to which unsealed bytes will be written (regular file, ramdisk, etc.)
   proverID      [31]byte, // uniquely identifies miner
-  sectorID      [31]byte, // uniquely identifies sector
+  sectorID      uint64, // uniquely identifies sector
   ticket        [32]byte, // ticket to which miner committed when sealing began
   startOffset   uint64,   // zero-based byte offset in original, unsealed sector-file
   numBytes      uint64,   // number of bytes to unseal (corresponds to contents of unsealed sector-file)
@@ -218,7 +209,7 @@ The structure of a `PieceInclusionProof` is determined by the start position and
 The form of a `PieceInclusionProof` is as follows:
  - The piece's position within the tree must be specified. This, combined with the length provided during verification completely determines the shape of the proof.
  - The remainder of the proof is a series of `ProofElements`, whose order is interpreted by the proof algorithm and is not (yet: TODO) specified here. The significance of the provided `ProofElements` is described by their role in the verification algorithm below.
- 
+
 
 `VerifyPieceInclusionProof` takes a sector data commitment (`commD`), piece commitment (`commP`), sector size, and piece size.
 Iff it returns true, then `PieceInclusionProof` indeed proves that all of piece's bytes were included in the merkle tree corresponding
@@ -249,13 +240,12 @@ Proof verification is as follows:
   - The proof proceeds in two stages:
     1. Zero or more __*candidate `ProofElements`*__ are proved to hash to `commP` through subsequent applications of `RepCompress`. Only after `commP` has been constructed from a set of __*candidate `ProofElements`*__ do those `ProofElements` become __*eligible*__ for use in the second phase of the proof. (Because `RepCompress` takes height as an input, only `ProofElements` from the same height in either the piece or data tree's can be combined. The output of `RepCompress` is always a `ProofElement` with height one greater than that of its two inputs.)
       - `commP` itself is by definition always __*eligible*__ for use in the second proof phase.
-      - An __*aligned `PieceInclusionProof`*__ is one whose `start` index is a power of 2, and for which *either* its piece's length is a power of 2 *or* the piece was zero-padded with **Piece Padding** when packed in a sector. In these cases, `commP` exists as a node in the data tree, and a minimal-size `PieceInclusionProof` can be generated. 
+      - An __*aligned `PieceInclusionProof`*__ is one whose `start` index is a power of 2, and for which *either* its piece's length is a power of 2 *or* the piece was zero-padded with **Piece Padding** when packed in a sector. In these cases, `commP` exists as a node in the data tree, and a minimal-size `PieceInclusionProof` can be generated.
       - In the case of an __*aligned `PieceInclusionProof`*__, zero candidate `ProofElements` are required. (This means that `commP` is the *only* __*eligible `ProofElement`*__.)
     2. Provided `ProofElements` are added to the set of __*eligible `ProofElements`*__ by successive application of `RepCompress`, as in the first phase.
       - When `commD` is produced by application of an __*eligible `ProofElement`*__ and a `ProofElement` provided by the proof, the proof is considered complete.
       - If all __*eligible `ProofElement`s*__ have been used as inputs to `RepCompress` and are dependencies of the final construction of `commD`, then the proof is considered to be valid.
- 
+
  NOTE: in the case of an __*aligned `PieceInclusionProof`*__ the `ProofElements` take the form of a standard Merkle inclusion proof proving that `commP` is contained in a sub-tree of the data tree whose root is `commD`. Because `commP`'s position within the data tree is fully specified by the tree's height and the piece's start position and length, the verifier can deterministically combine each successive `ProofElement` with the result of the previous `RepCompress` operation as either a right or left input to the next `RepCompress` operation. In this sense, an __*aligned `PieceInclusionProof`*__ is simply a Merkle inclusion proof that `commP` is a constituent of `commD`'s merkle tree *and* that it is located at the appropriate height for it to also be the root of a (piece) tree with `length` leaves.
 
-In the non-aligned case, the principle is similar. However, in this case, `commP` does *not* occur as a node in `commD`'s Merkle tree. This is because the original piece has been packed out-of-order to minimize alignment padding in the sector (at the cost of a larger `PieceInclusionProof`). Because `commP` does not exist as the root of a data sub-tree, it is necessary first to prove that the root of every sub-tree into which the original piece has been decomposed (when reordering) *is* indeed present in the data tree. Once each __*candidate `ProofElement`*__ has been proved to be an actual constituent of `commP`, it must also be shown that this __*eligible `ProofElement`*__ is *also* a constituent of `commD`. 
- 
+In the non-aligned case, the principle is similar. However, in this case, `commP` does *not* occur as a node in `commD`'s Merkle tree. This is because the original piece has been packed out-of-order to minimize alignment padding in the sector (at the cost of a larger `PieceInclusionProof`). Because `commP` does not exist as the root of a data sub-tree, it is necessary first to prove that the root of every sub-tree into which the original piece has been decomposed (when reordering) *is* indeed present in the data tree. Once each __*candidate `ProofElement`*__ has been proved to be an actual constituent of `commP`, it must also be shown that this __*eligible `ProofElement`*__ is *also* a constituent of `commD`.
