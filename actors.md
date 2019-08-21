@@ -455,7 +455,7 @@ type StorageMinerActorState struct {
 	## when a PoSt is submitted (not as each new sector commitment is added).
     provingSet &SectorSet
 
-    ## Faulty sectors reported since last SubmitPost, up to the current PoSt challenge time.
+    ## Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
     currentFaultSet BitField
 
     ## Faults for the next round of PoSt.
