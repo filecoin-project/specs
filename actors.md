@@ -458,7 +458,8 @@ type StorageMinerActorState struct {
     ## Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
     currentFaultSet BitField
 
-    ## Faults for the next round of PoSt.
+    ## Faults submitted after the current proving period's challenge time, but before the PoSt for that period
+    ## is submitted. These become the currentFaultSet when a PoSt is submitted.
     nextFaultSet BitField
 
 	## Sectors reported during the last PoSt submission as being 'done'. The collateral
@@ -526,9 +527,7 @@ type MinerInfo struct {
 | `IsLate` | 16 |
 | `PaymentVerifyInclusion` | 17 |
 | `PaymentVerifySector` | 18 |
-| `ReportFaultySectors` | 19 |
-| `RecoverFaultySectors` | 20 |
-| `AddFaults` | 21 |
+| `AddFaults` | 19 |
 
 #### `Constructor`
 
