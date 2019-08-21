@@ -26,7 +26,7 @@ Only faults which have been reported at challenge time, will be accounted for. I
 
 The PoSt generation then takes the latest available `faults` of the miner to generate a PoSt matching the committed sectors and faults.
 
-At the beginning of a new proving period all faults are reset, and if they persist the miner needs to resubmit an `AddFaults` message.
+When a PoSt is successfully submitted all faults are reset and assumed to be recovered. A miner must either (1) resolve a faulty sector and accept challenges against it in the next proof submission, (2) report a sector faulty again if it persists but is eventually recoverable, (3) report a sector faulty *and done* if the fault cannot be recovered.
 
 If the miner knows that the sectors are permanently lost, they can submit them as part of the `doneSet`, to ensure they are removed from the proving set.
 
