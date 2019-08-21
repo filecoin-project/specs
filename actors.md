@@ -455,6 +455,13 @@ type StorageMinerActorState struct {
 	## when a PoSt is submitted (not as each new sector commitment is added).
     provingSet &SectorSet
 
+    ## Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
+    currentFaultSet BitField
+
+    ## Faults submitted after the current proving period's challenge time, but before the PoSt for that period
+    ## is submitted. These become the currentFaultSet when a PoSt is submitted.
+    nextFaultSet BitField
+
 	## Sectors reported during the last PoSt submission as being 'done'. The collateral
     ## for them is still being held until the next PoSt submission in case early sector
     ## removal penalization is needed.
@@ -497,7 +504,6 @@ type MinerInfo struct {
     sectorSize BytesAmount
 
 }
-```
 
 #### Methods
 
@@ -521,6 +527,7 @@ type MinerInfo struct {
 | `IsLate` | 16 |
 | `PaymentVerifyInclusion` | 17 |
 | `PaymentVerifySector` | 18 |
+| `AddFaults` | 19 |
 
 #### `Constructor`
 
@@ -590,11 +597,6 @@ func CommitSector(sectorID SectorID, commD, commR, commRStar []byte, proof SealP
 		Fatal("not enough collateral")
 	}
 
-	// ensure that the miner cannot commit more sectors than can be proved with a single PoSt
-	if miner.Sectors.Size() >= POST_SECTORS_COUNT {
-		Fatal("too many sectors")
-	}
-
 	// Note: There must exist a unique index in the miner's sector set for each
 	// sector ID. The `faults`, `recovered`, and `done` parameters of the
 	// SubmitPoSt method express indices into this sector set.
@@ -632,43 +634,29 @@ func CollateralForPower(power BytesAmount) TokenAmount {
 ```sh
 type SubmitPost struct {
     proofs PoStProof
-    faults [FaultSet]
-    recovered Bitfield
-    done Bitfield
+    doneSet Bitfield
 } representation tuple
 ```
 
 **Algorithm**
 
-{{% notice todo %}}
-TODO: GenerationAttackTime
-{{% /notice %}}
-
 ```go
-func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bitfield) {
-	if msg.From != miner.Worker {
+func SubmitPost(proofs PoStProof, doneSet Bitfield) {
+	if msg.From != self.Worker {
 		Fatal("not authorized to submit post for miner")
 	}
 
-	// ensure recovered is a subset of the combined fault sets, and that done
-	// does not intersect with either, and that all sets only reference sectors
-	// that currently exist
-	allFaults = AggregateBitfields(faults)
-	if !miner.ValidateFaultSets(faults, recovered, done) {
-		Fatal("fault sets invalid")
-	}
-
 	feesRequired := 0
+    nextProvingPeriodEnd := self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
 
-	if chain.Now() > self.ProvingPeriodEnd+GenerationAttackTime(self.SectorSize) {
-		// slashing ourselves
-		SlashStorageFault(self)
-		return
+    // TODO: rework fault handling, for now anything later than 2 proving periods is invalid
+    if chain.now() > nextProvingPeriodEnd {
+        Fatal("PoSt submited too late")
 	} else if chain.Now() > self.ProvingPeriodEnd {
-		feesRequired += ComputeLateFee(self.power, chain.Now()-self.provingPeriodEnd)
+		feesRequired += ComputeLateFee(self.power, chain.Now() - self.provingPeriodEnd)
 	}
 
-	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
+	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, self.currentFaultSet)
 
 	if msg.Value < feesRequired {
 		Fatal("not enough funds to pay post submission fees")
@@ -679,68 +667,44 @@ func SubmitPost(proofs PoStProof, faults []FaultSet, recovered Bitfield, done Bi
 		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
 
-	if !CheckPostProof(miner.SectorSize, proof, faults) {
+    var seed
+    if chain.Now() < self.ProvingPeriodEnd {
+      // good case, submitted in time
+      seed = GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
+    } else {
+      // bad case, submitted late, need to take new proving period end as reference
+      seed = GetRandFromBlock(nextPovingPeriodEnd - POST_CHALLENGE_TIME)
+    }
+
+    faultSet := self.currentFaultSet
+
+	if !VerifyPoSt(self.SectorSize, self.provingSet, seed, proof, faultSet) {
 		Fatal("proof invalid")
 	}
 
-	// combine all the fault set bitfields, and subtract out the recovered
-	// ones to get the set of sectors permanently lost
-	permLostSet = allFaults.Subtract(recovered)
+    // The next fault set becomes the current one
+    self.currentFaultSet = self.nextFaultSet
+    self.nextFaultSet = EmptySectorSet()
 
-	// burn funds for fees and collateral penalization
-	self.BurnFunds(CollateralForSize(self.SectorSize*permLostSet.Size()) + feesRequired)
+    // TODO: penalize for faults
 
-	// update sector sets and proving set
-	miner.Sectors.Subtract(done)
-	miner.Sectors.Subtract(permLostSet)
+	// Remove doneSet from the current sectors
+	self.Sectors.Subtract(doneSet)
 
-	// update miner power to the amount of data actually proved during
-	// the last proving period.
-	oldPower := miner.Power
+	// Update miner power to the amount of data actually proved during the last proving period.
+	oldPower := self.Power
 
-	miner.Power = (miner.ProvingSet.Size() - allFaults.Count()) * miner.SectorSize
-	StorageMarket.UpdateStorage(miner.Power - oldPower)
+	self.Power = (self.ProvingSet.Size() - faultSet.Count()) * self.SectorSize
+	StorageMarket.UpdateStorage(self.Power - oldPower)
 
-	miner.ProvingSet = miner.Sectors
+	self.ProvingSet = self.Sectors
 
 	// Updating proving period given a fixed schedule, independent of late submissions.
-	miner.ProvingPeriodEnd = miner.ProvingPeriodEnd + ProvingPeriodDuration(miner.SectorSize)
+	self.ProvingPeriodEnd = nextProvingPeriodEnd
 
 	// update next done set
-	miner.NextDoneSet = done
-	miner.ArbitratedDeals.Clear()
-}
-
-func ValidateFaultSets(faults []FaultSet, recovered, done BitField) bool {
-	var aggregate BitField
-	for _, fs := range faults {
-		aggregate = aggregate.Union(fs.BitField)
-	}
-
-	// all sectors marked recovered must have actually failed
-	if !recovered.IsSubsetOf(aggregate) {
-		return false
-	}
-
-	// the done set cannot intersect with the aggregated faults
-	// you can't mark a fault as 'done'
-	if aggregate.Intersects(done) {
-		return false
-	}
-
-	for _, bit := range aggregate.Bits() {
-		if !miner.HasSectorByID(bit) {
-			return false
-		}
-	}
-
-	for _, bit := range done.Bits() {
-		if !miner.HasSectorByID(bit) {
-			return false
-		}
-	}
-
-	return true
+	self.NextDoneSet = done
+	self.ArbitratedDeals.Clear()
 }
 
 func ProvingPeriodDuration(sectorSize uint64) Integer {
@@ -767,34 +731,6 @@ type SlashStorageFault struct {
 ```
 
 **Algorithm**
-
-
-## late submission and resubmission
-
-- If After provingPeriodEnd
-  - post submission now requires paying pay late submission fee
-    - (fixed cost, dependent on the total storage size)
-  - [implicit] loose all power, can be explicitly slashed for
-  - post submission returns your power immediately
-- If After `GenerationAttackTimeout` (<< 1 proving period)
-  - .... nothing changes atm
-- If After `PoStTimeout` (< 1 proving period)
-  - [explicit - slashStorageFault] loose all storage collateral
-  - clients can arbitrate deals with the miner now
-  - post submission now requires paying both late fee + lost storage collateral
-  - the valid post submission returns your power immediately
-- If After `SectorFailureTimeout` (> 1 proving period)
-  - [explicit - slashStorageFault] loose all sectors
-     - [implicit] resets proving period, as they need to resubmit all sectors after this
-  - there is now no way to reintroduce the sectors, unless they are resubmitted, etc
-  - power can not be recovered anymore
-
-- If [miner] does not call postsubmit
-
-
-Notes:
-- Should post submission only return your power, after the following proving period, when after the generation attack timeout
-- Is one proving period enough time for abitration of faulty deals for a client?
 
 ```go
 func SlashStorageFault() {
@@ -1154,7 +1090,7 @@ func PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProo
   if !has {
     Fatal("miner does not have required sector")
   }
-  
+
   return ValidatePIP(self.SectorSize, extra.PieceSize, extra.CommP, commD, proof.Proof)
 }
 ```
@@ -1186,8 +1122,34 @@ func PaymentVerifyInclusion(extra BigInt, proof Bytes) {
   if len(proof) > 0 {
     Fatal("unexpected proof bytes")
   }
-  
+
   return self.HasSector(extra)
+}
+```
+
+#### `AddFaults`
+
+**Parameters**
+
+```sh
+type AddFaults struct {
+    faults FaultSet
+} representation tuple
+```
+
+**Algorithm**
+
+```go
+func AddFaults(faults FaultSet) {
+    challengeBlockHeight := self.ProvingPeriodEnd - POST_CHALLENGE_TIME
+
+    if VM.CurrentBlockHeight() < challengeBlockHeight {
+        // Up to the challenge time new faults can be added.
+        self.currentFaultSet = Merge(self.currentFaultSet, faults)
+    } else {
+        // After that they are only accounted for in the next proving period
+        self.nextFaultSet = Merge(self.nextFaultSet, faults)
+    }
 }
 ```
 

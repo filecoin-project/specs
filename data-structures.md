@@ -298,8 +298,14 @@ type Bitfield Bytes
 
 ### SectorSet
 
+A sector set stores a mapping of sector IDs to the respective `commR`s.
+
+```sh
+type SectorSet map{SectorID:Bytes}
+```
+
 {{% notice todo %}}
-Define me
+Improve on this, see https://github.com/filecoin-project/specs/issues/116
 {{% /notice %}}
 
 

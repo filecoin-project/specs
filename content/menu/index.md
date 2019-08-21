@@ -30,6 +30,7 @@ headless: true
 
 * [Proof-of-Replication]({{< relref "/docs/zigzag-porep.md" >}})
   * [Circuit]({{< relref "/docs/zigzag-circuit.md" >}})
+* [Proof-of-Spacetime]({{< relref "/docs/proof-of-spacetime.md" >}})
 
 [**Glossary**]({{< relref "/docs/definitions.md" >}})
 
