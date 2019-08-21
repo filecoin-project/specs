@@ -657,7 +657,7 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 		feesRequired += ComputeLateFee(self.power, chain.Now() - self.provingPeriodEnd)
 	}
 
-	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, recovered)
+	feesRequired += ComputeTemporarySectorFailureFee(self.sectorSize, self.currentFaultSet)
 
 	if msg.Value < feesRequired {
 		Fatal("not enough funds to pay post submission fees")
