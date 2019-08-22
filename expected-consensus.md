@@ -257,9 +257,9 @@ Output: newTicket
 1. Draw prior ticket
     i. # take the last ticket for each parent 'Tickets' array
         lastTickets <-- map(parentTickets, fun(x): x.last)
-		ii. # sort the tickets (as defined in 'comparing tickets' above)
-				sortedTickets <-- lastTickets.sort()
-		iii. # draw the smallest ticket
+    ii. # sort the tickets (as defined in 'comparing tickets' above)
+        sortedTickets <-- lastTickets.sort()
+    iii. # draw the smallest ticket
         parentTicket <-- min(sortedTickets)
 2. Run it through VRF and get determinstic output
     i. # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
