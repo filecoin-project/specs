@@ -29,9 +29,6 @@ type RetDealProposal struct {
   # mode specific parameters saying which data to retrieve
   params RetParams
 
-	## The total amount that the client is willing to pay for the retrieval of the data.
-	price TokenAmount
-
 	## The info from the client to the retrieval miner for the data
 	payment PaymentInfo
 }
