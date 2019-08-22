@@ -102,7 +102,35 @@ In cases in which no winning ticket is found by any miner in a given round (i.e.
 
 In order to pressure the network to converge on a single chain, each miner may only submit one block per round (see: [`Slashing`](#slashing)).
 
-TODO: pictures of ticket chain and block chain
+```
+                     ┌────────────────────────────────────────────────────────────────────────────────────┐                                                
+                      │                                                                                    │                                                
+                      ▼                                  ◀─────────────────────────────────────────────────┼────────────────────────────────────────────┐   
+          ┌─┐        ┌─┐        ┌─┐        ┌─┐          ┌─┐                                       ┌─┐      │    ┌─┐         ┌─┐         ┌─┐           ┌─┤   
+   ◀──────│T1◀───────│T2◀───────│T3◀───────│T4◀─────────│T5◀───────────────    ...    ◀───────────T1+k─────┼───T2+k◀────────T3+k────────T4+k──────────T5│k  
+          └─┘        └─┘        └─┘        └─┘          └─┘                                       └─┘      │    └─┘         └─┘         └─┘           └─┤   
+                                 ▲                       │                                                 │                 │           │             ││   
+           │          │          │          │                                                      │       │     │                                      │   
+                                 ├───────────────────────┼─────────────────────────────────────────────────┼─────────────────┼────┐      │             ││   
+           │          │                     │                                                      │       │     │                │                     │   
+                       ─ ─ ─ ─ ─ ┴ ─   ─ ─ ─             ┘                                            ─ ─ ─│─ ─ ─          ─ ┘    │      └ ─ ─ ─   ─ ─ ┘│   
+        ┌──┼──────┬─┬┐         ┌──┼─┼─┼──┬─┬┐        ┌──┼──────┬─┬┐                             ┌──┼─┼────┬─┬┐         ┌──┼──────┬─┬┐        ┌──┼─┼────┬─┬┐ 
+        │         │E1│         │         │E2│        │         │E3│                             │         E1+l         │         E2+l        │         E3+l 
+        │  │      └─┘│         │  │ │ │  └─┘│        │  │      └─┘│                             │  │ │    └─┘│         │  │      └─┘│        │  │ │    └─┘│ 
+        │            │         │            │        │            │                             │            │         │            │        │            │ 
+ ◀──────│  ▼         │◀────────│  ▼ ▼ ▼     │◀───────│  ▼         │◀──────     ...     ◀────────│  ▼ ▼       │◀────────│  ▼         │◀───────│  ▼ ▼       │ 
+        │ ┌─┐        │         │ ┌─┬─┬─┐    │        │ ┌─┐        │                             │ ┌─┬─┐      │         │ ┌─┐        │        │ ┌─┬─┐      │ 
+        │ │T1     B1 │         │ │T2 │ │ B2 │        │ │T5     B3 │                             │ │ │ │  B1+l│         │ │ │    B2+l│        │ │ │ │  B3+l│ 
+        └─┴─┴────────┘         └─┴─┴─┴─┴────┘        └─┴─┴────────┘                             └─┴─┴─┴──────┘         └─┴─┴────────┘        └─┴─┴─┴──────┘ 
+```
+
+
+
+The above represents an instance of a block-chain, and its associated ticket-chain. The details of how it works should be clear by the end of this section, but quickly, some observations:
+
+- Block 1 contains a single ticket T1
+- Block 2 contains 3 tickets T2, T3, T4 meaning it was likely generated after 2 failed leader election attempts in the network.
+- Block B1+l has two tickets and an Election Proof E1+l that was generated using T2. This means B1+l's miner tried to generate an election proof using T1 and failed, succeeding on their second attempt with T2.
 
 ### Tickets
 
@@ -117,9 +145,6 @@ At a high-level, tickets must do the following:
 - Prove appropriate delay between drawings — thereby preventing leaders from "rushing" the protocol by releasing blocks early (at the expense of fairness for miners with worse connectivity).
 - Ensure a single drawing per round — derived in part from the above, thereby preventing miners from grinding on tickets (e.g. by repeatedly drawing new tickets in the hopes of winning) within a round.
 
-```text
-ticket = {TODO} where (proof, value) <-- VDF(SK, x) for some seed x
-```
 You can find the Ticket data structure [here](data-structures.md#tickets).
 
 In practice, EC defines two different fields within a block:
@@ -162,13 +187,51 @@ decreasing the cost of running a targeted attack (given they have local predicta
 more space on-chain.
 ```
 
+##### Comparing Tickets
+
+Whenever comparing tickets is evoked, for instance when discussing selecting the "min ticket" in a TipSet, the comparison is that of the little endian representation of the ticket's VDFOutput bytes.
+
+Thus, specifically, we might define a sorting function for tickets using the following:
+
+```text
+less(tickets, func(i, j Bytes)) {
+	if (readLittleEndian(tickets[i].VDFOutput) < readLittleEndian(tickets[j].VDFOutput)) {
+		return true
+	}
+	return false
+}
+```
+
 #### Ticket generation
 
 This section discusses how tickets are generated for the `Tickets` array. For how tickets are validated, see [ticket validation](mining.md#ticket-validation).
 
 At round `N`, new tickets are generated using tickets drawn from the [TipSet](#tipsets) at round `N-1`. This ensures the miner cannot publish a new block (corresponding to the `ElectionProof` generated by a winning ticket `K` rounds back) until the correct round. Because a Tipset can contain multiple blocks (see [Chain Selection](#chain-selection) below), the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.
 
-TODO: pictures of TipSet ticket drawing
+```
+   ┌──────────────────────┐                     
+   │                      │                     
+   │                      │                     
+   │┌────┐                │                     
+   ││ TA │              A │                     
+   └┴────┴────────────────┘                     
+                                                
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
+                          │                     
+   │                                            
+    ┌────┐                │       TA < TB < TC  
+   ││ TB │              B                       
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
+                                                
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
+                          │                     
+   │                                            
+    ┌────┐                │                     
+   ││ TC │              C                       
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
+```
+
+In the above diagram, a miner will use block A's Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the TipSet.
 
 The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output. This output is then used as input into a Verifiable Delay Function (VDF), with the VRFProof, VDFProof and VDFOutput generating a new ticket for future use. 
 
@@ -194,7 +257,9 @@ Output: newTicket
 1. Draw prior ticket
     i. # take the last ticket for each parent 'Tickets' array
         lastTickets <-- map(parentTickets, fun(x): x.last)
-    ii. # draw the smallest ticket
+		ii. # sort the tickets (as defined in 'comparing tickets' above)
+				sortedTickets <-- lastTickets.sort()
+		iii. # draw the smallest ticket
         parentTicket <-- min(sortedTickets)
 2. Run it through VRF and get determinstic output
     i. # take the VDFOutput of that ticket as input, specifying the personalization (see data-structures)
@@ -283,7 +348,23 @@ New blocks (with multiple tickets) will have a few key properties:
 - All tickets in the `Tickets` array are signed by the same miner -- to avoid grinding through out-of-band collusion between miners exchanging tickets.
 - The `ElectionProof` was correctly generated from the ticket `K-|Tickets|` (with `|Tickets|` the length of the `Tickets` array) rounds back.
 
-This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array.
+This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array. In cases where there are multiple tickets to choose from (i.e. a `Tipset` made up of multiple blocks mined atop losing tickets), a miner must use tickets from the `Tickets` array in the block whose final ticket is the min-ticket (though that may not be the min ticket in that round).
+
+                                     
+                  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                 
+                                         │                
+                  │                                       
+                   ┌────┬────┬────┐      │                
+                  ││T1-A│T2-A│T3-A│    A                  
+                   ┴────┴────┴────┘─ ─ ─ ┘   T1-A < T1-B  
+                                             T2-A < T2-B  
+                  ┌──────────────────────┐   T3-A > T3-B  
+                  │                      │                
+                  │                      │                
+                  │┌────┬────┬────┐      │                
+                  ││T1-B│T2-B│T3-B│    B │                
+                  └┴────┴────┴────┴──────┘                
+In the above case, because T3-B < T3-A, then a miner will use T*-B to generate election proofs, even if T1-A < T1-B.
 
 #### A note on miners' 'power fraction'
 
@@ -352,7 +433,7 @@ potentially long chain scans would be required to compute a given block's weight
 
 ### Selecting between TipSets with equal weight
 
-When selecting between TipSets of equal weight, a miner chooses the one with the smallest min ticket (by bytewise comparison).
+When selecting between TipSets of equal weight, a miner chooses the one with the smallest min ticket.
 
 In the case where two TipSets of equal weight have the same min ticket, the miner will compare the next smallest ticket (and select the TipSet with the next smaller ticket). This continues until one TipSet is selected.
 
