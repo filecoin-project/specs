@@ -24,7 +24,10 @@ The v0 `retrieval market` will initially be implemented as two `libp2p` services
 ```sh
 type RetDealProposal struct {
 	## Reference to the data being retrieved.
-	ref Link
+	ref Cid
+
+  # mode specific parameters saying which data to retrieve
+  params RetParams
 
 	## The total amount that the client is willing to pay for the retrieval of the data.
 	price TokenAmount
@@ -33,23 +36,37 @@ type RetDealProposal struct {
 	payment PaymentInfo
 }
 
-type RetDealResponse union {
-    | AcceptedResponse 0
-    | RejectedResponse 1
-    | ErrorResponse 2
+type RetParams union {
+  | RetParams_Unixfs "unixfs0"
+  | RetParams_Ipld "ipld"
 } representation keyed
 
-type AcceptedResponse struct {}
-type RejectedResponse struct {
-    message optional String
+type RetParams_Unixfs struct {
+  Offset Uint
+  Size Uint
 }
 
-type ErrorResponse RejectedResponse
+type RetParams_Ipld struct {
+  Selector Selector
+}
+
+type RetDealResponseStatus enum {
+    | "accepted" 0
+    | "rejected" 1
+    | "error" 2
+    | "unsealing" 3
+} 
+
+type RetDealResponse struct {
+  Status RetDealResponseStatus
+
+  Message string
+}
 
 type Block struct {
 	## Cid prefix parameters for this block. It describes how to
 	## hash the block to verify it matches the expected value.
-	refix CidPrefix
+	prefix CidPrefix
 	data Bytes
 }
 
@@ -63,6 +80,8 @@ type CidPrefix struct {
 }
 ```
 
+
+
 `Retrieval miners` should also support a query service that allows clients to request pricing information from a miner.
 
 The query should include the CID of the piece that the client is interested in retrieving. The response contains whether or not the miner will serve that data, the price they will accept for it.
@@ -70,7 +89,7 @@ The query should include the CID of the piece that the client is interested in r
 ```sh
 type RetQuery struct {
     ## TODO: what exactly does this link to?
-	piece Link
+	piece Cid
 }
 
 type RetQueryResponse union {
