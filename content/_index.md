@@ -50,20 +50,20 @@ For clarity, we introduce the following types of entities to describe implementa
     including other routines and potentially the Filecoin network.
     The following are the dynamic routines in the Filecoin protocol:
 
-      - [Storage Provider]({{< relref "/docs/impl/storage_provider.md" >}})
-      - [Retrieval Provider]({{< relref "/docs/impl/retrieval_provider.md" >}})
-      - [Block Miner]({{< relref "/docs/impl/block_miner.md" >}})
-      - [Block Propagator]({{< relref "/docs/impl/block_propagator.md" >}})
-      - [Chain Manager]({{< relref "/docs/impl/chain_manager.md" >}})
-      - [Chain Verifier]({{< relref "/docs/impl/chain_verifier.md" >}})
+      - [Storage Provider]({{<ref "docs/impl/storage_provider.md">}})
+      - [Retrieval Provider]({{<ref "docs/impl/retrieval_provider.md">}})
+      - [Block Miner]({{<ref "docs/impl/block_miner.md">}})
+      - [Block Propagator]({{<ref "docs/impl/block_propagator.md">}})
+      - [Chain Manager]({{<ref "docs/impl/chain_manager.md">}})
+      - [Chain Verifier]({{<ref "docs/impl/chain_verifier.md">}})
 
   - In contrast, we use the term _static routine_ for a routine that only has access to its own internal state,
     such as a local daemon maintaining a key-value store. The following are the static routines in the Filecoin protocol:
 
-      - [VM Interpreter]({{< relref "/docs/impl/vm_interpreter.md" >}})
-      - [Sector Manager]({{< relref "/docs/impl/sector_manager.md" >}})
+      - [VM Interpreter]({{<ref "docs/impl/vm_interpreter.md">}})
+      - [Sector Manager]({{<ref "docs/impl/sector_manager.md">}})
 
-- **_APIs_** are messages that can be sent to routines. A client's view of a given sub-protocol, such as a request to a miner node's [Storage Provider]({{<relref "/docs/impl/storage_provider.md">}}) to store files in the storage market, may require the execution of a series of APIs.
+- **_APIs_** are messages that can be sent to routines. A client's view of a given sub-protocol, such as a request to a miner node's [Storage Provider]({{<ref "docs/impl/storage_provider.md">}}) to store files in the storage market, may require the execution of a series of APIs.
 
 - **_Nodes_** are complete software and hardware systems that interact with the protocol.
   A node might be constantly running several of the above _routines_, and exposing one or more _APIs_ locally and/or over the network,

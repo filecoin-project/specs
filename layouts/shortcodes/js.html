@@ -8,7 +8,7 @@
     for (let x of xs) {
       let res = structRefs[x.innerText];
       if (res !== undefined) {
-        x.innerHTML = "<a href=\"/docs/" + res + "/#go__" + x.innerHTML.toLowerCase() + "\">" + x.innerHTML + "</a>";
+        x.innerHTML = "<a href=\"/docs/" + res + "/#go__" + x.innerHTML + "\">" + x.innerHTML + "</a>";
       }
     }
   };

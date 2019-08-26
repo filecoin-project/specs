@@ -1,6 +1,3 @@
-
-
-
 ## Filecoin VM
 
 The majority of Filecoin's user facing functionality (payments, storage market, power table, etc) is managed through the Filecoin State Machine. The network generates a series of blocks, and agrees which 'chain' of blocks is the correct one. Each block contains a series of state transitions called `messages`, and a checkpoint of the current `global state` after the application of those `messages`.
@@ -17,4 +14,4 @@ First, to call a method as an external participant of the system (aka, a normal 
 
 Second, an `actor` may call a method on another actor during the invocation of one of its methods.  However, the only time this may happen is as a result of some actor being invoked by an external users message (note: an actor called by a user may call another actor that then calls another actor, as many layers deep as the execution can afford to run for).
 
-For full implementation details, see the [VM Interpreter spec]({{< relref "docs/impl/vm_interpreter" >}}).
+For full implementation details, see the [VM Interpreter spec]({{<ref "/docs/impl/vm_interpreter">}}).

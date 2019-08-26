@@ -1,5 +1,7 @@
 # Expected Consensus
 
+{{<js>}}
+
 **This spec describes how the expected consensus (EC) protocol works in general. To read more about Filecoin-specific processes, see:**
 
 - [Mining Blocks](mining.md#mining-blocks) on how consensus is used in block mining.
