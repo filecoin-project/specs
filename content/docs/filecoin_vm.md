@@ -679,6 +679,7 @@ type MinerInfo struct {
     sectorSize BytesAmount
 
 }
+```
 
 #### Methods
 
