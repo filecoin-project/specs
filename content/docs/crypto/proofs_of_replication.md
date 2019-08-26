@@ -472,9 +472,19 @@ TODO: inputs are missing
 The Replication Algorithm  proceeds as follows:
 
 - Calculate `ReplicaID` using `Hash` (Blake2s):
+
+The `SectorID` defined by the chain is an unsigned 64-bit integer which is encoded as a 31-byte array for the purpose of computing a `ReplicaID`. This transform consists of encoding the number to its little-endian byte representation and then zero-padding to 31-bytes.
+
+Example:
+
 ```
-ReplicaID := Hash(ProverID || SectorID || ticket)
+encode(uint64(1025)) -> [1 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 ```
+
+```
+ReplicaID := Hash(ProverID || encode(SectorID) || ticket)
+```
+
 - Perform `RepHash` on `Data` to yield `CommD` and `TreeD`:
 ```
 CommD, TreeD = RepHash(data)
