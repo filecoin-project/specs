@@ -654,7 +654,7 @@ TODO: reconcile outputs of non-circuit proof with inputs to circuit proof.
 
 ### SNARK Proof Generation
 
-See [# ZigZag: Offline PoRep Circuit Spec]({{<relref "detail/zigzag_circuit_spec">}}) for details of Circuit Proof Generation.
+See [# ZigZag: Offline PoRep Circuit Spec]({{<ref "/docs/detail/zigzag_circuit_spec">}}) for details of Circuit Proof Generation.
 
 ## Appendex
 

@@ -1,11 +1,6 @@
-# Block Receiver
+# Block Propagator
 
 {{<js>}}
-
-- {{% todo %}} finish {{% /todo %}}
-
-
-
 
 ## Filecoin Data Propagation
 

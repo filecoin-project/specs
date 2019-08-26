@@ -31,6 +31,20 @@ The Filecoin protocol itself is really a suite of protocols, including:
   - the [retrieval market](retrieval-market.md) protocol for retrieving files
   - the [payment channel](payments.md) channel protocol for transferring FIL tokens between actors
 
+The Filecoin protocol uses cryptographic proofs to ensure the two following guarantees:
+
+- **Storage Based Consensus**: Miners' power in the consensus is proportional to their amount of storage. Miner increase their power by proving that they are dedicating unique storage to the network.
+- **Verifiable Storage Market**: Miners must be proving that they are dedicating unique physical space for each copy of the clients data through a period of time.
+
+We briefly describe the three main Filecoin proofs:
+
+- __*Proof-of-Replication (PoRep)*__ proves that a Storage Miner is dedicating unique dedicated storage for each ***sector***. Filecoin Storage Miners collect new clients' data in a sector, run a slow encoding process (called `Seal`) and generate a proof (`SealProof`) that the encoding was generated correctly.
+
+  In Filecoin, PoRep provides two guarantees: (1) *space-hardness*: Storage Miners cannot lie about the amount of space they are dedicating to Filecoin in order to gain more power in the consensus; (2) *replication*: Storage Miners are dedicating unique storage for each copy of their clients data.
+
+- __*Proof of Spacetime*__ proves that an arbitrary number of __*sealed sectors*__ existed over a specified period of time in their own dedicated storage — as opposed to being generated on-the-fly at proof generation time.
+
+- __*Piece-Inclusion-Proof*__ proves that a given __*piece*__ is contained within a specified __*sealed sector*__.
 
 
 
@@ -42,11 +56,7 @@ The `global state` here consists of a set of `actors`, each with their own priva
 
 An `actor` is the Filecoin equivalent of Ethereum's smart contracts, it is essentially an 'object' in the filecoin network with state and a set of methods that can be used to interact with it. Every actor has a Filecoin balance attributed to it, a `state` pointer, a `code` CID which tells the system what type of actor it is, and a `nonce` which tracks the number of messages sent by this actor. (TODO: the nonce is really only needed for external user interface actors, AKA `account actors`. Maybe we should find a way to clean that up?)
 
-### Method Invocation
-
-There are two routes to calling a method on an `actor`.
-
-First, to call a method as an external participant of the system (aka, a normal user with Filecoin) you must send a signed `message` to the network, and pay a fee to the miner that includes your `message`.  The signature on the message must match the key associated with an account with sufficient Filecoin to pay for the messages execution. The fee here is equivalent to transaction fees in Bitcoin and Ethereum, where it is proportional to the work that is done to process the message (Bitcoin prices messages per byte, Ethereum uses the concept of 'gas'. We also use 'gas').
+There are two routes to calling a method on an `actor`. First, to call a method as an external participant of the system (aka, a normal user with Filecoin) you must send a signed `message` to the network, and pay a fee to the miner that includes your `message`.  The signature on the message must match the key associated with an account with sufficient Filecoin to pay for the messages execution. The fee here is equivalent to transaction fees in Bitcoin and Ethereum, where it is proportional to the work that is done to process the message (Bitcoin prices messages per byte, Ethereum uses the concept of 'gas'. We also use 'gas').
 
 Second, an `actor` may call a method on another actor during the invocation of one of its methods.  However, the only time this may happen is as a result of some actor being invoked by an external users message (note: an actor called by a user may call another actor that then calls another actor, as many layers deep as the execution can afford to run for).
 
@@ -76,13 +86,11 @@ For clarity, we introduce the following types of entities to describe implementa
       - [Block Miner]({{<ref "docs/impl/block_miner.md">}})
       - [Block Propagator]({{<ref "docs/impl/block_propagator.md">}})
       - [Chain Manager]({{<ref "docs/impl/chain_manager.md">}})
-      - [Chain Verifier]({{<ref "docs/impl/chain_verifier.md">}})
 
   - In contrast, we use the term _static routine_ for a routine that only has access to its own internal state,
     such as a local daemon maintaining a key-value store. The following are the static routines in the Filecoin protocol:
 
       - [VM Interpreter]({{<ref "docs/impl/vm_interpreter.md">}})
-      - [Sector Manager]({{<ref "docs/impl/sector_manager.md">}})
 
 - **_APIs_** are messages that can be sent to routines. A client's view of a given sub-protocol, such as a request to a miner node's [Storage Provider]({{<ref "docs/impl/storage_provider.md">}}) to store files in the storage market, may require the execution of a series of APIs.
 

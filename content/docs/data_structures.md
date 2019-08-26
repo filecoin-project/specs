@@ -13,7 +13,7 @@ An address is an identifier that refers to an actor in the Filecoin state. All [
 - The data itself
 - Checksum (depending on the type of address)
 
-For more detail, see the full [address spec]({{<relref "address">}}).
+For more detail, see the full [address spec]({{<ref "/docs/detail/address.md">}}).
 
 ## Block
 

@@ -1,4 +1,4 @@
-# Definitions / Glossary
+# Glossary
 
 {{<js>}}
 

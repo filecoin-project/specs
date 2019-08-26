@@ -1,9 +1,6 @@
-# Network Manager
+# Network Interface
 
 {{<js>}}
-
-# Filecoin Network
-
 
 
 ## Message Transport
@@ -118,13 +115,6 @@ We also recommend to regularly check the ranking and drop and clear up the lowes
 
 All this to create a local view of for that node most useful connections to the network. The reputation may be stored permanently and be available between restarts - thus providing a neat bootstrap start list, too.
 
-
-
-
-
-
-{{% todo %}} Move the following to a different section, and expand on
-rationale for handshake message format
 
 ## Hello Handshake
 
