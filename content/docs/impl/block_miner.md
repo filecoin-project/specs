@@ -42,24 +42,18 @@ TODO: sectors need to be globally unique. This can be done either by having the 
 
 #### Step 2: Proving Storage (PoSt creation)
 
-At the beginning of their proving period, miners collect the proving set (the set of all live sealed sectors on the chain at this point), and then call `ProveStorage`. This process will take the entire proving period to complete.
-
 ```go
-func ProveStorage(sectorSize BytesAmount, sectors []commR, startTime BlockHeight) (PoSTProof, []FaultSet) {
-    var proofs []Proofs
-    var seeds []Seed
-    var faults []FaultSet
-    for t := 0; t < ProvingPeriod; t += ReseedPeriod {
-        seeds = append(seeds, GetSeedFromBlock(startTime+t))
-        proof, faultset := GenPost(sectors, seeds[t], vdfParams)
-        proofs = append(proofs, proof)
-        faults = append(faults, faultset)
-    }
-    return GenPostSnark(sectorSize, sectors, seeds, proofs), faults
+func ProveStorage(sectorSize BytesAmount, sectors []commR) PoStProof {
+    challengeBlockHeight := miner.ProvingPeriodEnd - POST_CHALLENGE_TIME
+
+    // Faults to be used are the currentFaultSet for the miner.
+    faults := miner.currentFaultSet
+    seed := GetRandFromBlock(challengeBlockHeight)
+    return GeneratePoSt(sectorSize, sectors, seed, faults)
 }
 ```
 
-Note: See ['Proof of Space Time'](proofs.md#proof-of-space-time) for more details.
+Note: See ['Proof of Space Time'](proof-of-spacetime.md) for more details.
 
 The proving set remains consistent during the proving period. Any sectors added in the meantime will be included in the next proving set, at the beginning of the next proving period.
 
@@ -96,7 +90,6 @@ Having registered as a miner, it's time to start making and checking tickets. At
 For additional details around how consensus works in Filecoin, see the [expected consensus spec](expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
 
-
 ### Ticket Generation
 
 For details of ticket generation, see the [expected consensus spec](expected-consensus.md#ticket-generation).
@@ -117,7 +110,7 @@ This process is repeated until either a winning ticket is found (and block publi
 Let's illustrate this with an example.
 
 Miner M is mining at Height H.
-Heaviest tipset at H-1 is {B0} 
+Heaviest tipset at H-1 is {B0}
 - New Round:
     - M produces a ticket at H, from B0's ticket (the min ticket at H-1)
     - M draws the ticket from height H-K to generate an ElectionProof
@@ -165,7 +158,7 @@ To create a block, the eligible miner must compute a few fields:
     - Strip the signatures off of the messages, and insert all the bare `Message`s for them into a sharray.
     - Aggregate all of the bls signatures into a single signature and use this to fill out the `BLSAggregate` field
   - For the secpk messages:
-    - Insert each of the secpk `SignedMessage`s into a sharray 
+    - Insert each of the secpk `SignedMessage`s into a sharray
   - Create a `TxMeta` object and fill each of its fields as follows:
     - `blsMessages`: the root cid of the bls messages sharray
     - `secpkMessages`: the root cid of the secp messages sharray
@@ -243,11 +236,11 @@ TODO: Ensure that if a miner earns a block reward while undercollateralized, the
 
 ### Notes on Block Reward Application
 
-As mentioned above, every round, a miner checks to see if they have been selected as the leader for that particular round (see [Secret Leader Election](expected-consensus.md#secret-leader-election) in the Expected Consensus spec for more detail). Thus, it is possible that multiple miners may be selected as winners in a given round, and thus, that there will be multiple blocks with the same parents that are produced at the same block height (forming a TipSet). Each of the winning miners will apply the block reward directly to their actor's state in their state tree. 
+As mentioned above, every round, a miner checks to see if they have been selected as the leader for that particular round (see [Secret Leader Election](expected-consensus.md#secret-leader-election) in the Expected Consensus spec for more detail). Thus, it is possible that multiple miners may be selected as winners in a given round, and thus, that there will be multiple blocks with the same parents that are produced at the same block height (forming a TipSet). Each of the winning miners will apply the block reward directly to their actor's state in their state tree.
 
 Other nodes will receive these blocks and form a TipSet out of the eligible blocks (those that have the same parents and are at the same block height). These nodes will then validate the TipSet. The full procedure for how to verify a TipSet can be found above in [Block Validation](#block-validation). To validate TipSet state, the validating node will, for each block in the TipSet, first apply the block reward value directly to the mining node's account and then apply the messages contained in the block.
 
-Thus, each of the miners who produced a block in the TipSet will receive a block reward. There will be no lockup. These rewards can be spent immediately. 
+Thus, each of the miners who produced a block in the TipSet will receive a block reward. There will be no lockup. These rewards can be spent immediately.
 
 Messages in Filecoin also have an associated transaction fee (based on the gas costs of executing the message). In the case where multiple winning miners included the same message in their blocks, only the first miner will be paid this transaction fee. The first miner is the miner with the lowest ticket value (sorted lexicographically). More details on message execution can be found in the [State Machine spec](state-machine.md#execution-calling-a-method-on-an-actor).
 

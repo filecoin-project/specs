@@ -95,7 +95,7 @@ Note: The details of this protocol including formats, datastructures, and algori
 2. **Storage Deal Start**: Clients makes sure data is in a [sector](definitions.md#sector)
 
     - **PieceInclusionProof:** Once the miner seals the sector, they update the PieceInclusionProof in the deal state, which the client then gets the next time they query that state.
-     - The PieceInclusionProof proves that the piece in the deal is contained in a sector whose commitment is on chain. The 'Merkle Translation' hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
+     - The PieceInclusionProof proves that the piece in the deal is contained in a sector whose commitment is on chain. The `commP` hash from earlier is used here. See [piece inclusion proof for more details](proofs.md#piece-inclusion-proof)
     -  Note: a client that is not interested in staying online to wait for PieceInclusionProof can leave immediately, however, they run the risk that their files don't actually get stored (but if their data is not stored, the miner will not be able to claim payment for it).
      - Note: In order to provide the piece inclusion proof, the miner needs to fill the sector. This may take some time. So there is a wait between the time the data is transferred to the miner, and when the piece inclusion proof becomes available.
    - **Mining**: Miner posts `seal commitment` and associated proof on chain by calling `CommitSector` and starts running `proofs of spacetime`. See [storage mining cycle](mining.md#storage-mining-cycle) for more details.
@@ -402,13 +402,11 @@ If `baseState` is `Unset` or a terminal state (`Complete`, `Rejected`, or `Faile
 
 ## Piece Commitment
 
-TODO: check if this section is not already repeated
+### commP
 
-A piece commitment (`CommP`) is a commitment to a file that a client wants to store in Filecoin. A client MUST store `CommP` in order to check the integrity of a stored file for future retrieval and MUST include it in the deal when proposing it to a miner.
+A piece commitment (`commP`) is the root hash of a piece that a client wants to store in Filecoin. It is generated using `RepHash` (as described in [Proof-of-Replication](zigzag-porep.md)) on some raw data which has been zero-padded to a multiple of 127 bytes, then preprocessed yielding `Fr32 padded` data which is a multiple of 128 bytes. 
 
-### CommP
 
-`CommP` is the root hash of a piece that a clients wants to store in Filecoin and it is generated on using `RepHash` (as described in TODO) on some raw data that respects the Storage Formats. 
 
 
 
@@ -435,8 +433,9 @@ For details on how UnixfsV1 works, see its spec [here](https://github.com/ipfs/s
 
 
 
-
 ## Storage Formats
+
+The Storage Format MUST be use for generating Filecoin proofs and hashing sectors data. 
 
 The current required storage format is `paddedfr32v1`.
 
@@ -445,6 +444,6 @@ The current required storage format is `paddedfr32v1`.
 A correctly formatted `paddedfr32v1` data must have:
 
 - **Fr32 Padding**: Every 32 bytes blocks MUST contain two zeroes in the most significant bits (every 254 bits must be followed by 2 zeroes if interpreted as little-endian number). That is, for each block, `0x11000000 & block[31] == 0`.
-- **Piece Padding**: blocks of 32 zero bytes MUST be added so that the total number of blocks (including *piece padding*) is a power of two.
+- **Piece Padding**: In order to generate minimal `PieceInclusionProofs`, blocks of 32 zero bytes MUST be added so that the total number of blocks (including *piece padding*) is a power of two. **Piece Padding** can be omitted if the prover wishes to generate unaligned proofs. [NOTE: not yet fully specified.]
 
 **Why do we need a special Storage Encoding Format?** In the Filecoin proofs we do operations in an arithmetic field of size `p`, where `p` is a prime of size `2^255`, hence the size of the data blocks must be smaller than `p`. We cautiously decide to have data blocks of size 254 to avoid possible overflows (data blocks numerical representation is bigger than `p`). 

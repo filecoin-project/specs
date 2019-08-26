@@ -110,7 +110,7 @@ We have describe three hash functions:
 | ------------- | ------------------------------------------------------------ | ------------- | -------------- | --------------------- |
 | `KDFHash`     | Hash function used as a KDF to derive the key to encode a single node. | TODO          | `32B`          | `Blake2s-256`         |
 | `CommRHash`   | Hash function used to hash all the commitments at every layer (`CommR`s) to generate `CommRStar` | TODO          | `32B`          | `Blake2s-256`         |
-| `RepCompress` | Collision Resistant Hash function used for the Merkle tree   | TODO          | `32B`          | `JubjubPedersen`      |
+| `RepCompress` | Collision Resistant Hash function used for the Merkle tree.   | 2 x `32B` + integer height          | `32B`          | `JubjubPedersen`      |
 | `RepHash`     | Merkle-tree based hash function used to generate commitments to sealed sectors, unsealed sectors, piece commitments and intermediate stepds of the Proof-of-Replication | TODO          | `32B`          | It uses `RepCompress` |
 
 #### RepHash
@@ -141,7 +141,7 @@ func RepHash(leaves []node) ([][]node, node) {
 			
 			input1 := append(heightPart, left...)
 			input := append(input1, right...)
-			hashed = RepCompress(input)
+			hashed = RepCompress(input, height)
 			nextRow = append(nextRow, hashed)
 		}
 
