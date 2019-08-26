@@ -11,12 +11,14 @@
 
 ## Important concepts and definitions
 Some important concepts relevant to expected consensus are:
+
 - [Verifiable Delay Function (VDF)](definitions.md#vdf)
 - [Verifiable Random Function (VRF)](defintions.md#vrf)
 - [TipSet](definitions.md#tipset)
 - [Ticket](definitions.md#ticket)
 - [Ticket Chain](defintions.md#ticket-chain)
-- [Height](definitions.md#height) -- In the realm of EC, it is worth noting that a new ticket must be produced at every height, consequently the duration of a round is bounded by the duration of the Verifiable Delay Function run to generate a ticket.
+- [Height](definitions.md#height)
+  - In the realm of EC, it is worth noting that a new ticket must be produced at every height, and consequently the duration of a round is bounded by the duration of the Verifiable Delay Function that is run to generate a ticket.
 - [Weight](definitions.md#weight)
 - [Power Fraction](definitions.md#power-fraction)
 - [ElectionProof](definitions.md#electionproof)
@@ -91,6 +93,7 @@ func CheckIfWinnerAtRound(key PrivateKey, n Integer, parentTipset Tipset) (bool,
 Note: Validity of blocks beyond appropriate ticket generation (defined below) is defined by the specific protocol using EC. For the Filecoin definition of a valid block, see the [mining spec](mining.md).
 
 The EC algorithm can be better understood by looking at its two major components in more detail:
+
 - [Leader Election](#secret-leader-election)
 - [Chain Selection](#chain-selection)
 

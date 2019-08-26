@@ -7,12 +7,11 @@ In this document, we give an introduction to each of the protocol data structure
 ## Address
 
 An address is an identifier that refers to an actor in the Filecoin state. All [actors](actors.md) (miner actors, the storage market actor, account actors) have an address. An address encodes information about:
+
 - Network this address belongs to
 - Type of data the address contains
 - The data itself
 - Checksum (depending on the type of address)
-
-
 
 For more detail, see the full [address spec]({{<relref "address">}}).
 
@@ -285,10 +284,10 @@ type SectorID uint64
 ## RLE+ Bitset Encoding
 
 RLE+ is a lossless compression format based on [RLE](https://en.wikipedia.org/wiki/Run-length_encoding).
-It's primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly,
+Its primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly,
 while keeping the same level of compression for large sets of contiugous bits.
 
-In tests it has shown to be more compact than RLE iteself, as well as [Concise](https://arxiv.org/pdf/1004.0403.pdf) and [Roaring](https://roaringbitmap.org/).
+In tests it has shown to be more compact than RLE itself, as well as [Concise](https://arxiv.org/pdf/1004.0403.pdf) and [Roaring](https://roaringbitmap.org/).
 
 ### Format
 
