@@ -52,6 +52,7 @@ The init actor is responsible for creating new actors on the filecoin network. T
 type InitActorState struct {
     addressMap {Address:ID}<Hamt>
     nextId UInt
+    network String
 }
 
 type InitActorMethod union {
@@ -67,11 +68,18 @@ type InitActorMethod union {
 
 ```sh
 type InitConstructor struct {
+    network String
 }
 
 ```
 
 **Algorithm**
+
+```go
+func InitActor(network String) {
+    self.network = network
+}
+```
 
 #### `Exec`
 
