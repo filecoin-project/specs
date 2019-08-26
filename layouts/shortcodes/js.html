@@ -1,14 +1,23 @@
 <script>
+  structLocs = {
+    "Block":                   "data_structures",
+    // "ChainManager_BlockState": "impl/chain_manager",
+  };
+
   structRefs = {
-    "Block":                   "impl/block_miner",
-    "ChainManager_BlockState": "impl/chain_manager",
+    "TxMeta":                  "Block",
   };
 
   fillCodeRefs = (xs) => {
     for (let x of xs) {
-      let res = structRefs[x.innerText];
+      let key = x.innerText;
+      let newKey = structRefs[x.innerText];
+      if (newKey !== undefined) {
+        key = newKey;
+      }
+      let res = structLocs[key];
       if (res !== undefined) {
-        x.innerHTML = "<a href=\"/docs/" + res + "/#go__" + x.innerHTML + "\">" + x.innerHTML + "</a>";
+        x.innerHTML = "<a href=\"/docs/" + res + "/#go__" + key + "\">" + x.innerHTML + "</a>";
       }
     }
   };

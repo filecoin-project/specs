@@ -1,5 +1,7 @@
 # ZigZag: Offline PoRep Circuit Spec
 
+{{<js>}}
+
 ZigZag is the Proof of Replication used in Filecoin. The prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
 
 ZigZag has been presented by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).

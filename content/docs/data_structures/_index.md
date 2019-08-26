@@ -1,5 +1,7 @@
 # Data Structures
 
+{{<js>}}
+
 In this document, we give an introduction to each of the protocol data structures and then explain how to encode these data structures for use in other parts of Filecoin (e.g. network protocols and the blockchain).
 
 ## Address

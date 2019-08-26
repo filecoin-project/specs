@@ -1,5 +1,7 @@
 # Storage Provider
 
+{{<js>}}
+
 # The Filecoin Storage Market
 
 ### What is the Filecoin Storage Market

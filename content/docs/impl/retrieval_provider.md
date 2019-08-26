@@ -1,5 +1,7 @@
 # Retrieval Provider
 
+{{<js>}}
+
 # `Retrieval Market` V0
 
 ### What is the `Retrieval Market`

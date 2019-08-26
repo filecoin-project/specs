@@ -1,5 +1,7 @@
 # Sharray
 
+{{<js>}}
+
 > Sharded IPLD Array
 
 The Sharray is an IPLD tree structure used to store an array of items. It is designed for usecases that know all items at the time of creation and do not need insertion or deletion.

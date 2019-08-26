@@ -1,5 +1,7 @@
 # Definitions / Glossary
 
+{{<js>}}
+
 ## Updates to definitions
 
 To make any updates to these definitions please submit a pull request with the changes, or open an issue and one of the maintainers will do it for you.

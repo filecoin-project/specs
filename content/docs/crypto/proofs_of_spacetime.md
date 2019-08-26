@@ -1,5 +1,7 @@
 ## Proof-of-Spacetime
 
+{{<js>}}
+
 This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 ## Rational PoSt

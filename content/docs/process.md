@@ -1,5 +1,7 @@
 # Filecoin Spec Process (v0)
 
+{{<js>}}
+
 ## 'Catch Up' Mode
 
 Until we get to 'spec parity' where our current level of understanding of the protocol and the spec are in sync, changes will be made to the spec by a simple PR process. If something is missing, PR it in, if something is wrong, PR a fix, if something needs to be elaborated, PR in updates. What is in the top level of this repo, in master, is the spec.

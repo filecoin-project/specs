@@ -1,5 +1,7 @@
 # Block Receiver
 
+{{<js>}}
+
 - {{% todo %}} finish {{% /todo %}}
 
 

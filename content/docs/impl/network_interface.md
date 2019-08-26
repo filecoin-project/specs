@@ -1,5 +1,7 @@
 # Network Manager
 
+{{<js>}}
+
 # Filecoin Network
 
 

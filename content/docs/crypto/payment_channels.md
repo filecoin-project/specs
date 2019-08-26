@@ -1,6 +1,6 @@
 # Payments
 
-
+{{<js>}}
 
 ## Payment Channels
 

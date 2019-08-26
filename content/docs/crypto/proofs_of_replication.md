@@ -1,5 +1,7 @@
 # Proof-of-Replication
 
+{{<js>}}
+
 This spec describes the specific Proof-of-Replication used in Filecoin called *ZigZag*. 
 
 ZigZag has been presented by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).

@@ -1,5 +1,7 @@
 # Cryptographic Tools
 
+{{<js>}}
+
 In the descriptions that follow, we assume the following components.
 
 - Cryptographic primitives:
