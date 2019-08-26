@@ -4,7 +4,8 @@ headless: true
 
 * [**Overview**]({{<ref "/">}})
 
-* [**Filecoin VM**]({{<ref "/docs/filecoin_vm">}})
+  - [Filecoin VM]({{<ref "/#filecoin-vm">}})
+  - [Protocol Entities]({{<ref "/#protocol-entities">}})
 
 * [**Cryptographic Tools**]({{<ref "/docs/crypto">}})
 
@@ -12,9 +13,6 @@ headless: true
   - [Proofs of Spacetime]({{<ref "/docs/crypto/proofs_of_spacetime">}})
   - [Proofs of Replication]({{<ref "/docs/crypto/proofs_of_replication">}})
   - [Payment Channels]({{<ref "/docs/crypto/payment_channels">}})
-  - [Depth-Robust Graphs]({{<ref "/docs/crypto/depth_robust_graphs">}})
-  - [zkSNARK Systems]({{<ref "/docs/crypto/snarks">}})
-  - [Merkle DAGs]({{<ref "/docs/crypto/merkle_trees">}})
   - [Signatures]({{<ref "/docs/crypto/signatures">}})
 
 * [**Implementation**]({{<ref "/docs/impl">}})

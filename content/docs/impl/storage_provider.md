@@ -447,3 +447,30 @@ A correctly formatted `paddedfr32v1` data must have:
 - **Piece Padding**: In order to generate minimal `PieceInclusionProofs`, blocks of 32 zero bytes MUST be added so that the total number of blocks (including *piece padding*) is a power of two. **Piece Padding** can be omitted if the prover wishes to generate unaligned proofs. [NOTE: not yet fully specified.]
 
 **Why do we need a special Storage Encoding Format?** In the Filecoin proofs we do operations in an arithmetic field of size `p`, where `p` is a prime of size `2^255`, hence the size of the data blocks must be smaller than `p`. We cautiously decide to have data blocks of size 254 to avoid possible overflows (data blocks numerical representation is bigger than `p`). 
+
+
+
+## Miners Claiming Earnings
+
+Storage Miners claim their Storage Market earnings via payment channels.
+
+The client proposes the cadence of the earnings for a deal by creating `SignedVoucher`-s. Each vouchers specify how often Storage Miners can claim earnings and how much each earning should be, more precisely, each voucher has some tokens assigned and can be redeemed only at a particular block height. The vouchers are part of the `PaymentInfo` included in the `StorageDealProposal`. When receiving a proposal, a Storage Miner can review and accept these terms by completing the deal protocol.
+
+After the block defined in each `SignedVoucher` is passed, the Storage Miner could claim the earning by updating the payment channel calling `UpdateChannelState` on the `PaymentChannel` actor for a particular `SignedVoucher`. This call passes if the Storage Miner is still storing the piece in sector and if the Storage Miner is not late in their PoSt submission and if the time specified in the `SignedVoucher` has passed.
+
+
+
+## Storage Miner Payments
+
+TODO: these bits were pulled out of a different doc, and describe strategies by which client payments to a miner might happen. We need to organize 'clients paying miners' better, unclear if it should be the same doc that talks about payment channel constructions.
+
+1. **Updates Contingent on Inclusion Proof**
+   - In this case, the miner must provide an inclusion proof that shows the client data is contained in one of the miners sectors on chain, and submit that along with the payment channel update.
+   - This can be pretty expensive for smaller files, and ideally, we make it to one of the latter two options
+   - This option does however allow clients to upload their files and leave.
+2. **Update Contingent on CommD Existence**
+   - For this, the client needs to wait around until the miner finishes packing a sector, and computing its commD. The client then signs a set of payment channel updates that are contingent on the given commD existing on chain.
+   - This route makes it difficult for miners to re-seal smaller files (really, small files just suck)
+3. **Reconciled Payment**
+   - In either of the above cases, the miner may go back to the client and say "Look, these payment channel updates you gave me are able to be cashed in right now, could you take them all and give me back a single update for a slightly smaller amount?".
+   - The slightly smaller amount could be the difference in transaction fees, meaning the client saves money, and the miner gets the same amount.

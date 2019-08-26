@@ -1,18 +1,5 @@
 # Payments
 
-### What are payments
-
-### What payments affect
-
-### Dependencies
-
-## Miners Claiming Earnings
-
-Storage Miners claim their Storage Market earnings via payment channels.
-
-The client proposes the cadence of the earnings for a deal by creating `SignedVoucher`-s. Each vouchers specify how often Storage Miners can claim earnings and how much each earning should be, more precisely, each voucher has some tokens assigned and can be redeemed only at a particular block height. The vouchers are part of the `PaymentInfo` included in the `StorageDealProposal`. When receiving a proposal, a Storage Miner can review and accept these terms by completing the deal protocol.
-
-After the block defined in each `SignedVoucher` is passed, the Storage Miner could claim the earning by updating the payment channel calling `UpdateChannelState` on the `PaymentChannel` actor for a particular `SignedVoucher`. This call passes if the Storage Miner is still storing the piece in sector and if the Storage Miner is not late in their PoSt submission and if the time specified in the `SignedVoucher` has passed.
 
 
 ## Payment Channels
@@ -80,18 +67,3 @@ Open Questions:
 
 - In a number of usecases, this protocol will require the miner look up and connect to a client to propose reconciliation. How does a miner look up and connect to a client over libp2p given only their filecoin address?
 - Without repair miners, this protocol will likely not be used that much. Should that be made clear? Should there be other considerations added to compensate?
-
-## Storage Miner Payments
-
-TODO: these bits were pulled out of a different doc, and describe strategies by which client payments to a miner might happen. We need to organize 'clients paying miners' better, unclear if it should be the same doc that talks about payment channel constructions.
-
-1. **Updates Contingent on Inclusion Proof**
-   - In this case, the miner must provide an inclusion proof that shows the client data is contained in one of the miners sectors on chain, and submit that along with the payment channel update.
-   - This can be pretty expensive for smaller files, and ideally, we make it to one of the latter two options
-   - This option does however allow clients to upload their files and leave.
-2. **Update Contingent on CommD Existence**
-   - For this, the client needs to wait around until the miner finishes packing a sector, and computing its commD. The client then signs a set of payment channel updates that are contingent on the given commD existing on chain.
-   - This route makes it difficult for miners to re-seal smaller files (really, small files just suck)
-3. **Reconciled Payment**
-   - In either of the above cases, the miner may go back to the client and say "Look, these payment channel updates you gave me are able to be cashed in right now, could you take them all and give me back a single update for a slightly smaller amount?".
-   - The slightly smaller amount could be the difference in transaction fees, meaning the client saves money, and the miner gets the same amount.

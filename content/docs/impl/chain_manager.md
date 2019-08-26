@@ -298,3 +298,25 @@ Output: 0, 1
 5. Everything checks out, it's a valid election proof
         return 1
 ```
+
+
+### ChainTipsManager
+
+The Chain Tips Manager is a subcomponent of Filecoin consensus that is technically up to the implementer, but since the pseudocode in previous sections reference it, it is documented here for clarity.
+
+The Chain Tips Manager is responsible for tracking all live tips of the Filecoin blockchain, and tracking what the current 'best' tipset is.
+
+```go
+// Returns the ticket that is at round 'r' in the chain behind 'head'
+func TicketFromRound(head Tipset, r Round) {}
+
+// Returns the tipset that contains round r (Note: multiple rounds' worth of tickets may exist within a single block due to losing tickets being added to the eventually successfully generated block)
+func TipsetFromRound(head Tipset, r Round) {}
+
+// GetBestTipset returns the best known tipset. If the 'best' tipset hasn't changed, then this
+// will return the previous best tipset.
+func GetBestTipset()
+
+// Adds the losing ticket to the chaintips manager so that blocks can be mined on top of it
+func AddLosingTicket(parent Tipset, t Ticket)
+```

@@ -31,61 +31,8 @@ A block header contains information relevant to a particular point in time over 
 **Note:** A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms `block` and `block header` interchangeably.
 {{% /notice %}}
 
-```sh
-type BlockHeader struct {
-	## Miner is the address of the miner actor that mined this block.
-	miner Address
+{{< goFile "Block" >}}
 
-	## Tickets is a chain (possibly singleton) of tickets ending with a winning ticket submitted with this block.
-	tickets [Ticket]
-
-	## ElectionProof is generated from a past ticket and proves this miner
-	## is a leader at this round
-	electionProof ElectionProof
-
-	## Parents is an array of distinct CIDs of parents on which this block was based.
-	## Typically one, but can be several in the case where there were multiple winning ticket-
-	## holders for a round.
-	## The order of parent CIDs is not defined.
-	parents [&Block]
-
-	## ParentWeight is the aggregate chain weight of the parent set.
-	parentWeight UInt
-
-	## Height is the chain height of this block.
-	height UInt
-
-	## StateRoot is a cid pointer to the state tree after application of the
-	## transactions state transitions.
-	stateRoot &StateTree
-
-	## Messages is the set of messages included in this block. This field is the Cid
-	## of the TxMeta object that contains the bls and secpk signed message trees
-	messages &TxMeta
-
-	## BLSAggregate is an aggregated BLS signature for all the messages in this block that
-	## were signed using BLS signatures
-	blsAggregate Signature
-
-	## MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-	## This field is the Cid of the root of a sharray of MessageReceipts.
-	messageReceipts &[MessageReceipt]
-
-	## The block Timestamp is used to enforce a form of block delay by honest miners.
-	## Unix time UTC timestamp (in seconds) stored as an unsigned integer.
-	timestamp Timestamp
-
-	## BlockSig is a signature over the hash of the entire block with the miners
-	## worker key to ensure that it is not tampered with after creation
-	blockSig Signature
-} representation tuple
-
-type TxMeta struct {
-  blsMessages &[&Message]<Sharray>
-
-	secpkMessages &[&SignedMessage]<Sharray>
-} representation tuple
-```
 
 ## TipSet
 
