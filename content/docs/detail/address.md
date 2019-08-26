@@ -44,27 +44,9 @@ When encoded to a string a filecoin address contains the following:
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 ```
 
-```sh
-type Address union {
-    | AddressId 0
-    | AddressSecp256k1 1
-    | AddressActor 2
-    | AddressBLS12_381 3
-} representation byteprefix
+{{<goFile Address>}}
 
-## ID
-type AddressId UInt
 
-## Blake2b-160 Hash
-type AddressSecp256k1 Bytes
-
-## Blake2b-160 Hash
-type AddressActor Bytes
-
-## 48 byte PublicKey
-type AddressBLS12_381 Bytes
-
-```
 #### Network Prefix
 
 The **network prefix** is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be `f` for filecoin mainnet or `t` for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.
