@@ -62,17 +62,6 @@ type InitActorMethod union {
 } representation keyed
 ```
 
-#### `Constructor`
-
-**Parameters**
-
-```sh
-type InitConstructor struct {
-    network String
-}
-
-```
-
 **Algorithm**
 
 ```go
