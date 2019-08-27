@@ -3,7 +3,7 @@ type Address union {
     | AddressSecp256k1 1
     | AddressActor 2
     | AddressBLS12_381 3
-} representation byteprefix
+} // representation byteprefix
 
 // ID
 type AddressId UInt
