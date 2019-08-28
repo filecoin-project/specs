@@ -1,0 +1,20 @@
+<script>
+  structRefs = {
+    "Block":                   "impl/block_miner",
+    "ChainManager_BlockState": "impl/chain_manager",
+  };
+
+  fillCodeRefs = (xs) => {
+    for (let x of xs) {
+      let res = structRefs[x.innerText];
+      if (res !== undefined) {
+        x.innerHTML = "<a href=\"/docs/" + res + "/#go__" + x.innerHTML.toLowerCase() + "\">" + x.innerHTML + "</a>";
+      }
+    }
+  };
+
+  window.onload = (event) => {
+    fillCodeRefs(document.getElementsByClassName("nx"));
+    fillCodeRefs(document.getElementsByClassName("codeRef"));
+  };
+</script>

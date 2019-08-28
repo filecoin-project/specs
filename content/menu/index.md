@@ -2,39 +2,36 @@
 headless: true
 ---
 
-[**Overview**]({{< relref "/" >}})
+* [**Overview**]({{< relref "/" >}})
 
-**Core**
+* [**Filecoin VM**]({{< relref "/docs/filecoin_vm.md" >}})
 
-* [Data Structures]({{< relref "/docs/data-structures.md" >}})
-* Cryptography
-  * [Address]({{< relref "/docs/address.md" >}})
-  * [Signatures]({{< relref "/docs/signatures.md" >}})
-  * [Block Validation]({{< relref "/docs/validation.md" >}})
-* [Network]({{< relref "/docs/networking.md" >}})
-  * [Data Propagation]({{< relref "/docs/data-propagation.md" >}})
-  * [Specific Protocols]({{< relref "/docs/network-protocols.md" >}})
-* [Expected Consensus]({{< relref "/docs/expected-consensus.md" >}})
-* [State Machine]({{< relref "/docs/state-machine.md" >}})
-  * [Local Storage]({{< relref "/docs/local-storage.md" >}})
+* [**Cryptographic Tools**]({{< relref "/docs/crypto" >}})
 
-[**Actors**]({{< relref "/docs/actors.md" >}})
+  - [Expected Consensus]({{< relref "/docs/crypto/expected_consensus.md" >}})
+  - [Proofs of Spacetime]({{< relref "/docs/crypto/proofs_of_spacetime.md" >}})
+  - [Proofs of Replication]({{< relref "/docs/crypto/proofs_of_replication.md" >}})
+  - [Payment Channels]({{< relref "/docs/crypto/payment_channels.md" >}})
+  - [Depth-Robust Graphs]({{< relref "/docs/crypto/depth_robust_graphs.md" >}})
+  - [zkSNARK Systems]({{< relref "/docs/crypto/snarks.md" >}})
+  - [Merkle DAGs]({{< relref "/docs/crypto/merkle_trees.md" >}})
+  - [Signatures]({{< relref "/docs/crypto/signatures.md" >}})
 
-* [Mining]({{< relref "/docs/mining.md" >}})
-* [Storage Market]({{< relref "/docs/storage-market.md" >}})
-* [Retrieval Market]({{< relref "/docs/retrieval-market.md" >}})
-* [Payments]({{< relref "/docs/payments.md" >}})
-* [Faults]({{< relref "/docs/faults.md" >}})
+* [**Implementation**]({{< relref "/docs/impl" >}})
 
-[**Proofs**]({{< relref "/docs/proofs.md" >}})
+  - [Client APIs]({{< relref "/docs/impl/client_apis.md" >}})
+  - [VM Interpreter]({{< relref "/docs/impl/vm_interpreter.md" >}})
+  - [Storage Provider]({{< relref "/docs/impl/storage_provider.md" >}})
+  - [Retrieval Provider]({{< relref "/docs/impl/retrieval_provider.md" >}})
+  - [Block Miner]({{< relref "/docs/impl/block_miner.md" >}})
+  - [Block Propagator]({{< relref "/docs/impl/block_propagator.md" >}})
+  - [Chain Manager]({{< relref "/docs/impl/chain_manager.md" >}})
+  - [Chain Verifier]({{< relref "/docs/impl/chain_verifier.md" >}})
+  - [Sector Manager]({{< relref "/docs/impl/sector_manager.md" >}})
+  - [Network Interface]({{< relref "/docs/impl/network_interface.md" >}})
 
-* [Proof-of-Replication]({{< relref "/docs/zigzag-porep.md" >}})
-  * [Circuit]({{< relref "/docs/zigzag-circuit.md" >}})
-* [Proof-of-Spacetime]({{< relref "/docs/proof-of-spacetime.md" >}})
+* [**Data Structures**]({{< relref "/docs/data_structures" >}})
 
-[**Glossary**]({{< relref "/docs/definitions.md" >}})
+* [**Glossary**]({{< relref "/docs/glossary.md" >}})
 
-**Spec**
-
-* [Style]({{< relref "/docs/style.md" >}})
-* [Process]({{< relref "/docs/process.md" >}})
+* [**Process**]({{< relref "/docs/process.md" >}})

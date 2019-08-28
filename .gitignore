@@ -1,6 +1,2 @@
-# Build outbook from `gitbook serve`
-_book
-public
-resources/_gen
-pdf-build
-.pdfworking
+resources
+go.mod

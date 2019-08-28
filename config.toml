@@ -1,4 +1,4 @@
-baseURL = "https://filecoin-project.github.io/specs/"
+# baseURL = "https://filecoin-project.github.io/specs/"
 languageCode = "en-us"
 title = "Filecoin Spec"
 canonifyurls = true
@@ -7,7 +7,7 @@ relativeURLs = true
 theme = "book"
 pygmentsCodeFences = true
 pygmentsUseClasses = true
-enableGitInfo = true
+# enableGitInfo = true
 disableKinds = ["taxonomy", "taxonomyTerm"]
 
 [params]
@@ -32,12 +32,12 @@ BookEnableJS = true
 
 # Set source repository location.
 # Used for 'Last Modified' and 'Edit this page' links.
-BookRepo = "https://github.com/filecoin-project/specs"
+# BookRepo = "https://github.com/filecoin-project/specs"
 
 # Enable "Edit this page" links for 'doc' page type.
 # Disabled by default. Uncomment to enable. Requires 'BookRepo' param.
 # Path must point to 'content' directory of repo.
-BookEditPath = "edit/master"
+# BookEditPath = "edit/master"
 
 # Configure the date format used on the pages
 # - In git information
