@@ -87,6 +87,7 @@ Note: The details of this protocol including formats, datastructures, and algori
   - If the miner accepts, the client now sends the data to the miner
   - Once the miner receives the data:
     - They validate that the data matches the storage market hash claimed by the client
+		- They validate that `commP` supplied in deal payments is correct
     - They stage it into a sector and set the deal state to `Staged`
 
 
