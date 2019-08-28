@@ -130,7 +130,7 @@ func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sectorCou
     for n := 0; n < POST_CHALLENGES_COUNT; n++ {
         attemptedSectors := {SectorID:bool}
         while challenges[n] == nil {
-            challenge := DerivePoStChallenge(seed, n, faults, attempt, sectorSize, sectorCount)
+            challenge := DerivePoStChallenge(seed, n, attempt, sectorSize, sectorCount)
 
             // check if we landed in a faulty sector
             if !faults.Contains(challenge.Sector) {
