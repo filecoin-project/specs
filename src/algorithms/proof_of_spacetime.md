@@ -59,9 +59,9 @@ Each reported fault carries a penality with it.
 func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults FaultSet) PoStProof {
     // Generate the Merkle Inclusion Proofs + Faults
 
+    challenges := DerivePoStChallenges(seed, faults, sectorSize, SortAsc(GetSectorIds(sectors)))
+    challengedSectors := []
     inclusionProofs := []
-	sectorsSorted := []
-    challenges := DerivePoStChallenges(seed, faults, sectorSize, len(sectors))
 
     for i := 0; i < len(challenges); i++ {
         challenge := challenges[i]
@@ -74,13 +74,13 @@ func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults F
         }
 
         inclusionProofs[n] = inclusionProof
-		sectorsSorted[i] = sectors[challenge.Sector]
+        challengedSectors[i] = sectors[challenge.Sector]
     }
 
     // Generate the snark
-    snark_proof := GeneratePoStSnark(sectorSize, challenges, sectorsSorted, inclusionProofs)
+    snarkProof := GeneratePoStSnark(sectorSize, challenges, challengedSectors, inclusionProofs)
 
-    return snark_proof
+    return snarkProof
 }
 ```
 
@@ -91,17 +91,16 @@ func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults F
 ```go
 // Verify a PoSt.
 func VerifyPoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, proof PoStProof, faults FaultSet) bool {
-    challenges := DerivePoStChallenges(seed, faults, sectorSize, len(sectors))
-    sectorsSorted := []
+    challenges := DerivePoStChallenges(seed, faults, sectorSize, SortAsc(GetSectorIds(sectors)))
+    challengedSectors := []
 
     // Match up commitments with challenges
     for i := 0; i < len(challenges); i++ {
-        challenge := challenges[i]
-        sectorsSorted[i] = sectors[challenge.Sector]
+        challengedSectors[i] = sectors[challenges[i].Sector]
     }
 
     // Verify snark
-    return VerifyPoStSnark(sectorSize, challenges, sectorsSorted)
+    return VerifyPoStSnark(sectorSize, challenges, challengedSectors)
 }
 ```
 
@@ -115,7 +114,7 @@ Seed [32]byte
 
 ```go
 type Challenge struct {
-    Sector Uint
+    Sector SectorID
     Leaf Uint
 }
 ```
@@ -124,13 +123,13 @@ type Challenge struct {
 
 ```go
 // Derive the full set of challenges for PoSt.
-func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sectorCount Uint) [POST_CHALLENGES_COUNT]Challenge {
+func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sortedSectors []SectorID) [POST_CHALLENGES_COUNT]Challenge {
     challenges := []
 
     for n := 0; n < POST_CHALLENGES_COUNT; n++ {
         attemptedSectors := {SectorID:bool}
         while challenges[n] == nil {
-            challenge := DerivePoStChallenge(seed, n, attempt, sectorSize, sectorCount)
+            challenge := DerivePoStChallenge(seed, n, attempt, sectorSize, sortedSectors)
 
             // check if we landed in a faulty sector
             if !faults.Contains(challenge.Sector) {
@@ -141,7 +140,7 @@ func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sectorCou
             // invalid challenge, regenerate
             attemptedSectors[challenge.Sector] = true
 
-            if len(attemptedSectors) >= sectorCount {
+            if len(attemptedSectors) >= len(sortedSectors) {
                 Fatal("All sectors are faulty")
             }
         }
@@ -151,17 +150,19 @@ func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sectorCou
 }
 
 // Derive a single challenge for PoSt.
-func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sectorCount Uint) Challenge {
-    n_bytes := WriteUintToLittleEndian(n)
-    data := concat(seed, n_bytes, WriteUintToLittleEndian(attempt))
-    challenge_bytes := blake2b(data)
+func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sortedSectors []SectorID) Challenge {
+    nBytes := WriteUintToLittleEndian(n)
+    data := concat(seed, nBytes, WriteUintToLittleEndian(attempt))
+    challengeBytes := blake2b(data)
 
-    sector_challenge := ReadUintLittleEndian(challenge_bytes[0..8])
-    leaf_challenge := ReadUintLittleEndian(challenge_bytes[8..16])
+    sectorChallenge := ReadUintLittleEndian(challengeBytes[0..8])
+    leafChallenge := ReadUintLittleEndian(challengeBytes[8..16])
+
+    sectorIdx := sectorChallenge % sectorCount
 
     return Challenge {
-        Sector: sector_challenge % sectorCount,
-        Leaf: leaf_challenge % (sectorSize / NODE_SIZE),
+        Sector: sortedSectors[sectorIdx],
+        Leaf: leafChallenge % (sectorSize / NODE_SIZE),
     }
 }
 ```
