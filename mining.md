@@ -104,7 +104,7 @@ Chain selection is a crucial component of how the Filecoin blockchain works. Eve
 
 The block structure and serialization is detailed in [the datastructures spec - block](data-structures.md#block). Check there for details on fields and types.
 
-In order to validate a block coming in from the network at height `N` was well mined a miner must do the following:
+In order to validate that a block coming in from the network at height `N` was properly mined, a miner must do the following:
 
 ```go
 func VerifyBlock(blk Block) {
@@ -206,9 +206,10 @@ func GetRandFromBlock(blk) []byte {
 }
 ```
 
-If all of this lines up, the block is valid. The miner repeats this for all blocks in a TipSet, and for all TipSets formed from incoming blocks.
+If all of these checks pass successfully, the block is valid. Remember that there can be multiple valid blocks at a particular height `N`. We use the term [`TipSet`](https://github.com/filecoin-project/specs/blob/master/definitions.md#tipset) to refer to blocks that share the same height and the same set of parents. Thus, there may be multiple TipSets formed from incoming blocks, even if they all were mined at the same height `N`. The miner must repeat this block validation process for all blocks in all TipSets that are formed from incoming blocks. The miner should also be keeping track of TipSets that are formed from incoming blocks for [block creation](#block-creation).
 
-Once they've ensured all blocks in the heaviest TipSet received were properly mined, they can mine on top of it. If they weren't, the miner may need to ensure the next heaviest `Tipset` was properly mined. This might mean the same `Tipset` with invalid blocks removed, or an altogether different one.
+
+Once a miner has ensured that all blocks in the [heaviest TipSet](https://github.com/filecoin-project/specs/blob/master/expected-consensus.md#chain-weighting), i.e. the TipSet that results in the highest aggregated chain weight, were properly mined, the miner can mine on top of this TipSet (block mining process is detailed in the next sections). If the blocks in the heaviest TipSet weren't properly formed, the miner may need to ensure that the next heaviest `Tipset` was properly mined. This might mean the same `Tipset` with invalid blocks removed, or an altogether different one.
 
 If no valid blocks are received, a miner may run leader election again (see [ticket generation](expected-consensus.md#ticket-generation)).
 
@@ -356,12 +357,13 @@ To create a block, the eligible miner must compute a few fields:
 - `Tickets` - An array containing a new ticket, and, if applicable, any intermediary tickets generated to prove appropriate delay for any failed election attempts. See [ticket generation](expected-consensus.md#ticket-generation).
 - `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [checking election results](expected-consensus.md#checking-election-results).
 - `ParentWeight` - As described in [Chain Weighting](expected-consensus.md#chain-weighting).
-- `Parents` - the CIDs of the parent blocks.
+- `Parents` - the CIDs of the parent blocks, i.e. the parent `TipSet`.
 - `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
-  - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
-  - For each block in the parent set, ordered by their tickets:
-    - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.
-    - Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
+  - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set, assuming the TipSet was properly formed).
+  - Order all blocks in the parent set (the TipSet) by their tickets
+  - For each block in the parent set:
+    - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it -- do not reapply the message.
+    - Transaction fees are given to the miner of the block that the first occurrence of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
     - It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state.
     - TODO: define message conflicts in the state-machine doc, and link to it from here
 - `MsgRoot` - To compute this:
