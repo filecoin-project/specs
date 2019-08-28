@@ -7,6 +7,7 @@ entries:
   - proof_of_spacetime_parameters.md
   - proof_of_spacetime
   - payment_channels
-  - vdf
+  - block_sync
+  - gossip_sub
   - crypto
 ---

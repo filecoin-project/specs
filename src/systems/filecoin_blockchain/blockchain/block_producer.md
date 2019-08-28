@@ -4,7 +4,7 @@ title: Block Producer
 
 # Mining Blocks
 
-Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [TipSets](expected-consensus.md#tipsets) seen on the network.
+Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [Tipsets](expected-consensus.md#tipsets) seen on the network.
 
 For additional details around how consensus works in Filecoin, see the [expected consensus spec](expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
@@ -18,13 +18,13 @@ New tickets are generated using the last ticket in the ticket-chain. Generating 
 Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block (see [block creation](#block-creation)).
 
 At any height `H`, there are three possible situations:
-- The miner is eligible to mine a block: they produce their block and form a TipSet with it and other blocks received in this round (if there are any), and resume mining at the next height `H+1`.
-- The miner is not eligible to mine a block but has received blocks: they form a TipSet with them and resume mining at the next height `H+1`.
+- The miner is eligible to mine a block: they produce their block and form a Tipset with it and other blocks received in this round (if there are any), and resume mining at the next height `H+1`.
+- The miner is not eligible to mine a block but has received blocks: they form a Tipset with them and resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block and has received no blocks: they run leader election again, using:
     - their losing ticket from the last leader election to produce a new ticket (the `Tickets` array in the block to be published grows with each new ticket generated).
     - the ticket `H + 1 - K` blocks back to attempt to generate an `ElectionProof`.
 
-This process is repeated until either a winning ticket is found (and block published) or a new valid TipSet comes in from the network.
+This process is repeated until either a winning ticket is found (and block published) or a new valid Tipset comes in from the network.
 
 Let's illustrate this with an example.
 
@@ -51,7 +51,7 @@ Heaviest tipset at H-1 is {B0}
     - M has received B4 from the network, mined atop {B1,B2,B3}
 - New Round with M mining atop B4
 
-Anytime a miner receives new blocks, it should evaluate which is the heaviest TipSet it knows about and mine atop it.
+Anytime a miner receives new blocks, it should evaluate which is the heaviest Tipset it knows about and mine atop it.
 
 ## Block Creation
 
@@ -96,7 +96,7 @@ To create a block, the eligible miner must compute a few fields:
 
 An eligible miner can start by filling out `Parents`, `Tickets` and `ElectionProof` with values from the ticket checking process.
 
-Next, they compute the aggregate state of their selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of the blocks' parent TipSet, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
+Next, they compute the aggregate state of their selected parent blocks, the `ParentState`. This is done by taking the aggregate parent state of the blocks' parent Tipset, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets 'virtual block'. For more details on message execution and state transitions, see the [Filecoin state machine](state-machine.md) document.
 
 Once the miner has the aggregate `ParentState`, they must apply the block reward. This is done by adding the correct block reward amount to the miner owner's account balance in the state tree. The reward will be spendable immediately in this block. See [block reward](#block-rewards) for details on how the block reward is structured. See [Notes on Block Reward Application](#notes-on-block-reward-application) for some of the nuances in applying block rewards.
 
@@ -155,11 +155,11 @@ TODO: Ensure that if a miner earns a block reward while undercollateralized, the
 
 ## Notes on Block Reward Application
 
-As mentioned above, every round, a miner checks to see if they have been selected as the leader for that particular round (see [Secret Leader Election](expected-consensus.md#secret-leader-election) in the Expected Consensus spec for more detail). Thus, it is possible that multiple miners may be selected as winners in a given round, and thus, that there will be multiple blocks with the same parents that are produced at the same block height (forming a TipSet). Each of the winning miners will apply the block reward directly to their actor's state in their state tree.
+As mentioned above, every round, a miner checks to see if they have been selected as the leader for that particular round (see [Secret Leader Election](expected-consensus.md#secret-leader-election) in the Expected Consensus spec for more detail). Thus, it is possible that multiple miners may be selected as winners in a given round, and thus, that there will be multiple blocks with the same parents that are produced at the same block height (forming a Tipset). Each of the winning miners will apply the block reward directly to their actor's state in their state tree.
 
-Other nodes will receive these blocks and form a TipSet out of the eligible blocks (those that have the same parents and are at the same block height). These nodes will then validate the TipSet. The full procedure for how to verify a TipSet can be found above in [Block Validation](#block-validation). To validate TipSet state, the validating node will, for each block in the TipSet, first apply the block reward value directly to the mining node's account and then apply the messages contained in the block.
+Other nodes will receive these blocks and form a Tipset out of the eligible blocks (those that have the same parents and are at the same block height). These nodes will then validate the Tipset. The full procedure for how to verify a Tipset can be found above in [Block Validation](#block-validation). To validate Tipset state, the validating node will, for each block in the Tipset, first apply the block reward value directly to the mining node's account and then apply the messages contained in the block.
 
-Thus, each of the miners who produced a block in the TipSet will receive a block reward. There will be no lockup. These rewards can be spent immediately.
+Thus, each of the miners who produced a block in the Tipset will receive a block reward. There will be no lockup. These rewards can be spent immediately.
 
 Messages in Filecoin also have an associated transaction fee (based on the gas costs of executing the message). In the case where multiple winning miners included the same message in their blocks, only the first miner will be paid this transaction fee. The first miner is the miner with the lowest ticket value (sorted lexicographically). More details on message execution can be found in the [State Machine spec](state-machine.md#execution-calling-a-method-on-an-actor).
 

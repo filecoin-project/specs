@@ -1,23 +1,15 @@
 ---
 title: Blockchain Components
 entries:
-  - block_receiver
-  - block_propagator
+  - block_syncer
   - chain_manager
   - block_producer
 # suppressMenu: true
 ---
 
-In order to ensure they are always on the correct latest state of the blockchain,
-a Filecoin node must continuously monitor and propagate blocks on the network.
+The Filecoin blockchain is the main interface linking various actors in the Filecoin system. It ensures that the system's state is verifiably updated over time and dictates how nodes are meant to extend the network through block reception and validation and extend it through block propagation.
 
-When a node receives blocks, it must also _validate_ them.
-Validation is split into two stages, syntactic and semantic.
-The syntactic stage may be validated without reference to additional data,
-while the semantic stage requires access to the chain which the block extends.
-For clarity, we separate these stages into separate components:
-syntactic validation is performed by the {{<sref block_receiver>}},
-and once collected and validated, the blocks are forwarded
-to the {{<sref chain_manager>}},
-which performs semantic validation and adds the blocks to the node's
-current view of the blockchain state.
+Its components include the:
+- {{ <sref block_syncer> }} -- which receives and propagates blocks, maintaining sets of candidate chains on which the miner may mine and running syntactic validation on incoming blocks.
+- {{ <sref chain_manager> }} -- which maintains a given chain's state, providing facilities to other blockchain subsystems which will query state about the latest chain in order to run, and ensuring incoming blocks are semantically validated before inclusion into the chain.
+- {{ <sref block_producer> }} -- which is called in the event of a successful leader election in order to produce a new block that will extend the current heaviest chain before forwarding it to the syncer for propagation.
