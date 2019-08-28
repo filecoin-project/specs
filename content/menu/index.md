@@ -29,6 +29,7 @@ headless: true
 [**Proofs**]({{< relref "/docs/proofs.md" >}})
 
 * [Proof-of-Replication]({{< relref "/docs/zigzag-porep.md" >}})
+  * [ZigZag Commitments]({{< relref "/docs/zigzag-commitments.md" >}})
   * [Circuit]({{< relref "/docs/zigzag-circuit.md" >}})
 * [Proof-of-Spacetime]({{< relref "/docs/proof-of-spacetime.md" >}})
 
