@@ -10,7 +10,7 @@ type: docs
 {{% /notice %}}
 
 <!-- the below comment is replaced with the pdf link on site builds -->
-<!-- REPLACE_ME_PDF_LINK -->
+You can also download the full spec in [PDF format](./).
 
 This collection of pages specify the protocols comprising the Filecoin network. The goal of these specs is to provide sufficient detail that another implementation, written using only this document as reference, can be fully compatible with `go-filecoin` peers, but this is still a work in progress.
 
