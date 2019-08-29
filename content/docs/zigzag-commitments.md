@@ -125,7 +125,7 @@ layer's label is \\(e\_{\bar{i}}^{(2)}\\).
 
     Generate Merkle root for data leaves.
 
-    \\(Comm\_D = VC(D\_i)\\), where \\(D\_i = \\{e\_1^{(0)}, …, e\_N^{(0)}\\}\\).
+    \\(Comm\_D = VC(D\_1, D\_2, … D\_n)\\), where \\(D\_i = \\{e\_1^{(0)}, …, e\_N^{(0)}\\}\\).
 
     This example: \\(Comm\_D = VC(e\_1^{(0)}, e\_2^{(0)}, e\_3^{(0)}, e\_4^{(0)}, e\_5^{(0)}, e\_6^{(0)}, e\_7^{(0)}, e\_8^{(0)})\\).
 
@@ -197,14 +197,14 @@ layer's label is \\(e\_{\bar{i}}^{(2)}\\).
 
     -    To open only odd-layer labels
 
-        Reveal all odd-layer labels and prove they hash to \\(O\_i\\) (\\(L / 2\\) hash proofs).
+        Reveal all odd-layer labels and prove they hash to \\(O\_i\\): \\(L / 2\\) hash proofs.
         Reveal the \\(E\_i\\) (\\(0\\) hash proofs).
 
         Note: odd-layer labels of \\(C\_i\\) have index \\(i\\).
 
     -    To open only even layer labels
 
-        Reveal all even layer labels and prove they hash to \\(E\_i\\)  (\\(L / 2\\) hash proofs).
+        Reveal all even layer labels and prove they hash to \\(E\_i\\): \\((L-1) / 2\\) hash proofs.
         Reveal the \\(O\_i\\) (\\(0\\) hash proofs).
 
         Note: even-layer labels of \\(C\_i\\) have index \\(N-i+1\\).

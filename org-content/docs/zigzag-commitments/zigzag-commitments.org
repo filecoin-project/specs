@@ -229,7 +229,7 @@ layer's label is $e_{\bar{i}}^{(2)}$.
 *** Vector Commitment
 Generate Merkle root for data leaves.
 
-$Comm_D = VC(D_i)$, where $D_i = \{e_1^{(0)}, …, e_N^{(0)}\}$.
+$Comm_D = VC(D_1, D_2, … D_n)$, where $D_i = \{e_1^{(0)}, …, e_N^{(0)}\}$.
 
 This example: $Comm_D = VC(e_1^{(0)}, e_2^{(0)}, e_3^{(0)}, e_4^{(0)}, e_5^{(0)}, e_6^{(0)}, e_7^{(0)}, e_8^{(0)})$.
 
@@ -308,12 +308,12 @@ $CommC = VC(C_1 || C_2 || … || C_N)$.
 
 *** Opening
 **** To open only odd-layer labels
-Reveal all odd-layer labels and prove they hash to $O_i$ ($L / 2$ hash proofs).
+Reveal all odd-layer labels and prove they hash to $O_i$: $L / 2$ hash proofs.
 Reveal the $E_i$ ($0$ hash proofs).
 
 Note: odd-layer labels of $C_i$ have index $i$.
 **** To open only even layer labels
-Reveal all even layer labels and prove they hash to $E_i$  ($L / 2$ hash proofs).
+Reveal all even layer labels and prove they hash to $E_i$: $(L-1) / 2$ hash proofs.
 Reveal the $O_i$ ($0$ hash proofs).
 
 Note: even-layer labels of $C_i$ have index $N-i+1$.
