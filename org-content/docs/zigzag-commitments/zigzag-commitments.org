@@ -177,7 +177,7 @@ Merkle roots (commitments) are generated with the vector-commitment function $VC
 
 Hashes are produced with a hash function $H(…)$, which is not necessarily that used by $VC(…)$.
 
-$Comm = VC(l_1,…l_N)$, where the $l_i$ are the data (labels or hashes) to be committed.
+$Comm = VC(l_1||…||l_N)$, where the $l_i$ are the data (labels or hashes) to be committed.
 
 Generated trees are retained until the proving phase, when merkle proofs of a given label's inclusion in $Comm$ will be
 created. We will designate such proofs $l_i \rightarrow Comm$.
@@ -229,7 +229,7 @@ layer's label is $e_{\bar{i}}^{(2)}$.
 *** Vector Commitment
 Generate Merkle root for data leaves.
 
-$Comm_D = VC(D_1, D_2, … D_n)$, where $D_i = \{e_1^{(0)}, …, e_N^{(0)}\}$.
+$Comm_D = VC(D_1 || D_2 || … || D_N)$, where $D_i = e_i^{(0)}$.
 
 This example: $Comm_D = VC(e_1^{(0)}, e_2^{(0)}, e_3^{(0)}, e_4^{(0)}, e_5^{(0)}, e_6^{(0)}, e_7^{(0)}, e_8^{(0)})$.
 
@@ -271,7 +271,7 @@ Define $C_{p_{odd}}$ to be the column containing the odd expander parents.
 
 Concatenate and hash rows of column $i$ to construct $O_i$.
 
-Odd column hash $O_i = H(e_i^{(1)} || e_i^{(3)} || … e_i^{(L-1)})$.
+Odd column hash $O_i = H(e_i^{(1)} || e_i^{(3)} || … || e_i^{(L-1)})$.
 
 Define $O_{p_{odd}}$ to be the odd column hash containing the odd expander parents.
 
@@ -292,7 +292,7 @@ Concatenate and hash rows of column $i$ to construct $E_i$.
 
 Remember that column with index $i$ contains even-layered labels of index $\bar{i} = N - i + 1$.
 
-Even column hash $E_i = H(e_{\bar{i}}^{(2)} || e_{\bar{i}}^{(4)} || … e_{\bar{i}}^{(L-2)})$.
+Even column hash $E_i = H(e_{\bar{i}}^{(2)} || e_{\bar{i}}^{(4)} || … || e_{\bar{i}}^{(L-2)})$.
 
 Define $E_{p_{odd}}$ to be the even column hash containing the odd expander parents.
 
