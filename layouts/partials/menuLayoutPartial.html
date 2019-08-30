@@ -1,0 +1,49 @@
+{{ $page := .page }}
+{{ $tag := .tag }}
+{{ $depth := .depth }}
+
+{{ $title := $page.Param "title" }}
+{{ if (not (eq nil ($page.Param "menuTitle"))) }}
+  {{ $title = ($page.Param "menuTitle") }}
+{{ end }}
+
+{{ $pathTokens := split $page.Path "/" }}
+
+{{ $pathLast := index $pathTokens (sub (len $pathTokens) 1) }}
+{{ $pathLast = index (split $pathLast ".") 0 }}
+
+{{ $currName := $pathLast }}
+{{ if (eq $currName "_index") }}
+  {{ $pathPrev := index $pathTokens (sub (len $pathTokens) 2) }}
+  {{ $currName = $pathPrev }}
+{{ end }}
+
+{{ if (eq $tag nil) }}
+  {{ $tag = $currName}}
+{{ else }}
+  {{ $tag = print $tag "__" $currName }}
+{{ end }}
+
+<a href="/#{{ $tag }}">    
+    {{ if (eq $depth 1) }}
+    <strong>
+    {{ end }}
+        {{ $title }}
+    {{ if (eq $depth 1) }}
+    </strong>
+    {{ end }}
+</a>
+
+{{ if (not ($page.Param "suppressMenu")) }}
+<ul>
+{{ range ($page.Param "entries") }}
+    <li>
+    {{ with $page.GetPage . }}
+      {{ $titleEscaped := (.Param "title" | replaceRE " " "_" | replaceRE "(\\(|\\))" "") }}
+      {{ $subTag := (print $tag "__" ($titleEscaped | lower)) }}
+      {{ partial "menuLayoutPartial.html" (dict "page" . "depth" (add $depth 1) "tag" $tag) }}
+    {{ end }}
+    </li>
+{{ end }}
+</ul>
+{{ end }}

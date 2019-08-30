@@ -1,0 +1,14 @@
+{{ $inputPath := . }}
+
+{{ $pathTokens := split $inputPath "/" }}
+
+{{ $pathLast := index $pathTokens (sub (len $pathTokens) 1) }}
+{{ $pathLast = index (split $pathLast ".") 0 }}
+
+{{ $currName := $pathLast }}
+{{ if (eq $currName "_index") }}
+  {{ $pathPrev := index $pathTokens (sub (len $pathTokens) 2) }}
+  {{ $currName = $pathPrev }}
+{{ end }}
+
+{{ return $currName }}

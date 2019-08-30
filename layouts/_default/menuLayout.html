@@ -1,0 +1,10 @@
+<div>
+  <ul>
+    {{ range $.Site.Data.sections }}
+      {{ $page := print "/docs/" . | $.Site.GetPage }}
+      <li>
+        {{ partial "menuLayoutPartial.html" (dict "page" $page.Page "depth" 1) }}
+      </li>
+    {{ end }}
+  </ul>
+</div>

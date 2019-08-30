@@ -1,17 +1,16 @@
 <script>
-  structLocs = {
-    "Actor":                   "data_structures",
-    "Address":                 "detail/address",
-    "Block":                   "data_structures",
-    "ElectionProof":           "data_structures",
-    "Message":                 "data_structures",
-    "Signature":               "data_structures",
-    "SignedMessage":           "data_structures",
-    "Ticket":                  "data_structures",
-    "TipSet":                  "data_structures",
-    "UnsignedMessage":         "data_structures",
-    // "ChainManager_BlockState": "impl/chain_manager",
-  };
+  structSet = new Set([
+    "Actor",
+    "Address",
+    "Block",
+    "ElectionProof",
+    "Message",
+    "Signature",
+    "SignedMessage",
+    "Ticket",
+    "TipSet",
+    "UnsignedMessage",
+  ]);
 
   structRefs = {
     "AddressId":               "Address",
@@ -28,13 +27,11 @@
     if (newKey !== undefined) {
       key = newKey;
     }
-    let res = structLocs[key];
-
-    if (res !== undefined) {
+    if (structSet.has(key)) {
       if (x.className == "nx" && isTokenDef) {
-        x.innerHTML = "<span id=go__" + origKey + "><a href=\"/docs/" + res + "/#go__" + origKey + "\">" + x.innerHTML + "</a></div>";
+        x.innerHTML = "<span id=go__" + origKey + "><a href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a></div>";
       } else {
-        x.innerHTML = "<a href=\"/docs/" + res + "/#go__" + origKey + "\">" + x.innerHTML + "</a>";
+        x.innerHTML = "<a href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a>";
       }
     }
   };
@@ -54,6 +51,7 @@
       }
 
       if (x.className != "nx" && x.className != "codeRef") {
+        isTokenDef = false;
         continue;
       }
 
