@@ -17,13 +17,15 @@ $gray: #e1e1e1;
 $lightestGray: #d5dae6;
 $white: #ffffff;
 $black: #000000;
-$purple: #0b3a53;
+$purple: #8f6cd6;
+$lightPurple: #7f60be;
 $codeBackground: #f7f9fc;
 $detailGray: #f7f7f7;
 $groupGray: #dddddd;
 $yellow: #f1c40f;
 $orange: #e67e22;
 $red: #e74c3c;
+$darkBlue: #1f5b83;
 $blue: #3498db;
 
 
@@ -194,7 +196,7 @@ img {
 // -- Code
 
 .markdown a, a, pre a {
-  color: $purple;
+  color: $blue;
   text-shadow: none;
   text-decoration: none;
   background-image: none;
@@ -203,7 +205,7 @@ img {
   &:active,
   &:focus,
   &:hover {
-    color: $purple;
+    color: $darkBlue;
     text-decoration: none;
   }
 }
