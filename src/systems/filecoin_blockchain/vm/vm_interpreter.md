@@ -645,7 +645,9 @@ type StorageMinerActorState struct {
 
     provingPeriodEnd BlockHeight
 }
+```
 
+```sh
 type MinerInfo struct {
 	## Account that owns this miner.
     ## - Income and returned collateral are paid to this address.
