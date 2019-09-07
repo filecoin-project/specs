@@ -19,15 +19,32 @@ document and those of the linked paper believe the two are consistent; and conve
 third design goal of this document's construction.
 * Graph
 #+NAME: init-graph
-#+BEGIN_SRC lisp :package "filecoin.theory" :results output silent :exports none 
-(defparameter *layers* 6)
-(defparameter *nodes* 8)
+#+BEGIN_SRC lisp :package "filecoin.theory" :exports none :results verbatim
+  (defparameter *layers* 6)
+  (defparameter *nodes* 8)
 
-(defparameter *zigzag-graph* (make-zigzag-graph *nodes* *layers*))
+  (defparameter *regenerate-zigzag-graph* nil)
 
-(let ((lg (first (zigzag-graph-layer-graphs *zigzag-graph*))))
-  (defparameter *comm-d-graph* (make-comm-d-layer-graph (layer-graph-nodes lg) (layer-graph-challenged-node lg))))
+  (defparameter *dumped-zigzag-graph* '(:NODES 8 :CHALLENGED-NODE 7 :LAYERS 6 :RENUMBERED-PERMUTATION
+                                        (:PERM-LIST (8 6 1 5 4 7 3 2) :TYPE PERM) :REVERSED-PERMUTATION
+                                        (:PERM-LIST (6 1 8 3 7 5 4 2) :TYPE PERM) :TYPE ZIGZAG-GRAPH))
+
+  (defparameter *zigzag-graph*  (if *regenerate-zigzag-graph*
+                                    (make-zigzag-graph *nodes* *layers*)
+                                    (load-from-plist *dumped-zigzag-graph*)))
+
+  (let ((lg (first (zigzag-graph-layer-graphs *zigzag-graph*))))
+    (defparameter *comm-d-graph* (make-comm-d-layer-graph (layer-graph-nodes lg) (layer-graph-challenged-node lg))))
+
+  (dump *zigzag-graph*)
 #+END_SRC
+
+#+RESULTS: init-graph
+: (:NODES 8 :CHALLENGED-NODE 7 :LAYERS 6 :RENUMBERED-PERMUTATION
+:  (:PERM-LIST (8 6 1 5 4 7 3 2) :TYPE PERM) :REVERSED-PERMUTATION
+:  (:PERM-LIST (6 1 8 3 7 5 4 2) :TYPE PERM) :TYPE ZIGZAG-GRAPH)
+
+
 
 #+NAME: legend-odd
 #+BEGIN_SRC lisp :package "filecoin.theory" :results output silent :exports none
@@ -223,8 +240,8 @@ layer's label is $e_{\bar{i}}^{(2)}$.
 #+END_SRC
 
  #+RESULTS:
- | ~~~~~~   | ~~~~~~   | ~~~~~~   | ~~~~~~   | (Odd) Challenge | ~~~~~~   | ~~~~~~   | ~~~~~~   |
- | $(0, 1)$ | $(0, 2)$ | $(0, 3)$ | $(0, 4)$ | $(0, 5)$        | $(0, 6)$ | $(0, 7)$ | $(0, 8)$ |
+ | ~~~~~~   | ~~~~~~   | ~~~~~~   | ~~~~~~   | ~~~~~~   | ~~~~~~   | (Odd) Challenge | ~~~~~~   |
+ | $(0, 1)$ | $(0, 2)$ | $(0, 3)$ | $(0, 4)$ | $(0, 5)$ | $(0, 6)$ | $(0, 7)$        | $(0, 8)$ |
 
 *** Vector Commitment
 Generate Merkle root for data leaves.
@@ -244,12 +261,12 @@ To open $D_i$, provide a merkle proof $D_i \rightarrow Comm_D$.
 #+END_SRC
 
 #+RESULTS:
-| Even Expander Parents | Odd Expander Parents | DRG Parents | ~~~~~~   | Challenges | ~~~~~~   | ~~~~~~   | ~~~~~~   |
-| $(1, 1)^{*}$          | $(1, 2)$             | $(1, 3)$    | $(1, 4)$ | $(1, 5)$   | $(1, 6)$ | $(1, 7)$ | $(1, 8)$ |
-| $(2, 8)$              | $(2, 7)^{*}$         | $(2, 6)$    | $(2, 5)$ | $(2, 4)$   | $(2, 3)$ | $(2, 2)$ | $(2, 1)$ |
-| $(3, 1)^{*}$          | $(3, 2)$             | $(3, 3)$    | $(3, 4)$ | $(3, 5)$   | $(3, 6)$ | $(3, 7)$ | $(3, 8)$ |
-| $(4, 8)$              | $(4, 7)^{*}$         | $(4, 6)$    | $(4, 5)$ | $(4, 4)$   | $(4, 3)$ | $(4, 2)$ | $(4, 1)$ |
-| $(5, 1)^{*}$          | $(5, 2)$             | $(5, 3)$    | $(5, 4)$ | $(5, 5)$   | $(5, 6)$ | $(5, 7)$ | $(5, 8)$ |
+| Even Expander Parents | ~~~~~~   | DRG Parents | Odd Expander Parents | ~~~~~~   | ~~~~~~   | Challenges | ~~~~~~   |
+| $(1, 1)^{*}$          | $(1, 2)$ | $(1, 3)$    | $(1, 4)$             | $(1, 5)$ | $(1, 6)$ | $(1, 7)$   | $(1, 8)$ |
+| $(2, 8)$              | $(2, 7)$ | $(2, 6)$    | $(2, 5)^{*}$         | $(2, 4)$ | $(2, 3)$ | $(2, 2)$   | $(2, 1)$ |
+| $(3, 1)^{*}$          | $(3, 2)$ | $(3, 3)$    | $(3, 4)$             | $(3, 5)$ | $(3, 6)$ | $(3, 7)$   | $(3, 8)$ |
+| $(4, 8)$              | $(4, 7)$ | $(4, 6)$    | $(4, 5)^{*}$         | $(4, 4)$ | $(4, 3)$ | $(4, 2)$   | $(4, 1)$ |
+| $(5, 1)^{*}$          | $(5, 2)$ | $(5, 3)$    | $(5, 4)$             | $(5, 5)$ | $(5, 6)$ | $(5, 7)$   | $(5, 8)$ |
 
 
 $^{*}$ Indicates labels which must be hashed for column commitments but need not be opened for proofs.
@@ -264,10 +281,10 @@ Define $C_{p_{odd}}$ to be the column containing the odd expander parents.
 #+END_SRC
 
 #+RESULTS:
-| Even Expander Parents | Odd Expander Parents | DRG Parents | ~~~~~~   | Challenges | ~~~~~~   | ~~~~~~   | ~~~~~~   |
-| $(1, 1)^{*}$          | $(1, 2)$             | $(1, 3)$    | $(1, 4)$ | $(1, 5)$   | $(1, 6)$ | $(1, 7)$ | $(1, 8)$ |
-| $(3, 1)^{*}$          | $(3, 2)$             | $(3, 3)$    | $(3, 4)$ | $(3, 5)$   | $(3, 6)$ | $(3, 7)$ | $(3, 8)$ |
-| $(5, 1)^{*}$          | $(5, 2)$             | $(5, 3)$    | $(5, 4)$ | $(5, 5)$   | $(5, 6)$ | $(5, 7)$ | $(5, 8)$ |
+| Even Expander Parents | ~~~~~~   | DRG Parents | Odd Expander Parents | ~~~~~~   | ~~~~~~   | Challenges | ~~~~~~   |
+| $(1, 1)^{*}$          | $(1, 2)$ | $(1, 3)$    | $(1, 4)$             | $(1, 5)$ | $(1, 6)$ | $(1, 7)$   | $(1, 8)$ |
+| $(3, 1)^{*}$          | $(3, 2)$ | $(3, 3)$    | $(3, 4)$             | $(3, 5)$ | $(3, 6)$ | $(3, 7)$   | $(3, 8)$ |
+| $(5, 1)^{*}$          | $(5, 2)$ | $(5, 3)$    | $(5, 4)$             | $(5, 5)$ | $(5, 6)$ | $(5, 7)$   | $(5, 8)$ |
 
 Concatenate and hash rows of column $i$ to construct $O_i$.
 
@@ -283,9 +300,9 @@ Define $O_{p_{even}}$ to be the odd column hash containing the even expander par
 #+END_SRC
 
 #+RESULTS:
-| Even Expander Parents | Odd Expander Parents | DRG Parents | ~~~~~~   | Challenges | ~~~~~~   | ~~~~~~   | ~~~~~~   |
-| $(2, 8)$              | $(2, 7)^{*}$         | $(2, 6)$    | $(2, 5)$ | $(2, 4)$   | $(2, 3)$ | $(2, 2)$ | $(2, 1)$ |
-| $(4, 8)$              | $(4, 7)^{*}$         | $(4, 6)$    | $(4, 5)$ | $(4, 4)$   | $(4, 3)$ | $(4, 2)$ | $(4, 1)$ |
+| Even Expander Parents | ~~~~~~   | DRG Parents | Odd Expander Parents | ~~~~~~   | ~~~~~~   | Challenges | ~~~~~~   |
+| $(2, 8)$              | $(2, 7)$ | $(2, 6)$    | $(2, 5)^{*}$         | $(2, 4)$ | $(2, 3)$ | $(2, 2)$   | $(2, 1)$ |
+| $(4, 8)$              | $(4, 7)$ | $(4, 6)$    | $(4, 5)^{*}$         | $(4, 4)$ | $(4, 3)$ | $(4, 2)$   | $(4, 1)$ |
 
 
 Concatenate and hash rows of column $i$ to construct $E_i$.
@@ -308,12 +325,12 @@ $CommC = VC(C_1 || C_2 || … || C_N)$.
 
 *** Opening
 **** To open only odd-layer labels
-Reveal all odd-layer labels and prove they hash to $O_i$: $L / 2$ hash proofs.
+Reveal all odd-layer labels and prove they hash to $O_i$: $L / 2 - 1$ hash proofs.
 Reveal the $E_i$ ($0$ hash proofs).
 
 Note: odd-layer labels of $C_i$ have index $i$.
 **** To open only even layer labels
-Reveal all even layer labels and prove they hash to $E_i$: $(L-1) / 2$ hash proofs.
+Reveal all even layer labels and prove they hash to $E_i$: $L / 2 - 2$ hash proofs.
 Reveal the $O_i$ ($0$ hash proofs).
 
 Note: even-layer labels of $C_i$ have index $N-i+1$.
@@ -330,8 +347,8 @@ Reveal all labels and prove they hash to $E_i$ and $O_i$ as above. ($L$ hash pro
 #+END_SRC
 
  #+RESULTS:
- | ~~~~~~   | ~~~~~~   | ~~~~~~   | Even Challenge | ~~~~~~   | Even DRG Parent | ~~~~~~   | Even Expander Parent |
- | $(6, 1)$ | $(6, 2)$ | $(6, 3)$ | $(6, 4)$       | $(6, 5)$ | $(6, 6)$        | $(6, 7)$ | $(6, 8)$             |
+ | ~~~~~~   | Even Challenge | ~~~~~~   | ~~~~~~   | ~~~~~~   | Even DRG Parent | ~~~~~~   | Even Expander Parent |
+ | $(6, 1)$ | $(6, 2)$       | $(6, 3)$ | $(6, 4)$ | $(6, 5)$ | $(6, 6)$        | $(6, 7)$ | $(6, 8)$             |
 
 *** Vector Commitment
 Generate Merkle tree for replica leaves.
