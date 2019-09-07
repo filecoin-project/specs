@@ -5,7 +5,7 @@ entries:
   - storage_miner
   - payment_channel
   - multisig_account
-suppressMenu: true
+# suppressMenu: true
 ---
 
 TODO

@@ -3,7 +3,7 @@ title: Filecoin VM Actors
 entries:
   - standard
   - singleton
-suppressMenu: true
+# suppressMenu: true
 ---
 
 TODO

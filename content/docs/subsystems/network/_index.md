@@ -7,7 +7,7 @@ entries:
   - pubsub
   - bitswap
   - graphsync
-suppressMenu: true
+# suppressMenu: true
 ---
 
 

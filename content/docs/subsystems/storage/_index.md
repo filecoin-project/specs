@@ -5,7 +5,7 @@ entries:
   - actors
   - components
   - libp2p
-suppressMenu: true
+# suppressMenu: true
 ---
 
 

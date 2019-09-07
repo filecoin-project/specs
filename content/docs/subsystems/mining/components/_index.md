@@ -4,7 +4,7 @@ entries:
   - sector_sealing
   - sector_prover
   - proof_generator
-suppressMenu: true
+# suppressMenu: true
 ---
 
 TODO

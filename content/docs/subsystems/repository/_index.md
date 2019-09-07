@@ -6,7 +6,7 @@ entries:
   - keys
   - chain
   - sectors
-suppressMenu: true
+# suppressMenu: true
 ---
 
 TODO

@@ -4,7 +4,7 @@ entries:
   - protocol
   - actors
   - components
-suppressMenu: true
+# suppressMenu: true
 ---
 
 ## Components

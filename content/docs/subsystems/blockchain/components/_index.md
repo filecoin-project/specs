@@ -5,7 +5,7 @@ entries:
   - block_propagator
   - chain_manager
   - block_producer
-suppressMenu: true
+# suppressMenu: true
 ---
 
 In order to ensure they are always on the correct latest state of the blockchain,
