@@ -2,27 +2,7 @@
 title: Chain Manager
 ---
 
-In order to ensure they are always on the correct latest state of the chain a filecoin full node must accept and process blocks continuously. Blocks are propagated was described in the [Data Propagation](data-propagation.md) document.
-
-Validation is split into two stages, syntactic and semantic. The syntactic stage may be validated without reference to additional data (see [block](data-structures.md#block)). The semantic stage requires access to the chain which the block extends.
-
-A node must decode and perform syntactic validation for every block received before passing it on (e.g. in a lipbp2p pubsub validator). A node must perform semantic validation before accepting the block as an extension to its chain.
-
-### Syntactical Validation
-
-A syntactically valid block:
-
-- must include a well-formed miner address
-- must include at least one well-formed ticket, and if more they form a valid ticket chain
-- must include an election proof which is a valid signature by the miner address of the final ticket
-- must include at least one parent CID
-- must include a positive parent weight
-- must include a positive height
-- must include well-formed state root, messages, and receipts CIDs
-- must include a timestamp not in the future
-
-
-### Semantical Validation
+{{<hd 1 "Semantic Validation">}}
 
 A semantically valid block:
 
