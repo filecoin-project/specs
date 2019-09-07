@@ -100,6 +100,9 @@ represent the renumbered index, \\(\bar{i} = N - i + 1\\).
 Taken together, the previous two paragraphs imply that the first layer's label in \\(C\_i\\) is \\(e\_i^{(1)}\\) and the second
 layer's label is \\(e\_{\bar{i}}^{(2)}\\).
 
+NOTE: Whenever we refer to even/odd parents or nodes (e.g. 'odd expander parents'), we mean those on even or odd
+_layers_.
+
 | Graph    | \\((1, 1)\\)     | \\((1, 2)\\)     | \\((1, 3)\\)     | \\((1, 4)\\)     | \\((1, 5)\\)     | \\((1, 6)\\)     | \\((1, 7)\\)     | \\((1, 8)\\)     |
 |----------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|------------------|
 | Notation | \\(e\_1^{(1)}\\) | \\(e\_2^{(1)}\\) | \\(e\_3^{(1)}\\) | \\(e\_4^{(1)}\\) | \\(e\_5^{(1)}\\) | \\(e\_6^{(1)}\\) | \\(e\_7^{(1)}\\) | \\(e\_8^{(1)}\\) |

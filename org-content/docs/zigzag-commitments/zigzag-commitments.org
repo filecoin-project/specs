@@ -209,6 +209,8 @@ represent the renumbered index, $\bar{i} = N - i + 1$.
 Taken together, the previous two paragraphs imply that the first layer's label in $C_i$ is $e_i^{(1)}$ and the second
 layer's label is $e_{\bar{i}}^{(2)}$.
 
+NOTE: Whenever we refer to even/odd parents or nodes (e.g. 'odd expander parents'), we mean those on even or odd
+/layers/.
 
 #+BEGIN_SRC lisp :package "filecoin.theory" :exports results
 (notation-row *zigzag-graph* 1)
