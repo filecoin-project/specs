@@ -95,9 +95,10 @@ Note: Validity of blocks beyond appropriate ticket generation (defined below) is
 
 The EC algorithm can be better understood by looking at its two major components in more detail:
 
-- [Leader Election](#secret-leader-election)
-- [Chain Selection](#chain-selection)
+- {{<sref secret_leader_election>}}
+- {{<sref chain_selection>}}
 
+{{<label secret_leader_election>}}
 {{<hd 1 "Secret Leader Election">}}
 
 Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](storage-market.md#the-power-table), where power is equivalent to storage provided through time.
@@ -311,6 +312,7 @@ At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using th
 
 Once a miner has a winning election proof generated over `i` rounds and `i` corresponding tickets, they may create a block. For more on this, see the [Mining spec](mining.md#block-creation).
 
+{{<label chain_selection>}}
 {{<hd 1 "Chain Selection">}}
 
 Just as there can be 0 miners win in a round, multiple miners can be elected in a given round. This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round.

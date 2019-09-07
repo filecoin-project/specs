@@ -1,24 +1,11 @@
 
 {{ $page := .page }}
-{{ $tag := .tag }}
-{{ $depth := .depth }}
 
-{{ $pathTokens := split $page.Path "/" }}
+{{ $tokens := partial "tokensFromPagePath" $page.Path }}
+{{ $name := partial "nameFromPagePath" $page.Path }}
+{{ $tag := partial "tagFromPagePath" $page.Path }}
 
-{{ $pathLast := index $pathTokens (sub (len $pathTokens) 1) }}
-{{ $pathLast = index (split $pathLast ".") 0 }}
-
-{{ $currName := $pathLast }}
-{{ if (eq $currName "_index") }}
-  {{ $pathPrev := index $pathTokens (sub (len $pathTokens) 2) }}
-  {{ $currName = $pathPrev }}
-{{ end }}
-
-{{ if (eq $tag nil) }}
-  {{ $tag = $currName}}
-{{ else }}
-  {{ $tag = print $tag "__" $currName }}
-{{ end }}
+{{ $depth := len $tokens }}
 
 <div id="{{ $tag }}">
 
@@ -30,9 +17,7 @@
 
 {{ range ($page.Param "entries") }}
   {{ with $page.GetPage . }}
-    {{ $titleEscaped := (.Param "title" | replaceRE " " "_" | replaceRE "(\\(|\\))" "") }}
-    {{ $subTag := (print $tag "__" ($titleEscaped | lower)) }}
-    {{ partial "sectionLayoutPartial.html" (dict "page" . "depth" (add $depth 1) "tag" $tag) }}
+    {{ partial "sectionLayoutPartial.html" (dict "page" .) }}
   {{ end }}
 {{ end }}
 

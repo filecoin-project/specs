@@ -1,3 +1,5 @@
+chain_selection: [algorithms, expected_consensus, chain_selection]
 retrieval_market: [subsystems, retrieval]
 storage_market: [subsystems, storage]
 sys_vm: [subsystems, vm]
+secret_leader_election: [algorithms, expected_consensus, secret_leader_election]
