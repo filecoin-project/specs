@@ -330,6 +330,7 @@ The blocks in a tipset have no defined order in representation. During state com
 
 Due to network propagation delay, it is possible for a miner in round N+1 to omit valid blocks mined at round N from their TipSet. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol.
 
+{{<label chain_weighting>}}
 {{<hd 2 "Chain Weighting">}}
 
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.

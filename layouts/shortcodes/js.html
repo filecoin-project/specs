@@ -2,13 +2,25 @@
   structSet = new Set([
     "Actor",
     "Address",
+    "Bitfield",
     "Block",
+    "BytesAmount",
     "ElectionProof",
+    "FaultSet",
     "Message",
+    "MessageReceipt",
+    "PeerId",
+    "PoSTProof",
+    "PublicKey",
+    "SealProof",
+    "SectorID",
+    "SectorSet",
     "Signature",
     "SignedMessage",
+    "StateTree",
     "Ticket",
     "TipSet",
+    "TokenAmount",
     "UnsignedMessage",
   ]);
 
@@ -17,7 +29,12 @@
     "AddressSecp256k1":        "Address",
     "AddressActor":            "Address",
     "AddressBLS12_381":        "Address",
+    "Bls12_381Signature":      "Signature",
+    "Secp256k1Signature":      "Signature",
     "TxMeta":                  "Block",
+    "VDFProof":                "Ticket",
+    "VDFResult":               "Ticket",
+    "VRFProof":                "Ticket",
   };
 
   fillSingleCodeRef = (x, isTokenDef) => {

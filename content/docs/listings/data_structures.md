@@ -2,7 +2,8 @@
 title: "Data Structures"
 ---
 
-## Address
+
+{{<hd 1 "Address">}}
 
 An address is an identifier that refers to an actor in the Filecoin state. All [actors](actors.md) (miner actors, the storage market actor, account actors) have an address. An address encodes information about:
 
@@ -11,15 +12,17 @@ An address is an identifier that refers to an actor in the Filecoin state. All [
 - The data itself
 - Checksum (depending on the type of address)
 
-For more detail, see the full {{<sref address "address spec">}}.
+For more detail, see the full {{<sref app_address "address spec">}}.
 
-## Block
+
+{{<hd 1 "Block">}}
 
 A block header contains information relevant to a particular point in time over which the network may achieve consensus. The block header contains:
 
 - The address of the miner that mined the block
-- An array of the tickets that led to this particular miner being selected as the leader for this round (see the [Secret Leader Election portion of the Expected Consensus spec](expected-consensus.md#secret-leader-election) for more) and a signature on the winning ticket
-- The set of parent blocks and aggregate [chain weight](expected-consensus.md#chain-weighting) of the parents
+- An array of the tickets that led to this particular miner being selected as the leader for this round (see
+{{<sref secret_leader_election>}} for more details), as well as a signature on the winning ticket
+- The set of parent blocks and aggregate {{<sref chain_weighting "chain weight">}} of the parents
 - This block's height
 - Merkle root of the state tree (after applying the messages -- state transitions -- included in this block)
 - Merkle root of the messages (state transitions) in this block
@@ -33,16 +36,17 @@ A block header contains information relevant to a particular point in time over 
 {{<goFile Block>}}
 
 
-## TipSet
+{{<hd 1 "TipSet">}}
 
 For more on TipSets, see [the Expected Consensus spec](expected-consensus.md#tipsets). Implementations may choose not to create a TipSet data structure, instead representing its operations in terms of the underlying blocks.
 
 {{<goFile TipSet>}}
 
 
-## VRF Personalization
+{{<hd 1 "VRF Personalization">}}
 
-We define VDF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. [Ticket](#ticket) and [ElectionProof](#electionproof)).
+We define VRF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. `Ticket` and
+`ElectionProof`).
 
 | Type          | Prefix |
 | ------------- | ------ |
@@ -50,189 +54,157 @@ We define VDF personalizations as follow, to enable domain separation across ope
 | ElectionProof | `0x02` |
 
 
-## Ticket
+{{<hd 1 "Ticket">}}
 
-A ticket is a shared random value stapled to a particular block in the chain. Every miner must produce a new ticket each time they run a leader election attempt. In that sense, every new block produced will have one or more associated tickets (in the case the block took multiple leader election attempts to produce).
+A ticket contains a shared random value referenced by a particular `Block` in the Filecoin blockchain.
+Every miner must produce a new `Ticket` each time they run a leader election attempt.
+In that sense, every new block produced will have one or more associated tickets
+(specifically, the block may contain more than one ticket if it corresponds to
+one or more zero-winner epochs of {{<sref expected_consensus>}}).
 
-We use an [EC-VRF per Goldberg et al.](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10) with Secp256k1 and sha256 to obtain a deterministic, pseudorandom output.
+To produce the ticket values,
+we use an [EC-VRF per Goldberg et al.](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10)
+with Secp256k1 and SHA-256 to obtain a deterministic, pseudorandom output.
 
 {{<goFile Ticket>}}
 
 
-### Min Ticket/Ticket Comparison
+{{<hd 2 "Ticket Comparison">}}
 
-The ticket is a struct. Whenever the protocol draws the ticket or in any way uses ticket values (notably in crafting PoSts or running leader election), what is meant is that the Bytes of the `VDFResult` are used.
+The ticket is represented concretely by the `Ticket` data structure.
+Whenever the Filecoin protocol refers to ticket values
+(notably in crafting {{<sref post "PoSTs">}} or running leader election),
+what is meant is that the bytes of the `VDFResult` field in the `Ticket` struct are used.
+Specifically, tickets are compared lexicographically,
+interpreting the bytes of the `VDFResult` as an unsigned integer value (little-endian).
 
-Ticket comparison is done using the VDFResult as an unsigned integer (little endian).
 
+{{<hd 1 "ElectionProof">}}
 
-## ElectionProof
-
-An election proof is generated from a past ticket (chosen based on public network parameters) by a miner during the leader election process. Its output value determines whether the miner is elected leader and may produce a block. Its inclusion in the block allows other network participants to verify that the block was mined by a valid leader.
+An election proof is generated from a past ticket (chosen based on public network parameters)
+by a miner during the leader election process.
+Its output value determines whether the miner is elected as one of the leaders,
+and hence is eligible to produce a block for the current epoch.
+The inclusion of the `ElectionProof` in the block allows other network participants
+to verify that the block was mined by a valid leader.
 
 {{<goFile ElectionProof>}}
 
 
-## Message
+{{<hd 1 "Message">}}
+
+`Message` data structures in Filecoin describe operations that can be performed on the Filecoin VM state
+(e.g., FIL transactions between accounts).
+To facilitate the process of producing secure protocol implementations,
+we explicitly distinguish between
+{{<sref crypto_signatures "signed and unsigned">}} `Message` structures.
 
 {{<goFile Message>}}
 {{<goFile UnsignedMessage>}}
 {{<goFile SignedMessage>}}
-
-The signature is a serialized signature over the serialized base message.
-For more details on how the signature itself is done, see the [signatures spec]({{<ref "/#algorithms__cryptographic_primitives__signatures">}}).
+{{<goFile MessageReceipt>}}
 
 
-## State Tree
+{{<hd 1 "State Tree">}}
 
-The state tree keeps track of all state in Filecoin. It is a map of addresses to `actors` in the system.
-The `ActorState` is defined in the [actors spec](actors.md).
+The state tree keeps track of the entire state of the {{<sref vm>}} at any given point.
+It is a map from `Address` structures to `Actor` structures, where each `Actor`
+may also contain some additional `ActorState` that is specific to a given actor
+type.
 
-```sh
-type StateTree map {ID:Actor}<Hamt>
-```
-
-## Message Receipt
-
-```sh
-type MessageReceipt struct {
-	exitCode UInt
-	return Bytes
-	gasUsed UInt
-} representation tuple
-```
-
-## Actor
-
-```sh
-type Actor struct {
-	## Cid of the code object for this actor.
-	code Cid
-
-	## Reference to the root of this actors state.
-	head &ActorState
-
-	## Counter of the number of messages this actor has sent.
-	nonce UInt
-
-	## Current balance of filecoin of this actor.
-	balance UInt
-}
-```
-
-## Signature
-
-All signatures in Filecoin come with a type that signifies which key type was used to create the signature.
-
-For more details on signature creation, see [the signatures spec](signatures.md).
-
-```sh
-type Signature union {
-	| Secp256k1Signature 0
-	| Bls12_381Signature 1
-} representation byteprefix
-
-type Secp256k1Signature Bytes
-type Bls12_381Signature Bytes
-```
-
-## FaultSet
-
-FaultSets are used to denote which sectors failed at which block height.
-
-```sh
-type FaultSet struct {
-	index    UInt
-	bitField BitField
-}
-```
-
-The `index` field is a block height offset from the start of the miners proving period (in order to make it more compact).
+{{<goFile StateTree>}}
 
 
-## Basic Types
+{{<hd 1 "Actor">}}
 
-### CID
-
-For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. This is effectively a hash value, prefixed with its hash function (multihash) prepended with a extra labels to inform applications about how to deserialize the given data. [CID Spec](https://github.com/ipld/cid) contains the detailed spec.
-
-### Timestamp
-
-```sh
-type Timestamp UInt
-```
-
-### PublicKey
-
-The public key type is simply an array of bytes.
-
-```sh
-type PublicKey Bytes
-```
-
-### BytesAmount
-
-BytesAmount is just a re-typed Integer.
-```sh
-type BytesAmount UInt
-```
-
-### PeerId
-
-The serialized bytes of a libp2p peer ID.
-
-Spec incomplete, take a look at this PR: https://github.com/libp2p/specs/pull/100
-
-```sh
-type PeerId Bytes
-```
-
-### Bitfield
-
-Bitfields are a set encoded using a custom run length encoding: RLE+.
-
-```sh
-type Bitfield Bytes
-```
-
-### SectorSet
-
-A sector set stores a mapping of sector IDs to the respective `commR`s.
-
-```sh
-type SectorSet map{SectorID:Bytes}
-```
-
-{{% notice todo %}}
-Improve on this, see https://github.com/filecoin-project/specs/issues/116
-{{% /notice %}}
+{{<goFile Actor>}}
 
 
-### SealProof
+{{<hd 1 "Signature">}}
 
-SealProof is an opaque, dynamically-sized array of bytes.
+{{<sref crypto_signatures "Cryptographic signatures">}} in Filecoin are represented
+as byte arrays, and come with a tag that signifies what key type was used to create
+the signature.
 
-### PoStProof
+{{<goFile Signature>}}
 
-PoStProof is an opaque, dynamically-sized array of bytes.
 
-### TokenAmount
+{{<hd 1 "FaultSet">}}
 
-A type to represent an amount of filecoin tokens.
+`FaultSet` data structures are used to denote which sectors failed at which block heights.
 
-```sh
-type TokenAmount UInt
-```
+{{<goFile FaultSet>}}
 
-### SectorID
+In order to make the serialization more compact,
+the `index` field denotes a block height offset from the start of the corresponding
+miner's proving period.
 
-Uniquely identifies a miner's sector.
 
-```sh
-type SectorID uint64
-```
+{{<hd 1 "Basic Types">}}
 
-## RLE+ Bitset Encoding
+  {{<hd 2 "CID">}}
+  For most objects referenced by Filecoin, a Content Identifier (CID for short) is used.
+  This is effectively a hash value, prefixed with its hash function (multihash)
+  as well as extra labels to inform applications about how to deserialize the given data.
+  For a more detailed specification, we refer the reader to the
+  [IPLD repository](https://github.com/ipld/cid).
+
+
+  {{<hd 2 "Timestamp">}}
+  {{<goFile Timestamp>}}
+
+
+  {{<hd 2 "PublicKey">}}
+  The public key type is simply an array of bytes.
+  {{<goFile PublicKey>}}
+
+
+  {{<hd 2 "BytesAmount">}}
+  BytesAmount is just a re-typed Integer.
+  {{<goFile BytesAmount>}}
+
+
+  {{<hd 2 "PeerId">}}
+  The serialized bytes of a libp2p peer ID.
+  {{% todo %}} Spec incomplete; take a look at [this PR](https://github.com/libp2p/specs/pull/100).{{% /todo %}}
+  {{<goFile PeerId>}}
+
+
+  {{<hd 2 "Bitfield">}}
+  Bitfields are a set encoded using a custom run length encoding: RLE+.
+  {{<goFile Bitfield>}}
+
+
+  {{<hd 2 "SectorSet">}}
+  A sector set stores a mapping of sector IDs to the respective `commR`s.
+  {{<goFile SectorSet>}}
+
+  {{% todo %}}
+  Improve on this; see https://github.com/filecoin-project/specs/issues/116.
+  {{% /todo %}}
+
+
+  {{<hd 2 "SealProof">}}
+  SealProof is an opaque, dynamically-sized array of bytes.
+  {{<goFile SealProof>}}
+
+
+  {{<hd 2 "PoSTProof">}}
+  PoSTProof is an opaque, dynamically-sized array of bytes.
+  {{<goFile PoSTProof>}}
+
+
+  {{<hd 2 "TokenAmount">}}
+  A type to represent an amount of Filecoin tokens.
+  {{<goFile TokenAmount>}}
+
+
+  {{<hd 2 "SectorID">}}
+  Uniquely identifies a miner's sector.
+  {{<goFile SectorID>}}
+
+
+{{<hd 1 "RLE+ Bitset Encoding">}}
 
 RLE+ is a lossless compression format based on [RLE](https://en.wikipedia.org/wiki/Run-length_encoding).
 Its primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly,
@@ -240,7 +212,7 @@ while keeping the same level of compression for large sets of contiugous bits.
 
 In tests it has shown to be more compact than RLE itself, as well as [Concise](https://arxiv.org/pdf/1004.0403.pdf) and [Roaring](https://roaringbitmap.org/).
 
-### Format
+{{<hd 2 "Format">}}
 
 The format consists of a header, followed by a series of blocks, of which there are three different types.
 
@@ -260,41 +232,40 @@ The format can be expressed as the following [BNF](https://en.wikipedia.org/wiki
 
 An `<unsigned_varint>` is defined as specified [here](https://github.com/multiformats/unsigned-varint).
 
-#### Header
+{{<hd 3 "Header">}}
 
-The header indiciates the very first bit of the bit vector to encode. This means the first bit is always
-the same for the encoded and non encoded form.
+The header indicates the very first bit of the bit vector to encode. This means the first bit is always
+the same for the encoded and non-encoded form.
 
-#### Blocks
+{{<hd 3 "Blocks">}}
 
 The blocks represent how many bits, of the current bit type there are. As `0` and `1` alternate in a bit vector
 the inital bit, which is stored in the header, is enough to determine if a length is currently referencing
 a set of `0`s, or `1`s.
 
-##### Block Single
+{{<hd 4 "Block Single">}}
 
 If the running length of the current bit is only `1`, it is encoded as a single set bit.
 
-##### Block Short
+{{<hd 4 "Block Short">}}
 
 If the running length is less than `16`, it can be encoded into up to four bits, which a short block
 represents. The length is encoded into a 4 bits, and prefixed with `01`, to indicate a short block.
 
-##### Block Long
+{{<hd 4 "Block Long">}}
 
 If the running length is `16` or larger, it is encoded into a varint, and then prefixed with `00` to indicate
 a long block.
 
-
 > **Note:** The encoding is unique, so no matter which algorithm for encoding is used, it should produce
 > the same encoding, given the same input.
 
-##### Bit Numbering
+{{<hd 4 "Bit Numbering">}}
 
 For Filecoin, byte arrays representing RLE+ bitstreams are encoded using [LSB 0](https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering) bit numbering.
 
 
-## Other Considerations
+{{<hd 1 "Other Considerations">}}
 
 - The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
 - Hashes should use a blake2b-256 multihash.

@@ -1,2 +1,5 @@
+app_address: "Address"
 chain_selection: "Chain Selection"
+chain_weighting: "Chain Weighting"
+ds_address: "Address"
 secret_leader_election: "Secret Leader Election"
