@@ -46,9 +46,9 @@
     }
     if (structSet.has(key)) {
       if (x.className == "nx" && isTokenDef) {
-        x.innerHTML = "<span id=go__" + origKey + "><a href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a></div>";
+        x.innerHTML = "<span id=go__" + origKey + "><a class=codeLink href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a></div>";
       } else {
-        x.innerHTML = "<a href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a>";
+        x.innerHTML = "<a class=codeLink href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a>";
       }
     }
   };

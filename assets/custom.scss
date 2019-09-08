@@ -195,18 +195,17 @@ img {
 
 // -- Code
 
-.markdown a, a, pre a {
-  color: $blue;
+.markdown a:not(.codeLink), a:not(.codeLink), pre a:not(.codeLink) {
+  color: $darkBlue;
   text-shadow: none;
   text-decoration: none;
   background-image: none;
 
-  &:visited,
   &:active,
   &:focus,
   &:hover {
-    color: $darkBlue;
-    text-decoration: none;
+    color: $blue;
+    text-decoration: underline;
   }
 }
 
@@ -237,6 +236,17 @@ img {
     border: 1px solid darken($codeBackground, 10%);
     text-transform: none;
     word-wrap: break-word;
+  }
+}
+
+a.codeLink {
+  color: $darkBlue;
+
+  &:active,
+  &:focus,
+  &:hover {
+    color: $purple;
+    text-decoration: none;
   }
 }
 
