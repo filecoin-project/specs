@@ -12,4 +12,4 @@ There are two routes to calling a method on an `actor`. First, to call a method 
 
 Second, an `actor` may call a method on another actor during the invocation of one of its methods.  However, the only time this may happen is as a result of some actor being invoked by an external users message (note: an actor called by a user may call another actor that then calls another actor, as many layers deep as the execution can afford to run for).
 
-For full implementation details, see the [VM Interpreter spec]({{<ref "/#vm_interpreter">}}).
+For full implementation details, see the {{<sref sys_vm "VM subsystem">}}.
