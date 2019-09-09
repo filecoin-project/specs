@@ -194,7 +194,7 @@ _layers_.
 
     Generate Merkle tree for column leaves:
 
-    \\(CommC = VC(C\_1 || C\_2 || … || C\_N)\\).
+    \\(Comm\_C = VC(C\_1 || C\_2 || … || C\_N)\\).
 
 -    Opening
 

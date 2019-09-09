@@ -323,7 +323,7 @@ Produce the column leaves: $C_i = H(O_i || E_i)$.
 
 Generate Merkle tree for column leaves:
 
-$CommC = VC(C_1 || C_2 || … || C_N)$.
+$Comm_C = VC(C_1 || C_2 || … || C_N)$.
 
 *** Opening
 **** To open only odd-layer labels
