@@ -271,7 +271,7 @@ To open $D_i$, provide a merkle proof $D_i \rightarrow Comm_D$.
 | $(5, 1)^{*}$          | $(5, 2)$ | $(5, 3)$    | $(5, 4)$             | $(5, 5)$ | $(5, 6)$ | $(5, 7)$   | $(5, 8)$ |
 
 
-$^{*}$ Indicates labels which must be hashed for column commitments but need not be opened for proofs.
+$^{*}$ Indicates labels which must be hashed for column commitments but need not be opened for label checks.
 
 Define $C_{p_{even}}$ to be the column containing the even expander parents.
 

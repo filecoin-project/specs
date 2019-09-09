@@ -149,7 +149,7 @@ _layers_.
     | \\((4, 8)\\)          | \\((4, 7)\\) | \\((4, 6)\\) | \\((4, 5)^{\*}\\)    | \\((4, 4)\\) | \\((4, 3)\\) | \\((4, 2)\\) | \\((4, 1)\\) |
     | \\((5, 1)^{\*}\\)     | \\((5, 2)\\) | \\((5, 3)\\) | \\((5, 4)\\)         | \\((5, 5)\\) | \\((5, 6)\\) | \\((5, 7)\\) | \\((5, 8)\\) |
 
-    \\(^{\*}\\) Indicates labels which must be hashed for column commitments but need not be opened for proofs.
+    \\(^{\*}\\) Indicates labels which must be hashed for column commitments but need not be opened for label checks.
 
     Define \\(C\_{p\_{even}}\\) to be the column containing the even expander parents.
 
