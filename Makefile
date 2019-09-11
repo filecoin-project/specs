@@ -43,7 +43,10 @@ org2md: $(ORG_MD_FILES)
 	# cd to each target's directory, run there
 	# this should invoke orient
 	# this should produce hugo markdown output
-	bin/org2md $< $@
+	bin/org2hugomd.el <$< >$@
+
+
+# installing deps
 
 
 # building our tools
