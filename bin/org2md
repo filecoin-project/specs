@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# input is org mode filename
+infile="$1"
+outfile="$2"
+
+# TODO: test infile and outfile are defined, else error
+
+# TODO: load emacs deps
+# make sure to set HUGO_BASE_DIR= property in emacs for xo-hugo
+emacs "$infile" -Q --batch \
+  -f org-hugo-export-with-toc \
+  --kill >"$outfile"
