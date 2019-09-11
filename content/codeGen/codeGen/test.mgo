@@ -1,0 +1,14 @@
+
+type Block struct {
+	MinerAddress           &Address
+	Tickets                byte
+
+	foo(x byte)                                        Word
+	UnsignedFingerprint(test1 [byte], test2 [Word])    [[byte]]
+}
+
+type Message struct {
+	To              Address
+	From            Address
+	Nonce           Word
+}
