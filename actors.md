@@ -217,7 +217,7 @@ type StorageMarketActorState struct {
 | `GetTotalStorage` | 5 |
 | `PowerLookup` | 6 |
 | `IsMiner` | 7 |
-| `StorageCollateralForSize` | 8 |
+| `PledgeCollateralForSize` | 8 |
 
 #### `Constructor`
 
@@ -413,13 +413,13 @@ func IsMiner(addr Address) bool {
 }
 ```
 
-#### `StorageCollateralForSize`
+#### `PledgeCollateralForSize`
 
 
 **Parameters**
 
 ```sh
-type StorageCollateralForSize struct {
+type PledgeCollateralForSize struct {
     size UInt
 } representation tuple
 ```
@@ -427,7 +427,7 @@ type StorageCollateralForSize struct {
 **Algorithm**
 
 ```go
-func StorageCollateralforSize(size UInt) TokenAmount {
+func PledgeCollateralforSize(size UInt) TokenAmount {
 	// TODO:
 }
 ```
