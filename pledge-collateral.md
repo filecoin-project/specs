@@ -40,7 +40,7 @@ minerPerCapitaCollateral := totalPerCapitaCollateral / numMiners
 
 Putting all these variables together, we have each miner's individual collateral requirement:
 ```go
-minerPlegeCollateral := availableFil * ( POWER_COLLATERAL_PROPORTION * minerPower / totalNetworkPower PER_CAPITA_COLLATERAL_PROPORTION / numMiners)
+minerPledgeCollateral := availableFil * ( POWER_COLLATERAL_PROPORTION * minerPower / totalNetworkPower PER_CAPITA_COLLATERAL_PROPORTION / numMiners)
 ```
 
 ## Dealing with Undercollateralization

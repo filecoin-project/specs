@@ -348,7 +348,7 @@ func SlashConsensusFault(block1, block2 BlockHeader) {
 	const blockElapsed = VM.CurrentBlockHeight() - block1.Height
 	const GROWTH_RATE = 1.26
 	const INITIAL_SHARE = 0.001
-	const SLASHER_SHARE = Min(Pow(INITIAL_SHARE, GROWTH_RATE), 1.0)
+	const SLASHER_SHARE = Min(INITIAL_SHARE * Pow(GROWTH_RATE, blockElapsed), 1.0)
 	VM.TransferFunds(SLASHER_SHARE * slashedCollateral, msg.From)
 	self.BurnFunds((1.0 - SLASHER_SHARE) * slashedCollateral)
 	
