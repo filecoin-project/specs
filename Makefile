@@ -1,18 +1,5 @@
 
-build:
-	# todo
-
-deps:
-	# require emacs
-	# require hugo
-	# require go 1.12+
-	# require cask (emacs deps)
-	#
-	# make bins last, after installing other deps
-	# not all deps can fit nicely into make's dependency graph
-	# so we re-invoke make.
-	make bins
-
+build: website
 
 # main Targets
 
@@ -27,12 +14,15 @@ publish: website
 hugo-build: $(shell find . | grep .md)
 	hugo
 
+# todo
 generate-code: $(shell find content/ | grep .ipld)
-	bin/codeGen <input-files?>
+	echo TODO: use codeGen && exit 1
+	# bin/codeGen <input-files?>
 
 go-test: $(shell find content/ | grep .go)
 	# testing should have the side effect that all go is compiled
-	go test ./content/... # todo: test?
+	cd content/codeGen && go build && go test ./...
+	cd content/code && go build && go test ./...
 
 # convert orgmode to markdown
 ORG_FILES=$(shell find content/ | grep .org)
@@ -48,10 +38,20 @@ org2md: $(ORG_MD_FILES)
 
 # installing deps
 
+deps:
+	bin/install-deps.sh
+	@# make bins last, after installing other deps
+	@# so we re-invoke make.
+	make bins
 
 # building our tools
 
 bins: bin/codeGen
 
 bin/codeGen: content/codeGen/*.go
-	go build -o bin/codeGen content/codeGen
+	cd content/codeGen && go build -o ../../bin/codeGen
+
+# other
+
+serve: hugo-build
+	hugo serve
