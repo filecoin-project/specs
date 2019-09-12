@@ -1,15 +1,17 @@
 #!/bin/sh
 
+#------- WIP FLAG
+echo "Hold up, this isn't ready yet."
+echo "if you need it, ping @jbenet to fix it"
+exit 1;
+#-------
+
 if [[ $(git status -s) ]]
 then
     echo "error: the working directory is dirty."
     echo "Please commit any pending changes and test, before publishing."
     exit 1;
 fi
-
-echo "Hold up, this isn't ready yet."
-echo "if you need it, ping @jbenet to fix it"
-exit 1;
 
 echo "Deleting old publication"
 rm -rf public

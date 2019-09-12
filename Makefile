@@ -32,6 +32,7 @@ help:
 	@echo ""
 	@echo "INTERMEDIATE TARGETS"
 	@echo "\tmake website     build the website artifact"
+	@#echo "\tmake pdf         build the pdf artifact"
 	@echo "\tmake hugo-build  run the hugo part of the pipeline"
 	@echo "\tmake gen-code    generate code artifacts (eg ipld -> go)"
 	@echo "\tmake org2md      run org mode to markdown compilation"
@@ -59,6 +60,10 @@ publish: website
 # intermediate targets
 website: go-test org2md hugo-build
 	@echo TODO: add generate-code to this target
+
+pdf: go-test org2md hugo-build
+	@echo TODO: add generate-code to this target
+	bin/build-pdf.sh
 
 hugo-build: $(shell find . | grep .md)
 	hugo
