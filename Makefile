@@ -51,10 +51,10 @@ deps:
 	make bins
 
 drafts: website
-	bin/publish-to-ipfs
+	bin/publish-to-ipfs.sh
 
 publish: website
-	bin/publish-to-gh-pages
+	bin/publish-to-gh-pages.sh
 
 # intermediate targets
 website: go-test org2md hugo-build
