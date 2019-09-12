@@ -26,6 +26,12 @@ which_v() {
 }
 
 require() {
+  if [ "$1" == "go" ]; then
+      gov=$(go version | cut -d" " -f3 | cut -d"." -f2)
+      if [[ $((gov < 12)) ]]; then
+          die "go v1.12+ required"
+      fi
+  fi
   which_v "$1" || die "$1 required - install package: $2
 $3"
 }
