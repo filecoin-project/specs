@@ -384,10 +384,9 @@ To prove encoding for a challenged label $\chi$ on odd layers $l_{odd}$ and $\ba
   - Open label for challenged data node $e_\chi^{(0)} — using Comm_D$.
 - ZigZag replica column openings
   - Open all labels in $C_\chi$ containing challenged label's 'replica node', ($C_\chi$) — using $Comm_C$.
-  - Open only odd-layer labels in the 'renumbered' column ($C_{\bar{\chi}}$) — using $Comm_C$. (This contains the
-    challenged label's 'data node', $e_\chi^{(L-1)}$.)
+  - Open all labels in the 'renumbered' column ($C_{\bar{\chi}}$) — using $Comm_C$. These are the challenged label's
+    'data nodes' (from the preceding layer).
   - Open all labels in the columns containing challenged label's DRG parents — using $Comm_C$.
-
   - Open only even-layer labels in the columns containing challenged label's even expander parents — using $Comm_C$ and
     $O_{p_{even}}$.
   - Open only odd-layer labels in the columns containing challenged label's odd-layer expander parents — using $Comm_C$
