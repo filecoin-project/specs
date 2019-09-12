@@ -1,15 +1,64 @@
 
-build: website
+# guidelines for editing this makefile:
+#
+# - keep it simple -- put complicated commands into scripts inside bin/ (eg install-deps.sh)
+# - document targets in the 'help' target
+# - distinguish main targets (meant for users) from intermediate targets
+# - if you write a new tool that requires compilation:
+#      add a compilation target here and move the binary into bin/
+# - if you add a dependency on another tool:
+#      make sure you edit install-deps.sh to install or prompt to install it
+# - keep diagrams/builsys/buildsys.dot in sync with the targets here
+#      that is a diagram that is meant to make it easy to understand everything here.
+
+help:
+	@echo "filecoin spec build toolchain commands"
+	@echo ""
+	@echo "USAGE"
+	@echo "\tmake deps        # run this once, to install dependencies"
+	@echo "\tmake build       # run this every time you want to re-build artifacts"
+	@echo ""
+	@echo "WARNING"
+	@echo "\tthis build tool is WIP, so some targets may not work yet"
+	@echo "\tthis should stabilize in the next couple of days"
+	@echo ""
+	@echo "MAIN TARGETS"
+	@echo "\tmake help        description of the targets (this message)"
+	@echo "\tmake deps        install all dependencies of this tool chain"
+	@echo "\tmake build       build all final artifacts (website only for now)"
+	@echo "\tmake test        run all test cases (go-test only for now)"
+	@echo "\tmake drafts      publish artifacts to ipfs and show an address"
+	@echo "\tmake publish     publish final artifacts to spec website (github pages)"
+	@echo ""
+	@echo "INTERMEDIATE TARGETS"
+	@echo "\tmake website     build the website artifact"
+	@echo "\tmake hugo-build  run the hugo part of the pipeline"
+	@echo "\tmake gen-code    generate code artifacts (eg ipld -> go)"
+	@echo "\tmake org2md      run org mode to markdown compilation"
+	@echo "\tmake go-test     run test cases in code artifacts"
+	@echo ""
+	@echo "OTHER TARGETS"
+	@echo "\tmake bins        compile some build tools whose source is in this repo"
+	@echo "\tmake serve       start hugo in serving mode -- must run make build on changes manually"
 
 # main Targets
+build: website
 
-# this bundles the website
-website: hugo-build
+deps:
+	bin/install-deps.sh
+	@# make bins last, after installing other deps
+	@# so we re-invoke make.
+	make bins
 
-publish: website
+drafts: website
 	bin/publish-to-ipfs
 
+publish: website
+	bin/publish-to-gh-pages
+
 # intermediate targets
+website: go-test org2md hugo-build
+	@echo TODO: add generate-code to this target
 
 hugo-build: $(shell find . | grep .md)
 	hugo
@@ -36,16 +85,7 @@ org2md: $(ORG_MD_FILES)
 	bin/org2hugomd.el <$< >$@
 
 
-# installing deps
-
-deps:
-	bin/install-deps.sh
-	@# make bins last, after installing other deps
-	@# so we re-invoke make.
-	make bins
-
 # building our tools
-
 bins: bin/codeGen
 
 bin/codeGen: content/codeGen/*.go
