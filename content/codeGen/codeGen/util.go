@@ -1,6 +1,7 @@
 package codeGen
 
 import (
+	"unsafe"
 	"log"
 )
 
@@ -36,7 +37,11 @@ type Fraction struct {
 	d BigInt
 }
 
-type Word int64
+type Word = int
+
+// Check that sizeof(Word) == 8 (we only support 64-bit builds for now)
+type _UnusedCompileAssert1 = [unsafe.Sizeof(Word(0))-8]byte
+type _UnusedCompileAssert2 = [8-unsafe.Sizeof(Word(0))]byte
 
 type Timestamp Word
 

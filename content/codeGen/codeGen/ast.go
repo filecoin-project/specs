@@ -1,6 +1,7 @@
 package codeGen
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
@@ -24,43 +25,62 @@ type TypeDecl struct {
 type Type_Case = Word
 
 const (
-	Type_Case_ProdType  Type_Case = 1
-	Type_Case_ArrayType Type_Case = 2
-	Type_Case_RefType   Type_Case = 3
-	Type_Case_FunType   Type_Case = 4
-	Type_Case_NamedType Type_Case = 5
+	Type_Case_NamedType    Type_Case = 1
+	Type_Case_AlgType      Type_Case = 2
+	Type_Case_ArrayType    Type_Case = 3
+	Type_Case_FunType      Type_Case = 4
+	Type_Case_RefType      Type_Case = 5
+	Type_Case_OptionType   Type_Case = 6
+	Type_Case_MapType      Type_Case = 7
 )
 
-func (ProdType) Case() Type_Case {
-	return Type_Case_ProdType
+func (NamedType) Case() Type_Case {
+	return Type_Case_NamedType
+}
+func (AlgType) Case() Type_Case {
+	return Type_Case_AlgType
 }
 func (ArrayType) Case() Type_Case {
 	return Type_Case_ArrayType
 }
-func (RefType) Case() Type_Case {
-	return Type_Case_RefType
-}
 func (FunType) Case() Type_Case {
 	return Type_Case_FunType
 }
-func (NamedType) Case() Type_Case {
-	return Type_Case_NamedType
+func (RefType) Case() Type_Case {
+	return Type_Case_RefType
+}
+func (OptionType) Case() Type_Case {
+	return Type_Case_OptionType
+}
+func (MapType) Case() Type_Case {
+	return Type_Case_MapType
 }
 
+type AlgSort = Word
+
+const (
+	AlgSort_Prod AlgSort = 1
+	AlgSort_Sum  AlgSort = 2
+)
+
 type Field struct {
-	fieldName string
-	fieldType Type
-	internal  bool
+	fieldName     string
+	fieldType     Type
+	internal      bool
+	attributeList []string
 }
 
 type Method struct {
-	methodName string
-	methodType *FunType
+	methodName    string
+	methodType    *FunType
+	attributeList []string
 }
 
-type ProdType struct {
-	fields  []Field
-	methods []Method
+type AlgType struct {
+	sort          AlgSort
+	fields        []Field
+	methods       []Method
+	attributeList []string
 }
 
 type ArrayType struct {
@@ -80,6 +100,15 @@ type NamedType struct {
 	name string
 }
 
+type OptionType struct {
+	valueType Type
+}
+
+type MapType struct {
+	keyType   Type
+	valueType Type
+}
+
 type TypeHash string
 
 func HashAccWord(buf *[]byte, w Word) {
@@ -97,16 +126,16 @@ func HashAccBool(buf *[]byte, b bool) {
 }
 
 func HashAccString(buf *[]byte, s string) {
-	HashAccWord(buf, Word(len(s)))
+	HashAccWord(buf, len(s))
 	*buf = append(*buf, s...)
 }
 
 func HashAccType(buf *[]byte, x Type) {
 	switch x.Case() {
-	case Type_Case_ProdType:
-		xr := x.(*ProdType)
-		HashAccWord(buf, Type_Case_ProdType)
-		HashAccWord(buf, Word(len(xr.fields)))
+	case Type_Case_AlgType:
+		xr := x.(*AlgType)
+		HashAccWord(buf, Type_Case_AlgType)
+		HashAccWord(buf, len(xr.fields))
 		for _, field := range xr.fields {
 			HashAccString(buf, field.fieldName)
 			HashAccType(buf, field.fieldType)
@@ -126,7 +155,7 @@ func HashAccType(buf *[]byte, x Type) {
 	case Type_Case_FunType:
 		xr := x.(*FunType)
 		HashAccWord(buf, Type_Case_FunType)
-		HashAccWord(buf, Word(len(xr.args)))
+		HashAccWord(buf, len(xr.args))
 		for _, arg := range xr.args {
 			HashAccString(buf, arg.fieldName)
 			HashAccType(buf, arg.fieldType)
@@ -137,6 +166,17 @@ func HashAccType(buf *[]byte, x Type) {
 		xr := x.(*NamedType)
 		HashAccWord(buf, Type_Case_NamedType)
 		HashAccString(buf, xr.name)
+
+	case Type_Case_OptionType:
+		xr := x.(*OptionType)
+		HashAccWord(buf, Type_Case_OptionType)
+		HashAccType(buf, xr.valueType)
+
+	case Type_Case_MapType:
+		xr := x.(*MapType)
+		HashAccWord(buf, Type_Case_MapType)
+		HashAccType(buf, xr.keyType)
+		HashAccType(buf, xr.valueType)
 
 	default:
 		panic("TODO")
@@ -182,7 +222,20 @@ type GoGenContext struct {
 	typeMap   map[string]Type
 	retDecls  *[]GoNode
 	retMap    map[TypeHash]GoNode
+	tokens    []string
 	concrete  bool
+}
+
+func (ctx GoGenContext) Extend(token string) GoGenContext {
+	ret := ctx
+	ret.tokens = append(ret.tokens, token)
+	return ret
+}
+
+func (ctx GoGenContext) Concrete(concrete bool) GoGenContext {
+	ret := ctx
+	ret.concrete = concrete
+	return ret
 }
 
 func GenGoTypeDecls(decls []TypeDecl) []GoNode {
@@ -190,6 +243,7 @@ func GenGoTypeDecls(decls []TypeDecl) []GoNode {
 		typeMap:  map[string]Type{},
 		retDecls: &[]GoNode{},
 		retMap:   map[TypeHash]GoNode{},
+		tokens:   []string{},
 		concrete: false,
 	}
 
@@ -221,6 +275,13 @@ func GoTypeByteArray() GoNode {
 		elementType: GoIdent {
 			name: "byte",
 		},
+	}
+}
+
+func GoTypeAny() GoNode {
+	return GoProdType {
+		typeCase: GoProdTypeCase_Interface,
+		fields:   []GoField{},
 	}
 }
 
@@ -273,15 +334,45 @@ func GenGoDerefAccessorBody(receiverVar GoNode, fieldName string) []GoNode {
 	return ret
 }
 
+func GenGoMethodCall(obj GoNode, methodName string, args []GoNode) GoNode {
+	ret := GoExprCall {
+		f: GoExprDot {
+			value: obj,
+			fieldName: methodName,
+		},
+		args: args,
+	}
+	return ret
+}
+
+func GoTypeToIdent(typeName string) GoIdent {
+	return GoIdent { name: strings.ToLower(typeName) }
+}
+
 func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 	Assert(x != nil)
 
 	switch x.(type) {
-	case *ProdType:
-		xr := x.(*ProdType)
+	case *NamedType:
+		xr := x.(*NamedType)
+		return GoIdent {name: xr.name}
 
-		ctxConcrete := ctx
-		ctxConcrete.concrete = true
+	case *OptionType:
+		xr := x.(*OptionType)
+		goValueType := GenGoTypeAcc(xr.valueType, ctx.Extend("OptValue"))
+		goValueType.implements_GoNode()
+		return GoIdent {name: "_TODO_"}
+
+	case *MapType:
+		xr := x.(*MapType)
+		goKeyType := GenGoTypeAcc(xr.keyType, ctx.Extend("MapKey"))
+		goValueType := GenGoTypeAcc(xr.valueType, ctx.Extend("MapValue"))
+		goKeyType.implements_GoNode()
+		goValueType.implements_GoNode()
+		return GoIdent {name: "_TODO_"}
+
+	case *AlgType:
+		xr := x.(*AlgType)
 	
 		interfaceName := name
 		interfaceID := GoIdent {name: interfaceName}
@@ -296,25 +387,27 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		implFields := []GoField{}
 		implRefFields := []GoField{}
 
-		for _, field := range xr.fields {
-			implFields = append(implFields, GoField {
-				fieldName: field.fieldName,
-				fieldType: GenGoTypeAcc(field.fieldType, ctxConcrete),
-			})
+		if xr.sort == AlgSort_Prod {
+			for _, field := range xr.fields {
+				implFields = append(implFields, GoField {
+					fieldName: field.fieldName,
+					fieldType: GenGoTypeAcc(field.fieldType, ctx.Extend(field.fieldName).Concrete(true)),
+				})
 
-			interfaceFields = append(interfaceFields, GoField {
-				fieldName: field.fieldName,
-				fieldType: GoFunType {
-					args:     []GoField{},
-					retType:  GenGoTypeAcc(field.fieldType, ctx),
-				},
-			})
+				interfaceFields = append(interfaceFields, GoField {
+					fieldName: field.fieldName,
+					fieldType: GoFunType {
+						args:     []GoField{},
+						retType:  GenGoTypeAcc(field.fieldType, ctx.Extend(field.fieldName)),
+					},
+				})
+			}
 		}
 
 		for _, method := range xr.methods {
 			interfaceFields = append(interfaceFields, GoField {
 				fieldName: method.methodName,
-				fieldType: GenGoTypeAcc(method.methodType, ctx),
+				fieldType: GenGoTypeAcc(method.methodType, ctx.Extend(method.methodName)),
 			})
 		}
 
@@ -327,20 +420,155 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		})
 
 		interfaceFields = append(interfaceFields, GoField {
-			fieldName: "ContentHash",
+			fieldName: "CID",
 			fieldType: GoFunType {
 				retType:  GoTypeByteArray(),
 				args:     []GoField{},
 			},
 		})
 
+		var caseTypeID GoNode = nil
+
+		if xr.sort == AlgSort_Sum {
+			caseNames := []string{}
+
+			caseTypeName := name + "_Case"
+			caseTypeID = GoIdent { caseTypeName }
+
+			for _, field := range xr.fields {
+				caseNames = append(caseNames, field.fieldName)
+				caseWhich := GoIdent { caseTypeName + "_" + field.fieldName }
+
+				caseInterfaceName := name + "_" + field.fieldName
+				GenGoTypeDeclAcc(caseInterfaceName, field.fieldType, ctx)
+
+				caseInterfaceType := GoIdent { caseInterfaceName }
+				caseImplType := GoIdent { IdToImpl(caseInterfaceName) }
+				// caseImplPtrType := GoPtrType { targetType: caseImplType }
+
+				interfaceFields = append(interfaceFields, GoField {
+					fieldName: "As_" + field.fieldName,
+					fieldType: GoFunType {
+						retType:   GoIdent { caseInterfaceName },
+						args:      []GoField{},
+					},
+				})
+
+				caseAsDeclArg := GoTypeToIdent(name + "_" + field.fieldName)
+				caseAsDeclBody := []GoNode {
+					GoStmtExpr {
+						expr: GoExprCall {
+							f: GoIdent { name: "Assert" },
+							args: []GoNode {
+								GoExprEq {
+									GenGoMethodCall(caseAsDeclArg, "Which", []GoNode{}),
+									caseWhich,
+								},
+							},
+						},
+					},
+					GoStmtReturn {
+						value: GoExprCast {
+							arg:     caseAsDeclArg,
+							resType: caseInterfaceType,
+						},
+					},
+				}
+				caseAsDecl := GoFunDecl {
+					receiverVar: &caseAsDeclArg,
+					receiverType: GoIdent { caseInterfaceName },
+					funName: "As_" + field.fieldName,
+					funType: GoFunType {
+						args: []GoField {},
+						retType: caseInterfaceType,
+					},
+					funArgs: []GoNode{},
+					funBody: caseAsDeclBody,
+				}
+
+				*ctx.retDecls = append(*ctx.retDecls, caseAsDecl)
+
+
+
+				caseNewDeclArg := GoTypeToIdent(name + "_" + field.fieldName)
+				caseNewDeclBody := []GoNode {
+					GoStmtReturn {
+						GoExprAddrOf {
+							target: GoExprStruct {
+								type_:  caseImplType,
+								fields: []GoField {
+									GoField {
+										fieldName: "cached_cid",
+										fieldType: GoExprLitNil {},
+									},
+									GoField {
+										fieldName: "rawValue",
+										fieldType: caseNewDeclArg,
+									},
+									GoField {
+										fieldName: "which",
+										fieldType: caseWhich,
+									},
+								},
+							},
+						},
+					},
+				}
+				caseNewDecl := GoFunDecl {
+					receiverVar: nil,
+					receiverType: nil,
+					funName: name + "_Make_" + field.fieldName,
+					funType: GoFunType {
+						args: []GoField {
+							GoField {
+								fieldName: caseNewDeclArg.name,
+								fieldType: GoIdent { caseInterfaceName },
+							},
+						},
+						retType: interfaceID,
+					},
+					funArgs: []GoNode{caseNewDeclArg},
+					funBody: caseNewDeclBody,
+				}
+
+				*ctx.retDecls = append(*ctx.retDecls, caseNewDecl)
+			}
+
+			caseTypeDecl := GoEnumDecl {
+				name:      caseTypeName,
+				caseNames: caseNames,
+			}
+
+			*ctx.retDecls = append(*ctx.retDecls, caseTypeDecl)
+
+			interfaceFields = append(interfaceFields, GoField {
+				fieldName: "Which",
+				fieldType: GoFunType {
+					retType: caseTypeID,
+					args:    []GoField{},
+				},
+			})
+		}
+
 		implFields = append(implFields, GoField {
-			fieldName: "cached_contentHash",
+			fieldName: "cached_cid",
 			fieldType: GoTypeByteArray(),
 		})
 
+		if xr.sort == AlgSort_Sum {
+			implFields = append(implFields, GoField {
+				fieldName: "rawValue",
+				fieldType: GoTypeAny(),
+			})
+
+			implFields = append(implFields, GoField {
+				fieldName: "which",
+				fieldType: caseTypeID,
+			})
+		}
+
 		implRefFields = append(implRefFields, GoField {
-			fieldName: "contentHash",
+			fieldName: "cid",
 			fieldType: GoTypeByteArray(),
 		})
 
@@ -378,13 +606,13 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		*ctx.retDecls = append(*ctx.retDecls, implDecl)
 		*ctx.retDecls = append(*ctx.retDecls, implRefDecl)
 
-		implReceiverVar := GoIdent {name: strings.ToLower(name)}
-		implRefReceiverVar := GoIdent {name: strings.ToLower(name)}
+		implReceiverVar := GoTypeToIdent(name)
+		implRefReceiverVar := GoTypeToIdent(name)
 		for _, field := range xr.fields {
-			baseFieldType := GenGoTypeAcc(field.fieldType, ctx)
+			baseFieldType := GenGoTypeAcc(field.fieldType, ctx.Extend(field.fieldName))
 
 			implAccessorDecl := GoFunDecl {
-				receiverVar: implReceiverVar,
+				receiverVar: &implReceiverVar,
 				receiverType: GoPtrType {
 					targetType: implID,
 				},
@@ -398,7 +626,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 			}
 
 			implRefAccessorDecl := GoFunDecl {
-				receiverVar: implRefReceiverVar,
+				receiverVar: &implRefReceiverVar,
 				receiverType: GoPtrType {
 					targetType: implRefID,
 				},
@@ -416,7 +644,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		}
 
 		implImplDecl := GoFunDecl {
-			receiverVar: implReceiverVar,
+			receiverVar: &implReceiverVar,
 			receiverType: GoPtrType { targetType: implID, },
 			funName: "Impl",
 			funType: GoFunType {
@@ -428,7 +656,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		}
 
 		implRefImplDecl := GoFunDecl {
-			receiverVar: implRefReceiverVar,
+			receiverVar: &implRefReceiverVar,
 			receiverType: GoPtrType { targetType: implRefID, },
 			funName: "Impl",
 			funType: GoFunType {
@@ -452,8 +680,6 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		panic("TODO")
 	case *FunType:
 		panic("TODO")
-	case *NamedType:
-		panic("TODO")
 	default:
 		errMsg := fmt.Sprintf("TODO: %v\n", x.Case())
 		panic(errMsg)
@@ -461,28 +687,25 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 }
 
 func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
-	// ret := []GoNode{}
-	// idMap := map[Type]string
-
 	if match, ok := ctx.retMap[HashType(x)]; ok {
 		return match
 	}
 
-	// for _, x := range decls {
 	switch x.Case() {
-	case Type_Case_ProdType:
-		panic("Inline ProdType not supported in this context")
+	case Type_Case_AlgType:
+		typeName := strings.Join(ctx.tokens, "_")
+		return GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
 
 	case Type_Case_ArrayType:
 		xr := x.(*ArrayType)
-		goElementType := GenGoTypeAcc(xr.elementType, ctx)
+		goElementType := GenGoTypeAcc(xr.elementType, ctx.Extend("ArrayElement"))
 		return GoArrayType {
 			elementType: goElementType,
 		}
 
 	case Type_Case_RefType:
 		xr := x.(*RefType)
-		goTargetType := GenGoTypeAcc(xr.targetType, ctx)
+		goTargetType := GenGoTypeAcc(xr.targetType, ctx.Extend("RefTarget"))
 		switch goTargetType.(type) {
 		case GoIdent:
 			if ctx.concrete {
@@ -498,10 +721,10 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
 
 	case Type_Case_FunType:
 		xr := x.(*FunType)
-		goRetType := GenGoTypeAcc(xr.retType, ctx)
+		goRetType := GenGoTypeAcc(xr.retType, ctx.Extend("FunRet"))
 		goArgs := []GoField{}
-		for _, arg := range xr.args {
-			goArgType := GenGoTypeAcc(arg.fieldType, ctx)
+		for i, arg := range xr.args {
+			goArgType := GenGoTypeAcc(arg.fieldType, ctx.Extend(fmt.Sprintf("FunArg%v", i)))
 			goArg := GoField {
 				fieldName: arg.fieldName,
 				fieldType: goArgType,
@@ -519,24 +742,58 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
 			name: xr.name,
 		}
 
+	case Type_Case_OptionType:
+		typeName := strings.Join(ctx.tokens, "_")
+		return GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
+
+	case Type_Case_MapType:
+		typeName := strings.Join(ctx.tokens, "_")
+		return GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
+
 	default:
 		panic("TODO")
 	}
 }
 
-type GoNode interface{}
+type GoNode interface {
+	implements_GoNode()
+}
+
+func (GoTypeDecl) implements_GoNode() {}
+func (GoEnumDecl) implements_GoNode() {}
+func (GoFunDecl) implements_GoNode() {}
+func (GoFunType) implements_GoNode() {}
+func (GoPtrType) implements_GoNode() {}
+func (GoStmtReturn) implements_GoNode() {}
+func (GoStmtExpr) implements_GoNode() {}
+func (GoExprDot) implements_GoNode() {}
+func (GoExprEq) implements_GoNode() {}
+func (GoExprCast) implements_GoNode() {}
+func (GoExprCall) implements_GoNode() {}
+func (GoExprStruct) implements_GoNode() {}
+func (GoExprAddrOf) implements_GoNode() {}
+func (GoExprLitNil) implements_GoNode() {}
+func (GoField) implements_GoNode() {}
+func (GoProdType) implements_GoNode() {}
+func (GoArrayType) implements_GoNode() {}
+func (GoIdent) implements_GoNode() {}
 
 type GoTypeDecl struct {
 	name  string
 	type_ GoNode
 }
 
+type GoEnumDecl struct {
+	name       string
+	caseNames  []string
+}
+
 type GoFunDecl struct {
-	receiverVar  GoIdent
+	receiverVar  *GoIdent
 	receiverType GoNode
 	funName      string
 	funType      GoFunType
-	funArgs      GoNode
+	funArgs      []GoNode
 	funBody      []GoNode
 }
 
@@ -560,9 +817,23 @@ type GoStmtReturn struct {
 	value GoNode
 }
 
+type GoStmtExpr struct {
+	expr GoNode
+}
+
 type GoExprDot struct {
 	value     GoNode
 	fieldName string
+}
+
+type GoExprEq struct {
+	lhs GoNode
+	rhs GoNode
+}
+
+type GoExprCast struct {
+	arg     GoNode
+	resType GoNode
 }
 
 type GoExprCall struct {
@@ -570,9 +841,20 @@ type GoExprCall struct {
 	args []GoNode
 }
 
+type GoExprStruct struct {
+	type_  GoNode
+	fields []GoField
+}
+
+type GoExprAddrOf struct {
+	target GoNode
+}
+
+type GoExprLitNil struct { }
+
 type GoField struct {
 	fieldName string
-	fieldType GoNode
+	fieldType GoNode  // TODO: rename
 }
 
 type GoProdType struct {
@@ -602,6 +884,29 @@ func GenAST(x GoNode) ast.Node {
 			},
 		}
 
+	case GoEnumDecl:
+		xr := x.(GoEnumDecl)
+		caseTypeNames := []*ast.Ident{}
+		caseTypeValues := []ast.Expr{}
+		for i, caseName := range xr.caseNames {
+			caseTypeNames = append(caseTypeNames, ast.NewIdent(xr.name + "_" + caseName))
+			caseTypeValue := &ast.BasicLit {
+				Kind:  token.INT,
+				Value: fmt.Sprintf("%v", i+1),
+			}
+			caseTypeValues = append(caseTypeValues, caseTypeValue)
+		}
+		return &ast.GenDecl {
+			Tok: token.CONST,
+			Specs: []ast.Spec {
+				&ast.ValueSpec {
+					Names: caseTypeNames,
+					Type: ast.NewIdent(xr.name),
+					Values: caseTypeValues,
+				},
+			},
+		}
+
 	case GoFunDecl:
 		xr := x.(GoFunDecl)
 		var goRecv *ast.FieldList = nil
@@ -610,7 +915,7 @@ func GenAST(x GoNode) ast.Node {
 				List: []*ast.Field {
 					&ast.Field {
 						Names: []*ast.Ident {
-							GenAST(xr.receiverVar).(*ast.Ident),
+							GenAST(*xr.receiverVar).(*ast.Ident),
 						},
 						Type: GenAST(xr.receiverType).(ast.Expr),
 					},
@@ -723,23 +1028,80 @@ func GenAST(x GoNode) ast.Node {
 			Args: goArgs,
 		}
 
+	case GoStmtExpr:
+		xr := x.(GoStmtExpr)
+		return &ast.ExprStmt {
+			X: GenAST(xr.expr).(ast.Expr),
+		}
+
+	case GoExprLitNil:
+		return &ast.BasicLit {
+			Kind:  token.STRING,
+			Value: "nil",
+		}
+
+	case GoExprStruct:
+		xr := x.(GoExprStruct)
+		goFields := []ast.Expr{}
+		for _, field := range xr.fields {
+			goField := &ast.KeyValueExpr {
+				Key:   ast.NewIdent(field.fieldName),
+				Value: GenAST(field.fieldType).(ast.Expr),
+			}
+			goFields = append(goFields, goField)
+		}
+		return &ast.CompositeLit {
+			Type:  GenAST(xr.type_).(ast.Expr),
+			Elts:  goFields,
+		}
+
+	case GoExprAddrOf:
+		xr := x.(GoExprAddrOf)
+		return &ast.UnaryExpr {
+			Op: token.AND,
+			X:  GenAST(xr.target).(ast.Expr),
+		}
+
+	case GoExprEq:
+		xr := x.(GoExprEq)
+		return &ast.BinaryExpr {
+			Op: token.EQL,
+			X:  GenAST(xr.lhs).(ast.Expr),
+			Y:  GenAST(xr.rhs).(ast.Expr),
+		}
+
+	case GoExprCast:
+		xr := x.(GoExprCast)
+		return &ast.TypeAssertExpr {
+			X:    GenAST(xr.arg).(ast.Expr),
+			Type: GenAST(xr.resType).(ast.Expr),
+		}
+
 	case GoIdent:
 		xr := x.(GoIdent)
 		return ast.NewIdent(xr.name)
 
 	default:
+		fmt.Printf("Unknown type: %T %v\n", x, x)
 		panic("Unknown type for GenAST")
 	}
 }
 
 const Whitespace = " \t\n"
-const Symbols = "(){}[],;|&"
+const Symbols = "(){}[],;|&?:"
 
 const DebugParser = false
 
+type LineInfo struct {
+	line  Word
+	col   Word
+}
+
 type ParseStream struct {
-	rs  io.ReadSeeker
-	pos Word
+	rs       io.ReadSeeker
+	pos      Word
+	lineMap  []LineInfo
+	buffer   *bytes.Buffer
 }
 
 func (r *ParseStream) Seek(offset Word) {
@@ -751,14 +1113,74 @@ func (r *ParseStream) Seek(offset Word) {
 	r.pos += offset
 }
 
+func (r *ParseStream) PosDebug() string {
+	var i Word = r.pos - 1
+	if i < 0 {
+		i = 0
+	}
+	lineInfo := r.lineMap[i]
+	return fmt.Sprintf("line %v, column %v", lineInfo.line + 1, lineInfo.col)
+}
+
+func (r *ParseStream) GenParseError(errMsg string) ParseError_S {
+	var i Word = r.pos - 1
+	if i < 0 {
+		i = 0
+	}
+	errMsgNew := fmt.Sprintf("Parse error (%v)\n\n", r.PosDebug())
+
+	for {
+		if i > 0 && r.buffer.Bytes()[i] != '\n' {
+			i--
+		} else {
+			break
+		}
+	}
+	for i++; i < len(r.buffer.Bytes()); i++ {
+		c := string(r.buffer.Bytes()[i:i+1])
+		errMsgNew = errMsgNew + c
+		if c == "\n" {
+			break
+		}
+	}
+	if i == len(r.buffer.Bytes()) {
+		errMsgNew += "\n"
+	}
+	errMsgNew += "\n"
+	errMsgNew += errMsg
+	return ParseError(errMsgNew)
+}
+
 func ReadCheck(r *ParseStream, lenMax Word) string {
 	buf := make([]byte, lenMax)
 	n, err := r.rs.Read(buf)
-	r.pos += Word(n)
-	// fmt.Printf("  n: %v  buf: %v  Pos: %v\n", n, string(buf), r.pos)
+	ret := string(buf[:n])
+	for i, c := range buf[:n] {
+		p := r.pos + i
+		if p >= len(r.lineMap) {
+			Assert(p == len(r.lineMap))
+			prevLineInfo := LineInfo { line: 0, col: 0 }
+			if p >= 1 {
+				prevLineInfo = r.lineMap[p-1]
+			}
+			newLineInfo := LineInfo {
+				line: prevLineInfo.line,
+				col:  prevLineInfo.col + 1,
+			}
+			if c == '\n' {
+				newLineInfo = LineInfo {
+					line: prevLineInfo.line + 1,
+					col:  0,
+				}
+			}
+			r.lineMap = append(r.lineMap, newLineInfo)
+			r.buffer.WriteByte(c)
+		}
+	}
+	r.pos += n
 	if err == io.EOF {
 		Assert(n == 0)
-		return string(buf[:n])
+		return ret
 	}
 	if err != nil {
 		if DebugParser {
@@ -766,59 +1188,36 @@ func ReadCheck(r *ParseStream, lenMax Word) string {
 		}
 		panic("Read error")
 	}
-	// if Word(n) < lenMin {
-	// 	panic("Read error")
-	// }
-	if Word(n) > lenMax {
+	if n > lenMax {
 		panic("Read error")
 	}
-	return string(buf[:n])
+	return ret
 }
 
-// func ReadExact(r *ParseStream, lenExact Word) string {
-// 	return ReadCheck(r, lenExact, lenExact)
-// }
 
-// func ParseStringExact(r *ParseStream, x string) {
-// 	xCheck := ReadExact(r, Word(len(x)))
-// 	if xCheck != x {
-// 		var s = "Parse error"
-// 		r.err = &s
-// 	}
-// }
-
-// func ParseStringTokenExact(r *ParseStream, x string) {
-// 	StepToken(r)
-// 	ParseStringExact(r, x)
-// }
-
-
-func ReadToken(r *ParseStream) (string, error) {
+func ReadToken(r *ParseStream) (string, bool, error) {
 	retToken := []byte{}
-	StepToken(r)
+	hitNewline := StepToken(r)
 	for {
 		res := ReadCheck(r, 1)
 		if len(res) == 0 {
 			if len(retToken) > 0 {
-				return string(retToken), nil
+				return string(retToken), hitNewline, nil
 			} else {
-				return "", io.EOF
+				return "", hitNewline, io.EOF
 			}
 		}
 		Assert(len(res) == 1)
 		if strings.Contains(Whitespace, res) {
-			r.Seek(-Word(len(res)))
-			return string(retToken), nil
+			r.Seek(-len(res))
+			return string(retToken), hitNewline, nil
 		} else if strings.Contains(Symbols, res) {
 			if len(retToken) == 0 {
 				retToken = append(retToken, res[0])
 			} else {
-				r.Seek(-Word(len(res)))
+				r.Seek(-len(res))
 			}
-			return string(retToken), nil
-			// if DebugParser {
-				// fmt.Printf("Read token: %v\n", string(retToken))
-			// }
+			return string(retToken), hitNewline, nil
 		} else {
 			retToken = append(retToken, res...)
 			continue
@@ -865,12 +1264,12 @@ func IsIdent(s string) bool {
 }
 
 func ParseIdent(r *ParseStream) (string, error) {
-	ret, err := ReadToken(r)
+	ret, _, err := ReadToken(r)
 	if err != nil {
 		return "", err
 	} else if !IsIdent(ret) {
 		msg := fmt.Sprintf("Expected identifier; received: \"%v\"", ret)
-		return "", ParseError(msg)
+		return "", r.GenParseError(msg)
 	} else {
 		return ret, nil
 	}
@@ -881,7 +1280,18 @@ func (err ParseError_S) Error() string {
 }
 
 func ReadTokenCheck(r *ParseStream, validTokens []string) (string, error) {
-	tok, err := ReadToken(r)
+	for _, v := range validTokens {
+		if v == "\n" {
+			if tok, ok := PeekToken(r, true); ok && (tok == "\n") {
+				if DebugParser {
+					fmt.Printf("ReadTokenCheck read newline (special case): %v\n", r.PosDebug())
+				}
+				return tok, nil
+			}
+		}
+	}
+
+	tok, _, err := ReadToken(r)
 	if err != nil {
 		return "", err
 	}
@@ -890,7 +1300,14 @@ func ReadTokenCheck(r *ParseStream, validTokens []string) (string, error) {
 			return tok, nil
 		}
 	}
-	return "", ParseError("Unexpected token")
+
+	validTokensDisp := []string{}
+	for _, tok := range validTokens {
+		validTokenDisp := "\"" + tok + "\""
+		validTokensDisp = append(validTokensDisp, validTokenDisp)
+	}
+	errMsg := fmt.Sprintf("Unexpected token \"%v\" (expected: %v)", tok, strings.Join(validTokensDisp, ", "))
+	return "", r.GenParseError(errMsg)
 }
 
 func TryReadTokenCheck(r *ParseStream, validTokens []string) (string, bool) {
@@ -902,19 +1319,62 @@ func TryReadTokenCheck(r *ParseStream, validTokens []string) (string, bool) {
 	return ret, (err == nil)
 }
 
-func StepToken(r *ParseStream) {
+func PeekToken(r *ParseStream, matchNewline bool) (string, bool) {
+	initPos := r.pos
+	defer func() { r.Seek(initPos - r.pos) }()
+	ret, hitNewline, err := ReadToken(r)
+	if hitNewline && matchNewline {
+		return "\n", true
+	}
+	if err != nil {
+		Assert(err == io.EOF)
+		return "", false
+	} else {
+		return ret, true
+	}
+}
+
+func StepToken(r *ParseStream) (hitNewline bool) {
+	hitNewline = false
 	for {
 		res := ReadCheck(r, 1)
 		if len(res) == 1 && strings.Contains(Whitespace, res) {
+			if res == "\n" {
+				hitNewline = true
+			}
 			continue
 		} else {
-			r.Seek(-Word(len(res)))
+			r.Seek(-len(res))
 			return
 		}
 	}
 }
 
-func ParseField(r *ParseStream) (*Field, error) {
+func ParseAttributeList(r *ParseStream) ([]string, error) {
+	if tok, ok := PeekToken(r, false); ok && (tok == "@") {
+		_, _ = ReadTokenCheck(r, []string{"@"})
+		fTryParse := func (rr *ParseStream) (interface{}, bool) {
+			ret, _, err := ReadToken(rr)
+			if err != nil {
+				return nil, false
+			}
+			return ret, true
+		}
+		ret := []string{}
+		fAppend := func (x interface{}) {
+			ret = append(ret, x.(string))
+		}
+		err := ParseDelimitedList(r, "(", ",", ")", fTryParse, fAppend, false)
+		if err != nil {
+			return nil, err
+		}
+		return ret, nil
+	} else {
+		return []string{}, nil
+	}
+}
+
+func ParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (*Field, error) {
 	fieldName, err := ParseIdent(r)
 
 	if DebugParser {
@@ -924,31 +1384,65 @@ func ParseField(r *ParseStream) (*Field, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
+	if allowEmptyFieldTypes {
+		matchNewline := false
+		for _, delim := range delimSet {
+			if delim == "\n" {
+				matchNewline = true
+			}
+		}
+		if tok, ok := PeekToken(r, matchNewline); ok {
+			for _, delim := range delimSet {
+				if tok == delim {
+					return &Field {
+						fieldName: fieldName,
+						fieldType: &AlgType {
+							sort: AlgSort_Prod,
+							fields: []Field{},
+							methods: []Method{},
+							attributeList: []string{},
+						},
+						internal: false,
+						attributeList: []string{},
+					}, nil
+				}
+			}
+		}
+	}
+
 	fieldType, err := ParseType(r)
-	
 	if DebugParser {
 		fmt.Printf(" >>>>> ParseField ParseType: %v %v\n", fieldType, err)
 	}
-	
 	if err != nil {
 		return nil, err
 	}
+
+	attributeList, err := ParseAttributeList(r)
+	if DebugParser {
+		fmt.Printf(" >>>>> ParseField ParseAttributeList: %v %v\n", attributeList, err)
+	}
+	if err != nil {
+		return nil, err
+	}
+	
 	return &Field {
 		fieldName: fieldName,
 		fieldType: fieldType,
 		internal: false,
+		attributeList: attributeList,
 	}, nil
 }
 
-func TryParseField(r *ParseStream) (*Field, bool) {
+func TryParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (*Field, bool) {
 	initPos := r.pos
 
 	if DebugParser {
 		fmt.Printf("TryParseField initPos: %v\n", initPos)
 	}
 
-	ret, err := ParseField(r)
+	ret, err := ParseField(r, allowEmptyFieldTypes, delimSet)
 	if err != nil {
 		r.Seek(initPos - r.pos)
 	}
@@ -958,6 +1452,105 @@ func TryParseField(r *ParseStream) (*Field, bool) {
 	}
 
 	return ret, (err == nil)
+}
+
+func ParseDelimitedList(
+	r *ParseStream,
+	start string,
+	delim string,
+	end string,
+	fTryParse func(*ParseStream)(interface{}, bool),
+	fAppend func(interface{})(),
+	allowInitDelim bool) error {
+
+	_, err := ReadTokenCheck(r, []string{start})
+	if err != nil {
+		return err
+	}
+
+	if DebugParser {
+		fmt.Printf("ParseDelimitedList read start: %v, %v\n", start, r.PosDebug())
+	}
+
+	if allowInitDelim {
+		ret, err := TryReadTokenCheck(r, []string{delim})
+		if DebugParser {
+			fmt.Printf("ParseDelimitedList read init delim: %v, %v, %v\n", ret, err, r.PosDebug())
+		}
+	}
+
+	for {
+		if x, ok := fTryParse(r); ok {
+			if DebugParser {
+				fmt.Printf("ParseDelimitedList read item: %v\n", x)
+			}
+			fAppend(x)
+		} else {
+			_, err := ReadTokenCheck(r, []string{end})
+			if err != nil {
+				return err
+			} else {
+				return nil
+			}
+		}
+		if _, ok := TryReadTokenCheck(r, []string{delim}); !ok {
+			_, err := ReadTokenCheck(r, []string{end})
+			if err != nil {
+				return err
+			} else {
+				return nil
+			}
+		}
+	}
+}
+
+func ParseFieldList(
+	r *ParseStream,
+	start string,
+	delim string,
+	end string,
+	allowMethods bool,
+	allowInitDelim bool,
+	allowEmptyFieldTypes bool,
+	) ([]Field, []Method, error) {
+
+	retFields  := []Field{}
+	retMethods := []Method{}
+	fTryParse := func (r *ParseStream) (interface{}, bool) {
+		retField, ok := TryParseField(r, allowEmptyFieldTypes, []string{delim, end})
+		if ok {
+			return retField, true
+		} else {
+			if allowMethods {
+				retMethod, ok := TryParseMethod(r)
+				if ok {
+					return retMethod, true
+				} else {
+					return nil, false
+				}
+			} else {
+				return nil, false
+			}
+		}
+	}
+	fAppend := func (x interface{}) {
+		switch x.(type) {
+		case *Field:
+			retFields = append(retFields, *(x.(*Field)))
+			break
+		case *Method:
+			retMethods = append(retMethods, *(x.(*Method)))
+			break
+		default:
+			panic("Case not supported in ParseFieldList -> fAppend")
+		}
+	}
+	err := ParseDelimitedList(r, start, delim, end, fTryParse, fAppend, allowInitDelim)
+	if err != nil {
+		return nil, nil, err
+	} else {
+		return retFields, retMethods, nil
+	}
 }
 
 func ParseMethod(r *ParseStream) (*Method, error) {
@@ -971,31 +1564,9 @@ func ParseMethod(r *ParseStream) (*Method, error) {
 		return nil, err
 	}
 
-	_, err = ReadTokenCheck(r, []string{"("})
+	methodArgs, _, err := ParseFieldList(r, "(", ",", ")", false, false, false)
 	if err != nil {
 		return nil, err
-	}
-
-	methodArgs := []Field{}
-	for {
-		if field, ok := TryParseField(r); ok {
-			methodArgs = append(methodArgs, *field)
-		} else {
-			_, err := ReadTokenCheck(r, []string{")"})
-			if err != nil {
-				return nil, ParseError("Error parsing method argument")
-			} else {
-				break
-			}
-		}
-		if _, ok := TryReadTokenCheck(r, []string{","}); !ok {
-			_, err := ReadTokenCheck(r, []string{")"})
-			if err != nil {
-				return nil, err
-			} else {
-				break
-			}
-		}
 	}
 
 	methodRetType, err := ParseType(r)
@@ -1008,9 +1579,18 @@ func ParseMethod(r *ParseStream) (*Method, error) {
 		retType: methodRetType,
 	}
 
+	attributeList, err := ParseAttributeList(r)
+	if DebugParser {
+		fmt.Printf(" >>>>> ParseMethod ParseAttributeList: %v %v\n", attributeList, err)
+	}
+	if err != nil {
+		return nil, err
+	}
+
 	return &Method {
-		methodName: methodName,
-		methodType: &methodType,
+		methodName:    methodName,
+		methodType:    &methodType,
+		attributeList: attributeList,
 	}, nil
 }
 
@@ -1024,7 +1604,7 @@ func TryParseMethod(r *ParseStream) (*Method, bool) {
 }
 
 func ParseType(r *ParseStream) (Type, error) {
-	tok, err := ReadToken(r)
+	tok, _, err := ReadToken(r)
 	if err != nil {
 		return nil, err
 	}
@@ -1033,33 +1613,35 @@ func ParseType(r *ParseStream) (Type, error) {
 		fmt.Printf("ParseType token: \"%v\"\n", tok)
 	}
 
+	var ret Type
+
 	switch {
-	case tok == "struct":
-		var fields []Field
-		var methods []Method
-		_, err := ReadTokenCheck(r, []string{"{"})
+	case tok == "struct" || tok == "union":
+		algSort := AlgSort_Prod
+		delim := "\n"
+		if tok == "union" {
+			algSort = AlgSort_Sum
+		}
+
+		attributeList, err := ParseAttributeList(r)
 		if err != nil {
 			return nil, err
 		}
-		for {
-			if field, ok := TryParseField(r); ok {
-				fields = append(fields, *field)
-			} else {
-				if method, ok := TryParseMethod(r); ok {
-					methods = append(methods, *method)
-				} else {
-					break
-				}
-			}
-		}
-		_, err = ReadTokenCheck(r, []string{"}"})
+		
+		allowEmptyFieldTypes := (algSort == AlgSort_Sum)
+		fields, methods, err := ParseFieldList(r, "{", delim, "}", true, true, allowEmptyFieldTypes)
+
 		if err != nil {
 			return nil, err
 		}
-		return &ProdType {
-			fields: fields,
-			methods: methods,
-		}, nil
+
+		ret = &AlgType {
+			sort:          algSort,
+			fields:        fields,
+			methods:       methods,
+			attributeList: attributeList,
+		}
+		break
 
 	case tok == "[":
 		elementType, err := ParseType(r)
@@ -1070,26 +1652,65 @@ func ParseType(r *ParseStream) (Type, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &ArrayType {
+		ret = &ArrayType {
 			elementType: elementType,
-		}, nil
+		}
+		break
 
 	case tok == "&":
 		targetType, err := ParseType(r)
 		if err != nil {
 			return nil, err
 		}
-		return &RefType {
+		ret = &RefType {
 			targetType: targetType,
-		}, nil
+		}
+		break
+
+	case tok == "{":
+		keyType, err := ParseType(r)
+		if err != nil {
+			return nil, err
+		}
+		_, err = ReadTokenCheck(r, []string{":"})
+		if err != nil {
+			return nil, err
+		}
+		valueType, err := ParseType(r)
+		if err != nil {
+			return nil, err
+		}
+		_, err = ReadTokenCheck(r, []string{"}"})
+		if err != nil {
+			return nil, err
+		}
+		ret = &MapType {
+			keyType:   keyType,
+			valueType: valueType,
+		}
+		break
 
 	default:
 		if IsIdent(tok) {		
-			return &NamedType {name: tok}, nil
+			ret = &NamedType {name: tok}
 		} else {
-			return nil, ParseError(fmt.Sprintf("Expected type; received \"%v\"", tok))
+			return nil, r.GenParseError(fmt.Sprintf("Expected type; received \"%v\"", tok))
+		}
+		break
+	}
+
+	for {
+		if tok, ok := PeekToken(r, false); ok && (tok == "?") {
+			_, _ = ReadTokenCheck(r, []string{"?"})
+			ret = &OptionType {
+				valueType: ret,
+			}
+		} else {
+			break
 		}
 	}
+
+	return ret, nil
 }
 
 func ParseTypeDecl(r *ParseStream) (*TypeDecl, error) {
@@ -1097,7 +1718,7 @@ func ParseTypeDecl(r *ParseStream) (*TypeDecl, error) {
 	if err != nil {
 		return nil, err
 	}
-	declName, err := ReadToken(r)
+	declName, _, err := ReadToken(r)
 	if err != nil {
 		return nil, err
 	}
@@ -1120,18 +1741,29 @@ func TryParseTypeDecl(r *ParseStream) (*TypeDecl, bool) {
 	return ret, (err == nil)
 }
 
-func ParseTypeDecls(r *ParseStream) []TypeDecl {
+func ParseFile(r *ParseStream) []TypeDecl {
 	ret := []TypeDecl{}
 	for {
-		if decl, ok := TryParseTypeDecl(r); ok {
-			ret = append(ret, *decl)
-		} else {
+		if _, ok := PeekToken(r, false); !ok {
 			return ret
 		}
+		decl, err := ParseTypeDecl(r)
+		if err != nil {
+			panic(err)
+		}
+		ret = append(ret, *decl)
 	}
 }
 
 func TestAST() {
+	// testSrc := ``
+	// fs := token.NewFileSet()
+	// f, err := parser.ParseFile(fs, "test.go", testSrc, 0)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// ast.Print(fs, f)
+
 	// fs := token.NewFileSet()
 	// f := &ast.File {
 	// 	Name: ast.NewIdent("fileName"),
@@ -1186,8 +1818,10 @@ func TestAST() {
 	r := ParseStream {
 		rs: file,
 		pos: 0,
+		lineMap: []LineInfo{},
+		buffer: bytes.NewBuffer([]byte{}),
 	}
-	decls := ParseTypeDecls(&r)
+	decls := ParseFile(&r)
 	goDecls := GenGoTypeDecls(decls)
 	goMod := GenGoMod(goDecls)
 	CheckErr(printer.Fprint(os.Stdout, goMod.astFileSet, goMod.astFile))

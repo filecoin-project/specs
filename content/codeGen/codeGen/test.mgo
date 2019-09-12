@@ -1,14 +1,159 @@
 
-type Block struct {
-	MinerAddress           &Address
-	Tickets                byte
+type Address struct {
+	NetworkID union {
+		Testnet
+		Mainnet
+	}
+	Protocol union {
+		ID
+		Secp256k1
+		Actor
+		BLS
+	}
+}
 
-	foo(x byte)                                        Word
-	UnsignedFingerprint(test1 [byte], test2 [Word])    [[byte]]
+type Block struct {
+	MinerAddress         Address
+	Tickets              [Ticket]
+	ParentTipset         Tipset
+	Weight               BlockWeight
+	Height               Word
+	StateTree            StateTree
+	Messages             [Message]
+	BLSAggregate         Signature
+	MessageReceipts      [MessageReceipt]
+	Timestamp            Timestamp
+	BlockSig             Signature?
+
+	SerializeSigned()    Bytes
 }
 
 type Message struct {
-	To              Address
-	From            Address
-	Nonce           Word
+	To          Address
+	From        Address
+	Nonce       Word
+	Value       BigInt
+	GasPrice    BigInt
+	GasLimit    BigInt
+	Method      Word
+	Params      Bytes
+}
+
+type ElectionSeed struct {
+	Data    Bytes    @(internal)
+}
+
+type SigType union {
+	Secp256k1
+	BLS
+}
+
+type SigSecretKey struct {
+	Data    Bytes    @(internal)
+}
+
+type SigPublicKey struct {
+	Data    Bytes    @(internal)
+}
+
+type SigKeyPair struct {
+	PublicKey    SigPublicKey
+	SecretKey    SigSecretKey
+
+	Sign(m Bytes)                            Signature
+	SignAggregate(sig Signature, m Bytes)    Signature
+}
+
+type Signature struct {
+	Type    SigType
+	Data    Bytes      @(internal)
+
+	Verify(m Bytes, pk SigPublicKey)    bool
+}
+
+type VDFResult struct {
+	Output    Bytes    @(internal)
+	Proof     Bytes    @(internal)
+
+	Generate(input Bytes)        VDFResult    @(static)
+	VerifyOutput(input Bytes)    Bytes?
+}
+
+type VRFKeyPair struct {
+	PublicKey    VRFPublicKey
+	SecretKey    VRFSecretKey
+
+	Generate(input Bytes)    VRFResult    @(static)
+}
+
+type VRFResult struct {
+	Output    Bytes    @(internal)
+
+	VerifyOutput(pk VRFPublicKey, input Bytes)    Bytes?
+}
+
+type MessageReceipt struct {
+	ExitCode    byte
+	Return      Bytes
+	GasUsed     BigInt
+}
+
+type BlockWeight BigInt
+
+type Ticket struct {
+	VRFResult    VRFResult
+	VDFResult    VDFResult
+
+	Generate(k VRFKeyPair, seed ElectionSeed)    Ticket    @(static)
+	IsWinning(power Fraction)                    bool
+}
+
+type Tipset struct {
+	Blocks               [Block]
+	StateTree            StateTree
+
+	GetElectionSeed()    ElectionSeed
+}
+
+type BlockMiner struct @(mutable) {
+	Address          Address
+	ChainManager     ChainManager
+	VRFKeyPair       VRFKeyPair
+	SigKeyPair       SigKeyPair
+	PowerFraction    Fraction
+
+	MineBlock(messages [Message])    Block
+}
+
+type ChainManager struct @(mutable) {
+	MiningEpoch              Word
+	ConfirmedEpoch           Word
+	TipsetAtEpoch(T Word)    Tipset
+}
+
+type ActorID Word
+
+type Actor struct {
+	Head       ActorSubState
+	Nonce      Word
+	Balance    BigInt
+}
+
+type ActorSubState union {
+	Init struct {
+		AddressMap    {Address:ActorID}
+		NextID        ActorID
+	}
+}
+
+type StateTree {Address:ActorState}
+
+type HashRole union {
+	TicketVDFInputFromVRFOutput
+	ElectionSeedFromVRFOutput
+	BlockSig
+}
+
+type Params struct {
+	ElectionLookback()    Word    @(static)
 }
