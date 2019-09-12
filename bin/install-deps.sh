@@ -51,8 +51,7 @@ tryinstall dot graphviz
 require go go "recommended install from https://golang.org/dl/ -- we need version 1.12+"
 
 # git repos
-git submodule init
-git submodule update
+git submodule update --init --recursive
 
 # orient
 # TODO: orient (git submodule?)
