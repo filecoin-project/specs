@@ -2,6 +2,19 @@
 
 In this document, we give an introduction to each of the protocol data structures and then explain how to encode these data structures for use in other parts of Filecoin (e.g. network protocols and the blockchain).
 
+## Advanced Data Layouts
+
+[Advanced Data Layouts](https://github.com/ipld/specs/blob/master/schemas/advanced-layouts.md) (ADL) define data structures that are coupled with a traversal algorithm to present simple forms that are backed by complex logic.
+
+Two ADLs used in Filecoin data structures are [Sharray](sharray.md) and HAMT (TODO: link). A `Sharray` ADL presents as an array / list while a HAMT presents as a map. Both are sharded and are backed by block construction and parsing logic so cannot be read naively from the raw blocks.
+
+```sh
+advanced Sharray
+advanced Hamt
+```
+
+These are used when `representation advanced X` is encountered, where `X` is the ADL name. This should be interpreted as the construction and parsing logic deferring to the respective ADL algorithm.
+
 ## Address
 
 An address is an identifier that refers to an actor in the Filecoin state. All [actors](actors.md) (miner actors, the storage market actor, account actors) have an address. An address encodes information about:
@@ -69,7 +82,7 @@ type BlockHeader struct {
 
 	## MessageReceipts is a set of receipts matching to the sending of the `Messages`.
 	## This field is the Cid of the root of a sharray of MessageReceipts.
-	messageReceipts &[MessageReceipt]
+	messageReceipts &MessageReceipts
 
 	## The block Timestamp is used to enforce a form of block delay by honest miners.
 	## Unix time UTC timestamp (in seconds) stored as an unsigned integer.
@@ -81,10 +94,16 @@ type BlockHeader struct {
 } representation tuple
 
 type TxMeta struct {
-  blsMessages &[&Message]<Sharray>
-
-	secpkMessages &[&SignedMessage]<Sharray>
+	blsMessages   &BlsMessages
+	secpkMessages &SecpkMessages
 } representation tuple
+
+## Both BlsMessages and SecpkMessages referenced by CID in TxMeta are implemented by the Sharray
+## advanced data layout so may be sharded.
+
+type BlsMessages [&Message] representation advanced Sharray
+
+type SecpkMessages [&SignedMessage] representation advanced Sharray
 ```
 
 ## TipSet
@@ -190,7 +209,9 @@ The state tree keeps track of all state in Filecoin. It is a map of addresses to
 The `ActorState` is defined in the [actors spec](actors.md).
 
 ```sh
-type StateTree map {ID:Actor}<Hamt>
+## StateTree is backed by a Hamt advanced data layout to present a map interface to a large sharded
+## data structure
+type StateTree {ID:Actor} representation advanced Hamt
 ```
 
 ## Message Receipt
@@ -201,6 +222,9 @@ type MessageReceipt struct {
 	return Bytes
 	gasUsed UInt
 } representation tuple
+
+## A Sharray-backed advanced data layout of MessageReceipt structs that may be sharded.
+type MessageReceipts [MessageReceipt] representation advanced Sharray
 ```
 
 ## Actor

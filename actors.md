@@ -4,6 +4,18 @@ Any implementations of the Filecoin actors must be exactly byte for byte compati
 
 This spec describes a set of actors that operate within the [Filecoin State Machine](state-machine.md). All types are defined in [the basic type encoding spec](data-structures.md#basic-type-encodings).
 
+## Advanced Data Layouts
+
+[Advanced Data Layouts](https://github.com/ipld/specs/blob/master/schemas/advanced-layouts.md) (ADL) define data structures that are coupled with a traversal algorithm to present simple forms that are backed by complex logic.
+
+The ADL used in Filecoin actors is HAMT (TODO: link). A `Hamt` ADL presents as a map but is sharded and backed by block construction and parsing logic so cannot be read naively from the raw blocks.
+
+```sh
+advanced Hamt
+```
+
+This is used when `representation advanced Hamt` is encountered. This should be interpreted as the construction and parsing logic deferring to the `Hamt` ADL algorithm.
+
 ## Actor State
 
 Each actor type defines their own structure for storing their state. We
@@ -30,8 +42,11 @@ Some state machine actors are 'system' actors that get instantiated in the genes
 The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that `NextID` will initially be set to 100.
 
 ```sh
+## AddressMap is a map backed by a Hamt advanced data layout
+type AddressMap {Address:ID} representation advanced Hamt
+
 type InitActorState struct {
-    addressMap {Address:ID}<Hamt>
+    addressMap AddressMap
     nextId UInt
 }
 ```
@@ -200,8 +215,11 @@ func GetAddress() Address {
 The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
 
 ```sh
+## Miners is a map backed by a Hamt advanced data layout
+type Miners {Address:Null} representation advanced Hamt
+
 type StorageMarketActorState struct {
-    miners {Address:Null}<Hamt>
+    miners Miners
     totalStorage BytesAmount
 }
 ```
