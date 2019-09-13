@@ -51,7 +51,7 @@ type Address union {
 } representation byteprefix
 
 ## ID
-type AddressId UInt
+type AddressId Int
 
 ## Blake2b-160 Hash
 type AddressSecp256k1 Bytes

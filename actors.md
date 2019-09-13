@@ -32,7 +32,7 @@ The init actor is responsible for creating new actors on the filecoin network. T
 ```sh
 type InitActorState struct {
     addressMap {Address:ID}<Hamt>
-    nextId UInt
+    nextId Int
 }
 ```
 
@@ -420,7 +420,7 @@ func IsMiner(addr Address) bool {
 
 ```sh
 type StorageCollateralForSize struct {
-    size UInt
+    size Int
 } representation tuple
 ```
 
@@ -471,7 +471,7 @@ type StorageMinerActorState struct {
     arbitratedDeals {Cid:Null}
 
 	## Amount of power this miner has.
-    power UInt
+    power Int
 
     ## List of sectors that this miner was slashed for.
     slashedSet optional &SectorSet
@@ -1169,40 +1169,40 @@ type PaymentChannel struct {
 
 	toSend       TokenAmount
 
-	closingAt      UInt
-	minCloseHeight UInt
+	closingAt      Int
+	minCloseHeight Int
 
-	laneStates {UInt:LaneState}
+	laneStates {Int:LaneState}
 } representation tuple
 
 type SignedVoucher struct {
   TimeLock BlockHeight
   SecretPreimage Bytes
   Extra ModVerifyParams
-  Lane Uint
-  Nonce Uint
+  Lane Int
+  Nonce Int
   Merges []Merge
   Amount TokenAmount
-  MinCloseHeight Uint
+  MinCloseHeight Int
 
   Signature Signature
 }
 
 type ModVerifyParams struct {
   Actor Address
-  Method Uint
+  Method Int
   Data Bytes
 }
 
 type Merge struct {
-  Lane Uint
-  Nonce Uint
+  Lane Int
+  Nonce Int
 }
 
 type LaneState struct {
   Closed bool
   Redeemed TokenAmount
-  Nonce Uint
+  Nonce Int
 }
 
 type PaymentChannelMethod union {
@@ -1403,23 +1403,23 @@ The [init actor](#init-actor) is used to create new instances of the multisig.
 ```sh
 type MultisigActorState struct {
     signers [Address]
-    required UInt
-    nextTxId UInt
-    initialBalance UInt
-    startingBlock UInt
-    unlockDuration UInt
-    transactions {UInt:Transaction}
+    required Int
+    nextTxId Int
+    initialBalance Int
+    startingBlock Int
+    unlockDuration Int
+    transactions {Int:Transaction}
 }
 
 type Transaction struct {
-    txID UInt
+    txID Int
     to Address
     value TokenAmount
     method &ActorMethod
     approved [Address]
     completed Bool
     canceled Bool
-    retcode UInt
+    retcode Int
 }
 ```
 
@@ -1449,9 +1449,9 @@ type MultisigConstructor struct {
     ## The addresses that will be the signatories of this wallet.
     signers [Address]
     ## The number of signatories required to perform a transaction.
-    required UInt
+    required Int
     ## Unlock time (in blocks) of initial filecoin balance of this wallet. Unlocking is linear.
-    unlockDuration UInt
+    unlockDuration Int
 } representation tuple
 ```
 
@@ -1528,7 +1528,7 @@ Approve is called by a signer to approve a given transaction. If their approval 
 ```sh
 type Approve struct {
     ## The ID of the transaction to approve.
-    txid UInt
+    txid Int
 } representation tuple
 ```
 
@@ -1572,7 +1572,7 @@ func Approve(txid UInt) {
 
 ```sh
 type Cancel struct {
-    txid UInt
+    txid Int
 } representation tuple
 ```
 
@@ -1721,7 +1721,7 @@ func SwapSigner(old Address, new Address) {
 
 ```sh
 type ChangeRequirement struct {
-    requirement UInt
+    requirement Int
 } representation tuple
 ```
 
