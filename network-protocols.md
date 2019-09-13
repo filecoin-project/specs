@@ -30,7 +30,7 @@ Whenever a node gets a new connection, it opens a new stream on that connection 
 ```sh
 type HelloMessage struct {
 	heaviestTipSet [&Block]
-	heaviestTipSetWeight UInt
+	heaviestTipSetWeight Int
 	genesisHash &Block
 }
 ```
@@ -300,7 +300,7 @@ type BlockSyncRequest struct {
     ## The TipSet being synced from
 	start [&Block]
     ## How many tipsets to sync
-	requestLength UInt
+	requestLength Int
     ## Query options
     options Options
 }
@@ -324,10 +324,10 @@ type BlockSyncResponse struct {
 type TipSetBundle struct {
   blocks [Blocks]
   secpMsgs [SignedMessage]
-  secpMsgIncludes [[UInt]]
+  secpMsgIncludes [[Int]]
 
   blsMsgs [Message]
-  blsMsgIncludes [[Uint]]
+  blsMsgIncludes [[Int]]
 }
 
 type Status enum {

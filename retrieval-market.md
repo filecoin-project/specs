@@ -56,10 +56,10 @@ type Block struct {
 ## Represents all the metadata of a Cid.
 ## It does not contains  any actual content information.
 type CidPrefix struct {
-	version  UInt
-	codec    UInt
-	mhType   UInt
-	mhLength UInt
+	version  Int
+	codec    Int
+	mhType   Int
+	mhLength Int
 }
 ```
 

@@ -50,10 +50,10 @@ type BlockHeader struct {
 	parents [&Block]
 
 	## ParentWeight is the aggregate chain weight of the parent set.
-	parentWeight UInt
+	parentWeight Int
 
 	## Height is the chain height of this block.
-	height UInt
+	height Int
 
 	## StateRoot is a cid pointer to the state tree after application of the
 	## transactions state transitions.
@@ -161,14 +161,14 @@ type UnsignedMessage struct {
 
 	## When receiving a message from a user account the nonce in the message must match the expected
 	## nonce in the from actor. This prevents replay attacks.
-	nonce UInt
+	nonce Int
 
-	value UInt
+	value Int
 
-	gasPrice UInt
-	gasLimit UInt
+	gasPrice Int
+	gasLimit Int
 
-	method Uint
+	method Int
 
 	## Serialized parameters to the method
 	params Bytes
@@ -197,9 +197,9 @@ type StateTree map {ID:Actor}<Hamt>
 
 ```sh
 type MessageReceipt struct {
-	exitCode UInt
+	exitCode Int
 	return Bytes
-	gasUsed UInt
+	gasUsed Int
 } representation tuple
 ```
 
@@ -214,10 +214,10 @@ type Actor struct {
 	head &ActorState
 
 	## Counter of the number of messages this actor has sent.
-	nonce UInt
+	nonce Int
 
 	## Current balance of filecoin of this actor.
-	balance UInt
+	balance Int
 }
 ```
 
@@ -243,7 +243,7 @@ FaultSets are used to denote which sectors failed at which block height.
 
 ```sh
 type FaultSet struct {
-	index    UInt
+	index    Int
 	bitField BitField
 }
 ```
@@ -260,7 +260,7 @@ For most objects referenced by Filecoin, a Content Identifier (CID for short) is
 ### Timestamp
 
 ```sh
-type Timestamp UInt
+type Timestamp Int
 ```
 
 ### PublicKey
@@ -275,7 +275,7 @@ type PublicKey Bytes
 
 BytesAmount is just a re-typed Integer.
 ```sh
-type BytesAmount UInt
+type BytesAmount Int
 ```
 
 ### PeerId
@@ -322,15 +322,15 @@ PoStProof is an opaque, dynamically-sized array of bytes.
 A type to represent an amount of filecoin tokens.
 
 ```sh
-type TokenAmount UInt
+type TokenAmount Int
 ```
 
 ### SectorID
 
-Uniquely identifies a miner's sector.
+Uniquely identifies a miner's sector. Within the 64-bit unsigned integer range.
 
 ```sh
-type SectorID uint64
+type SectorID int
 ```
 
 ## RLE+ Bitset Encoding
@@ -399,3 +399,4 @@ For Filecoin, byte arrays representing RLE+ bitstreams are encoded using [LSB 0]
 
 - The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.
 - Hashes should use a blake2b-256 multihash.
+- Integers used throughout these data structures are assumed to be within the 32-bit unsigned integer range unless otherwise stated
