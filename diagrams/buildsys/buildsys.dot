@@ -20,11 +20,11 @@ strict digraph G {
 
   { // programs
     node [shape=none]
-    "<emacs>"
+    "emacs"
     "dot"
     "orient"
     "bin/codeGen"
-    "hugo build"
+    "hugo"
     "go test"
     "make website"
     "make pdf"
