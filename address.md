@@ -44,23 +44,23 @@ When encoded to a string a filecoin address contains the following:
 
 ```sh
 type Address union {
-    | AddressId 0
-    | AddressSecp256k1 1
-    | AddressActor 2
-    | AddressBLS12_381 3
+	| AddressId 0
+	| AddressSecp256k1 1
+	| AddressActor 2
+	| AddressBLS12_381 3
 } representation byteprefix
 
 ## ID
-type AddressId Int
+type AddressId int
 
 ## Blake2b-160 Hash
-type AddressSecp256k1 Bytes
+type AddressSecp256k1 bytes
 
 ## Blake2b-160 Hash
-type AddressActor Bytes
+type AddressActor bytes
 
 ## 48 byte PublicKey
-type AddressBLS12_381 Bytes
+type AddressBLS12_381 bytes
 
 ```
 #### Network Prefix

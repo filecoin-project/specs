@@ -120,19 +120,19 @@ To check the power of a given miner, use the following:
 
 ```go
 func GetMinersPowerAt(ts TipSet, m Address) Integer {
-  curState := GetStateTree(ts)
-  miner := curState.GetMiner(m)
-  if miner.IsSlashed() || miner.IsLate() {
-    return 0
-  }
-  
-  # lookback to the last valid PoSt put up by the miner
-  lookbackTipset := WalkBack(ts, miner.provingPeriodEnd - provingPeriodDuration(miner.SectorSize))
-  lbState := GetStateTree(lookbackTipset)
-  
-  sm := lbState.GetStorageMarket()
-  
-  return sm.PowerLookup(m)
+	curState := GetStateTree(ts)
+	miner := curState.GetMiner(m)
+	if miner.IsSlashed() || miner.IsLate() {
+		return 0
+	}
+
+	# lookback to the last valid PoSt put up by the miner
+	lookbackTipset := WalkBack(ts, miner.provingPeriodEnd - provingPeriodDuration(miner.SectorSize))
+	lbState := GetStateTree(lookbackTipset)
+
+	sm := lbState.GetStorageMarket()
+
+	return sm.PowerLookup(m)
 }
 ```
 

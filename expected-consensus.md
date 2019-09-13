@@ -333,7 +333,7 @@ weight is a term P times the sum of a constant `V` times the number of blocks in
 
 The weight should be rounded down to its fourth decimal at each height (i.e. each time it is recalculated).
 
-```sh
+```
 Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
 ```
 

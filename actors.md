@@ -46,8 +46,8 @@ The init actor is responsible for creating new actors on the filecoin network. T
 type AddressMap {Address:ID} representation advanced Hamt
 
 type InitActorState struct {
-    addressMap AddressMap
-    nextId Int
+	addressMap AddressMap
+	nextId Int
 }
 ```
 
@@ -79,10 +79,10 @@ This method is the core of the `Init Actor`. It handles instantiating new actors
 
 ```sh
 type Exec struct {
-    ## Reference to the location at which the code of the actor to create is stored.
-    code &Code
-    ## Parameters passed to the constructor of the actor.
-    params ActorMethod
+	## Reference to the location at which the code of the actor to create is stored.
+	code &Code
+	## Parameters passed to the constructor of the actor.
+	params ActorMethod
 } representation tuple
 ```
 
@@ -151,7 +151,7 @@ This method allows for fetching the corresponding ID of a given Address
 
 ```sh
 type GetIdForAddress struct {
-    addr Address
+	addr Address
 } representation tuple
 ```
 
@@ -175,7 +175,7 @@ The Account actor is the actor used for normal keypair backed accounts on the fi
 
 ```sh
 type AccountActorState struct {
-    address Address
+	address Address
 }
 ```
 
@@ -219,8 +219,8 @@ The storage market actor is the central point for the Filecoin storage market. I
 type Miners {Address:Null} representation advanced Hamt
 
 type StorageMarketActorState struct {
-    miners Miners
-    totalStorage BytesAmount
+	miners Miners
+	totalStorage BytesAmount
 }
 ```
 
@@ -253,9 +253,9 @@ type StorageMarketConstructor struct {}
 
 ```sh
 type CreateStorageMiner struct {
-    worker Address
-    sectorSize BytesAmount
-    peerId PeerId
+	worker Address
+	sectorSize BytesAmount
+	peerId PeerId
 } representation tuple
 ```
 
@@ -281,8 +281,8 @@ func CreateStorageMiner(worker Address, owner Address, sectorSize BytesAmount, p
 
 ```sh
 type SlashConsensusFault struct {
-    block1 &Block
-    block2 &Block
+	block1 &Block
+	block2 &Block
 } representation tuple
 ```
 
@@ -354,7 +354,7 @@ UpdateStorage is used to update the global power table.
 
 ```sh
 type UpdateStorage struct {
-    delta BytesAmount
+	delta BytesAmount
 } representation tuple
 
 ```
@@ -395,7 +395,7 @@ func GetTotalStorage() BytesAmount {
 
 ```sh
 type PowerLookup struct {
-    miner Address
+	miner Address
 } representation tuple
 ```
 
@@ -419,7 +419,7 @@ func PowerLookup(miner Address) BytesAmount {
 
 ```sh
 type IsMiner struct {
-    addr Address
+	addr Address
 } representation tuple
 ```
 
@@ -438,7 +438,7 @@ func IsMiner(addr Address) bool {
 
 ```sh
 type StorageCollateralForSize struct {
-    size Int
+	size Int
 } representation tuple
 ```
 
@@ -456,72 +456,72 @@ func StorageCollateralforSize(size UInt) TokenAmount {
 
 ```sh
 type StorageMinerActorState struct {
-  ## contains mostly static info about this miner
-  info &MinerInfo
+	## contains mostly static info about this miner
+	info &MinerInfo
 
 
-    ## Collateral that is waiting to be withdrawn.
-    dePledgedCollateral TokenAmount
+	## Collateral that is waiting to be withdrawn.
+	dePledgedCollateral TokenAmount
 
 	## Time at which the depledged collateral may be withdrawn.
-    dePledgeTime BlockHeight
+	dePledgeTime BlockHeight
 
 	## All sectors this miner has committed.
-    sectors &SectorSet
+	sectors &SectorSet
 
 	## Sectors this miner is currently mining. It is only updated
 	## when a PoSt is submitted (not as each new sector commitment is added).
-    provingSet &SectorSet
+	provingSet &SectorSet
 
-    ## Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
-    currentFaultSet BitField
+	## Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
+	currentFaultSet BitField
 
-    ## Faults submitted after the current proving period's challenge time, but before the PoSt for that period
-    ## is submitted. These become the currentFaultSet when a PoSt is submitted.
-    nextFaultSet BitField
+	## Faults submitted after the current proving period's challenge time, but before the PoSt for that period
+	## is submitted. These become the currentFaultSet when a PoSt is submitted.
+	nextFaultSet BitField
 
 	## Sectors reported during the last PoSt submission as being 'done'. The collateral
-    ## for them is still being held until the next PoSt submission in case early sector
-    ## removal penalization is needed.
-    nextDoneSet BitField
+	## for them is still being held until the next PoSt submission in case early sector
+	## removal penalization is needed.
+	nextDoneSet BitField
 
 	## Deals this miner has been slashed for since the last post submission.
-    arbitratedDeals {Cid:Null}
+	arbitratedDeals {Cid:Null}
 
 	## Amount of power this miner has.
-    power Int
+	power Int
 
-    ## List of sectors that this miner was slashed for.
-    slashedSet optional &SectorSet
+	## List of sectors that this miner was slashed for.
+	slashedSet optional &SectorSet
 
-    ## The height at which this miner was slashed at.
-    slashedAt optional BlockHeight
+	## The height at which this miner was slashed at.
+	slashedAt optional BlockHeight
 
-    ## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
-    owedStorageCollateral TokenAmount
+	## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+	owedStorageCollateral TokenAmount
 
-    provingPeriodEnd BlockHeight
+	provingPeriodEnd BlockHeight
 }
 ```
 
 ```sh
 type MinerInfo struct {
 	## Account that owns this miner.
-    ## - Income and returned collateral are paid to this address.
-    ## - This address is also allowed to change the worker address for the miner.
-    owner Address
+	## - Income and returned collateral are paid to this address.
+	## - This address is also allowed to change the worker address for the miner.
+	owner Address
 
 	## Worker account for this miner.
 	## This will be the key that is used to sign blocks created by this miner, and
 	## sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 	## other day to day miner activities.
-    worker Address
+	worker Address
 
-    ## Libp2p identity that should be used when connecting to this miner.
-    peerId PeerId
+	## Libp2p identity that should be used when connecting to this miner.
+	peerId PeerId
 
-    ## Amount of space in each sector committed to the network by this miner.
-    sectorSize BytesAmount
+	## Amount of space in each sector committed to the network by this miner.
+	sectorSize BytesAmount
 
 }
 ```
@@ -544,7 +544,7 @@ type MinerInfo struct {
 | `GetSectorSize` | 12 |
 | `UpdatePeerID` | 13 |
 | `ChangeWorker` | 14 |
-| `IsSlashed` |  15 |
+| `IsSlashed` | 15 |
 | `IsLate` | 16 |
 | `PaymentVerifyInclusion` | 17 |
 | `PaymentVerifySector` | 18 |
@@ -558,10 +558,10 @@ Along with the call, the actor must be created with exactly enough filecoin for 
 
 ```sh
 type StorageMinerConstructor struct {
-    worker Address
-    owner Address
-    sectorSize BytesAmount
-    peerId PeerId
+	worker Address
+	owner Address
+	sectorSize BytesAmount
+	peerId PeerId
 } representation tuple
 ```
 
@@ -585,11 +585,11 @@ func StorageMinerActor(worker Address, owner Address, sectorSize BytesAmount, pi
 
 ```sh
 type CommitSector struct {
-    sectorId SectorID
-    commD Bytes
-    commR Bytes
-    commRStar Bytes
-    proof SealProof
+	sectorId SectorID
+	commD Bytes
+	commR Bytes
+	commRStar Bytes
+	proof SealProof
 } representation tuple
 ```
 
@@ -654,8 +654,8 @@ func CollateralForPower(power BytesAmount) TokenAmount {
 
 ```sh
 type SubmitPost struct {
-    proofs PoStProof
-    doneSet Bitfield
+	proofs PoStProof
+	doneSet Bitfield
 } representation tuple
 ```
 
@@ -668,11 +668,11 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 	}
 
 	feesRequired := 0
-    nextProvingPeriodEnd := self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
+	nextProvingPeriodEnd := self.ProvingPeriodEnd + ProvingPeriodDuration(self.SectorSize)
 
-    // TODO: rework fault handling, for now anything later than 2 proving periods is invalid
-    if chain.now() > nextProvingPeriodEnd {
-        Fatal("PoSt submited too late")
+	// TODO: rework fault handling, for now anything later than 2 proving periods is invalid
+	if chain.now() > nextProvingPeriodEnd {
+		Fatal("PoSt submited too late")
 	} else if chain.Now() > self.ProvingPeriodEnd {
 		feesRequired += ComputeLateFee(self.power, chain.Now() - self.provingPeriodEnd)
 	}
@@ -688,26 +688,26 @@ func SubmitPost(proofs PoStProof, doneSet Bitfield) {
 		TransferFunds(msg.From, msg.Value-feesRequired)
 	}
 
-    var seed
-    if chain.Now() < self.ProvingPeriodEnd {
-      // good case, submitted in time
-      seed = GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
-    } else {
-      // bad case, submitted late, need to take new proving period end as reference
-      seed = GetRandFromBlock(nextPovingPeriodEnd - POST_CHALLENGE_TIME)
-    }
+	var seed
+	if chain.Now() < self.ProvingPeriodEnd {
+		// good case, submitted in time
+		seed = GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
+	} else {
+		// bad case, submitted late, need to take new proving period end as reference
+		seed = GetRandFromBlock(nextPovingPeriodEnd - POST_CHALLENGE_TIME)
+	}
 
-    faultSet := self.currentFaultSet
+	faultSet := self.currentFaultSet
 
 	if !VerifyPoSt(self.SectorSize, self.provingSet, seed, proof, faultSet) {
 		Fatal("proof invalid")
 	}
 
-    // The next fault set becomes the current one
-    self.currentFaultSet = self.nextFaultSet
-    self.nextFaultSet = EmptySectorSet()
+	// The next fault set becomes the current one
+	self.currentFaultSet = self.nextFaultSet
+	self.nextFaultSet = EmptySectorSet()
 
-    // TODO: penalize for faults
+	// TODO: penalize for faults
 
 	// Remove doneSet from the current sectors
 	self.Sectors.Subtract(doneSet)
@@ -747,7 +747,7 @@ func ComputeTemporarySectorFailureFee(sectorSize BytesAmount, numSectors Integer
 
 ```sh
 type SlashStorageFault struct {
-    miner Address
+	miner Address
 } representation tuple
 ```
 
@@ -818,7 +818,7 @@ This may be called by anyone to penalize a miner for dropping the data of a deal
 
 ```sh
 type ArbitrateDeal struct {
-    deal Deal
+	deal Deal
 } representation tuple
 ```
 
@@ -877,7 +877,7 @@ func AbitrateDeal(deal Deal) {
 
 ```sh
 type DePledge struct {
-    amount TokenAmount
+	amount TokenAmount
 } representation tuple
 ```
 
@@ -1001,7 +1001,7 @@ func GetSectorSize() BytesAmount {
 
 ```sh
 type UpdatePeerID struct {
-    peerId PeerId
+	peerId PeerId
 } representation tuple
 ```
 
@@ -1025,7 +1025,7 @@ Changes the worker address. Note that since Sector Commitments take the miners w
 
 ```sh
 type ChangeWorker struct {
-    addr Address
+	addr Address
 } representation tuple
 ```
 
@@ -1056,7 +1056,7 @@ type IsLate struct {
 
 ```go
 func IsLate() (bool) {
-    return self.provingPeriodEnd < VM.CurrentBlockHeight()
+	return self.provingPeriodEnd < VM.CurrentBlockHeight()
 }
 ```
 
@@ -1075,8 +1075,8 @@ type IsSlashed struct {
 
 ```go
 func IsSlashed() (bool) {
-    # SlashedAt is reset on recovery
-    return self.SlashedAt > 0
+	# SlashedAt is reset on recovery
+	return self.SlashedAt > 0
 }
 ```
 
@@ -1088,18 +1088,18 @@ Verifies a storage market payment channel voucher's 'Extra' data by validating p
 
 ```sh
 type PaymentVerify struct {
-    Extra Bytes
-    Proof Bytes
+	Extra Bytes
+	Proof Bytes
 } representation tuple
 
 type PieceInclusionVoucherData struct {
-    CommP Bytes
-    PieceSize BigInt
+	CommP Bytes
+	PieceSize BigInt
 } representation tuple
 
 type InclusionProof struct {
-    Sector BigInt // for CommD, also verifies the sector is in sector set
-    Proof  Bytes
+	Sector BigInt ## for CommD, also verifies the sector is in sector set
+	Proof  Bytes
 } representation tuple
 ```
 
@@ -1107,12 +1107,12 @@ type InclusionProof struct {
 
 ```go
 func PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) {
-  has, commD := self.GetSector(proof.Sector)
-  if !has {
-    Fatal("miner does not have required sector")
-  }
+	has, commD := self.GetSector(proof.Sector)
+	if !has {
+		Fatal("miner does not have required sector")
+	}
 
-  return ValidatePIP(self.SectorSize, extra.PieceSize, extra.CommP, commD, proof.Proof)
+	return ValidatePIP(self.SectorSize, extra.PieceSize, extra.CommP, commD, proof.Proof)
 }
 ```
 
@@ -1131,8 +1131,8 @@ Miners can incentivize clients to produce such vouchers by applying small 'disco
 
 ```sh
 type PaymentVerify struct {
-    Extra Bytes
-    Proof Bytes
+	Extra Bytes
+	Proof Bytes
 } representation tuple
 ```
 
@@ -1140,11 +1140,11 @@ type PaymentVerify struct {
 
 ```go
 func PaymentVerifyInclusion(extra BigInt, proof Bytes) {
-  if len(proof) > 0 {
-    Fatal("unexpected proof bytes")
-  }
+	if len(proof) > 0 {
+		Fatal("unexpected proof bytes")
+	}
 
-  return self.HasSector(extra)
+	return self.HasSector(extra)
 }
 ```
 
@@ -1154,7 +1154,7 @@ func PaymentVerifyInclusion(extra BigInt, proof Bytes) {
 
 ```sh
 type AddFaults struct {
-    faults FaultSet
+	faults FaultSet
 } representation tuple
 ```
 
@@ -1162,15 +1162,15 @@ type AddFaults struct {
 
 ```go
 func AddFaults(faults FaultSet) {
-    challengeBlockHeight := self.ProvingPeriodEnd - POST_CHALLENGE_TIME
+	challengeBlockHeight := self.ProvingPeriodEnd - POST_CHALLENGE_TIME
 
-    if VM.CurrentBlockHeight() < challengeBlockHeight {
-        // Up to the challenge time new faults can be added.
-        self.currentFaultSet = Merge(self.currentFaultSet, faults)
-    } else {
-        // After that they are only accounted for in the next proving period
-        self.nextFaultSet = Merge(self.nextFaultSet, faults)
-    }
+	if VM.CurrentBlockHeight() < challengeBlockHeight {
+		// Up to the challenge time new faults can be added.
+		self.currentFaultSet = Merge(self.currentFaultSet, faults)
+	} else {
+		// After that they are only accounted for in the next proving period
+		self.nextFaultSet = Merge(self.nextFaultSet, faults)
+	}
 }
 ```
 
@@ -1194,40 +1194,40 @@ type PaymentChannel struct {
 } representation tuple
 
 type SignedVoucher struct {
-  TimeLock BlockHeight
-  SecretPreimage Bytes
-  Extra ModVerifyParams
-  Lane Int
-  Nonce Int
-  Merges []Merge
-  Amount TokenAmount
-  MinCloseHeight Int
+	TimeLock BlockHeight
+	SecretPreimage Bytes
+	Extra ModVerifyParams
+	Lane Int
+	Nonce Int
+	Merges [Merge]
+	Amount TokenAmount
+	MinCloseHeight Int
 
-  Signature Signature
+	Signature Signature
 }
 
 type ModVerifyParams struct {
-  Actor Address
-  Method Int
-  Data Bytes
+	Actor Address
+	Method Int
+	Data Bytes
 }
 
 type Merge struct {
-  Lane Int
-  Nonce Int
+	Lane Int
+	Nonce Int
 }
 
 type LaneState struct {
-  Closed bool
-  Redeemed TokenAmount
-  Nonce Int
+	Closed bool
+	Redeemed TokenAmount
+	Nonce Int
 }
 
 type PaymentChannelMethod union {
-  | PaymentChannelConstructor "0"
-  | UpdateChannelState "1"
-  | Close "2"
-  | Collect "3"
+	| PaymentChannelConstructor "0"
+	| UpdateChannelState "1"
+	| Close "2"
+	| Collect "3"
 } representation keyed
 ```
 
@@ -1246,7 +1246,7 @@ type PaymentChannelMethod union {
 
 ```sh
 type PaymentChannelConstructor struct {
-  to Address
+	to Address
 }
 ```
 
@@ -1264,9 +1264,9 @@ TODO: Define me
 
 ```sh
 type UpdateChannelState struct {
-  sv SignedVoucher
-  secret Bytes
-  proof Bytes
+	sv SignedVoucher
+	secret Bytes
+	proof Bytes
 } representation tuple
 ```
 
@@ -1402,7 +1402,7 @@ func Collect() {
 
 	TransferFunds(self.From, self.Balance-self.ToSend)
 	TransferFunds(self.To, self.ToSend)
-  self.ToSend = 0
+	self.ToSend = 0
 }
 ```
 
@@ -1420,24 +1420,24 @@ The [init actor](#init-actor) is used to create new instances of the multisig.
 
 ```sh
 type MultisigActorState struct {
-    signers [Address]
-    required Int
-    nextTxId Int
-    initialBalance Int
-    startingBlock Int
-    unlockDuration Int
-    transactions {Int:Transaction}
+	signers [Address]
+	required Int
+	nextTxId Int
+	initialBalance Int
+	startingBlock Int
+	unlockDuration Int
+	transactions {Int:Transaction}
 }
 
 type Transaction struct {
-    txID Int
-    to Address
-    value TokenAmount
-    method &ActorMethod
-    approved [Address]
-    completed Bool
-    canceled Bool
-    retcode Int
+	txID Int
+	to Address
+	value TokenAmount
+	method &ActorMethod
+	approved [Address]
+	completed Bool
+	canceled Bool
+	retcode Int
 }
 ```
 
@@ -1464,12 +1464,12 @@ This method sets up the initial state for the multisig account
 
 ```sh
 type MultisigConstructor struct {
-    ## The addresses that will be the signatories of this wallet.
-    signers [Address]
-    ## The number of signatories required to perform a transaction.
-    required Int
-    ## Unlock time (in blocks) of initial filecoin balance of this wallet. Unlocking is linear.
-    unlockDuration Int
+	## The addresses that will be the signatories of this wallet.
+	signers [Address]
+	## The number of signatories required to perform a transaction.
+	required Int
+	## Unlock time (in blocks) of initial filecoin balance of this wallet. Unlocking is linear.
+	unlockDuration Int
 } representation tuple
 ```
 
@@ -1494,12 +1494,12 @@ Propose is used to propose a new transaction to be sent by this multisig. The pr
 
 ```sh
 type Propose struct {
-    ## The address of the target of the proposed transaction.
-    to Address
-    ## The amount of funds to send with the proposed transaction.
-    value TokenAmount
-    ## The method and parameters that will be invoked on the proposed transactions target.
-    method &ActorMethod
+	## The address of the target of the proposed transaction.
+	to Address
+	## The amount of funds to send with the proposed transaction.
+	value TokenAmount
+	## The method and parameters that will be invoked on the proposed transactions target.
+	method &ActorMethod
 } representation tuple
 ```
 
@@ -1545,8 +1545,8 @@ Approve is called by a signer to approve a given transaction. If their approval 
 
 ```sh
 type Approve struct {
-    ## The ID of the transaction to approve.
-    txid Int
+	## The ID of the transaction to approve.
+	txid Int
 } representation tuple
 ```
 
@@ -1590,7 +1590,7 @@ func Approve(txid UInt) {
 
 ```sh
 type Cancel struct {
-    txid Int
+	txid Int
 } representation tuple
 ```
 
@@ -1650,8 +1650,8 @@ func ClearCompleted() {
 
 ```sh
 type AddSigner struct {
-    signer Address
-    increaseReq bool
+	signer Address
+	increaseReq bool
 } representation tuple
 ```
 
@@ -1679,8 +1679,8 @@ func AddSigner(signer Address, increaseReq bool) {
 
 ```sh
 type RemoveSigner struct {
-    signer Address
-    decreaseReq bool
+	signer Address
+	decreaseReq bool
 } representation tuple
 ```
 
@@ -1709,8 +1709,8 @@ func RemoveSigner(signer Address, decreaseReq bool) {
 
 ```sh
 type SwapSigner struct {
-    old Address
-    new Address
+	old Address
+	new Address
 } representation tuple
 ```
 
@@ -1739,7 +1739,7 @@ func SwapSigner(old Address, new Address) {
 
 ```sh
 type ChangeRequirement struct {
-    requirement Int
+	requirement Int
 } representation tuple
 ```
 

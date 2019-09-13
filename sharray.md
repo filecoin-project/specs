@@ -8,10 +8,10 @@ The Sharray is an IPLD tree structure used to store an array of items. It is des
 
 Each sharray node is represented by an IPLD node of the following schema:
 
-```
+```sh
 type Node struct {
-  height Int
-  items [Item]
+	height Int
+	items [Item]
 } representation tuple
 ```
 

@@ -34,14 +34,14 @@ type RetDealProposal struct {
 }
 
 type RetDealResponse union {
-    | AcceptedResponse "0"
-    | RejectedResponse "1"
-    | ErrorResponse "2"
+	| AcceptedResponse "0"
+	| RejectedResponse "1"
+	| ErrorResponse "2"
 } representation keyed
 
 type AcceptedResponse struct {}
 type RejectedResponse struct {
-    message optional String
+	message optional String
 }
 
 type ErrorResponse RejectedResponse
@@ -69,13 +69,13 @@ The query should include the CID of the piece that the client is interested in r
 
 ```sh
 type RetQuery struct {
-    ## TODO: what exactly does this link to?
+	## TODO: what exactly does this link to?
 	piece Link
 }
 
 type RetQueryResponse union {
-    | AvailableResponse
-    | UnavailableResponse
+	| AvailableResponse "available"
+	| UnavailableResponse "unavailable"
 } representation keyed
 
 type AvailableResponse struct {

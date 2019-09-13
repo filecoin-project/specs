@@ -48,16 +48,16 @@ The protocol starts with storage client (which in this case may be a normal stor
 First the client sends a `SignedStorageDealProposal` to the storage miner:
 
 ```sh
-type Commitment Bytes
+type Commitment bytes
 ```
 
 ```sh
 type SerializationMode enum {
-     | "UnixFs"
-    ## no transformations applied
-    | "Raw"
-    ## Serialized as IPLD, encoding is specified in the CID stored in `pieceRef`
-    | "IPLD"
+	| "UnixFs"
+	## no transformations applied
+	| "Raw"
+	## Serialized as IPLD, encoding is specified in the CID stored in `pieceRef`
+	| "IPLD"
 }
 ```
 
@@ -65,7 +65,7 @@ type SerializationMode enum {
 type StorageDealProposal struct {
 	## PieceRef is the hash of the data in native structure. This will be used for
 	## certifying the data transfer.
-    ## Reference for transit.
+	## Reference for transit.
 	pieceRef String
 
 	## Specifies how the graph referenced by 'PieceRef' gets transformed
@@ -73,7 +73,7 @@ type StorageDealProposal struct {
 	serializationMode SerializationMode
 
 	## The data hashed in a form that is compatible with the proofs system.
-    ## Reference for actual storage in a sector.
+	## Reference for actual storage in a sector.
 	commP Commitment
 
 	size BytesAmount
@@ -84,7 +84,7 @@ type StorageDealProposal struct {
 	Duration NumBlocks
 
 	## A reference to the mechanism that the proposer will use to pay the miner. It should be
-    ## verifiable by the miner using on-chain information.
+	## verifiable by the miner using on-chain information.
 	payment PaymentInfo
 
 	## MinerAddress is the address of the storage miner in the deal proposal
@@ -112,31 +112,31 @@ type PaymentInfo struct {
 	## channel is accepted on chain. (optional)
 	channelMessage &Message
 
-  ## Set of payments from the client to the miner that can be cashed out contingent on the agreed
-  ## upon data being provably within a live sector in the miners control on-chain.
+	## Set of payments from the client to the miner that can be cashed out contingent on the agreed
+	## upon data being provably within a live sector in the miners control on-chain.
 	vouchers [SignedVoucher]
 }
 ```
 
 ```sh
 type DealState enum {
-    ## Signifies an unknown negotiation.
-    | Unknown 0
-    ## The deal was rejected for some reason.
-    | Rejected 1
-    ## The deal was accepted but hasn't yet started.
-    | Accepted 2
-    ## The deal has started and the transfer is in progress.
-    | Started 3
-    ## The deal has failed for some reason.
-    | Failed 4
-    ## The data has been received and staged into a sector, but is not sealed yet.
-    | Staged 5
-    ## The data is being sealed and a `PieceInclusionProof` is available.
-    | Sealing 6
-    ## Deal is complete, and the sector that the deal is contained in has been sealed and its
-    ## commitment posted on chain.
-    | Complete 7
+	## Signifies an unknown negotiation.
+	| Unknown 0
+	## The deal was rejected for some reason.
+	| Rejected 1
+	## The deal was accepted but hasn't yet started.
+	| Accepted 2
+	## The deal has started and the transfer is in progress.
+	| Started 3
+	## The deal has failed for some reason.
+	| Failed 4
+	## The data has been received and staged into a sector, but is not sealed yet.
+	| Staged 5
+	## The data is being sealed and a `PieceInclusionProof` is available.
+	| Sealing 6
+	## Deal is complete, and the sector that the deal is contained in has been sealed and its
+	## commitment posted on chain.
+	| Complete 7
 }
 ```
 
@@ -147,14 +147,14 @@ type DealState enum {
 
 ```sh
 type StorageDealResponse union {
-    | UnknownParams "0"
-    | RejectedParams "1"
-    | AcceptedParams "2"
-    | StartedParams "3"
-    | FailedParams "4"
-    | StagedParams "5"
-    | SealingParams "6"
-    | CompleteParams "7"
+	| UnknownParams "0"
+	| RejectedParams "1"
+	| AcceptedParams "2"
+	| StartedParams "3"
+	| FailedParams "4"
+	| StagedParams "5"
+	| SealingParams "6"
+	| CompleteParams "7"
 } representation keyed
 
 type UnknownParams struct {
@@ -163,10 +163,10 @@ type UnknownParams struct {
 }
 
 type RejectedParams struct {
-    message optional String
+	message optional String
 
 	## A reference to the proposal this is the response to.
-    proposal &SignedStorageDealProposal
+	proposal &SignedStorageDealProposal
 }
 
 type AcceptedParams RejectedParams
@@ -265,10 +265,10 @@ type RetrievePieceRequest struct {
 
 ```sh
 type RetrievePieceResponse union {
-    ## Success means that the piece can be retrieved from the miner.
-    | RetrievePieceResponseSuccess "0"
+	## Success means that the piece can be retrieved from the miner.
+	| RetrievePieceResponseSuccess "0"
 	## Failure indicates that the piece can not be retrieved from the miner.
-    | RetrievePieceResponseFailure "1"
+	| RetrievePieceResponseFailure "1"
 } representation keyed
 
 type RetrievePieceResponseSuccess struct {}
@@ -280,8 +280,8 @@ type RetrievePieceResponseFailure struct {
 ```
 
 ```sh
-##  A chunk of a piece. The length must be > 0.
-type RetrievePieceChunk Bytes
+## A chunk of a piece. The length must be > 0.
+type RetrievePieceChunk bytes
 ```
 
 ## BlockSync
@@ -297,23 +297,23 @@ The response contains the requested chain in reverse iteration order. Each item 
 
 ```sh
 type BlockSyncRequest struct {
-    ## The TipSet being synced from
+	## The TipSet being synced from
 	start [&Block]
-    ## How many tipsets to sync
+	## How many tipsets to sync
 	requestLength Int
-    ## Query options
-    options Options
+	## Query options
+	options Options
 }
 ```
 
 ```sh
 type Options enum {
-    # Include only blocks
-    | Blocks 0
-    # Include only messages
-    | Messages 1
-    # Include messages and blocks
-    | BlocksAndMessages 2
+	# Include only blocks
+	| Blocks 0
+	# Include only messages
+	| Messages 1
+	# Include messages and blocks
+	| BlocksAndMessages 2
 }
 
 type BlockSyncResponse struct {
@@ -322,29 +322,30 @@ type BlockSyncResponse struct {
 }
 
 type TipSetBundle struct {
-  blocks [Blocks]
-  secpMsgs [SignedMessage]
-  secpMsgIncludes [[Int]]
+	blocks [Blocks]
+	secpMsgs [SignedMessage]
+	secpMsgIncludes [[Int]]
 
-  blsMsgs [Message]
-  blsMsgIncludes [[Int]]
+	blsMsgs [Message]
+	blsMsgIncludes [[Int]]
 }
 
 type Status enum {
-    ## All is well.
-    | Success 0
-    ## Sent back fewer blocks than requested.
-    | PartialResponse 101
-    ## Request.Start not found.
-    | BlockNotFound 201
-    ## Requester is making too many requests.
-    | GoAway 202
-    ## Internal error occured.
-    | InternalError 203
-    ## Request was bad
-    | BadRequest 204
+	## All is well.
+	| Success 0
+	## Sent back fewer blocks than requested.
+	| PartialResponse 101
+	## Request.Start not found.
+	| BlockNotFound 201
+	## Requester is making too many requests.
+	| GoAway 202
+	## Internal error occured.
+	| InternalError 203
+	## Request was bad
+	| BadRequest 204
 }
 ```
+
 
 ### Example
 

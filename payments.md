@@ -71,8 +71,8 @@ type ReconcileResponse struct {
 
 ## TODO: what are the possible status cases?
 type Status enum {
-    | Success
-    | Failure
+	| "success"
+	| "failure"
 }
 ```
 
