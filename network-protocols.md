@@ -147,14 +147,14 @@ type DealState enum {
 
 ```sh
 type StorageDealResponse union {
-    | UnknownParams
-    | RejectedParams
-    | AcceptedParams
-    | StartedParams
-    | FailedParams
-    | StagedParams
-    | SealingParams
-    | CompleteParams
+    | UnknownParams "0"
+    | RejectedParams "1"
+    | AcceptedParams "2"
+    | StartedParams "3"
+    | FailedParams "4"
+    | StagedParams "5"
+    | SealingParams "6"
+    | CompleteParams "7"
 } representation keyed
 
 type UnknownParams struct {
@@ -266,9 +266,9 @@ type RetrievePieceRequest struct {
 ```sh
 type RetrievePieceResponse union {
     ## Success means that the piece can be retrieved from the miner.
-    | RetrievePieceResponseSuccess 0
+    | RetrievePieceResponseSuccess "0"
 	## Failure indicates that the piece can not be retrieved from the miner.
-    | RetrievePieceResponseFailure 1
+    | RetrievePieceResponseFailure "1"
 } representation keyed
 
 type RetrievePieceResponseSuccess struct {}
