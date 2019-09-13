@@ -19,3 +19,4 @@ For every subsystem in the Filecoin spec, it must always have a markdown file th
 ```
 hugo server --disableFastRender
 ```
+*Note that you must run this from the top-level specs directory*
