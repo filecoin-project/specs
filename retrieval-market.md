@@ -34,9 +34,9 @@ type RetDealProposal struct {
 }
 
 type RetDealResponse union {
-    | AcceptedResponse 0
-    | RejectedResponse 1
-    | ErrorResponse 2
+    | AcceptedResponse "0"
+    | RejectedResponse "1"
+    | ErrorResponse "2"
 } representation keyed
 
 type AcceptedResponse struct {}

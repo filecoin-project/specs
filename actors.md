@@ -1206,10 +1206,10 @@ type LaneState struct {
 }
 
 type PaymentChannelMethod union {
-  | PaymentChannelConstructor 0
-  | UpdateChannelState 1
-  | Close 2
-  | Collect 3
+  | PaymentChannelConstructor "0"
+  | UpdateChannelState "1"
+  | Close "2"
+  | Collect "3"
 } representation keyed
 ```
 
