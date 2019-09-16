@@ -47,11 +47,14 @@ help:
 # main Targets
 build: website
 
-deps:
+deps: submodules
 	bin/install-deps.sh
 	@# make bins last, after installing other deps
 	@# so we re-invoke make.
 	make bins
+
+submodules:
+	git submodule update --init --recursive
 
 deps-user: deps
 	bin/install-deps-orient-user.sh
@@ -64,27 +67,29 @@ publish: website
 
 # intermediate targets
 website: go-test org2md hugo-build
+	mkdir -p build
+	mv hugo/public build/website
 	@echo TODO: add generate-code to this target
 
 pdf: go-test org2md hugo-build
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
-hugo-build: $(shell find . | grep .md)
-	hugo
+hugo-build: $(shell find hugo | grep .md)
+	cd hugo && hugo
 
 # todo
-generate-code: $(shell find content/ | grep .ipld)
+generate-code: $(shell find hugo/content/ | grep .ipld)
 	echo TODO: use codeGen && exit 1
 	# bin/codeGen <input-files?>
 
-go-test: $(shell find content/ | grep .go)
+go-test: $(shell find hugo/content/ | grep .go)
 	# testing should have the side effect that all go is compiled
-	cd content/codeGen && go build && go test ./...
-	# cd content/code && go build && go test ./...
+	cd hugo/content/codeGen && go build && go test ./...
+	# cd hugo/content/code && go build && go test ./...
 
 # convert orgmode to markdown
-ORG_FILES=$(shell find content/ | grep .org)
+ORG_FILES=$(shell find hugo/content | grep .org)
 ORG_MD_FILES=$(patsubt %.md, %.org, $(ORG_FILES))
 org2md: $(ORG_MD_FILES)
 %.md: %.org
@@ -98,8 +103,8 @@ org2md: $(ORG_MD_FILES)
 # building our tools
 bins: bin/codeGen
 
-bin/codeGen: content/codeGen/*.go
-	cd content/codeGen && go build -o ../../bin/codeGen
+bin/codeGen: hugo/content/codeGen/*.go
+	cd hugo/content/codeGen && go build -o ../../../bin/codeGen
 
 # other
 

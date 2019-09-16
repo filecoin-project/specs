@@ -1,4 +1,4 @@
-public
-resources
-deps
-.slime
+public/
+deps/
+.slime/
+build/

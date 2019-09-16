@@ -1,6 +1,6 @@
-[submodule "themes/book"]
-	path = themes/book
-	url = https://github.com/alex-shpak/hugo-book
 [submodule "orient"]
 	path = orient
 	url = git@github.com:filecoin-project/orient
+[submodule "hugo/themes/book"]
+	path = hugo/themes/book
+	url = https://github.com/alex-shpak/hugo-book
