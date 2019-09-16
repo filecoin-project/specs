@@ -26,6 +26,7 @@ help:
 	@echo "MAIN TARGETS"
 	@echo "\tmake help        description of the targets (this message)"
 	@echo "\tmake deps        install all dependencies of this tool chain"
+	@echo "\tmake deps-user   install dependencies for user tooling"
 	@echo "\tmake build       build all final artifacts (website only for now)"
 	@echo "\tmake test        run all test cases (go-test only for now)"
 	@echo "\tmake drafts      publish artifacts to ipfs and show an address"
@@ -51,6 +52,9 @@ deps:
 	@# make bins last, after installing other deps
 	@# so we re-invoke make.
 	make bins
+
+deps-user: deps
+	bin/install-deps-orient-user.sh
 
 drafts: website
 	bin/publish-to-ipfs.sh
