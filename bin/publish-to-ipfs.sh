@@ -1,9 +1,7 @@
 #!/bin/bash
 
-die() {
-  echo >&2 "error: $@"
-  exit 1
-}
+source "$(dirname $0)/lib.sh"
+must_run_from_spec_root
 
 dir=build/website
 

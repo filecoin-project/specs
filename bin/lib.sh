@@ -92,3 +92,11 @@ ensure_symlink() {
     prun ln -s "$dst" "$src"
   fi
 }
+
+must_run_from_spec_root() {
+  # assert we're running from spec root dir
+  err="please run $(basename $0) from spec root directory"
+  [ -f "$(pwd)/bin/$(basename $0)" ] || die "$err"
+  grep 'filecoin-project/specs' "$(pwd)/.git/config" >/dev/null || die "$err"
+  grep -i 'filecoin spec' "$(pwd)/README.md" >/dev/null || die "$err"
+}

@@ -79,6 +79,8 @@ install_emacs_deps() {
 }
 
 main() {
+  must_run_from_spec_root
+
   # warn the user
   echo "WARNING: $0 is work in progress."
   echo "         This warning will be removed once it is done."
