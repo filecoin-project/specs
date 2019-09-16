@@ -2,3 +2,4 @@ public/
 deps/
 .slime/
 build/
+hugo/content/docs
