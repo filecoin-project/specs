@@ -12,13 +12,14 @@
 #      that is a diagram that is meant to make it easy to understand everything here.
 
 help:
-	@echo "filecoin spec build toolchain commands"
+	@echo "SYNOPSIS"
+	@echo "\tmake -- filecoin spec build toolchain commands"
 	@echo ""
 	@echo "USAGE"
-	@echo "\tmake deps        # run this once, to install dependencies"
+	@echo "\tmake deps        # run this once, to install & build dependencies"
 	@echo "\tmake build       # run this every time you want to re-build artifacts"
 	@echo ""
-	@echo "WARNING"
+	@echo "WARNING !"
 	@echo "\tthis build tool is WIP, so some targets may not work yet"
 	@echo "\tthis should stabilize in the next couple of days"
 	@echo ""
