@@ -48,16 +48,45 @@ tryinstall() {
   prun "$pkgmgr" install "$2"
 }
 
-# package manager packages
-tryinstall emacs emacs
-tryinstall hugo hugo
-tryinstall dot graphviz
+# usage() {
+#   cat << USAGE
+# SYNOPSIS
+#     install dependencies for the filecoin spec buildsys
+#     usage: $0 [-y]
+#
+# OPTIONS
+#     -h,--help      show usage
+#     -y,--yes       pass yes to installers and confirmation prompts
+# USAGE
+# }
+#
+# parse_args() {
+#   while [ $# -gt 0 ]; do
+#     case "$1" in
+#     -y|--yes) y=y ;;
+#     -h|--help) usage ; exit 0 ;;
+#     *) die "unrecognized argument: $1 (-h shows usage)" ;;
+#     esac
+#     shift
+#   done
+# }
 
-# other packages
-require go go "recommended install from https://golang.org/dl/ -- we need version 1.12+"
+main() {
+  # assert we're running from spec root dir
+  [ -f "$(pwd)/bin/$(basename $0)" ] || die "please run $(basename $0) from spec root directory"
 
-# git repos
-git submodule update --init --recursive
+  # package manager packages
+  tryinstall emacs emacs
+  tryinstall hugo hugo
+  tryinstall dot graphviz
 
-# orient
-# TODO: orient (git submodule?)
+  # other packages
+  require go go "recommended install from https://golang.org/dl/ -- we need version 1.12+"
+
+  # git repos
+  prun git submodule update --init --recursive
+
+  # orient
+  prun bin/install-deps-orient.sh -y
+}
+main

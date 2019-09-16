@@ -145,22 +145,24 @@ install_cllaunch() {
   [ $? -eq 0 ] || die "dailed to install cl-launch"
 }
 
-#--------------------
+main() {
+  # warn the user
+  echo "WARNING: $0 is work in progress."
+  echo "         This warning will be removed once it is done."
 
-# warn the user
-echo "WARNING: This is work in progress."
-echo "         This warning will be removed once it is done."
+  # get confirmation from user
+  if [ "$1" != "-y" ]; then
+    get_user_confirmation
+  fi
 
-# get confirmation from user
-if [ "$1" != "-y" ]; then
-  get_user_confirmation
-fi
+  # package manager packages
+  tryinstall wget wget
+  tryinstall emacs emacs
+  tryinstall sbcl sbcl
+  mkdir -p deps/bin
+  install_quicklisp
+  install_slime
+  install_cllaunch
+}
+main $1
 
-# package manager packages
-tryinstall wget wget
-tryinstall emacs emacs
-tryinstall sbcl sbcl
-mkdir -p deps/bin
-install_quicklisp
-install_slime
-install_cllaunch

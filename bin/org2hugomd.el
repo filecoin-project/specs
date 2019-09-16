@@ -8,23 +8,8 @@
  inhibit-message t) ; if there are errors, remove this.
  ; debug-on-error t) ; if there are errors, add this.
 
-;; require package
-(require 'package)
-
-;; enable melpa
-(add-to-list
- 'package-archives
- '("melpa" . "https://melpa.org/packages/")
- t)
-
-;; Update package list
-(package-initialize)
-(unless (require 'use-package nil 'noerror)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-;; Load packages we need
-(use-package ox-hugo)
+;; load info
+(load (concat (file-name-directory load-file-name) "./emacs-deps.el"))
 
 ;; process input
 (with-temp-buffer
