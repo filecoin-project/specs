@@ -9,7 +9,7 @@
  ; debug-on-error t) ; if there are errors, add this.
 
 ;; load info
-(load (concat (file-name-directory load-file-name) "./emacs-deps.el"))
+(load (concat (file-name-directory load-file-name) "emacs-deps.el"))
 
 ;; process input
 (with-temp-buffer
