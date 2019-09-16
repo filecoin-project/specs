@@ -1,3 +1,7 @@
+;; Options
+(setq
+  use-package-always-ensure t)
+
 ;; require package
 (require 'package)
 
@@ -20,6 +24,6 @@
 (use-package slime
   :init
   (global-set-key (kbd "C-c z") 'slime-repl)
-  (load (expand-file-name ".quicklisp/slime-helper.el"))
-  (setq inferior-lisp-program "bin/sbcl")
+  (load (substitute-in-file-name "$HOME/quicklisp/slime-helper.el"))
+  (setq inferior-lisp-program "sbcl") ; TODO: verify this doesn't require full path to binary
   (add-to-list 'slime-contribs 'slime-repl))
