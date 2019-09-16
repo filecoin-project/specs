@@ -3,71 +3,8 @@
 #------- modes
 # set -e
 
-#------- install-deps.sh
-
-find_pkgmgr() {
-  pkgmgrs=(apt-get brew)
-  for pm in ${pkgmgrs[@]}; do
-    which "$pm" >/dev/null && printf "$pm" && return 0
-  done
-  printf ""
-}
-pkgmgr=$(find_pkgmgr)
-
-die() {
-  echo >&2 "error: $@"
-  exit 1
-}
-
-prun() {
-  echo "> $@"
-  $@
-}
-
-which_v() {
-  printf "which $1: "
-  which "$1" 2>/dev/null && return 0
-  echo "not found" && return 1
-}
-
-require() {
-  which_v "$1" || die "$1 required - install package: $2
-$3"
-}
-
-tryinstall() {
-  # no pkg mgr? bail w/ require msg.
-  if [ "" = "$pkgmgr" ]; then
-    require "$1" "$2"
-  else
-    which_v "$1" && return 0 # have it
-  fi
-
-  # pkg mgr, try using it
-  prun "$pkgmgr" install "$2"
-}
-
-get_user_confirmation() {
-  while : ; do
-    read -p "Continue (y/n)? " choice
-    case "$choice" in
-      y|yes ) break ;;
-      n|no ) die "aborting" ;;
-    esac
-  done
-}
-
-download_if_not_present() {
-  src="$1"
-  dst="$2"
-  echo "> installing $dst"
-  if [ -f "$dst" ]; then
-    echo "$dst already exists. skipping download. to force redownload, remove the file."
-  else
-    echo "downloading $src to $dst"
-    wget -O "$2" "$1"
-  fi
-}
+# load lib
+source "$(dirname $0)/lib.sh"
 
 is_quicklisp_installed() {
   echo "> check whether quicklisp is already installed."
@@ -106,43 +43,39 @@ LISP
 
     is_quicklisp_installed || die "failed to install quicklisp"
   fi
-
-  # the below should also work, but harder time getting it to work:
-  # bin/sbclw --script << LISP
-  # (if
-  #   (find-package '#:ql)
-  #   (princ "quicklisp already installed")
-  #   (progn
-  #     (load "deps/quicklisp.lisp")
-  #     (eval (quicklisp-quickstart:install :path "$(pwd)/.quicklisp")
-  #     (ql:add-to-init-file)))
-# LISP
-
 }
 
 install_slime() {
-  # add slime to emacs + user startup file
-  echo "> adding slime to emacs"
+  echo "> installing slime"
   bin/sbclw --eval "(ql:quickload \"quicklisp-slime-helper\")" --quit
   [ $? -eq 0 ] || die "failed to install slime"
 }
 
 link_orient_to_quicklisp() {
-  # integrate quicklisp with orient
   echo "> integrating quicklisp with orient"
-  ln -s ../../orient/orient.asd deps/quicklisp/local-projects/orient.asd
+  dst="../../orient/orient.asd"
+  src="deps/quicklisp/local-projects/orient.asd"
+  ensure_symlink "$dst" "$src"
+
   # this is a symlink. brittle!
   # if we move orient or quicklisp (relative to each other) we have to change this.
 }
 
 install_cllaunch() {
-  # installing cl-launch
   cll="cl-launch.sh"
   dst="deps/bin/cl"
   src="https://common-lisp.net/project/xcvb/cl-launch/$cll"
 
   download_if_not_present "$src" "$dst"
-  [ $? -eq 0 ] || die "dailed to install cl-launch"
+  [ $? -eq 0 ] || die "failed to install cl-launch"
+}
+
+install_emacs_deps() {
+  # loading the init file will do
+  emacs_init="bin/emacs-init-build.el"
+  echo "> installing emacs deps from $emacs_init"
+  HOME=$HOME emacs -Q --script "$emacs_init"
+  [ $? -eq 0 ] || die "failed to install emacs deps"
 }
 
 main() {
@@ -163,6 +96,8 @@ main() {
   install_quicklisp
   install_slime
   install_cllaunch
+  install_emacs_deps
+  link_orient_to_quicklisp
 }
 main $1
 
