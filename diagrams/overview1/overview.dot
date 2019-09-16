@@ -1,0 +1,344 @@
+digraph Filecoin {
+  compound=true;
+
+
+  subgraph cluster_blockchain_subgroup {
+    color=lightcyan1
+    style=filled
+
+    subgraph cluster_blockchain {
+      style=filled
+      color=lightgrey
+      label = "Blockchain"
+
+      { // components
+        node [shape=box]
+        "Chain Manager"
+        "Block Receiver"
+        "Block Propagator"
+        "Block Producer"
+      }
+
+      { // actors
+        node [shape=doubleoctagon]
+        "Chain Manager"
+        "Block Receiver"
+        "Block Propagator"
+        "Block Producer"
+      }
+
+      "Chain Manager" -> "Block Receiver"
+      "Chain Manager" -> "Block Propagator"
+      "Chain Manager" -> "Block Producer"
+    }
+
+    subgraph cluster_vm {
+      style=filled
+      color=lightgrey
+      label = "Filecoin VM"
+
+      { // components
+        node [shape=box]
+        "VM Interpreter"
+        "Messages"
+      }
+
+      { // actors
+        node [shape=doubleoctagon]
+        "Init Actor"
+        "Account Actor"
+      }
+    }
+
+    subgraph cluster_messagepool {
+      style=filled
+      color=lightgrey
+      label = "Message Pool"
+
+      { // components
+        node [shape=box]
+        "Message Pool"
+        "Message Storage"
+        "Message Propagator"
+        "Message Receiver"
+      }
+
+      "Message Pool" -> "Message Storage"
+      "Message Pool" -> "Message Propagator"
+      "Message Pool" -> "Message Receiver"
+    }
+
+
+    subgraph cluster_storagepowerconsensus {
+      style=filled
+      color=lightgrey
+      label = "Storage Power Consensus"
+
+      { // components
+        node [shape=box]
+        "Expected Consensus"
+      }
+
+      { // actors
+        node [shape=doubleoctagon]
+        "Storage Power Actor"
+      }
+    }
+  }
+
+
+  subgraph cluster_payments {
+    style=filled
+    color=lightgrey
+    label = "Payments"
+
+    { // components
+      node [shape=box]
+      "Wallet"
+    }
+
+    { // actors
+      node [shape=doubleoctagon]
+      "Payment Channel Actor"
+    }
+  }
+
+  subgraph cluster_markets {
+    color=lightcyan1
+    style=filled
+
+    subgraph cluster_storagemarket {
+      style=filled
+      color=lightgrey
+      label = "Storage Market"
+
+      { // components
+        node [shape=box]
+        "Storage Provider" [label="Storage\nProvider"]
+        "Storage Client" [label="Storage\nClient"]
+      }
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "Storage Deal Protocol" [label="Storage\nDeal\nProtocol"]
+      }
+
+    }
+
+    subgraph cluster_retrievalmarket {
+      style=filled
+      color=lightgrey
+      label = "Retrieval Market"
+
+      { // components
+        node [shape=box]
+        "Retrieval Provider" [label="Retrieval\nProvider"]
+        "Retrieval Client" [label="Retrieval\nClient"]
+      }
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "Retrieval Deal Protocol" [label="Retrieval\nDeal\nProtocol"]
+      }
+
+    }
+  }
+
+  subgraph cluster_storageminerprocess {
+    color=lightcyan1
+    style=filled
+
+    subgraph cluster_storagemining {
+      style=filled
+      color=lightgrey
+      label = "Storage Mining"
+
+      { // components
+        node [shape=box]
+        "Seal Prover"
+        "PoSt Generator"
+        "Pledge Prover"
+      }
+
+      { // actors
+        node [shape=doubleoctagon]
+        "Storage Miner Actor"
+      }
+    }
+
+    subgraph cluster_sectorstorage {
+      style=filled
+      color=lightgrey
+      label = "Sector Storage"
+
+      { // components
+        node [shape=box]
+        "Sector Manager"
+        "Sector Store"
+        "Sector Builder"
+        "Sector Sealer"
+      }
+      "Disks" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
+
+      "Sector Manager" -> "Sector Store"
+      "Sector Manager" -> "Sector Builder"
+      "Sector Manager" -> "Sector Sealer"
+      "Sector Store" -> "Disks"
+    }
+  }
+
+  subgraph cluster_clock {
+    style=filled
+    color=lightgrey
+    label = "Clock"
+
+    { // components
+      node [shape=box]
+      "Wall Clock"
+      "NTP"
+      "Round Clock"
+    }
+
+    { // actors
+      node [shape=doubleoctagon]
+      "Cron Actor"
+    }
+
+    { // libp2p protocols
+      node [shape=Msquare]
+      "NTP"
+    }
+    "Wall Clock" -> "NTP"
+  }
+
+  subgraph cluster_repository {
+    style=filled
+    color=lightgrey
+    label = "Repository"
+
+    { // components
+      node [shape=box]
+      "Config"
+      "Checkpoints"
+      "KeyStore"
+      "IPLD DagStore"
+    }
+    "Local Storage" [shape=cylinder,label="Local Storage\n(Disk)"]
+
+    "Checkpoints" -> "Config"
+    "IPLD DagStore" -> "Local Storage"
+    "Config" -> "Local Storage"
+    "KeyStore" -> "Local Storage"
+  }
+
+  subgraph cluster_datatransfers {
+    style=filled
+    color=lightgrey
+    label = "Data Transfers"
+
+    { // components
+      node [shape=box]
+      "Data Transfers"
+      "Scheduler"
+    }
+
+    { // libp2p protocols
+      node [shape=Msquare]
+      "AuthSwap" [label="data\ntransfer\nprotocol\n(unnamed)"]
+    }
+
+    "Disk2" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
+
+    "Data Transfers" -> "Disk2"
+
+  }
+
+  subgraph cluster_net {
+    color=lightcyan1
+    style=filled
+
+    subgraph cluster_network {
+      style=filled
+      color=lightgrey
+      label = "Network Interface"
+
+      { // components
+        node [shape=box]
+        "Filecoin Network Node"
+      }
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "Block Pubsub" [label="Filecoin\nBlock\nPubsub"]
+        "Message Pubsub" [label="Filecoin\nMessage\nPubsub"]
+        "Bootstrap List" [label="Bootstrap\nList"]
+      }
+    }
+
+    subgraph cluster_libp2p {
+      style=filled
+      color=lightgrey
+      label = "libp2p"
+
+      { // components
+        node [shape=box]
+        "p2p.Node"
+        "Switch"
+        "Conn"
+        "TLS"
+        "QUIC"
+        "yamux"
+        "mplex"
+      }
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "Identify"
+        "Gossipsub"
+        "Graphsync"
+        "Bitswap"
+      }
+
+      "Identify" -> "p2p.Node"
+      "Gossipsub" -> "p2p.Node"
+      "Graphsync" -> "p2p.Node"
+      "Bitswap" -> "p2p.Node"
+
+      "p2p.Node" -> "Switch"
+      "Switch" -> "Conn"
+      "Conn" -> "QUIC"
+      "Conn" -> "yamux" -> "TLS"
+      "Conn" -> "mplex" -> "TLS"
+    }
+  }
+
+
+
+  // cross module links
+  {
+    edge [minlen=3]
+    "PoSt Generator" -> "Sector Manager" [ltail=cluster_storagemining,lhead=cluster_sectorstorage]
+    "Chain Manager" -> "VM Interpreter" [ltail=cluster_blockchain, lhead=cluster_vm]
+    "Message Pool" -> "Messages" [ltail=cluster_messagepool]
+    // "Chain Manager" -> "Expected Consensus" [ltail=cluster_blockchain, lhead=cluster_storagepowerconsensus]
+    "Pledge Prover" -> "Storage Power Actor" [ltail=cluster_storagemining, lhead=cluster_storagepowerconsensus]
+    "Block Pubsub" -> "Gossipsub"
+    "Message Pubsub" -> "Gossipsub"
+    "Storage Provider" -> "Chain Manager" [ltail=cluster_blockchain, lhead=cluster_storagemarket]
+    "Retrieval Provider" -> "Chain Manager" [ltail=cluster_blockchain, lhead=cluster_retrievalmarket]
+    "PoSt Generator" -> "Chain Manager" [ltail=cluster_storagemining, lhead=cluster_retrievalmarket]
+    "Chain Manager" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
+    "AuthSwap" -> "Graphsync" [ltail=cluster_datatransfers]
+    "Storage Provider" -> "Data Transfers" [ltail=cluster_storagemarket, lhead=cluster_datatransfers]
+    "Retrieval Provider" -> "Data Transfers" [ltail=cluster_retrievalmarket, lhead=cluster_datatransfers]
+    "Block Receiver" -> "Block Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
+    "Message Receiver" -> "Message Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
+    "Message Storage" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
+    "Switch" -> "KeyStore"
+    "NTP" -> "Switch" [ltail=cluster_clock, lhead=cluster_libp2p]
+    "Bootstrap List" -> "p2p.Node"
+    "Block Producer" -> "Message Pool" [lhead=cluster_messagepool]
+    "Wallet" -> "KeyStore"
+    // "Block Producer" -> "PoSt Generator" [style=dashed]
+  }
+}
