@@ -1,0 +1,56 @@
+- introduction
+  - architecture
+  - key concepts
+  - filecoin vm
+  - spec process
+- algorithms
+  - expected consensus
+  - proof of replication
+  - proof of spacetime
+  - payment channels
+  - verifiable delay functions
+  - cryptographic primitives
+- Subsystem Groups
+  - Data Structures
+    - Filecoin Nodes
+    - Repository
+    - Data Structures
+    - Filecoin Compact Serialization
+  - Networking
+    - Filecoin libp2p nodes
+    - libp2p protocols
+      - gossipsub
+      - kad-dht
+    - ipfs protocols
+      - graphsync
+      - bitswap
+  - State Machine
+    - State Tree
+    - Filecoin VM
+    - Message Pool
+    - Blockchain
+    - Storage Power Consensus
+  - Token
+    - Wallets
+    - Payments
+    - Payment Channels
+    - Fees
+  - Mining
+    - storage mining
+    - sector storage
+  - Markets
+    - storage market
+    - retrieval market
+    - data transfers
+  - Other
+    - Clock
+- Listings
+  - Data Structures
+  - Components
+  - Subsystems
+  - Filecoin VM Actors
+  - libp2p Protocols
+- Glossary
+- Appendix
+  - Sharded IPLD Arrays
+  - Filecoin Addresses
