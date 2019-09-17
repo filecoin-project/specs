@@ -8,10 +8,10 @@ type StorageMinerActor struct {
   info &MinerInfo
 
   // Collateral that is waiting to be withdrawn.
-  pledgeCollateral TokenAmount
+  dePledgeCollateral TokenAmount
 
   // Time at which the depledged collateral may be withdrawn.
-  pledgeTime Epoch
+  dePledgeTime Epoch
 
   // All sectors this miner has committed.
   sectors &SectorSet
