@@ -28,8 +28,7 @@ type Chain struct {
 type ChainWeight UVarint
 
 type Address struct {
-	NetworkID 
-    + {
+	NetworkID union {
 		Testnet
 		Mainnet
 	}
@@ -39,11 +38,10 @@ type Address struct {
 		Actor
 		BLS
     }
-    
+
     VerifySyntax(addrType) bool
 }
 
 func (addr *Address) VerifySyntax(addrType) {
     // TODO
 }
-
