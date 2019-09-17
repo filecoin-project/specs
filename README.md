@@ -7,7 +7,9 @@ For every subsystem in the Filecoin spec, it must always have a markdown file th
 
 <img src="./diagrams/buildsys/buildsys.svg" width="50%">
 
-## Install
+## Developing
+
+### Install
 
 1. Install [Hugo](https://gohugo.io) (at least works with latest, `v0.57.2`)
 2. Then run:
@@ -16,7 +18,7 @@ For every subsystem in the Filecoin spec, it must always have a markdown file th
   git submodule update
   ```
 
-## Compile
+### Compile
 
 ```
 make
@@ -24,7 +26,7 @@ make
 
 *Note that you must run this from the top-level specs directory*
 
-## Serve
+### Serve
 
 ```
 make serve
@@ -32,8 +34,12 @@ make serve
 
 will write out an HTTP address to check out with your browser
 
-## Website
+### Website
 
 ```
 make website
 ```
+
+## System Overview
+
+<img src="diagrams/overview1/overview.svg" />
