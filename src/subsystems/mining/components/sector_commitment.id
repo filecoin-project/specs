@@ -1,0 +1,5 @@
+type SectorCommitment struct {
+  CommD []bytes
+  CommR []bytes
+  CommRStar []bytes
+}

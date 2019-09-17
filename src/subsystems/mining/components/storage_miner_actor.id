@@ -1,0 +1,88 @@
+type MiningSubsystem struct {
+    Pledge()
+    AddSector(sectorID SectorID, comm SealCommitment, proof SealProof) SectorID
+    ProveStorage(proofs PoStProof, doneSet Bitfield)
+    ReportFaults()
+}
+
+type SealProver struct {
+  GetReplicaID(CommD Commitment, block Block)
+  Prove() (SealCommitment, SealProof)
+}
+
+type PostGenerator struct {
+  GetRandomness(/*TODO*/)
+  Prove(/*TODO*/)
+}
+
+type StorageMinerActor struct {
+  // Amount of power this miner has.
+  power UInt
+
+  provingPeriodEnd Epoch
+
+  // contains mostly static info about this miner
+  info &MinerInfo
+
+  // Collateral that is waiting to be withdrawn.
+  pledgeCollateral TokenAmount
+
+  // Time at which the depledged collateral may be withdrawn.
+  pledgeTime Epoch
+
+  // All sectors this miner has committed.
+  sectors &SectorSet
+
+  // Sectors this miner is currently mining. It is only updated
+  // when a PoSt is submitted (not as each new sector commitment is added).
+  provingSet &SectorSet
+
+  // Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
+  currentFaultSet BitField
+
+  // Faults submitted after the current proving period's challenge time, but before the PoSt for that period
+  // is submitted. These become the currentFaultSet when a PoSt is submitted.
+  nextFaultSet BitField
+
+  // Sectors reported during the last PoSt submission as being 'done'. The collateral
+  // for them is still being held until the next PoSt submission in case early sector
+  // removal penalization is needed.
+  nextDoneSet BitField
+
+  // List of sectors that this miner was slashed for.
+  slashedSet optional &SectorSet
+
+  // Deals this miner has been slashed for since the last post submission.
+  arbitratedDeals {Cid:Null} // TODO
+
+  // The height at which this miner was slashed at.
+  slashedAt optional Epoch
+
+  // The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+  owedStorageCollateral TokenAmount
+
+  // Getters
+  GetOwner() Address
+  GetWorkerAddr() Address
+  GetPower() BytesAmount
+  GetPeerID() PeerID
+  GetSectorSize() BytesAmount
+  GetCurrentProvingSet() BitField
+
+  // Commit Sectors and SubmitPost
+  CommitSector(sectorID SectorID, comm SealCommitment, proof SealProof) SectorID // TODO rename to AddPower?
+  SubmitPost(proofs PoStProof, doneSet Bitfield) // TODO: rename to ProvePower?
+  DePledge(amt TokenAmount)
+
+  AbitrateDeal (deal Deal)
+  SlashStorageFault() // TODO maybe add CheckStorageFault?
+  AddFaults(faults FaultSet) // TODO rename into ReportFaults
+  IsLate() (bool)
+  IsSlashed() (bool)
+
+  UpdatePeerID(pid PeerID)
+  ChangeWorker(addr Address)
+
+  PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
+  PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)
+}
