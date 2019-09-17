@@ -1,0 +1,6 @@
+type PostProver struct {
+  // this must  GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
+  GetChallenge(minerActor &StorageMinerActor, currBlock) Challenge
+  GeneratePoSt(Challenge, &[&Sector]) PoStProof
+  SubmitPoSt(minerActor &StorageMinerActor, postProof)
+}

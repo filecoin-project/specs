@@ -1,0 +1,12 @@
+type Commitment = []bytes
+type SectorCommitment struct {
+  CommD Commitment
+  CommR Commitment
+  CommRStar Commitment
+}
+
+type SealProver struct {
+  GetReplicaID(CommD Commitment, block Block)
+  GenerateSeal(replicaId ReplicaID, data Data) (Replica, SealCommitment, SealProof)
+  SubmitSeal(comms SealCommitment, proof SealProof)
+}

@@ -1,6 +1,0 @@
-type MiningSubsystem struct {
-    Pledge()
-    AddSector(sectorID SectorID, comm SealCommitment, proof SealProof) SectorID
-    ProveStorage(proofs PoStProof, doneSet Bitfield)
-    ReportFaults()
-}

@@ -1,0 +1,9 @@
+type MiningSubsystem struct {
+    CreateMiner(owner Address, worker Address) // Pledge(pledgeAmount TokenAmount)
+    AddSector(pledge TokenAmount, sectorID SectorID, comm SealCommitment, proof SealProof) SectorID
+    ProveStorage(proofs PoStProof, doneSet Bitfield)
+    CheckForFaults()
+    ReportFaults(/**/)
+    UpdateSectors()
+    Depledge(amount TokenAmount)
+}
