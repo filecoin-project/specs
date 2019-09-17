@@ -1,18 +1,18 @@
-type MiningSubsystem struct {
-    Pledge()
-    AddSector(sectorID SectorID, comm SealCommitment, proof SealProof) SectorID
-    ProveStorage(proofs PoStProof, doneSet Bitfield)
-    ReportFaults()
+// TODO do we need one? seems implementation specific
+type ProofsManager struct {
+
 }
 
 type SealProver struct {
   GetReplicaID(CommD Commitment, block Block)
-  Prove() (SealCommitment, SealProof)
+  GenerateSeal(replicaId ReplicaID, data Data) (Replica, SealCommitment, SealProof)
+  SubmitSeal(comms SealCommitment, proof SealProof)
 }
 
-type PostGenerator struct {
-  GetRandomness(/*TODO*/)
-  Prove(/*TODO*/)
+type PostProver struct {
+  GetChallenge(/*TODO*/)
+  GeneratePoSt(/*TODO*/)
+  SubmitPoSt()
 }
 
 type StorageMinerActor struct {
@@ -61,6 +61,10 @@ type StorageMinerActor struct {
   // The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
   owedStorageCollateral TokenAmount
 
+  // Internal methods
+  verifySeal(sectorID SectorID, comm SealCommitment, proof SealProof)
+  verifyPoSt(proofs PoStProof, doneSet Bitfield)
+
   // Getters
   GetOwner() Address
   GetWorkerAddr() Address
@@ -69,8 +73,9 @@ type StorageMinerActor struct {
   GetSectorSize() BytesAmount
   GetCurrentProvingSet() BitField
 
-  // Commit Sectors and SubmitPost
+  // CommitSector verifies the sealProof
   CommitSector(sectorID SectorID, comm SealCommitment, proof SealProof) SectorID // TODO rename to AddPower?
+  // SubmitPost verifies the PoSt
   SubmitPost(proofs PoStProof, doneSet Bitfield) // TODO: rename to ProvePower?
   DePledge(amt TokenAmount)
 
