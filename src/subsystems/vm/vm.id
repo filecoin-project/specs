@@ -1,0 +1,77 @@
+package blockchain
+
+type VMSubsystem struct {
+	State() StateTree
+	Exec(Message) StateTree
+}
+
+type StateTree struct {
+	ActorStates {Address:Actor}
+	API ConvenienceAPI
+
+	GetActorState(Address) ActorState
+}
+
+type ActorID UVarint
+type ActorMeta struct {
+	// common fields for all actors
+	SeqNo UVarint
+	Balance BigInt
+}
+
+type ActorState union {
+	| InitActorState
+	| AccountActorState
+	| StoragePowerActorState
+	| StorageMinerActorState
+	| CronActorState
+	| PaymentChannelActorState
+}
+
+// type ActorMethod union {
+// 	| InitActorMethod
+// 	| AccountActorMethod
+// 	| StoragePowerActorMethod
+// 	| StorageMinerActorMethod
+// 	| CronActorMethod
+// 	| PaymentChannelActorMethod
+// }
+
+type InitActorState struct {
+	// responsible for create new actors
+	Meta ActorMeta
+	AddressMap {Address:ActorID}
+	NextID ActorID
+
+	GetActorIDForAddress(Address) ActorID
+}
+
+type AccountActorState struct {
+	// normal keypair backed accounts
+	Meta ActorMeta
+	Address Address
+
+	GetAddress() Address
+}
+
+// type StoragePowerActorState struct {
+// 	// maintain storage power over time
+// 	Meta ActorMeta
+// 	PowerTableMap {Address:BytesAmount}
+
+// 	GetPowerForMiner(Address) BytesAmount
+// 	PutPowerForMiner(Address, BytesAmount) bool
+// }
+
+// type StorageMinerActorState struct {
+// 	Meta ActorMeta
+// 	RegisterMiner(PublicKey, BytesAmount) Address
+// }
+
+// type CronActorState struct {
+// 	Meta ActorMeta
+// }
+
+// type PaymentChannelActorState struct {
+// 	Meta ActorMeta
+// }
