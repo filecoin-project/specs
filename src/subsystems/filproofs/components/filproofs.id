@@ -1,0 +1,82 @@
+type SectorId    UInt64
+type ProverId    UInt64
+type Commitment  [32]byte
+type DataElement [32]byte
+type Rephash     func(left DataElement, right DataElement) hash Commitment
+
+// Constants can be zero-arg methods of structs (for now).
+
+// Add data structures to minimize individual parameters.
+// PublicInputs
+// Configs.
+
+type FilproofsSubsystem struct {
+    Seal(
+	partitions     Uvarint,
+	sectorSize     Uvarint,
+	subsectorCount Uvarint
+	unsealedPath   String,
+	sealedPath     String,
+	proverId       ProverId,
+	ticket         Ticket, // Assuming this is defined  elsewhere.
+	sectorId       SectorId) ProofError | SealResponse
+
+    VerifySeal(
+	commD Commitment,
+	commR Commitment,
+	proof SNARKProof) ProofError | bool
+
+    Unseal(
+         // TODO
+    )
+
+   GeneratePoSt(
+	// TODO
+   )
+
+   VerifyPoSt(
+       // TODO
+   )
+
+    GenerateCommP()
+    GenerateCommD()
+
+    GeneratePieceInclusionProofs(
+	Tree          MerkleTree<Rephash>,
+	PieceStarts   []Uint,
+	PieceLength   []Uint,
+    ) Error | []PieceInclusionProof
+
+    GeneratePieceInclusionProof(
+	Tree          MerkleTree<Rephash>,
+	PieceStart    Uint,
+	PieceLength   Uint,
+    ) Error | []PieceInclusionProof
+
+   VerifyPieceInclusionProof(
+   )
+}
+
+type ProofError struct {
+}
+
+type SealResponse struct {
+     commD     Commitment,
+     commR     Commitment,
+     proof     SealProof,
+}
+
+type SNARKProof<curve, system> {
+     partitionCount Uvarint,
+     proofBytes []bytes
+}
+
+type FilecoinSNAKRProof<bls12-381, Groth16>
+
+type SealProof struct {
+     snarkProof      SNARKProof,
+     susbsectorCount Uvarint,
+}
+
+type PieceInclusionProof {
+}
