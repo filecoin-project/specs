@@ -15,17 +15,6 @@
 <polygon fill="#ffffe0" stroke="#000000" points="65.2397,-468 11.2397,-468 11.2397,-432 65.2397,-432 65.2397,-468"/>
 <text text-anchor="middle" x="38.2397" y="-445.8" font-family="Times,serif" font-size="14.00" fill="#000000">.md</text>
 </g>
-<!-- hugo build -->
-<g id="node13" class="node">
-<title>hugo build</title>
-<text text-anchor="middle" x="453.2397" y="-337.8" font-family="Times,serif" font-size="14.00" fill="#000000">hugo build</text>
-</g>
-<!-- .md&#45;&gt;hugo build -->
-<g id="edge3" class="edge">
-<title>.md&#45;&gt;hugo build</title>
-<path fill="none" stroke="#000000" d="M65.4391,-442.8998C78.1392,-439.5857 93.4624,-435.5889 107.2397,-432 213.6464,-404.2818 338.4771,-371.8268 405.276,-354.4647"/>
-<polygon fill="#000000" stroke="#000000" points="406.2961,-357.8159 415.0941,-351.9129 404.5352,-351.041 406.2961,-357.8159"/>
-</g>
 <!-- make pdf -->
 <g id="node16" class="node">
 <title>make pdf</title>
@@ -36,6 +25,18 @@
 <title>.md&#45;&gt;make pdf</title>
 <path fill="none" stroke="#000000" d="M37.9056,-431.9555C37.21,-394.3938 35.6019,-307.5541 34.7659,-262.4103"/>
 <polygon fill="#000000" stroke="#000000" points="38.2604,-262.0785 34.5758,-252.1451 31.2616,-262.2082 38.2604,-262.0785"/>
+</g>
+<!-- hugo build -->
+<g id="node18" class="node">
+<title>hugo build</title>
+<polygon fill="none" stroke="#000000" points="491.5196,-360 414.9599,-360 414.9599,-324 491.5196,-324 491.5196,-360"/>
+<text text-anchor="middle" x="453.2397" y="-337.8" font-family="Times,serif" font-size="14.00" fill="#000000">hugo build</text>
+</g>
+<!-- .md&#45;&gt;hugo build -->
+<g id="edge3" class="edge">
+<title>.md&#45;&gt;hugo build</title>
+<path fill="none" stroke="#000000" d="M65.4391,-442.8998C78.1392,-439.5857 93.4624,-435.5889 107.2397,-432 213.6464,-404.2818 338.4771,-371.8268 405.276,-354.4647"/>
+<polygon fill="#000000" stroke="#000000" points="406.2961,-357.8159 415.0941,-351.9129 404.5352,-351.041 406.2961,-357.8159"/>
 </g>
 <!-- .ipld -->
 <g id="node2" class="node">
@@ -60,12 +61,6 @@
 <polygon fill="#ffffe0" stroke="#000000" points="551.2397,-468 497.2397,-468 497.2397,-432 551.2397,-432 551.2397,-468"/>
 <text text-anchor="middle" x="524.2397" y="-445.8" font-family="Times,serif" font-size="14.00" fill="#000000">.go</text>
 </g>
-<!-- .go&#45;&gt;hugo build -->
-<g id="edge15" class="edge">
-<title>.go&#45;&gt;hugo build</title>
-<path fill="none" stroke="#000000" d="M512.1956,-431.6793C500.8049,-414.3527 483.5827,-388.1555 470.6891,-368.5427"/>
-<polygon fill="#000000" stroke="#000000" points="473.524,-366.4835 465.1061,-360.0502 467.6748,-370.3289 473.524,-366.4835"/>
-</g>
 <!-- go test -->
 <g id="node14" class="node">
 <title>go test</title>
@@ -76,6 +71,12 @@
 <title>.go&#45;&gt;go test</title>
 <path fill="none" stroke="#000000" d="M535.4357,-431.6793C545.9765,-414.4307 561.8895,-388.3914 573.857,-368.8081"/>
 <polygon fill="#000000" stroke="#000000" points="576.981,-370.4081 579.2091,-360.0502 571.0081,-366.7579 576.981,-370.4081"/>
+</g>
+<!-- .go&#45;&gt;hugo build -->
+<g id="edge15" class="edge">
+<title>.go&#45;&gt;hugo build</title>
+<path fill="none" stroke="#000000" d="M512.1956,-431.6793C500.8049,-414.3527 483.5827,-388.1555 470.6891,-368.5427"/>
+<polygon fill="#000000" stroke="#000000" points="473.524,-366.4835 465.1061,-360.0502 467.6748,-370.3289 473.524,-366.4835"/>
 </g>
 <!-- .orient -->
 <g id="node4" class="node">
@@ -101,8 +102,9 @@
 <text text-anchor="middle" x="38.2397" y="-661.8" font-family="Times,serif" font-size="14.00" fill="#000000">.org</text>
 </g>
 <!-- &lt;emacs&gt; -->
-<g id="node9" class="node">
+<g id="node17" class="node">
 <title>&lt;emacs&gt;</title>
+<polygon fill="none" stroke="#000000" points="71.5106,-576 4.9688,-576 4.9688,-540 71.5106,-540 71.5106,-576"/>
 <text text-anchor="middle" x="38.2397" y="-553.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;emacs&gt;</text>
 </g>
 <!-- .org&#45;&gt;&lt;emacs&gt; -->
@@ -140,14 +142,13 @@
 <polygon fill="#000000" stroke="#000000" points="65.7778,-144 2.7016,-144 2.7016,-108 65.7778,-108 65.7778,-144"/>
 <text text-anchor="middle" x="34.2397" y="-121.8" font-family="Times,serif" font-size="14.00" fill="#000000">spec.pdf</text>
 </g>
-<!-- &lt;emacs&gt;&#45;&gt;.md -->
-<g id="edge2" class="edge">
-<title>&lt;emacs&gt;&#45;&gt;.md</title>
-<path fill="none" stroke="#000000" d="M38.2397,-539.6793C38.2397,-522.821 38.2397,-497.5651 38.2397,-478.147"/>
-<polygon fill="#000000" stroke="#000000" points="41.7398,-478.0501 38.2397,-468.0502 34.7398,-478.0502 41.7398,-478.0501"/>
+<!-- emacs -->
+<g id="node9" class="node">
+<title>emacs</title>
+<text text-anchor="middle" x="296.2397" y="-769.8" font-family="Times,serif" font-size="14.00" fill="#000000">emacs</text>
 </g>
 <!-- .svg -->
-<g id="node18" class="node">
+<g id="node20" class="node">
 <title>.svg</title>
 <polygon fill="none" stroke="#000000" points="197.2397,-360 143.2397,-360 143.2397,-324 197.2397,-324 197.2397,-360"/>
 <text text-anchor="middle" x="170.2397" y="-337.8" font-family="Times,serif" font-size="14.00" fill="#000000">.svg</text>
@@ -171,7 +172,7 @@
 <polygon fill="#000000" stroke="#000000" points="70.3616,-579.7593 60.4057,-576.1357 65.9289,-585.177 70.3616,-579.7593"/>
 </g>
 <!-- .html -->
-<g id="node17" class="node">
+<g id="node19" class="node">
 <title>.html</title>
 <polygon fill="none" stroke="#000000" points="340.2397,-252 286.2397,-252 286.2397,-216 340.2397,-216 340.2397,-252"/>
 <text text-anchor="middle" x="313.2397" y="-229.8" font-family="Times,serif" font-size="14.00" fill="#000000">.html</text>
@@ -188,14 +189,13 @@
 <path fill="none" stroke="#000000" d="M524.2397,-539.6793C524.2397,-522.821 524.2397,-497.5651 524.2397,-478.147"/>
 <polygon fill="#000000" stroke="#000000" points="527.7398,-478.0501 524.2397,-468.0502 520.7398,-478.0502 527.7398,-478.0501"/>
 </g>
-<!-- hugo build&#45;&gt;.html -->
-<g id="edge4" class="edge">
-<title>hugo build&#45;&gt;.html</title>
-<path fill="none" stroke="#000000" d="M429.8069,-323.9232C406.4874,-305.9339 370.5494,-278.2103 344.7429,-258.3024"/>
-<polygon fill="#000000" stroke="#000000" points="346.8047,-255.4726 336.749,-252.1357 342.5291,-261.0151 346.8047,-255.4726"/>
+<!-- hugo -->
+<g id="node13" class="node">
+<title>hugo</title>
+<text text-anchor="middle" x="422.2397" y="-769.8" font-family="Times,serif" font-size="14.00" fill="#000000">hugo</text>
 </g>
 <!-- [ok] -->
-<g id="node19" class="node">
+<g id="node21" class="node">
 <title>[ok]</title>
 <polygon fill="none" stroke="#000000" points="617.2397,-252 563.2397,-252 563.2397,-216 617.2397,-216 617.2397,-252"/>
 <text text-anchor="middle" x="590.2397" y="-229.8" font-family="Times,serif" font-size="14.00" fill="#000000">[ok]</text>
@@ -222,6 +222,18 @@
 <title>make pdf&#45;&gt;spec.pdf</title>
 <path fill="none" stroke="#000000" d="M34.2397,-215.6793C34.2397,-198.821 34.2397,-173.5651 34.2397,-154.147"/>
 <polygon fill="#000000" stroke="#000000" points="37.7398,-154.0501 34.2397,-144.0502 30.7398,-154.0502 37.7398,-154.0501"/>
+</g>
+<!-- &lt;emacs&gt;&#45;&gt;.md -->
+<g id="edge2" class="edge">
+<title>&lt;emacs&gt;&#45;&gt;.md</title>
+<path fill="none" stroke="#000000" d="M38.2397,-539.6793C38.2397,-522.821 38.2397,-497.5651 38.2397,-478.147"/>
+<polygon fill="#000000" stroke="#000000" points="41.7398,-478.0501 38.2397,-468.0502 34.7398,-478.0502 41.7398,-478.0501"/>
+</g>
+<!-- hugo build&#45;&gt;.html -->
+<g id="edge4" class="edge">
+<title>hugo build&#45;&gt;.html</title>
+<path fill="none" stroke="#000000" d="M429.8069,-323.9232C406.4874,-305.9339 370.5494,-278.2103 344.7429,-258.3024"/>
+<polygon fill="#000000" stroke="#000000" points="346.8047,-255.4726 336.749,-252.1357 342.5291,-261.0151 346.8047,-255.4726"/>
 </g>
 <!-- .html&#45;&gt;make website -->
 <g id="edge16" class="edge">
