@@ -1,0 +1,10 @@
+# single makefile for all dot->svg conversions.
+# for now, symlink it into your directory.
+
+DOTs=$(shell ls | grep '.dot')
+SVGs=$(DOTs:%.dot=%.svg)
+
+build: ${SVGs}
+
+%.svg: %.dot
+	dot -Tsvg $< >$@

@@ -1,2 +1,1 @@
-overview.svg: overview.dot
-	dot -Tsvg $< >$@
+../../tools/Makefile.diagrams

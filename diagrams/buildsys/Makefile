@@ -1,2 +1,1 @@
-buildsys.svg: buildsys.dot
-	dot -Tsvg $< >$@
+../../tools/Makefile.diagrams
