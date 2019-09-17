@@ -1,10 +1,10 @@
-Piece	*[Bytes]
 type DataTransferSubsystem struct (@mutable) {
 	dataTransfers 								{UInt: DataTransferChannel}
 	volumes										[Storage]
-	OpenDataTransferChannel(DataTransferParams)	UInt
+	OpenDataTransferChannel(StorageDealID)		UInt
 	CloseDataTransferChannel(UInt)
-	ReportTransferError(UInt)
+	TransferChannelStatus(UInt)					DataTransferStatus
+	ReportDataTransferEvent(Function)			(DataTransferStatus, error)
 
 	findData(CID)								Piece
 }
@@ -26,6 +26,7 @@ type DataTransferChannel struct {
 	totalSize		UVarint
 	sent			UVarint
 	received		UVarint
+	transferNum		Float (@cached)
 }
 
 type DataTransferParams struct {
@@ -41,4 +42,13 @@ type DataTransferType union {
 	Sender
 	Recipient
 }
+
+type DataTransferStatus union {
+	Ongoing
+	Completed
+	Failed
+	ChannelNotFoundError
+}
+
+type Piece	*[Bytes]
 
