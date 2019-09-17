@@ -1,0 +1,5 @@
+type PostProver struct {
+  GetChallenge(/*TODO*/)
+  GeneratePoSt(/*TODO*/)
+  SubmitPoSt()
+}

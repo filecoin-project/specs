@@ -1,20 +1,3 @@
-// TODO do we need one? seems implementation specific
-type ProofsManager struct {
-
-}
-
-type SealProver struct {
-  GetReplicaID(CommD Commitment, block Block)
-  GenerateSeal(replicaId ReplicaID, data Data) (Replica, SealCommitment, SealProof)
-  SubmitSeal(comms SealCommitment, proof SealProof)
-}
-
-type PostProver struct {
-  GetChallenge(/*TODO*/)
-  GeneratePoSt(/*TODO*/)
-  SubmitPoSt()
-}
-
 type StorageMinerActor struct {
   // Amount of power this miner has.
   power UInt
@@ -90,4 +73,23 @@ type StorageMinerActor struct {
 
   PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
   PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)
+}
+
+type MinerInfo struct {
+	// Account that owns this miner.
+  // - Income and returned collateral are paid to this address.
+  // - This address is also allowed to change the worker address for the miner.
+  owner Address
+
+	// Worker account for this miner.
+	// This will be the key that is used to sign blocks created by this miner, and
+	// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+	// other day to day miner activities.
+  worker Address
+
+  // Libp2p identity that should be used when connecting to this miner.
+  peerId PeerId
+
+  // Amount of space in each sector committed to the network by this miner.
+  sectorSize BytesAmount
 }
