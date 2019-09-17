@@ -1,0 +1,17 @@
+type Path String // Opaque identifier allowing read/write access to storage.
+
+struct StagedSector {
+       SectorConfig SectorConfig,
+       BytesUsed  UInt, // Size of data in sector after preprocessing and padding.
+       Path       Path,
+
+       CapacityRemaining() UInt, // How many more bytes of raw data can this sector hold, at most?
+}
+
+struct SectorStore {
+   WritePiece(piece Piece) piecePath string, // Temp storage for pieces not yet sealed.
+   PlacePiece(from Path, to StagedSector, position UInt)
+
+   AllocateSealedSector(SectorSize UInt) Path,
+   AllocateStagedSector(SectorSize UInt) Path,
+}

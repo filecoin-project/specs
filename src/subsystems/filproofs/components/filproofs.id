@@ -10,11 +10,15 @@ type Rephash     func(left DataElement, right DataElement) hash Commitment
 // PublicInputs
 // Configs.
 
+struct SectorConfig {
+       SectorSize     UInt,
+       SubsectorCount UInt,
+       Partitions     Uint,
+}
+
 type FilproofsSubsystem struct {
     Seal(
-	partitions     Uvarint,
-	sectorSize     Uvarint,
-	subsectorCount Uvarint
+        SectorConfig   SectorConfig,
 	unsealedPath   String,
 	sealedPath     String,
 	proverId       ProverId,
@@ -59,6 +63,10 @@ type FilproofsSubsystem struct {
 
    VerifyPieceInclusionProof(
    )
+
+   MaxUnsealedBytesPerSector(
+      SectorSize UInt
+   ) UInt
 }
 
 type ProofError struct {
