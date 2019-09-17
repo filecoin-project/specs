@@ -2,35 +2,33 @@ type PowerFraction 	Float
 type StoragePower	UVarint
 
 type StoragePowerConsensusSubsystem struct (@mutable) {
-
-	InitStoragePowerSubsystem(stateTree)				StoragePowerSubsystem
-	UpdateStoragePowerSubsystem(Tipset, StateTree)
-	powerTable											PowerTable
-	actor												StoragePowerActor
-	associatedStateTree 								*StateTree
-	NotifyStorageFault(Address)
-	ChooseTipsetToMine([Tipset])						[Tipset]
-	GenerateElectionProof(Tipset)						ElectionProof
+	powerTable						PowerTable
+	actor							StoragePowerActor
+	associatedStateTree 			*StateTree
+	TotalStorage()					UVarint
 }
 
 type StoragePowerActor struct {
+
+	UpdateStoragePowerSubsystem(Tipset, StateTree)
 	
 	VerifyElectionProof(Address, ElectionProof)	bool
 	RegisterStorage(SealProof)					
 
 	// What does graceful removal look like?
-	UpdatePower()?
 	NotifyConsensusFault(Address, [Block])
+	NotifyStorageFault(Address)
+	ChooseTipsetToMine([Tipset])				[Tipset]
+	GenerateElectionProof(Tipset)				ElectionProof
 }
 
 type PowerTable struct {
 	// all power here is always verified
 	minerPower							{Address:StorageMiner}
-	getTotalStorage()					UVarint
-	lookupMinerStorage(Address)			UVarint
-	lookupMinerPowerFraction(Address)	Float
-	removePower(Address)
-	updatePower(Address, newPower)
+	LookupMinerStorage(Address)			UVarint
+	LookupMinerPowerFraction(Address)	Float
+	RemovePower(Address)
+	UpdatePower(Address, newPower)
 }
 
 type StorageMiner struct {

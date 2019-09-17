@@ -1,0 +1,26 @@
+type PaymentsSubsystem struct (@mutable) {
+	actor		PaymentsChannelActor
+	wallet		Wallet
+	channels 	{UInt:PaymentChannel}
+	MakePayment(UInt, UInt)
+	ReceivePayment(UInt, UInt)
+}
+
+type PaymentChannelActor struct {
+	OpenChannel(Address, Address, UVarint)	UInt
+	CloseChannel(UInt)
+}
+
+type PaymentChannel struct {
+	channelID		UInt
+	controlParty	Address
+	counterParty	Address
+	aliceToBob		UVarint	
+	bobToAlice		UVarint
+}
+
+type Wallet	struct {
+	balance				UInt
+	Balance()			UInt
+	UpdateBalance(UInt)
+}
