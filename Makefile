@@ -67,8 +67,8 @@ publish: website
 
 # intermediate targets
 website: go-test org2md hugo-build
+	mkdir -p build
 	-rm -rf build/website
-	mkdir -p build/website
 	mv hugo/public build/website
 	@echo TODO: add generate-code to this target
 
@@ -115,5 +115,10 @@ bin/codeGen: hugo/content/codeGen/*.go
 
 serve: hugo-build .PHONY
 	hugo serve
+
+serve-website: website .PHONY
+	# use this if `make serve` breaks
+	cd build/website && python -m SimpleHTTPServer 1313
+
 
 .PHONY:
