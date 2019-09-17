@@ -1,5 +1,6 @@
 digraph Filecoin {
   compound=true;
+  ranksep=0.1;
 
 
   subgraph cluster_blockchain_subgroup {
@@ -13,23 +14,14 @@ digraph Filecoin {
 
       { // components
         node [shape=box]
-        "Chain Manager"
+        "Chain"
         "Block Receiver"
         "Block Propagator"
         "Block Producer"
       }
 
-      { // actors
-        node [shape=doubleoctagon]
-        "Chain Manager"
-        "Block Receiver"
-        "Block Propagator"
-        "Block Producer"
-      }
-
-      "Chain Manager" -> "Block Receiver"
-      "Chain Manager" -> "Block Propagator"
-      "Chain Manager" -> "Block Producer"
+      "Chain" -> "Block Producer" [style=invis]
+      "Block Receiver" -> "Block Propagator" [style=invis]
     }
 
     subgraph cluster_vm {
@@ -48,6 +40,9 @@ digraph Filecoin {
         "Init Actor"
         "Account Actor"
       }
+
+      "Init Actor" -> "Account Actor" [style=invis]
+      "VM Interpreter" -> "Messages" [style=invis]
     }
 
     subgraph cluster_messagepool {
@@ -57,15 +52,12 @@ digraph Filecoin {
 
       { // components
         node [shape=box]
-        "Message Pool"
         "Message Storage"
         "Message Propagator"
         "Message Receiver"
       }
 
-      "Message Pool" -> "Message Storage"
-      "Message Pool" -> "Message Propagator"
-      "Message Pool" -> "Message Receiver"
+      "Message Storage" -> "Message Receiver" -> "Message Propagator" [style=invis]
     }
 
 
@@ -83,6 +75,8 @@ digraph Filecoin {
         node [shape=doubleoctagon]
         "Storage Power Actor"
       }
+
+      "Storage Power Actor" -> "Expected Consensus" [style=invis]
     }
   }
 
@@ -142,6 +136,28 @@ digraph Filecoin {
       }
 
     }
+
+    subgraph cluster_datatransfers {
+      style=filled
+      color=lightgrey
+      label = "Data Transfers"
+
+      { // components
+        node [shape=box]
+        "Data Transfers"
+        "Scheduler"
+      }
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "AuthSwap" [label="data\ntransfer\nprotocol\n(unnamed)"]
+      }
+
+      "Disk2" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
+
+      "Data Transfers" -> "Disk2"
+
+    }
   }
 
   subgraph cluster_storageminerprocess {
@@ -164,6 +180,9 @@ digraph Filecoin {
         node [shape=doubleoctagon]
         "Storage Miner Actor"
       }
+
+      "Storage Miner Actor" -> "PoSt Generator" [style=invis]
+      "Seal Prover" -> "Pledge Prover" [style=invis]
     }
 
     subgraph cluster_sectorstorage {
@@ -184,6 +203,24 @@ digraph Filecoin {
       "Sector Manager" -> "Sector Builder"
       "Sector Manager" -> "Sector Sealer"
       "Sector Store" -> "Disks"
+    }
+
+    subgraph cluster_filproofs {
+      style=filled
+      color=lightgrey
+      label = "Filecoin Proofs"
+
+      { // components
+        node [shape=box]
+        "ZigZag-Porep"
+        "Rational PoSt"
+        "Piece Inclusion Proofs" [label="Piece\nInclusion\nProofs"]
+        "VRFs"
+        "VDFs"
+      }
+
+      "ZigZag-Porep" -> "Rational PoSt" [style=invis]
+      VRFs -> VDFs [style=invis]
     }
   }
 
@@ -231,27 +268,7 @@ digraph Filecoin {
     "KeyStore" -> "Local Storage"
   }
 
-  subgraph cluster_datatransfers {
-    style=filled
-    color=lightgrey
-    label = "Data Transfers"
 
-    { // components
-      node [shape=box]
-      "Data Transfers"
-      "Scheduler"
-    }
-
-    { // libp2p protocols
-      node [shape=Msquare]
-      "AuthSwap" [label="data\ntransfer\nprotocol\n(unnamed)"]
-    }
-
-    "Disk2" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
-
-    "Data Transfers" -> "Disk2"
-
-  }
 
   subgraph cluster_net {
     color=lightcyan1
@@ -318,26 +335,27 @@ digraph Filecoin {
   {
     edge [minlen=3]
     "PoSt Generator" -> "Sector Manager" [ltail=cluster_storagemining,lhead=cluster_sectorstorage]
-    "Chain Manager" -> "VM Interpreter" [ltail=cluster_blockchain, lhead=cluster_vm]
-    "Message Pool" -> "Messages" [ltail=cluster_messagepool]
-    // "Chain Manager" -> "Expected Consensus" [ltail=cluster_blockchain, lhead=cluster_storagepowerconsensus]
+    "Chain" -> "VM Interpreter" [ltail=cluster_blockchain, lhead=cluster_vm]
+    // "Message Pool" -> "Messages" [ltail=cluster_messagepool]
+    // "Chain" -> "Expected Consensus" [ltail=cluster_blockchain, lhead=cluster_storagepowerconsensus]
     "Pledge Prover" -> "Storage Power Actor" [ltail=cluster_storagemining, lhead=cluster_storagepowerconsensus]
     "Block Pubsub" -> "Gossipsub"
     "Message Pubsub" -> "Gossipsub"
-    "Storage Provider" -> "Chain Manager" [ltail=cluster_blockchain, lhead=cluster_storagemarket]
-    "Retrieval Provider" -> "Chain Manager" [ltail=cluster_blockchain, lhead=cluster_retrievalmarket]
-    "PoSt Generator" -> "Chain Manager" [ltail=cluster_storagemining, lhead=cluster_retrievalmarket]
-    "Chain Manager" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
+    "Storage Provider" -> "Chain" [ltail=cluster_blockchain, lhead=cluster_blockchain]
+    "Retrieval Provider" -> "Chain" [ltail=cluster_blockchain, lhead=cluster_blockchain]
+    "PoSt Generator" -> "Chain" [ltail=cluster_storagemining, lhead=cluster_blockchain]
+    "Chain" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
     "AuthSwap" -> "Graphsync" [ltail=cluster_datatransfers]
     "Storage Provider" -> "Data Transfers" [ltail=cluster_storagemarket, lhead=cluster_datatransfers]
     "Retrieval Provider" -> "Data Transfers" [ltail=cluster_retrievalmarket, lhead=cluster_datatransfers]
     "Block Receiver" -> "Block Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
     "Message Receiver" -> "Message Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
-    "Message Storage" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
+    // "Message Storage" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
     "Switch" -> "KeyStore"
     "NTP" -> "Switch" [ltail=cluster_clock, lhead=cluster_libp2p]
     "Bootstrap List" -> "p2p.Node"
-    "Block Producer" -> "Message Pool" [lhead=cluster_messagepool]
+    "Block Producer" -> "Message Storage" [lhead=cluster_messagepool]
+    "Pledge Prover" -> "ZigZag-Porep" [ltail=cluster_storagemining, lhead=cluster_filproofs]
     "Wallet" -> "KeyStore"
     // "Block Producer" -> "PoSt Generator" [style=dashed]
   }
