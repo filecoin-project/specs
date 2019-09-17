@@ -22,9 +22,13 @@ type FilproofsSubsystem struct {
 	sectorId       SectorId) ProofError | SealResponse
 
     VerifySeal(
-	commD Commitment,
-	commR Commitment,
-	proof SNARKProof) ProofError | bool
+	CommD    Commitment,
+	CommR    Commitment,
+	Proof    SNARKProof,
+	ProverId ProverId,
+	Ticket   Ticket,
+	SectorId SectorId,
+	) ProofError | bool
 
     Unseal(
          // TODO
@@ -66,8 +70,17 @@ type SealResponse struct {
      proof     SealProof,
 }
 
+type SealPublicInputs {
+
+}
+
+type SealProofConfig {
+    partitionCount UInt,
+    subsectorsCount UInt,
+}
+
 type SNARKProof<curve, system> {
-     partitionCount Uvarint,
+     config SealProofConfig,
      proofBytes []bytes
 }
 
