@@ -16,9 +16,24 @@ For every subsystem in the Filecoin spec, it must always have a markdown file th
   git submodule update
   ```
 
-## Compile and Serve
+## Compile
 
 ```
-hugo server --disableFastRender
+make
 ```
+
 *Note that you must run this from the top-level specs directory*
+
+## Serve
+
+```
+make serve
+```
+
+will write out an HTTP address to check out with your browser
+
+## Website
+
+```
+make website
+```
