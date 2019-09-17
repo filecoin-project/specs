@@ -1,77 +1,27 @@
 package blockchain
 
+
+
+// VMSubsystem controls VM execution.
+// It uses no local storage
 type VMSubsystem struct {
-	State() StateTree
-	Exec(Message) StateTree
+
+    // Execute computes and returns outTree, a new StateTree which is the
+    // application of msgs to inTree.
+    //
+    // *Important:* Execute is intended to be a pure function, with no side-effects.
+    // however, storage of the new parts of the computed outTree may exist in
+    // local storage.
+    //
+    // *TODO:* define whether this should take 0, 1, or 2 IpldStores:
+    // - (): storage of IPLD datastructures is assumed implicit
+    // - (store): get and put to same IpldStore
+    // - (inStore, outStore): get from inStore, put new structures into outStore
+    //
+    // This decision impacts callers, and potentially impacts how we reason about
+    // local storage, and intermediate storage. It is definitely the case that
+    // implementations may want to operate on this differently, depending on
+    // how their IpldStores work.
+    Execute(inTree StateTree, msgs [Message]) (outTree StateTree, err error)
+
 }
-
-type StateTree struct {
-	ActorStates {Address:Actor}
-	API ConvenienceAPI
-
-	GetActorState(Address) ActorState
-}
-
-type ActorID UVarint
-type ActorMeta struct {
-	// common fields for all actors
-	SeqNo UVarint
-	Balance BigInt
-}
-
-type ActorState union {
-	| InitActorState
-	| AccountActorState
-	| StoragePowerActorState
-	| StorageMinerActorState
-	| CronActorState
-	| PaymentChannelActorState
-}
-
-// type ActorMethod union {
-// 	| InitActorMethod
-// 	| AccountActorMethod
-// 	| StoragePowerActorMethod
-// 	| StorageMinerActorMethod
-// 	| CronActorMethod
-// 	| PaymentChannelActorMethod
-// }
-
-type InitActorState struct {
-	// responsible for create new actors
-	Meta ActorMeta
-	AddressMap {Address:ActorID}
-	NextID ActorID
-
-	GetActorIDForAddress(Address) ActorID
-}
-
-type AccountActorState struct {
-	// normal keypair backed accounts
-	Meta ActorMeta
-	Address Address
-
-	GetAddress() Address
-}
-
-// type StoragePowerActorState struct {
-// 	// maintain storage power over time
-// 	Meta ActorMeta
-// 	PowerTableMap {Address:BytesAmount}
-
-// 	GetPowerForMiner(Address) BytesAmount
-// 	PutPowerForMiner(Address, BytesAmount) bool
-// }
-
-// type StorageMinerActorState struct {
-// 	Meta ActorMeta
-// 	RegisterMiner(PublicKey, BytesAmount) Address
-// }
-
-// type CronActorState struct {
-// 	Meta ActorMeta
-// }
-
-// type PaymentChannelActorState struct {
-// 	Meta ActorMeta
-// }
