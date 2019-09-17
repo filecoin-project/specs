@@ -1,6 +1,6 @@
 type Path String // Opaque identifier allowing read/write access to storage.
 
-struct StagedSector {
+type StagedSector struct {
        SectorConfig SectorConfig,
        BytesUsed  UInt, // Size of data in sector after preprocessing and padding.
        Path       Path,
@@ -8,10 +8,18 @@ struct StagedSector {
        CapacityRemaining() UInt, // How many more bytes of raw data can this sector hold, at most?
 }
 
-struct SectorStore {
+type SectorStore struct {
+   SectorMetadata     { (CommR Commitment) : SectorMetadata }
+   
    WritePiece(piece Piece) piecePath string, // Temp storage for pieces not yet sealed.
    PlacePiece(from Path, to StagedSector, position UInt)
 
    AllocateSealedSector(SectorSize UInt) Path,
    AllocateStagedSector(SectorSize UInt) Path,
+
+
+   RegisterMetadata(sectorMetadata),
+   GetMetadata(Commitment) SectorMetadata,
+   UpdateMetadata(sectorMetadata),    // This may not actually be needed.
+   RemoveMetadata(CommR),
 }

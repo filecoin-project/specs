@@ -16,8 +16,8 @@ struct SectorStorageSubsystem {
 
        AddPiece(
          piece Piece,
-	 sectorConfig SectorConfig,
-       ) Error | bool {
+		 sectorConfig SectorConfig,
+       ) error | bool {
            sectorbuilder := SectorBuilders[sectorConfig];
        	   piecePath := SectorStore.WritePiece(piece);
 	   response := sectorBuilder.addPiece(PiecePath);
@@ -29,9 +29,21 @@ struct SectorStorageSubsystem {
        
        Seal(stagedSector StagedSector) {
        	    sealedPath := SectorStore.AllocateSealedSector(stagedSector.SectorSize);
-	    return SectorSealer.seal(stagedSector, sealedPath, ProverId);
-       }
-
+			response := SectorSealer.seal(stagedSector, sealedPath, ProverId);
+			SectorStore.RegisterMetadata(
+			  SectorMetadata {
+			    response.CommR,
+				response.PersistentAux,
+				response.PartialMerkleTreePath,
+			  });
+			  
        RetrievePiece(CommD Commitment, Start UInt, Length UInt) Piece {
-       }             
+       }
+}
+
+// Indexed by CommR
+type SectorMetadata struct {
+	CommR                   Commitment,
+	PersistentAux           SectorPersistentAux,
+	MerkleTreePath          Path,
 }
