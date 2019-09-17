@@ -48,4 +48,8 @@ type RetrievalMarketSubsystem struct {
 	// to propose a retrieval deal
 	ProposeRetrievalDeal(RetrievalDeal) RetrievalDealResponse
 
+	// AcceptRetrievalDeal is called by both users and miners
+	// to accept a retrieval deal
+	AcceptRetrievalDeal(RetrievalDeal) RetrievalDealResponse
+
 }
