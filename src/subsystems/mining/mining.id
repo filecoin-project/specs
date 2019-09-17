@@ -1,5 +1,7 @@
 type MiningSubsystem struct {
-    CreateMiner(owner Address, worker Address) // Pledge(pledgeAmount TokenAmount)
+    faults FaultSet
+
+    CreateMiner(owner Address, worker Address) &StorageMinerActor
     AddSector(pledge TokenAmount, sectorID SectorID, comm SealCommitment, proof SealProof) SectorID
     ProveStorage(proofs PoStProof, doneSet Bitfield)
     CheckForFaults()
