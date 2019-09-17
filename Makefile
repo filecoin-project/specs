@@ -113,5 +113,7 @@ bin/codeGen: hugo/content/codeGen/*.go
 
 # other
 
-serve: hugo-build
+serve: hugo-build .PHONY
 	hugo serve
+
+.PHONY:
