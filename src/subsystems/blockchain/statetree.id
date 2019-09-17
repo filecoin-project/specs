@@ -1,0 +1,43 @@
+
+type StateTree struct {
+    ActorStates {Address:ActorState}
+
+    API ConvenienceAPI
+}
+
+
+// Things we may add:
+//
+// number of sectors
+// number of miners
+// number of deals?
+// number of actors
+//
+// number of addresses
+// token stats
+// storage power stats
+//
+// $head/state/sectors/count
+// $head/state/sectors/<num> (cid)
+// $head/state/sectors/<num>/size
+// $head/state/sectors/<num>/pieces/count
+// $head/state/sectors/<num>/pieces/<num> (cid)
+// $head/state/pieces/count
+// $head/state/pieces/<num> (cid)
+
+
+
+type ActorID UVarint
+
+type ActorState struct {
+	Head       ActorSubState
+	SeqNo      UVarint
+	Balance    BigInt
+}
+
+type ActorSubState union {
+	Init struct {
+		AddressMap    {Address:ActorID}
+		NextID        ActorID
+	}
+}

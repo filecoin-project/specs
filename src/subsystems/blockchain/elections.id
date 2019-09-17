@@ -1,0 +1,67 @@
+package blockchain
+
+
+type VRFKeyPair struct {
+	PublicKey    VRFPublicKey
+	SecretKey    VRFSecretKey
+
+	Generate(input Bytes)    VRFResult    @(static)
+}
+
+type VRFResult struct {
+	Output    Bytes    @(internal)
+
+	VerifyOutput(pk VRFPublicKey, input Bytes)    Bytes?
+}
+
+type Ticket struct {
+	ElectionVRFResult    VRFResult
+	ElectionVDFResult    VDFResult
+
+	Generate(k VRFKeyPair, seed ElectionSeed)    Ticket    @(static)
+	IsWinning(power Fraction)                    bool
+}
+
+func SmallerBytes(a, b Bytes) Bytes {
+    if CompareBytesStrict(a, b) > 0 {
+        return b
+    }
+    return a
+}
+
+func ExtractElectionSeed(lookbackTipset *TipsetI) ElectionSeed {
+	var ret []byte
+
+	for _, currBlock := range lookbackTipset.Blocks() {
+		for _, currTicket := range currBlock.Tickets() {
+			currSeed := Hash(
+				HashRole_ElectionSeedFromVRFOutput,
+				currTicket.VRFResult().bytes(),
+			)
+			if ret == nil {
+				ret = currSeed
+			} else {
+                ret = SmallerBytes(currSeed, ret)
+            }
+		}
+	}
+
+	Assert(ret != nil)
+	return ElectionSeed.FromBytesInternal(nil, ret)
+}
+
+
+func GenerateElectionTicket(k VRFKeyPair, seed ElectionSeed) Ticket {
+	var vrfResult VRFResult = VRFEval(k, seed.ToBytesInternal())
+
+	var vdfInput []byte = Hash(
+		HashRole_TicketVDFInputFromVRFOutput,
+		vrfResult.ToBytesInternal(),
+	)
+	var vdfResult VDFResult = VDFEval(vdfInput)
+
+	return &TicketI{
+		vrfResult,
+		vdfResult,
+	}
+}

@@ -1,0 +1,45 @@
+
+type Epoch Uvarint
+
+type BlockchainSubsystem struct @(mutable) {
+    LatestEpoch() Epoch
+    BestChain() Chain
+    CandidateChains() []Chain
+
+    NewTipsets() TipsetChan
+    NewBestTipset() TipsetChan
+    ProcessBlock(Block)
+
+    SyncState() union {
+        Booting
+        CatchingUp
+        Synchronized
+    }
+}
+
+type Chain struct {
+    HeadEpoch() Epoch
+    FinalizedEpoch() Epoch
+    LatestCheckpoint() Epoch
+
+    TipsetAtEpoch(epoch Epoch) Tipset
+}
+
+type ChainWeight UVarint
+
+type Address struct {
+	NetworkID 
+    + {
+		Testnet
+		Mainnet
+	}
+	Protocol union {
+		ID
+		Secp256k1
+		Actor
+		BLS
+	}
+}
+
+
+

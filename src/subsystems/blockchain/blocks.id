@@ -1,0 +1,16 @@
+
+type BlockStore struct {
+    GetBlock(CID) Block
+    PutBlock(Block) error
+}
+
+
+type Tipset struct {
+	Blocks            [Block]
+
+    Has(Block)        bool
+    Parents()         Tipset         @(cached)
+	StateTree()       StateTree      @(cached)
+    Epoch()           Epoch          @(cached)
+    Weight()          ChainWeight    @(cached)
+}
