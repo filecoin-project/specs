@@ -1,0 +1,7 @@
+type storageMinerActor struct {
+	Address()			Address
+}
+
+func (storageMinerActor *storageMinerActor) VerifyMinerAddress() bool {
+	// TODO: well structured address based on address type
+}
