@@ -1,11 +1,9 @@
 type MiningSubsystem struct {
-    faults FaultSet
+    proof_scheduler ProofScheduler
+    post_prover PostProver
+    seal_prover SealProver
 
     CreateMiner(owner Address, worker Address) &StorageMinerActor
-    AddSector(pledge TokenAmount, sectorID SectorID, comm SealCommitment, proof SealProof) SectorID
-    ProveStorage(proofs PoStProof, doneSet Bitfield)
-    CheckForFaults()
-    ReportFaults(/**/)
-    UpdateSectors()
-    Depledge(amount TokenAmount)
+    StartMining()
+    StopMining()
 }

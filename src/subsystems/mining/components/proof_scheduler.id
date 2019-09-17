@@ -1,0 +1,11 @@
+type MiningScheduler {
+  checkReadySectors() SectorSet
+  checkFaultySectors() FaultSet
+
+  AddSector(pledge TokenAmount, sectorID &SectorID, comm &SealCommitment, proof SealProof) SectorID
+  ProveStorage(&[&Sector], &SectorSet) (PoStProof,Bitfield)
+  ReportFaults(actor &StorageMinerActor)
+
+  RemoveSectors(sectorsToRemove SectorSet)
+  DePledge(amount TokenAmount)
+}
