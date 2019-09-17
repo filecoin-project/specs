@@ -25,7 +25,6 @@ type CronActor	struct {
 
 type CallbackQuery struct {
 	requestType	CallbackType
-	start		CallbackParameter
 	frequency	CallbackParameter
 	endpoint	Function
 }

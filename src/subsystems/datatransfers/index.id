@@ -1,0 +1,44 @@
+Piece	*[Bytes]
+type DataTransferSubsystem struct (@mutable) {
+	dataTransfers 								{UInt: DataTransferChannel}
+	volumes										[Storage]
+	OpenDataTransferChannel(DataTransferParams)	UInt
+	CloseDataTransferChannel(UInt)
+	ReportTransferError(UInt)
+
+	findData(CID)								Piece
+}
+
+// Assumes access to error-checked, ordered, reliable transmission protocol
+type Scheduler struct {
+	ScheduleTransfer(UInt, Piece)
+	requestData(DataTransferChannel) 			(error, [Bytes])
+	sendData(DataTransferChannel, [Bytes])		error
+}
+
+type DataTransferChannel struct {
+	channelID		UInt
+	channelType		DataTransferType (@cached)
+	contentID		CID
+	dataIncrement	UVarint
+	sender			Address
+	recipient		Address
+	totalSize		UVarint
+	sent			UVarint
+	received		UVarint
+}
+
+type DataTransferParams struct {
+	channelType		DataTransferType	
+	contentID		CID
+	dataIncrement	UVarint
+	sender			Address
+	recipient		Address
+	totalSize		Address
+}
+
+type DataTransferType union {
+	Sender
+	Recipient
+}
+

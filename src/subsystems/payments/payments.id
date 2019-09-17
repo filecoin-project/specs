@@ -7,16 +7,17 @@ type PaymentsSubsystem struct (@mutable) {
 }
 
 type PaymentChannelActor struct {
-	OpenChannel(Address, Address, UVarint)	UInt
+	OpenChannel(Address, Address, UVarint, Float)	UInt
 	CloseChannel(UInt)
 }
 
 type PaymentChannel struct {
-	channelID		UInt
-	controlParty	Address
-	counterParty	Address
-	aliceToBob		UVarint	
-	bobToAlice		UVarint
+	channelID			UInt
+	controlParty		Address
+	counterParty		Address
+	controlToCounter	UVarint	
+	counterToControl	UVarint
+	paymentIncrement	Float
 }
 
 type Wallet	struct {
