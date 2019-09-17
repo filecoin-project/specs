@@ -1,6 +1,7 @@
 package codeGen
 
 import (
+	"runtime/debug"
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
@@ -248,7 +249,7 @@ func GenGoTypeDecls(decls []TypeDecl) []GoNode {
 	}
 
 	for _, decl := range decls {
-		GenGoTypeDeclAcc(decl.name, decl.type_, ctx)
+		GenGoTypeDeclAcc(decl.name, decl.type_, ctx.Extend(decl.name))
 	}
 
 	return *ctx.retDecls
@@ -346,7 +347,7 @@ func GenGoMethodCall(obj GoNode, methodName string, args []GoNode) GoNode {
 }
 
 func GoTypeToIdent(typeName string) GoIdent {
-	return GoIdent { name: strings.ToLower(typeName) }
+	return GoIdent { name: strings.ToLower(typeName)[0:1] }
 }
 
 func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
@@ -435,12 +436,17 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 			caseTypeName := name + "_Case"
 			caseTypeID = GoIdent { caseTypeName }
 
+			*ctx.retDecls = append(*ctx.retDecls, GoTypeDecl {
+				name: caseTypeName,
+				type_: GoIdent { name: "Word" },
+			})
+
 			for _, field := range xr.fields {
 				caseNames = append(caseNames, field.fieldName)
 				caseWhich := GoIdent { caseTypeName + "_" + field.fieldName }
 
 				caseInterfaceName := name + "_" + field.fieldName
-				GenGoTypeDeclAcc(caseInterfaceName, field.fieldType, ctx)
+				GenGoTypeDeclAcc(caseInterfaceName, field.fieldType, ctx.Extend(field.fieldName))
 
 				caseInterfaceType := GoIdent { caseInterfaceName }
 				caseImplType := GoIdent { IdToImpl(caseInterfaceName) }
@@ -1088,7 +1094,7 @@ func GenAST(x GoNode) ast.Node {
 }
 
 const Whitespace = " \t\n"
-const Symbols = "(){}[],;|&?:"
+const Symbols = "(){}[],;|&?://*"
 
 const DebugParser = false
 
@@ -1097,33 +1103,63 @@ type LineInfo struct {
 	col   Word
 }
 
+type ParseStreamState struct {
+	pos Word
+
+}
+
 type ParseStream struct {
-	rs       io.ReadSeeker
-	pos      Word
-	lineMap  []LineInfo
-	buffer   *bytes.Buffer
+	rs          io.ReadSeeker
+	state       ParseStreamState
+	stateStack  []ParseStreamState
+	lineMap     []LineInfo
+	buffer      *bytes.Buffer
+}
+
+func (r *ParseStream) Push() {
+	if DebugParser {
+		fmt.Printf("Push():  %v\n", r.PosDebug())
+	}
+
+	r.stateStack = append(r.stateStack, r.state)
+}
+
+func (r *ParseStream) Pop(restore bool) {
+	if DebugParser {
+		fmt.Printf("Pop(%v):  %v\n", restore, r.PosDebug())
+	}
+
+	n := len(r.stateStack)
+	Assert(n > 0)
+	if restore {
+		r.Seek(r.stateStack[n-1].pos - r.state.pos)
+		r.state = r.stateStack[n-1]
+	}
+	r.stateStack = r.stateStack[0:n-1]
 }
 
 func (r *ParseStream) Seek(offset Word) {
-	if DebugParser {
-		fmt.Printf("Seek: %v\n", offset)
-	}
+	// if DebugParser {
+	// 	fmt.Printf("Seek: %v\n", offset)
+	// }
 	_, err := r.rs.Seek(int64(offset), io.SeekCurrent)
 	CheckErr(err)
-	r.pos += offset
+	r.state.pos += offset
 }
 
 func (r *ParseStream) PosDebug() string {
-	var i Word = r.pos - 1
+	var i Word = r.state.pos - 1
+	var lineInfo LineInfo
 	if i < 0 {
-		i = 0
+		lineInfo = LineInfo { line: 0, col: 0 }
+	} else {
+		lineInfo = r.lineMap[i]
 	}
-	lineInfo := r.lineMap[i]
-	return fmt.Sprintf("line %v, column %v", lineInfo.line + 1, lineInfo.col)
+	return fmt.Sprintf("line %v, column %v", lineInfo.line + 1, lineInfo.col + 1)
 }
 
 func (r *ParseStream) GenParseError(errMsg string) ParseError_S {
-	var i Word = r.pos - 1
+	var i Word = r.state.pos - 1
 	if i < 0 {
 		i = 0
 	}
@@ -1148,15 +1184,22 @@ func (r *ParseStream) GenParseError(errMsg string) ParseError_S {
 	}
 	errMsgNew += "\n"
 	errMsgNew += errMsg
+	errMsgNew += "\n\n"
+	errMsgNew += string(debug.Stack())
 	return ParseError(errMsgNew)
 }
 
-func ReadCheck(r *ParseStream, lenMax Word) string {
+func (r *ParseStream) Get(lenMax Word, advance bool) string {
 	buf := make([]byte, lenMax)
+
 	n, err := r.rs.Read(buf)
+	if !advance {
+		defer r.Seek(-n)
+	}
+
 	ret := string(buf[:n])
 	for i, c := range buf[:n] {
-		p := r.pos + i
+		p := r.state.pos + i
 		if p >= len(r.lineMap) {
 			Assert(p == len(r.lineMap))
 			prevLineInfo := LineInfo { line: 0, col: 0 }
@@ -1177,14 +1220,14 @@ func ReadCheck(r *ParseStream, lenMax Word) string {
 			r.buffer.WriteByte(c)
 		}
 	}
-	r.pos += n
+	r.state.pos += n
 	if err == io.EOF {
 		Assert(n == 0)
 		return ret
 	}
 	if err != nil {
 		if DebugParser {
-			fmt.Printf("err: %v\n", err)
+			fmt.Printf("err == nil: %v\n", err == nil)
 		}
 		panic("Read error")
 	}
@@ -1195,31 +1238,108 @@ func ReadCheck(r *ParseStream, lenMax Word) string {
 }
 
 
-func ReadToken(r *ParseStream) (string, bool, error) {
-	retToken := []byte{}
-	hitNewline := StepToken(r)
+func (r *ParseStream) Read(lenMax Word) string {
+	return r.Get(lenMax, true)
+}
+
+func (r *ParseStream) Peek(lenMax Word) string {
+	return r.Get(lenMax, false)
+}
+
+
+func (r *ParseStream) ParseComments() (hitComment bool, err error, hitNewline bool) {
+	hitComment = false
+
+	if DebugParser {
+		fmt.Printf(" ** ParseComments body: %v \n", r.PosDebug())
+	}
+
+	depth := 0
+	singleLineComment := false
 	for {
-		res := ReadCheck(r, 1)
-		if len(res) == 0 {
-			if len(retToken) > 0 {
-				return string(retToken), hitNewline, nil
-			} else {
-				return "", hitNewline, io.EOF
+		if _, ok := r.PeekExact(1); !ok {
+			return
+		}
+
+		if res, ok := r.PeekExact(1); strings.Contains(Whitespace, res) && ok {
+			if res == "\n" {
+				singleLineComment = false
+				if depth == 0 {
+					hitNewline = true
+				}
+			}
+			r.Seek(1)
+			continue
+		}
+
+		if depth == 0 {
+			if res, ok := r.PeekExact(2); res == "//" && ok {
+				r.Seek(2)
+				singleLineComment = true
 			}
 		}
-		Assert(len(res) == 1)
-		if strings.Contains(Whitespace, res) {
-			r.Seek(-len(res))
-			return string(retToken), hitNewline, nil
-		} else if strings.Contains(Symbols, res) {
-			if len(retToken) == 0 {
-				retToken = append(retToken, res[0])
-			} else {
-				r.Seek(-len(res))
-			}
-			return string(retToken), hitNewline, nil
+
+		if res, ok := r.PeekExact(2); res == "/*" && ok {
+			r.Seek(2)
+			depth += 1
+		} else if res, ok := r.PeekExact(2); res == "*/" && ok {
+			r.Seek(2)
+			depth -= 1
 		} else {
-			retToken = append(retToken, res...)
+			if depth > 0 || singleLineComment {
+				r.Seek(1)
+			} else {
+				return
+			}
+		}
+	}
+}
+
+
+func ReadToken(r *ParseStream) (ret string, hitNewline bool, err error) {
+	if DebugParser {
+		defer func() {
+			fmt.Printf("ReadToken: \"%v\", %v, %v\n", ret, hitNewline, err == nil)
+		}()
+	}
+
+	retToken := []byte{}
+	_, err, hitNewline = r.ParseComments()
+	if err != nil {
+		ret = ""
+		return
+	}
+
+	for {
+		c, ok := r.PeekExact(1)
+		if !ok {
+			if len(retToken) > 0 {
+				ret = string(retToken)
+				return
+			} else {
+				ret = ""
+				err = io.EOF
+				return
+			}
+		}
+
+		Assert(len(c) == 1)
+
+		if strings.Contains(Whitespace, c) {
+			ret = string(retToken)
+			return
+
+		} else if strings.Contains(Symbols, c) {
+			if len(retToken) == 0 {
+				retToken = append(retToken, c[0])
+				r.Seek(1)
+			}
+			ret = string(retToken)
+			return
+
+		} else {
+			retToken = append(retToken, c...)
+			r.Seek(1)
 			continue
 		}
 	}
@@ -1310,18 +1430,35 @@ func ReadTokenCheck(r *ParseStream, validTokens []string) (string, error) {
 	return "", r.GenParseError(errMsg)
 }
 
-func TryReadTokenCheck(r *ParseStream, validTokens []string) (string, bool) {
-	initPos := r.pos
-	ret, err := ReadTokenCheck(r, validTokens)
-	if err != nil {
-		r.Seek(initPos - r.pos)
+func (r *ParseStream) ReadTokenSequenceCheck(tokenSeq []string) (string, error) {
+	ret := ""
+	for _, token := range tokenSeq {
+		currRet, err := ReadTokenCheck(r, []string{token})
+		ret += currRet
+		if err != nil {
+			return ret, err
+		}
 	}
-	return ret, (err == nil)
+	return ret, nil
+}
+
+func TryReadTokenCheck(r *ParseStream, validTokens []string) (ret string, err error) {
+	r.Push()
+	defer func() { r.Pop(err != nil) }()
+
+	ret, err = ReadTokenCheck(r, validTokens)
+	return
+}
+
+func (r *ParseStream) PeekExact(len_ Word) (string, bool) {
+	ret := r.Peek(len_)
+	return ret, (len(ret) == len_)
 }
 
 func PeekToken(r *ParseStream, matchNewline bool) (string, bool) {
-	initPos := r.pos
-	defer func() { r.Seek(initPos - r.pos) }()
+	r.Push()
+	defer func() { r.Pop(true) }()
+
 	ret, hitNewline, err := ReadToken(r)
 	if hitNewline && matchNewline {
 		return "\n", true
@@ -1334,37 +1471,21 @@ func PeekToken(r *ParseStream, matchNewline bool) (string, bool) {
 	}
 }
 
-func StepToken(r *ParseStream) (hitNewline bool) {
-	hitNewline = false
-	for {
-		res := ReadCheck(r, 1)
-		if len(res) == 1 && strings.Contains(Whitespace, res) {
-			if res == "\n" {
-				hitNewline = true
-			}
-			continue
-		} else {
-			r.Seek(-len(res))
-			return
-		}
-	}
-}
-
 func ParseAttributeList(r *ParseStream) ([]string, error) {
 	if tok, ok := PeekToken(r, false); ok && (tok == "@") {
 		_, _ = ReadTokenCheck(r, []string{"@"})
-		fTryParse := func (rr *ParseStream) (interface{}, bool) {
+		fTryParse := func (rr *ParseStream) (interface{}, error) {
 			ret, _, err := ReadToken(rr)
 			if err != nil {
-				return nil, false
+				return nil, err
 			}
-			return ret, true
+			return ret, nil
 		}
 		ret := []string{}
 		fAppend := func (x interface{}) {
 			ret = append(ret, x.(string))
 		}
-		err := ParseDelimitedList(r, "(", ",", ")", fTryParse, fAppend, false)
+		err := ParseDelimitedList(r, "(", []string{","}, ")", fTryParse, fAppend, false)
 		if err != nil {
 			return nil, err
 		}
@@ -1378,7 +1499,7 @@ func ParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (*
 	fieldName, err := ParseIdent(r)
 
 	if DebugParser {
-		fmt.Printf(" >>>>> IDENT: %v %v\n", fieldName, err)
+		fmt.Printf(" >>>>> IDENT: %v %v\n", fieldName, err == nil)
 	}
 
 	if err != nil {
@@ -1413,7 +1534,7 @@ func ParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (*
 
 	fieldType, err := ParseType(r)
 	if DebugParser {
-		fmt.Printf(" >>>>> ParseField ParseType: %v %v\n", fieldType, err)
+		fmt.Printf(" >>>>> ParseField ParseType: %v %v\n", fieldType, err == nil)
 	}
 	if err != nil {
 		return nil, err
@@ -1421,7 +1542,7 @@ func ParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (*
 
 	attributeList, err := ParseAttributeList(r)
 	if DebugParser {
-		fmt.Printf(" >>>>> ParseField ParseAttributeList: %v %v\n", attributeList, err)
+		fmt.Printf(" >>>>> ParseField ParseAttributeList: %v %v\n", attributeList, err == nil)
 	}
 	if err != nil {
 		return nil, err
@@ -1435,31 +1556,20 @@ func ParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (*
 	}, nil
 }
 
-func TryParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (*Field, bool) {
-	initPos := r.pos
+func TryParseField(r *ParseStream, allowEmptyFieldTypes bool, delimSet []string) (ret *Field, err error) {
+	r.Push()
+	defer func(){ r.Pop(err != nil) }()
 
-	if DebugParser {
-		fmt.Printf("TryParseField initPos: %v\n", initPos)
-	}
-
-	ret, err := ParseField(r, allowEmptyFieldTypes, delimSet)
-	if err != nil {
-		r.Seek(initPos - r.pos)
-	}
-
-	if DebugParser {
-		fmt.Printf("TryParseField final pos: (%v, %v): %v\n", ret, err, r.pos)
-	}
-
-	return ret, (err == nil)
+	ret, err = ParseField(r, allowEmptyFieldTypes, delimSet)
+	return
 }
 
 func ParseDelimitedList(
 	r *ParseStream,
 	start string,
-	delim string,
+	validDelims []string,
 	end string,
-	fTryParse func(*ParseStream)(interface{}, bool),
+	fTryParse func(*ParseStream)(interface{}, error),
 	fAppend func(interface{})(),
 	allowInitDelim bool) error {
 
@@ -1473,27 +1583,27 @@ func ParseDelimitedList(
 	}
 
 	if allowInitDelim {
-		ret, err := TryReadTokenCheck(r, []string{delim})
+		ret, err := TryReadTokenCheck(r, validDelims)
 		if DebugParser {
-			fmt.Printf("ParseDelimitedList read init delim: %v, %v, %v\n", ret, err, r.PosDebug())
+			fmt.Printf("ParseDelimitedList read init delim: %v, %v, %v\n", ret, err == nil, r.PosDebug())
 		}
 	}
 
 	for {
-		if x, ok := fTryParse(r); ok {
+		if x, errTryParse := fTryParse(r); errTryParse == nil {
 			if DebugParser {
-				fmt.Printf("ParseDelimitedList read item: %v\n", x)
+				fmt.Printf("ParseDelimitedList read item: %T %v\n", x, x)
 			}
 			fAppend(x)
 		} else {
 			_, err := ReadTokenCheck(r, []string{end})
 			if err != nil {
-				return err
+				return errTryParse
 			} else {
 				return nil
 			}
 		}
-		if _, ok := TryReadTokenCheck(r, []string{delim}); !ok {
+		if _, errTok := TryReadTokenCheck(r, validDelims); errTok != nil {
 			_, err := ReadTokenCheck(r, []string{end})
 			if err != nil {
 				return err
@@ -1507,7 +1617,7 @@ func ParseDelimitedList(
 func ParseFieldList(
 	r *ParseStream,
 	start string,
-	delim string,
+	validDelims []string,
 	end string,
 	allowMethods bool,
 	allowInitDelim bool,
@@ -1516,20 +1626,20 @@ func ParseFieldList(
 
 	retFields  := []Field{}
 	retMethods := []Method{}
-	fTryParse := func (r *ParseStream) (interface{}, bool) {
-		retField, ok := TryParseField(r, allowEmptyFieldTypes, []string{delim, end})
-		if ok {
-			return retField, true
+	fTryParse := func (r *ParseStream) (interface{}, error) {
+		retField, errField := TryParseField(r, allowEmptyFieldTypes, append(validDelims, end))
+		if errField == nil {
+			return retField, nil
 		} else {
 			if allowMethods {
-				retMethod, ok := TryParseMethod(r)
-				if ok {
-					return retMethod, true
+				retMethod, errMethod := TryParseMethod(r)
+				if errMethod == nil {
+					return retMethod, nil
 				} else {
-					return nil, false
+					return nil, errField
 				}
 			} else {
-				return nil, false
+				return nil, errField
 			}
 		}
 	}
@@ -1537,15 +1647,13 @@ func ParseFieldList(
 		switch x.(type) {
 		case *Field:
 			retFields = append(retFields, *(x.(*Field)))
-			break
 		case *Method:
 			retMethods = append(retMethods, *(x.(*Method)))
-			break
 		default:
 			panic("Case not supported in ParseFieldList -> fAppend")
 		}
 	}
-	err := ParseDelimitedList(r, start, delim, end, fTryParse, fAppend, allowInitDelim)
+	err := ParseDelimitedList(r, start, validDelims, end, fTryParse, fAppend, allowInitDelim)
 	if err != nil {
 		return nil, nil, err
 	} else {
@@ -1564,7 +1672,7 @@ func ParseMethod(r *ParseStream) (*Method, error) {
 		return nil, err
 	}
 
-	methodArgs, _, err := ParseFieldList(r, "(", ",", ")", false, false, false)
+	methodArgs, _, err := ParseFieldList(r, "(", []string{","}, ")", false, false, false)
 	if err != nil {
 		return nil, err
 	}
@@ -1594,13 +1702,12 @@ func ParseMethod(r *ParseStream) (*Method, error) {
 	}, nil
 }
 
-func TryParseMethod(r *ParseStream) (*Method, bool) {
-	initPos := r.pos
-	ret, err := ParseMethod(r)
-	if err != nil {
-		r.Seek(initPos - r.pos)
-	}
-	return ret, (err == nil)
+func TryParseMethod(r *ParseStream) (ret *Method, err error) {
+	r.Push()
+	defer func(){ r.Pop(err != nil) }()
+
+	ret, err = ParseMethod(r)
+	return
 }
 
 func ParseType(r *ParseStream) (Type, error) {
@@ -1616,11 +1723,12 @@ func ParseType(r *ParseStream) (Type, error) {
 	var ret Type
 
 	switch {
-	case tok == "struct" || tok == "union":
+	case tok == "struct" || tok == "union" || tok == "enum":
 		algSort := AlgSort_Prod
-		delim := "\n"
-		if tok == "union" {
+		validDelims := []string{"\n", ","}
+		if tok == "union" || tok == "enum" {
 			algSort = AlgSort_Sum
+			validDelims = append(validDelims, "|")
 		}
 
 		attributeList, err := ParseAttributeList(r)
@@ -1629,7 +1737,7 @@ func ParseType(r *ParseStream) (Type, error) {
 		}
 		
 		allowEmptyFieldTypes := (algSort == AlgSort_Sum)
-		fields, methods, err := ParseFieldList(r, "{", delim, "}", true, true, allowEmptyFieldTypes)
+		fields, methods, err := ParseFieldList(r, "{", validDelims, "}", true, true, allowEmptyFieldTypes)
 
 		if err != nil {
 			return nil, err
@@ -1641,7 +1749,6 @@ func ParseType(r *ParseStream) (Type, error) {
 			methods:       methods,
 			attributeList: attributeList,
 		}
-		break
 
 	case tok == "[":
 		elementType, err := ParseType(r)
@@ -1655,7 +1762,6 @@ func ParseType(r *ParseStream) (Type, error) {
 		ret = &ArrayType {
 			elementType: elementType,
 		}
-		break
 
 	case tok == "&":
 		targetType, err := ParseType(r)
@@ -1665,7 +1771,6 @@ func ParseType(r *ParseStream) (Type, error) {
 		ret = &RefType {
 			targetType: targetType,
 		}
-		break
 
 	case tok == "{":
 		keyType, err := ParseType(r)
@@ -1688,7 +1793,6 @@ func ParseType(r *ParseStream) (Type, error) {
 			keyType:   keyType,
 			valueType: valueType,
 		}
-		break
 
 	default:
 		if IsIdent(tok) {		
@@ -1696,7 +1800,6 @@ func ParseType(r *ParseStream) (Type, error) {
 		} else {
 			return nil, r.GenParseError(fmt.Sprintf("Expected type; received \"%v\"", tok))
 		}
-		break
 	}
 
 	for {
@@ -1733,10 +1836,10 @@ func ParseTypeDecl(r *ParseStream) (*TypeDecl, error) {
 }
 
 func TryParseTypeDecl(r *ParseStream) (*TypeDecl, bool) {
-	initPos := r.pos
+	initPos := r.state.pos
 	ret, err := ParseTypeDecl(r)
 	if err != nil {
-		r.Seek(initPos - r.pos)
+		r.Seek(initPos - r.state.pos)
 	}
 	return ret, (err == nil)
 }
@@ -1813,16 +1916,27 @@ func TestAST() {
 	// goMod := GenGoMod(goDecls)
 	// CheckErr(printer.Fprint(os.Stdout, goMod.astFileSet, goMod.astFile))
 
-	file, err := os.Open("codeGen/test.mgo")
-	CheckErr(err)
-	r := ParseStream {
-		rs: file,
-		pos: 0,
-		lineMap: []LineInfo{},
-		buffer: bytes.NewBuffer([]byte{}),
+	// file, err := os.Open("codeGen/test.mgo")
+
+	pathRoot := "../../../src/subsystems/blockchain"
+	fileNames := []string{"blockchain", "blocks", "elections", "statetree"}
+
+	for _, fileName := range fileNames {
+		filePath := pathRoot + "/" + fileName + ".id"
+		// fmt.Printf(" ===== Parsing: %v\n\n", filePath)
+		file, err := os.Open(filePath)
+		CheckErr(err)
+		r := ParseStream {
+			rs: file,
+			state: ParseStreamState {
+				pos: 0,
+			},
+			lineMap: []LineInfo{},
+			buffer: bytes.NewBuffer([]byte{}),
+		}
+		decls := ParseFile(&r)
+		goDecls := GenGoTypeDecls(decls)
+		goMod := GenGoMod(goDecls)
+		CheckErr(printer.Fprint(os.Stdout, goMod.astFileSet, goMod.astFile))
 	}
-	decls := ParseFile(&r)
-	goDecls := GenGoTypeDecls(decls)
-	goMod := GenGoMod(goDecls)
-	CheckErr(printer.Fprint(os.Stdout, goMod.astFileSet, goMod.astFile))
 }

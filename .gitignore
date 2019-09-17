@@ -3,4 +3,5 @@ deps/
 .slime/
 build/
 hugo/content/docs
+hugo/content/codeGen/main
 .DS_Store
