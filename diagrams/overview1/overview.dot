@@ -292,6 +292,18 @@ digraph Filecoin {
       }
     }
 
+    subgraph cluster_ipfs {
+      style=filled
+      color=lightgrey
+      label = "IPFS"
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "Graphsync"
+        "Bitswap"
+      }
+    }
+
     subgraph cluster_libp2p {
       style=filled
       color=lightgrey
@@ -312,8 +324,6 @@ digraph Filecoin {
         node [shape=Msquare]
         "Identify"
         "Gossipsub"
-        "Graphsync"
-        "Bitswap"
       }
 
       "Identify" -> "p2p.Node"
