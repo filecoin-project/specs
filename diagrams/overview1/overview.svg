@@ -54,8 +54,8 @@
 </g>
 <g id="clust22" class="cluster">
 <title>cluster_datatransfers</title>
-<polygon fill="#d3d3d3" stroke="#d3d3d3" points="203,-1129.0898 203,-1301.2314 501,-1301.2314 501,-1129.0898 203,-1129.0898"/>
-<text text-anchor="middle" x="352" y="-1286.0314" font-family="Times,serif" font-size="14.00" fill="#000000">Data Transfers</text>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="196,-1129.0898 196,-1301.2314 516,-1301.2314 516,-1129.0898 196,-1129.0898"/>
+<text text-anchor="middle" x="356" y="-1286.0314" font-family="Times,serif" font-size="14.00" fill="#000000">Data Transfers</text>
 </g>
 <g id="clust25" class="cluster">
 <title>cluster_storageminerprocess</title>
@@ -63,8 +63,8 @@
 </g>
 <g id="clust26" class="cluster">
 <title>cluster_storagemining</title>
-<polygon fill="#d3d3d3" stroke="#d3d3d3" points="1112,-1342.8867 1112,-1522.542 1414,-1522.542 1414,-1342.8867 1112,-1342.8867"/>
-<text text-anchor="middle" x="1263" y="-1507.342" font-family="Times,serif" font-size="14.00" fill="#000000">Storage Mining</text>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="1112,-1342.8867 1112,-1522.542 1549,-1522.542 1549,-1342.8867 1112,-1342.8867"/>
+<text text-anchor="middle" x="1330.5" y="-1507.342" font-family="Times,serif" font-size="14.00" fill="#000000">Storage Mining</text>
 </g>
 <g id="clust29" class="cluster">
 <title>cluster_sectorstorage</title>
@@ -131,7 +131,7 @@
 <polygon fill="#000000" stroke="#000000" points="868.2632,-1050.002 870.2085,-1039.5873 862.1931,-1046.5158 868.2632,-1050.002"/>
 </g>
 <!-- IPLD DagStore -->
-<g id="node47" class="node">
+<g id="node48" class="node">
 <title>IPLD DagStore</title>
 <polygon fill="none" stroke="#000000" points="1092.9875,-125.5 989.0125,-125.5 989.0125,-89.5 1092.9875,-89.5 1092.9875,-125.5"/>
 <text text-anchor="middle" x="1041" y="-103.3" font-family="Times,serif" font-size="14.00" fill="#000000">IPLD DagStore</text>
@@ -156,7 +156,7 @@
 </g>
 <!-- Block Receiver&#45;&gt;Block Propagator -->
 <!-- Block Pubsub -->
-<g id="node50" class="node">
+<g id="node51" class="node">
 <title>Block Pubsub</title>
 <polygon fill="none" stroke="#000000" points="338.8829,-716.2521 277.1171,-716.2521 277.1171,-654.4862 338.8829,-654.4862 338.8829,-716.2521"/>
 <polyline fill="none" stroke="#000000" points="289.1171,-716.2521 277.1171,-704.2521 "/>
@@ -222,7 +222,7 @@
 </g>
 <!-- Message Receiver&#45;&gt;Message Propagator -->
 <!-- Message Pubsub -->
-<g id="node51" class="node">
+<g id="node52" class="node">
 <title>Message Pubsub</title>
 <polygon fill="none" stroke="#000000" points="421.4863,-717.8555 356.5137,-717.8555 356.5137,-652.8828 421.4863,-652.8828 421.4863,-717.8555"/>
 <polyline fill="none" stroke="#000000" points="368.5137,-717.8555 356.5137,-705.8555 "/>
@@ -260,7 +260,7 @@
 <text text-anchor="middle" x="982" y="-277.3" font-family="Times,serif" font-size="14.00" fill="#000000">Wallet</text>
 </g>
 <!-- KeyStore -->
-<g id="node46" class="node">
+<g id="node47" class="node">
 <title>KeyStore</title>
 <polygon fill="none" stroke="#000000" points="971.3761,-125.5 902.6239,-125.5 902.6239,-89.5 971.3761,-89.5 971.3761,-125.5"/>
 <text text-anchor="middle" x="937" y="-103.3" font-family="Times,serif" font-size="14.00" fill="#000000">KeyStore</text>
@@ -288,20 +288,20 @@
 <!-- Storage Provider&#45;&gt;Chain -->
 <g id="edge38" class="edge">
 <title>Storage Provider&#45;&gt;Chain</title>
-<path fill="none" stroke="#000000" d="M508.4092,-1362.8187C550.8941,-1353.8942 626.7345,-1334.5708 684,-1301.2314 691.2576,-1297.0061 698.5282,-1292.1554 705.5829,-1287.0297"/>
-<polygon fill="#000000" stroke="#000000" points="707.8488,-1289.7054 713.7517,-1280.9073 703.6506,-1284.104 707.8488,-1289.7054"/>
+<path fill="none" stroke="#000000" d="M508.3739,-1362.7579C550.8203,-1353.7668 626.6186,-1334.3708 684,-1301.2314 691.2923,-1297.02 698.5923,-1292.1707 705.6709,-1287.0393"/>
+<polygon fill="#000000" stroke="#000000" points="707.9557,-1289.701 713.865,-1280.9072 703.7616,-1284.0966 707.9557,-1289.701"/>
 </g>
 <!-- Data Transfers -->
 <g id="node22" class="node">
 <title>Data Transfers</title>
-<polygon fill="none" stroke="#000000" points="493.0586,-1250.9106 394.9414,-1250.9106 394.9414,-1214.9106 493.0586,-1214.9106 493.0586,-1250.9106"/>
-<text text-anchor="middle" x="444" y="-1228.7106" font-family="Times,serif" font-size="14.00" fill="#000000">Data Transfers</text>
+<polygon fill="none" stroke="#000000" points="508.0586,-1250.9106 409.9414,-1250.9106 409.9414,-1214.9106 508.0586,-1214.9106 508.0586,-1250.9106"/>
+<text text-anchor="middle" x="459" y="-1228.7106" font-family="Times,serif" font-size="14.00" fill="#000000">Data Transfers</text>
 </g>
 <!-- Storage Provider&#45;&gt;Data Transfers -->
 <g id="edge43" class="edge">
 <title>Storage Provider&#45;&gt;Data Transfers</title>
-<path fill="none" stroke="#000000" d="M466.6525,-1329.1668C465.295,-1323.3984 463.8597,-1317.2997 462.3972,-1311.0848"/>
-<polygon fill="#000000" stroke="#000000" points="465.7754,-1310.1607 460.0776,-1301.2284 458.9615,-1311.7643 465.7754,-1310.1607"/>
+<path fill="none" stroke="#000000" d="M471.0341,-1329.1664C470.3294,-1323.5298 469.5853,-1317.5779 468.8267,-1311.5103"/>
+<polygon fill="#000000" stroke="#000000" points="472.2548,-1310.7169 467.5412,-1301.2284 465.3089,-1311.5854 472.2548,-1310.7169"/>
 </g>
 <!-- Storage Client -->
 <g id="node17" class="node">
@@ -338,8 +338,8 @@
 <!-- Retrieval Provider&#45;&gt;Data Transfers -->
 <g id="edge44" class="edge">
 <title>Retrieval Provider&#45;&gt;Data Transfers</title>
-<path fill="none" stroke="#000000" d="M269.9988,-1329.4783C271.3217,-1328.6857 272.6565,-1327.9343 274,-1327.2314 316.096,-1305.2094 339.0119,-1324.6545 377.0863,-1306.1223"/>
-<polygon fill="#000000" stroke="#000000" points="378.9166,-1309.1103 386,-1301.2314 375.5493,-1302.9734 378.9166,-1309.1103"/>
+<path fill="none" stroke="#000000" d="M269.9989,-1329.4167C271.3211,-1328.6433 272.6557,-1327.9124 274,-1327.2314 322.1842,-1302.822 348.0668,-1327.1212 391.9676,-1306.0735"/>
+<polygon fill="#000000" stroke="#000000" points="393.8402,-1309.0409 401,-1301.2314 390.5329,-1302.8715 393.8402,-1309.0409"/>
 </g>
 <!-- Retrieval Client -->
 <g id="node20" class="node">
@@ -363,38 +363,38 @@
 <!-- Disk2 -->
 <g id="node25" class="node">
 <title>Disk2</title>
-<path fill="none" stroke="#000000" d="M492.9216,-1181.8873C492.9216,-1184.3455 462.9262,-1186.3423 426,-1186.3423 389.0738,-1186.3423 359.0784,-1184.3455 359.0784,-1181.8873 359.0784,-1181.8873 359.0784,-1141.7923 359.0784,-1141.7923 359.0784,-1139.3341 389.0738,-1137.3373 426,-1137.3373 462.9262,-1137.3373 492.9216,-1139.3341 492.9216,-1141.7923 492.9216,-1141.7923 492.9216,-1181.8873 492.9216,-1181.8873"/>
-<path fill="none" stroke="#000000" d="M492.9216,-1181.8873C492.9216,-1179.4291 462.9262,-1177.4323 426,-1177.4323 389.0738,-1177.4323 359.0784,-1179.4291 359.0784,-1181.8873"/>
-<text text-anchor="middle" x="426" y="-1164.6398" font-family="Times,serif" font-size="14.00" fill="#000000">Data Storage System</text>
-<text text-anchor="middle" x="426" y="-1150.6398" font-family="Times,serif" font-size="14.00" fill="#000000">(Disks, etc)</text>
+<path fill="none" stroke="#000000" d="M507.9216,-1181.8873C507.9216,-1184.3455 477.9262,-1186.3423 441,-1186.3423 404.0738,-1186.3423 374.0784,-1184.3455 374.0784,-1181.8873 374.0784,-1181.8873 374.0784,-1141.7923 374.0784,-1141.7923 374.0784,-1139.3341 404.0738,-1137.3373 441,-1137.3373 477.9262,-1137.3373 507.9216,-1139.3341 507.9216,-1141.7923 507.9216,-1141.7923 507.9216,-1181.8873 507.9216,-1181.8873"/>
+<path fill="none" stroke="#000000" d="M507.9216,-1181.8873C507.9216,-1179.4291 477.9262,-1177.4323 441,-1177.4323 404.0738,-1177.4323 374.0784,-1179.4291 374.0784,-1181.8873"/>
+<text text-anchor="middle" x="441" y="-1164.6398" font-family="Times,serif" font-size="14.00" fill="#000000">Data Storage System</text>
+<text text-anchor="middle" x="441" y="-1150.6398" font-family="Times,serif" font-size="14.00" fill="#000000">(Disks, etc)</text>
 </g>
 <!-- Data Transfers&#45;&gt;Disk2 -->
 <g id="edge8" class="edge">
 <title>Data Transfers&#45;&gt;Disk2</title>
-<path fill="none" stroke="#000000" d="M439.3646,-1214.6081C437.9427,-1208.9941 436.3291,-1202.6229 434.727,-1196.2973"/>
-<polygon fill="#000000" stroke="#000000" points="438.0963,-1195.3446 432.2482,-1186.51 431.3105,-1197.0632 438.0963,-1195.3446"/>
+<path fill="none" stroke="#000000" d="M454.3646,-1214.6081C452.9427,-1208.9941 451.3291,-1202.6229 449.727,-1196.2973"/>
+<polygon fill="#000000" stroke="#000000" points="453.0963,-1195.3446 447.2482,-1186.51 446.3105,-1197.0632 453.0963,-1195.3446"/>
 </g>
-<!-- Scheduler -->
+<!-- DT Scheduler -->
 <g id="node23" class="node">
-<title>Scheduler</title>
-<polygon fill="none" stroke="#000000" points="376.9795,-1250.9106 305.0205,-1250.9106 305.0205,-1214.9106 376.9795,-1214.9106 376.9795,-1250.9106"/>
-<text text-anchor="middle" x="341" y="-1228.7106" font-family="Times,serif" font-size="14.00" fill="#000000">Scheduler</text>
+<title>DT Scheduler</title>
+<polygon fill="none" stroke="#000000" points="391.8956,-1250.9106 298.1044,-1250.9106 298.1044,-1214.9106 391.8956,-1214.9106 391.8956,-1250.9106"/>
+<text text-anchor="middle" x="345" y="-1228.7106" font-family="Times,serif" font-size="14.00" fill="#000000">DT Scheduler</text>
 </g>
 <!-- AuthSwap -->
 <g id="node24" class="node">
 <title>AuthSwap</title>
-<polygon fill="none" stroke="#000000" points="287.1424,-1271.0531 210.8576,-1271.0531 210.8576,-1194.7682 287.1424,-1194.7682 287.1424,-1271.0531"/>
-<polyline fill="none" stroke="#000000" points="222.8576,-1271.0531 210.8576,-1259.0531 "/>
-<polyline fill="none" stroke="#000000" points="210.8576,-1206.7682 222.8576,-1194.7682 "/>
-<polyline fill="none" stroke="#000000" points="275.1424,-1194.7682 287.1424,-1206.7682 "/>
-<polyline fill="none" stroke="#000000" points="287.1424,-1259.0531 275.1424,-1271.0531 "/>
-<text text-anchor="middle" x="249" y="-1249.7106" font-family="Times,serif" font-size="14.00" fill="#000000">data</text>
-<text text-anchor="middle" x="249" y="-1235.7106" font-family="Times,serif" font-size="14.00" fill="#000000">transfer</text>
-<text text-anchor="middle" x="249" y="-1221.7106" font-family="Times,serif" font-size="14.00" fill="#000000">protocol</text>
-<text text-anchor="middle" x="249" y="-1207.7106" font-family="Times,serif" font-size="14.00" fill="#000000">(unnamed)</text>
+<polygon fill="none" stroke="#000000" points="280.1424,-1271.0531 203.8576,-1271.0531 203.8576,-1194.7682 280.1424,-1194.7682 280.1424,-1271.0531"/>
+<polyline fill="none" stroke="#000000" points="215.8576,-1271.0531 203.8576,-1259.0531 "/>
+<polyline fill="none" stroke="#000000" points="203.8576,-1206.7682 215.8576,-1194.7682 "/>
+<polyline fill="none" stroke="#000000" points="268.1424,-1194.7682 280.1424,-1206.7682 "/>
+<polyline fill="none" stroke="#000000" points="280.1424,-1259.0531 268.1424,-1271.0531 "/>
+<text text-anchor="middle" x="242" y="-1249.7106" font-family="Times,serif" font-size="14.00" fill="#000000">data</text>
+<text text-anchor="middle" x="242" y="-1235.7106" font-family="Times,serif" font-size="14.00" fill="#000000">transfer</text>
+<text text-anchor="middle" x="242" y="-1221.7106" font-family="Times,serif" font-size="14.00" fill="#000000">protocol</text>
+<text text-anchor="middle" x="242" y="-1207.7106" font-family="Times,serif" font-size="14.00" fill="#000000">(unnamed)</text>
 </g>
 <!-- Graphsync -->
-<g id="node53" class="node">
+<g id="node54" class="node">
 <title>Graphsync</title>
 <polygon fill="none" stroke="#000000" points="433.1492,-469.9735 356.8508,-469.9735 356.8508,-393.675 433.1492,-393.675 433.1492,-469.9735"/>
 <polyline fill="none" stroke="#000000" points="368.8508,-469.9735 356.8508,-457.9735 "/>
@@ -406,20 +406,20 @@
 <!-- AuthSwap&#45;&gt;Graphsync -->
 <g id="edge42" class="edge">
 <title>AuthSwap&#45;&gt;Graphsync</title>
-<path fill="none" stroke="#000000" d="M249,-1129.0928C249,-1115.3873 249,-1101.5253 249,-1088.3398 249,-1088.3398 249,-1088.3398 249,-582.1484 249,-525.0153 309.442,-542.3086 348,-500.1484 354.1366,-493.4386 360.1059,-485.881 365.6169,-478.3024"/>
-<polygon fill="#000000" stroke="#000000" points="368.4932,-480.2969 371.4034,-470.1096 362.7755,-476.2585 368.4932,-480.2969"/>
+<path fill="none" stroke="#000000" d="M245.564,-1129.0921C245.8316,-1115.3884 246,-1101.5271 246,-1088.3398 246,-1088.3398 246,-1088.3398 246,-582.1484 246,-523.9822 308.432,-542.7828 348,-500.1484 354.1855,-493.4836 360.1795,-485.9489 365.7002,-478.3791"/>
+<polygon fill="#000000" stroke="#000000" points="368.5746,-480.3762 371.4915,-470.1907 362.8595,-476.3341 368.5746,-480.3762"/>
 </g>
 <!-- Seal Prover -->
 <g id="node26" class="node">
 <title>Seal Prover</title>
-<polygon fill="none" stroke="#000000" points="1406.4278,-1488.542 1325.5722,-1488.542 1325.5722,-1452.542 1406.4278,-1452.542 1406.4278,-1488.542"/>
-<text text-anchor="middle" x="1366" y="-1466.342" font-family="Times,serif" font-size="14.00" fill="#000000">Seal Prover</text>
+<polygon fill="none" stroke="#000000" points="1541.4278,-1488.542 1460.5722,-1488.542 1460.5722,-1452.542 1541.4278,-1452.542 1541.4278,-1488.542"/>
+<text text-anchor="middle" x="1501" y="-1466.342" font-family="Times,serif" font-size="14.00" fill="#000000">Seal Prover</text>
 </g>
 <!-- Pledge Prover -->
 <g id="node28" class="node">
 <title>Pledge Prover</title>
-<polygon fill="none" stroke="#000000" points="1406.4278,-1386.8867 1311.5722,-1386.8867 1311.5722,-1350.8867 1406.4278,-1350.8867 1406.4278,-1386.8867"/>
-<text text-anchor="middle" x="1359" y="-1364.6867" font-family="Times,serif" font-size="14.00" fill="#000000">Pledge Prover</text>
+<polygon fill="none" stroke="#000000" points="1541.4278,-1386.8867 1446.5722,-1386.8867 1446.5722,-1350.8867 1541.4278,-1350.8867 1541.4278,-1386.8867"/>
+<text text-anchor="middle" x="1494" y="-1364.6867" font-family="Times,serif" font-size="14.00" fill="#000000">Pledge Prover</text>
 </g>
 <!-- Seal Prover&#45;&gt;Pledge Prover -->
 <!-- PoSt Generator -->
@@ -435,7 +435,7 @@
 <polygon fill="#000000" stroke="#000000" points="813.2617,-1285.1162 803.539,-1280.9066 808.5145,-1290.2605 813.2617,-1285.1162"/>
 </g>
 <!-- Sector Manager -->
-<g id="node30" class="node">
+<g id="node31" class="node">
 <title>Sector Manager</title>
 <polygon fill="none" stroke="#000000" points="1287.5176,-1250.9106 1182.4824,-1250.9106 1182.4824,-1214.9106 1287.5176,-1214.9106 1287.5176,-1250.9106"/>
 <text text-anchor="middle" x="1235" y="-1228.7106" font-family="Times,serif" font-size="14.00" fill="#000000">Sector Manager</text>
@@ -449,11 +449,11 @@
 <!-- Pledge Prover&#45;&gt;Storage Power Actor -->
 <g id="edge35" class="edge">
 <title>Pledge Prover&#45;&gt;Storage Power Actor</title>
-<path fill="none" stroke="#000000" d="M1312.7666,-1342.8894C1300.4834,-1336.9204 1287.0078,-1331.1762 1274,-1327.2314 1190.7508,-1301.9852 1163.3739,-1326.0628 1080,-1301.2314 1068.4143,-1297.7809 1056.5933,-1293.5023 1044.9591,-1288.7816"/>
+<path fill="none" stroke="#000000" d="M1363.0324,-1342.8892C1333.7825,-1337.418 1302.8754,-1331.8966 1274,-1327.2314 1188.1205,-1313.3567 1163.3739,-1326.0628 1080,-1301.2314 1068.4143,-1297.7809 1056.5933,-1293.5023 1044.9591,-1288.7816"/>
 <polygon fill="#000000" stroke="#000000" points="1046.2534,-1285.5293 1035.6768,-1284.9083 1043.5577,-1291.9894 1046.2534,-1285.5293"/>
 </g>
 <!-- ZigZag&#45;Porep -->
-<g id="node35" class="node">
+<g id="node36" class="node">
 <title>ZigZag&#45;Porep</title>
 <polygon fill="none" stroke="#000000" points="1677.0324,-1250.9106 1582.9676,-1250.9106 1582.9676,-1214.9106 1677.0324,-1214.9106 1677.0324,-1250.9106"/>
 <text text-anchor="middle" x="1630" y="-1228.7106" font-family="Times,serif" font-size="14.00" fill="#000000">ZigZag&#45;Porep</text>
@@ -461,11 +461,17 @@
 <!-- Pledge Prover&#45;&gt;ZigZag&#45;Porep -->
 <g id="edge51" class="edge">
 <title>Pledge Prover&#45;&gt;ZigZag&#45;Porep</title>
-<path fill="none" stroke="#000000" d="M1413.9982,-1360.614C1459.8705,-1351.6977 1525.3574,-1334.12 1574,-1301.2314 1576.9192,-1299.2577 1579.7654,-1297.0879 1582.5284,-1294.7732"/>
-<polygon fill="#000000" stroke="#000000" points="1585.0369,-1297.223 1590.0856,-1287.9084 1580.3302,-1292.0415 1585.0369,-1297.223"/>
+<path fill="none" stroke="#000000" d="M1527.4502,-1342.8891C1542.2629,-1330.8077 1559.5622,-1315.8929 1574,-1301.2314 1575.8178,-1299.3855 1577.6395,-1297.4857 1579.4567,-1295.5472"/>
+<polygon fill="#000000" stroke="#000000" points="1582.2704,-1297.6562 1586.4257,-1287.9103 1577.0996,-1292.9378 1582.2704,-1297.6562"/>
+</g>
+<!-- Mining Scheduler -->
+<g id="node29" class="node">
+<title>Mining Scheduler</title>
+<polygon fill="none" stroke="#000000" points="1442.2074,-1488.542 1325.7926,-1488.542 1325.7926,-1452.542 1442.2074,-1452.542 1442.2074,-1488.542"/>
+<text text-anchor="middle" x="1384" y="-1466.342" font-family="Times,serif" font-size="14.00" fill="#000000">Mining Scheduler</text>
 </g>
 <!-- Storage Miner Actor -->
-<g id="node29" class="node">
+<g id="node30" class="node">
 <title>Storage Miner Actor</title>
 <polygon fill="none" stroke="#000000" points="1303.7525,-1463.0861 1303.7525,-1477.9978 1251.1767,-1488.542 1176.8233,-1488.542 1124.2475,-1477.9978 1124.2475,-1463.0861 1176.8233,-1452.542 1251.1767,-1452.542 1303.7525,-1463.0861"/>
 <polygon fill="none" stroke="#000000" points="1307.758,-1459.8096 1307.758,-1481.2744 1251.5749,-1492.542 1176.4251,-1492.542 1120.242,-1481.2744 1120.242,-1459.8096 1176.4251,-1448.542 1251.5749,-1448.542 1307.758,-1459.8096"/>
@@ -473,7 +479,7 @@
 </g>
 <!-- Storage Miner Actor&#45;&gt;PoSt Generator -->
 <!-- Sector Store -->
-<g id="node31" class="node">
+<g id="node32" class="node">
 <title>Sector Store</title>
 <polygon fill="none" stroke="#000000" points="1285.3176,-1179.8398 1200.6824,-1179.8398 1200.6824,-1143.8398 1285.3176,-1143.8398 1285.3176,-1179.8398"/>
 <text text-anchor="middle" x="1243" y="-1157.6398" font-family="Times,serif" font-size="14.00" fill="#000000">Sector Store</text>
@@ -485,7 +491,7 @@
 <polygon fill="#000000" stroke="#000000" points="1243.2784,-1190.6561 1240.919,-1180.3273 1236.3223,-1189.873 1243.2784,-1190.6561"/>
 </g>
 <!-- Sector Builder -->
-<g id="node32" class="node">
+<g id="node33" class="node">
 <title>Sector Builder</title>
 <polygon fill="none" stroke="#000000" points="1400.7591,-1179.8398 1303.2409,-1179.8398 1303.2409,-1143.8398 1400.7591,-1143.8398 1400.7591,-1179.8398"/>
 <text text-anchor="middle" x="1352" y="-1157.6398" font-family="Times,serif" font-size="14.00" fill="#000000">Sector Builder</text>
@@ -497,7 +503,7 @@
 <polygon fill="#000000" stroke="#000000" points="1315.498,-1188.1079 1322.2277,-1179.9248 1311.8638,-1182.1252 1315.498,-1188.1079"/>
 </g>
 <!-- Sector Sealer -->
-<g id="node33" class="node">
+<g id="node34" class="node">
 <title>Sector Sealer</title>
 <polygon fill="none" stroke="#000000" points="1182.2455,-1179.8398 1091.7545,-1179.8398 1091.7545,-1143.8398 1182.2455,-1143.8398 1182.2455,-1179.8398"/>
 <text text-anchor="middle" x="1137" y="-1157.6398" font-family="Times,serif" font-size="14.00" fill="#000000">Sector Sealer</text>
@@ -509,7 +515,7 @@
 <polygon fill="#000000" stroke="#000000" points="1172.0876,-1182.9623 1161.9375,-1179.9248 1167.978,-1188.629 1172.0876,-1182.9623"/>
 </g>
 <!-- Disks -->
-<g id="node34" class="node">
+<g id="node35" class="node">
 <title>Disks</title>
 <path fill="none" stroke="#000000" d="M1309.9216,-1108.3873C1309.9216,-1110.8455 1279.9262,-1112.8423 1243,-1112.8423 1206.0738,-1112.8423 1176.0784,-1110.8455 1176.0784,-1108.3873 1176.0784,-1108.3873 1176.0784,-1068.2923 1176.0784,-1068.2923 1176.0784,-1065.8341 1206.0738,-1063.8373 1243,-1063.8373 1279.9262,-1063.8373 1309.9216,-1065.8341 1309.9216,-1068.2923 1309.9216,-1068.2923 1309.9216,-1108.3873 1309.9216,-1108.3873"/>
 <path fill="none" stroke="#000000" d="M1309.9216,-1108.3873C1309.9216,-1105.9291 1279.9262,-1103.9323 1243,-1103.9323 1206.0738,-1103.9323 1176.0784,-1105.9291 1176.0784,-1108.3873"/>
@@ -523,14 +529,14 @@
 <polygon fill="#000000" stroke="#000000" points="1246.5001,-1122.9532 1243,-1112.9532 1239.5001,-1122.9532 1246.5001,-1122.9532"/>
 </g>
 <!-- Rational PoSt -->
-<g id="node36" class="node">
+<g id="node37" class="node">
 <title>Rational PoSt</title>
 <polygon fill="none" stroke="#000000" points="1676.8973,-1179.8398 1583.1027,-1179.8398 1583.1027,-1143.8398 1676.8973,-1143.8398 1676.8973,-1179.8398"/>
 <text text-anchor="middle" x="1630" y="-1157.6398" font-family="Times,serif" font-size="14.00" fill="#000000">Rational PoSt</text>
 </g>
 <!-- ZigZag&#45;Porep&#45;&gt;Rational PoSt -->
 <!-- Piece Inclusion Proofs -->
-<g id="node37" class="node">
+<g id="node38" class="node">
 <title>Piece Inclusion Proofs</title>
 <polygon fill="none" stroke="#000000" points="1565.1036,-1257.9106 1496.8964,-1257.9106 1496.8964,-1207.9106 1565.1036,-1207.9106 1565.1036,-1257.9106"/>
 <text text-anchor="middle" x="1531" y="-1242.7106" font-family="Times,serif" font-size="14.00" fill="#000000">Piece</text>
@@ -538,26 +544,26 @@
 <text text-anchor="middle" x="1531" y="-1214.7106" font-family="Times,serif" font-size="14.00" fill="#000000">Proofs</text>
 </g>
 <!-- VRFs -->
-<g id="node38" class="node">
+<g id="node39" class="node">
 <title>VRFs</title>
 <polygon fill="none" stroke="#000000" points="1479,-1250.9106 1425,-1250.9106 1425,-1214.9106 1479,-1214.9106 1479,-1250.9106"/>
 <text text-anchor="middle" x="1452" y="-1228.7106" font-family="Times,serif" font-size="14.00" fill="#000000">VRFs</text>
 </g>
 <!-- VDFs -->
-<g id="node39" class="node">
+<g id="node40" class="node">
 <title>VDFs</title>
 <polygon fill="none" stroke="#000000" points="1479,-1179.8398 1425,-1179.8398 1425,-1143.8398 1479,-1143.8398 1479,-1179.8398"/>
 <text text-anchor="middle" x="1452" y="-1157.6398" font-family="Times,serif" font-size="14.00" fill="#000000">VDFs</text>
 </g>
 <!-- VRFs&#45;&gt;VDFs -->
 <!-- Wall Clock -->
-<g id="node40" class="node">
+<g id="node41" class="node">
 <title>Wall Clock</title>
 <polygon fill="none" stroke="#000000" points="1029.5342,-600.1484 950.4658,-600.1484 950.4658,-564.1484 1029.5342,-564.1484 1029.5342,-600.1484"/>
 <text text-anchor="middle" x="990" y="-577.9484" font-family="Times,serif" font-size="14.00" fill="#000000">Wall Clock</text>
 </g>
 <!-- NTP -->
-<g id="node41" class="node">
+<g id="node42" class="node">
 <title>NTP</title>
 <polygon fill="none" stroke="#000000" points="889,-552.1484 835,-552.1484 835,-516.1484 889,-516.1484 889,-552.1484"/>
 <text text-anchor="middle" x="862" y="-529.9484" font-family="Times,serif" font-size="14.00" fill="#000000">NTP</text>
@@ -569,7 +575,7 @@
 <polygon fill="#000000" stroke="#000000" points="899.8939,-542.0587 889.3035,-542.3638 897.7727,-548.7296 899.8939,-542.0587"/>
 </g>
 <!-- Switch -->
-<g id="node56" class="node">
+<g id="node57" class="node">
 <title>Switch</title>
 <polygon fill="none" stroke="#000000" points="637.3898,-299.5 582.6102,-299.5 582.6102,-263.5 637.3898,-263.5 637.3898,-299.5"/>
 <text text-anchor="middle" x="610" y="-277.3" font-family="Times,serif" font-size="14.00" fill="#000000">Switch</text>
@@ -581,26 +587,26 @@
 <polygon fill="#000000" stroke="#000000" points="672.5374,-339.2421 662.9973,-334.6337 667.5812,-344.1855 672.5374,-339.2421"/>
 </g>
 <!-- Round Clock -->
-<g id="node42" class="node">
+<g id="node43" class="node">
 <title>Round Clock</title>
 <polygon fill="none" stroke="#000000" points="932.2797,-600.1484 841.7203,-600.1484 841.7203,-564.1484 932.2797,-564.1484 932.2797,-600.1484"/>
 <text text-anchor="middle" x="887" y="-577.9484" font-family="Times,serif" font-size="14.00" fill="#000000">Round Clock</text>
 </g>
 <!-- Cron Actor -->
-<g id="node43" class="node">
+<g id="node44" class="node">
 <title>Cron Actor</title>
 <polygon fill="none" stroke="#000000" points="819.979,-574.6926 819.979,-589.6043 788.3588,-600.1484 743.6412,-600.1484 712.021,-589.6043 712.021,-574.6926 743.6412,-564.1484 788.3588,-564.1484 819.979,-574.6926"/>
 <polygon fill="none" stroke="#000000" points="823.9962,-571.8138 823.9962,-592.483 789.0136,-604.1484 742.9864,-604.1484 708.0038,-592.483 708.0038,-571.8138 742.9864,-560.1484 789.0136,-560.1484 823.9962,-571.8138"/>
 <text text-anchor="middle" x="766" y="-577.9484" font-family="Times,serif" font-size="14.00" fill="#000000">Cron Actor</text>
 </g>
 <!-- Config -->
-<g id="node44" class="node">
+<g id="node45" class="node">
 <title>Config</title>
 <polygon fill="none" stroke="#000000" points="884.1242,-125.5 829.8758,-125.5 829.8758,-89.5 884.1242,-89.5 884.1242,-125.5"/>
 <text text-anchor="middle" x="857" y="-103.3" font-family="Times,serif" font-size="14.00" fill="#000000">Config</text>
 </g>
 <!-- Local Storage -->
-<g id="node48" class="node">
+<g id="node49" class="node">
 <title>Local Storage</title>
 <path fill="none" stroke="#000000" d="M984.1349,-60.7975C984.1349,-63.2557 963.0083,-65.2525 937,-65.2525 910.9917,-65.2525 889.8651,-63.2557 889.8651,-60.7975 889.8651,-60.7975 889.8651,-20.7025 889.8651,-20.7025 889.8651,-18.2443 910.9917,-16.2475 937,-16.2475 963.0083,-16.2475 984.1349,-18.2443 984.1349,-20.7025 984.1349,-20.7025 984.1349,-60.7975 984.1349,-60.7975"/>
 <path fill="none" stroke="#000000" d="M984.1349,-60.7975C984.1349,-58.3393 963.0083,-56.3425 937,-56.3425 910.9917,-56.3425 889.8651,-58.3393 889.8651,-60.7975"/>
@@ -614,7 +620,7 @@
 <polygon fill="#000000" stroke="#000000" points="899.1986,-73.7391 904.8081,-64.7511 894.818,-68.2793 899.1986,-73.7391"/>
 </g>
 <!-- Checkpoints -->
-<g id="node45" class="node">
+<g id="node46" class="node">
 <title>Checkpoints</title>
 <polygon fill="none" stroke="#000000" points="915.9932,-169.5 830.0068,-169.5 830.0068,-133.5 915.9932,-133.5 915.9932,-169.5"/>
 <text text-anchor="middle" x="873" y="-147.3" font-family="Times,serif" font-size="14.00" fill="#000000">Checkpoints</text>
@@ -638,13 +644,13 @@
 <polygon fill="#000000" stroke="#000000" points="984.078,-66.807 973.7717,-64.3511 980.2969,-72.6981 984.078,-66.807"/>
 </g>
 <!-- Filecoin Network Node -->
-<g id="node49" class="node">
+<g id="node50" class="node">
 <title>Filecoin Network Node</title>
 <polygon fill="none" stroke="#000000" points="676.1935,-703.3691 527.8065,-703.3691 527.8065,-667.3691 676.1935,-667.3691 676.1935,-703.3691"/>
 <text text-anchor="middle" x="602" y="-681.1691" font-family="Times,serif" font-size="14.00" fill="#000000">Filecoin Network Node</text>
 </g>
 <!-- Gossipsub -->
-<g id="node63" class="node">
+<g id="node64" class="node">
 <title>Gossipsub</title>
 <polygon fill="none" stroke="#000000" points="531.3455,-469.1697 456.6545,-469.1697 456.6545,-394.4787 531.3455,-394.4787 531.3455,-469.1697"/>
 <polyline fill="none" stroke="#000000" points="468.6545,-469.1697 456.6545,-457.1697 "/>
@@ -666,7 +672,7 @@
 <polygon fill="#000000" stroke="#000000" points="477.9002,-479.848 478.4928,-469.2697 471.4329,-477.1696 477.9002,-479.848"/>
 </g>
 <!-- Bootstrap List -->
-<g id="node52" class="node">
+<g id="node53" class="node">
 <title>Bootstrap List</title>
 <polygon fill="none" stroke="#000000" points="510.4428,-720.8119 439.5572,-720.8119 439.5572,-649.9263 510.4428,-649.9263 510.4428,-720.8119"/>
 <polyline fill="none" stroke="#000000" points="451.5572,-720.8119 439.5572,-708.8119 "/>
@@ -677,7 +683,7 @@
 <text text-anchor="middle" x="475" y="-674.1691" font-family="Times,serif" font-size="14.00" fill="#000000">List</text>
 </g>
 <!-- p2p.Node -->
-<g id="node55" class="node">
+<g id="node56" class="node">
 <title>p2p.Node</title>
 <polygon fill="none" stroke="#000000" points="572.3244,-377.5 501.6756,-377.5 501.6756,-341.5 572.3244,-341.5 572.3244,-377.5"/>
 <text text-anchor="middle" x="537" y="-355.3" font-family="Times,serif" font-size="14.00" fill="#000000">p2p.Node</text>
@@ -695,7 +701,7 @@
 <polygon fill="#000000" stroke="#000000" points="492.4961,-371.2075 501.3997,-365.465 490.8584,-364.4017 492.4961,-371.2075"/>
 </g>
 <!-- Bitswap -->
-<g id="node54" class="node">
+<g id="node55" class="node">
 <title>Bitswap</title>
 <polygon fill="none" stroke="#000000" points="338.8897,-462.714 277.1103,-462.714 277.1103,-400.9345 338.8897,-400.9345 338.8897,-462.714"/>
 <polyline fill="none" stroke="#000000" points="289.1103,-462.714 277.1103,-450.714 "/>
@@ -723,7 +729,7 @@
 <polygon fill="#000000" stroke="#000000" points="944.5333,-135.5097 940.1616,-125.8589 937.5608,-136.1295 944.5333,-135.5097"/>
 </g>
 <!-- Conn -->
-<g id="node57" class="node">
+<g id="node58" class="node">
 <title>Conn</title>
 <polygon fill="none" stroke="#000000" points="601,-243.5 547,-243.5 547,-207.5 601,-207.5 601,-243.5"/>
 <text text-anchor="middle" x="574" y="-221.3" font-family="Times,serif" font-size="14.00" fill="#000000">Conn</text>
@@ -735,7 +741,7 @@
 <polygon fill="#000000" stroke="#000000" points="594.166,-250.3968 585.8142,-243.8777 588.2777,-254.1822 594.166,-250.3968"/>
 </g>
 <!-- QUIC -->
-<g id="node59" class="node">
+<g id="node60" class="node">
 <title>QUIC</title>
 <polygon fill="none" stroke="#000000" points="583,-169.5 529,-169.5 529,-133.5 583,-133.5 583,-169.5"/>
 <text text-anchor="middle" x="556" y="-147.3" font-family="Times,serif" font-size="14.00" fill="#000000">QUIC</text>
@@ -747,7 +753,7 @@
 <polygon fill="#000000" stroke="#000000" points="566.1627,-178.4711 560.3983,-169.5817 559.361,-180.1257 566.1627,-178.4711"/>
 </g>
 <!-- yamux -->
-<g id="node60" class="node">
+<g id="node61" class="node">
 <title>yamux</title>
 <polygon fill="none" stroke="#000000" points="511.1036,-169.5 456.8964,-169.5 456.8964,-133.5 511.1036,-133.5 511.1036,-169.5"/>
 <text text-anchor="middle" x="484" y="-147.3" font-family="Times,serif" font-size="14.00" fill="#000000">yamux</text>
@@ -759,7 +765,7 @@
 <polygon fill="#000000" stroke="#000000" points="503.1494,-175.8423 494.5779,-169.6148 497.395,-179.8283 503.1494,-175.8423"/>
 </g>
 <!-- mplex -->
-<g id="node61" class="node">
+<g id="node62" class="node">
 <title>mplex</title>
 <polygon fill="none" stroke="#000000" points="655,-169.5 601,-169.5 601,-133.5 655,-133.5 655,-169.5"/>
 <text text-anchor="middle" x="628" y="-147.3" font-family="Times,serif" font-size="14.00" fill="#000000">mplex</text>
@@ -771,7 +777,7 @@
 <polygon fill="#000000" stroke="#000000" points="611.7378,-179.7228 614.8052,-169.5817 606.0832,-175.5965 611.7378,-179.7228"/>
 </g>
 <!-- TLS -->
-<g id="node58" class="node">
+<g id="node59" class="node">
 <title>TLS</title>
 <polygon fill="none" stroke="#000000" points="583,-125.5 529,-125.5 529,-89.5 583,-89.5 583,-125.5"/>
 <text text-anchor="middle" x="556" y="-103.3" font-family="Times,serif" font-size="14.00" fill="#000000">TLS</text>
@@ -789,7 +795,7 @@
 <polygon fill="#000000" stroke="#000000" points="593.6165,-126.3861 583.2586,-124.158 589.9663,-132.3591 593.6165,-126.3861"/>
 </g>
 <!-- Identify -->
-<g id="node62" class="node">
+<g id="node63" class="node">
 <title>Identify</title>
 <polygon fill="none" stroke="#000000" points="609.3182,-462.1424 548.6818,-462.1424 548.6818,-401.506 609.3182,-401.506 609.3182,-462.1424"/>
 <polyline fill="none" stroke="#000000" points="560.6818,-462.1424 548.6818,-450.1424 "/>
