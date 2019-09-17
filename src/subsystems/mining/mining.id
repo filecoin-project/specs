@@ -2,6 +2,7 @@ type MiningSubsystem struct {
     proof_scheduler ProofScheduler
     post_prover PostProver
     seal_prover SealProver
+    actor &StorageMinerActor
 
     CreateMiner(owner Address, worker Address) &StorageMinerActor
     StartMining()
