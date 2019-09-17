@@ -1,0 +1,51 @@
+package blockchain
+
+type RetrievalDeal struct {
+	File CID
+	CounterParty Address
+	MinPrice TokenAmount
+}
+
+type RetrievalDealResponse union {
+	| DealAccepted
+	| DealRejected
+	| DealError
+}
+
+type DealAccepted struct {
+	CounterParty Address
+	Payment PaymentChannelInfo
+}
+
+type RetrievalQuery struct {
+	File CID
+}
+
+type RetrievalQueryResponse union {
+	| FileAvailable
+	| FileUnavailable
+}
+
+type FileAvailable struct {
+	MinPrice TokenAmount
+	Miner Address
+}
+
+type RetrievalMarketSubsystem struct {
+	// need access to:
+	// - DataTransferSubsystem
+	//   - transfer data
+	// - BlockchainSubsystem?
+	//   - verify data stored on chain?
+	// - NetworkSubsystem
+	// 	 - needs access to pubsub
+
+	// SubmitRetrievalQuery is call by users
+	// to query miners who have the file
+	SubmitRetrievalQuery(CID) RetrievalQueryResponse
+
+	// ProposeRetrievalDeal is called by both users and miners
+	// to propose a retrieval deal
+	ProposeRetrievalDeal(RetrievalDeal) RetrievalDealResponse
+
+}
