@@ -257,13 +257,11 @@ digraph Filecoin {
     { // components
       node [shape=box]
       "Config"
-      "Checkpoints"
       "KeyStore"
       "IPLD DagStore"
     }
     "Local Storage" [shape=cylinder,label="Local Storage\n(Disk)"]
 
-    "Checkpoints" -> "Config"
     "IPLD DagStore" -> "Local Storage"
     "Config" -> "Local Storage"
     "KeyStore" -> "Local Storage"
