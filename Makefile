@@ -52,6 +52,13 @@ help:
 	@echo "	make bins        compile some build tools whose source is in this repo"
 	@echo "	make serve       start hugo in serving mode -- must run make build on changes manually"
 
+# Source
+ORG_FILES=$(shell find -L hugo/content -name '*.org')
+ORG_MD_FILES=$(ORG_FILES:%.org=%.md)
+IPLD_FILES=$(shell find -L hugo/content -name '*.ipld')
+GO_FILES=$(shell find -L hugo/content -name '*.go')
+MD_FILES=$(shell find -L hugo/content -name '*.md') $(ORG_MD_FILES)
+
 # main Targets
 build: website
 
@@ -84,22 +91,20 @@ pdf: go-test org2md hugo-build
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
-hugo-build: $(shell find hugo/content | grep '.md')
+hugo-build: $(MD_FILES)
 	cd hugo && hugo
 
 # todo
-generate-code: $(shell find hugo/content/ | grep .ipld)
+generate-code: $(IPLD_FILES)
 	echo TODO: use codeGen && exit 1
 	# bin/codeGen <input-files?>
 
-go-test: $(shell find hugo/content/ | grep .go)
+go-test: $(GO_FILES)
 	# testing should have the side effect that all go is compiled
 	cd hugo/content/codeGen && go build && go test ./...
 	# cd hugo/content/code && go build && go test ./...
 
 # convert orgmode to markdown
-ORG_FILES=$(shell find hugo/content | grep .org)
-ORG_MD_FILES=$(patsubt %.md, %.org, $(ORG_FILES))
 org2md: $(ORG_MD_FILES)
 %.md: %.org
 	# use emacs to compile.
@@ -107,7 +112,6 @@ org2md: $(ORG_MD_FILES)
 	# this should invoke orient
 	# this should produce hugo markdown output
 	bin/org2hugomd.el <$< >$@
-
 
 # building our tools
 bins: bin/codeGen
