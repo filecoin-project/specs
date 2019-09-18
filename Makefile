@@ -81,13 +81,13 @@ publish: website
 	bin/publish-to-gh-pages.sh
 
 # intermediate targets
-website: go-test org2md hugo-build
+website: go-test hugo-build
 	mkdir -p build/website
 	-rm -rf build/website/*
 	mv hugo/public/* build/website
 	@echo TODO: add generate-code to this target
 
-pdf: go-test org2md hugo-build
+pdf: go-test hugo-build
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
