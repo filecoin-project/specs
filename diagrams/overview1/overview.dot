@@ -171,9 +171,6 @@ digraph Filecoin {
 
       { // components
         node [shape=box]
-        "Seal Prover"
-        "PoSt Generator"
-        "Pledge Prover"
         "Mining Scheduler"
       }
 
@@ -181,9 +178,6 @@ digraph Filecoin {
         node [shape=doubleoctagon]
         "Storage Miner Actor"
       }
-
-      "Storage Miner Actor" -> "PoSt Generator" [style=invis]
-      "Seal Prover" -> "Pledge Prover" [style=invis]
     }
 
     subgraph cluster_sectorstorage {
@@ -193,37 +187,48 @@ digraph Filecoin {
 
       { // components
         node [shape=box]
-        "Sector Manager"
         "Sector Store"
         "Sector Builder"
-        "Sector Sealer"
       }
       "Disks" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
 
-      "Sector Manager" -> "Sector Store"
-      "Sector Manager" -> "Sector Builder"
-      "Sector Manager" -> "Sector Sealer"
+      "Sector Store"
+      "Sector Builder"
       "Sector Store" -> "Disks"
     }
 
-    subgraph cluster_filproofs {
+    subgraph cluster_filproofs_subsystem {
       style=filled
       color=lightgrey
-      label = "Filecoin Proofs"
+      label = "Storage Proofs"
 
       { // components
         node [shape=box]
-        "ZigZag-Porep"
-        "Rational PoSt"
-        "Piece Inclusion Proofs" [label="Piece\nInclusion\nProofs"]
-        "VRFs"
-        "VDFs"
-      }
-
-      "ZigZag-Porep" -> "Rational PoSt" [style=invis]
-      VRFs -> VDFs [style=invis]
+        "Seal Prover"
+        "PoSt Generator"
+        "Pledge Prover"
+      } 
     }
   }
+    
+  subgraph cluster_filproofs_lib {
+    style=filled
+    color=lightgrey
+    label = "Filecoin Proofs"
+
+    { // components
+      node [shape=box]
+      "ZigZag-Porep"
+      "Rational PoSt"
+      "Piece Inclusion Proofs" [label="Piece\nInclusion\nProofs"]
+      "VRFs"
+      "VDFs"
+    }
+
+    "ZigZag-Porep" -> "Rational PoSt" [style=invis]
+    VRFs -> VDFs [style=invis]
+  }
+ 
 
   subgraph cluster_clock {
     style=filled
@@ -343,16 +348,17 @@ digraph Filecoin {
   // cross module links
   {
     edge [minlen=3]
-    "PoSt Generator" -> "Sector Manager" [ltail=cluster_storagemining,lhead=cluster_sectorstorage]
     "Chain" -> "VM Interpreter" [ltail=cluster_blockchain, lhead=cluster_vm]
     // "Message Pool" -> "Messages" [ltail=cluster_messagepool]
     // "Chain" -> "Expected Consensus" [ltail=cluster_blockchain, lhead=cluster_storagepowerconsensus]
-    "Pledge Prover" -> "Storage Power Actor" [ltail=cluster_storagemining, lhead=cluster_storagepowerconsensus]
+    "Pledge Prover" -> "Storage Power Actor" [ltail=cluster_filproofs_subsystem, lhead=cluster_storagepowerconsensus]
     "Block Pubsub" -> "Gossipsub"
     "Message Pubsub" -> "Gossipsub"
     "Storage Provider" -> "Chain" [ltail=cluster_blockchain, lhead=cluster_blockchain]
     "Retrieval Provider" -> "Chain" [ltail=cluster_blockchain, lhead=cluster_blockchain]
-    "PoSt Generator" -> "Chain" [ltail=cluster_storagemining, lhead=cluster_blockchain]
+    "Mining Scheduler" -> "Pledge Prover" [ltail=cluster_storagemining, lhead=cluster_filproofs_subsystem]
+    "Mining Scheduler" -> "Sector Builder" [ltail=cluster_storagemining, lhead=cluster_sectorstorage]
+    "PoSt Generator" -> "Chain" [ltail=cluster_filproofs_subsystem, lhead=cluster_blockchain]
     "Chain" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
     "AuthSwap" -> "Graphsync" [ltail=cluster_datatransfers]
     "Storage Provider" -> "Data Transfers" [ltail=cluster_storagemarket, lhead=cluster_datatransfers]
@@ -364,7 +370,7 @@ digraph Filecoin {
     "NTP" -> "Switch" [ltail=cluster_clock, lhead=cluster_libp2p]
     "Bootstrap List" -> "p2p.Node"
     "Block Producer" -> "Message Storage" [lhead=cluster_messagepool]
-    "Pledge Prover" -> "ZigZag-Porep" [ltail=cluster_storagemining, lhead=cluster_filproofs]
+    "Pledge Prover" -> "ZigZag-Porep" [ltail=cluster_filproofs_subsystem, lhead=cluster_filproofs_lib]
     "Wallet" -> "KeyStore"
     // "Block Producer" -> "PoSt Generator" [style=dashed]
   }
