@@ -30,22 +30,22 @@ type Actor union {
 }
 
 type SystemActor union {
-	| InitActor
-	| AccountActor
-	| StoragePowerActor
-	| StorageMinerActor
-	| CronActor
-	| PaymentChannelActor
+	InitActor
+	AccountActor
+	StoragePowerActor
+	StorageMinerActor
+	CronActor
+	PaymentChannelActor
 }
 
 
 // type ActorMethod union {
-// 	| InitActorMethod
-// 	| AccountActorMethod
-// 	| StoragePowerActorMethod
-// 	| StorageMinerActorMethod
-// 	| CronActorMethod
-// 	| PaymentChannelActorMethod
+// 	  InitActorMethod
+// 	  AccountActorMethod
+// 	  StoragePowerActorMethod
+// 	  StorageMinerActorMethod
+// 	  CronActorMethod
+// 	  PaymentChannelActorMethod
 // }
 
 // type StoragePowerActorState struct {

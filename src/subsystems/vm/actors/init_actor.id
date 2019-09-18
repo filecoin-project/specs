@@ -5,5 +5,5 @@ type InitActorState struct {
 	AddressMap {Address:ActorID}
 	NextID ActorID
 
-	GetActorIDForAddress(Address) ActorID
+	GetActorIDForAddress(address Address) ActorID
 }

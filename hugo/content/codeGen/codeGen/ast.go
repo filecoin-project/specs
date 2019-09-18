@@ -1918,12 +1918,56 @@ func TestAST() {
 
 	// file, err := os.Open("codeGen/test.mgo")
 
-	pathRoot := "../../../src/subsystems/blockchain"
-	fileNames := []string{"blockchain", "blocks", "elections", "statetree"}
+	pathRoot := "../../../src/subsystems"
+	fileSubPaths := []string {
+		// "blockchain/components/block_receiver.id",
+		// "blockchain/components/block_producer.id",
+		// "blockchain/components/block_propagator.id",
+		// "blockchain/elections.id",
+		// "blockchain/statetree.id",
+		// "blockchain/blockchain.id",
+		// "blockchain/block.id",
 
-	for _, fileName := range fileNames {
-		filePath := pathRoot + "/" + fileName + ".id"
-		// fmt.Printf(" ===== Parsing: %v\n\n", filePath)
+		// "clock/clock.id",
+
+		// "datatransfer/datatransfer.id",
+
+		// "libp2p/libp2p.id",
+
+		// "messagepool/message.id",
+		// "messagepool/messagepool.id",
+
+		// "payments/payments.id",
+
+		// "repository/repository.id",
+
+		// "retrieval_market/retrieval_market.id",
+
+		// "sectorstorage/components/sector_sealer.id",
+		// "sectorstorage/components/sector_store.id",
+		// "sectorstorage/components/sector_builder.id",
+		// "sectorstorage/components/sectorstoragesubsystem.id",
+
+		// "storage_market/storage_market.id",
+
+		// "storagemining/components/mining_scheduler.id",
+		// "storagemining/components/post_prover.id",
+		// "storagemining/actors/storagemineractor.id",
+		// "storagemining/mining.id",
+
+		// "storagepowerconsensus/components/expectedconsensus.id",
+		// "storagepowerconsensus/actors/storagepoweractor.id",
+
+		"vm/components/actor.id",
+		"vm/components/vm_interpreter.id",
+		"vm/actors/account_actor.id",
+		"vm/actors/init_actor.id",
+		"vm/vm.id",
+	}
+
+	for _, fileSubPath := range fileSubPaths {
+		filePath := pathRoot + "/" + fileSubPath
+		fmt.Printf(" ===== Parsing: %v\n\n", filePath)
 		file, err := os.Open(filePath)
 		CheckErr(err)
 		r := ParseStream {
