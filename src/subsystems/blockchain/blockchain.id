@@ -5,6 +5,7 @@ type BlockchainSubsystem struct @(mutable) {
     BestChain() Chain
     CandidateChains() []Chain
 
+    // Receiving blocks and tipset
     NewTipsets() TipsetChan
     NewBestTipset() TipsetChan
     ProcessBlock(Block)

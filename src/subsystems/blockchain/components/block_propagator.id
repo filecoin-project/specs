@@ -1,0 +1,12 @@
+package blockchain
+
+type BlockPubSub struct {}
+
+type BlockPropagator struct {
+
+	BroadcastBlock(SignedBlock)
+}
+
+func (b *BlockPropagator) BroadcastBlock(block SignedBlock) {
+	NetworkBroadcast(BlockPubSub, block)
+}
