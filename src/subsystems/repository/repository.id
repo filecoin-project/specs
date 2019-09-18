@@ -1,7 +1,7 @@
 type Repository struct {
   config Config
   ipldStore IPLDDagStore
-  KeyStore KeyStore
+  keyStore KeyStore
 
   CreateRepository(config Config, ipldStore IPLDDagStore, keyStore KeyStore) &Repository
   GetIPLDDagStore() &IPLDDagStore
@@ -12,9 +12,9 @@ type Repository struct {
 type IPLDDagStore struct {
   store LocalStorage
 
-  Get(cid CID) &IPLDObject
-  Put(cid CID, ipldObject &IPLDObject)
-  Search(ipldQuery IPLDQuery) &IPLDObject // TODO Maybe drop?
+  Get(cid CID) (&IPLDObject, error)
+  Put(cid CID, ipldObject &IPLDObject) error
+  // Search(ipldQuery IPLDQuery) &IPLDObject // TODO Maybe drop?
 }
 
 type KeyStore struct {
