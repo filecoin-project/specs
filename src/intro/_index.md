@@ -43,7 +43,7 @@ over time, without requiring further interaction from the original parties
 {{% mermaid %}}
 sequenceDiagram
     participant StorageClient
-    participant StorageMarket
+    participant StorageMarketActor
     participant StorageProvider
 
     participant Blockchain
@@ -52,7 +52,12 @@ sequenceDiagram
 
     participant StorageMining
     participant SectorIndexing
-    participant SectorProving
+    participant StorageProving
+
+    Note over StorageClient,StorageProvider: MarketsGroup
+    Note over StorageClient,StorageProvider: StorageMarketSubsystem
+    Note over Blockchain,SPC: BlockchainGroup
+    Note over StorageMining,StorageProving: MiningGroup
 
     opt StorageDealMake
         Note left of StorageClient: Piece, PieceCID
@@ -108,7 +113,7 @@ sequenceDiagram
 
         else Via Blockchain
 
-            StorageProvider ->> StorageMarket: RedeemVoucher(Voucher, PIP)
+            StorageProvider ->> StorageMarketActor: RedeemVoucher(Voucher, PIP)
         end
     end
 
