@@ -118,7 +118,7 @@ bin/codeGen: hugo/content/codeGen/*.go
 # other
 
 serve: hugo-build .PHONY
-	hugo serve
+	cd hugo && hugo serve
 
 serve-website: website .PHONY
 	# use this if `make serve` breaks
