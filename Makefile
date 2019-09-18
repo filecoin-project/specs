@@ -11,6 +11,14 @@
 # - keep diagrams/builsys/buildsys.dot in sync with the targets here
 #      that is a diagram that is meant to make it easy to understand everything here.
 
+# Pick the right python version.
+# If python2 exists, use it. Otherwise, assume python is python2.
+ifneq (,$(shell which python2 2>/dev/null))
+PYTHON ?= python2
+else
+PYTHON ?= python
+endif
+
 help:
 	@echo "SYNOPSIS"
 	@echo "	make -- filecoin spec build toolchain commands"
@@ -114,7 +122,7 @@ serve: hugo-build .PHONY
 
 serve-website: website .PHONY
 	# use this if `make serve` breaks
-	cd build/website && python -m SimpleHTTPServer 1313
+	cd build/website && $(PYTHON) -m SimpleHTTPServer 1313
 
 
 .PHONY:
