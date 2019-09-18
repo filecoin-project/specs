@@ -1930,7 +1930,7 @@ func TestAST() {
 
 		"clock/clock.id",
 
-		// "datatransfer/datatransfer.id",
+		"datatransfer/datatransfer.id",
 
 		// "libp2p/libp2p.id",
 
