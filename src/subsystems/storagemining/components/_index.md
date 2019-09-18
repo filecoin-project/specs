@@ -1,8 +1,9 @@
 ---
-title: Storage Market Components
+title: Storage Mining Components
 entries:
-#  - storage_provider
-#  - storage_client
+  - sector_sealing
+  - sector_prover
+  - proof_generator
 # suppressMenu: true
 ---
 

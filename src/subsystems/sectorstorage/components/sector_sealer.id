@@ -1,12 +1,15 @@
 struct SectorSealer {
        Seal(stagedSector StagedSector, sealedPath Path, proverId ProverId) SealedSector {
-          FilProofs.Seal(stagedSector.SectorConfig,
-	  stagedSector.path,
-	  sealedPath,
-
-	  proverId,
-	  ticket,
-	  stagedSector.SectorConfig.SectorId // Need to get these.
-	  )
+          return FilProofs.Seal(stagedSector.SectorConfig,
+			        stagedSector.path,
+				sealedPath,
+				proverId,
+				ticket,
+				stagedSector.SectorConfig.SectorId // Need to get these.
+	  )			
        }
+}
+
+type SealedSector struct {
+  panic("TODO");
 }

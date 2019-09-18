@@ -2,7 +2,6 @@ type Commitment = []bytes
 type SectorCommitment struct {
   CommD Commitment
   CommR Commitment
-  CommRStar Commitment
 }
 
 type SealProver struct {

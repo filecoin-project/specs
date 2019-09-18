@@ -1,0 +1,33 @@
+type StorageMinerActor struct {
+     CollateralVault CollateralVault
+     sectors &[]MinedSector // sectors and faults, proving period ends
+
+}
+
+type CollateralVault struct {
+     Pledged(Collateral) TokenAmount
+     Pledge(Collateral, TokenAmount)
+     DePledge(Collateral, TokenAmount)
+
+     pledgedStorageCollateral UVarint
+     pledgedConsensusCollateral UVarint
+}
+
+type Collateral union {
+     | StorageCollateral
+     | ConsensusCollateral
+}
+
+type TokenAmount UVarint # What are the units? Attofil?
+
+type MinedSector {
+     CommR Commitment
+     ProvingPeriodEnd Epoch
+     FaultStatus(Epoch) Fault
+}
+
+type Fault union {
+     | None
+     | GracePeriod
+     | Fault
+}

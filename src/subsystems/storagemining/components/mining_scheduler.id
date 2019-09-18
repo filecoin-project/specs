@@ -8,4 +8,6 @@ type MiningScheduler {
 
   RemoveSectors(sectorsToRemove SectorSet)
   DePledge(amount TokenAmount)
+
+  ReceivePiece(Piece)
 }
