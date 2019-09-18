@@ -5,7 +5,8 @@ type StoragePowerConsensusSubsystem struct (@mutable) {
 	powerTable						PowerTable
 	actor							StoragePowerActor
 	associatedStateTree 			*StateTree
-	TotalStorage()					UVarint
+	GenerateElectionProof(Tipset)	ElectionProof
+	ChooseTipsetToMine([Tipset])				[Tipset]
 }
 
 type StoragePowerActor struct {
@@ -13,13 +14,15 @@ type StoragePowerActor struct {
 	UpdateStoragePowerSubsystem(Tipset, StateTree)
 	
 	VerifyElectionProof(Address, ElectionProof)	bool
-	RegisterStorage(SealProof)					
+	TotalStorage()								UVarint
 
 	// What does graceful removal look like?
 	NotifyConsensusFault(Address, [Block])
 	NotifyStorageFault(Address)
-	ChooseTipsetToMine([Tipset])				[Tipset]
-	GenerateElectionProof(Tipset)				ElectionProof
+	TryPublishBlock(StateTree)					Block
+	
+	RegisterStorageMiner(SealProof)				Address
+	TryUpdateStorage(Address, newPower)			error					
 }
 
 type PowerTable struct {
