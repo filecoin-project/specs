@@ -1928,7 +1928,7 @@ func TestAST() {
 		// "blockchain/blockchain.id",
 		// "blockchain/block.id",
 
-		// "clock/clock.id",
+		"clock/clock.id",
 
 		// "datatransfer/datatransfer.id",
 
