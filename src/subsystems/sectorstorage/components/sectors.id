@@ -1,0 +1,90 @@
+
+type PieceID CID
+
+type PieceInfo struct {
+  ID   PieceID
+  Size UVarint
+}
+
+type SectorID {
+  MinerID
+  SectorNumber
+}
+
+type UnsealedSectorID CID // CommDs
+type SealedSectorID CID // CommRs
+
+type SealAlgorithm union {
+  ZigZagPoRep
+}
+
+type SectorInfo {
+  SectorID
+
+  Unsealed {
+    CID        UnsealedSectorID // CommD
+    Size       UVarint
+    PieceCount Uvarint          // number of pieces in this sector (can get it from len(Pieces) too)
+    Pieces     [PieceInfo]      // wont get externalized easy, -- it's big
+  }
+
+  Sealed {
+    CID  SealedSectorID // CommR
+    Size UVarint
+
+    SealArguments { // ReplicaCfg
+      Algorithm union {
+        SuperSectorPorep struct { // TODO Porcu names it
+          SectorSize SuperSectorPorepSectorSize
+          Partitions SuperSectorPorepPartitions
+          Subsectors SuperSectorPorepSubsectorCount
+        }
+      }
+    }
+
+    SealOutputArtifacts union {
+      SuperSectorPorepOutputArtifacts struct {
+        Proof       ZigZagSealProof
+        ReplicaTree ReplicaTree
+        CommRLast   ZigZagCommRLast
+        CommC       ZigZagCommC
+      }
+    }
+  }
+
+  OnChainSealInfo struct {
+    SectorID            SectorID
+    UnsealedCID         UnsealedSectorCID // CommD
+    SealedCID           SealedSectorCID   // CommR
+    SealVerifyArtifacts union {
+      ZigZagSealVerifyArtifacts struct {
+        Proof ZigZagSealProof
+      }
+    }
+  }
+}
+
+
+
+
+type SealAlgorithmArtifacts struct {
+
+  AlgorithmWideArtifacts struct {
+    // trusted setup output parameters go here
+    // updates to public parameters go here
+
+  }
+
+  SealSetupArtifacts struct {
+    // per-sector setup artifacts go here
+  }
+
+  ProveArtifacts or
+  ChallengeArtifacts struct {
+    // inputs into prove() go here
+  }
+
+  VerifyArtifacts struct {
+    // inputs into verify() go here
+  }
+}
