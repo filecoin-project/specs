@@ -37,3 +37,80 @@ Via the distributed implementation of the Filecoin VM, storage deals
 and other contract mechanisms recorded on the chain continue to be processed
 over time, without requiring further interaction from the original parties
 (such as the clients who requested the data storage).
+
+## Storage Flow
+
+{{% mermaid %}}
+sequenceDiagram
+    participant StorageClient
+    participant StorageMarket
+    participant StorageProvider
+
+    participant Blockchain
+    participant PaymentChannelActor
+    participant SPC
+
+    participant StorageMining
+    participant SectorIndexing
+    participant SectorProving
+
+    opt StorageDealMake
+        Note left of StorageClient: Piece, PieceCID
+        StorageClient->>StorageProvider: DealProposal
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal
+        Note left of StorageClient: Piece, PieceCID, Deal
+        Note right of StorageProvider: Piece, PieceCID, Deal
+        StorageClient->>StorageProvider: StorageDealQuery
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal
+    end
+
+    opt AddingDealToSector
+        StorageProvider->>StorageMining: MadeDeal(Deal,PieceRef)
+        StorageMining->>+SectorIndexing: AddToSector(Deal, PieceRef)
+        SectorIndexing-->>SectorIndexing: SectorID ← PackDealIntoSector(Deal)
+        SectorIndexing-->>SectorIndexing: PIP ← PackSector(SectorID)
+        SectorIndexing->>-StorageMining: SectorID
+        StorageMining->>StorageProvider: DealInSector(Deal,PieceRef,PIP,SectorID)
+    end
+
+    opt ClientQuery
+        StorageClient->>StorageProvider: StorageDealQuery
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal,PIP
+    end
+
+    opt SealingSector
+        StorageMining->>+StorageProving: SealSector(SectorID, ReplicaCfg)
+        StorageProving-->>StorageProving: SealOutputs ← Seal(SectorID, ReplicaCfg)
+        StorageProving->>-StorageMining: (SectorID,SealOutputs)
+        StorageMining-->>StorageMining: PublishSeal(SectorID, OnChainSectorInfo)
+    end
+
+    opt ClientQuery
+        StorageClient->>StorageProvider: StorageDealQuery
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal,PIP,SealedSectorCID
+    end
+
+
+
+    loop StorageDealCollect
+        Note Right of StorageProvider: Deal
+        alt Via Client
+            StorageProvider ->> StorageClient: ReconcileRequest(Deal, [Voucher])
+            opt If Client Does Not Have PIP
+                StorageClient -->> StorageProvider: StorageDealQuery(Deal)
+                StorageProvider -->> StorageClient: PieceID, SectorID, PIP
+            end
+            StorageClient -->> Blockchain: VerifySectorExists(SectorID)
+            StorageClient --> StorageClient: VerifyPIP(SectorID, PIP)
+            StorageClient -->> StorageClient: ReconcileResponse ← SignVouchers([Voucher])
+            StorageClient ->> StorageProvider: ReconcileResponse
+            StorageProvider ->> PaymentChannelActor: RedeemVoucher(ReconcileResponse.Voucher)
+
+        else Via Blockchain
+
+            StorageProvider ->> StorageMarket: RedeemVoucher(Voucher, PIP)
+        end
+    end
+
+
+{{% /mermaid %}}
