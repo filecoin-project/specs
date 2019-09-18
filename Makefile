@@ -76,12 +76,8 @@ pdf: go-test org2md hugo-build
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
-hugo-build: hugo-src $(shell find hugo/content | grep '.md')
+hugo-build: $(shell find hugo/content | grep '.md')
 	cd hugo && hugo
-
-hugo-src: $(shell find src)
-	rm -rf hugo/content/docs
-	cp -r src hugo/content/docs
 
 # todo
 generate-code: $(shell find hugo/content/ | grep .ipld)
