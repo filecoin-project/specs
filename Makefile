@@ -67,9 +67,9 @@ publish: website
 
 # intermediate targets
 website: go-test org2md hugo-build
-	mkdir -p build
-	-rm -rf build/website
-	mv hugo/public build/website
+	mkdir -p build/website
+	-rm -rf build/website/*
+	mv hugo/public/* build/website
 	@echo TODO: add generate-code to this target
 
 pdf: go-test org2md hugo-build
