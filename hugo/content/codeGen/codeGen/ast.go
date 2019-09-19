@@ -1858,130 +1858,21 @@ func ParseFile(r *ParseStream) []TypeDecl {
 	}
 }
 
-func TestAST() {
-	// testSrc := ``
-	// fs := token.NewFileSet()
-	// f, err := parser.ParseFile(fs, "test.go", testSrc, 0)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// ast.Print(fs, f)
-
-	// fs := token.NewFileSet()
-	// f := &ast.File {
-	// 	Name: ast.NewIdent("fileName"),
-	// 	Decls: []ast.Decl {
-	// 		GenAST(GoTypeDecl {
-	// 			"typeName",
-	// 			GoNamedType {
-	// 				"int64",
-	// 			},
-	// 		}).(ast.Decl),
-	// 	},
-	// }
-	// CheckErr(printer.Fprint(os.Stdout, fs, f))
-
-	// decls := []TypeDecl{
-	// 	TypeDecl{
-	// 		name: "Block",
-	// 		type_: ProdType{
-	// 			fields: []Field{
-	// 				Field{
-	// 					fieldName: "MinerAddress",
-	// 					fieldType: NamedType{"Address"},
-	// 					internal:  false,
-	// 				},
-	// 				Field{
-	// 					fieldName: "TestField1",
-	// 					fieldType: NamedType{"byte"},
-	// 					internal:  true,
-	// 				},
-	// 			},
-	// 			methods: []Method {
-	// 				Method {
-	// 					methodName: "SerializeSigned",
-	// 					methodType: FunType {
-	// 						retType: ArrayType {
-	// 							elementType: NamedType{"byte"},
-	// 						},
-	// 						argTypes: []Type{},
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
-
-	// goDecls := GenGoTypeDecls(origDecls)
-	// goMod := GenGoMod(goDecls)
-	// CheckErr(printer.Fprint(os.Stdout, goMod.astFileSet, goMod.astFile))
-
-	// file, err := os.Open("codeGen/test.mgo")
-
-	pathRoot := "../../../src/subsystems"
-	fileSubPaths := []string {
-		"blockchain/components/block_syncer.id",
-		// "blockchain/elections.id",
-		// "blockchain/state_tree.id",
-		// "blockchain/blockchain.id",
-		// "blockchain/block.id",
-
-		"clock/clock.id",
-
-		"data_transfer/data_transfer.id",
-
-		"filproofs/filproofs.id",
-		"libp2p/libp2p.id",
-		
-		// "libp2p/libp2p.id",
-
-		"message_pool/message.id",
-		"message_pool/message_pool.id",
-
-		// "payments/payments.id",
-
-		// "repository/repository.id",
-
-		// "retrieval_market/retrieval_market.id",
-
-		"sector_storage/components/sector_sealer.id",
-		"sector_storage/components/sector_store.id",
-		"sector_storage/components/sector_builder.id",
-		"sector_storage/sector_storage_subsystem.id",
-
-		// "storage_market/storage_market.id",
-
-		"storage_mining/components/mining_scheduler.id",
-		"storage_mining/components/post_prover.id",
-		"storage_mining/actors/storage_miner_actor.id",
-		"storage_mining/mining.id",
-
-		"storage_power_consensus/components/expected_consensus.id",
-		"storage_power_consensus/storage_power_consensus_subsystem.id",
-
-		"vm/components/actor.id",
-		"vm/components/vm_interpreter.id",
-		"vm/actors/account_actor.id",
-		"vm/actors/init_actor.id",
-		"vm/vm.id",
+func GenGoModFromFile(file *os.File) GoMod {
+	r := ParseStream {
+		rs: file,
+		state: ParseStreamState {
+			pos: 0,
+		},
+		lineMap: []LineInfo{},
+		buffer: bytes.NewBuffer([]byte{}),
 	}
+	decls := ParseFile(&r)
+	goDecls := GenGoTypeDecls(decls)
+	goMod := GenGoMod(goDecls)
+	return goMod
+}
 
-	for _, fileSubPath := range fileSubPaths {
-		filePath := pathRoot + "/" + fileSubPath
-		fmt.Printf(" ===== Parsing: %v\n\n", filePath)
-		file, err := os.Open(filePath)
-		CheckErr(err)
-		r := ParseStream {
-			rs: file,
-			state: ParseStreamState {
-				pos: 0,
-			},
-			lineMap: []LineInfo{},
-			buffer: bytes.NewBuffer([]byte{}),
-		}
-		decls := ParseFile(&r)
-		goDecls := GenGoTypeDecls(decls)
-		goMod := GenGoMod(goDecls)
-		CheckErr(printer.Fprint(os.Stdout, goMod.astFileSet, goMod.astFile))
-	}
+func WriteGoMod(goMod GoMod, outputFile *os.File) {
+	CheckErr(printer.Fprint(outputFile, goMod.astFileSet, goMod.astFile))
 }

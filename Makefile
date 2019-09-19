@@ -36,7 +36,7 @@ help:
 	@echo "	make website     build the website artifact"
 	@#echo "	make pdf         build the pdf artifact"
 	@echo "	make hugo-build  run the hugo part of the pipeline"
-	@echo "	make gen-code    generate code artifacts (eg ipld -> go)"
+	@echo "	make gen-code    generate code artifacts (eg id -> go)"
 	@echo "	make org2md      run org mode to markdown compilation"
 	@echo "	make go-test     run test cases in code artifacts"
 	@echo ""
@@ -85,10 +85,13 @@ hugo-src: $(shell find src)
 
 orient: src/orient/*
 	bin/build-spec-orient.sh
-# todo
-generate-code: $(shell find hugo/content/ | grep .ipld)
-	echo TODO: use codeGen && exit 1
-	# bin/codeGen <input-files?>
+
+ID_FILES=$(shell find src/ -name '*.id')
+GEN_GO_FILES=$(patsubst %.id, %.gen.go, $(ID_FILES))
+%.gen.go: %.id bin/codeGen
+	bin/codeGen $<
+
+gen-code: $(GEN_GO_FILES)
 
 go-test: $(shell find hugo/content/ | grep .go)
 	# testing should have the side effect that all go is compiled
