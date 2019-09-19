@@ -1934,8 +1934,8 @@ func TestAST() {
 
 		// "libp2p/libp2p.id",
 
-		// "messagepool/message.id",
-		// "messagepool/messagepool.id",
+		"messagepool/message.id",
+		"messagepool/messagepool.id",
 
 		// "payments/payments.id",
 
@@ -1943,20 +1943,20 @@ func TestAST() {
 
 		// "retrieval_market/retrieval_market.id",
 
-		// "sectorstorage/components/sector_sealer.id",
-		// "sectorstorage/components/sector_store.id",
-		// "sectorstorage/components/sector_builder.id",
-		// "sectorstorage/components/sectorstoragesubsystem.id",
+		"sectorstorage/components/sector_sealer.id",
+		"sectorstorage/components/sector_store.id",
+		"sectorstorage/components/sector_builder.id",
+		"sectorstorage/components/sectorstoragesubsystem.id",
 
 		// "storage_market/storage_market.id",
 
-		// "storagemining/components/mining_scheduler.id",
-		// "storagemining/components/post_prover.id",
-		// "storagemining/actors/storagemineractor.id",
-		// "storagemining/mining.id",
+		"storagemining/components/mining_scheduler.id",
+		"storagemining/components/post_prover.id",
+		"storagemining/actors/storagemineractor.id",
+		"storagemining/mining.id",
 
-		// "storagepowerconsensus/components/expectedconsensus.id",
-		// "storagepowerconsensus/actors/storagepoweractor.id",
+		"storagepowerconsensus/components/expectedconsensus.id",
+		"storagepowerconsensus/actors/storagepoweractor.id",
 
 		"vm/components/actor.id",
 		"vm/components/vm_interpreter.id",

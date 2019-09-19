@@ -1,43 +1,43 @@
 type PowerFraction 	Float
 type StoragePower	UVarint
 
-type StoragePowerConsensusSubsystem struct (@mutable) {
+type StoragePowerConsensusSubsystem struct  { //(@mutable)
 	powerTable						PowerTable
 	actor							StoragePowerActor
-	associatedStateTree 			*StateTree
-	GenerateElectionProof(Tipset)	ElectionProof
-	ChooseTipsetToMine([Tipset])				[Tipset]
+	// associatedStateTree 			*StateTree
+	// GenerateElectionProof(Tipset)	ElectionProof
+	// ChooseTipsetToMine([Tipset])				[Tipset]
 }
 
 type StoragePowerActor struct {
 
-	UpdateStoragePowerSubsystem(Tipset, StateTree)
+	// UpdateStoragePowerSubsystem(Tipset, StateTree)
 	
-	VerifyElectionProof(Address, ElectionProof)	bool
-	TotalStorage()								UVarint
+	// VerifyElectionProof(Address, ElectionProof)	bool
+	// TotalStorage()								UVarint
 
-	// What does graceful removal look like?
-	NotifyConsensusFault(Address, [Block])
-	NotifyStorageFault(Address)
-	TryPublishBlock(StateTree)					Block
+	// // What does graceful removal look like?
+	// NotifyConsensusFault(Address, [Block])
+	// NotifyStorageFault(Address)
+	// TryPublishBlock(StateTree)					Block
 	
-	RegisterStorageMiner(SealProof)				Address
-	TryUpdateStorage(Address, newPower)			error					
+	// RegisterStorageMiner(SealProof)				Address
+	// TryUpdateStorage(Address, newPower)			error					
 }
 
 type PowerTable struct {
 	// all power here is always verified
-	minerPower							{Address:StorageMiner}
-	LookupMinerStorage(Address)			UVarint
-	LookupMinerPowerFraction(Address)	Float
-	RemovePower(Address)
-	UpdatePower(Address, newPower)
+	// minerPower							{Address:StorageMiner}
+	// LookupMinerStorage(Address)			UVarint
+	// LookupMinerPowerFraction(Address)	Float
+	// RemovePower(Address)
+	// UpdatePower(Address, newPower)
 }
 
 type StorageMiner struct {
-	minerAddress	Address
-	minerStorage	UVarint
-	isSuspended		Bool
-	VRFKeyPair		VRFKeyPair
-	VDFKeyPair		VDFKeyPair
+	// minerAddress	Address
+	// minerStorage	UVarint
+	// isSuspended		Bool
+	// VRFKeyPair		VRFKeyPair
+	// VDFKeyPair		VDFKeyPair
 }

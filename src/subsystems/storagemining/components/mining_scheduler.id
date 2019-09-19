@@ -1,21 +1,21 @@
-type MiningScheduler {
-  checkReadySectors() SectorSet
-  checkFaultySectors() FaultSet
+type MiningScheduler struct {
+//   checkReadySectors() SectorSet
+//   checkFaultySectors() FaultSet
 
-  ProveStorage(&[&Sector], &SectorSet) (PoStProof,Bitfield)
-  ReportFaults(actor &StorageMinerActor)
+//   ProveStorage(&[&Sector], &SectorSet) (PoStProof,Bitfield)
+//   ReportFaults(actor &StorageMinerActor)
 
-  RemoveSectors(sectorsToRemove SectorSet)
-  DePledge(amount TokenAmount)
+//   RemoveSectors(sectorsToRemove SectorSet)
+//   DePledge(amount TokenAmount)
 
-  SealedSector(SealedSector) // receives from sector storage subsystem
-  AddSector(pledge TokenAmount, sectorID &SectorID, comm &SealCommitment, proof SealProof) SectorID
+//   SealedSector(SealedSector) // receives from sector storage subsystem
+//   AddSector(pledge TokenAmount, sectorID &SectorID, comm &SealCommitment, proof SealProof) SectorID
 
-  generateReplicaID(CommD Commitment, block Block)
-}
+//   generateReplicaID(CommD Commitment, block Block)
+// }
 
-type Commitment = []bytes
-type SealCommitment struct {
-  CommD     Commitment
-  CommR     Commitment
+// type Commitment = []bytes
+// type SealCommitment struct {
+//   CommD     Commitment
+//   CommR     Commitment
 }

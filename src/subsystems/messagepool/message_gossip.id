@@ -3,6 +3,7 @@
 // MessageGossip is a component of the MessagePool. It is in charge of receiving and
 // propagating Messages. It a libp2p pubsub protocol.
 type MessageGossip struct {
+	/*
 	// PropagateMessages is called to send out a set of messages to the rest of the
 	// network. This is used for messages added locally.
 	PropagateMessages([Message])
@@ -14,11 +15,13 @@ type MessageGossip struct {
 	pubsub pubsub.PubSub
 	sub    *pubsub.Subscription
 	mchan  MessageChan
+	*/
 }
 
 var FilecoinVMMessageTopic = "/filecoin.org/messages"
 
 func NewMessageGossip(ps libp2p.PubSub) (mg *MessageGossip) error {
+	/*
 	// TODO: address validation + bad message suppression.
 	val := nil
 	sub, err := ps.Subscribe(FilecoinVMMessageTopic, val)
@@ -34,16 +37,20 @@ func NewMessageGossip(ps libp2p.PubSub) (mg *MessageGossip) error {
 	go mg.handleIncoming()
 
 	return mg
+	*/
 }
 
 func (mg *MessageGossip) PropagateMessages(msgs [Message]) {
+	/*
 	// msgs is most likely to be completely new messages that nobody has.
 	// sometimes not. if we think it's really a problem, deal with it then.
 	buf := serialize(msgs)
 	mg.pubsub.Publish(FilecoinVMMessageTopic, buf)
+	*/
 }
 
 func (mg *MessageGossip) handleIncoming() {
+	/*
 	for {
 		m, err := mg.sub.Next()
 		if err != nil {
@@ -51,4 +58,5 @@ func (mg *MessageGossip) handleIncoming() {
 		}
 		m.NewMessageReceived <- m
 	}
+	*/
 }

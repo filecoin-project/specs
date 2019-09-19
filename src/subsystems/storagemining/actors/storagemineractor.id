@@ -1,15 +1,15 @@
 type StorageMinerActor struct {
-    CollateralVault CollateralVault
-    Sectors {UInt:MinedSector} // sectors and faults, proving period ends
-    CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)
-    ProvingPeriodEnd   Epoch
+    // CollateralVault CollateralVault
+    // Sectors {UInt:MinedSector} // sectors and faults, proving period ends
+    // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)
+    // ProvingPeriodEnd   Epoch
 
 
-    // contains mostly static info about this miner
-    info &MinerInfo
-
+    // // contains mostly static info about this miner
+    // info &MinerInfo
 }
 
+/*
 type CollateralVault struct {
     Pledged(Collateral) TokenAmount
     Pledge(Collateral, TokenAmount)
@@ -56,9 +56,9 @@ type MinerInfo struct {
   // Amount of space in each sector committed to the network by this miner.
   sectorSize BytesAmount
 }
+*/
 
-\**
-
+/*
 ype StorageMinerActor struct {
   // Amount of power this miner has.
   power UInt
