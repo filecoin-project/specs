@@ -48,16 +48,26 @@ sequenceDiagram
 
     participant Blockchain
     participant PaymentChannelActor
-    participant SPC
+    participant StoragePowerConsensus
+    participant StoragePowerActor
 
     participant StorageMining
+    participant StorageMinerActor
     participant SectorIndexing
     participant StorageProving
+    participant FilProofs
 
     Note over StorageClient,StorageProvider: MarketsGroup
     Note over StorageClient,StorageProvider: StorageMarketSubsystem
-    Note over Blockchain,SPC: BlockchainGroup
+    Note over Blockchain,StoragePowerActor: BlockchainGroup
     Note over StorageMining,StorageProving: MiningGroup
+
+
+    opt RegisterStorageMiner
+        StorageMining->>StorageMining: CreateMiner(WorkerPubKey)
+        StorageMining->StoragePowerActor: RegisterMiner(OwnerAddr, WorkerPubKey)
+        StoragePowerActor->StorageMining: StorageMinerActor
+    end
 
     opt StorageDealMake
         Note left of StorageClient: Piece, PieceCID
@@ -87,15 +97,24 @@ sequenceDiagram
         StorageMining->>+StorageProving: SealSector(SectorID, ReplicaCfg)
         StorageProving-->>StorageProving: SealOutputs ← Seal(SectorID, ReplicaCfg)
         StorageProving->>-StorageMining: (SectorID,SealOutputs)
-        StorageMining-->>StorageMining: PublishSeal(SectorID, OnChainSectorInfo)
+        opt CommitSector
+            StorageMining-->>StorageMinerActor: CommitSector(SectorID, OnChainSectorInfo)
+            StorageMinerActor-->>+FilProofs: VerifySeal(SectorID, OnChainSectorInfo)
+            FilProofs-->>-StorageMinerActor: {1,0} ← VerifySeal
+            alt 1 - success
+                StorageMinerActor-->>StorageMinerActor: ...Update State...
+                StorageMinerActor-->>StoragePowerActor: UpdatePower(MinerAddr)
+                StorageMinerActor-->>StorageMinerActor: 1 ← CommitSector(.)
+            else 0 - failure
+                StorageMinerActor-->>StorageMinerActor: 0 ← CommitSector(.)
+            end
+        end
     end
 
     opt ClientQuery
         StorageClient->>StorageProvider: StorageDealQuery
         StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal,PIP,SealedSectorCID
     end
-
-
 
     loop StorageDealCollect
         Note Right of StorageProvider: Deal
