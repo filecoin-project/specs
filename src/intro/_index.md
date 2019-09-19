@@ -43,6 +43,9 @@ over time, without requiring further interaction from the original parties
 {{% mermaid %}}
 sequenceDiagram
 
+    participant RetrievalClient
+    participant RetrievalProvider
+
     participant StorageClient
     participant StorageMarketActor
     participant StorageProvider
@@ -65,11 +68,20 @@ sequenceDiagram
 
     participant libp2p
 
-    Note over StorageClient,StorageProvider: MarketsGroup
+    Note over RetrievalClient,RetrievalProvider: RetrievalMarketSubsystem
     Note over StorageClient,StorageProvider: StorageMarketSubsystem
     Note over Blockchain,StoragePowerActor: BlockchainGroup
     Note over StorageMining,StorageProving: MiningGroup
 
+    opt RetrievalDealMake
+        RetrievalClient ->> RetrievalProvider: DealProposal
+        RetrievalProvider ->> RetrievalClient: Accepted, Rejected
+    end
+
+    opt RetrievalQuery
+        RetrievalClient ->> RetrievalProvider: Query(CID)
+        RetrievalProvider ->> RetrievalClient: MinPrice, Unavail
+    end
 
     opt RegisterStorageMiner
         StorageMining->>StorageMining: CreateMiner(WorkerPubKey, PledgeCollateral)
