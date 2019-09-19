@@ -6,7 +6,7 @@ type MessageGossip struct {
 	/*
 	// PropagateMessages is called to send out a set of messages to the rest of the
 	// network. This is used for messages added locally.
-	PropagateMessages([Message])
+	PropagateMessages(msgs [Message]) struct{}
 
 	// NewMessageReceived is a channel that returns message objects as they arrive.
 	// It is a notification for MessageGossip's client (usually the MessagePool).

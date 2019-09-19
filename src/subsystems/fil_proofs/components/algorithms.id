@@ -34,20 +34,21 @@ type ZigZagPoRep StackedDRG
 
 type SDRPoSpace StackedDRG
 
+type StackedDRGAlgorithm struct{}
+
 type StackedDRG struct {
   Layers            StackedDRGLayers
   NodeSize          StackedDRGNodeSize
-  EncodingAlgorithm StackedDRGAlgorithm struct {
+  Algorithm         struct {
 
   }
-
   DRGCfg            DRGCfg
   ExpanderGraphCfg  ExpanderGraphCfg
   // invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
 }
 
-DRGCfg struct {
-  Algorithm DRGAlgorithm struct {
+type DRGCfg struct {
+  Algorithm struct {
     Depth    DRGDepth    // D
     Fraction DRGFraction // E
 
@@ -60,8 +61,8 @@ DRGCfg struct {
   Nodes  DRGNodeCount
 }
 
-ExpanderGraphCfg struct {
-  Algorithm ExpanderGraphAlgorithm union {
+type ExpanderGraphCfg struct {
+  Algorithm union {
     ChungExpanderAlgorithm struct {
       Alpha ChungExpanderAlpha
       Beta  ChungExpanderBeta
