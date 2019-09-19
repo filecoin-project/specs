@@ -1931,7 +1931,10 @@ func TestAST() {
 
 		"datatransfer/datatransfer.id",
 
+		"filproofs/filproofs.id",
 		"libp2p/libp2p.id",
+		
+		// "libp2p/libp2p.id",
 
 		"messagepool/message.id",
 		"messagepool/messagepool.id",
