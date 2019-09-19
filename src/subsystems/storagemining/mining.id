@@ -1,10 +1,16 @@
-type MiningSubsystem struct {
-    // proof_scheduler ProofScheduler
-    // post_prover PostProver
-    // seal_prover SealProver
-    // actor &StorageMinerActor
+type PubKey struct {}
+type StorageDeal struct {}
+type TicketRandomness struct {}
+type Ticket struct {}
 
+type MiningSubsystem struct {
+    // actors [&StorageMinerActor]
     // CreateMiner(owner Address, worker Address) &StorageMinerActor
-    // StartMining()
-    // StopMining()
+
+    StartMining() struct {}
+    StopMining() struct {}
+
+    CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}
+    MadeDeal(deal StorageDeal)
+    ScratchTickets(randomness TicketRandomness) [Ticket]
 }
