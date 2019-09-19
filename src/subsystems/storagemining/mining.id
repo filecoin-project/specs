@@ -11,6 +11,6 @@ type MiningSubsystem struct {
     StopMining() struct {}
 
     CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}
-    MadeDeal(deal StorageDeal)
+    MadeDeal(deal StorageDeal) struct {}
     ScratchTickets(randomness TicketRandomness) [Ticket]
 }
