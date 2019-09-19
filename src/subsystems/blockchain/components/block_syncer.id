@@ -1,4 +1,4 @@
-type ErrInvalidBlock error
+// type ErrInvalidBlock error
 
 type BlockSyncer struct {
     /*
@@ -11,7 +11,9 @@ type BlockSyncer struct {
     validationGraph         BlockValidationGraph
     validateBlockSyntax()   bool
     */ 
-    OnNewBlock(block Block) struct {}
+    // call from libp2p
+    ReceiveBlock(block Block) struct {}
+    PublishBlock(block Block) struct {}
     ValidateBlock(block Block) bool
 }
 
