@@ -1,0 +1,20 @@
+{
+  "expected_winning_miners": 1,
+  "degree_expander": 8,
+  "degree_base": 6,
+  "epsilon": 0.1,
+  "node_size": 32,
+  "lambda": 80,
+  "reseal": 0,
+  "proving_period_hours": 24,
+  "sector_size_gb": 32,
+  "block_time": 15,
+  "merkle_hash_constraints": 1300,
+  "kdf_hash_time": 0.000000045608,
+  "leaf_hash_time": 0.000000045608,
+  "encoding_amax": 2,
+  "merkle_hash_time": 0.000013078,
+  "cores": 16,
+  "leaf_hash_constraints": 10000,
+  "merkle_hash_time_circuit": 0.076994
+}
