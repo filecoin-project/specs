@@ -42,12 +42,16 @@ over time, without requiring further interaction from the original parties
 
 {{% mermaid %}}
 sequenceDiagram
+
     participant StorageClient
     participant StorageMarketActor
     participant StorageProvider
 
-    participant Blockchain
     participant PaymentChannelActor
+
+    participant Blockchain
+    participant BlockSyncer
+    participant BlockProducer
     participant StoragePowerConsensus
     participant StoragePowerActor
 
@@ -56,6 +60,8 @@ sequenceDiagram
     participant SectorIndexing
     participant StorageProving
     participant FilProofs
+
+    participant libp2p
 
     Note over StorageClient,StorageProvider: MarketsGroup
     Note over StorageClient,StorageProvider: StorageMarketSubsystem
@@ -133,6 +139,29 @@ sequenceDiagram
         else Via Blockchain
 
             StorageProvider ->> StorageMarketActor: RedeemVoucher(Voucher, PIP)
+        end
+    end
+
+    loop BlockReception
+        libp2p -->> BlockSyncer: block ← Subscription.Next()
+        BlockSyncer -->> BlockSyncer: ValidateBlock(block)
+    end
+
+
+    loop BlockProduction
+
+        alt New Tipset
+            Blockchain -->> Blockchain: tipset ← onNewBestTipset()
+        else Retrying on null block
+            Blockchain -->> Blockchain: tipset ← addNullBlock(tipset)
+        end
+        Blockchain -->> StoragePowerConsensus: tryLeaderElection(tipset)
+        StoragePowerConsensus -->> StoragePowerConsensus: VDF(VRF())
+        StoragePowerConsensus -->> Blockchain: {Electifact} ← tryLeaderElection(.)
+        opt Electifact - success
+            Blockchain -->> BlockProducer: AssembleBlock(Electifact)
+            BlockProducer  -->> BlockProducer: block ← AssembleBlock()
+            BlockProducer -->> BlockSyncer: SendBlock(block)
         end
     end
 
