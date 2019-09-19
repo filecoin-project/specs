@@ -178,7 +178,7 @@ sequenceDiagram
 
 
     loop PoStSubmission
-            Note in every proving period
+            Note Right of PostSubmission: in every proving period
             StorageMining -->> Blockchain: GetRandomness(PoSt)
             Blockchain -->> StorageMining: randomness ← GetRandomness(PoSt)
             StorageMining -->> StorageProving: GeneratePoSt(randomness)
