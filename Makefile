@@ -116,10 +116,12 @@ bin/codeGen: hugo/content/codeGen/*.go
 # other
 
 serve: hugo-build .PHONY
-	hugo serve
+	echo "run `make website` and refresh to update"
+	cd hugo && hugo serve
 
 serve-website: website .PHONY
 	# use this if `make serve` breaks
+	echo "run `make website` and refresh to update"
 	cd build/website && python -m SimpleHTTPServer 1313
 
 

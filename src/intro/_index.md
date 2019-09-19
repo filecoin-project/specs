@@ -149,13 +149,12 @@ sequenceDiagram
         BlockSyncer -->> StoragePowerConsensus: ValidateBlock(block)
         BlockSyncer -->> Chain: ValidateBlock(block)
         Chain -->> BlockSyncer: {StateTree} ← ValidateBlock(block)
-        
+
         alt Round Cutoff
             Chain -->> Chain: AssembleTipsets([block])
             Chain -->> StoragePowerConsensus: BestTipset([Tipset])
             Chain -->> StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
         end
-
     end
 
 
