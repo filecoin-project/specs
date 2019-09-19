@@ -83,7 +83,7 @@ hugo-src: $(shell find src)
 	rm -rf hugo/content/docs
 	cp -r src hugo/content/docs
 
-orient: .PHONY
+orient: src/orient/*
 	bin/build-spec-orient.sh
 # todo
 generate-code: $(shell find hugo/content/ | grep .ipld)
