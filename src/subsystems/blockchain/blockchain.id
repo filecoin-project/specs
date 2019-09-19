@@ -1,48 +1,60 @@
 type Epoch Uvarint
+type SectorID struct {}
+type Randomness struct {}
 
 type BlockchainSubsystem struct @(mutable) {
-    LatestEpoch() Epoch
-    BestChain() Chain
-    CandidateChains() []Chain
+    // LatestEpoch() Epoch
+    // BestChain() Chain
+    // CandidateChains() []Chain
 
-    // Receiving blocks and tipset
-    NewTipsets() TipsetChan
-    NewBestTipset() TipsetChan
-    ProcessBlock(Block)
+    // // Receiving blocks and tipset
+    // NewTipsets() TipsetChan
+    // NewBestTipset() TipsetChan
+    // ProcessBlock(Block)
 
-    validateBlockSemantics(Block)
-    SyncState() union {
-        Booting
-        CatchingUp
-        Synchronized
-    }
+    // validateBlockSemantics(Block)
+    // SyncState() union {
+    //     Booting
+    //     CatchingUp
+    //     Synchronized
+    // }
+
+    // call by StorageClient
+    VerifySectorExists(sectorId SectorID) bool
+    
+    // call by BlockSyncer
+    ConsiderBlock(block Block) bool
+
+    // call by StorageMining
+    GetPostRandomness() Randomness
+
 }
 
-type Chain struct {
-    HeadEpoch() Epoch
-    FinalizedEpoch() Epoch
-    LatestCheckpoint() Epoch
+// type Chain struct {
+//     HeadEpoch() Epoch
+//     FinalizedEpoch() Epoch
+//     LatestCheckpoint() Epoch
 
-    TipsetAtEpoch(epoch Epoch) Tipset
-}
+//     TipsetAtEpoch(epoch Epoch) Tipset
+// }
 
-type ChainWeight UVarint
+// type ChainWeight UVarint
 
-type Address struct {
-	NetworkID union {
-		Testnet
-		Mainnet
-	}
-	Protocol union {
-		ID
-		Secp256k1
-		Actor
-		BLS
-    }
+// type Address struct {
+// 	NetworkID union {
+// 		Testnet
+// 		Mainnet
+// 	}
+// 	Protocol union {
+// 		ID
+// 		Secp256k1
+// 		Actor
+// 		BLS
+//     }
 
-    VerifySyntax(addrType) bool
-}
+//     VerifySyntax(addrType) bool
+// }
 
-func (addr *Address) VerifySyntax(addrType) {
-    // TODO
-}
+// func (addr *Address) VerifySyntax(addrType) {
+//     // TODO
+// }
