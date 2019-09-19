@@ -126,17 +126,17 @@ sequenceDiagram
 
     loop BlockReception
         libp2p -->> BlockSyncer: block ← Subscription.Next()
-        BlockSyncer -->- BlockSyncer: ValidateBlock(block)
+        BlockSyncer -->+ BlockSyncer: ValidateBlock(block)
         BlockSyncer -->> FilProofs: Proofs.ValidateBlock(block)
         BlockSyncer -->> StoragePowerConsensus: SPC.ValidateBlock(block)
-        BlockSyncer -->+ Blockchain: ConsiderBlock(block)
+        BlockSyncer -->- Blockchain: ConsiderBlock(block)
         Blockchain -->> Blockchain: VerifyStateRoot(block)
         Blockchain -->> Blockchain: StateTree ← GetStateTree(block)
 
         alt Round Cutoff
             Blockchain -->> Blockchain: AssembleTipsets([block])
-            Blockchain -->- StoragePowerConsensus: BestTipset([Tipset])
-            Blockchain -->+ StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
+            Blockchain -->+ StoragePowerConsensus: BestTipset([Tipset])
+            Blockchain -->- StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
             Blockchain -->> Blockchain: ApplyStateTree(StateTree)
         end
     end
@@ -171,7 +171,7 @@ sequenceDiagram
             StorageProving -->> StorageMining: (PoSt) ← GeneratePoSt(randomness)
             StorageMining -->> StorageMinerActor: PublishPoSt(PoSt, DoneSet)
         alt PoStCompletion
-            StorageMining --> SectorIndexing: DoneSet(Sector)
+            StorageMining -->> SectorIndexing: DoneSet(Sector)
         end
     end
 
@@ -200,13 +200,13 @@ sequenceDiagram
     end
 
     opt Consensus Fault
-        StorageMinerActor --> StoragePowerActor: DeclareConsensusFault(Proof)
-        StoragePowerActor ->+ StoragePowerConsensus: ValidateFault(Proof)
+        StorageMinerActor -->> StoragePowerActor: DeclareConsensusFault(Proof)
+        StoragePowerActor -->+ StoragePowerConsensus: ValidateFault(Proof)
 
         alt Valid Fault
-            StoragePowerConsensus --> StoragePowerActor: TerminateMiner()
-            StoragePowerConsensus --> StoragePowerActor: SlashPledgeCollateral(Address)
-            StoragePowerConsensus ->- StorageMinerActor: Reward ← DeclareConsensusFault(Proof)
+            StoragePowerConsensus -->> StoragePowerActor: TerminateMiner()
+            StoragePowerConsensus -->> StoragePowerActor: SlashPledgeCollateral(Address)
+            StoragePowerConsensus -->- StorageMinerActor: Reward ← DeclareConsensusFault(Proof)
         end
     end
 
