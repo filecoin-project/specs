@@ -2,4 +2,208 @@
 title: "Architecture Diagram"
 ---
 
-TODO
+## Overview Diagram
+
+<img src="overview.svg" />
+
+## Storage Flow
+
+{{% mermaid %}}
+sequenceDiagram
+
+    participant RetrievalClient
+    participant RetrievalProvider
+
+    participant StorageClient
+    participant StorageMarketActor
+    participant StorageProvider
+
+    participant PaymentChannelActor
+
+    participant Blockchain
+    participant BlockSyncer
+    participant BlockProducer
+    participant StoragePowerConsensus
+    participant StoragePowerActor
+
+    participant StorageMining
+    participant StorageMinerActor
+    participant SectorIndexing
+    participant StorageProving
+    participant FilProofs
+
+    participant Clock
+
+    participant libp2p
+
+    Note over RetrievalClient,RetrievalProvider: RetrievalMarketSubsystem
+    Note over StorageClient,StorageProvider: StorageMarketSubsystem
+    Note over Blockchain,StoragePowerActor: BlockchainGroup
+    Note over StorageMining,StorageProving: MiningGroup
+
+    opt RetrievalDealMake
+        RetrievalClient ->> RetrievalProvider: DealProposal
+        RetrievalProvider ->> RetrievalClient: Accepted, Rejected
+    end
+
+    opt RetrievalQuery
+        RetrievalClient ->> RetrievalProvider: Query(CID)
+        RetrievalProvider ->> RetrievalClient: MinPrice, Unavail
+    end
+
+    opt RegisterStorageMiner
+        StorageMining->>StorageMining: CreateMiner(WorkerPubKey, PledgeCollateral)
+        StorageMining->StoragePowerActor: RegisterMiner(OwnerAddr, WorkerPubKey)
+        StoragePowerActor->StorageMining: StorageMinerActor
+    end
+
+    opt StorageDealMake
+        Note left of StorageClient: Piece, PieceCID
+        StorageClient->>StorageProvider: DealProposal
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal
+        Note left of StorageClient: Piece, PieceCID, Deal
+        Note right of StorageProvider: Piece, PieceCID, Deal
+        StorageClient->>StorageProvider: StorageDealQuery
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal
+    end
+
+    opt AddingDealToSector
+        StorageProvider->>StorageMining: MadeDeal(Deal,PieceRef)
+        StorageMining->>+SectorIndexing: AddToSector(Deal, PieceRef)
+        SectorIndexing-->>SectorIndexing: SectorID ← PackDealIntoSector(Deal)
+        SectorIndexing-->>SectorIndexing: PIP ← PackSector(SectorID)
+        SectorIndexing->>-StorageMining: SectorID
+        StorageMining->>StorageProvider: DealInSector(Deal,PieceRef,PIP,SectorID)
+    end
+
+    opt ClientQuery
+        StorageClient->>StorageProvider: StorageDealQuery
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal,PIP
+    end
+
+    opt SealingSector
+        StorageMining->>+StorageProving: SealSector(SectorID, ReplicaCfg)
+        StorageProving-->>StorageProving: SealOutputs ← Seal(SectorID, ReplicaCfg)
+        StorageProving->>-StorageMining: (SectorID,SealOutputs)
+        opt CommitSector
+            StorageMining-->>StorageMinerActor: CommitSector(SectorID, OnBlockchainSectorInfo, StorageCollateral)
+            StorageMinerActor-->>+FilProofs: VerifySeal(SectorID, OnSectorInfo)
+            FilProofs-->>-StorageMinerActor: {1,0} ← VerifySeal
+            alt 1 - success
+                StorageMinerActor-->>StorageMinerActor: ...Update State...
+                StorageMinerActor-->>StoragePowerActor: UpdatePower(MinerAddr)
+                StorageMinerActor-->>StorageMinerActor: 1 ← CommitSector(.)
+            else 0 - failure
+                StorageMinerActor-->>StorageMinerActor: 0 ← CommitSector(.)
+            end
+        end
+    end
+
+    opt ClientQuery
+        StorageClient->>StorageProvider: StorageDealQuery
+        StorageProvider->>StorageClient: DealResponse,DealAccepted,Deal,PIP,SealedSectorCID
+    end
+
+    loop StorageDealCollect
+        Note Right of StorageProvider: Deal
+        alt Via Client
+            StorageProvider ->> StorageClient: ReconcileRequest(Deal, [Voucher])
+            opt If Client Does Not Have PIP
+                StorageClient -->> StorageProvider: StorageDealQuery(Deal)
+                StorageProvider -->> StorageClient: PieceID, SectorID, PIP
+            end
+            StorageClient -->> Blockchain: VerifySectorExists(SectorID)
+            StorageClient --> StorageClient: VerifyPIP(SectorID, PIP)
+            StorageClient -->> StorageClient: ReconcileResponse ← SignVouchers([Voucher])
+            StorageClient ->> StorageProvider: ReconcileResponse
+            StorageProvider ->> PaymentChannelActor: RedeemVoucher(ReconcileResponse.Voucher)
+
+        else Via Blockchain
+
+            StorageProvider ->> StorageMarketActor: RedeemVoucher(Voucher, PIP)
+        end
+    end
+
+    loop BlockReception
+        libp2p -->> BlockSyncer: block ← Subscription.Next()
+        BlockSyncer -->> BlockSyncer: ValidateBlock(block)
+        BlockSyncer -->> FilProofs: ValidateBlock(block)
+        BlockSyncer -->> StoragePowerConsensus: ValidateBlock(block)
+        BlockSyncer -->> Blockchain: ValidateBlock(block)
+        Blockchain -->> BlockSyncer: {StateTree} ← ValidateBlock(block)
+
+        alt Round Cutoff
+            Blockchain -->> Blockchain: AssembleTipsets([block])
+            Blockchain -->> StoragePowerConsensus: BestTipset([Tipset])
+            Blockchain -->> StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
+        end
+    end
+
+
+    loop BlockProduction
+        alt New Tipset
+            Blockchain -->> Blockchain: tipset ← onNewBestTipset()
+        else Retrying on null block
+            Blockchain -->> Blockchain: tipset ← addNullBlock(tipset)
+        end
+        Blockchain -->> StoragePowerConsensus: tryLeaderElection(tipset)
+        StoragePowerConsensus -->> StoragePowerConsensus: VDF(VRF())
+        StoragePowerConsensus -->> Blockchain: {Electifact} ← tryLeaderElection(.)
+        opt Electifact - success
+            Blockchain -->> BlockProducer: AssembleBlock(Electifact)
+            BlockProducer  -->> BlockProducer: block ← AssembleBlock()
+            BlockProducer -->> BlockSyncer: SendBlock(block)
+        end
+    end
+
+
+    loop PoStSubmission
+            Note Right of PostSubmission: in every proving period
+            StorageMining -->> Blockchain: GetRandomness(PoSt)
+            Blockchain -->> StorageMining: randomness ← GetRandomness(PoSt)
+            StorageMining -->> StorageProving: GeneratePoSt(randomness)
+            StorageProving -->> StorageMining: PoSt ← GeneratePoSt(randomness)
+            StorageMining -->> StorageMining: PublishPoSt()
+    end
+
+    alt PoStCompletion
+        StorageMining -->> StorageMining: DoneSet(Sector)
+        StorageMining --> SectorIndexing: DoneSet(Sector)
+    end
+
+    opt Storage Fault
+
+        alt Declared Storage Fault
+            StorageMinerActor -->> StorageMinerActor: DeclareFaults([faults])
+            StorageMinerActor -->>  StoragePowerConsensus: SuspendMiner(Address)
+        else Undeclared Storage Fault
+            Clock -->>  StoragePowerConsensus: SuspendMiner(Address)
+        end
+
+        alt Recovery in Grace Period
+            StorageMinerActor -->> StorageMinerActor: PublishPoSt(FaultedPoSt)
+            StorageMinerActor -->> StoragePowerConsensus: UpdatePower()
+        else Recovery past Grace Period
+            Clock -->>  StorageMinerActor: SlashStorageCollateral(Fault)
+            StorageMinerActor -->> StorageMinerActor: AddCollateral(Sector)
+            StorageMinerActor -->> StorageMinerActor: PublishPoSt(FaultedPoSt)
+            StorageMinerActor -->> StoragePowerActor: UpdatePower()
+        else Recovery Past Sector Failure Timeout
+            Clock -->>  StorageMinerActor: SlashStorageCollateral(Fault)
+            StorageMinerActor -->> StorageMinerActor: AddCollateral(Sector)
+            StorageMining-->>StorageProving: SealSector(SectorID, ReplicaCfg)
+        end
+    end
+
+    opt Consensus Fault
+        StorageMinerActor --> StoragePowerActor: DeclareConsensusFault(Proof)
+        StoragePowerActor ->+ StoragePowerConsensus: ValidateFault(Proof)
+
+        alt Valid Fault
+            StoragePowerConsensus --> StoragePowerActor: TerminateMiner()
+            StoragePowerConsensus --> StoragePowerActor: SlashPledgeCollateral(Address)
+            StoragePowerConsensus ->- StorageMinerActor: Reward ← DeclareConsensusFault(Proof)
+        end
+    end
+
+{{% /mermaid %}}
