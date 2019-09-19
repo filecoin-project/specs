@@ -1,18 +1,28 @@
-package blockchain
-
 // type BlockStore struct {
 //     GetBlock(CID) Block
 //     PutBlock(Block) error
 // }
 
 type BlockProducer struct {
-	ProduceBlock(/**/) SignedBlock
+	ElectionProof() ElectionProof
+	Messages() [Message]
+
+	OnNewBestTipset(tipset Tipset) struct {}
+
+	TryLeaderElection (scratchedTicket [Ticket])
+	AssembleBlock(electionProof ElectionProof, messages [Message]) Block
 }
 
-type SignedBlock struct {
-	UnsignedBlock Block
-	BlockSig Signature
-}
+type ElectionProof struct {}
+type Message struct {}
+
+// type SignedBlock struct {
+// 	UnsignedBlock Block
+// 	BlockSig Signature
+// }
+
+
+
 
 type Block struct {
 	//TODO can we group these better into subcomponents?
@@ -33,6 +43,7 @@ type Block struct {
 //	ComputeUnsignedFingerprint() []byte
 }
 
+/*
 type Tipset struct {
 	Blocks            [Block]
 
@@ -100,3 +111,4 @@ func (ts *Tipset) ValidateSyntax() bool {
 
 	return true
 }
+*/

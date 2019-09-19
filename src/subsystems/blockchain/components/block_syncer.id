@@ -12,7 +12,7 @@ type BlockSyncer struct {
     validateBlockSyntax()   bool
     */ 
     OnNewBlock(block Block) struct {}
-    ValidateBlock(block Block) struct {bool bool}
+    ValidateBlock(block Block) bool
 }
 
     /*
