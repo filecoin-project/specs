@@ -1920,24 +1920,23 @@ func TestAST() {
 
 	pathRoot := "../../../src/subsystems"
 	fileSubPaths := []string {
-		// "blockchain/components/block_receiver.id",
 		"blockchain/components/block_syncer.id",
 		// "blockchain/elections.id",
-		// "blockchain/statetree.id",
+		// "blockchain/state_tree.id",
 		// "blockchain/blockchain.id",
 		// "blockchain/block.id",
 
 		"clock/clock.id",
 
-		"datatransfer/datatransfer.id",
+		"data_transfer/data_transfer.id",
 
 		"filproofs/filproofs.id",
 		"libp2p/libp2p.id",
 		
 		// "libp2p/libp2p.id",
 
-		"messagepool/message.id",
-		"messagepool/messagepool.id",
+		"message_pool/message.id",
+		"message_pool/message_pool.id",
 
 		// "payments/payments.id",
 
@@ -1945,20 +1944,20 @@ func TestAST() {
 
 		// "retrieval_market/retrieval_market.id",
 
-		"sectorstorage/components/sector_sealer.id",
-		"sectorstorage/components/sector_store.id",
-		"sectorstorage/components/sector_builder.id",
-		"sectorstorage/components/sectorstoragesubsystem.id",
+		"sector_storage/components/sector_sealer.id",
+		"sector_storage/components/sector_store.id",
+		"sector_storage/components/sector_builder.id",
+		"sector_storage/components/sector_storage_subsystem.id",
 
 		// "storage_market/storage_market.id",
 
 		"storagemining/components/mining_scheduler.id",
 		"storagemining/components/post_prover.id",
-		"storagemining/actors/storagemineractor.id",
+		"storagemining/actors/storage_miner_actor.id",
 		"storagemining/mining.id",
 
-		"storagepowerconsensus/components/expectedconsensus.id",
-		"storagepowerconsensus/actors/storagepoweractor.id",
+		"storage_power_consensus/components/expected_consensus.id",
+		"storage_power_consensus/storage_power_consensus_subsystem.id",
 
 		"vm/components/actor.id",
 		"vm/components/vm_interpreter.id",

@@ -2,6 +2,16 @@ digraph Filecoin {
   compound=true;
   ranksep=0.01;
 
+  subgraph cluster_block_producer {
+    style=filled
+    color=lightgrey
+    label = "Block Producer"
+
+    { // components
+      node [shape=box]
+      "Block Producer"
+    }
+  }
 
   subgraph cluster_blockchain_subgroup {
     color=lightcyan1
@@ -16,7 +26,6 @@ digraph Filecoin {
         node [shape=box]
         "Chain"
         "Block Syncer"
-        "Block Producer"
       }
 
       "Chain" -> "Block Producer" [style=invis]
