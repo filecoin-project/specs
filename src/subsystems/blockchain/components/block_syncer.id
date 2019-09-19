@@ -11,12 +11,13 @@ type BlockSyncer struct {
     validationGraph         BlockValidationGraph
     validateBlockSyntax()   bool
     */ 
+    OnNewBlock(block Block) struct {}
+    ValidateBlock(block Block) struct {bool bool}
 }
 
-
-
-type BlockValidationGraph struct {
     /*
+type BlockValidationGraph struct {
+
     // ValidatedBlocks contains all the blocks we have validated.
     // This means all the blocks connected into the main blockchain.
     ValidatedBlocks BlockStore
@@ -34,7 +35,6 @@ type BlockValidationGraph struct {
     UnconnectedBlocks AncestryGraph
 
     ConsiderBlock(Block) error
-    */
 }
 
 ////////////////////
