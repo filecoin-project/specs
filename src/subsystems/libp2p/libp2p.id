@@ -19,7 +19,7 @@ type Libp2pNode struct {
   PeerID() PeerID
 
   // MountProtocol adds given Protocol under specified protocol id.
-  MountProtocol(Path, Protocol)
+  MountProtocol(path Path, protocol Protocol) struct {}
 
   // ConnectPeerID establishes a connection to peer matching given PeerInfo.
   //
@@ -30,7 +30,7 @@ type Libp2pNode struct {
   //     NOTE: probably implies using kad-dht or gossipsub for this.
   //
   // Idempotent. If a connection already exists, this method returns silently.
-  Connect(PeerInfo)
+  Connect(peerInfo PeerInfo) struct {}
 }
 
 type Protocol union {
@@ -42,18 +42,18 @@ type Protocol union {
 // via streams of bytes.
 //
 // See golang.org/pkg/io -- as this is modelled after io.Reader and io.Writer
-type Stream interface {
+type Stream struct {
   // Read reads bytes from the underlying stream and copies them to buf.
   // Read returns the number of bytes read (n), and potentially an error
   // encountered while reading. Read reads at most len(buf) byte.
   // Read may read 0 bytes.
-  Read(buf []byte) (n int, err error)
+  Read(buf Bytes) union {n int, err error}
 
   // Write writes bytes to the underlying stream, copying them from buf.
   // Write returns the number of bytes written (n), and potentially an error
   // encountered while writing. Write writes at most len(buf) byte.
   // Write may read 0 bytes.
-  Write(buf []byte) (n int, err error)
+  Write(buf Bytes) union {n int, err error}
 
   // Close terminates client's use of the stream.
   // Calling Read or Write after Close is an error.
@@ -63,14 +63,21 @@ type Stream interface {
 
 type StreamProtocol struct {
   // AcceptStream accepts an incoming stream connection.
-  AcceptStream() (Stream, PeerInfo, error)
+  AcceptStream() struct {
+    stream Stream,
+    peerInfo PeerInfo,
+    err error
+  }
 
   // OpenStream opens a stream to a particular PeerID.
-  OpenStream(PeerInfo) (Stream, error)
+  OpenStream(peerInfo PeerInfo) struct {
+    stream Stream,
+    err error
+  }
 }
 
 // Datagram
-type Datagram []bytes
+type Datagram Bytes
 
 // Datagrams are "messages" in the network packet sense of the word.
 //
@@ -82,15 +89,19 @@ type Datagram []bytes
 // Suggestion for libp2p: use datagram too.
 type DatagramProtocol struct {
   // AcceptDatagram accepts an incoming message.
-  AcceptDatagram() (Datagram, PeerInfo, error)
+  AcceptDatagram() struct {
+    datagram Datagram, 
+    peerInfo PeerInfo, 
+    err error
+  }
 
   // OpenStream opens a stream to a particular PeerID
-  SendDatagram(Datagram, PeerInfo) (error)
+  SendDatagram(datagram Datagram, peerInfo PeerInfo) struct {err error}
 }
 
 type StorageDealLibp2pProtocol struct {
-  StreamProtocol
+  StreamProtocol StreamProtocol
   // ---
-  AcceptStream()
-  OpenStream()
+  AcceptStream() struct {}
+  OpenStream() struct {}
 }

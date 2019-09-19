@@ -1921,8 +1921,7 @@ func TestAST() {
 	pathRoot := "../../../src/subsystems"
 	fileSubPaths := []string {
 		// "blockchain/components/block_receiver.id",
-		// "blockchain/components/block_producer.id",
-		// "blockchain/components/block_propagator.id",
+		"blockchain/components/block_syncer.id",
 		// "blockchain/elections.id",
 		// "blockchain/statetree.id",
 		// "blockchain/blockchain.id",
@@ -1932,7 +1931,7 @@ func TestAST() {
 
 		"datatransfer/datatransfer.id",
 
-		// "libp2p/libp2p.id",
+		"libp2p/libp2p.id",
 
 		"messagepool/message.id",
 		"messagepool/messagepool.id",

@@ -1,6 +1,7 @@
 type ErrInvalidBlock error
 
-type BlockReceiver struct {
+type BlockSyncer struct {
+    /*
     // Note: a Block uniquely identifies a tipset (the parents)
     // from here, we may consider many tipsets that _include_ Block
     // but we must indeed include it and not consider tipsets that
@@ -8,10 +9,14 @@ type BlockReceiver struct {
     LatestCheckpoint        *Block
 
     validationGraph         BlockValidationGraph
-    validateBlockSyntax()   bool   
+    validateBlockSyntax()   bool
+    */ 
 }
 
+
+
 type BlockValidationGraph struct {
+    /*
     // ValidatedBlocks contains all the blocks we have validated.
     // This means all the blocks connected into the main blockchain.
     ValidatedBlocks BlockStore
@@ -29,12 +34,13 @@ type BlockValidationGraph struct {
     UnconnectedBlocks AncestryGraph
 
     ConsiderBlock(Block) error
+    */
 }
 
 ////////////////////
 // Implementation //
 ////////////////////
-
+/*
 func (g *BlockValidationGraph) ConsiderBlock(block Block) error {
     if ! block.CheapValidate() {
         return ErrInvalidBlock
@@ -144,3 +150,14 @@ type Subchain struct {
     Tipsets {Block:Tipset}
 }
 
+type BlockPubSub struct {}
+
+type BlockPropagator struct {
+
+    BroadcastBlock(SignedBlock)
+}
+
+func (b *BlockPropagator) BroadcastBlock(block SignedBlock) {
+    NetworkBroadcast(BlockPubSub, block)
+}
+*/
