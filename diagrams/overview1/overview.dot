@@ -15,13 +15,11 @@ digraph Filecoin {
       { // components
         node [shape=box]
         "Chain"
-        "Block Receiver"
-        "Block Propagator"
+        "Block Syncer"
         "Block Producer"
       }
 
       "Chain" -> "Block Producer" [style=invis]
-      "Block Receiver" -> "Block Propagator" [style=invis]
     }
 
     subgraph cluster_vm {
@@ -53,11 +51,8 @@ digraph Filecoin {
       { // components
         node [shape=box]
         "Message Storage"
-        "Message Propagator"
-        "Message Receiver"
+        "Message Syncer"
       }
-
-      "Message Storage" -> "Message Receiver" -> "Message Propagator" [style=invis]
     }
 
 
@@ -363,8 +358,8 @@ digraph Filecoin {
     "AuthSwap" -> "Graphsync" [ltail=cluster_datatransfers]
     "Storage Provider" -> "Data Transfers" [ltail=cluster_storagemarket, lhead=cluster_datatransfers]
     "Retrieval Provider" -> "Data Transfers" [ltail=cluster_retrievalmarket, lhead=cluster_datatransfers]
-    "Block Receiver" -> "Block Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
-    "Message Receiver" -> "Message Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
+    "Block Syncer" -> "Block Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
+    "Message Syncer" -> "Message Pubsub" [ltail=cluster_blockchain, lhead=cluster_network]
     // "Message Storage" -> "IPLD DagStore" [ltail=cluster_blockchain, lhead=cluster_repository]
     "Switch" -> "KeyStore"
     "NTP" -> "Switch" [ltail=cluster_clock, lhead=cluster_libp2p]
