@@ -126,16 +126,18 @@ sequenceDiagram
 
     loop BlockReception
         libp2p -->> BlockSyncer: block ← Subscription.Next()
-        BlockSyncer -->> BlockSyncer: ValidateBlock(block)
-        BlockSyncer -->> FilProofs: ValidateBlock(block)
-        BlockSyncer -->> StoragePowerConsensus: ValidateBlock(block)
-        BlockSyncer -->> Blockchain: ValidateBlock(block)
-        Blockchain -->> BlockSyncer: {StateTree} ← ValidateBlock(block)
+        BlockSyncer -->- BlockSyncer: ValidateBlock(block)
+        BlockSyncer -->> FilProofs: Proofs.ValidateBlock(block)
+        BlockSyncer -->> StoragePowerConsensus: SPC.ValidateBlock(block)
+        BlockSyncer -->+ Blockchain: ConsiderBlock(block)
+        Blockchain -->> Blockchain: VerifyStateRoot(block)
+        Blockchain -->> Blockchain: StateTree ← GetStateTree(block)
 
         alt Round Cutoff
             Blockchain -->> Blockchain: AssembleTipsets([block])
-            Blockchain -->> StoragePowerConsensus: BestTipset([Tipset])
-            Blockchain -->> StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
+            Blockchain -->- StoragePowerConsensus: BestTipset([Tipset])
+            Blockchain -->+ StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
+            Blockchain -->> Blockchain: ApplyStateTree(StateTree)
         end
     end
 
@@ -146,12 +148,16 @@ sequenceDiagram
         else Retrying on null block
             Blockchain -->> Blockchain: tipset ← addNullBlock(tipset)
         end
-        Blockchain -->> StoragePowerConsensus: tryLeaderElection(tipset)
-        StoragePowerConsensus -->> StoragePowerConsensus: VDF(VRF())
-        StoragePowerConsensus -->> Blockchain: {Electifact} ← tryLeaderElection(.)
-        opt Electifact - success
-            Blockchain -->> BlockProducer: AssembleBlock(Electifact)
-            BlockProducer  -->> BlockProducer: block ← AssembleBlock()
+        Blockchain -->> BlockProducer: NewBestTipset(tipset)
+        BlockProducer -->+ StorageMining: ScratchTicket(randomness)
+        StorageMining -->- BlockProducer: [scratchedTicket] ← ScratchTicket(ticket)
+        BlockProducer -->+ StoragePowerConsensus: tryLeaderElection([scratchedTicket])
+        StoragePowerConsensus -->- BlockProducer: {[(Address, ElectionProof)]} ← tryLeaderElection([ticket])
+        opt tryLeaderElection - success, for each ElectionProof
+            BlockProducer -->+ MessagePool: GetMessages()
+            MessagePool -->- BlockProducer: [Message] ← GetMessages()
+            BlockProducer -->+ BlockProducer: AssembleBlock(ElectionProof, Messages)
+            BlockProducer  -->- BlockProducer: block ← AssembleBlock()
             BlockProducer -->> BlockSyncer: SendBlock(block)
         end
     end
@@ -159,16 +165,14 @@ sequenceDiagram
 
     loop PoStSubmission
             Note Right of PostSubmission: in every proving period
-            StorageMining -->> Blockchain: GetRandomness(PoSt)
-            Blockchain -->> StorageMining: randomness ← GetRandomness(PoSt)
+            StorageMining -->> Blockchain: GetPoStRandomness()
+            Blockchain -->> StorageMining: randomness ← GetPoStRandomness()
             StorageMining -->> StorageProving: GeneratePoSt(randomness)
-            StorageProving -->> StorageMining: PoSt ← GeneratePoSt(randomness)
-            StorageMining -->> StorageMining: PublishPoSt()
-    end
-
-    alt PoStCompletion
-        StorageMining -->> StorageMining: DoneSet(Sector)
-        StorageMining --> SectorIndexing: DoneSet(Sector)
+            StorageProving -->> StorageMining: (PoSt) ← GeneratePoSt(randomness)
+            StorageMining -->> StorageMinerActor: PublishPoSt(PoSt, DoneSet)
+        alt PoStCompletion
+            StorageMining --> SectorIndexing: DoneSet(Sector)
+        end
     end
 
     opt Storage Fault
