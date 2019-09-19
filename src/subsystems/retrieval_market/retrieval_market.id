@@ -1,5 +1,4 @@
-package blockchain
-
+/*
 type RetrievalDeal struct {
 	File CID
 	CounterParty Address
@@ -53,3 +52,4 @@ type RetrievalMarketSubsystem struct {
 	AcceptRetrievalDeal(RetrievalDeal) RetrievalDealResponse
 
 }
+*/

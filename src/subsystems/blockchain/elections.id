@@ -1,3 +1,4 @@
+/*
 package blockchain
 
 
@@ -65,3 +66,4 @@ func GenerateElectionTicket(k VRFKeyPair, seed ElectionSeed) Ticket {
 		vdfResult,
 	}
 }
+*/

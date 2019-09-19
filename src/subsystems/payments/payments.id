@@ -1,3 +1,4 @@
+/*
 type PaymentsSubsystem struct (@mutable) {
 	actor		PaymentsChannelActor
 	wallet		Wallet
@@ -25,3 +26,4 @@ type Wallet	struct {
 	Balance()			UInt
 	UpdateBalance(UInt)
 }
+*/

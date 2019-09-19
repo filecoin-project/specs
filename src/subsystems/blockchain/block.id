@@ -1,4 +1,4 @@
-
+/*
 type BlockStore struct {
     GetBlock(CID) Block
     PutBlock(Block) error
@@ -184,3 +184,4 @@ func (block *BlockI) BlockSig() Signature {
 	panic("TODO")
 }
 **/
+*/

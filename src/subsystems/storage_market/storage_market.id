@@ -1,5 +1,4 @@
-package blockchain
-
+/*
 type StorageDealID BigInt
 
 type StorageDeal struct {
@@ -105,3 +104,4 @@ type StorageMarketSubsystem struct {
 	AddAsk(UnitStorageCommodity, StorageMarketOrder)
 
 }
+*/

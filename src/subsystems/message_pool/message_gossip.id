@@ -1,4 +1,4 @@
-
+/*
 
 // MessageGossip is a component of the MessagePool. It is in charge of receiving and
 // propagating Messages. It a libp2p pubsub protocol.
@@ -60,3 +60,4 @@ func (mg *MessageGossip) handleIncoming() {
 	}
 	*/
 }
+*/

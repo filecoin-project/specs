@@ -1,3 +1,4 @@
+/*
 type Repository struct {
   config Config
   ipldStore IPLDDagStore
@@ -23,3 +24,4 @@ type KeyStore struct {
   Put(cid CID, key Key)
   Sign(cid CID, message []bytes) &Signature
 }
+*/

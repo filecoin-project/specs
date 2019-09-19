@@ -1,4 +1,4 @@
-
+/*
 type PieceID CID
 
 type PieceInfo struct {
@@ -88,3 +88,4 @@ type SealAlgorithmArtifacts struct {
   //   // inputs into verify() go here
   // }
 }
+*/

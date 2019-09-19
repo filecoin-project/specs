@@ -1,4 +1,4 @@
-
+/*
 type MessagePoolSubsystem struct {
   /*
   // needs access to:
@@ -62,3 +62,4 @@ type MessageQuery struct {
   GasLimitMax TokenAmount
   */
 }
+*/
