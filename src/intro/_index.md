@@ -145,6 +145,17 @@ sequenceDiagram
     loop BlockReception
         libp2p -->> BlockSyncer: block ← Subscription.Next()
         BlockSyncer -->> BlockSyncer: ValidateBlock(block)
+        BlockSyncer -->> FilProofs: ValidateBlock(block)
+        BlockSyncer -->> StoragePowerConsensus: ValidateBlock(block)
+        BlockSyncer -->> Chain: ValidateBlock(block)
+        Chain -->> BlockSyncer: {StateTree} ← ValidateBlock(block)
+        
+        alt Round Cutoff
+            Chain -->> Chain: AssembleTipsets([block])
+            Chain -->> StoragePowerConsensus: BestTipset([Tipset])
+            Chain -->> StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
+        end
+
     end
 
 
