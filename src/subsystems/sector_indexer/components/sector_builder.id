@@ -1,0 +1,19 @@
+type SectorBuilder struct {
+       // SectorConfig SectorConfig,
+       // ProverId     ProverId,
+
+       // StagedSectors []StagedSector,
+
+       // MaxUnsealedBytesPerSector() UInt,
+
+       // AddPiece(
+       //   PiecePath String
+       // ) Error | AddPieceResponse,
+
+       // chooseStagedSector(pieceSize UInt) StagedSector,
+}
+
+type AddPieceResponse struct {
+       // StagedSector StagedSector,
+       // BytesRemaining UInt, // Raw byte capacity remaining in StagedSector, after adding piece.
+}
