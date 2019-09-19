@@ -9,6 +9,9 @@ type StorageMinerActor struct {
     // info &MinerInfo
 }
 
+type DoneSet struct {}
+type FaultSet struct {}
+
 /*
 type CollateralVault struct {
     Pledged(Collateral) TokenAmount
@@ -80,16 +83,16 @@ ype StorageMinerActor struct {
   provingSet &SectorSet
 
   // Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
-  currentFaultSet BitField
+  currentFaultSet FaultSet
 
   // Faults submitted after the current proving period's challenge time, but before the PoSt for that period
   // is submitted. These become the currentFaultSet when a PoSt is submitted.
-  nextFaultSet BitField
+  nextFaultSet FaultSet
 
   // Sectors reported during the last PoSt submission as being 'done'. The collateral
   // for them is still being held until the next PoSt submission in case early sector
   // removal penalization is needed.
-  nextDoneSet BitField
+  nextDoneSet DoneSet
 
   // List of sectors that this miner was slashed for.
   slashedSet optional &SectorSet
@@ -116,14 +119,16 @@ ype StorageMinerActor struct {
   GetCurrentProvingSet() BitField
 
   // CommitSector verifies the sealProof
-  CommitSector(sectorID SectorID, comm SealCommitment, proof SealProof) SectorID // TODO rename to AddPower?
+  CommitSector(sectorID SectorID, comm SealCommitment, proof SealProof) bool // TODO rename to AddPower?
   // SubmitPost verifies the PoSt
-  SubmitPost(proofs PoStProof, doneSet Bitfield) // TODO: rename to ProvePower?
+  SubmitPost(proofs PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
   DePledge(amt TokenAmount)
+
+  AddCollateral()
 
   AbitrateDeal (deal Deal)
   SlashStorageFault() // TODO maybe add CheckStorageFault?
-  AddFaults(faults FaultSet) // TODO rename into ReportFaults
+  UpdateFaults(faults FaultSet) // TODO rename into ReportFaults
   IsLate() (bool)
   IsSlashed() (bool)
 

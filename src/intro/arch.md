@@ -86,7 +86,7 @@ sequenceDiagram
         StorageProving-->>StorageProving: SealOutputs ← Seal(SectorID, ReplicaCfg)
         StorageProving->>-StorageMining: (SectorID,SealOutputs)
         opt CommitSector
-            StorageMining-->>StorageMinerActor: CommitSector(SectorID, OnBlockchainSectorInfo, StorageCollateral)
+            StorageMining-->>StorageMinerActor: CommitSector(SectorID,SealCommitment,SealProof)
             StorageMinerActor-->>+FilProofs: VerifySeal(SectorID, OnSectorInfo)
             FilProofs-->>-StorageMinerActor: {1,0} ← VerifySeal
             alt 1 - success
@@ -169,7 +169,7 @@ sequenceDiagram
             Blockchain -->> StorageMining: randomness ← GetPoStRandomness()
             StorageMining -->> StorageProving: GeneratePoSt(randomness)
             StorageProving -->> StorageMining: (PoSt) ← GeneratePoSt(randomness)
-            StorageMining -->> StorageMinerActor: PublishPoSt(PoSt, DoneSet)
+            StorageMining -->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
         alt PoStCompletion
             StorageMining -->> SectorIndexing: DoneSet(Sector)
         end
@@ -178,23 +178,23 @@ sequenceDiagram
     opt Storage Fault
 
         alt Declared Storage Fault
-            StorageMinerActor -->> StorageMinerActor: DeclareFaults([faults])
+            StorageMinerActor -->> StorageMinerActor: UpdateFaults(FaultSet)
             StorageMinerActor -->>  StoragePowerConsensus: SuspendMiner(Address)
         else Undeclared Storage Fault
             Clock -->>  StoragePowerConsensus: SuspendMiner(Address)
         end
 
         alt Recovery in Grace Period
-            StorageMinerActor -->> StorageMinerActor: PublishPoSt(FaultedPoSt)
+            StorageMinerActor -->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
             StorageMinerActor -->> StoragePowerConsensus: UpdatePower()
         else Recovery past Grace Period
-            Clock -->>  StorageMinerActor: SlashStorageCollateral(Fault)
-            StorageMinerActor -->> StorageMinerActor: AddCollateral(Sector)
-            StorageMinerActor -->> StorageMinerActor: PublishPoSt(FaultedPoSt)
+            Clock -->>  StorageMinerActor: SlashStorageFault()
+            StorageMinerActor -->> StorageMinerActor: AddCollateral()
+            StorageMinerActor -->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
             StorageMinerActor -->> StoragePowerActor: UpdatePower()
         else Recovery Past Sector Failure Timeout
-            Clock -->>  StorageMinerActor: SlashStorageCollateral(Fault)
-            StorageMinerActor -->> StorageMinerActor: AddCollateral(Sector)
+            Clock -->>  StorageMinerActor: SlashStorageFault()
+            StorageMinerActor -->> StorageMinerActor: AddCollateral()
             StorageMining-->>StorageProving: SealSector(SectorID, ReplicaCfg)
         end
     end
