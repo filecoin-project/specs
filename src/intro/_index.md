@@ -61,6 +61,8 @@ sequenceDiagram
     participant StorageProving
     participant FilProofs
 
+    participant Clock
+
     participant libp2p
 
     Note over StorageClient,StorageProvider: MarketsGroup
@@ -70,7 +72,7 @@ sequenceDiagram
 
 
     opt RegisterStorageMiner
-        StorageMining->>StorageMining: CreateMiner(WorkerPubKey)
+        StorageMining->>StorageMining: CreateMiner(WorkerPubKey, PledgeCollateral)
         StorageMining->StoragePowerActor: RegisterMiner(OwnerAddr, WorkerPubKey)
         StoragePowerActor->StorageMining: StorageMinerActor
     end
@@ -104,8 +106,8 @@ sequenceDiagram
         StorageProving-->>StorageProving: SealOutputs ← Seal(SectorID, ReplicaCfg)
         StorageProving->>-StorageMining: (SectorID,SealOutputs)
         opt CommitSector
-            StorageMining-->>StorageMinerActor: CommitSector(SectorID, OnChainSectorInfo)
-            StorageMinerActor-->>+FilProofs: VerifySeal(SectorID, OnChainSectorInfo)
+            StorageMining-->>StorageMinerActor: CommitSector(SectorID, OnBlockchainSectorInfo, StorageCollateral)
+            StorageMinerActor-->>+FilProofs: VerifySeal(SectorID, OnSectorInfo)
             FilProofs-->>-StorageMinerActor: {1,0} ← VerifySeal
             alt 1 - success
                 StorageMinerActor-->>StorageMinerActor: ...Update State...
@@ -147,19 +149,18 @@ sequenceDiagram
         BlockSyncer -->> BlockSyncer: ValidateBlock(block)
         BlockSyncer -->> FilProofs: ValidateBlock(block)
         BlockSyncer -->> StoragePowerConsensus: ValidateBlock(block)
-        BlockSyncer -->> Chain: ValidateBlock(block)
-        Chain -->> BlockSyncer: {StateTree} ← ValidateBlock(block)
-
+        BlockSyncer -->> Blockchain: ValidateBlock(block)
+        Blockchain -->> BlockSyncer: {StateTree} ← ValidateBlock(block)
+        
         alt Round Cutoff
-            Chain -->> Chain: AssembleTipsets([block])
-            Chain -->> StoragePowerConsensus: BestTipset([Tipset])
-            Chain -->> StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
+            Blockchain -->> Blockchain: AssembleTipsets([block])
+            Blockchain -->> StoragePowerConsensus: BestTipset([Tipset])
+            Blockchain -->> StoragePowerConsensus: {Tipset} ← BestTipset([Tipset])
         end
     end
 
 
     loop BlockProduction
-
         alt New Tipset
             Blockchain -->> Blockchain: tipset ← onNewBestTipset()
         else Retrying on null block
@@ -175,5 +176,54 @@ sequenceDiagram
         end
     end
 
+
+    loop PoStSubmission
+            Note in every proving period
+            StorageMining -->> Blockchain: GetRandomness(PoSt)
+            Blockchain -->> StorageMining: randomness ← GetRandomness(PoSt)
+            StorageMining -->> StorageProving: GeneratePoSt(randomness)
+            StorageProving -->> StorageMining: PoSt ← GeneratePoSt(randomness)
+            StorageMining -->> StorageMining: PublishPoSt()
+    end
+
+    alt PoStCompletion
+        StorageMining -->> StorageMining: DoneSet(Sector)
+        StorageMining --> SectorIndexing: DoneSet(Sector)
+    end
+
+    opt Storage Fault
+
+        alt Declared Storage Fault
+            StorageMinerActor -->> StorageMinerActor: DeclareFaults([faults])
+            StorageMinerActor -->>  StoragePowerConsensus: SuspendMiner(Address)
+        else Undeclared Storage Fault
+            Clock -->>  StoragePowerConsensus: SuspendMiner(Address)
+        end
+
+        alt Recovery in Grace Period
+            StorageMinerActor -->> StorageMinerActor: PublishPoSt(FaultedPoSt)
+            StorageMinerActor -->> StoragePowerConsensus: UpdatePower()
+        else Recovery past Grace Period
+            Clock -->>  StorageMinerActor: SlashStorageCollateral(Fault)
+            StorageMinerActor -->> StorageMinerActor: AddCollateral(Sector)
+            StorageMinerActor -->> StorageMinerActor: PublishPoSt(FaultedPoSt)
+            StorageMinerActor -->> StoragePowerActor: UpdatePower()
+        else Recovery Past Sector Failure Timeout
+            Clock -->>  StorageMinerActor: SlashStorageCollateral(Fault)
+            StorageMinerActor -->> StorageMinerActor: AddCollateral(Sector)
+            StorageMining-->>StorageProving: SealSector(SectorID, ReplicaCfg) 
+        end
+    end
+
+    opt Consensus Fault
+        StorageMinerActor --> StoragePowerActor: DeclareConsensusFault(Proof)
+        StoragePowerActor ->+ StoragePowerConsensus: ValidateFault(Proof)
+
+        alt Valid Fault
+            StoragePowerConsensus --> StoragePowerActor: TerminateMiner()
+            StoragePowerConsensus --> StoragePowerActor: SlashPledgeCollateral(Address)
+            StoragePowerConsensus ->- StorageMinerActor: Reward ← DeclareConsensusFault(Proof)
+        end
+    end
 
 {{% /mermaid %}}
