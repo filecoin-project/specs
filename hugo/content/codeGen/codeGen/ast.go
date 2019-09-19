@@ -1947,14 +1947,14 @@ func TestAST() {
 		"sector_storage/components/sector_sealer.id",
 		"sector_storage/components/sector_store.id",
 		"sector_storage/components/sector_builder.id",
-		"sector_storage/components/sector_storage_subsystem.id",
+		"sector_storage/sector_storage_subsystem.id",
 
 		// "storage_market/storage_market.id",
 
-		"storagemining/components/mining_scheduler.id",
-		"storagemining/components/post_prover.id",
-		"storagemining/actors/storage_miner_actor.id",
-		"storagemining/mining.id",
+		"storage_mining/components/mining_scheduler.id",
+		"storage_mining/components/post_prover.id",
+		"storage_mining/actors/storage_miner_actor.id",
+		"storage_mining/mining.id",
 
 		"storage_power_consensus/components/expected_consensus.id",
 		"storage_power_consensus/storage_power_consensus_subsystem.id",
