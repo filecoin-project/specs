@@ -190,14 +190,14 @@ digraph Filecoin {
       }
       // "Disks" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
 
-      "Sector Store"
-      "Sector Builder"
+      // "Sector Store"
+      // "Sector Builder"
     }
 
     subgraph cluster_filproofs_subsystem {
       style=filled
       color=lightgrey
-      label = "Storage Proofs"
+      label = "Storage Proving"
 
       { // components
         node [shape=box]
