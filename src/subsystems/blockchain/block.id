@@ -89,7 +89,22 @@ func (ts *Tipset) ValidateSyntax() bool {
 	return true
 }
 
-/**
+func (tipset *TipsetI) StateTree() StateTree {
+	var currTree StateTree = nil
+	for _, block := range tipset.Blocks() {
+		if currTree == nil {
+			currTree = block.StateTree()
+		} else {
+			Assert(block.StateTree().CID().Equals(currTree.CID()))
+		}
+	}
+	Assert(currTree != nil)
+	for _, block := range tipset.Blocks() {
+		currTree = UpdateStateTree(currTree, block)
+	}
+	return currTree
+}
+
 type Message interface {
 	To()        Address
 	From()      Address
@@ -107,81 +122,6 @@ type MessageReceipt interface {
 	GasUsed()   BigInt
 }
 
-
 type BlockWeight BigInt
 
-func (block *BlockI) ComputeUnsignedFingerprint() []byte {
-	return Hash(HashRole_BlockSig, block.SerializeUnsigned());	
-}
-
-func (block *BlockI) SerializeUnsigned() []byte {
-	panic("TODO")
-}
-
-func (block *BlockI) SerializeSigned() []byte {
-	panic("TODO")
-}
-
-////////////////////
-// Implementation //
-////////////////////
-
-type BlockI struct {
-	minerAddress    Address
-	tickets         []Ticket
-	parentTipset    Tipset
-	weight          BigInt
-	height          Word
-	stateTree       StateTree
-	messages        []Message
-	blsAggregate    Signature
-	messageReceipts []MessageReceipt
-	timestamp       Timestamp
-	blockSig        Signature
-}
-
-func (block *BlockI) MinerAddress() Address {
-	return block.minerAddress
-}
-
-func (block *BlockI) Tickets() []Ticket {
-	return block.tickets
-}
-
-func (block *BlockI) ParentTipset() Tipset {
-	panic("TODO")
-}
-
-func (block *BlockI) Weight() BlockWeight {
-	panic("TODO")
-}
-
-func (block *BlockI) Height() Word {
-	panic("TODO")
-}
-
-func (block *BlockI) StateTree() StateTree {
-	panic("TODO")
-}
-
-func (block *BlockI) Messages() []Message {
-	panic("TODO")
-}
-
-func (block *BlockI) BLSAggregate() Signature {
-	return block.blsAggregate
-}
-
-func (block *BlockI) MessageReceipts() []MessageReceipt {
-	return block.messageReceipts
-}
-
-func (block *BlockI) Timestamp() Timestamp {
-	panic("TODO")
-}
-
-func (block *BlockI) BlockSig() Signature {
-	panic("TODO")
-}
-**/
 */

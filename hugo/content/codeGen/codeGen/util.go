@@ -26,17 +26,6 @@ func HashBlake2bInternal(x []byte) []byte {
 	panic("TODO")
 }
 
-func Hash(role HashRole, x []byte) []byte {
-	panic("TODO")
-}
-
-type BigInt interface{}  // TODO: import
-
-type Fraction struct {
-	n BigInt
-	d BigInt
-}
-
 type Word = int
 
 // Check that sizeof(Word) == 8 (we only support 64-bit builds for now)
