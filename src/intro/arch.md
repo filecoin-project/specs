@@ -96,26 +96,26 @@ sequenceDiagram
             alt 1 - success
                 StorageMinerActor ->> StoragePowerActor: IncrementPower(StorageMiner.WorkerPubKey)
             else 0 - failure
-                StorageMinerActor -->> StorageMiningSubsystem: hi CommitSectorError
+                StorageMinerActor -->> StorageMiningSubsystem: CommitSectorError
             end
         end
     end
 
     loop PoStSubmission
-        Note Right of PostSubmission: in every proving period
-        Note Right of PostSubmission: DoneSet
+        Note Right of PoStSubmission: in every proving period
+        Note Right of PoStSubmission: DoneSet
         StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: GetPoStChallenge(Chain, Epoch)
         StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: challenge
         StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
         StorageProvingSubsystem -->>- StorageMiningSubsystem: PoStProof
-        StorageMiningSubsystem ->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
+        StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
     end
 
     opt ClientQuery
         StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
         StorageProvider -->>- StorageClient: StorageDealResponse{SealingParams,DealComplete,...}
     end
-
+    
     loop StorageDealCollect
         Note Right of StorageProvider: Deal
         alt Via Client
@@ -204,12 +204,12 @@ sequenceDiagram
         end
 
         alt Recovery in Grace Period
-            StorageMinerActor -->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
+            StorageMinerActor -->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
             StorageMinerActor -->> StoragePowerConsensusSubsystem: UpdatePower()
         else Recovery past Grace Period
             Clock -->>  StorageMinerActor: SlashStorageFault()
             StorageMinerActor -->> StorageMinerActor: AddCollateral()
-            StorageMinerActor -->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
+            StorageMinerActor -->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
             StorageMinerActor -->> StoragePowerActor: UpdatePower()
         else Recovery Past Sector Failure Timeout
             Clock -->>  StorageMinerActor: SlashStorageFault()
