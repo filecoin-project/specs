@@ -90,13 +90,13 @@ sequenceDiagram
         StorageProvingSubsystem ->> StorageProvingSubsystem: SealOutputs ← Seal(Seed, SectorID, ReplicaCfg)
         StorageProvingSubsystem ->>- StorageMiningSubsystem: (SectorID,SealOutputs)
         opt CommitSector
-            StorageMiningSubsystem ->>+ StorageMinerActor: CommitSector(Seed, SectorID, SealCommitment, SealProof)
+            StorageMiningSubsystem ->> StorageMinerActor: CommitSector(Seed, SectorID, SealCommitment, SealProof)
             StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifySeal(SectorID, OnSectorInfo)
             FilecoinProofsSubsystem -->>- StorageMinerActor: {1,0}
             alt 1 - success
-                StorageMinerActor ->>- StoragePowerActor: IncrementPower(MinerAddr)
+                StorageMinerActor ->> StoragePowerActor: IncrementPower(StorageMiner.WorkerPubKey)
             else 0 - failure
-                StorageMinerActor -->>- StorageMiningSubsystem: CommitSectorError
+                StorageMinerActor -->> StorageMiningSubsystem: hi CommitSectorError
             end
         end
     end
@@ -123,11 +123,11 @@ sequenceDiagram
             opt If Client Does Not Have PIP
                 StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
                 StorageProvider -->>- StorageClient: StorageDealResponse{SealingParams,DealComplete,SectorID, PIP}
-                StorageClient ->>+ StorageClient: {0, 1} ← VerifyPIP(SectorID, PIP)
+                StorageClient ->> StorageClient: {0, 1} ← VerifyPIP(SectorID, PIP)
             end
             StorageClient ->>+ BlockchainSubsystem: VerifySectorExists(SectorID)
             BlockchainSubsystem ->>- StorageClient: {0, 1}
-            StorageClient ->>+ StorageClient: VouchersApprovalResponse ← ApproveVouchers([Voucher])
+            StorageClient ->> StorageClient: VouchersApprovalResponse ← ApproveVouchers([Voucher])
             StorageClient -->>- StorageProvider: VouchersApprovalResponse
             StorageProvider ->> PaymentChannelActor: RedeemVoucherWithApproval(VoucherApprovalResponse.Voucher)
         else Via Blockchain
@@ -157,7 +157,7 @@ sequenceDiagram
         alt New Tipset
             BlockchainSubsystem ->> StorageMiningSubsystem: OnNewTipset(Chain, Epoch)
         else Null block last round
-            WallClock --> StorageMiningSubsystem: OnNewRound()
+            WallClock ->> StorageMiningSubsystem: OnNewRound()
             Note Right of WallClock: epoch is incremented by 1
         end
         StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: GetElectionArtifacts(Chain, Epoch)
@@ -168,20 +168,19 @@ sequenceDiagram
         loop forEach StorageMiningSubsystem.StorageMiner
             StorageMiningSubsystem ->> StorageMiningSubsystem: EP ← DrawElectionProof(TK.randomness(), StorageMiner.WorkerKey)
             alt New Tipset
-                StorageMiningSubsystem ->>+ StorageMiningSubsystem: T0 ← GenerateNextTicket(T1.randomness(), StorageMiner.WorkerKey)            
+                StorageMiningSubsystem ->> StorageMiningSubsystem: T0 ← GenerateNextTicket(T1.randomness(), StorageMiner.WorkerKey)            
             else Null block last round
-                StorageMiningSubsystem ->>+ StorageMiningSubsystem: T1 ← GenerateNextTicket(T0.randomness(), StorageMiner.WorkerKey)   
+                StorageMiningSubsystem ->> StorageMiningSubsystem: T1 ← GenerateNextTicket(T0.randomness(), StorageMiner.WorkerKey)   
                 Note Right of StorageMiningSubsystem: Using tickets derived in failed election proof in last epoch
             end
             StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: TryLeaderElection(EP)
             StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: {1, 0}
-            alt 1- success
+            opt 1- success
                 StorageMiningSubsystem ->> BlockProducer: GenerateBlock(EP, T0, Tipset, StorageMiner.Address)
                 BlockProducer ->>+ MessagePool: MostProfitableMessages(StorageMiner.Address)
                 MessagePool -->>- BlockProducer: [Message]
-                BlockProducer ->>+ BlockProducer: block ← AssembleBlock(ElectionProof, [Message], Tipset, EP, T0, StorageMiner.Address)
+                BlockProducer ->> BlockProducer: block ← AssembleBlock(ElectionProof, [Message], Tipset, EP, T0, StorageMiner.Address)
                 BlockProducer ->> BlockSyncer: PropagateBlock(block)
-            else 0 - failure
             end
         end
     end
