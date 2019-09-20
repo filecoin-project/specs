@@ -1,9 +1,9 @@
 type StoragePowerActor struct {
 
-	// call by StorageMiningSubsytem
+	// call by StorageMiningSubsytem on miner creation
 	RegisterMiner(ownerAddr Address, workerPubKey PubKey) struct{}
 	
-	// call by StorageMinerActor
+	// call by StorageMinerActor on successful seal
 	// TODO: workerKey of type StorageMiner.WorkerPubKey
 	IncrementPower(workerKey PubKey) struct{}
 

@@ -26,8 +26,29 @@ type StorageMiningSubsystem struct {
     // StartMining() struct {}
     // StopMining() struct {}
 
+    // call by StorageMiningSubsystem itself to create miner
     CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}
-    HandleStorageDeal(deal StorageDeal, pieceRef CID) struct {}
+    
+    // call by StorageProvider at the start of a deal
+    // and trigger AddPieceToSector on SectorIndexer
+    // TODO: procedural call
+    HandleStorageDeal(deal StorageDeal, pieceRef CID) struct{}
+
+    // call by StorageMinerActor when error in sealing
+    CommitmentSectorError() struct{}
+
+    // call by BlockChain when a new block is produced
     OnNewTipset(chain Chain, epoch Epoch) struct{}
-    // GenerateTickets(randomness Ticket) [Ticket] // TODO
+
+    // call by clock during BlockProduction
+    // TODO: define clock better
+    OnNewRound() struct{}
+
+    // call by StorageMiningSubsystem itself in BlockProduction
+    DrawElectionProof(tk Randomness, workerKey PrivateKey) ElectionProof
+    
+    // call by StorageMiningSubsystem itself in BlockProduction
+    // use T1 randomness when producing on a tipset
+    // use T0 randomness when producing on a null block
+    GenerateNextTicket(seed Randomness, workerKey PrivateKey) Ticket
 }

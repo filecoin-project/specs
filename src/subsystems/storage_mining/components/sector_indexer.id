@@ -1,8 +1,14 @@
 type PieceInclusionProof struct {}
 
 type SectorIndexer struct {
-	HandlePiece(deal StorageDeal, pieceRef CID) SectorID
-	GetPieceInclusionProof(deal StorageDeal) PieceInclusionProof
+
+	// call by StorageMiningSubsystem during AddingDealToSector
+	// trigger getPieceInclusionProof
+	// TODO: procedural call
+	AddPieceToSector(deal StorageDeal, sectorID SectorID) struct{}
+
+	// call by SectorIndexer itself to get pip of a deal
+	getPieceInclusionProof(deal StorageDeal) PieceInclusionProof
 	
-	addPieceToSector(deal StorageDeal, sectorID SectorID) struct{}
+
 }
