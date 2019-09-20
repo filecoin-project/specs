@@ -1,9 +1,15 @@
 type BlockProducer struct {
-	ElectionProof() ElectionProof
-	Messages() [Message]
+	// ElectionProof() ElectionProof
+	// Messages() [Message]
 
-	NewBestTipset(tipset Tipset) struct {}
-	AssembleBlock(electionProof ElectionProof, messages [Message]) Block
+	// call by StorageMiningSubsystem when elected as a leader
+	// a procedural call that calls GetMostProfitableMessages(minerAddr Address)
+	// and then get back the messages and call AssembleBlock
+	// TODO minerAddr is of type StorageMiner.Address
+	GenerateBlock(electionProof ElectionProof, T0 Ticket, tipset Tipset, minerAddr Address) struct{}
+
+	// call by BlockProducer itself after getting back messages
+	AssembleBlock(electionProof ElectionProof, T0 Ticket, tipset Tipset, minerAddr Address, messages [Message]) Block
 }
 
 type ElectionProof struct {}

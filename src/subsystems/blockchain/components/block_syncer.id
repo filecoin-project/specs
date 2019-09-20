@@ -1,4 +1,5 @@
 // type ErrInvalidBlock error
+type PubSubTopic struct {}
 
 type BlockSyncer struct {
     /*
@@ -11,10 +12,18 @@ type BlockSyncer struct {
     validationGraph         BlockValidationGraph
     validateBlockSyntax()   bool
     */ 
-    // call from libp2p
-    ReceiveBlock(block Block) struct {}
-    PublishBlock(block Block) struct {}
-    ValidateBlock(block Block) bool
+
+    // on receiving newBlock event from libp2p
+    // call by BlockSyncer itself
+    NewBlock(onNewBlock PubSubTopic, block Block) struct {}
+
+    // call by BlockSyncer itself in BlockReception
+    // perform syntactic validation on block
+    ValidateSyntax(block Block) bool
+
+    // call by BlockProducer when a block is produced
+    PropogateBlock(block Block) struct {}
+    
 }
 
     /*

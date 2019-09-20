@@ -38,7 +38,7 @@ type BlockchainSubsystem struct @(mutable) {
     AssembleTipsets() [Tipset]
 
     // call by BlockchainSubsystem itself in BlockReception after Round Cutoff
-    ChooseTipset([Tipset]) Tipset
+    ChooseTipset(tipsets [Tipset]) Tipset
 
     // call by StorageMining
     GetPostRandomness() Randomness
