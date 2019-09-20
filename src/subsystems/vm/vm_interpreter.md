@@ -153,7 +153,7 @@ To store data, `Put` is used. Any number of objects may be `Put`, but only the o
 
 ### Burning Funds
 
-In the case that an actor needs to provably burn funds, the funds should be transferred to the 'Burnt Funds Actor' (ID 99).  
+In the case that an actor needs to provably burn funds, the funds should be transferred to the 'Burnt Funds Actor' (ID 99).
 
 
 

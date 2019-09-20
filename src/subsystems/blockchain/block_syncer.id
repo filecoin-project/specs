@@ -11,7 +11,7 @@ type BlockSyncer struct {
 
     validationGraph         BlockValidationGraph
     validateBlockSyntax()   bool
-    */ 
+    */
 
     // on receiving newBlock event from libp2p
     // call by BlockSyncer itself
@@ -23,7 +23,7 @@ type BlockSyncer struct {
 
     // call by BlockProducer when a block is produced
     PropogateBlock(block Block) struct {}
-    
+
 }
 
     /*
@@ -34,7 +34,7 @@ type BlockValidationGraph struct {
     ValidatedBlocks BlockStore
 
     // ValidationFringe is the set of unvalidated partial chains fully connected
-    // to the validated blockchain. These are ready to be validated, and 
+    // to the validated blockchain. These are ready to be validated, and
     // ordered by total ChainWeight. Their ancestors are all in either the
     // ValidationFringe or in the ValidatedBlocks
     ValidationFringe SubchainOrganizer
@@ -105,7 +105,7 @@ func validateBlockSyntax(block Block) {
     if !block.ParentTipset().validateSyntax() {
         return false
     }
-    
+
     if !block.ParentWeight() > 0 {
         return false
     }

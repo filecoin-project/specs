@@ -44,7 +44,7 @@ type StorageProvingSubsystem struct {
 		ticket         Ticket, // Assuming this is defined  elsewhere.
 		sectorId       union { SectorId, error, SealResponse }
 		) struct {}
-		
+
 //    Unseal(xxx Integer
 //         // TODO
 //    )
@@ -60,7 +60,7 @@ type StorageProvingSubsystem struct {
        // TODO
    ) struct {}
 
-    GenerateCommP() struct {} 
+    GenerateCommP() struct {}
     GenerateCommD() struct {}
 
     GeneratePieceInclusionProofs(
@@ -113,4 +113,3 @@ type SealProof struct {
 
 type PieceInclusionProof struct {
 }
-

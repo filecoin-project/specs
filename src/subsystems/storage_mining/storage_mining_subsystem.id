@@ -28,7 +28,7 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself to create miner
     CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}
-    
+
     // call by StorageProvider at the start of a deal
     // and trigger AddPieceToSector on SectorIndexer
     // TODO: procedural call
@@ -46,7 +46,7 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself in BlockProduction
     DrawElectionProof(tk Randomness, workerKey PrivateKey) ElectionProof
-    
+
     // call by StorageMiningSubsystem itself in BlockProduction
     // use T1 randomness when producing on a tipset
     // use T0 randomness when producing on a null block

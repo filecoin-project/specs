@@ -50,7 +50,7 @@ type ElectionProof struct {
 ////////////////////
 
 func (tix *Ticket) ValidateSyntax() bool {
-	
+
 	return VRFResult.validateSyntax() // TODO
 		&& VDFResult.validateSyntax()
 		&& VDFProof.validateSyntax()
@@ -73,7 +73,7 @@ func (ts *Tipset) ValidateSyntax() bool {
             return false
 		}
 	}
-	
+
 	numTickets := len(ts.Blocks[0].Tickets())
     for i := 1; i < len(ts.Blocks); i++ {
         if numTickets != len(ts.Blocks[i].Tickets()) {

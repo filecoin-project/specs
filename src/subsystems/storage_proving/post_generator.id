@@ -1,5 +1,5 @@
 type PostGenerator struct {
-   // May not need these explicit subsystem references.	
+   // May not need these explicit subsystem references.
 //   SectorStorage SectorStorageSubsystem,
 //   FilProofs     FilProofsSubsystem,
 
@@ -23,6 +23,6 @@ type PostGenerator struct {
 //       // seems cleaner.
 //       PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetadata, trees);
 //   }
-  
+
 //   SubmitPoSt(minerActor &StorageMinerActor, postProof)
 // }

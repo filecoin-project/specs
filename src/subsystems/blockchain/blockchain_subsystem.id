@@ -21,7 +21,7 @@ type BlockchainSubsystem struct @(mutable) {
 
     // call by StorageClient in StorageDealMake
     VerifySectorExists(sectorId SectorID) bool
-    
+
     // call by BlockSyncer in BlockReception
     HandleBlock(block Block) bool
 

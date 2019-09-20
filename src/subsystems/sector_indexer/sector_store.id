@@ -10,7 +10,7 @@ type StagedSector struct {
 
 type SectorStore struct {
    // SectorMetadata     { (CommR Commitment) : SectorMetadata }
-   
+
    // WritePiece(piece Piece) piecePath string, // Temp storage for pieces not yet sealed.
    // PlacePiece(from Path, to StagedSector, position UInt)
 

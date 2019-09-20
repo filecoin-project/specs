@@ -90,8 +90,8 @@ type Datagram Bytes
 type DatagramProtocol struct {
   // AcceptDatagram accepts an incoming message.
   AcceptDatagram() struct {
-    datagram Datagram, 
-    peerInfo PeerInfo, 
+    datagram Datagram,
+    peerInfo PeerInfo,
     err error
   }
 

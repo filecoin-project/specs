@@ -21,7 +21,7 @@ type RequestID UVarint
 type CronActor struct {
 	RequestCallback(query CallbackQuery)  RequestID
 	RemoveCallbackRequest(req RequestID)  struct{}
-	
+
 	UpdateRound(t UVarint)  struct{}
 }
 
@@ -36,7 +36,7 @@ type ScheduledCallback struct {
 	requestType	CallbackType
 	start		CallbackParameter
 	frequency	CallbackParameter
-	endpoint	Function	
+	endpoint	Function
 }
 
 type WallClock struct {

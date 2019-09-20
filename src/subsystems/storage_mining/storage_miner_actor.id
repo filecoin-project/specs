@@ -11,7 +11,7 @@ type StorageMinerActor struct {
     // info &MinerInfo
 
     // call by StorageMiningSubsystem after sealing a sector
-    CommitSector(seed Seed, sectorID SectorID, sectorCommitment SectorCommitment , proof SealProof) bool 
+    CommitSector(seed Seed, sectorID SectorID, sectorCommitment SectorCommitment , proof SealProof) bool
 
     // call by StorageMiningSubsystem every PoSt submission
     SubmitPoSt(post PoStProof, doneSet DoneSet) struct{}

@@ -16,7 +16,7 @@ type PaymentChannel struct {
 	channelID			UInt
 	controlParty		Address
 	counterParty		Address
-	controlToCounter	UVarint	
+	controlToCounter	UVarint
 	counterToControl	UVarint
 	paymentIncrement	Float
 }

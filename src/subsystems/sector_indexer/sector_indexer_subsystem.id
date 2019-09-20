@@ -9,7 +9,7 @@ type SectorIndexer struct {
 
 	// call by SectorIndexer itself to get pip of a deal
 	getPieceInclusionProof(deal StorageDeal) PieceInclusionProof
-	
+
 
 }
 
@@ -35,7 +35,7 @@ type SectorIndexerSubsystem struct {
    //     }
 
    //     MaybeSeal(StagedSector StagedSector, BytesRmaining Uint);
-       
+
    //     Seal(stagedSector StagedSector) {
    //     	    sealedPath := SectorStore.AllocateSealedSector(stagedSector.SectorSize);
 			// response := SectorSealer.seal(stagedSector, sealedPath, ProverId);
@@ -45,7 +45,7 @@ type SectorIndexerSubsystem struct {
 			// 	response.PersistentAux,
 			// 	response.PartialMerkleTreePath,
 			//   });
-			  
+
    //     RetrievePiece(CommD Commitment, Start UInt, Length UInt) Piece {
    //     }
 }

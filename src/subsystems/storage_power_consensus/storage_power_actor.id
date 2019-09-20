@@ -2,7 +2,7 @@ type StoragePowerActor struct {
 
 	// call by StorageMiningSubsytem on miner creation
 	RegisterMiner(ownerAddr Address, workerPubKey PubKey) struct{}
-	
+
 	// call by StorageMinerActor on successful seal
 	// TODO: workerKey of type StorageMiner.WorkerPubKey
 	IncrementPower(minerAddress Address) struct {}
@@ -10,7 +10,7 @@ type StoragePowerActor struct {
 	SuspendMiner(address Address) struct {}
 
 	// UpdateStoragePowerSubsystem(Tipset, StateTree)
-	
+
 	// VerifyElectionProof(Address, ElectionProof)	bool
 	// TotalStorage()								UVarint
 
@@ -18,7 +18,7 @@ type StoragePowerActor struct {
 	// NotifyConsensusFault(Address, [Block])
 	// NotifyStorageFault(Address)
 	// TryPublishBlock(StateTree)					Block
-	
+
 	// RegisterStorageMiner(SealProof)				Address
 	// TryUpdateStorage(Address, newPower)			error
 

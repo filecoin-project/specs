@@ -31,7 +31,7 @@ type DataTransferChannel struct {
 }
 
 type DataTransferParams struct {
-	channelType		DataTransferType	
+	channelType		DataTransferType
 	contentID		CID
 	dataIncrement	UVarint
 	sender			Address
