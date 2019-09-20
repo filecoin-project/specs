@@ -1,0 +1,9 @@
+type StorageDealProposal struct{}
+type StorageDealResponse struct{}
+type StorageDealQuery struct{}
+
+type StorageProvider struct {
+	ProposeStorageDeal(proposal StorageDealProposal) StorageDealResponse
+	QueryStorageDealStatus(query StorageDealQuery) StorageDealResponse
+	NotifyStorageDealStaged(deal StorageDeal, pieceRef CID, pip PieceInclusionProof, sectorID SectorID) struct{}
+}
