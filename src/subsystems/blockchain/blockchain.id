@@ -19,11 +19,26 @@ type BlockchainSubsystem struct @(mutable) {
     //     Synchronized
     // }
 
-    // call by StorageClient
+    // call by StorageClient in StorageDealMake
     VerifySectorExists(sectorId SectorID) bool
     
-    // call by BlockSyncer
-    ConsiderBlock(block Block) bool
+    // call by BlockSyncer in BlockReception
+    HandleBlock(block Block) bool
+
+    // call by BlockchainSubsystem itself in BlockProduction
+    ValidateBlock(block Block) bool
+
+    // call by BlockchainSubsystem itself in BlockProduction
+    // apply messages in the parent tipset to the StateTree
+    // and verify state root
+    TryGenerateStateTree(block Block) StateTree
+
+    // call by clock in BlockReception after Round Cutoff
+    // TODO define clock here
+    AssembleTipsets() [Tipset]
+
+    // call by BlockchainSubsystem itself in BlockReception after Round Cutoff
+    ChooseTipset([Tipset]) Tipset
 
     // call by StorageMining
     GetPostRandomness() Randomness
