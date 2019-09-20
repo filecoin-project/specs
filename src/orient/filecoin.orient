@@ -12,12 +12,12 @@ Primitives:
   u64 = 8
   Dimensions:
     Size:
-      kb = 1000
-      mb = 1000 * kb
-      gb = 1000 * mb
-      tb = 1000 * gb
-      pb = 1000 * tb
-      ex = 1000 * pb
+      kib = 1024
+      mib = 1024 * kib
+      gib = 1024 * mib
+      tib = 1024 * gib
+      pib = 1024 * tib
+      eix = 1024 * pib
     Time:
       year_in_seconds = 365.25 * 24 * 60 * 60
 
@@ -144,7 +144,7 @@ Proofs:
       declare(nodes, integer)
       nodes = sector_size / node_size
       degree = degree_base + degree_expander
-      sector_size_gb = sector_size / gb
+      sector_size_gib = sector_size / gib
 
       DRG (DRSample) [DRGAssumption]:
         declare(degree_base, integer)
@@ -321,7 +321,7 @@ ScalingRequirements:
   declare(max_network_throughput_year)
 
   StorageCapacity:
-    max_storage_network_capacity_year = 10 * ex
+    max_storage_network_capacity_year = 10 * eix
     max_sectors = max_storage_network_capacity_year / sector_size
 
     max_proofs_size_per_year = proofs_size_per_sector_per_year * max_sectors

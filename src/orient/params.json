@@ -8,7 +8,7 @@
     "lambda": 80,
     "reseal": 0,
     "proving_period_hours": 24,
-    "sector_size_gb": 32,
+    "sector_size_gib": 32,
     "block_time": 15,
     "kdf_hash_time": 0.000000045608,
     "leaf_hash_time": 0.000000045608,
@@ -28,4 +28,3 @@
    }
   ]
 ]
-
