@@ -137,7 +137,7 @@ VDF (VDFRSA):
   vdf_output_size = 0
 
 Proofs:
-  ProofOfReplication (ZigZag):
+  ProofOfReplication:
     Graph:
       declare(node_size, integer)
       declare(sector_size, integer)
@@ -154,8 +154,33 @@ Proofs:
       ExpanderParents (Chung) [ChungAssumption]:
         declare(degree_expander, integer)
 
+    Soundness:
+      declare(lambda, integer)
+      assume(soundness > 0)
+      assume(soundness < 0.5)
+      soundness = 1/(2^lambda)
+
+
+  ProofOfReplication (SDR):
+    SpaceGap:
+      epsilon <= 0.24
+      delta < epsilon/2
+      spacegap = epsilon + 2 * delta
+
+    Graph:
       Layers:
-//        declare(layers, integer)
+        layers = max(layers_a, layers_b) + 1
+        layers_a = (0.68 - epsilon + delta)/(0.12 - delta)
+        layers_b = log2(1/(3*(epsilon - 2 * delta))) + 0.12/(0.12-delta) + 1
+    Challenges:
+      OfflineChallenges:
+        offline_challenges = - lambda / log2(1 - delta)
+        online_challenges = - lambda / (log2(2 - epsilon - 2 * delta) - 1)
+
+  ProofOfReplication (ZigZag):
+    Graph:
+      Layers:
+        // declare(layers, integer)
         assume(layers > 0)
         layers = 2 * log2(1 / (3 * (epsilon -2 * delta))) + 2 * (0.8 - epsilon + delta)/(0.12 -2 * delta) + 2 // TODO should be >=
 
@@ -164,12 +189,6 @@ Proofs:
       assume(spacegap < 0.5)
       spacegap = epsilon + 2 * delta
       epsilon = - 3 * delta + 0.24 // was epsilon + 3 * delta < 0.24
-
-    Soundness:
-      declare(lambda, integer)
-      assume(soundness > 0)
-      assume(soundness < 0.5)
-      soundness = 1/(2^lambda)
 
     Challenges:
       OfflineChallenges:
