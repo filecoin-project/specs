@@ -1,0 +1,8 @@
+type PieceInclusionProof struct {}
+
+type SectorIndexer struct {
+	HandlePiece(deal StorageDeal, pieceRef CID) SectorID
+	GetPieceInclusionProof(deal StorageDeal) PieceInclusionProof
+	
+	addPieceToSector(deal StorageDeal, sectorID SectorID) struct{}
+}

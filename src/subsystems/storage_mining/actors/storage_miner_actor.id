@@ -4,9 +4,11 @@ type StorageMinerActor struct {
     // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)
     // ProvingPeriodEnd   Epoch
 
-
     // // contains mostly static info about this miner
     // info &MinerInfo
+    // CommitSector verifies the sealProof
+    // CommitSector(seed sectorID SectorID, proof SealProof) bool 
+
 }
 
 type DoneSet struct {}
@@ -118,8 +120,6 @@ ype StorageMinerActor struct {
   GetSectorSize() BytesAmount
   GetCurrentProvingSet() BitField
 
-  // CommitSector verifies the sealProof
-  CommitSector(sectorID SectorID, comm SealCommitment, proof SealProof) bool // TODO rename to AddPower?
   // SubmitPost verifies the PoSt
   SubmitPost(proofs PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
   DePledge(amt TokenAmount)

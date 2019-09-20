@@ -21,15 +21,13 @@ type Ticket struct {
 
 
 
-type MiningSubsystem struct {
+type StorageMiningSubsystem struct {
     // actors [&StorageMinerActor]
-    // CreateMiner(owner Address, worker Address) &StorageMinerActor
-
-    StartMining() struct {}
-    StopMining() struct {}
+    // StartMining() struct {}
+    // StopMining() struct {}
 
     CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}
-    MadeDeal(deal StorageDeal) struct {}
-
-    GenerateTickets(randomness Ticket) [Ticket] // TODO
+    HandleStorageDeal(deal StorageDeal, pieceRef CID) struct {}
+    OnNewTipset(chain Chain, epoch Epoch) struct{}
+    // GenerateTickets(randomness Ticket) [Ticket] // TODO
 }
