@@ -83,7 +83,7 @@ hugo-src: $(shell find src)
 	rm -rf hugo/content/docs
 	cp -r src hugo/content/docs
 
-orient: src/orient/*
+orient: .PHONY
 	bin/build-spec-orient.sh
 
 ID_FILES=$(shell find src/ -name '*.id')
