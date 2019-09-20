@@ -132,45 +132,56 @@ sequenceDiagram
         Blockchain -->- Blockchain: StateTree ← TryGenerateStateTree(block)
 
         alt Round Cutoff
-            WallClock -->> Blockchain: AssembleTipsets()
-            Blockchain -->+ StoragePowerConsensus: ChooseTipset([Tipset])
-            Blockchain -->- StoragePowerConsensus: Tipset ← ChooseTipset([Tipset])
+            WallClock -->> Blockchain: [Tipset] ← AssembleTipsets()
+            Blockchain -->> Blockchain: Tipset ← ChooseTipset([Tipset])
             Blockchain -->> BlockChain: ApplyStateTree(StateTree)
         end
     end
 
-
     loop BlockProduction
         alt New Tipset
-            StoragePowerConsensus -->> Blockchain: Tipset ← ChooseTipset([Tipset])
+            Blockchain -->> BlockChain: ApplyStateTree(StateTree)
         else Retrying on null block
-            Blockchain -->> Blockchain: tipset ← addNullBlock(tipset)
+            BlockProducer -->+ StoragePowerConsensus: tryLeaderElection([T0])
         end
-        Blockchain -->> BlockProducer: NewBestTipset(tipset)
-        BlockProducer -->+ StorageMining: ScratchTicket(randomness)
-        StorageMining -->- BlockProducer: [scratchedTicket] ← ScratchTicket(ticket)
-        BlockProducer -->+ StoragePowerConsensus: tryLeaderElection([scratchedTicket])
-        StoragePowerConsensus -->- BlockProducer: {[(Address, ElectionProof)]} ← tryLeaderElection([ticket])
-        opt tryLeaderElection - success, for each ElectionProof
-            BlockProducer -->+ MessagePool: GetMessages()
-            MessagePool -->- BlockProducer: [Message] ← GetMessages()
-            BlockProducer -->+ BlockProducer: AssembleBlock(ElectionProof, Messages)
-            BlockProducer  -->- BlockProducer: block ← AssembleBlock()
-            BlockProducer -->> BlockSyncer: SendBlock(block)
+        Blockchain -->> StorageMining: OnNewTipset(Chain, Epoch)
+        StorageMining -->+ StoragePowerConsensus: GetElectionArtifacts(Chain, Epoch)
+        StoragePowerConsensus -->> StoragePowerConsensus: TK ← TicketAtEpoch(Chain, Epoch-k)
+        StoragePowerConsensus -->> StoragePowerConsensus: TK ← TicketAtEpoch(Chain, Epoch)
+        StoragePowerConsensus -->- StorageMining: TK, T1 ← GetElectionArtifacts(Chain, Epoch)
+        loop forEach StorageMining.StorageMiner
+            StorageMining -->> StorageMining: EP ← DrawElectionProof(TK.randomness(), StorageMiner.WorkerKey)
+            StorageMining -->> StorageMining: T0 ← GenerateNextTicket(T1.randomness(), StorageMiner.WorkerKey)
+            StorageMining -->> StoragePowerConsensus: TryLeaderElection(EP)
+            StoragePowerConsensus -->> StorageMining: 1/0 ← TryLeaderElection(EP)
+            alt Success
+                StorageMining -->> BlockProducer: GenerateBlock(EP, T0, Tipset, StorageMiner.Address)
+                BlockProducer -->+ MessagePool: MostProfitableMessage(StorageMiner.Address)
+                MessagePool -->- BlockProducer: [Message] ← MostProfitableMessage(StorageMiner.Address)
+                BlockProducer -->+ BlockProducer: AssembleBlock(ElectionProof, [Message], Tipset, EP, T0, StorageMiner.Address)
+                BlockProducer  -->- BlockProducer: block ← AssembleBlock()
+                BlockProducer -->> BlockSyncer: PropagateBlock(block)
+            end
         end
     end
 
-
     loop PoStSubmission
-            Note Right of PostSubmission: in every proving period
-            StorageMining -->> Blockchain: GetPoStRandomness()
-            Blockchain -->> StorageMining: randomness ← GetPoStRandomness()
-            StorageMining -->> StorageProving: GeneratePoSt(randomness)
-            StorageProving -->> StorageMining: (PoSt) ← GeneratePoSt(randomness)
-            StorageMining -->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
-        alt PoStCompletion
-            StorageMining -->> SectorIndexing: DoneSet(Sector)
-        end
+        Note Right of PostSubmission: in every proving period
+        Note Right of PostSubmission: DoneSet
+        StorageMining -->> StoragePowerConsensus: GetPoStChallenge(Chain, Epoch)
+        StoragePowerConsensus -->> StorageMining: challenge ← GetPoStChallenge(Chain, Epoch)
+        StorageMining -->> StorageProving: GeneratePoSt(challenge, [SectorID])
+        StorageProving -->> StorageMining: (PoStProof) ← GeneratePoSt(challenge, [SectorID])
+        StorageMining -->> StorageMinerActor: SubmitPost(PoStProof, DoneSet)
+    end
+    
+    opt MiningScheduler
+        Note Right of MiningScheduler: Schedule and resume PoSts
+        Note Right of MiningScheduler: Schedule and resume SEALs
+        Note Right of MiningScheduler: Process expired deals
+        Note Right of MiningScheduler: Process deal payments
+        Note Right of MiningScheduler: Maintain FaultSet
+        Note Right of MiningScheduler: Maintain DoneSet
     end
 
     opt Storage Fault
