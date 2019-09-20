@@ -1,0 +1,7 @@
+type SectorInfo struct {}
+
+type FilecoinProofsSubsystem struct {
+
+    VerifySeal(sectorID SectorID, sectorInfo SectorInfo) bool
+    ValidateBlock(block Block) bool
+}

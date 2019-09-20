@@ -31,7 +31,7 @@ type BlockchainSubsystem struct @(mutable) {
     // call by BlockchainSubsystem itself in BlockProduction
     // apply messages in the parent tipset to the StateTree
     // and verify state root
-    TryGenerateStateTree(block Block) StateTree
+    TryGenerateStateTree(block Block) union { StateTree, Error }
 
     // call by clock in BlockReception after Round Cutoff
     // TODO define clock here

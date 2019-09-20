@@ -15,7 +15,7 @@ type BlockSyncer struct {
 
     // on receiving newBlock event from libp2p
     // call by BlockSyncer itself
-    NewBlock(onNewBlock PubSubTopic, block Block) struct {}
+    OnNewBlock(block Block) struct {}
 
     // call by BlockSyncer itself in BlockReception
     // perform syntactic validation on block
@@ -165,10 +165,10 @@ type BlockPubSub struct {}
 
 type BlockPropagator struct {
 
-    BroadcastBlock(SignedBlock)
+    PropagateBlock(SignedBlock)
 }
 
-func (b *BlockPropagator) BroadcastBlock(block SignedBlock) {
+func (b *BlockPropagator) PropagateBlock(block SignedBlock) {
     NetworkBroadcast(BlockPubSub, block)
 }
 */

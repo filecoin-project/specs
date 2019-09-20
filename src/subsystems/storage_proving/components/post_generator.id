@@ -1,11 +1,14 @@
-type PostProver struct {
+type PostGenerator struct {
    // May not need these explicit subsystem references.	
 //   SectorStorage SectorStorageSubsystem,
 //   FilProofs     FilProofsSubsystem,
 
+   GeneratePoSt(challenge Challenge, sectors [&Sector]) PoStProof
+}
+
 // // this must  GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
 //   GetChallenge(minerActor &StorageMinerActor, currBlock) Challenge
-  
+
 //   GeneratePoSt(challenge Challenge, sectors &[&Sector]) PoStProof {
 //       sectorsMetadata := sectors.map(func(sector) { SectorStorage.GetMetadata(sector.CommR) });
 
@@ -22,4 +25,4 @@ type PostProver struct {
 //   }
   
 //   SubmitPoSt(minerActor &StorageMinerActor, postProof)
-}
+// }

@@ -1,6 +1,4 @@
-/*
 type MessagePoolSubsystem struct {
-  /*
   // needs access to:
   // - BlockchainSubsystem
   //   - needs access to StateTree
@@ -21,7 +19,7 @@ type MessagePoolSubsystem struct {
   // are then propagated to other filecoin nodes via the MessagePool
   // subsystem. Other nodes receive and propagate Messages via their
   // own MessagePools.
-  AddNewMessage(Message)
+  AddNewMessage(msg Message) struct {}
 
   // Stats returns information about the MessagePool contents.
   Stats() MessagePoolStats
@@ -29,15 +27,17 @@ type MessagePoolSubsystem struct {
   // FindMessage receives a descriptor query q, and returns a set of
   // messages currently in the mempool that match the Query constraints.
   // q may have all, any, or no constraints specified.
-  FindMessage(q MessageQuery) ([Message], error)
+  // FindMessage(q MessageQuery) union {
+  //  [Message],
+  //  Error
+  // }
 
   // MostProfitableMessages returns messages that are most profitable
   // to mine for this miner.
   //
   // Note: This is where algorithms about chosing best messages given
   //       many leaders should go.
-  MostProfitableMessages(miner Address)
-  */
+  GetMostProfitableMessages(miner Address) [Message]
 }
 
 type MessagePoolStats struct {
@@ -62,4 +62,3 @@ type MessageQuery struct {
   GasLimitMax TokenAmount
   */
 }
-*/

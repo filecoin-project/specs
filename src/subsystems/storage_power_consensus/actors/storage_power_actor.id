@@ -5,7 +5,9 @@ type StoragePowerActor struct {
 	
 	// call by StorageMinerActor on successful seal
 	// TODO: workerKey of type StorageMiner.WorkerPubKey
-	IncrementPower(workerKey PubKey) struct{}
+	IncrementPower(minerAddress Address) struct {}
+	UpdatePower(address Address, newPower minerStorage) struct {}
+	SuspendMiner(address Address) struct {}
 
 	// UpdateStoragePowerSubsystem(Tipset, StateTree)
 	

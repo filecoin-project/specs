@@ -1,3 +1,5 @@
 type StorageClient struct {
-	
+    RequestVouchersApproval(deal StorageDeal, vouchers [Voucher]) VouchersApprovalResponse
+    VerifyPIP(sectorID SectorID, pip PieceInclusionProof) bool
+    ApproveVouchers(vouchers [Voucher]) VouchersApprovalResponse
 }

@@ -22,7 +22,6 @@ sequenceDiagram
 
     participant BlockchainSubsystem
     participant BlockSyncer
-    participant Chain
     participant BlockProducer
 
     participant StoragePowerConsensusSubsystem
@@ -87,8 +86,9 @@ sequenceDiagram
         StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: GetSealSeed(Chain, Epoch)
         StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: Seed
         StorageMiningSubsystem ->>+ StorageProvingSubsystem: SealSector(Seed, SectorID, ReplicaCfg)
-        StorageProvingSubsystem ->> StorageProvingSubsystem: SealOutputs ← Seal(Seed, SectorID, ReplicaCfg)
-        StorageProvingSubsystem ->>- StorageMiningSubsystem: (SectorID,SealOutputs)
+        StorageProvingSubsystem ->>+ SectorSealer: Seal(Seed, SectorID, ReplicaCfg)
+        SectorSealer -->>- StorageProvingSubsystem: SealOutputs
+        StorageProvingSubsystem ->>- StorageMiningSubsystem: SealOutputs
         opt CommitSector
             StorageMiningSubsystem ->> StorageMinerActor: CommitSector(Seed, SectorID, SealCommitment, SealProof)
             StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifySeal(SectorID, OnSectorInfo)
@@ -106,6 +106,8 @@ sequenceDiagram
         Note Right of PoStSubmission: DoneSet
         StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: GetPoStChallenge(Chain, Epoch)
         StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: challenge
+        StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
+        StorageProvingSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
         StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
         StorageProvingSubsystem -->>- StorageMiningSubsystem: PoStProof
         StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
@@ -198,14 +200,14 @@ sequenceDiagram
 
         alt Declared Storage Fault
             StorageMinerActor -->> StorageMinerActor: UpdateFaults(FaultSet)
-            StorageMinerActor -->>  StoragePowerConsensusSubsystem: SuspendMiner(Address)
+            StorageMinerActor -->>  StorageMinerActor: SuspendMiner(Address)
         else Undeclared Storage Fault
-            ClockSubsystem -->>  StoragePowerConsensusSubsystem: SuspendMiner(Address)
+            ClockSubsystem -->>  StorageMinerActor: SuspendMiner(Address)
         end
 
         alt Recovery in Grace Period
             StorageMinerActor -->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
-            StorageMinerActor -->> StoragePowerConsensusSubsystem: UpdatePower()
+            StorageMinerActor -->> StorageMinerActor: UpdatePower()
         else Recovery past Grace Period
             Clock -->>  StorageMinerActor: SlashStorageFault()
             StorageMinerActor -->> StorageMinerActor: AddCollateral()

@@ -36,7 +36,7 @@ type StorageProvingSubsystem struct {
 	) union { error, bool }
 
 
-    Seal(
+    SealSector(
 		SectorConfig   SectorConfig,
 		unsealedPath   String,
 		sealedPath     String,

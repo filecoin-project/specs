@@ -31,6 +31,7 @@ type StoragePowerConsensusSubsystem struct  { //(@mutable)
 
 	// call by StorageMiningSubsystem during block production
 	TryLeaderElection(electionProof ElectionProof) bool
+
 }
 
 
@@ -40,13 +41,14 @@ type PowerTable struct {
 	// LookupMinerStorage(Address)			UVarint
 	// LookupMinerPowerFraction(Address)	Float
 	// RemovePower(Address)
-	// UpdatePower(Address, newPower)
 }
 
 type StorageMiner struct {
-	// minerAddress	Address
-	// minerStorage	UVarint
-	// isSuspended		Bool
-	// VRFKeyPair		VRFKeyPair
-	// VDFKeyPair		VDFKeyPair
+	minerAddress	Address
+	minerStorage	MinerStorage
+	isSuspended		Bool
+	VRFKeyPair		VRFKeyPair
+	VDFKeyPair		VDFKeyPair
 }
+
+type minerStorage UVarint
