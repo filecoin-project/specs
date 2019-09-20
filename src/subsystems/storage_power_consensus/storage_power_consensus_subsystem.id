@@ -1,29 +1,38 @@
 type PowerFraction 	Float
 type StoragePower	UVarint
+type Seed struct {}
+type PoStChallenge struct {}
+type ElectionArtifacts struct {
+	TK Ticket
+	T1 Ticket
+}
 
 type StoragePowerConsensusSubsystem struct  { //(@mutable)
-	powerTable						PowerTable
-	actor							StoragePowerActor
+	// powerTable						PowerTable
+	// actor							StoragePowerActor
 	// associatedStateTree 			*StateTree
 	// GenerateElectionProof(Tipset)	ElectionProof
 	// ChooseTipsetToMine([Tipset])				[Tipset]
+
+	// call by StorageMiningSubsystem in sealing sector
+	GetSealSeed(chain Chain, epoch Epoch) Seed
+
+	// call by StorageMiningSubsystem after sealing
+	GetPoStChallenge(chain Chain, epoch Epoch) PoStChallenge
+
+	// call by BlockchainSubsystem during block reception
+	ValidateBlock(block Block) bool
+
+	// call by StorageMiningSubsystem during block production
+	GetElectionArtifacts(chain Chain, epoch Epoch) ElectionArtifacts
+
+	// call by StoragePowerConsensusSubsystem itself during block production
+	TicketAtEpoch(chain Chain, epoch Epoch) Ticket
+
+	// call by StorageMiningSubsystem during block production
+	TryLeaderElection(electionProof ElectionProof) bool
 }
 
-type StoragePowerActor struct {
-
-	// UpdateStoragePowerSubsystem(Tipset, StateTree)
-	
-	// VerifyElectionProof(Address, ElectionProof)	bool
-	// TotalStorage()								UVarint
-
-	// // What does graceful removal look like?
-	// NotifyConsensusFault(Address, [Block])
-	// NotifyStorageFault(Address)
-	// TryPublishBlock(StateTree)					Block
-	
-	// RegisterStorageMiner(SealProof)				Address
-	// TryUpdateStorage(Address, newPower)			error					
-}
 
 type PowerTable struct {
 	// all power here is always verified

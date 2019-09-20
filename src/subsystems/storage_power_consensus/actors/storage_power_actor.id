@@ -7,4 +7,18 @@ type StoragePowerActor struct {
 	// TODO: workerKey of type StorageMiner.WorkerPubKey
 	IncrementPower(workerKey PubKey) struct{}
 
+
+	// UpdateStoragePowerSubsystem(Tipset, StateTree)
+	
+	// VerifyElectionProof(Address, ElectionProof)	bool
+	// TotalStorage()								UVarint
+
+	// // What does graceful removal look like?
+	// NotifyConsensusFault(Address, [Block])
+	// NotifyStorageFault(Address)
+	// TryPublishBlock(StateTree)					Block
+	
+	// RegisterStorageMiner(SealProof)				Address
+	// TryUpdateStorage(Address, newPower)			error
+
 }
