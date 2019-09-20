@@ -25,7 +25,7 @@ type SectorPersistentAux struct {
        CommC          Commitment
 }
 
-type FilproofsSubsystem struct {
+type StorageProvingSubsystem struct {
     VerifySeal(
 		CommD    Commitment,
 		CommR    Commitment,

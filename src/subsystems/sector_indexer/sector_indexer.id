@@ -1,7 +1,7 @@
 
 // type Piece []byte
 
-type SectorStorageSubsystem struct {
+type SectorIndexerSubsystem struct {
    //     SectorSealer   SectorSealer,
    //     SectorStore    SectorStore,
    //     SectorBuilders { SectorConfig : SectorBuilder },

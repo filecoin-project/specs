@@ -177,9 +177,9 @@ sequenceDiagram
             StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: {1, 0}
             opt 1- success
                 StorageMiningSubsystem ->> BlockProducer: GenerateBlock(EP, T0, Tipset, StorageMiner.Address)
-                BlockProducer ->>+ MessagePool: MostProfitableMessages(StorageMiner.Address)
+                BlockProducer ->>+ MessagePool: GetMostProfitableMessages(StorageMiner.Address)
                 MessagePool -->>- BlockProducer: [Message]
-                BlockProducer ->> BlockProducer: block ← AssembleBlock(ElectionProof, [Message], Tipset, EP, T0, StorageMiner.Address)
+                BlockProducer ->> BlockProducer: block ← AssembleBlock([Message], Tipset, EP, T0, StorageMiner.Address)
                 BlockProducer ->> BlockSyncer: PropagateBlock(block)
             end
         end

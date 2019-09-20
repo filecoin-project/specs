@@ -1,15 +1,15 @@
 /*
 
-// MessageGossip is a component of the MessagePool. It is in charge of receiving and
+// MessageSyncer is a component of the MessagePool. It is in charge of receiving and
 // propagating Messages. It a libp2p pubsub protocol.
-type MessageGossip struct {
+type MessageSyncer struct {
 	/*
 	// PropagateMessages is called to send out a set of messages to the rest of the
 	// network. This is used for messages added locally.
 	PropagateMessages(msgs [Message]) struct{}
 
 	// NewMessageReceived is a channel that returns message objects as they arrive.
-	// It is a notification for MessageGossip's client (usually the MessagePool).
+	// It is a notification for MessageSyncer's client (usually the MessagePool).
 	NewMessageReceived() MessageChan
 
 	pubsub pubsub.PubSub
@@ -20,7 +20,7 @@ type MessageGossip struct {
 
 var FilecoinVMMessageTopic = "/filecoin.org/messages"
 
-func NewMessageGossip(ps libp2p.PubSub) (mg *MessageGossip) error {
+func NewMessageSyncer(ps libp2p.PubSub) (mg *MessageSyncer) error {
 	/*
 	// TODO: address validation + bad message suppression.
 	val := nil
@@ -30,7 +30,7 @@ func NewMessageGossip(ps libp2p.PubSub) (mg *MessageGossip) error {
 	}
 
 	mch := new(MessageChan)
-	mg := &MessageGossip{ps, sub, mch}
+	mg := &MessageSyncer{ps, sub, mch}
 
 	// TODO: how will he handle things like this in the spec?
 	// this is an idiomatic thing, BUT we do need to address asynchrony in the spec somehow.
@@ -40,7 +40,7 @@ func NewMessageGossip(ps libp2p.PubSub) (mg *MessageGossip) error {
 	*/
 }
 
-func (mg *MessageGossip) PropagateMessages(msgs [Message]) {
+func (mg *MessageSyncer) PropagateMessages(msgs [Message]) {
 	/*
 	// msgs is most likely to be completely new messages that nobody has.
 	// sometimes not. if we think it's really a problem, deal with it then.
@@ -49,7 +49,7 @@ func (mg *MessageGossip) PropagateMessages(msgs [Message]) {
 	*/
 }
 
-func (mg *MessageGossip) handleIncoming() {
+func (mg *MessageSyncer) handleIncoming() {
 	/*
 	for {
 		m, err := mg.sub.Next()

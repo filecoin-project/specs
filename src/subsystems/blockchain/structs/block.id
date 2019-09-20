@@ -1,9 +1,4 @@
 /*
-type BlockStore struct {
-    GetBlock(CID) Block
-    PutBlock(Block) error
-}
-
 type Block struct {
 	MinerAddress()               Address
 	Tickets()                    []Ticket
@@ -21,12 +16,12 @@ type Block struct {
 //	ComputeUnsignedFingerprint() []byte
 }
 
-
 type Tipset struct {
 	Blocks            [Block]
 
     Has(Block)        bool
     Parents()         Tipset         @(cached)
+	// StateTree should live in VM
 	StateTree()       StateTree      @(cached)
     Epoch()           Epoch          @(cached)
     Weight()          ChainWeight    @(cached)
@@ -103,23 +98,6 @@ func (tipset *TipsetI) StateTree() StateTree {
 		currTree = UpdateStateTree(currTree, block)
 	}
 	return currTree
-}
-
-type Message interface {
-	To()        Address
-	From()      Address
-	Nonce()     Word
-	Value()     BigInt
-	GasPrice()  BigInt
-	GasLimit()  BigInt
-	Method()    Word
-	Params()    []byte
-}
-
-type MessageReceipt interface {
-	ExitCode()  byte
-	Return()    []byte
-	GasUsed()   BigInt
 }
 
 type BlockWeight BigInt
