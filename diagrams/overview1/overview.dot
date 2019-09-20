@@ -2,17 +2,6 @@ digraph Filecoin {
   compound=true;
   ranksep=0.01;
 
-  subgraph cluster_block_producer {
-    style=filled
-    color=lightgrey
-    label = "Block Producer"
-
-    { // components
-      node [shape=box]
-      "Block Producer"
-    }
-  }
-
   subgraph cluster_blockchain_subgroup {
     color=lightcyan1
     style=filled
@@ -25,6 +14,7 @@ digraph Filecoin {
       { // components
         node [shape=box]
         "Chain"
+        "Block Producer"
         "Block Syncer"
       }
 
@@ -46,6 +36,7 @@ digraph Filecoin {
         node [shape=doubleoctagon]
         "Init Actor" [label="Init\nActor"]
         "Account Actor" [label="Account\nActor"]
+        "Cron Actor" [label="Cron\nActor"]
       }
 
       "Init Actor" -> "Account Actor" [style=invis]
@@ -146,15 +137,14 @@ digraph Filecoin {
       { // components
         node [shape=box]
         "Data Transfers"
-        "DT Scheduler"
+        "Data Transfers Scheduler"
       }
+      // "Disks" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
 
       { // libp2p protocols
         node [shape=Msquare]
         "AuthSwap" [label="data\ntransfer\nprotocol\n(unnamed)"]
       }
-
-
     }
   }
 
@@ -188,8 +178,7 @@ digraph Filecoin {
         "Sector Store"
         "Sector Builder"
       }
-      // "Disks" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
-
+      
       // "Sector Store"
       // "Sector Builder"
     }
@@ -213,31 +202,6 @@ digraph Filecoin {
   subgraph cluster_systems {
     // color=lavender
     // style=filled
-
-
-    subgraph cluster_clock {
-      style=filled
-      color=lightgrey
-      label = "Clock"
-
-      { // components
-        node [shape=box]
-        "Wall Clock"
-        "NTP"
-        "Round Clock"
-      }
-
-      { // actors
-        node [shape=doubleoctagon]
-        "Cron Actor" [label="Cron\nActor"]
-      }
-
-      { // libp2p protocols
-        node [shape=Msquare]
-        "NTP"
-      }
-      "Wall Clock" -> "NTP"
-    }
 
     subgraph cluster_repository {
       style=filled
@@ -291,7 +255,6 @@ digraph Filecoin {
       }
     }
 
-    "NTP" -> "Config" [style=invis]
     "VDFs" -> "Cron Actor" [style=invis]
   }
 
@@ -300,6 +263,25 @@ digraph Filecoin {
   subgraph cluster_net {
     color=lightcyan1
     style=filled
+    
+    subgraph cluster_clock {
+      style=filled
+      color=lightgrey
+      label = "Clock"
+
+      { // components
+        node [shape=box]
+        "Wall Clock"
+        "NTP"
+      }
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "NTP"
+      }
+      "Wall Clock" -> "NTP"
+    }
+
 
     subgraph cluster_network {
       style=filled
@@ -369,8 +351,12 @@ digraph Filecoin {
   "Filecoin Network Node" -> "Gossipsub" [style=invis]
 
 
-  "Disk2" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
-
+  subgraph cluster_libp2p {
+    style=filled
+    color=lightgrey
+    label = "File Storage"
+    "Disk2" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
+  }
 
   // cross module links
   {
