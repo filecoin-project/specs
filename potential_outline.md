@@ -3,6 +3,50 @@
   - key concepts
   - filecoin vm
   - spec process
+- Systems
+  - Filecoin Nodes
+    - Node
+    - Repository
+      - IpldStore
+      - KeyStore
+      - Config
+    - FileStore
+    - Network
+    - Clock
+  - Filecoin Blockchain
+    - State Tree
+    - Filecoin VM
+      - Actors
+      - Message
+    - Message Pool
+    - Blockchain
+      - Chain Manager
+      - Block Syncer
+    - Storage Power Consensus
+      - Storage Power Actor
+      - Expected Consensus
+  - Filecoin Token
+    - Wallets
+    - Payments
+    - Payment Channels
+  - Filecoin Mining
+    - storage mining
+    - sector storage
+  - Filecoin Markets
+    - storage market
+    - retrieval market
+    - data transfers
+- libraries
+  - Filecoin Proofs
+  - Filecoin Compact Serialization
+  - libp2p
+    - Filecoin libp2p nodes
+    - gossipsub
+    - kad-dht
+  - ipfs
+    - graphsync
+    - bitswap
+    - unixfs
 - algorithms
   - expected consensus
   - proof of replication
@@ -10,40 +54,6 @@
   - payment channels
   - verifiable delay functions
   - cryptographic primitives
-- Subsystem Groups
-  - Data Structures
-    - Filecoin Nodes
-    - Repository
-    - Data Structures
-    - Filecoin Compact Serialization
-  - Networking
-    - Filecoin libp2p nodes
-    - libp2p protocols
-      - gossipsub
-      - kad-dht
-    - ipfs protocols
-      - graphsync
-      - bitswap
-  - State Machine
-    - State Tree
-    - Filecoin VM
-    - Message Pool
-    - Blockchain
-    - Storage Power Consensus
-  - Token
-    - Wallets
-    - Payments
-    - Payment Channels
-    - Fees
-  - Mining
-    - storage mining
-    - sector storage
-  - Markets
-    - storage market
-    - retrieval market
-    - data transfers
-  - Other
-    - Clock
 - Listings
   - Data Structures
   - Components
