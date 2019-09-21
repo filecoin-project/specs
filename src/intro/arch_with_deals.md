@@ -8,10 +8,9 @@ title: "Architecture Diagram"
 
 ## Storage Flow
 
-Without deals
+With deals
 
 {{% mermaid %}}
-
 sequenceDiagram
 
     participant RetrievalClient
@@ -70,20 +69,25 @@ sequenceDiagram
         Note right of StorageProvider: Piece, PieceCID, Deal
         StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
         StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealStarted, Deal}
+        alt StorageClient notifies network
+            StorageClient ->> StorageMarketActor: NotifyOfDeal(Deal, DealStatusPending)
+        else 
+            StorageProvider ->>  StorageMarketActor: NotifyOfDeal(Deal, DealStatusPending)
+        end
+        StorageMarketActor -->>- StorageMarketActor: AddDeal(Deal, DealStatusPending)
     end
 
     opt AddingDealToSector
         StorageProvider ->>+ StorageMiningSubsystem: HandleStorageDeal(Deal, PieceRef)
         StorageMiningSubsystem ->>+ SectorIndexerSubsystem: AddPieceToSector(Deal, SectorID)
         SectorIndexerSubsystem ->> SectorIndexerSubsystem: IndexSectorByDealExpiration(SectorID, Deal)
-        SectorIndexerSubsystem ->> SectorIndexerSubsystem: PIP ← GetPieceInclusionProof(Deal)
-        SectorIndexerSubsystem -->>- StorageMiningSubsystem: SectorID
-        StorageMiningSubsystem ->>- StorageProvider: NotifyStorageDealStaged(Deal,PieceRef,PIP,SectorID)
+        SectorIndexerSubsystem -->>- StorageMiningSubsystem: (SectorID, Deal)
+        StorageMiningSubsystem ->>- StorageProvider: NotifyStorageDealStaged(Deal,PieceRef,SectorID)
     end
 
     opt ClientQuery
         StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
-        StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealStaged,Deal,PIP}
+        StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealStaged,Deal}
     end
 
     opt SealingSector
@@ -94,10 +98,12 @@ sequenceDiagram
         SectorSealer -->>- StorageProvingSubsystem: SealOutputs
         StorageProvingSubsystem ->>- StorageMiningSubsystem: SealOutputs
         opt CommitSector
-            StorageMiningSubsystem ->> StorageMinerActor: CommitSector(Seed, SectorID, SealCommitment, SealProof)
+            StorageMiningSubsystem ->> StorageMinerActor: CommitSector(Seed, SectorID, SealCommitment, SealProof, [&Deal], [Deal])
             StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifySeal(SectorID, OnSectorInfo)
             FilecoinProofsSubsystem -->>- StorageMinerActor: {1,0}
             alt 1 - success
+                StorageMinerActor ->> StorageMinerActor: AddDeal(SectorID, [&Deal], DealStatusOnChain)
+                StorageMinerActor ->> StorageMinerActor: AddDeal(SectorID, [Deal], DealStatusPending)
                 StorageMinerActor ->> StoragePowerActor: IncrementPower(StorageMiner.WorkerPubKey)
             else 0 - failure
                 StorageMinerActor -->> StorageMiningSubsystem: CommitSectorError
@@ -114,31 +120,23 @@ sequenceDiagram
         StorageProvingSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
         StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
         StorageProvingSubsystem -->>- StorageMiningSubsystem: PoStProof
-        StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+        opt SubmitPoSt
+            StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+            StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifyPoSt(PoStProof)
+            FilecoinProofsSubsystem -->>- StorageMinerActor: {1,0}
+            alt 1 - success
+                StorageMinerActor ->> StorageMinerActor:  UpdateDoneSet()
+                StorageMinerActor ->> MarketMinerActor:  EnsureDealsAreAccountedFor()
+                StorageMarketActor ->> StorageMarketActor: ProcessDealPayment(Deal.Frequency, Deal.Expiration, Deal.Amount)
+            else 0 - failure
+                StorageMinerActor -->> StorageMiningSubsystem: PoStError
+            end
+        end
     end
 
     opt ClientQuery
         StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
         StorageProvider -->>- StorageClient: StorageDealResponse{SealingParams,DealComplete,...}
-    end
-    
-    loop StorageDealCollect
-        Note Right of StorageProvider: Deal
-        alt Via Client
-            StorageProvider ->>+ StorageClient: RequestVouchersApproval(Deal, [Voucher])
-            opt If Client Does Not Have PIP
-                StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
-                StorageProvider -->>- StorageClient: StorageDealResponse{SealingParams,DealComplete,SectorID, PIP}
-                StorageClient ->> StorageClient: {0, 1} ← VerifyPIP(SectorID, PIP)
-            end
-            StorageClient ->>+ BlockchainSubsystem: VerifySectorExists(SectorID)
-            BlockchainSubsystem ->>- StorageClient: {0, 1}
-            StorageClient ->> StorageClient: VouchersApprovalResponse ← ApproveVouchers([Voucher])
-            StorageClient -->>- StorageProvider: VouchersApprovalResponse
-            StorageProvider ->> PaymentChannelActor: RedeemVoucherWithApproval(VoucherApprovalResponse.Voucher)
-        else Via Blockchain
-            StorageProvider ->> PaymentChannelActor: RedeemVoucherWithPIP(Voucher, PIP)
-        end
     end
 
     loop BlockReception
@@ -191,7 +189,7 @@ sequenceDiagram
         end
     end
     
-    opt MiningScheduler
+     opt MiningScheduler
         opt Expired deals
             BlockchainSubsystem ->> SectorIndexerSubsystem: OnNewTipset(Chain, Epoch)
             SectorIndexerSubsystem ->> SectorIndexerSubsystem: [SectorID] ← LookupSectorByDealExpiry(Epoch)
@@ -199,13 +197,12 @@ sequenceDiagram
         end
         Note Right of MiningScheduler: Schedule and resume PoSts
         Note Right of MiningScheduler: Schedule and resume SEALs
-        Note Right of MiningScheduler: Process deal payments
         Note Right of MiningScheduler: Maintain FaultSet
         Note Right of MiningScheduler: Maintain DoneSet
     end
     
     opt ClockSubsystem
-        Note Right of ClockSubsystem: Close PendingArbitrations
+        Note Right of ClockSubsystem: Process expired deals
     end
 
     opt Storage Fault
@@ -216,39 +213,30 @@ sequenceDiagram
                 StorageMinerActor ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
                 StorageMinerActor -->> StoragePowerActor: UnsuspendMinerPower(Address, [RecoveredSector])
             else RecoveryAfterGracePeriodBeforeSlashRounds (~1hr to ~1 day since end of PoSt)
-                StorageMinerActor ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+                StorageMinerActor ->> StorageMinerActor: SubmitPoSt(PoStProof, [DoneSet])
                 StorageMinerActor -->> StoragePowerActor: UnsuspendMinerPowerOnNextPoSt(Address, [RecoveredSector])
             else RecoveryAfterSlashRounds (~1 day to ~7 days since end of PoSt)
                 CronActor ->> StorageMinerActor: SlashStorageCollateralPartial(Address, [FaultySector])
-                StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
-                StorageMinerActor ->>+ StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+                StorageMinerActor ->> StorageMarketActor: CompensateDealClientsForFaults([Deal], amount)
+                StorageMinerActor ->>+ StorageMinerActor: SubmitPoSt(PoStProof, [DoneSet])
                 StorageMinerActor ->> StorageMinerActor: AddCollateral()
                 StorageMinerActor -->>- StoragePowerActor: UpdatePower()
             else RecoveryAfterSectorFaultTimeout (~7 days+ since end of PoSt)
                 CronActor ->> StorageMinerActor: SlashStorageCollateralTotal(Address)
-                StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
+                StorageMinerActor ->> StorageMarketActor: CompensateDealClientsForFaults([Deal], amount)
                 StorageMinerActor ->> StorageMinerActor: AddSectorToDoneSet([FaultySector])
             end
         end
     end
 
-    opt FaultArbitration
-        Note Right of FaultArbitration: Does storageCollateral live with StorageMarketActor, or storageMiningActor? Does pledgeCollateral (create separate consensus collateral) live with StorageMiningActor or StoragePowerActor.
-        StorageClient ->> StorageMarketActor: ArbitrateFault(SectorID, Deal)
-        StorageMarketActor ->> StorageMarketActor: PendingArbitration ← FindArbitrationBySector(Deal.Size, Deal.Amount, Arbitration.Amount) 
-        StorageMarketActor ->> StorageMarketActor: Amt ← CalculateCompensation(Deal.Size, Deal.Amount, Arbitration.Amount)
-        StorageMarketActor -->> StorageMarketActor: CompensateClient(Amt, StorageClient.Address)
-    end
-
-    opt ConsensusFault
+    opt Consensus Fault
         StorageMinerActor -->> StoragePowerActor: DeclareConsensusFault(ConsensusFaultProof)
         StoragePowerActor -->+ StoragePowerConsensusSubsystem: ValidateFault(ConsensusFaultProof)
 
-        alt ValidFault
+        alt Valid Fault
             StoragePowerConsensusSubsystem -->> StoragePowerActor: TerminateMiner(Address)
             StoragePowerConsensusSubsystem -->> StoragePowerActor: SlashPledgeCollateral(Address)
             StoragePowerConsensusSubsystem -->- StorageMinerActor: UpdateBalance(Reward)
         end
     end
-
 {{% /mermaid %}}
