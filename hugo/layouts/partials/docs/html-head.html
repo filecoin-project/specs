@@ -1,6 +1,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{- template "title" . }} | {{ .Site.Title -}}</title>
+<title>{{- partial "docs/title" . }} | {{ .Site.Title -}}</title>
 
 <!-- Theme stylesheet, you can customize scss by creatig `assets/custom.scss` in your website -->
 {{ $styles := resources.Get "book.scss" | resources.ToCSS | resources.Minify | resources.Fingerprint }}

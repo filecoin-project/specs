@@ -1,0 +1,26 @@
+$header-highlight: #e6fbfd;
+
+h1, h2, h3, h4, h5 {
+  background: $header-highlight;
+}
+
+h1 {
+  font-weight: bold;
+  padding: 20px;
+}
+
+h2 {
+  padding: 18px;
+}
+
+h3 {
+  padding: 16px;
+}
+
+h4 {
+  padding: 14px;
+}
+
+h5 {
+  padding: 12px;
+}
