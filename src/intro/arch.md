@@ -209,28 +209,35 @@ sequenceDiagram
     end
 
     opt Storage Fault
-        alt Declared Storage Fault
+        opt With Declaration 
             StorageMinerSubsystem ->> StorageMinerActor: UpdateFaultsForEpoch([FaultSet])
-            StorageMinerActor -->> StoragePowerActor : SuspendMinerPower(Address, [FaultySector])
-            alt Recovery in Grace Period (~1hr since end of PoSt)
-                StorageMinerActor ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
-                StorageMinerActor -->> StoragePowerActor: UnsuspendMinerPower(Address, [RecoveredSector])
-            else RecoveryAfterGracePeriodBeforeSlashRounds (~1hr to ~1 day since end of PoSt)
-                StorageMinerActor ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+            StorageMinerActor -->> StoragePowerActor : SuspendPartialMinerPower(Address, [FaultySector])
+        end
+
+        alt Recovery in Grace Period (within ~1hr since end of PoSt)
+            StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+            StorageMinerActor -->> StoragePowerActor: UnsuspendMinerPower(Address, [RecoveredSector])
+        else RecoveryAfterGracePeriodBeforeSlashRounds (~1hr to ~1 day since end of PoSt)
+            CronActor ->>  StoragePowerActor: VerifyPoSts()       
+            alt With Declaration
+                StoragePowerActor ->> StorageMinerActor: SlashPledgeCollateralPartial(Address, [FaultySector])
+                StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
                 StorageMinerActor -->> StoragePowerActor: UnsuspendMinerPowerOnNextPoSt(Address, [RecoveredSector])
-            else RecoveryAfterSlashRounds (~1 day to ~7 days since end of PoSt)
-                CronActor ->> StorageMinerActor: SlashStorageCollateralPartial(Address, [FaultySector])
-                StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
-                StorageMinerActor ->>+ StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
-                StorageMinerActor ->> StorageMinerActor: AddCollateral()
-                StorageMinerActor -->>- StoragePowerActor: UpdatePower()
-            else RecoveryAfterSectorFaultTimeout (~7 days+ since end of PoSt)
-                CronActor ->> StorageMinerActor: SlashStorageCollateralTotal(Address)
-                StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
-                StorageMinerActor ->> StorageMinerActor: AddSectorToDoneSet([FaultySector])
+            else Without Declaration
+                StoragePowerActor ->> StoragePowerActor : SuspendAllMinerPower(Address)
+                StorageMinerActor ->> StorageMinerActor: SlashStorageDealCollateralTotal(Address)
             end
+            StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
+            StorageMiningSubsystem ->>+ StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+            StorageMinerActor ->> StorageMinerActor: AddCollateral()
+            StorageMinerActor -->>- StoragePowerActor: UpdatePower()
+        else RecoveryAfterSectorFaultTimeout (~7 days+ since end of PoSt)
+            CronActor ->> StorageMinerActor: SlashStorageCollateralTotal(Address)
+            StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
+            StorageMinerActor ->> StorageMinerActor: AddSectorToDoneSet([FaultySector])
         end
     end
+    
 
     opt FaultArbitration
         Note Right of FaultArbitration: Does storageCollateral live with StorageMarketActor, or storageMiningActor? Does pledgeCollateral (create separate consensus collateral) live with StorageMiningActor or StoragePowerActor.
