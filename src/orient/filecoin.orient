@@ -21,7 +21,6 @@ Primitives:
     Time:
       year_in_seconds = 365.25 * 24 * 60 * 60
 
-
 VDFRSA:
   declare(rsa_element, bytes)
   rsa_element = (2048/8)
@@ -43,19 +42,30 @@ Blockchain:
         message_size = to_address + from_address + message_nonce + value + gas_price + gas_limit + actor_method
         to_address = address_size
         from_address = address_size
-        declare(message_nonce, bytes) // TODO
-        message_nonce = varint
-        declare(value, bytes)
-        value = u64
-        declare(gas_price, bytes)
-        gas_price = u64
-        declare(gas_limit, bytes)
-        gas_limit = u64
-        declare(actor_method, bytes) // TODO: actor_method what is it? how big is it?
-        actor_method = u64
+
+        Nonce:
+          declare(message_nonce, bytes) // TODO
+          message_nonce = varint
+
+        Value:
+          declare(value, bytes)
+          value = u64
+
+        Gas:
+          declare(gas_price, bytes)
+          gas_price = u64
+          declare(gas_limit, bytes)
+          gas_limit = u64
+
+        ActorMethod:
+          declare(actor_method, bytes) // TODO: actor_method what is it? how big is it?
+          actor_method = u64
 
     Receipts:
+      declare(receipts, integer) // TODO
+      receipts_size = receipts * message_receipt
       message_receipts_cid = cid_size
+
       Receipt:
         message_receipt = exit_code + return + gas_used
         declare(exit_code, bytes) // TODO
@@ -118,8 +128,8 @@ Blockchain:
         block_sig_size = 96
 
       Tickets:
-        declare(tickets_size, bytes)
         declare(tickets, integer)
+        declare(tickets_size, bytes)
         tickets_size = ticket_size * tickets
         ticket_size = election_proof_size + vdf_proof_size + vdf_output_size
 
@@ -247,39 +257,23 @@ Proofs:
     Graph:
       Layers:
         layers = max(layers_a, layers_b) + 1
-        layers_a = (0.68 - epsilon + delta)/(0.12 - delta)
-        layers_b = log2(1/(3*(epsilon - 2 * delta))) + 0.12/(0.12-delta) + 1
+        layers_a = (0.68 - epsilon + delta) / (0.12 - delta)
+        layers_b = log2(1 / (3 * (epsilon - 2 * delta))) + 0.12 / (0.12 - delta) + 1
 
     SpaceGap:
-      epsilon <= 0.24
+      assume(epsilon <= 0.24)
       delta < epsilon/2
       spacegap = epsilon + 2 * delta
 
     Challenges:
       OfflineChallenges:
-        offline_challenges = - lambda / log2(1 - delta)
+        offline_challenges = (- lambda) / log2(1 - delta)
 
       OnlineChallenges:
-        online_challenges = - lambda / (log2(2 - epsilon - 2 * delta) - 1)
+        online_challenges = (- lambda) / (log2(2 - epsilon - 2 * delta) - 1)
 
     ProofGeneration (ColumnCommitments):
       opening_per_challenge = degree_base + degree_expander + 1
-
-  ProofOfReplication (ZigZag):
-    Graph:
-      Layers:
-        layers = 2 * log2(1 / (3 * (epsilon -2 * delta))) + 2 * (0.8 - epsilon + delta)/(0.12 -2 * delta) + 2 // TODO should be >=
-
-    SpaceGap:
-      spacegap = epsilon + 2 * delta
-      epsilon = - 3 * delta + 0.24 // was epsilon + 3 * delta < 0.24
-
-    Challenges:
-      OfflineChallenges:
-        offline_challenges = - lambda / (log2(2 - epsilon - 3  * delta) -1) // TODO should be >=
-
-      OnlineChallenges:
-        online_challenges = log2(1/(3 *(epsilon - 2 * delta))) // TODO should be >=
 
   ProofOfSpacetime:
     Randomness [RandomBeacon]:
@@ -334,6 +328,13 @@ Mining:
 
   StorageMarket:
     declare(min_storing_time)
+    Deals (OnChainDeals):
+      comm_p_size = cid_size
+      declare(p_size, 1)
+      p_size = log2(sector_size)
+      sector_manifest_size = pieces * comm_p_size + p_size
+      max_sector_manifest_hashes = sector_size / min_piece_size
+
 
 NetworkGoals:
   DataPropagation: // TODO some network assumptions here
