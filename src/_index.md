@@ -1,9 +1,9 @@
 ---
 entries:
 - intro
-- algorithms
 - systems
 - libraries
+- algorithms
 - listings
 - glossary
 - appendix

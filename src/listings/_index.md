@@ -3,6 +3,6 @@ title: Listings
 entries:
   - actors
   - data_structures
-  - components
+  - system_map
   - libp2p_protocols
 ---
