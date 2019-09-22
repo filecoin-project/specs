@@ -209,35 +209,31 @@ sequenceDiagram
     end
 
     opt Storage Fault
-        opt With Declaration 
-            StorageMinerSubsystem ->> StorageMinerActor: UpdateFaultsForEpoch([FaultSet])
-            StorageMinerActor -->> StoragePowerActor : SuspendPartialMinerPower(Address, [FaultySector])
+        opt Declaration within a Proving Period
+            StorageMinerSubsystem ->> StorageMinerActor: UpdateSectorStatus([FaultSet], SectorStateSets)
+            StorageMinerActor ->> StoragePowerActor: RecomputeMinerPower()
+            Note SectorStateSets := (FaultSet, RecoverSet, ExpireSet)
         end
 
-        alt Recovery in Grace Period (within ~1hr since end of PoSt)
-            StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
-            StorageMinerActor -->> StoragePowerActor: UnsuspendMinerPower(Address, [RecoveredSector])
-        else RecoveryAfterGracePeriodBeforeSlashRounds (~1hr to ~1 day since end of PoSt)
-            CronActor ->>  StoragePowerActor: VerifyPoSts()       
-            alt With Declaration
-                StoragePowerActor ->> StorageMinerActor: SlashPledgeCollateralPartial(Address, [FaultySector])
-                StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
-                StorageMinerActor -->> StoragePowerActor: UnsuspendMinerPowerOnNextPoSt(Address, [RecoveredSector])
-            else Without Declaration
-                StoragePowerActor ->> StoragePowerActor : SuspendAllMinerPower(Address)
-                StorageMinerActor ->> StorageMinerActor: SlashStorageDealCollateralTotal(Address)
+        opt Miner DID NOT win blocks this proving period -- deadline challenge
+            StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, SectorStateSets)
+        end
+
+        loop EveryBlock
+            CronActor ->> StoragePowerActor: VerifyPosts()
+            loop forEach StorageMinerActor in StoragePowerActor.Miners
+                alt if miner ProvingPeriod ends
+                    StoragePowerActor -->>+ StorageMinerActor: ProvingPeriodUpdate()
+                    StorageMinerActor ->> StorageMinerActor: computeProvingPeriodEndSectorState()
+                    Note Right of StorageMinerActor: FaultSet is all sectors if no post submitted
+                    Note Right of StorageMinerActor: sectors Faulted longer than threshold proving periods are destroyed
+                    StorageMinerActor ->> StorageMinerActor: UpdateSectorStatus(newSectorState)
+                    StorageMinerActor ->> StoragePowerActor: RecomputeMinerPower()
+                    StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([newSectorState.DestroyedSet])
+                end
             end
-            StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
-            StorageMiningSubsystem ->>+ StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
-            StorageMinerActor ->> StorageMinerActor: AddCollateral()
-            StorageMinerActor -->>- StoragePowerActor: UpdatePower()
-        else RecoveryAfterSectorFaultTimeout (~7 days+ since end of PoSt)
-            CronActor ->> StorageMinerActor: SlashStorageCollateralTotal(Address)
-            StorageMinerActor ->> StorageMarketActor: StagePendingArbitration([FaultySectorID], amount, arbitrationExpiration)
-            StorageMinerActor ->> StorageMinerActor: AddSectorToDoneSet([FaultySector])
         end
     end
-    
 
     opt FaultArbitration
         Note Right of FaultArbitration: Does storageCollateral live with StorageMarketActor, or storageMiningActor? Does pledgeCollateral (create separate consensus collateral) live with StorageMiningActor or StoragePowerActor.
