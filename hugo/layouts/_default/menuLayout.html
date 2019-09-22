@@ -1,10 +1,14 @@
 <div>
+  {{ $page := print "/docs" | $.Site.GetPage }}
+  {{ if (not ($page.Param "suppressMenu")) }}
   <ul>
-    {{ range $.Site.Data.sections }}
-      {{ $page := print "/docs/" . | $.Site.GetPage }}
+  {{ range ($page.Param "entries") }}
       <li>
-        {{ partial "menuLayoutPartial.html" (dict "page" $page.Page "depth" 1) }}
+      {{ with $page.GetPage . }}
+        {{ partial "menuLayoutPartial.html" (dict "page" . "depth" 1) }}
+      {{ end }}
       </li>
-    {{ end }}
+  {{ end }}
   </ul>
+  {{ end }}
 </div>

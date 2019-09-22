@@ -1,5 +1,6 @@
 <div>
-  {{ range $.Site.Data.sections }}
+  {{ $page := print "/docs" | $.Site.GetPage }}
+  {{ range ($page.Param "entries") }}
     {{ $x := $.Site.GetPage (print "/docs/" .) }}
     {{ $x.Render "sectionLayout" }}
   {{ end }}
