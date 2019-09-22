@@ -32,6 +32,7 @@ main() {
   tryinstall emacs emacs
   tryinstall hugo hugo
   tryinstall dot graphviz
+  tryinstall rsync rsync
 
   # other packages
   require go go "recommended install from https://golang.org/dl/ -- we need version 1.12+"

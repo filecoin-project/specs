@@ -79,9 +79,14 @@ pdf: go-test org2md hugo-build
 hugo-build: hugo-src $(shell find hugo/content | grep '.md')
 	cd hugo && hugo
 
-hugo-src: $(shell find src)
-	rm -rf hugo/content/docs
-	cp -r src hugo/content/docs
+hugo-src: $(shell find src | grep '.md')
+	@mkdir -p hugo/content/docs
+	rsync -av --inplace --safe-links src/ hugo/content/docs
+	echo "" >> hugo/content/_index.md # force reload
+	echo "" >> hugo/content/menu/index.md # force reload
+
+hugo-watch: .PHONY
+	bin/watcher --cmd="make hugo-src" --startcmd src 2>/dev/null
 
 orient: .PHONY
 	bin/build-spec-orient.sh
@@ -116,16 +121,22 @@ bins: bin/codeGen
 bin/codeGen: hugo/content/codeGen/*.go
 	cd hugo/content/codeGen && go build -o ../../../bin/codeGen
 
+bin/watcher:
+	go get -u github.com/radovskyb/watcher/...
+	go build -o $@ github.com/radovskyb/watcher/cmd/watcher
+
 # other
 
 serve: hugo-build .PHONY
 	echo "run `make website` and refresh to update"
-	cd hugo && hugo serve
+	cd hugo && hugo serve --noHTTPCache
 
 serve-website: website .PHONY
 	# use this if `make serve` breaks
 	echo "run `make website` and refresh to update"
 	cd build/website && python -m SimpleHTTPServer 1313
 
+serve-and-watch: .PHONY
+	make serve& make hugo-watch
 
 .PHONY:
