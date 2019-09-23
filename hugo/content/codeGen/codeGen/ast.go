@@ -438,7 +438,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 
 			*ctx.retDecls = append(*ctx.retDecls, GoTypeDecl {
 				name: caseTypeName,
-				type_: GoIdent { name: "Word" },
+				type_: GoIdent { name: "UVarint" },
 			})
 
 			for _, field := range xr.fields {
