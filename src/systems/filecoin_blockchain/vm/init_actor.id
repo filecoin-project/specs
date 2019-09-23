@@ -6,23 +6,14 @@ type InitActorImpl struct {
 
   // 0
 	GetActorIDForAddress(address Address) ActorID
-
-  // 1
-  Foo()
-
-  // 2
-  Bar()
 }
 
-func (a *InitActorImpl) GetActorIDForAddress(address Address) ActorID {
-  // go code
-}
+// func (a *InitActorImpl) GetActorIDForAddress(address Address) ActorID {
+// }
 
+// var initActor := getInitActor()
+// initActor.Actor.Balance
+// initActor.foo()
 
-
-var initActor := getInitActor()
-initActor.Actor.Balance
-initActor.foo()
-
-var initActorImpl := (InitActor*)(initActor.Head)
-initActorImpl.foo()
+// var initActorImpl := (InitActor*)(initActor.Head)
+// initActorImpl.foo()
