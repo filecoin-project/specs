@@ -31,7 +31,8 @@
     - Payment Channels
   - Filecoin Mining
     - storage mining
-    - sector storage
+    - storage indexing
+    - storage proving
   - Filecoin Markets
     - storage market
     - retrieval market

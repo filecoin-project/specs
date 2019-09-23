@@ -46,6 +46,8 @@ h5 {
 
 // section numbering
 
+$section-number-menu-color: #a9a9a9;
+
 body, .book-menu {
   counter-reset : h1;
 }
@@ -68,6 +70,10 @@ h4, .menu-item.depth-4 {
 
 h5, .menu-item.depth-5 {
   counter-reset : h6;
+}
+
+.menu-item:before {
+  color: $section-number-menu-color;
 }
 
 article h1:before, .menu-item.depth-1:before {
