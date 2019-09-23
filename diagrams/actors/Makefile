@@ -1,1 +1,1 @@
-../../../../../tools/Makefile.diagrams
+../../tools/Makefile.diagrams
