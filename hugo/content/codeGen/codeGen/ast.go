@@ -356,7 +356,12 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 	switch x.(type) {
 	case *NamedType:
 		xr := x.(*NamedType)
-		return GoIdent {name: xr.name}
+		goTypeDecl := GoTypeDecl{
+			name: name,
+			type_: GoIdent {name: xr.name},
+		}
+		*ctx.retDecls = append(*ctx.retDecls, goTypeDecl)
+		return GoIdent {name: name}
 
 	case *OptionType:
 		xr := x.(*OptionType)
