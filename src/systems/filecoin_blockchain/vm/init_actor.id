@@ -2,6 +2,7 @@
 type InitActorState struct {
 	// responsible for create new actors
 	// AddressMap {Address:ActorID}
+  // IDMap {ActorID:Address}
 	NextID ActorID
 
   // 0

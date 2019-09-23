@@ -5,6 +5,9 @@ type UVarint int
 type TokenAmount UVarint
 type ActorID UVarint
 
+type ActorMethod UVarint
+type Address Bytes
+
 type CallSeqNo UVarint
 
 // Question for language:
