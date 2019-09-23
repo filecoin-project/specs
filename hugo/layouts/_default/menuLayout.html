@@ -1,7 +1,13 @@
 <div>
+
+  <div>
+    <input id="menu-detail-slider" type="range" min="1" value="3" max="5" step="1" onchange="onMenuDetailChange();" />
+    <span id="menu-detail-slider-label">3</span>
+  </div>
+
   {{ $page := print "/docs" | $.Site.GetPage }}
   {{ if (not ($page.Param "suppressMenu")) }}
-  <ul>
+  <ul class="menu-item-section depth-0">
   {{ range ($page.Param "entries") }}
       <li>
       {{ with $page.GetPage . }}

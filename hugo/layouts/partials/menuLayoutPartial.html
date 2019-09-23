@@ -12,7 +12,7 @@
   {{ $title = ($page.Param "menuTitle") }}
 {{ end }}
 
-<a href="/#{{ $tag }}">
+<a href="/#{{ $tag }}" class="menu-item depth-{{ $depth }}">
     {{ if (eq $depth 1) }}
     <strong>
     {{ end }}
@@ -24,7 +24,7 @@
 
 
 {{ if (not ($page.Param "suppressMenu")) }}
-<ul>
+<ul class="menu-item-section depth-{{ $depth }}">
 {{ range ($page.Param "entries") }}
     <li>
     {{ with $page.GetPage . }}
