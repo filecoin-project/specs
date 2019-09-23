@@ -81,7 +81,7 @@ hugo-build: hugo-src $(shell find hugo/content | grep '.md')
 
 hugo-src: $(shell find src | grep '.md')
 	@mkdir -p hugo/content/docs
-	rsync -av --inplace --safe-links src/ hugo/content/docs
+	rsync -av --inplace src/ hugo/content/docs
 	echo "" >> hugo/content/_index.md # force reload
 	echo "" >> hugo/content/menu/index.md # force reload
 
