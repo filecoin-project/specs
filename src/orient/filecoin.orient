@@ -120,7 +120,7 @@ Blockchain:
         timestamp_size = u64
 
       // BlockSig (BlockSigSecpk):
-         declare(block_sig_size, integer) // TODO
+        declare(block_sig_size, integer) // TODO
       //    block_sig_size = 80
 
       BlockSig (BlockSigBls):
@@ -262,7 +262,7 @@ Proofs:
 
     SpaceGap:
       assume(epsilon <= 0.24)
-      delta < epsilon/2
+      // delta = epsilon/2 <-- FIXME uncoomment.
       spacegap = epsilon + 2 * delta
 
     Challenges:
