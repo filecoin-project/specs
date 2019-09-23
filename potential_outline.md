@@ -4,18 +4,19 @@
   - filecoin vm
   - spec process
 - Systems
-  - Filecoin Nodes
-    - Node
-    - Repository
+  x Filecoin Nodes
+    x Node
+    x Repository
       - IpldStore
       - KeyStore
       - Config
-    - FileStore
-    - Network
-    - Clock
-  - Filecoin Blockchain
-    - State Tree
-    - Filecoin VM
+    x FileStore
+    x Network
+    x Clock
+  x Filecoin Blockchain
+    x State Tree
+    x Filecoin VM
+      - VM Interpreter
       - Actors
       - Message
     x Message Pool
