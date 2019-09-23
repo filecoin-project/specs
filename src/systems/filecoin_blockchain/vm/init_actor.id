@@ -1,19 +1,15 @@
 
-type InitActorImpl struct {
+type InitActorState struct {
 	// responsible for create new actors
-	AddressMap {Address:ActorID}
+	// AddressMap {Address:ActorID}
 	NextID ActorID
 
   // 0
-	GetActorIDForAddress(address Address) ActorID
+  // InitConstructor()
+
+  // 1
+  // Exec(code &Code, params ActorMethod) Address
+
+  // 2
+  // GetActorIDForAddress(address Address) ActorID
 }
-
-// func (a *InitActorImpl) GetActorIDForAddress(address Address) ActorID {
-// }
-
-// var initActor := getInitActor()
-// initActor.Actor.Balance
-// initActor.foo()
-
-// var initActorImpl := (InitActor*)(initActor.Head)
-// initActorImpl.foo()

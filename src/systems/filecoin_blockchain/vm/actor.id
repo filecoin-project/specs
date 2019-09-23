@@ -34,9 +34,18 @@ type SystemActorState union {
 }
 
 
-
 // state := actor.State.as_SystemActorState().as_InitActorState()
 // var actor, state := getInitActor()
+
+
+
+
+
+
+
+
+
+
 
 // type StoragePowerActorState struct {
 // 	// maintain storage power over time
