@@ -2,8 +2,6 @@
 title: Network Interface
 ---
 
-# Filecoin Network Interface
-
 ```
 type NetworkInterface struct {
   libp2p.Node
