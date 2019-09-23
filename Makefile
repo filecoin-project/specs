@@ -100,7 +100,7 @@ GEN_GO_FILES=$(patsubst %.id, %.gen.go, $(ID_FILES))
 %.gen.go: %.id bin/codeGen
 	bin/codeGen $<
 
-gen-code: $(GEN_GO_FILES)
+gen-code: bin/codeGen $(GEN_GO_FILES)
 
 go-test: $(shell find hugo/content/ | grep .go)
 	# testing should have the side effect that all go is compiled
@@ -122,7 +122,7 @@ org2md: $(ORG_MD_FILES)
 # building our tools
 bins: bin/codeGen
 
-bin/codeGen: hugo/content/codeGen/*.go
+bin/codeGen: hugo/content/codeGen/*.go hugo/content/codeGen/codeGen/*.go
 	cd hugo/content/codeGen && go build -o ../../../bin/codeGen
 
 bin/watcher:
