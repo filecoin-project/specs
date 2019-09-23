@@ -1,7 +1,8 @@
 // This contains actor things that are _outside_ of VM exection.
 // The VM uses this to execute actors.
 
-
+type UVarint int
+type TokenAmount UVarint
 type ActorID UVarint
 
 type CallSeqNo UVarint
@@ -11,42 +12,31 @@ type CallSeqNo UVarint
 //   but we should make including actor state nicer.
 // -
 type Actor struct {
-	// common fields for all actors
-	Balance TokenAmount
-	SeqNo   CallSeqNo // FKA Nonce
-
-    CodeCID() CID
+  // common fields for all actors
+  // CodeCID CID
+  State   ActorState
+  Balance TokenAmount
+  SeqNo   CallSeqNo // FKA Nonce
 }
 
-// SystemActor is a union that defines actors. It's needed
-// in the type system to be able to refer to actors generically.
-//
-
-type Actor union {
-    // TODO: enable when we allow UserActors
-    //       this is here to distinguish actors
-    // UserActor
-    SystemActor
+type ActorState union {
+  SystemActorState SystemActorState
+  // UserActorState UserActorState
 }
 
-type SystemActor union {
-	InitActor
-	AccountActor
-	StoragePowerActor
-	StorageMinerActor
-	CronActor
-	PaymentChannelActor
+type SystemActorState union {
+	InitActorState           InitActorState
+//	AccountActorState        AccountActorState
+//	StoragePowerActorState   StoragePowerActorState
+//	StorageMinerActorState   StorageMinerActorState
+//	CronActorState           CronActorState
+//	PaymentChannelActorState PaymentChannelActorState
 }
 
 
-// type ActorMethod union {
-// 	  InitActorMethod
-// 	  AccountActorMethod
-// 	  StoragePowerActorMethod
-// 	  StorageMinerActorMethod
-// 	  CronActorMethod
-// 	  PaymentChannelActorMethod
-// }
+
+// state := actor.State.as_SystemActorState().as_InitActorState()
+// var actor, state := getInitActor()
 
 // type StoragePowerActorState struct {
 // 	// maintain storage power over time

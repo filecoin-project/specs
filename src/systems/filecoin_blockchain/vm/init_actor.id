@@ -1,9 +1,28 @@
 
-type InitActorState struct {
+type InitActorImpl struct {
 	// responsible for create new actors
-	Meta ActorMeta
 	AddressMap {Address:ActorID}
 	NextID ActorID
 
+  // 0
 	GetActorIDForAddress(address Address) ActorID
+
+  // 1
+  Foo()
+
+  // 2
+  Bar()
 }
+
+func (a *InitActorImpl) GetActorIDForAddress(address Address) ActorID {
+  // go code
+}
+
+
+
+var initActor := getInitActor()
+initActor.Actor.Balance
+initActor.foo()
+
+var initActorImpl := (InitActor*)(initActor.Head)
+initActorImpl.foo()

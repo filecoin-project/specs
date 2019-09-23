@@ -1,5 +1,8 @@
 
+
+
 type StateTree struct {
+    SystemActors {ActorName:Address}
     ActorStates {Address:ActorState}
 
     API ConvenienceAPI
@@ -24,7 +27,6 @@ type StateTree struct {
 // $head/state/sectors/<num>/pieces/<num> (cid)
 // $head/state/pieces/count
 // $head/state/pieces/<num> (cid)
-
 
 
 type ActorID UVarint
