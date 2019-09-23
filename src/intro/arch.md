@@ -212,7 +212,7 @@ sequenceDiagram
         opt Declaration within a Proving Period
             StorageMinerSubsystem ->> StorageMinerActor: UpdateSectorStatus([FaultSet], SectorStateSets)
             StorageMinerActor ->> StoragePowerActor: RecomputeMinerPower()
-            Note SectorStateSets := (FaultSet, RecoverSet, ExpireSet)
+            Note Right of StorageMinerActor: SectorStateSets := (FaultSet, RecoverSet, ExpireSet)
         end
 
         opt Miner DID NOT win blocks this proving period -- deadline challenge
