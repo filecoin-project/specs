@@ -18,43 +18,46 @@
     - Filecoin VM
       - Actors
       - Message
-    - Message Pool
-    - Blockchain
-      - Chain Manager
-      - Block Syncer
-    - Storage Power Consensus
-      - Storage Power Actor
-      - Expected Consensus
-  - Filecoin Token
-    - Wallets
-    - Payments
-    - Payment Channels
-  - Filecoin Mining
-    - storage mining
-    - storage indexing
-    - storage proving
-  - Filecoin Markets
-    - storage market
-    - retrieval market
-    - data transfers
-- libraries
-  - Filecoin Proofs
-  - Filecoin Compact Serialization
-  - libp2p
-    - Filecoin libp2p nodes
-    - gossipsub
-    - kad-dht
-  - ipfs
-    - graphsync
-    - bitswap
-    - unixfs
-- algorithms
-  - expected consensus
-  - proof of replication
-  - proof of spacetime
-  - payment channels
-  - verifiable delay functions
-  - cryptographic primitives
+    x Message Pool
+    x Blockchain
+      x Chain Manager
+      x Block Syncer
+      x Message Pool
+    x Storage Power Consensus
+      x Storage Power Actor
+      x Expected Consensus
+  x Filecoin Token
+    x Wallets
+    x Payments
+    x Payment Channels
+  x Filecoin Mining
+    x storage mining
+    x storage indexing
+    x storage proving
+  x Filecoin Markets
+    x storage market
+    x retrieval market
+    x data transfers
+x libraries
+  x Filecoin Proofs
+  x Filecoin Compact Serialization
+  x ipld
+    x
+  x libp2p
+    x Filecoin libp2p nodes
+    x gossipsub
+    x kad-dht
+  x ipfs
+    x graphsync
+    x bitswap
+    x unixfs
+x algorithms
+  x expected consensus
+  x proof of replication
+  x proof of spacetime
+  x payment channels
+  x verifiable delay functions
+  x cryptographic primitives
 - Listings
   - Data Structures
   - Components

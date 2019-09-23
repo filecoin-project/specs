@@ -25,13 +25,18 @@
   {{- $v = after 1 $v -}}
 {{- end -}}
 
-{{- $dstTag := print "/#" (delimit $v "__") -}}
+{{- if not (eq $v nil) -}}
+  {{- $dstTag := print "/#" (delimit $v "__") -}}
 
-{{- $dstPagePath := print "/docs/" (delimit $v "/") -}}
-{{- $dstPageObj := $.Site.GetPage $dstPagePath -}}
+  {{- $dstPagePath := print "/docs/" (delimit $v "/") -}}
+  {{- $dstPageObj := $.Site.GetPage $dstPagePath -}}
 
-{{- $text = default ($dstPageObj.Param "title") $text -}}
-{{- $text = default (index $loc_titles $k) $text -}}
+  {{- $text = default ($dstPageObj.Param "title") $text -}}
+  {{- $text = default (index $loc_titles $k) $text -}}
 
-<a href="{{ $dstTag }}">{{- $text -}}</a>
+  <a href="{{ $dstTag }}">{{- $text -}}</a>
+{{- else -}}
+  {{- $text -}}
+{{- end -}}
+
 {{- $unused := 17 -}}
