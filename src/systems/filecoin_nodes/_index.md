@@ -1,9 +1,9 @@
 ---
 title: Filecoin Nodes
 entries:
-  - node_types
-  - repository
-  - filestore
-  - network
-  - clock
+- node_types
+- repository
+- filestore
+- network
+- clock
 ---

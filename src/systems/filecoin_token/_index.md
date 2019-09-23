@@ -1,11 +1,7 @@
 ---
-title: Subsystems
+title: Token
 entries:
-  - blockchain
-  - vm
-  - storage
-  - retrieval
-  - mining
-  - network
-  - repository
+- wallets
+- payments
+- payment_channels
 ---

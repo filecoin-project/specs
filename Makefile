@@ -80,13 +80,17 @@ hugo-build: hugo-src $(shell find hugo/content | grep '.md')
 	cd hugo && hugo
 
 hugo-src: $(shell find src | grep '.md')
+	rm -rf hugo/content/docs
+	cp -r src hugo/content/docs
+
+hugo-src-rsync: $(shell find src | grep '.md')
 	@mkdir -p hugo/content/docs
 	rsync -av --inplace src/ hugo/content/docs
 	echo "" >> hugo/content/_index.md # force reload
 	echo "" >> hugo/content/menu/index.md # force reload
 
 hugo-watch: .PHONY
-	bin/watcher --cmd="make hugo-src" --startcmd src 2>/dev/null
+	bin/watcher --cmd="make hugo-src-rsync" --startcmd src 2>/dev/null
 
 orient: .PHONY
 	bin/build-spec-orient.sh

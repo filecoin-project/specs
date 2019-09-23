@@ -48,7 +48,9 @@ h5 {
 
 $section-number-menu-color: #a9a9a9;
 
-body, .book-menu {
+// this has to happen once for the menu, once for the content
+// so that the counting is right for both.
+body, .book-menu, .book-page {
   counter-reset : h1;
 }
 
