@@ -22,9 +22,14 @@ type Ticket struct {
 
 
 type StorageMiningSubsystem struct {
-    // actors [&StorageMinerActor]
-    // StartMining() struct {}
-    // StopMining() struct {}
+
+    storageMinerActors [&StorageMinerActor]
+    sectorIndexerSubsystem SectoerIndexerSubsystem
+
+    StartMining() struct {}
+    StopMining() struct {}
+
+    InitStorageMiningSubsystem() struct{}
 
     // call by StorageMiningSubsystem itself to create miner
     CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}

@@ -1,28 +1,30 @@
 type PieceInclusionProof struct {}
 
-type SectorIndexer struct {
+type SectorIndexerSubsystem struct {
+
+    SectorStore    SectorStore,
+    SectorBuilders { SectorConfig : SectorBuilder },
+    ProverID       UInt
 
 	// call by StorageMiningSubsystem during AddingDealToSector
 	// trigger getPieceInclusionProof
 	// TODO: procedural call
-	AddPieceToSector(deal StorageDeal, sectorID SectorID) struct{}
+	AddPieceToSector(deal StorageDeal, pieceRef CID) struct {
+		sectorID SectorID,
+		pip PieceInclusionProof,
+	}
 
 	// call by SectorIndexer itself to get pip of a deal
 	getPieceInclusionProof(deal StorageDeal) PieceInclusionProof
 
+	selectSectorBuilderByDeal(deal StorageDeal) SectorBuilder
 
 }
 
 // ----- old
 // type Piece []byte
 
-type SectorIndexerSubsystem struct {
-   //     SectorSealer   SectorSealer,
-   //     SectorStore    SectorStore,
-   //     SectorBuilders { SectorConfig : SectorBuilder },
-
-   //     ProverId       UInt
-
+// type SectorIndexerSubsystem struct {
    //     AddPiece(
    //       piece Piece,
 		 // sectorConfig SectorConfig,
@@ -48,7 +50,7 @@ type SectorIndexerSubsystem struct {
 
    //     RetrievePiece(CommD Commitment, Start UInt, Length UInt) Piece {
    //     }
-}
+// }
 
 // Indexed by CommR
 type SectorMetadata struct {
