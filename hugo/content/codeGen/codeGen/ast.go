@@ -350,6 +350,10 @@ func GoTypeToIdent(typeName string) GoIdent {
 	return GoIdent { name: strings.ToLower(typeName)[0:1] }
 }
 
+func GoMethodToFieldName(methodName string) string {
+	return methodName + "_";
+}
+
 func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 	Assert(x != nil)
 
@@ -396,7 +400,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		if xr.sort == AlgSort_Prod {
 			for _, field := range xr.fields {
 				implFields = append(implFields, GoField {
-					fieldName: field.fieldName,
+					fieldName: GoMethodToFieldName(field.fieldName),
 					fieldType: GenGoTypeAcc(field.fieldType, ctx.Extend(field.fieldName).Concrete(true)),
 				})
 
@@ -455,7 +459,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 
 				caseInterfaceType := GoIdent { caseInterfaceName }
 				caseImplType := GoIdent { IdToImpl(caseInterfaceName) }
-				// caseImplPtrType := GoPtrType { targetType: caseImplType }
+				caseImplPtrType := GoPtrType { targetType: caseImplType }
 
 				interfaceFields = append(interfaceFields, GoField {
 					fieldName: "As_" + field.fieldName,
@@ -487,7 +491,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 				}
 				caseAsDecl := GoFunDecl {
 					receiverVar: &caseAsDeclArg,
-					receiverType: GoIdent { caseInterfaceName },
+					receiverType: caseImplPtrType,
 					funName: "As_" + field.fieldName,
 					funType: GoFunType {
 						args: []GoField {},
@@ -619,39 +623,42 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 
 		implReceiverVar := GoTypeToIdent(name)
 		implRefReceiverVar := GoTypeToIdent(name)
-		for _, field := range xr.fields {
-			baseFieldType := GenGoTypeAcc(field.fieldType, ctx.Extend(field.fieldName))
 
-			implAccessorDecl := GoFunDecl {
-				receiverVar: &implReceiverVar,
-				receiverType: GoPtrType {
-					targetType: implID,
-				},
-				funName: field.fieldName,
-				funType: GoFunType {
-					args:    []GoField{},
-					retType: baseFieldType,
-				},
-				funArgs: []GoNode{},
-				funBody: GenGoAccessorBody(implReceiverVar, field.fieldName),
+		if xr.sort == AlgSort_Prod {
+			for _, field := range xr.fields {
+				baseFieldType := GenGoTypeAcc(field.fieldType, ctx.Extend(field.fieldName))
+
+				implAccessorDecl := GoFunDecl {
+					receiverVar: &implReceiverVar,
+					receiverType: GoPtrType {
+						targetType: implID,
+					},
+					funName: field.fieldName,
+					funType: GoFunType {
+						args:    []GoField{},
+						retType: baseFieldType,
+					},
+					funArgs: []GoNode{},
+					funBody: GenGoAccessorBody(implReceiverVar, GoMethodToFieldName(field.fieldName)),
+				}
+
+				implRefAccessorDecl := GoFunDecl {
+					receiverVar: &implRefReceiverVar,
+					receiverType: GoPtrType {
+						targetType: implRefID,
+					},
+					funName: field.fieldName,
+					funType: GoFunType {
+						args:    []GoField{},
+						retType: baseFieldType,
+					},
+					funArgs: []GoNode{},
+					funBody: GenGoDerefAccessorBody(implRefReceiverVar, GoMethodToFieldName(field.fieldName)),
+				}
+
+				*ctx.retDecls = append(*ctx.retDecls, implAccessorDecl)
+				*ctx.retDecls = append(*ctx.retDecls, implRefAccessorDecl)
 			}
-
-			implRefAccessorDecl := GoFunDecl {
-				receiverVar: &implRefReceiverVar,
-				receiverType: GoPtrType {
-					targetType: implRefID,
-				},
-				funName: field.fieldName,
-				funType: GoFunType {
-					args:    []GoField{},
-					retType: baseFieldType,
-				},
-				funArgs: []GoNode{},
-				funBody: GenGoDerefAccessorBody(implRefReceiverVar, field.fieldName),
-			}
-
-			*ctx.retDecls = append(*ctx.retDecls, implAccessorDecl)
-			*ctx.retDecls = append(*ctx.retDecls, implRefAccessorDecl)
 		}
 
 		implImplDecl := GoFunDecl {
