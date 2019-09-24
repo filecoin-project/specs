@@ -4,8 +4,8 @@ type File struct {
   Path() Path
   Size() int
   Seek(offset int) error
-  Read(buf Bytes) union { size int, e error }
-  Write(buf Bytes) union { size int, e error }
+  Read(buf Bytes) struct { size int, e error }
+  Write(buf Bytes) struct { size int, e error }
   Close() error
 }
 
