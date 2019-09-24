@@ -5,7 +5,7 @@ type StateTree struct {
     SystemActors {ActorName:Address}
     ActorStates {Address:ActorState}
 
-    API ConvenienceAPI
+    // TODO: API ConvenienceAPI
 }
 
 

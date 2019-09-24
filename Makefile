@@ -95,12 +95,27 @@ hugo-watch: .PHONY
 orient: .PHONY
 	bin/build-spec-orient.sh
 
-ID_FILES=$(shell find src/ -name '*.id')
-GEN_GO_FILES=$(patsubst %.id, %.gen.go, $(ID_FILES))
-%.gen.go: %.id bin/codeGen
-	bin/codeGen $<
+GO_INPUT_FILES=$(shell find src/ -iname '*.go')
+GO_OUTPUT_FILES=$(patsubst src/%.go, build/%.go, $(GO_INPUT_FILES))
 
-gen-code: bin/codeGen $(GEN_GO_FILES)
+GO_UTIL_INPUT_FILE=hugo/content/codeGen/util/util.go
+GO_UTIL_OUTPUT_FILE=build/util/util.go
+
+$(GO_UTIL_OUTPUT_FILE): $(GO_UTIL_INPUT_FILE)
+	mkdir -p $(dir $@)
+	cp $< $@
+
+build/%.go: src/%.go
+	mkdir -p $(dir $@)
+	cp $< $@
+
+ID_FILES=$(shell find src/ -name '*.id')
+GEN_GO_FILES=$(patsubst src/%.id, build/%.gen.go, $(ID_FILES))
+build/%.gen.go: src/%.id bin/codeGen
+	mkdir -p $(dir $@)
+	bin/codeGen $< $@
+
+gen-code: bin/codeGen $(GEN_GO_FILES) $(GO_OUTPUT_FILES) $(GO_UTIL_OUTPUT_FILE)
 
 go-test: $(shell find hugo/content/ | grep .go)
 	# testing should have the side effect that all go is compiled
@@ -122,7 +137,7 @@ org2md: $(ORG_MD_FILES)
 # building our tools
 bins: bin/codeGen
 
-bin/codeGen: hugo/content/codeGen/*.go hugo/content/codeGen/codeGen/*.go
+bin/codeGen: hugo/content/codeGen/*.go hugo/content/codeGen/*/*.go
 	cd hugo/content/codeGen && go build -o ../../../bin/codeGen
 
 bin/watcher:

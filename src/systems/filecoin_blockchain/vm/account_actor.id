@@ -1,8 +1,7 @@
 
+import bc systems.filecoin_blockchain.blockchain
+
 type AccountActorState struct {
 	// normal keypair backed accounts
-	Meta ActorMeta
-	Address Address
-
-	GetAddress() Address
+	Address bc.Address
 }

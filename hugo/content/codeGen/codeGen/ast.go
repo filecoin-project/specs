@@ -12,10 +12,19 @@ import (
 	"io"
 	"os"
 	"strings"
+	util "github.com/filecoin-project/specs/codeGen/main/util"
 )
 
-type Type interface {
-	Case() Type_Case
+type Decl_Case = util.Word
+
+const (
+	Decl_Case_Type     Decl_Case = 1
+	Decl_Case_Package  Decl_Case = 2
+	Decl_Case_Import   Decl_Case = 3
+)
+
+type Decl interface {
+	Case() Decl_Case
 }
 
 type TypeDecl struct {
@@ -23,7 +32,33 @@ type TypeDecl struct {
 	type_ Type
 }
 
-type Type_Case = Word
+type PackageDecl struct {
+	name  string
+}
+
+type ImportDecl struct {
+	name  string
+	path  string
+}
+
+func (TypeDecl) Case() Decl_Case {
+	return Decl_Case_Type
+}
+
+func (PackageDecl) Case() Decl_Case {
+	return Decl_Case_Package
+}
+
+func (ImportDecl) Case() Decl_Case {
+	return Decl_Case_Import
+}
+
+
+type Type interface {
+	Case() Type_Case
+}
+
+type Type_Case = util.Word
 
 const (
 	Type_Case_NamedType    Type_Case = 1
@@ -57,7 +92,7 @@ func (MapType) Case() Type_Case {
 	return Type_Case_MapType
 }
 
-type AlgSort = Word
+type AlgSort = util.Word
 
 const (
 	AlgSort_Prod AlgSort = 1
@@ -112,7 +147,7 @@ type MapType struct {
 
 type TypeHash string
 
-func HashAccWord(buf *[]byte, w Word) {
+func HashAccWord(buf *[]byte, w util.Word) {
 	bufAcc := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bufAcc, uint64(w))
 	*buf = append(*buf, bufAcc...)
@@ -202,17 +237,52 @@ type GoMod struct {
 	astFile    *ast.File
 }
 
-func GenGoMod(goDecls []GoNode) GoMod {
+func GenGoMod(goDecls []GoNode, packageName string) GoMod {
 	var ret GoMod
 
 	var astDecls = []ast.Decl{}
+
 	for _, goDecl := range goDecls {
-		astDecls = append(astDecls, GenAST(goDecl).(ast.Decl))
+		switch goDecl.(type) {
+		case GoPackageDecl:
+			astDecls = append(astDecls, GenAST(goDecl).(ast.Decl))
+		}
+	}
+
+	importNames := []string{}
+	importPaths := []string{}
+	for _, goDecl := range goDecls {
+		switch goDecl.(type) {
+		case GoImportDecl:
+			xr := goDecl.(GoImportDecl)
+			importNames = append(importNames, xr.name)
+			importPaths = append(importPaths, xr.path)
+		}
+	}
+
+	util.Assert(len(importNames) == len(importPaths))
+	if len(importNames) > 0 {
+		goImportDecl := GoImportMultiDecl {
+			names: importNames,
+			paths: importPaths,
+		}
+		astDecls = append(astDecls, GenAST(goImportDecl).(ast.Decl))
+	}
+
+	for _, goDecl := range goDecls {
+		switch goDecl.(type) {
+		case GoImportDecl:
+			break
+		case GoPackageDecl:
+			break
+		default:
+			astDecls = append(astDecls, GenAST(goDecl).(ast.Decl))
+		}
 	}
 
 	ret.astFileSet = token.NewFileSet()
 	ret.astFile = &ast.File{
-		Name:  ast.NewIdent("fileName"),
+		Name:  ast.NewIdent(packageName),
 		Decls: astDecls,
 	}
 
@@ -225,6 +295,7 @@ type GoGenContext struct {
 	retMap    map[TypeHash]GoNode
 	tokens    []string
 	concrete  bool
+	usesUtil  *[]bool
 }
 
 func (ctx GoGenContext) Extend(token string) GoGenContext {
@@ -239,17 +310,37 @@ func (ctx GoGenContext) Concrete(concrete bool) GoGenContext {
 	return ret
 }
 
-func GenGoTypeDecls(decls []TypeDecl) []GoNode {
+func GenGoDecls(decls []Decl) []GoNode {
 	ctx := GoGenContext {
 		typeMap:  map[string]Type{},
 		retDecls: &[]GoNode{},
 		retMap:   map[TypeHash]GoNode{},
 		tokens:   []string{},
 		concrete: false,
+		usesUtil: &[]bool{false},
 	}
 
 	for _, decl := range decls {
-		GenGoTypeDeclAcc(decl.name, decl.type_, ctx.Extend(decl.name))
+		switch decl.Case() {
+		case Decl_Case_Type:
+			xr := decl.(*TypeDecl)
+			GenGoTypeDeclAcc(xr.name, xr.type_, ctx.Extend(xr.name))
+		case Decl_Case_Import:
+			xr := decl.(*ImportDecl)
+			GenGoImportDeclAcc(*xr, ctx)
+		case Decl_Case_Package:
+			xr := decl.(*PackageDecl)
+			GenGoPackageDeclAcc(*xr, ctx)
+		default:
+			panic("Unhandled case")
+		}
+	}
+
+	if (*ctx.usesUtil)[0] {
+		GenGoImportDeclAcc(ImportDecl {
+			name: "util",
+			path: "util",
+		}, ctx)
 	}
 
 	return *ctx.retDecls
@@ -354,8 +445,27 @@ func GoMethodToFieldName(methodName string) string {
 	return methodName + "_";
 }
 
+func GenGoImportDeclAcc(decl ImportDecl, ctx GoGenContext) GoNode {
+	goImportPath := strings.ReplaceAll(decl.path, ".", "/")
+	goImportPath = "\"github.com/filecoin-project/specs/" + goImportPath + "\""
+	goImportDecl := GoImportDecl {
+		name: decl.name,
+		path: goImportPath,
+	}
+	*ctx.retDecls = append(*ctx.retDecls, goImportDecl)
+	return goImportDecl
+}
+
+func GenGoPackageDeclAcc(decl PackageDecl, ctx GoGenContext) GoNode {
+	goPackageDecl := GoPackageDecl {
+		name: decl.name,
+	}
+	*ctx.retDecls = append(*ctx.retDecls, goPackageDecl)
+	return goPackageDecl
+}
+
 func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
-	Assert(x != nil)
+	util.Assert(x != nil)
 
 	switch x.(type) {
 	case *NamedType:
@@ -371,7 +481,8 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		xr := x.(*OptionType)
 		goValueType := GenGoTypeAcc(xr.valueType, ctx.Extend("OptValue"))
 		goValueType.implements_GoNode()
-		return GoIdent {name: "_TODO_"}
+		*ctx.usesUtil = []bool{true}
+		return GoIdent {name: "util.TODO_TYPE_"}
 
 	case *MapType:
 		xr := x.(*MapType)
@@ -379,7 +490,8 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		goValueType := GenGoTypeAcc(xr.valueType, ctx.Extend("MapValue"))
 		goKeyType.implements_GoNode()
 		goValueType.implements_GoNode()
-		return GoIdent {name: "_TODO_"}
+		*ctx.usesUtil = []bool{true}
+		return GoIdent {name: "util.TODO_TYPE_"}
 
 	case *AlgType:
 		xr := x.(*AlgType)
@@ -429,13 +541,15 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 			},
 		})
 
-		interfaceFields = append(interfaceFields, GoField {
-			fieldName: "CID",
-			fieldType: GoFunType {
-				retType:  GoTypeByteArray(),
-				args:     []GoField{},
-			},
-		})
+		// TODO: re-enable
+		//
+		// interfaceFields = append(interfaceFields, GoField {
+		// 	fieldName: "CID",
+		// 	fieldType: GoFunType {
+		// 		retType:  GoTypeByteArray(),
+		// 		args:     []GoField{},
+		// 	},
+		// })
 
 		var caseTypeID GoNode = nil
 
@@ -458,8 +572,8 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 				GenGoTypeDeclAcc(caseInterfaceName, field.fieldType, ctx.Extend(field.fieldName))
 
 				caseInterfaceType := GoIdent { caseInterfaceName }
-				caseImplType := GoIdent { IdToImpl(caseInterfaceName) }
-				caseImplPtrType := GoPtrType { targetType: caseImplType }
+				// caseImplType := GoIdent { IdToImpl(caseInterfaceName) }
+				// caseImplPtrType := GoPtrType { targetType: caseImplType }
 
 				interfaceFields = append(interfaceFields, GoField {
 					fieldName: "As_" + field.fieldName,
@@ -484,14 +598,14 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 					},
 					GoStmtReturn {
 						value: GoExprCast {
-							arg:     caseAsDeclArg,
+							arg:     GoExprDot { value: caseAsDeclArg, fieldName: "rawValue" },
 							resType: caseInterfaceType,
 						},
 					},
 				}
 				caseAsDecl := GoFunDecl {
 					receiverVar: &caseAsDeclArg,
-					receiverType: caseImplPtrType,
+					receiverType: GoPtrType { targetType: implID },
 					funName: "As_" + field.fieldName,
 					funType: GoFunType {
 						args: []GoField {},
@@ -503,14 +617,12 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 
 				*ctx.retDecls = append(*ctx.retDecls, caseAsDecl)
 
-
-
 				caseNewDeclArg := GoTypeToIdent(name + "_" + field.fieldName)
 				caseNewDeclBody := []GoNode {
 					GoStmtReturn {
 						GoExprAddrOf {
 							target: GoExprStruct {
-								type_:  caseImplType,
+								type_:  implID,
 								fields: []GoField {
 									GoField {
 										fieldName: "cached_cid",
@@ -580,6 +692,29 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 				fieldName: "which",
 				fieldType: caseTypeID,
 			})
+
+			whichDeclArg := GoTypeToIdent(name)
+			whichDeclBody := []GoNode {
+				GoStmtReturn {
+					value: GoExprDot {
+						value: whichDeclArg,
+						fieldName: "which",
+					},
+				},
+			}
+			whichDecl := GoFunDecl {
+				receiverVar: &whichDeclArg,
+				receiverType: GoPtrType { targetType: implID },
+				funName: "Which",
+				funType: GoFunType {
+					args: []GoField {},
+					retType: caseTypeID,
+				},
+				funArgs: []GoNode{},
+				funBody: whichDeclBody,
+			}
+
+			*ctx.retDecls = append(*ctx.retDecls, whichDecl)
 		}
 
 		implRefFields = append(implRefFields, GoField {
@@ -778,6 +913,9 @@ type GoNode interface {
 }
 
 func (GoTypeDecl) implements_GoNode() {}
+func (GoPackageDecl) implements_GoNode() {}
+func (GoImportDecl) implements_GoNode() {}
+func (GoImportMultiDecl) implements_GoNode() {}
 func (GoEnumDecl) implements_GoNode() {}
 func (GoFunDecl) implements_GoNode() {}
 func (GoFunType) implements_GoNode() {}
@@ -801,6 +939,20 @@ type GoTypeDecl struct {
 	type_ GoNode
 }
 
+type GoPackageDecl struct {
+	name  string
+}
+
+type GoImportDecl struct {
+	name  string
+	path  string
+}
+
+type GoImportMultiDecl struct {
+	names  []string
+	paths  []string
+}
+
 type GoEnumDecl struct {
 	name       string
 	caseNames  []string
@@ -815,7 +967,7 @@ type GoFunDecl struct {
 	funBody      []GoNode
 }
 
-type GoProdTypeCase = Word
+type GoProdTypeCase = util.Word
 
 const (
 	GoProdTypeCase_Interface GoProdTypeCase = 0
@@ -900,6 +1052,41 @@ func GenAST(x GoNode) ast.Node {
 					Type: GenAST(xr.type_).(ast.Expr),
 				},
 			},
+		}
+
+	case GoImportDecl:
+		xr := x.(GoImportDecl)
+		return &ast.GenDecl {
+			Tok: token.IMPORT,
+			Specs: []ast.Spec {
+				&ast.ImportSpec {
+					Name: ast.NewIdent(xr.name),
+					Path: &ast.BasicLit {
+						Kind: token.STRING,
+						Value: xr.path,
+					},
+				},
+			},
+		}
+
+	case GoImportMultiDecl:
+		xr := x.(GoImportMultiDecl)
+		importSpecs := []ast.Spec{}
+		n := len(xr.names)
+		util.Assert(len(xr.paths) == n)
+		for i, name := range xr.names {
+			path := xr.paths[i]
+			importSpecs = append(importSpecs, &ast.ImportSpec {
+				Name: ast.NewIdent(name),
+				Path: &ast.BasicLit {
+					Kind: token.STRING,
+					Value: path,
+				},
+			})
+		}
+		return &ast.GenDecl {
+			Tok: token.IMPORT,
+			Specs: importSpecs,
 		}
 
 	case GoEnumDecl:
@@ -1111,12 +1298,12 @@ const Symbols = "(){}[],;|&?://*"
 const DebugParser = false
 
 type LineInfo struct {
-	line  Word
-	col   Word
+	line  util.Word
+	col   util.Word
 }
 
 type ParseStreamState struct {
-	pos Word
+	pos util.Word
 
 }
 
@@ -1142,7 +1329,7 @@ func (r *ParseStream) Pop(restore bool) {
 	}
 
 	n := len(r.stateStack)
-	Assert(n > 0)
+	util.Assert(n > 0)
 	if restore {
 		r.Seek(r.stateStack[n-1].pos - r.state.pos)
 		r.state = r.stateStack[n-1]
@@ -1150,17 +1337,17 @@ func (r *ParseStream) Pop(restore bool) {
 	r.stateStack = r.stateStack[0:n-1]
 }
 
-func (r *ParseStream) Seek(offset Word) {
+func (r *ParseStream) Seek(offset util.Word) {
 	// if DebugParser {
 	// 	fmt.Printf("Seek: %v\n", offset)
 	// }
 	_, err := r.rs.Seek(int64(offset), io.SeekCurrent)
-	CheckErr(err)
+	util.CheckErr(err)
 	r.state.pos += offset
 }
 
 func (r *ParseStream) PosDebug() string {
-	var i Word = r.state.pos - 1
+	var i util.Word = r.state.pos - 1
 	var lineInfo LineInfo
 	if i < 0 {
 		lineInfo = LineInfo { line: 0, col: 0 }
@@ -1171,7 +1358,7 @@ func (r *ParseStream) PosDebug() string {
 }
 
 func (r *ParseStream) GenParseError(errMsg string) ParseError_S {
-	var i Word = r.state.pos - 1
+	var i util.Word = r.state.pos - 1
 	if i < 0 {
 		i = 0
 	}
@@ -1201,7 +1388,7 @@ func (r *ParseStream) GenParseError(errMsg string) ParseError_S {
 	return ParseError(errMsgNew)
 }
 
-func (r *ParseStream) Get(lenMax Word, advance bool) string {
+func (r *ParseStream) Get(lenMax util.Word, advance bool) string {
 	buf := make([]byte, lenMax)
 
 	n, err := r.rs.Read(buf)
@@ -1213,7 +1400,7 @@ func (r *ParseStream) Get(lenMax Word, advance bool) string {
 	for i, c := range buf[:n] {
 		p := r.state.pos + i
 		if p >= len(r.lineMap) {
-			Assert(p == len(r.lineMap))
+			util.Assert(p == len(r.lineMap))
 			prevLineInfo := LineInfo { line: 0, col: 0 }
 			if p >= 1 {
 				prevLineInfo = r.lineMap[p-1]
@@ -1234,7 +1421,7 @@ func (r *ParseStream) Get(lenMax Word, advance bool) string {
 	}
 	r.state.pos += n
 	if err == io.EOF {
-		Assert(n == 0)
+		util.Assert(n == 0)
 		return ret
 	}
 	if err != nil {
@@ -1250,11 +1437,11 @@ func (r *ParseStream) Get(lenMax Word, advance bool) string {
 }
 
 
-func (r *ParseStream) Read(lenMax Word) string {
+func (r *ParseStream) Read(lenMax util.Word) string {
 	return r.Get(lenMax, true)
 }
 
-func (r *ParseStream) Peek(lenMax Word) string {
+func (r *ParseStream) Peek(lenMax util.Word) string {
 	return r.Get(lenMax, false)
 }
 
@@ -1335,7 +1522,7 @@ func ReadToken(r *ParseStream) (ret string, hitNewline bool, err error) {
 			}
 		}
 
-		Assert(len(c) == 1)
+		util.Assert(len(c) == 1)
 
 		if strings.Contains(Whitespace, c) {
 			ret = string(retToken)
@@ -1387,7 +1574,7 @@ func IsIdent(s string) bool {
 		if IsAlpha(c) || c == '_' {
 			continue
 		}
-		if IsDigit(c) && i > 0 {
+		if (IsDigit(c) || c == '.') && i > 0 {
 			continue
 		}
 		return false
@@ -1462,7 +1649,7 @@ func TryReadTokenCheck(r *ParseStream, validTokens []string) (ret string, err er
 	return
 }
 
-func (r *ParseStream) PeekExact(len_ Word) (string, bool) {
+func (r *ParseStream) PeekExact(len_ util.Word) (string, bool) {
 	ret := r.Peek(len_)
 	return ret, (len(ret) == len_)
 }
@@ -1476,7 +1663,7 @@ func PeekToken(r *ParseStream, matchNewline bool) (string, bool) {
 		return "\n", true
 	}
 	if err != nil {
-		Assert(err == io.EOF)
+		util.Assert(err == io.EOF)
 		return "", false
 	} else {
 		return ret, true
@@ -1847,30 +2034,83 @@ func ParseTypeDecl(r *ParseStream) (*TypeDecl, error) {
 	}
 }
 
-func TryParseTypeDecl(r *ParseStream) (*TypeDecl, bool) {
-	initPos := r.state.pos
-	ret, err := ParseTypeDecl(r)
-	if err != nil {
-		r.Seek(initPos - r.state.pos)
-	}
-	return ret, (err == nil)
+func TryParseTypeDecl(r *ParseStream) (ret *TypeDecl, err error) {
+	r.Push()
+	defer func(){ r.Pop(err != nil) }()
+
+	ret, err = ParseTypeDecl(r)
+	return
 }
 
-func ParseFile(r *ParseStream) []TypeDecl {
-	ret := []TypeDecl{}
+func ParsePackageDecl(r *ParseStream) (*PackageDecl, error) {
+	_, err := ReadTokenCheck(r, []string{"package"})
+	if err != nil {
+		return nil, err
+	}
+	packageName, _, err := ReadToken(r)
+	return &PackageDecl {
+		name:  packageName,
+	}, nil
+}
+
+func TryParsePackageDecl(r *ParseStream) (ret *PackageDecl, err error) {
+	r.Push()
+	defer func(){ r.Pop(err != nil) }()
+
+	ret, err = ParsePackageDecl(r)
+	return
+}
+
+func ParseImportDecl(r *ParseStream) (*ImportDecl, error) {
+	_, err := ReadTokenCheck(r, []string{"import"})
+	if err != nil {
+		return nil, err
+	}
+	importName, _, err := ReadToken(r)
+	if err != nil {
+		return nil, err
+	}
+	importPath, _, err := ReadToken(r)
+	if err != nil {
+		return nil, err
+	}
+	return &ImportDecl {
+		name:  importName,
+		path:  importPath,
+	}, nil
+}
+
+func TryParseImportDecl(r *ParseStream) (ret *ImportDecl, err error) {
+	r.Push()
+	defer func(){ r.Pop(err != nil) }()
+
+	ret, err = ParseImportDecl(r)
+	return
+}
+
+func ParseFile(r *ParseStream) []Decl {
+	ret := []Decl{}
+	var decl Decl
+	var err error
 	for {
 		if _, ok := PeekToken(r, false); !ok {
 			return ret
 		}
-		decl, err := ParseTypeDecl(r)
+		decl, err = TryParseTypeDecl(r)
 		if err != nil {
-			panic(err)
+			decl, err = TryParsePackageDecl(r)
+			if err != nil {
+				decl, err = TryParseImportDecl(r)
+				if err != nil {
+					panic(err)
+				}
+			}
 		}
-		ret = append(ret, *decl)
+		ret = append(ret, decl)
 	}
 }
 
-func GenGoModFromFile(file *os.File) GoMod {
+func GenGoModFromFile(file *os.File, packageName string) GoMod {
 	r := ParseStream {
 		rs: file,
 		state: ParseStreamState {
@@ -1880,11 +2120,11 @@ func GenGoModFromFile(file *os.File) GoMod {
 		buffer: bytes.NewBuffer([]byte{}),
 	}
 	decls := ParseFile(&r)
-	goDecls := GenGoTypeDecls(decls)
-	goMod := GenGoMod(goDecls)
+	goDecls := GenGoDecls(decls)
+	goMod := GenGoMod(goDecls, packageName)
 	return goMod
 }
 
 func WriteGoMod(goMod GoMod, outputFile *os.File) {
-	CheckErr(printer.Fprint(outputFile, goMod.astFileSet, goMod.astFile))
+	util.CheckErr(printer.Fprint(outputFile, goMod.astFileSet, goMod.astFile))
 }
