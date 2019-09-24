@@ -125,8 +125,8 @@ serve-website: website .PHONY
 	echo "run `make website` and refresh to update"
 	cd build/website && python -m SimpleHTTPServer 1313
 
-serve-and-watch: .PHONY
-	make serve& make hugo-watch
+serve-and-watch: serve hugo-watch
+	echo "make sure you run this with `make -j2`"
 
 .PHONY:
 
