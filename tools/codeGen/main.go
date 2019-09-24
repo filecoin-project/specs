@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"strings"
+	codeGen "github.com/filecoin-project/specs/codeGen/codeGen"
+	util "github.com/filecoin-project/specs/codeGen/util"
 	"os"
-	codeGen "github.com/filecoin-project/specs/codeGen/main/codeGen"
-	util "github.com/filecoin-project/specs/codeGen/main/util"
+	"strings"
 )
 
 func replaceExt(filePath string, srcExt string, dstExt string) string {

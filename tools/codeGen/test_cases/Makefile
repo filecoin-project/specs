@@ -6,8 +6,12 @@ test: build
 build: $(GEN_GO_FILES)
 	go build -gcflags="-e" ./...
 
-codeGen: $(shell find .. -name '*.go' -path test_cases -prune)
+codeGen: $(shell find .. | grep .go | grep -v .gen.go)
 	cd .. && go build -o test_cases/codeGen
 
 %.gen.go: %.id codeGen
 	-./codeGen $< $@
+
+clean:
+	find . | grep .gen.go | xargs rm
+	rm codeGen

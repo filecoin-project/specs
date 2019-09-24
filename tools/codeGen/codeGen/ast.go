@@ -12,7 +12,7 @@ import (
 	"io"
 	"os"
 	"strings"
-	util "github.com/filecoin-project/specs/codeGen/main/util"
+	util "github.com/filecoin-project/specs/codeGen/util"
 )
 
 type Decl_Case = util.Word

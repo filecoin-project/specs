@@ -1,6 +1,6 @@
 
-import ipld "github.com/filecoin-project/idc/test_cases/ipld_1"
-import key "github.com/filecoin-project/idc/test_cases/repository_2/key"
+import ipld "github.com/filecoin-project/specs/codeGen/test_cases/ipld_1"
+import key "github.com/filecoin-project/specs/codeGen/test_cases/repository_2/key"
 
 type Repository struct {
   config    Config
