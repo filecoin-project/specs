@@ -8,11 +8,11 @@ type ElectionArtifacts struct {
 }
 
 type StoragePowerConsensusSubsystem struct  { //(@mutable)
-	powerTable						PowerTable
-	actor							StoragePowerActor
-	associatedStateTree 			*StateTree
-	GenerateElectionProof(Tipset)	ElectionProof
-	ChooseTipsetToMine([Tipset])	[Tipset]
+	powerTable									PowerTable
+	actor										StoragePowerActor
+	associatedStateTree		 					&StateTree
+	GenerateElectionProof(tipset Tipset)		ElectionProof
+	ChooseTipsetToMine(tipsets [Tipset])		[Tipset]
 
 	// call by StorageMiningSubsystem in sealing sector
 	GetSealSeed(chain Chain, epoch Epoch) Seed
@@ -43,10 +43,10 @@ type StoragePowerConsensusSubsystem struct  { //(@mutable)
 
 type PowerTable struct {
 	// all power here is always verified
-	minerPower							{Address:StorageMiner}
-	LookupMinerStorage(Address)			UVarint
-	LookupMinerPowerFraction(Address)	Float
-	RemovePower(Address)
+	minerPower									{Address:StorageMiner}
+	LookupMinerStorage(addr Address)			UVarint
+	LookupMinerPowerFraction(addr Address)		Float
+	RemovePower(addr Address)					struct {}
 }
 
 type StorageMiner struct {
