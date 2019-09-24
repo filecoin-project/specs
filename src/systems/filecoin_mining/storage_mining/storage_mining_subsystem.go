@@ -1,3 +1,5 @@
+package storage_mining
+
 func (sms *StorageMiningSubsystem) CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) StorageMinerActor {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)
 	return spa.RegisterMiner(ownerAddr, workerPubKey)

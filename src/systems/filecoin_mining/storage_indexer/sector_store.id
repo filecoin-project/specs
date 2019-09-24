@@ -10,18 +10,9 @@ type SectorPersistentAux struct {
 
 // Indexed by CommR
 type SectorMetaData struct {
-  CommR                   Commitment,
-  PersistentAux           SectorPersistentAux,
-  MerkleTreePath          Path,
-}
-
-type StagedSector struct {
-  SectorInfo    SectorInfo
-  ReplicaConfig ReplicaConfig
-  BytesUsed     UInt // Size of data in sector after preprocessing and padding.
-  Path          Path
-
-  CapacityRemaining() UInt // How many more bytes of raw data can this sector hold, at most?
+  CommR                   Commitment
+  PersistentAux           SectorPersistentAux
+  MerkleTreePath          Path
 }
 
 // commR to SectorMetaData
@@ -31,14 +22,14 @@ type SectorStore struct {
 
   SectorMetaDataStore SectorMetaDataStore
 
-  WritePiece(piece Piece) Path // path - temp storage for pieces not yet sealed.
-  PlacePiece(from Path, to StagedSector, position UInt) struct {}
+  WritePiece(Piece Piece) Path // path - temp storage for pieces not yet sealed.
+  PlacePiece(From Path, To StagedSector, Position UInt) struct {}
 
   AllocateSealedSector(SectorSize UInt) Path
   AllocateStagedSector(SectorSize UInt) Path
 
-  RegisterMetadata(sectorMetadata SectorMetaData) bool
-  GetMetaData(commR Commitment) SectorMetaData
+  RegisterMetadata(SectorMetadata SectorMetaData) bool
+  GetMetaData(CommR Commitment) SectorMetaData
 
   UpdateMetaData(
     CommR       Commitment,

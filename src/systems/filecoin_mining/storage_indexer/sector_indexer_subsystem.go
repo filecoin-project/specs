@@ -1,3 +1,5 @@
+package storage_indexer
+
 func (sis *SectorIndexerSubsystem) AddDealToSector(deal StorageDeal) AddDealToSectorResponse {
 	addPieceResponse := sis.SectorBuilder.AddPiece(deal.PiecePath)
 	pip := sis.StorageProofs.GetPieceInclusionProof(deal.PieceRef)

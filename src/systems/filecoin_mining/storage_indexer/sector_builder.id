@@ -4,6 +4,15 @@ type ReplicaConfig struct {
   Partitions     UInt
 }
 
+type StagedSector struct {
+  Sector        Sector
+  ReplicaConfig ReplicaConfig
+  BytesUsed     UInt // Size of data in sector after preprocessing and padding.
+  Path          Path
+
+  CapacityRemaining() UInt // How many more bytes of raw data can this sector hold, at most?
+}
+
 type SectorBuilder struct {
   ReplicaConfig   ReplicaConfig
   ProverID        ProverID

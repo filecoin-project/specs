@@ -1,21 +1,32 @@
+import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
+
+type SectorSet       [Sector]
+type SealedSectorSet [Sector]
+type ReplicaID       CID
+
+type ProveStorageArtifact struct {
+	PoStProof PoStProof
+	BitField  Bytes // TODO verify type here
+}
+
 type MiningScheduler struct {
-//   checkReadySectors() SectorSet
-//   checkFaultySectors() FaultSet
+  getStagedSectors()   SectorSet
+  getSealedSectors()   SealedSectorSet
+  getFaultySectors()   SectorSet
+  getRepairedSectors() SectorSet
+  getExpiredSectors()  SectorSet // same as completedSectors/doneSectors
 
-//   ProveStorage(&[&Sector], &SectorSet) (PoStProof,Bitfield)
-//   ReportFaults(actor &StorageMinerActor)
+  ProveStorage(sectors SectorSet) ProveStorageArtifact
+  ReportFaults(actor &StorageMinerActor) bool
+  RemoveSectors(sectorsToRemove SectorSet) bool
+  DePledge(amount TokenAmount) bool
+  SealedSector(sealedSector SealedSector) bool // receives from sector storage subsystem
+  AddSector(pledge TokenAmount, sectorID &SectorID, comm &SealCommitment, proof SealProof) SectorID
 
-//   RemoveSectors(sectorsToRemove SectorSet)
-//   DePledge(amount TokenAmount)
+  // generateReplicaID(CommD Commitment, block Block)
+}
 
-//   SealedSector(SealedSector) // receives from sector storage subsystem
-//   AddSector(pledge TokenAmount, sectorID &SectorID, comm &SealCommitment, proof SealProof) SectorID
-
-//   generateReplicaID(CommD Commitment, block Block)
-// }
-
-// type Commitment = []bytes
-// type SealCommitment struct {
-//   CommD     Commitment
-//   CommR     Commitment
+type SealCommitment struct {
+  CommD     Commitment
+  CommR     Commitment
 }

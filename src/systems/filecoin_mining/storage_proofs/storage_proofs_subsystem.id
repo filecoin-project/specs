@@ -1,5 +1,3 @@
-import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/sto"
-
 type PoStProof struct {}
 type SealOuput struct {}
 
@@ -18,9 +16,9 @@ type StorageProofsSubsystem struct {
       CommD    Commitment,
       CommR    Commitment,
       Proof    SNARKProof,
-      ProverId ProverId,
+      ProverID ProverID,
       Ticket   Ticket,
-      SectorId SectorId,
+      SectorID SectorID,
   ) union { error, bool }
 
   ValidateBlock(

@@ -4,8 +4,6 @@ type PieceID     CID
 type PieceRef    CID
 type ProverID    UInt64
 type Commitment  Bytes32
-type CommD       Commitment
-type CommC       Commitment
 
 type PieceInfo struct {
   ID   PieceID
@@ -47,10 +45,34 @@ type SealAlgorithm union {
 // }
 
 type UnsealedSectorInfo struct {
-  CommD      CommD
+  CommD      Commitment
   Size       UVarint
   PieceCount Uvarint          // number of pieces in this sector (can get it from len(Pieces) too)
   Pieces     [PieceInfo]      // wont get externalized easy, -- it's big
+}
+
+type SealedSectorInfo struct {
+    CommR           Commitment
+    Size            UVarint
+    SealArguments   SealArguments
+  }
+
+type OnChainSealInfo struct {}
+    // SectorID            SectorID
+    // UnsealedCID         UnsealedSectorCID // CommD
+    // SealedCID           SealedSectorCID   // CommR
+    // SealVerifyArtifacts struct {}
+    // SealVerifyArtifacts union {
+    //   ZigZagSealVerifyArtifacts struct {
+    //     Proof ZigZagSealProof
+    //   }
+    // }
+
+type Sector struct {
+  ID             SectorID
+  UnsealedInfo   UnsealedSectorInfo
+  SealedInfo     SealedSectorInfo
+  OnChainSeal    OnChainSealInfo
 }
 
 type SealAlgorithm struct {}
@@ -75,28 +97,4 @@ type SealOutputArtifacts struct {}
 type SealArguments struct {
   Algorithm          SealAlgorithm
   OutputArtifacts    SealOutputArtifacts
-}
-
-type SealedSectorInfo struct {
-    CommR           SealedSectorID
-    Size            UVarint
-    SealArguments   SealArguments
-  }
-
-type OnChainSealInfo struct {}
-    // SectorID            SectorID
-    // UnsealedCID         UnsealedSectorCID // CommD
-    // SealedCID           SealedSectorCID   // CommR
-    // SealVerifyArtifacts struct {}
-    // SealVerifyArtifacts union {
-    //   ZigZagSealVerifyArtifacts struct {
-    //     Proof ZigZagSealProof
-    //   }
-    // }
-
-type SectorInfo struct {
-  ID             SectorID
-  UnsealedSector UnsealedSectorInfo
-  SealedSector   SealedSectorInfo
-  OnChainSeal    OnChainSealInfo
 }
