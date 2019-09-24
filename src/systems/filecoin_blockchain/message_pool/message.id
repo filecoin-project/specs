@@ -1,3 +1,7 @@
+
+import blockchain systems.filecoin_blockchain.blockchain
+
+
 type Message union {
     UnsignedMessage
     SignedMessage
@@ -5,8 +9,8 @@ type Message union {
 
 
 type UnsignedMessage struct {
-    to Address
-    from Address
+    to blockchain.Address
+    from blockchain.Address
 
     // When receiving a message from a user account the nonce in the message must match
     // the expected nonce in the "from" actor. This prevents replay attacks.
