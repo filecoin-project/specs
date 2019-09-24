@@ -16,6 +16,9 @@ type StorageMiningSubsystem struct {
     // call by StorageMiningSubsystem itself to create miner
     CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}
 
+    // get miner key by address
+    GetMinerKeyByAddress(addr Address) PubKey
+
     // call by StorageProvider at the start of a deal
     // and trigger AddPieceToSector on SectorIndexer
     HandleStorageDeal(deal StorageDeal) struct{}

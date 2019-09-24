@@ -8,24 +8,27 @@ func SmallerBytes(a, b Bytes) Bytes {
 }
 
 func ExtractElectionSeed(lookbackTipset *TipsetI) ElectionSeed {
-	var ret []byte
 
-	for _, currBlock := range lookbackTipset.Blocks() {
-		for _, currTicket := range currBlock.Tickets() {
-			currSeed := Hash(
-				HashRole_ElectionSeedFromVRFOutput,
-				currTicket.VRFResult().bytes(),
-			)
-			if ret == nil {
-				ret = currSeed
-			} else {
-                ret = SmallerBytes(currSeed, ret)
-            }
-		}
-	}
+	Panic("TODO")
+	// var ret []byte
 
-	Assert(ret != nil)
-	return ElectionSeed.FromBytesInternal(nil, ret)
+	// for _, currBlock := range lookbackTipset.Blocks() {
+	// 	for _, currTicket := range currBlock.Tickets() {
+
+	// 		currSeed := Hash(
+	// 			HashRole_ElectionSeedFromVRFOutput,
+	// 			currTicket.VRFResult().bytes(),
+	// 		)
+	// 		if ret == nil {
+	// 			ret = currSeed
+	// 		} else {
+    //             ret = SmallerBytes(currSeed, ret)
+    //         }
+	// 	}
+	// }
+
+	// Assert(ret != nil)
+	// return ElectionSeed.FromBytesInternal(nil, ret)
 }
 
 
@@ -69,6 +72,10 @@ func (ep *ElectionProof) ValidateSyntax() bool {
 
 func (ep *ElectionProof) Validate(input Bytes, pk VRFPublicKey) bool {
 	return tix.VRFResult.Verify(input, pk)
+}
+
+func (ep *ElectionProof) IsWinning(power PowerFraction) bool {
+	Panic("TODO")
 }
 
 func (ts *Tipset) ValidateSyntax() bool {

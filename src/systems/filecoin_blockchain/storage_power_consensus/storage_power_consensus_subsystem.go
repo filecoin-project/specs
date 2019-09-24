@@ -7,33 +7,28 @@ func (self *StoragePowerConsensusSubsystem) ValidateBlock(block Block) {
 		return self.StoragePowerConsensusError("block miner not valid")
 	}
 
+	minerPK := self.StorageMiningSubsystem.GetMinerKeyByAddress(block.MinerAddress())
 	// 2. Verify ParentWeight
 	if block.ParentWeight != self.computeTipsetWeight(block.ParentTipset()) {
 		return self.StoragePowerConsensusError("invalid parent weight")
 	}
 
 	// 3. Verify Tickets
-	if !block.ValidateTickets() {
+	if !block.ValidateTickets(minerPK) {
 		return self.StoragePowerConsensusError("tickets were invalid")
 	}
 
-	// 4. Verify ElectionProof
-	// randomnessLookbackTipset := RandomnessLookback(blk)
-	// lookbackTicket := minTicket(randomnessLookbackTipset)
-	// challenge := blake2b(lookbackTicket)
+	// 4. Verify ElectionProof construction
+	seed := block.ParentTipset().ExtractElectionSeed()
+	if !block.ElectionProof.Validate(seed, minerPK) {
+		return self.StoragePowerConsensusError("election proof was not a valid signature of the last ticket")
+	}
 
-	// if !ValidateSignature(blk.ElectionProof, pubk, challenge) {
-	// 	Fatal("election proof was not a valid signature of the last ticket")
-	// }
-
-	// powerLookbackTipset := PowerLookback(blk)
-
-	// lbStorageMarket := LoadStorageMarket(powerLookbackTipset.state)
-	// minerPower := lbStorageMarket.PowerLookup(blk.Miner)
-	// totalPower := lbStorageMarket.GetTotalStorage()
-	// if !IsProofAWinner(blk.ElectionProof, minerPower, totalPower) {
-	// 	Fatal("election proof was not a winner")
-	// }
+	// and value
+	minerPower := self.PowerTable.LookupMinerPowerFraction(block.MinerAddress)
+	if !block.ElectionProof.IsWinning(minerPower) {
+		return self.StoragePowerConsensusError("election proof was not a winner")
+	}
 
 	return nil
 }

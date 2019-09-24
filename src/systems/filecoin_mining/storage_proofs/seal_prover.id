@@ -25,11 +25,11 @@ type SealProof struct {
      susbsectorCount Uvarint,
 }
 
-type PieceInclusionProof struct {
-}
+type PieceInclusionProof struct {}
 
-  GenerateCommP() struct {}
-  GenerateCommD() struct {}
+type SealProver struct {
+  GenerateCommP() Commitment
+  GenerateCommD() Commitment
 
   GeneratePieceInclusionProof(
     Tree          MerkleTree, //MerkleTree<Rephash>,
@@ -37,9 +37,7 @@ type PieceInclusionProof struct {
     PieceLength   Uint,
   ) union { Error, PieceInclusionProofs }
 
- VerifyPieceInclusionProof(
- ) struct {}
+  VerifyPieceInclusionProof() struct {}
 
- MaxUnsealedBytesPerSector(
-    SectorSize UInt
- ) UInt
+  MaxUnsealedBytesPerSector(SectorSize UInt) UInt
+}

@@ -44,10 +44,12 @@ type Ticket struct {
 
 type ElectionProof struct {
 	VRFResult() VRFResult
-	IsWinning(minerPower Fraction) bool	@(cached)
+	IsWinning(minerPower PowerFraction) bool	@(cached)
 
 	ValidateSyntax(ep &ElectionProof) bool
 }
+
+type ElectionSeed VDFResult
 
 type ChainWeight UVarint
 
