@@ -871,11 +871,16 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) (ret GoNode) {
 		ret = interfaceID
 
 	case Type_Case_ArrayType:
-		panic("TODO")
+		xr := x.(*ArrayType)
+		goElementType := GenGoTypeAcc(xr.elementType, ctx.Extend("ArrayElement"))
+		ret = GoArrayType { elementType: goElementType }
+
 	case Type_Case_RefType:
 		panic("TODO")
+
 	case Type_Case_FunType:
 		panic("TODO")
+
 	default:
 		errMsg := fmt.Sprintf("TODO: %v\n", x.Case())
 		panic(errMsg)
