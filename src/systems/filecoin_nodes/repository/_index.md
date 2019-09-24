@@ -3,7 +3,7 @@ menuTitle: Repository
 title: "Repository - Local Storage for Chain Data and Systems"
 entries:
   - config
-  - keystore
+  - key
   - ipldstore
   - usage
 ---

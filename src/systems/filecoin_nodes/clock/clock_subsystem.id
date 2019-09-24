@@ -1,47 +1,6 @@
-type CallbackType union {
-	Wall
-	Round
-}
 
-type CallbackParameter union {
-	UVarint
-	Timestamp
-}
-
-type ClockSubsystem struct @(mutable) {
-	wallTimeCallbacks		{UVarint:scheduledCallback}
-	roundTimeCallbacks		{UVarint:scheduledCallback}
-	actor					CronActor
-	wallClock				WallClock
-	roundTime				UVarint
-}
-
-type RequestID UVarint
-
-type CronActor struct {
-	RequestCallback(query CallbackQuery)  RequestID
-	RemoveCallbackRequest(req RequestID)  struct{}
-
-	UpdateRound(t UVarint)  struct{}
-}
-
-type CallbackQuery struct {
-	requestType	CallbackType
-	frequency	CallbackParameter
-	endpoint	Function
-}
-
-type ScheduledCallback struct {
-	requestID	RequestID
-	requestType	CallbackType
-	start		CallbackParameter
-	frequency	CallbackParameter
-	endpoint	Function
-}
+type Time int64
 
 type WallClock struct {
-	wallTime	Timestamp
-	WallTime()	Timestamp
-	lastSync	Timestamp
-	sync()		struct{}
+	NowUTC() Time
 }

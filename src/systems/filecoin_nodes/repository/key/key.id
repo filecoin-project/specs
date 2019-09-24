@@ -1,0 +1,50 @@
+
+type Key struct {
+  Algo Algorithm
+  Data Bytes
+}
+
+// key.Name
+type Name string
+
+// key.Store
+type Store struct {
+//  Put(n Name, key Key) error
+//  Get(n Name) (Key, error)
+//  Sign(n Name, data Bytes) Signature
+}
+
+type Algorithm union {
+  Sig SignatureAlgorithm
+}
+
+
+type EdDSASignatureAlgorithm struct {
+//  Sign(b Bytes) (Signature, error)
+//  Verify(b Bytes, Signature) (bool, error)
+}
+
+type Secp256k1SignatureAlgorithm struct {
+//  Sign(b Bytes) (Signature, error)
+//  Verify(b Bytes, Signature) (bool, error)
+}
+
+type BLSAggregateSignatureAlgorithm struct {
+//  Sign(b Bytes) (Signature, error)
+//  Verify(b Bytes, Signature) (bool, error)
+}
+
+
+
+type SignatureAlgorithm union {
+  EdDSASigAlgo     EdDSASignatureAlgorithm
+  Secp256k1SigAlgo Secp256k1SignatureAlgorithm
+  BLSSigAlgo       BLSAggregateSignatureAlgorithm
+}
+
+type Signature struct {
+  Algo SignatureAlgorithm
+  Data Bytes
+
+//  Verify(Key) (bool, error)
+}

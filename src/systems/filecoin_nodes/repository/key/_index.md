@@ -1,5 +1,5 @@
 ---
-title: KeyStore
+title: KeyStore & user keys
 entries:
   - config
   - keystore

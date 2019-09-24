@@ -1,27 +1,14 @@
-/*
+
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import key "github.com/filecoin-project/specs/systems/filecoin_nodes/repository/key"
+
 type Repository struct {
-  config Config
-  ipldStore IPLDDagStore
-  keyStore KeyStore
+  // config    Config
+  ipldStore ipld.Store
+  keyStore  key.Store
 
-  CreateRepository(config Config, ipldStore IPLDDagStore, keyStore KeyStore) &Repository
-  GetIPLDDagStore() &IPLDDagStore
-  GetKeyStore() &KeyStore
-  GetConfig() &Config
+  // CreateRepository(config Config, ipldStore IPLDDagStore, keyStore KeyStore) &Repository
+  GetIPLDStore() ipld.Store
+  GetKeyStore() key.Store
+  // GetConfig() &Config
 }
-
-type IPLDDagStore struct {
-  store LocalStorage
-
-  Get(cid CID) (&IPLDObject, error)
-  Put(cid CID, ipldObject &IPLDObject) error
-  // Search(ipldQuery IPLDQuery) &IPLDObject // TODO Maybe drop?
-}
-
-type KeyStore struct {
-  store KeyStore
-
-  Put(cid CID, key Key)
-  Sign(cid CID, message []bytes) &Signature
-}
-*/
