@@ -27,6 +27,7 @@ help:
 	@echo "	make test        run all test cases (go-test only for now)"
 	@echo "	make drafts      publish artifacts to ipfs and show an address"
 	@echo "	make publish     publish final artifacts to spec website (github pages)"
+	@echo "	make clean       removes all build artifacts. you shouldn't need this"
 	@echo ""
 	@echo "INTERMEDIATE TARGETS"
 	@echo "	make website     build the website artifact"
@@ -42,7 +43,7 @@ help:
 	@echo "	make serve       start hugo in serving mode -- must run make build on changes manually"
 
 # main Targets
-build: website
+build: build-code website
 
 deps: submodules
 	bin/install-deps.sh
@@ -61,6 +62,16 @@ drafts: website
 
 publish: website
 	bin/publish-to-gh-pages.sh
+
+clean: .PHONY
+	rm -rf build
+
+clean-deps: .PHONY
+	@echo "WARNING: this does not uninstall global packages, sorry."
+	@echo "         If you would like to remove them, see bin/install-deps.sh"
+	-rm -r deps
+	-rm -r .slime
+	-rm -r bin/.emacs
 
 # intermediate targets
 website: org2md hugo-build
