@@ -1,4 +1,4 @@
-package fileName
+package blockchain
 
 // The semantic stage requires access to the chain which the block extends.
 func (self *BlockchainSubsystem) validateBlockSemantics(block Block) {

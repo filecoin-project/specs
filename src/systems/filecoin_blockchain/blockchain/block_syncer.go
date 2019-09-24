@@ -1,4 +1,4 @@
-package fileName
+package blockchain 
 
 func (self *BlockSyncer) OnNewBlock(block Block) error {
 	err := uuuuuself.validateBlockSyntax(block)

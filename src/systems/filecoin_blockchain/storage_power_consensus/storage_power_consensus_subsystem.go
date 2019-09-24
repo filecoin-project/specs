@@ -1,4 +1,4 @@
-package fileName
+package storage_power_consensus
 
 func (self *StoragePowerConsensusSubsystem) ValidateBlock(block Block) {
 

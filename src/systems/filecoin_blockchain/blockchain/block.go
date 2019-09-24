@@ -1,4 +1,4 @@
-package fileName
+package blockchain 
 
 func SmallerBytes(a, b Bytes) Bytes {
     if CompareBytesStrict(a, b) > 0 {
