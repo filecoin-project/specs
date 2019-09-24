@@ -1,0 +1,17 @@
+type Path string
+
+type File struct {
+  Path() Path
+  Read(buf Bytes) union { size int, e error }
+  Write(buf Bytes) union { size int, e error }
+  Close() error
+}
+
+type Store struct {
+  Open(p Path) union{ f File, e error }
+  Create(p Path) union{ f File, e error }
+  Delete(p Path) error
+
+  // maybe add:
+  // Copy(SrcPath, DstPath)
+}

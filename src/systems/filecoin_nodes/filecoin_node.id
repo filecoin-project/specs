@@ -1,12 +1,12 @@
 
 import repo "github.com/filecoin-project/specs/systems/filecoin_nodes/repository"
-// import fs "github.com/filecoin-project/specs/systems/filecoin_nodes/filestore"
+import file "github.com/filecoin-project/specs/systems/filecoin_nodes/filestore"
 // import net "github.com/filecoin-project/specs/systems/filecoin_nodes/network"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 
 type FilecoinNode struct {
   Repository repo.Repository
-  // FileStore fs.FileStore
+  FileStore file.Store
   // Network net.Network
   Clock clock.WallClock
 }
