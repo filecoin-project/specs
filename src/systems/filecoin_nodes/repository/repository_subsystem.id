@@ -18,7 +18,7 @@ type ConfigKey string
 type ConfigVal Bytes
 
 type Config struct {
-  Get(k ConfigKey) ConfigVal
+  Get(k ConfigKey) union{ c ConfigVal, e error }
   Put(k ConfigKey, v ConfigVal) error
 
   Subconfig(k ConfigKey) Config
