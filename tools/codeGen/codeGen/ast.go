@@ -290,7 +290,6 @@ func GenGoMod(goDecls []GoNode, packageName string) GoMod {
 }
 
 type GoGenContext struct {
-	typeMap   map[string]Type
 	retDecls  *[]GoNode
 	retMap    map[TypeHash]GoNode
 	tokens    []string
@@ -312,7 +311,6 @@ func (ctx GoGenContext) Concrete(concrete bool) GoGenContext {
 
 func GenGoDecls(decls []Decl) []GoNode {
 	ctx := GoGenContext {
-		typeMap:  map[string]Type{},
 		retDecls: &[]GoNode{},
 		retMap:   map[TypeHash]GoNode{},
 		tokens:   []string{},
@@ -483,36 +481,60 @@ func GenGoPackageDeclAcc(decl PackageDecl, ctx GoGenContext) GoNode {
 	return goPackageDecl
 }
 
-func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
+func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) (ret GoNode) {
 	util.Assert(x != nil)
 
-	switch x.(type) {
-	case *NamedType:
+	if t, ok := ctx.retMap[HashType(x)]; ok {
+		ret = t
+		return
+	}
+	defer func() { ctx.retMap[HashType(x)] = ret }()
+
+	switch x.Case() {
+	case Type_Case_NamedType:
 		xr := x.(*NamedType)
 		goTypeDecl := GoTypeDecl{
 			name: name,
 			type_: TranslateGoIdent(xr.name, ctx),
 		}
 		*ctx.retDecls = append(*ctx.retDecls, goTypeDecl)
-		return GoIdent {name: name}
+		ret = GoIdent {name: name}
 
-	case *OptionType:
+	case Type_Case_OptionType:
 		xr := x.(*OptionType)
-		goValueType := GenGoTypeAcc(xr.valueType, ctx.Extend("OptValue"))
-		goValueType.implements_GoNode()
-		*ctx.usesUtil = []bool{true}
-		return GoIdent {name: "util.TODO_TYPE_"}
+		// goValueType := GenGoTypeAcc(xr.valueType, ctx.Extend("OptValue"))
+		ret = GenGoTypeDeclAcc(name, &AlgType {
+			sort: AlgSort_Sum,
+			fields: []Field {
+				Field {
+					fieldName: "Some",
+					fieldType: xr.valueType,
+					internal: false,
+					attributeList: []string{},
+				},
+				Field {
+					fieldName: "None",
+					fieldType: &AlgType {
+						sort: AlgSort_Prod,
+						fields: []Field{},
+						methods: []Method{},
+						attributeList: []string{},
+					},
+					internal: false,
+					attributeList: []string{},
+				},
+			},
+			methods: []Method{},
+			attributeList: []string{},
+		}, ctx)
 
-	case *MapType:
+	case Type_Case_MapType:
 		xr := x.(*MapType)
 		goKeyType := GenGoTypeAcc(xr.keyType, ctx.Extend("MapKey"))
 		goValueType := GenGoTypeAcc(xr.valueType, ctx.Extend("MapValue"))
-		goKeyType.implements_GoNode()
-		goValueType.implements_GoNode()
-		*ctx.usesUtil = []bool{true}
-		return GoIdent {name: "util.TODO_TYPE_"}
+		ret = GoMapType { keyType: goKeyType, valueType: goValueType }
 
-	case *AlgType:
+	case Type_Case_AlgType:
 		xr := x.(*AlgType)
 	
 		interfaceName := name
@@ -843,19 +865,21 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		*ctx.retDecls = append(*ctx.retDecls, implRefImplDecl)
 
 		// TODO: assert not in retMap
-		ctx.retMap[HashType(x)] = interfaceID
-		return interfaceID
+		// ctx.retMap[HashType(x)] = interfaceID
+		ret = interfaceID
 
-	case *ArrayType:
+	case Type_Case_ArrayType:
 		panic("TODO")
-	case *RefType:
+	case Type_Case_RefType:
 		panic("TODO")
-	case *FunType:
+	case Type_Case_FunType:
 		panic("TODO")
 	default:
 		errMsg := fmt.Sprintf("TODO: %v\n", x.Case())
 		panic(errMsg)
 	}
+
+	return
 }
 
 func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
@@ -949,6 +973,7 @@ func (GoExprLitNil) implements_GoNode() {}
 func (GoField) implements_GoNode() {}
 func (GoProdType) implements_GoNode() {}
 func (GoArrayType) implements_GoNode() {}
+func (GoMapType) implements_GoNode() {}
 func (GoIdent) implements_GoNode() {}
 
 type GoTypeDecl struct {
@@ -1051,6 +1076,11 @@ type GoProdType struct {
 
 type GoArrayType struct {
 	elementType GoNode
+}
+
+type GoMapType struct {
+	keyType   GoNode
+	valueType GoNode
 }
 
 type GoIdent struct {
@@ -1192,6 +1222,13 @@ func GenAST(x GoNode) ast.Node {
 		xr := x.(GoArrayType)
 		return &ast.ArrayType{
 			Elt: GenAST(xr.elementType).(ast.Expr),
+		}
+
+	case GoMapType:
+		xr := x.(GoMapType)
+		return &ast.MapType{
+			Key: GenAST(xr.keyType).(ast.Expr),
+			Value: GenAST(xr.valueType).(ast.Expr),
 		}
 
 	case GoFunType:

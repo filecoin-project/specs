@@ -5,10 +5,6 @@ import (
 	"log"
 )
 
-// TODO: remove
-type TODO_TYPE_ struct {
-}
-
 // TODO: finish
 type CID struct {
 }
