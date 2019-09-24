@@ -339,7 +339,7 @@ func GenGoDecls(decls []Decl) []GoNode {
 	if (*ctx.usesUtil)[0] {
 		GenGoImportDeclAcc(ImportDecl {
 			name: "util",
-			path: "util",
+			path: "github.com/filecoin-project/specs/util",
 		}, ctx)
 	}
 
@@ -467,11 +467,9 @@ func GoMethodToFieldName(methodName string) string {
 }
 
 func GenGoImportDeclAcc(decl ImportDecl, ctx GoGenContext) GoNode {
-	goImportPath := strings.ReplaceAll(decl.path, ".", "/")
-	goImportPath = "\"github.com/filecoin-project/specs/" + goImportPath + "\""
 	goImportDecl := GoImportDecl {
 		name: decl.name,
-		path: goImportPath,
+		path: "\"" + decl.path + "\"",
 	}
 	*ctx.retDecls = append(*ctx.retDecls, goImportDecl)
 	return goImportDecl
@@ -1312,7 +1310,7 @@ func GenAST(x GoNode) ast.Node {
 }
 
 const Whitespace = " \t\n"
-const Symbols = "(){}[],;|&?://*"
+const Symbols = "(){}[],;|&?://*\""
 
 const DebugParser = false
 
@@ -2080,6 +2078,27 @@ func TryParsePackageDecl(r *ParseStream) (ret *PackageDecl, err error) {
 	return
 }
 
+func ReadStringLiteral(r *ParseStream) (string, error) {
+	ret := ""
+
+	if _, err := ReadTokenCheck(r, []string{"\""}); err != nil {
+		return "", r.GenParseError("Expected string literal")
+	}
+
+	for {
+		c, ok := r.PeekExact(1)
+		if !ok {
+			return "", r.GenParseError("Error parsing string literal")
+		}
+		r.Seek(1)
+		if c == "\"" {
+			return ret, nil
+		} else {
+			ret += c
+		}
+	}
+}
+
 func ParseImportDecl(r *ParseStream) (*ImportDecl, error) {
 	_, err := ReadTokenCheck(r, []string{"import"})
 	if err != nil {
@@ -2089,7 +2108,7 @@ func ParseImportDecl(r *ParseStream) (*ImportDecl, error) {
 	if err != nil {
 		return nil, err
 	}
-	importPath, _, err := ReadToken(r)
+	importPath, err := ReadStringLiteral(r)
 	if err != nil {
 		return nil, err
 	}

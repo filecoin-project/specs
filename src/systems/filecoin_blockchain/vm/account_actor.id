@@ -1,7 +1,7 @@
 
-import bc systems.filecoin_blockchain.blockchain
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
 
 type AccountActorState struct {
 	// normal keypair backed accounts
-	Address bc.Address
+	Address blockchain.Address
 }
