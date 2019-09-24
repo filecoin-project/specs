@@ -95,40 +95,6 @@ hugo-watch: .PHONY
 orient: .PHONY
 	bin/build-spec-orient.sh
 
-GO_INPUT_FILES=$(shell find src/ -iname '*.go')
-GO_OUTPUT_FILES=$(patsubst src/%.go, build/%.go, $(GO_INPUT_FILES))
-
-GO_UTIL_INPUT_FILE=tools/codeGen/util/util.go
-GO_UTIL_OUTPUT_FILE=build/util/util.go
-
-$(GO_UTIL_OUTPUT_FILE): $(GO_UTIL_INPUT_FILE)
-	mkdir -p $(dir $@)
-	cp $< $@
-
-build/%.go: src/%.go
-	mkdir -p $(dir $@)
-	cp $< $@
-
-ID_FILES=$(shell find src/ -name '*.id')
-GEN_GO_FILES=$(patsubst src/%.id, build/%.gen.go, $(ID_FILES))
-build/%.gen.go: src/%.id bin/codeGen
-	mkdir -p $(dir $@)
-	bin/codeGen $< $@
-
-gen-code: bin/codeGen $(GEN_GO_FILES) $(GO_OUTPUT_FILES) $(GO_UTIL_OUTPUT_FILE)
-
-build/go.mod: src/build_go.mod
-	mkdir -p $(dir $@)
-	cp $< $@
-
-build-code: gen-code build/go.mod
-	cd build && go build -gcflags="-e" ./...
-
-go-test: $(shell find hugo/content/ | grep .go)
-	# testing should have the side effect that all go is compiled
-	cd tools/codeGen && go build && go test ./...
-	# cd hugo/content/code && go build && go test ./...
-
 # convert orgmode to markdown
 ORG_FILES=$(shell find hugo/content | grep .org)
 ORG_MD_FILES=$(patsubt %.md, %.org, $(ORG_FILES))
@@ -166,3 +132,39 @@ serve-and-watch: .PHONY
 	make serve& make hugo-watch
 
 .PHONY:
+
+# code generation and building targets
+
+GO_INPUT_FILES=$(shell find src -iname '*.go')
+GO_OUTPUT_FILES=$(patsubst src/%.go, build/code/%.go, $(GO_INPUT_FILES))
+
+GO_UTIL_INPUT_FILE=tools/codeGen/util/util.go
+GO_UTIL_OUTPUT_FILE=build/code/util/util.go
+
+$(GO_UTIL_OUTPUT_FILE): $(GO_UTIL_INPUT_FILE)
+	mkdir -p $(dir $@)
+	cp $< $@
+
+build/code/%.go: src/%.go
+	mkdir -p $(dir $@)
+	cp $< $@
+
+ID_FILES=$(shell find src -name '*.id')
+GEN_GO_FILES=$(patsubst src/%.id, build/code/%.gen.go, $(ID_FILES))
+build/code/%.gen.go: src/%.id bin/codeGen
+	mkdir -p $(dir $@)
+	bin/codeGen $< $@
+
+gen-code: bin/codeGen $(GEN_GO_FILES) $(GO_OUTPUT_FILES) $(GO_UTIL_OUTPUT_FILE)
+
+build/code/go.mod: src/build_go.mod
+	mkdir -p $(dir $@)
+	cp $< $@
+
+build-code: gen-code build/code/go.mod
+	cd build/code && go build -gcflags="-e" ./...
+
+go-test: $(shell find tools/codeGen | grep .go)
+	# testing should have the side effect that all go is compiled
+	cd tools/codeGen && go build && go test ./...
+	# cd hugo/content/code && go build && go test ./...
