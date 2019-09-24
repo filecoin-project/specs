@@ -33,7 +33,7 @@ help:
 	@#echo "	make pdf         build the pdf artifact"
 	@echo "	make hugo-build  run the hugo part of the pipeline"
 	@echo "	make gen-code    generate code artifacts (eg id -> go)"
-	@echo " make build-code  build all src go code (test it)"
+	@echo "	make build-code  build all src go code (test it)"
 	@echo "	make org2md      run org mode to markdown compilation"
 	@echo "	make go-test     run test cases in code artifacts"
 	@echo ""
