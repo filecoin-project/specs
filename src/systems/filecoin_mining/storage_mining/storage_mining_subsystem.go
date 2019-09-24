@@ -33,14 +33,14 @@ func (sms *StorageMiningSubsystem) CommitSectorError() StorageDeal {
 }
 
 func (sms *StorageMiningSubsystem) OnNewTipset(chain Chain, epoch Epoch, tipset Tipset) struct {} {
-	sms.currentChain := chain
-	sms.currentEpoch := epoch
-	sms.currentTipset := tipset
+	sms.CurrentChain := chain
+	sms.CurrentEpoch := epoch
+	sms.CurrentTipset := tipset
 }
 
 func (sms *StorageMiningSubsystem) OnNewRound() ElectionArtifacts {
-	TK := storagePowerConsensus.TicketAtEpoch(sms.chain, sms.epoch - k)
-	T1 := storagePowerConsensus.TicketAtEpoch(sms.chain, sms.epoch - 1)
+	TK := storagePowerConsensus.TicketAtEpoch(sms.CurrentChain, sms.CurrentEpoch - k)
+	T1 := storagePowerConsensus.TicketAtEpoch(sms.CurrentChain, sms.CurrentEpoch - 1)
 	EP := DrawElectionProof(TK, workerPrivateKey)
 	if NewTipset {
 		T0 := GenerateNextTicket(T1, workerPrivateKey)
@@ -49,10 +49,12 @@ func (sms *StorageMiningSubsystem) OnNewRound() ElectionArtifacts {
 	}
 
 	if storagePowerConsensus.TryLeaderElection(EP) {
-		BlockProducer.GenerateBlock(EP, T0, sms.currentTipset, workerKey)
+		BlockProducer.GenerateBlock(EP, T0, sms.CurrentTipset, workerKey)
 	} else {
 
 	}
+
+
 }
 
 func (sms *StorageMiningSubsystem) DrawElectionProof(tk Ticket, workerKey PrivateKey) ElectionProof {

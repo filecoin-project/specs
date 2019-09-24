@@ -31,9 +31,9 @@ type StorageMiningSubsystem struct {
     sectorIndexer SectorIndexerSubsystem
     storagePowerConsensus StoragePowerConsensusSubsystem
 
-    currentChain() Chain
-    currentEpoch() Epoch
-    currentTipset() Tipset
+    CurrentChain() Chain
+    CurrentEpoch() Epoch
+    CurrentTipset() Tipset
     
     StartMining() struct {}
     StopMining() struct {}
