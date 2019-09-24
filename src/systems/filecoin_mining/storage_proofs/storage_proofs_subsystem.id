@@ -1,30 +1,31 @@
+import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/sto"
+
+type PoStProof struct {}
+type SealOuput struct {}
+
 type StorageProofsSubsystem struct {
 
-    SealSector(
-        seed Seed,
-        sectorID SectorID,
-        replicaConfig ReplicaConfig,
-    ) SealOutput
+  SealProver SealProver
+  SectorSealer SectorSealer
 
-    GeneratePoSt(
-        challenge Challenge,
-        sectorIDs [SectorID]
-    ) PoStProof
-}
+  SealSector(
+    seed Seed,
+    sectorID SectorID,
+    replicaConfig ReplicaConfig,
+  ) SealOutput
 
-type FilecoinStorageProofs struct {
+  VerifySeal(
+      CommD    Commitment,
+      CommR    Commitment,
+      Proof    SNARKProof,
+      ProverId ProverId,
+      Ticket   Ticket,
+      SectorId SectorId,
+  ) union { error, bool }
 
-    VerifySeal(
-        CommD    Commitment,
-        CommR    Commitment,
-        Proof    SNARKProof,
-        ProverId ProverId,
-        Ticket   Ticket,
-        SectorId SectorId,
-    ) union { error, bool }
+  ValidateBlock(
+      block Block
+  ) struct {}
 
-    ValidateBlock(
-        block Block
-    ) struct {}
-
+  GetPieceInclusionProof(pieceRef CID) union { Error, PieceInclusionProofs }
 }

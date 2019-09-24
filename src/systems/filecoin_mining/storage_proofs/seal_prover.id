@@ -1,3 +1,8 @@
+type SealPublicInputs struct {}
+type MerkleTree struct {}
+type PieceInclusionProof struct {}
+type Error String
+
 type SealResponse struct {
      CommD                 Commitment
      CommR                 Commitment
@@ -5,8 +10,6 @@ type SealResponse struct {
      PersistentAux         SectorPersistentAux
      MerkleTreePath        Path // TODO: This may be a partially-cached tree.
 }
-
-type SealPublicInputs struct {}
 
 type SealProofConfig struct {
     partitionCount UInt
@@ -18,18 +21,25 @@ type SNARKProof struct { //<curve, system> {
      proofBytes Bytes
 }
 
-type FilecoinSNAKRProof struct {} //<bls12-381, Groth16>
+type FilecoinSNARKProof struct {} //<bls12-381, Groth16>
 
 type SealProof struct {
      snarkProof      SNARKProof,
      susbsectorCount Uvarint,
 }
 
-type PieceInclusionProof struct {}
-
 type SealProver struct {
   GenerateCommP() Commitment
   GenerateCommD() Commitment
+
+  SealSector(
+		SectorConfig   SectorConfig,
+		unsealedPath   Path,
+		sealedPath     Path,
+		proverID       ProverID,
+		ticket         Ticket, // Assuming this is defined  elsewhere.
+		sectorID       union { SectorID, Error, SealResponse }
+  ) struct {}
 
   GeneratePieceInclusionProof(
     Tree          MerkleTree, //MerkleTree<Rephash>,

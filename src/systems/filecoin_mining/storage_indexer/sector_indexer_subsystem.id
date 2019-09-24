@@ -22,7 +22,7 @@ type SectorIndexerSubsystem struct {
 
 	ProverID       ProverID
     SectorStore    SectorStore
-    SectorBuilder  SectorBuilder
+    SectorBuilders  { SectorConfig : SectorBuilder }
     StorageProofs  StorageProofs
     
 	// call by StorageMiningSubsystem when adding a deal to sector
