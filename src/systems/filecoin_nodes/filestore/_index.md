@@ -3,24 +3,8 @@ menuTitle: FileStore
 title: "FileStore - Local Storage for Files"
 ---
 
+{{< readfile file="filestore.id" code="true" lang="go" >}}
 
-```go
-type Path string
-
-type File inteface {
-  Path() Path
-  Size() int
-  Seek(offset int) error
-  Read([]byte) (n int, err error)
-  Write([]byte) (n int, err error)
-  Close() error
-}
-
-type FileStore interface {
-  Open(Path) (File, error)
-  Create(Path) (File, error)
-}
-```
 
 TODO:
 

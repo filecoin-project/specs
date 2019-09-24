@@ -3,6 +3,8 @@ menuTitle: IpldStore
 title: "IpldStore - Local Storage for hash-linked data"
 ---
 
+{{< readfile file="../../../../libraries/ipld/ipld.id" code="true" lang="go" >}}
+
 TODO:
 
 - What is IPLD

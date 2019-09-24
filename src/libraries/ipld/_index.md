@@ -5,3 +5,5 @@ entries:
 - datamodel
 - selectors
 ---
+
+{{< readfile file="ipld.id" code="true" lang="go" >}}

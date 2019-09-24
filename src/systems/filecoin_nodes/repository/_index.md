@@ -7,3 +7,5 @@ entries:
   - ipldstore
   - usage
 ---
+
+{{< readfile file="repository_subsystem.id" code="true" lang="go" >}}
