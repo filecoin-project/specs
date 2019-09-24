@@ -1,4 +1,4 @@
-package fileName
+package filcrypto
 
 func (self *VRFResult) ValidateSyntax() bool {
 	panic("TODO")
