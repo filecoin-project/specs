@@ -1,12 +1,11 @@
 package fileName
 
+// func NewSectorIndexerSubsystem() *SectorIndexerSubsystem {
+// 	panic("TODO")
+// 	return struct{}
+// }
 
-func InitSectorIndexerSubsystem() *SectorIndexerSubsystem {
-	panic("TODO")
-	return struct{}
-}
-
-func (sis *SectorIndexerSubsystem) AddPieceToSector(deal StorageDeal, pieceRef CID) struct {
+func (sis *SectorIndexerSubsystem) AddDealToSector(deal StorageDeal) struct {
 	sectorID SectorID,
 	pip PieceInclusionProof
 } {

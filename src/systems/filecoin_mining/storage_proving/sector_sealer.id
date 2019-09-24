@@ -1,20 +1,7 @@
 type SectorSealer struct {
-	Seal(stagedSector StagedSector, sealedPath Path, proverId ProverId) SealedSector
+	Seal(seed Seed, sectorID SectorID, replicaConfig ReplicaConfig) SealedSector
 }
 
 type SealedSector struct {
     // TODO
 }
-
-/*
-func (s *SectorSealer_I) Seal(stagedSector StagedSector, sealedPath Path, proverId ProverId) SealedSector {
-	return FilProofs.Seal(
-		stagedSector.SectorConfig,
-		stagedSector.path,
-		sealedPath,
-		proverId,
-		ticket,
-		stagedSector.SectorConfig.SectorId,  // Need to get these.
-	)
-}
-*/

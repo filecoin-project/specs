@@ -1,5 +1,9 @@
 type PubKey struct {}
 type StorageDeal struct {}
+type ElectionArtifacts struct {
+    TK Ticket,
+    T1 Ticket,
+}
 
 type ElectionProof struct {
     // Output is generated from Ticket.VDFOutput output of a ticket drawn k-rounds back
@@ -24,8 +28,13 @@ type Ticket struct {
 type StorageMiningSubsystem struct {
 
     storageMinerActors [&StorageMinerActor]
-    sectorIndexerSubsystem SectoerIndexerSubsystem
+    sectorIndexer SectorIndexerSubsystem
+    storagePowerConsensus StoragePowerConsensusSubsystem
 
+    currentChain() Chain
+    currentEpoch() Epoch
+    currentTipset() Tipset
+    
     StartMining() struct {}
     StopMining() struct {}
 
@@ -40,14 +49,14 @@ type StorageMiningSubsystem struct {
     HandleStorageDeal(deal StorageDeal, pieceRef CID) struct{}
 
     // call by StorageMinerActor when error in sealing
-    CommitmentSectorError() struct{}
+    CommitSectorError() struct{}
 
     // call by BlockChain when a new block is produced
     OnNewTipset(chain Chain, epoch Epoch) struct{}
 
     // call by clock during BlockProduction
     // TODO: define clock better
-    OnNewRound() struct{}
+    OnNewRound() ElectionArtifacts
 
     // call by StorageMiningSubsystem itself in BlockProduction
     DrawElectionProof(tk Randomness, workerKey PrivateKey) ElectionProof

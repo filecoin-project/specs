@@ -81,6 +81,8 @@ type StorageProvingSubsystem struct {
    MaxUnsealedBytesPerSector(
       SectorSize UInt
    ) UInt
+
+
 }
 
 

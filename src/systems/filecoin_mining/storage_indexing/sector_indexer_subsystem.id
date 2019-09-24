@@ -1,4 +1,8 @@
 type PieceInclusionProof struct {}
+type AddDealToSectorResponse struct {
+	sectorID SectorID,
+	pip PieceInclusionProof,
+}
 
 type SectorIndexerSubsystem struct {
 
@@ -6,13 +10,15 @@ type SectorIndexerSubsystem struct {
     SectorBuilders { SectorConfig : SectorBuilder },
     ProverID       UInt
 
-	// call by StorageMiningSubsystem during AddingDealToSector
+	// call by StorageMiningSubsystem when adding a deal to sector
 	// trigger getPieceInclusionProof
-	// TODO: procedural call
-	AddPieceToSector(deal StorageDeal, pieceRef CID) struct {
-		sectorID SectorID,
-		pip PieceInclusionProof,
-	}
+	AddDealToSector(deal StorageDeal) AddDealToSectorResponse
+
+	OnNewTipset(chain Chain, epoch Epoch) struct {}
+
+	LookupSectorByExpiry(currentEpoch Epoch) [SectorID]
+
+	PurgeSectorWithNoLiveDeals(sectorIDs [SectorID]) struct{}
 
 	// call by SectorIndexer itself to get pip of a deal
 	getPieceInclusionProof(deal StorageDeal) PieceInclusionProof
