@@ -98,7 +98,7 @@ orient: .PHONY
 GO_INPUT_FILES=$(shell find src/ -iname '*.go')
 GO_OUTPUT_FILES=$(patsubst src/%.go, build/%.go, $(GO_INPUT_FILES))
 
-GO_UTIL_INPUT_FILE=hugo/content/codeGen/util/util.go
+GO_UTIL_INPUT_FILE=tools/codeGen/util/util.go
 GO_UTIL_OUTPUT_FILE=build/util/util.go
 
 $(GO_UTIL_OUTPUT_FILE): $(GO_UTIL_INPUT_FILE)
@@ -126,7 +126,7 @@ build-code: gen-code build/go.mod
 
 go-test: $(shell find hugo/content/ | grep .go)
 	# testing should have the side effect that all go is compiled
-	cd hugo/content/codeGen && go build && go test ./...
+	cd tools/codeGen && go build && go test ./...
 	# cd hugo/content/code && go build && go test ./...
 
 # convert orgmode to markdown
@@ -144,8 +144,8 @@ org2md: $(ORG_MD_FILES)
 # building our tools
 bins: bin/codeGen
 
-bin/codeGen: hugo/content/codeGen/*.go hugo/content/codeGen/*/*.go
-	cd hugo/content/codeGen && go build -o ../../../bin/codeGen
+bin/codeGen: $(shell find tools/codeGen | grep .go)
+	cd tools/codeGen && go build -o ../../bin/codeGen
 
 bin/watcher:
 	go get -u github.com/radovskyb/watcher/...
