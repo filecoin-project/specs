@@ -291,7 +291,8 @@ func GenGoMod(goDecls []GoNode, packageName string) GoMod {
 
 type GoGenContext struct {
 	retDecls  *[]GoNode
-	retMap    map[TypeHash]GoNode
+	declMap   map[string]GoNode
+	typeMap   map[TypeHash]GoNode
 	tokens    []string
 	concrete  bool
 	usesUtil  *[]bool
@@ -312,7 +313,8 @@ func (ctx GoGenContext) Concrete(concrete bool) GoGenContext {
 func GenGoDecls(decls []Decl) []GoNode {
 	ctx := GoGenContext {
 		retDecls: &[]GoNode{},
-		retMap:   map[TypeHash]GoNode{},
+		declMap:  map[string]GoNode{},
+		typeMap:  map[TypeHash]GoNode{},
 		tokens:   []string{},
 		concrete: false,
 		usesUtil: &[]bool{false},
@@ -484,11 +486,11 @@ func GenGoPackageDeclAcc(decl PackageDecl, ctx GoGenContext) GoNode {
 func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) (ret GoNode) {
 	util.Assert(x != nil)
 
-	if t, ok := ctx.retMap[HashType(x)]; ok {
+	if t, ok := ctx.declMap[name]; ok {
 		ret = t
 		return
 	}
-	defer func() { ctx.retMap[HashType(x)] = ret }()
+	defer func() { ctx.declMap[name] = ret }()
 
 	switch x.Case() {
 	case Type_Case_NamedType:
@@ -882,20 +884,21 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) (ret GoNode) {
 	return
 }
 
-func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
-	if match, ok := ctx.retMap[HashType(x)]; ok {
+func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
+	if match, ok := ctx.typeMap[HashType(x)]; ok {
 		return match
 	}
+	defer func() { ctx.typeMap[HashType(x)] = ret }()
 
 	switch x.Case() {
 	case Type_Case_AlgType:
 		typeName := strings.Join(ctx.tokens, "_")
-		return GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
+		ret = GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
 
 	case Type_Case_ArrayType:
 		xr := x.(*ArrayType)
 		goElementType := GenGoTypeAcc(xr.elementType, ctx.Extend("ArrayElement"))
-		return GoArrayType {
+		ret = GoArrayType {
 			elementType: goElementType,
 		}
 
@@ -905,11 +908,11 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
 		switch goTargetType.(type) {
 		case GoIdent:
 			if ctx.concrete {
-				return GoPtrType {
+				ret = GoPtrType {
 					targetType: GoIdent { name: IdToImplRef(goTargetType.(GoIdent).name), },
 				}
 			} else {
-				return goTargetType
+				ret = goTargetType
 			}
 		default:
 			panic("General reference types not yet supported")
@@ -927,26 +930,28 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
 			}
 			goArgs = append(goArgs, goArg)
 		}
-		return GoFunType {
+		ret = GoFunType {
 			retType:  goRetType,
 			args:     goArgs,
 		}
 
 	case Type_Case_NamedType:
 		xr := x.(*NamedType)
-		return TranslateGoIdent(xr.name, ctx.Concrete(false))
+		ret = TranslateGoIdent(xr.name, ctx.Concrete(false))
 
 	case Type_Case_OptionType:
 		typeName := strings.Join(ctx.tokens, "_")
-		return GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
+		ret = GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
 
 	case Type_Case_MapType:
 		typeName := strings.Join(ctx.tokens, "_")
-		return GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
+		ret = GenGoTypeDeclAcc(typeName, x, ctx.Concrete(false))
 
 	default:
 		panic("TODO")
 	}
+
+	return
 }
 
 type GoNode interface {
