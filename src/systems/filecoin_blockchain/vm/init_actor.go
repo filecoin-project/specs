@@ -1,4 +1,4 @@
-package fileName
+package vm
 
 type InitActor struct {
     VM    *VMSyscalls

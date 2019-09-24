@@ -1,4 +1,4 @@
-package fileName
+package storage_mining
 
 // func NewStorageMiningSubsystem() *StorageMiningSubsystem {
 // 	storageMinerActors := []StorageMinerActor{}
