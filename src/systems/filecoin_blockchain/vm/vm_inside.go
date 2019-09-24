@@ -1,9 +1,5 @@
 package vm
 
-type VMInterpreter interface {
-  Call()
-}
-
 type VMMessage struct {
   To     Addres
   Method string
@@ -94,4 +90,7 @@ type VMChainState interface {
   // ChainMessageNumber returns the number of messages in the chain so far.
   // TODO: this probably should be in a bunch of state accessible to the contracts.
   ChainMessageNumber() MessageNumber
+
+  // MinerAddress who should earn this message txn id
+  MinerAddress()
 }
