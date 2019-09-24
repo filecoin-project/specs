@@ -3,12 +3,23 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import key "github.com/filecoin-project/specs/systems/filecoin_nodes/repository/key"
 
 type Repository struct {
-  // config    Config
+  config    Config
   ipldStore ipld.Store
   keyStore  key.Store
 
   // CreateRepository(config Config, ipldStore IPLDDagStore, keyStore KeyStore) &Repository
   GetIPLDStore() ipld.Store
   GetKeyStore() key.Store
-  // GetConfig() &Config
+  GetConfig() Config
+}
+
+
+type ConfigKey string
+type ConfigVal Bytes
+
+type Config struct {
+  Get(k ConfigKey) ConfigVal
+  Put(k ConfigKey, v ConfigVal) error
+
+  Subconfig(k ConfigKey) Config
 }

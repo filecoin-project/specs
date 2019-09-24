@@ -1,6 +1,6 @@
 
 type Key struct {
-  Algo Algorithm
+//  Algo Algorithm
   Data Bytes
 }
 
@@ -9,42 +9,35 @@ type Name string
 
 // key.Store
 type Store struct {
-//  Put(n Name, key Key) error
-//  Get(n Name) (Key, error)
+  Put(n Name, key Key) error
+  Get(n Name) union { k Key, e error }
 //  Sign(n Name, data Bytes) Signature
 }
 
-type Algorithm union {
-  Sig SignatureAlgorithm
-}
-
-
-type EdDSASignatureAlgorithm struct {
-//  Sign(b Bytes) (Signature, error)
-//  Verify(b Bytes, Signature) (bool, error)
-}
-
-type Secp256k1SignatureAlgorithm struct {
-//  Sign(b Bytes) (Signature, error)
-//  Verify(b Bytes, Signature) (bool, error)
-}
-
-type BLSAggregateSignatureAlgorithm struct {
-//  Sign(b Bytes) (Signature, error)
-//  Verify(b Bytes, Signature) (bool, error)
-}
-
-
-
-type SignatureAlgorithm union {
-  EdDSASigAlgo     EdDSASignatureAlgorithm
-  Secp256k1SigAlgo Secp256k1SignatureAlgorithm
-  BLSSigAlgo       BLSAggregateSignatureAlgorithm
-}
-
-type Signature struct {
-  Algo SignatureAlgorithm
-  Data Bytes
-
-//  Verify(Key) (bool, error)
-}
+// TODO: this breaks the parser.
+//
+// type Algorithm union {
+//   Sig SignatureAlgorithm
+// }
+//
+// type SignatureAlgoC struct {
+//   Sign(b Bytes) union { s Signature, e error }
+//   Verify(b Bytes, s Signature) union { b bool, e error }
+// }
+//
+// type EdDSASignatureAlgorithm SignatureAlgoC
+// type Secp256k1SignatureAlgorithm SignatureAlgoC
+// type BLSAggregateSignatureAlgorithm SignatureAlgoC
+//
+// type SignatureAlgorithm union {
+//   EdDSASigAlgo     EdDSASignatureAlgorithm
+//   Secp256k1SigAlgo Secp256k1SignatureAlgorithm
+//   BLSSigAlgo       BLSAggregateSignatureAlgorithm
+// }
+//
+// type Signature struct {
+//   Algo SignatureAlgorithm
+//   Data Bytes
+//
+//   Verify(k Key) union { b bool, e error }
+// }
