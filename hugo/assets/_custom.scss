@@ -78,6 +78,10 @@ h5, .menu-item.depth-5 {
   color: $section-number-menu-color;
 }
 
+.menu-item.highlight {
+//  background: rgb(231, 252, 255); // probably not needed. here if we do
+}
+
 article h1:before, .menu-item.depth-1:before {
   content : counter(h1,decimal) ". ";
   counter-increment : h1;

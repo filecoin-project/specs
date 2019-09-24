@@ -1,5 +1,5 @@
 ---
-title: Token
+title: 📀 **Token**
 entries:
 - wallets
 - payments

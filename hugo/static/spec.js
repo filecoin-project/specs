@@ -11,8 +11,12 @@ function onMenuDetailChange(event) {
     for (var j = 0; j < $uls.length; j++) {
       $ul = $uls[j]
       if (i < depth) {
+        if ($ul.childElementCount > 0) {
+          $ul.previousElementSibling.classList.add('highlight')
+        }
         $ul.classList.remove('hidden')
       } else {
+        $ul.previousElementSibling.classList.remove('highlight')
         $ul.classList.add('hidden')
       }
     }

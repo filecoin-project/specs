@@ -16,7 +16,7 @@
     {{ if (eq $depth 1) }}
     <strong>
     {{ end }}
-        {{ $title }}
+        {{ $title | markdownify }}
     {{ if (eq $depth 1) }}
     </strong>
     {{ end }}

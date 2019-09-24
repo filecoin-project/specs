@@ -1,5 +1,5 @@
 ---
-title: Blockchain
+title: 📦 **Blockchain**
 entries:
 - state_tree
 - vm
