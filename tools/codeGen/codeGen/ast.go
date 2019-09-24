@@ -2171,18 +2171,18 @@ func TryParseImportDecl(r *ParseStream) (ret *ImportDecl, err error) {
 func ParseFile(r *ParseStream) []Decl {
 	ret := []Decl{}
 	var decl Decl
-	var err error
+	var typeParseErr, packageParseErr, importParseErr error
 	for {
 		if _, ok := PeekToken(r, false); !ok {
 			return ret
 		}
-		decl, err = TryParseTypeDecl(r)
-		if err != nil {
-			decl, err = TryParsePackageDecl(r)
-			if err != nil {
-				decl, err = TryParseImportDecl(r)
-				if err != nil {
-					panic(err)
+		decl, typeParseErr = TryParseTypeDecl(r)
+		if typeParseErr != nil {
+			decl, packageParseErr = TryParsePackageDecl(r)
+			if packageParseErr != nil {
+				decl, importParseErr = TryParseImportDecl(r)
+				if importParseErr != nil {
+					panic(typeParseErr)
 				}
 			}
 		}
