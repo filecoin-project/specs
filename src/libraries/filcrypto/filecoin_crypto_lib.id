@@ -9,7 +9,8 @@ type VRFResult struct {
 	Output    Bytes    @(internal)
     Proof     Bytes    @(internal)
 
-	VerifyOutput(pk VRFPublicKey, input Bytes, proof Bytes)    bool
+    GetOutput() Bytes
+	Verify(input Bytes, pk VRFPublicKey)    bool
     ValidateSyntax()    bool
 }
 

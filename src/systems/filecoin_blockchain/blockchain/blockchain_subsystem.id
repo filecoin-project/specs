@@ -3,14 +3,15 @@ type SectorID struct {}
 type Randomness struct {}
 
 type BlockchainSubsystem struct @(mutable) {
-    Clock   WallClock
+    Clock           WallClock
+    SPCSubsystem    StoragePowerConsensusSubsystem
 
-    LatestEpoch() Epoch
-    BestChain() Chain
+    LatestEpoch()   Epoch
+    BestChain()     Chain
     CandidateChains() [Chain]
 
     // // Receiving blocks and tipset
-    NewTipsets() TipsetChan
+    NewTipsets()    TipsetChan
     NewBestTipset() TipsetChan
 
     // validateBlockSemantics(Block)
@@ -19,6 +20,9 @@ type BlockchainSubsystem struct @(mutable) {
         CatchingUp
         Synchronized
     }
+
+    // time of round cutoff time for accepting new blocks
+    epochCutoffTime() Timestamp
 
     // call by StorageClient in StorageDealMake
     VerifySectorExists(sectorId SectorID) bool

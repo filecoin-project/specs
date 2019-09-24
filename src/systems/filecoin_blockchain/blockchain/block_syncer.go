@@ -54,7 +54,7 @@ func (bs *BlockSyncer) validateBlockSyntax(block Block) {
 
     // TODO msg receipts
 
-	if block.Timestamp() > blockchainSubsystem.Clock.Now()
+	if block.Timestamp() > bs.blockchainSubsystem.Clock.Now()
 	{
 		return ErrInvalidBlockSyntax("bad timestamp")
 	} 

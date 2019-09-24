@@ -12,7 +12,9 @@ type Block struct {
 	BlockSig()                   Signature
 
 //	SerializeSigned()            []byte
-//	ComputeUnsignedFingerprint() []byte
+//	ComputeUnsignedFingerprint() []
+
+	VerifyTickets()				bool
 }
 
 type Tipset struct {
@@ -34,10 +36,10 @@ type Timestamp Time
 type Ticket struct {
 	VRFResult() VRFResult
 	VDFResult() VDFResult
-	VDFProof() 	VDFProof
 
 	// Generate(k VRFKeyPair, seed ElectionSeed) Ticket
-	ValidateSyntax(tix &Ticket) bool
+	ValidateSyntax() 	bool
+	Validate()			bool
 }
 
 type ElectionProof struct {

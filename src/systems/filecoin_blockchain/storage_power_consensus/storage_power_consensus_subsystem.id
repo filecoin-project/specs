@@ -8,11 +8,11 @@ type ElectionArtifacts struct {
 }
 
 type StoragePowerConsensusSubsystem struct  { //(@mutable)
-	// powerTable						PowerTable
-	// actor							StoragePowerActor
-	// associatedStateTree 			*StateTree
-	// GenerateElectionProof(Tipset)	ElectionProof
-	// ChooseTipsetToMine([Tipset])				[Tipset]
+	powerTable						PowerTable
+	actor							StoragePowerActor
+	associatedStateTree 			*StateTree
+	GenerateElectionProof(Tipset)	ElectionProof
+	ChooseTipsetToMine([Tipset])	[Tipset]
 
 	// call by StorageMiningSubsystem in sealing sector
 	GetSealSeed(chain Chain, epoch Epoch) Seed
@@ -21,7 +21,7 @@ type StoragePowerConsensusSubsystem struct  { //(@mutable)
 	GetPoStChallenge(chain Chain, epoch Epoch) PoStChallenge
 
 	// call by BlockchainSubsystem during block reception
-	ValidateBlock(block Block) bool
+	ValidateBlock(block Block) StoragePowerConsensusError
 
 	// call by StorageMiningSubsystem during block production
 	GetElectionArtifacts(chain Chain, epoch Epoch) ElectionArtifacts
@@ -32,23 +32,29 @@ type StoragePowerConsensusSubsystem struct  { //(@mutable)
 	// call by StorageMiningSubsystem during block production
 	TryLeaderElection(electionProof ElectionProof) bool
 
+	// validate new incoming block
+	ValidateBlock(block Block) StoragePowerConsensusError
+
+	StoragePowerConsensusError() StoragePowerConsensusError
+
+	computeTipsetWeight(tipset Tipset) ChainWeight
 }
 
 
 type PowerTable struct {
 	// all power here is always verified
-	// minerPower							{Address:StorageMiner}
-	// LookupMinerStorage(Address)			UVarint
-	// LookupMinerPowerFraction(Address)	Float
-	// RemovePower(Address)
+	minerPower							{Address:StorageMiner}
+	LookupMinerStorage(Address)			UVarint
+	LookupMinerPowerFraction(Address)	Float
+	RemovePower(Address)
 }
 
 type StorageMiner struct {
 	minerAddress	Address
 	minerStorage	MinerStorage
-	isSuspended		Bool
 	VRFKeyPair		VRFKeyPair
 	VDFKeyPair		VDFKeyPair
 }
 
 type minerStorage UVarint
+type StoragePowerConsensusError Error
