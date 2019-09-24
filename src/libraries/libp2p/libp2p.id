@@ -1,25 +1,26 @@
 
-// PeerID is the CID of the public key of this peer
-type PeerID CID
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import mf "github.com/filecoin-project/specs/libraries/multiformats"
 
-// Multiaddr is a self-describing network address
-type Multiaddr bytes
+
+// PeerID is the CID of the public key of this peer
+type PeerID ipld.CID
 
 // PeerInfo is a simple datastructure that relates PeerIDs to corresponding partial Multiaddrs.
 // This is a convenience struct used in interfaces where we must specify both, or may specify
 // either.
 type PeerInfo struct {
   PeerID PeerID
-  Addrs  [Multiaddr]
+  Addrs  [mf.Multiaddr]
 }
 
 
-type Libp2pNode struct {
+type Node struct {
   // PeerID returns the PeerID associated with this libp2p Node
   PeerID() PeerID
 
   // MountProtocol adds given Protocol under specified protocol id.
-  MountProtocol(path Path, protocol Protocol) struct {}
+  MountProtocol(path ProtocolPath, protocol Protocol) struct {}
 
   // ConnectPeerID establishes a connection to peer matching given PeerInfo.
   //
@@ -32,6 +33,8 @@ type Libp2pNode struct {
   // Idempotent. If a connection already exists, this method returns silently.
   Connect(peerInfo PeerInfo) struct {}
 }
+
+type ProtocolPath string
 
 type Protocol union {
   StreamProtocol
@@ -99,9 +102,9 @@ type DatagramProtocol struct {
   SendDatagram(datagram Datagram, peerInfo PeerInfo) struct {err error}
 }
 
-type StorageDealLibp2pProtocol struct {
-  StreamProtocol StreamProtocol
-  // ---
-  AcceptStream() struct {}
-  OpenStream() struct {}
-}
+// type StorageDealLibp2pProtocol struct {
+//   StreamProtocol StreamProtocol
+//   // ---
+//   AcceptStream() struct {}
+//   OpenStream() struct {}
+// }

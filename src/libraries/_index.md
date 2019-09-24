@@ -6,4 +6,5 @@ entries:
 - ipld
 - libp2p
 - ipfs
+- multiformats
 ---
