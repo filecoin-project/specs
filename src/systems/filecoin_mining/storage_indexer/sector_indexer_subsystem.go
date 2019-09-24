@@ -1,18 +1,9 @@
-package storage_indexing
-
-// func NewSectorIndexerSubsystem() *SectorIndexerSubsystem {
-// 	panic("TODO")
-// 	return struct{}
-// }
-
 func (sis *SectorIndexerSubsystem) AddDealToSector(deal StorageDeal) AddDealToSectorResponse {
-	sectorBuilder := sis.selectSectorBuilderByDeal(deal)
-	sectorBuilder.AddPiece(pieceRef)
-	sis.SectorStore.AddPieceByRef(pieceRef)
-	pip := sis.getPieceInclusionProof(deal)
+	addPieceResponse := sis.SectorBuilder.AddPiece(deal.PiecePath)
+	pip := sis.StorageProofs.getPieceInclusionProof(deal)
 
 	return AddDealToSectorResponse{
-		sectorID: sectorBuilder.sectorID,
+		sectorID: addPieceResponse.SectorInfo.ID
 		pip: pip,
 	}
 }
@@ -20,7 +11,6 @@ func (sis *SectorIndexerSubsystem) AddDealToSector(deal StorageDeal) AddDealToSe
 func (sis *SectorIndexerSubsystem) selectSectorBuilderByDeal(deal StorageDeal) SectorBuilder {
 	panic("TODO")
 }
-
 
 func (sis *SectorIndexerSubsystem) indexSectorByDealExpiration(sectorID SectorID, deal StorageDeal) {
 	panic("TODO")
@@ -31,8 +21,7 @@ func (sis *SectorIndexerSubsystem) getPieceInclusionProof(deal StorageDeal) Piec
 }
 
 func (sis *SectorIndexerSubsystem) OnNewTipset(chain Chain, epoch Epoch) {
-	sectorIDs := lookupSectorByExpiry(epoch)
-	purgeSectorWithNoLiveDeals(sectorIDs)
+	panic("TODO")
 }
 
 func (sis *SectorIndexerSubsystem) lookupSectorByExpiry(currentEpoch Epoch) []SectorID {

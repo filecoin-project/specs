@@ -1,0 +1,50 @@
+// Opaque identifier allowing read/write access to storage.
+type Path String 
+
+// This is MetaData required to generate a PoSt proof for a sector.
+// These should be stored and indexed somewhere by CommR.
+type SectorPersistentAux struct {
+  CommRLast      Commitment
+  CommC          Commitment
+}
+
+// Indexed by CommR
+type SectorMetaData struct {
+  CommR                   Commitment,
+  PersistentAux           SectorPersistentAux,
+  MerkleTreePath          Path,
+}
+
+type StagedSector struct {
+  SectorInfo    SectorInfo
+  ReplicaConfig ReplicaConfig
+  BytesUsed     UInt // Size of data in sector after preprocessing and padding.
+  Path          Path
+
+  CapacityRemaining() UInt // How many more bytes of raw data can this sector hold, at most?
+}
+
+// commR to SectorMetaData
+type SectorMetaDataStore { SealedSectorID : SectorMetaData }
+
+type SectorStore struct {
+
+  SectorMetaDataStore SectorMetaDataStore
+
+  WritePiece(piece Piece) Path // path - temp storage for pieces not yet sealed.
+  PlacePiece(from Path, to StagedSector, position UInt) struct {}
+
+  AllocateSealedSector(SectorSize UInt) Path
+  AllocateStagedSector(SectorSize UInt) Path
+
+  RegisterMetadata(sectorMetadata SectorMetaData) bool
+  GetMetaData(commR Commitment) SectorMetaData
+
+  UpdateMetaData(
+    CommR       Commitment,
+    NewMetaData SectorMetaData
+  ) bool // This may not actually be needed.
+  
+  RemoveMetaData(CommR Commitment) struct {}
+
+}

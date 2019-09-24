@@ -1,7 +1,0 @@
-type SectorSealer struct {
-	Seal(seed Seed, sectorID SectorID, replicaConfig ReplicaConfig) SealedSector
-}
-
-type SealedSector struct {
-    // TODO
-}

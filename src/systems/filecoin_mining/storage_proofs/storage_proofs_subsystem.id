@@ -1,0 +1,30 @@
+type StorageProofsSubsystem struct {
+
+    SealSector(
+        seed Seed,
+        sectorID SectorID,
+        replicaConfig ReplicaConfig,
+    ) SealOutput
+
+    GeneratePoSt(
+        challenge Challenge,
+        sectorIDs [SectorID]
+    ) PoStProof
+}
+
+type FilecoinStorageProofs struct {
+
+    VerifySeal(
+        CommD    Commitment,
+        CommR    Commitment,
+        Proof    SNARKProof,
+        ProverId ProverId,
+        Ticket   Ticket,
+        SectorId SectorId,
+    ) union { error, bool }
+
+    ValidateBlock(
+        block Block
+    ) struct {}
+
+}

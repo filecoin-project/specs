@@ -1,0 +1,102 @@
+type Bytes32     struct {}
+type UInt64      struct {}
+type PieceID     CID
+type PieceRef    CID
+type ProverID    UInt64
+type Commitment  Bytes32
+type CommD       Commitment
+type CommC       Commitment
+
+type PieceInfo struct {
+  ID   PieceID
+  Size UVarint
+  Ref  PieceRef
+}
+
+// TODO make sure this is globally unique
+// type SectorID    UInt64
+type SectorID struct {
+  ProverID     ProverID
+  SectorNumber UInt64
+}
+
+type SealAlgorithm union {
+  // ZigZagPoRep
+  // StackedDRG
+}
+
+// type SealAlgorithmArtifacts struct {
+  // AlgorithmWideArtifacts struct {
+  //   // trusted setup output parameters go here
+  //   // updates to public parameters go here
+
+  // }
+
+  // SealSetupArtifacts struct {
+  //   // per-sector setup artifacts go here
+  // }
+
+  // ProveArtifacts or
+  // ChallengeArtifacts struct {
+  //   // inputs into prove() go here
+  // }
+
+  // VerifyArtifacts struct {
+  //   // inputs into verify() go here
+  // }
+// }
+
+type UnsealedSectorInfo struct {
+  CommD      CommD
+  Size       UVarint
+  PieceCount Uvarint          // number of pieces in this sector (can get it from len(Pieces) too)
+  Pieces     [PieceInfo]      // wont get externalized easy, -- it's big
+}
+
+type SealAlgorithm struct {}
+  // SealAlgorithm union {
+  //   SuperSectorPorep struct { // TODO Porcu names it
+  //     SectorSize SuperSectorPorepSectorSize
+  //     Partitions SuperSectorPorepPartitions
+  //     Subsectors SuperSectorPorepSubsectorCount
+  //   }
+  // }
+
+type SealOutputArtifacts struct {}
+  // SealOutputArtifacts union {
+  //   SuperSectorPorepOutputArtifacts struct {
+  //     Proof       ZigZagSealProof
+  //     ReplicaTree ReplicaTree
+  //     CommRLast   ZigZagCommRLast
+  //     CommC       ZigZagCommC
+  //   }
+  // }
+
+type SealArguments struct {
+  Algorithm          SealAlgorithm
+  OutputArtifacts    SealOutputArtifacts
+}
+
+type SealedSectorInfo struct {
+    CommR           SealedSectorID
+    Size            UVarint
+    SealArguments   SealArguments
+  }
+
+type OnChainSealInfo struct {}
+    // SectorID            SectorID
+    // UnsealedCID         UnsealedSectorCID // CommD
+    // SealedCID           SealedSectorCID   // CommR
+    // SealVerifyArtifacts struct {}
+    // SealVerifyArtifacts union {
+    //   ZigZagSealVerifyArtifacts struct {
+    //     Proof ZigZagSealProof
+    //   }
+    // }
+
+type SectorInfo struct {
+  ID             SectorID
+  UnsealedSector UnsealedSectorInfo
+  SealedSector   SealedSectorInfo
+  OnChainSeal    OnChainSealInfo
+}

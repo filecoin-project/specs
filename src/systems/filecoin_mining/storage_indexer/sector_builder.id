@@ -1,0 +1,26 @@
+type ReplicaConfig struct {
+  SectorSize     UInt
+  SubsectorCount UInt
+  Partitions     UInt
+}
+
+type SectorBuilder struct {
+  ReplicaConfig   ReplicaConfig
+  ProverID        ProverID
+  StagedSectors   [StagedSector]
+
+  MaxUnsealedBytesPerSector()        UInt
+  AddPiece(piecePath Path)         AddPieceResponse
+  selectStagedSectorBySize(pieceSize UInt) [StagedSector]
+}
+
+type AddPieceError String
+type AddPieceSuccess struct {
+  StagedSector StagedSector
+  BytesRemaining  UInt // Raw byte capacity remaining in StagedSector, after adding piece.
+}
+
+type AddPieceResponse union {
+  AddPieceSuccess
+  AddPieceError
+}

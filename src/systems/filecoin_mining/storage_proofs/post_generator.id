@@ -1,0 +1,9 @@
+import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
+
+type Challenge   UInt64
+
+type PostGenerator struct {
+
+	GeneratePoSt(challenge Challenge, sectors [&Sector]) PoStProof
+}
+
