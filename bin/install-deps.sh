@@ -35,7 +35,8 @@ main() {
   tryinstall rsync rsync
 
   # other packages
-  require go go "recommended install from https://golang.org/dl/ -- we need version 1.12+"
+  require_version "$(emacs -version)" emacs 26.3 "recommended install from you package manager"
+  require_version "$(go version)" go 1.12 "recommended install from https://golang.org/dl/"
 
   # git repos
   prun git submodule update --init --recursive
