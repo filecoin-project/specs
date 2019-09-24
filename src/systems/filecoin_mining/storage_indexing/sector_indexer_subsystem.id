@@ -14,14 +14,16 @@ type SectorIndexerSubsystem struct {
 	// trigger getPieceInclusionProof
 	AddDealToSector(deal StorageDeal) AddDealToSectorResponse
 
-	OnNewTipset(chain Chain, epoch Epoch) struct {}
-
-	LookupSectorByExpiry(currentEpoch Epoch) [SectorID]
-
-	PurgeSectorWithNoLiveDeals(sectorIDs [SectorID]) struct{}
+	indexSectorByDealExpiration(sectorID SectorID, deal StorageDeal) struct {}
 
 	// call by SectorIndexer itself to get pip of a deal
 	getPieceInclusionProof(deal StorageDeal) PieceInclusionProof
+
+	OnNewTipset(chain Chain, epoch Epoch) struct {}
+
+	lookupSectorByExpiry(currentEpoch Epoch) [SectorID]
+
+	purgeSectorWithNoLiveDeals(sectorIDs [SectorID]) struct{}	
 
 	selectSectorBuilderByDeal(deal StorageDeal) SectorBuilder
 

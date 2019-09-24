@@ -18,6 +18,8 @@ type SectorConfig struct {
        Partitions     Uint
 }
 
+type SealOuput struct {}
+
 // This is metadata required to generate a PoSt proof for a sector.
 // These should be stored and indexed somewhere by CommR.
 type SectorPersistentAux struct {
@@ -26,65 +28,70 @@ type SectorPersistentAux struct {
 }
 
 type StorageProvingSubsystem struct {
-    VerifySeal(
-		CommD    Commitment,
-		CommR    Commitment,
-		Proof    SNARKProof,
-		ProverId ProverId,
-		Ticket   Ticket,
-		SectorId SectorId,
-	) union { error, bool }
-
 
     SealSector(
-		SectorConfig   SectorConfig,
-		unsealedPath   String,
-		sealedPath     String,
-		proverId       ProverId,
-		ticket         Ticket, // Assuming this is defined  elsewhere.
-		sectorId       union { SectorId, error, SealResponse }
-		) struct {}
+        seed Seed,
+        sectorID SectorID,
+        replicaConfig ReplicaConfig,
+    ) SealOutput
 
-//    Unseal(xxx Integer
-//         // TODO
-//    )
+    GeneratePoSt(
+        challenge Challenge,
+        sectorIDs [SectorID]
+    ) PoStProof
 
-   GeneratePoSt(
-     Challenge Challenge,
-     CommRs    Commitments, //[commmitments],
-     Trees     MerkleTree, //MerkleTree<Rephash>,
-     Faults    FaultSet
-   ) struct {}
+    // GeneratePoSt(
+    //   Challenge Challenge,
+    //   CommRs    Commitments, //[commmitments],
+    //   Trees     MerkleTree, //MerkleTree<Rephash>,
+    //   Faults    FaultSet
+    // ) struct {}
 
-   VerifyPoSt(
-       // TODO
-   ) struct {}
+    //   SealSector(
+    // SectorConfig   SectorConfig,
+    // unsealedPath   String,
+    // sealedPath     String,
+    // proverId       ProverId,
+    // ticket         Ticket, // Assuming this is defined  elsewhere.
+    // sectorId       union { SectorId, error, SealResponse }
+    // ) struct {}
 
-    GenerateCommP() struct {}
-    GenerateCommD() struct {}
+    //    Unseal(xxx Integer
+    //         // TODO
+    //    )
 
-    GeneratePieceInclusionProofs(
-		Tree          MerkleTree, //MerkleTree<Rephash>,
-		PieceStarts   UInts,//[]Uint,
-		PieceLength   UInts, //[]Uint,
-    ) union { error, PieceInclusionProof }
+    // VerifySeal(
+    //     CommD    Commitment,
+    //     CommR    Commitment,
+    //     Proof    SNARKProof,
+    //     ProverId ProverId,
+    //     Ticket   Ticket,
+    //     SectorId SectorId,
+    // ) union { error, bool }
 
-    GeneratePieceInclusionProof(
-		Tree          MerkleTree, //MerkleTree<Rephash>,
-		PieceStart    Uint,
-		PieceLength   Uint,
-    ) union { Error, PieceInclusionProofs }
+    //   GenerateCommP() struct {}
+    //   GenerateCommD() struct {}
 
-   VerifyPieceInclusionProof(
-   ) struct {}
+    //   GeneratePieceInclusionProofs(
+		  // Tree          MerkleTree, //MerkleTree<Rephash>,
+		  // PieceStarts   UInts,//[]Uint,
+		  // PieceLength   UInts, //[]Uint,
+    //   ) union { error, PieceInclusionProof }
 
-   MaxUnsealedBytesPerSector(
-      SectorSize UInt
-   ) UInt
+    //   GeneratePieceInclusionProof(
+		// Tree          MerkleTree, //MerkleTree<Rephash>,
+		// PieceStart    Uint,
+		// PieceLength   Uint,
+    //   ) union { Error, PieceInclusionProofs }
 
+    //  VerifyPieceInclusionProof(
+    //  ) struct {}
+
+    //  MaxUnsealedBytesPerSector(
+    //     SectorSize UInt
+    //  ) UInt
 
 }
-
 
 type SealResponse struct {
      CommD                 Commitment
