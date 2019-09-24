@@ -3,21 +3,22 @@ type SectorID struct {}
 type Randomness struct {}
 
 type BlockchainSubsystem struct @(mutable) {
-    // LatestEpoch() Epoch
-    // BestChain() Chain
-    // CandidateChains() []Chain
+    Clock   WallClock
+
+    LatestEpoch() Epoch
+    BestChain() Chain
+    CandidateChains() [Chain]
 
     // // Receiving blocks and tipset
-    // NewTipsets() TipsetChan
-    // NewBestTipset() TipsetChan
-    // ProcessBlock(Block)
+    NewTipsets() TipsetChan
+    NewBestTipset() TipsetChan
 
     // validateBlockSemantics(Block)
-    // SyncState() union {
-    //     Booting
-    //     CatchingUp
-    //     Synchronized
-    // }
+    SyncState() union {
+        Booting
+        CatchingUp
+        Synchronized
+    }
 
     // call by StorageClient in StorageDealMake
     VerifySectorExists(sectorId SectorID) bool
@@ -44,32 +45,3 @@ type BlockchainSubsystem struct @(mutable) {
     GetPostRandomness() Randomness
 
 }
-
-// type Chain struct {
-//     HeadEpoch() Epoch
-//     FinalizedEpoch() Epoch
-//     LatestCheckpoint() Epoch
-
-//     TipsetAtEpoch(epoch Epoch) Tipset
-// }
-
-// type ChainWeight UVarint
-
-// type Address struct {
-// 	NetworkID union {
-// 		Testnet
-// 		Mainnet
-// 	}
-// 	Protocol union {
-// 		ID
-// 		Secp256k1
-// 		Actor
-// 		BLS
-//     }
-
-//     VerifySyntax(addrType) bool
-// }
-
-// func (addr *Address) VerifySyntax(addrType) {
-//     // TODO
-// }

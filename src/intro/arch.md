@@ -144,7 +144,7 @@ sequenceDiagram
     loop BlockReception
         BlockSyncer ->>+ libp2p: Subscribe(OnNewBlock)
         libp2p -->>- BlockSyncer: Event(OnNewBlock, block)
-        BlockSyncer ->> BlockSyncer: ValidateSyntax(block)
+        BlockSyncer ->> BlockSyncer: ValidateBlockSyntax(block)
         BlockSyncer ->>+ BlockchainSubsystem: HandleBlock(block)
         BlockchainSubsystem ->> BlockchainSubsystem: ValidateBlock(block)
         BlockchainSubsystem ->> StoragePowerConsensusSubsystem: ValidateBlock(block)

@@ -1,0 +1,47 @@
+type VRFKeyPair struct {
+	PublicKey    VRFPublicKey
+	SecretKey    VRFSecretKey
+
+	Generate(input Bytes)    VRFResult    @(static)    
+}
+
+type VRFResult struct {
+	Output    Bytes    @(internal)
+    Proof     Bytes    @(internal)
+
+	VerifyOutput(pk VRFPublicKey, input Bytes, proof Bytes)    bool
+    ValidateSyntax()    bool
+}
+
+type VDF struct {
+    evalKey     Bytes   @(internal)
+    VerifKey    Bytes   @(internal)
+    
+    Eval(input Bytes)   VDFResult       @(static)
+}
+
+type VDFResult struct {
+    Output      Bytes   @(internal)
+    Proof       Bytes   @(internal)   
+
+    Verify(input Bytes) bool            @(static)
+    ValidateSyntax()    bool
+}
+
+type SigKeyPair struct {
+    PublicKey       SigPublicKey
+    SecretKey       SigSecretKey      
+
+    Generate(input Bytes, type SigType)   Signature
+}
+
+type Signature struct {
+    Signature       Bytes               @(internal)
+    type            SigType             @(internal)
+
+    Verify(pk SigPublicKey, input Bytes)   bool
+}
+
+type SigType union {
+    RandomSigType
+}

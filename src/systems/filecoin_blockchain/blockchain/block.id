@@ -1,16 +1,15 @@
-/*
 type Block struct {
 	MinerAddress()               Address
-	Tickets()                    []Ticket
+	Tickets()                    [Ticket]
 	ParentTipset()               Tipset
 	ParentWeight()               BlockWeight
 	Height()                     Word
 	StateTree()                  StateTree
-	Messages()                   []Message
+	Messages()                   [Message]
 //	BLSAggregate()               Signature
-// 	MessageReceipts()            []MessageReceipt
-//	Timestamp()                  Timestamp
-//	BlockSig()                   Signature
+ 	MessageReceipts()            [MessageReceipt]
+	Timestamp()                  Timestamp
+	BlockSig()                   Signature
 
 //	SerializeSigned()            []byte
 //	ComputeUnsignedFingerprint() []byte
@@ -19,15 +18,18 @@ type Block struct {
 type Tipset struct {
 	Blocks            [Block]
 
-    Has(Block)        bool
-    Parents()         Tipset         @(cached)
+    Has(block Block)  bool			 			@(cached)
+    Parents()         Tipset      		   		@(cached)
 	// StateTree should live in VM
-	StateTree()       StateTree      @(cached)
-    Epoch()           Epoch          @(cached)
-    Weight()          ChainWeight    @(cached)
+	StateTree()       StateTree      			@(cached)
+    Epoch()           Epoch          			@(cached)
+    Weight()          ChainWeight    			@(cached)
 
-	ValidateSyntax()
+	ValidateSyntax()			 	bool		@(cached)
+	LatestTimestamp()				Timestamp 	@(cached)
 }
+
+type Timestamp Time
 
 type Ticket struct {
 	VRFResult() VRFResult
@@ -35,71 +37,37 @@ type Ticket struct {
 	VDFProof() 	VDFProof
 
 	// Generate(k VRFKeyPair, seed ElectionSeed) Ticket
-	ValidateSyntax() bool
+	ValidateSyntax(tix &Ticket) bool
 }
 
 type ElectionProof struct {
 	VRFResult() VRFResult
 	IsWinning(minerPower Fraction) bool	@(cached)
 
-	ValidateSyntax() bool
+	ValidateSyntax(ep &ElectionProof) bool
 }
 
-////////////////////
-// Implementation //
-////////////////////
+type ChainWeight UVarint
 
-func (tix *Ticket) ValidateSyntax() bool {
+type Chain struct {
+    HeadEpoch() Epoch
+    FinalizedEpoch() Epoch
+    LatestCheckpoint() Epoch
 
-	return VRFResult.validateSyntax() // TODO
-		&& VDFResult.validateSyntax()
-		&& VDFProof.validateSyntax()
+    TipsetAtEpoch(epoch Epoch) Tipset
 }
 
-func (ep *ElectionProof) ValidateSyntax() bool {
-	return VRFResult.validateSyntax()
+type Address struct {
+ 	NetworkID union {
+ 		Testnet
+ 		Mainnet
+ 	}
+ 	Protocol union {
+ 		ID
+ 		Secp256k1
+ 		Actor
+ 		BLS
+     }
+
+    VerifySyntax(addrType Protocol) bool
 }
-
-func (ts *Tipset) ValidateSyntax() bool {
-
-    if !len(ts.Blocks) > 0 {
-        return false
-    }
-
-	parents := ts.Parents()
-	grandparent := parents[0].Parents()
-    for i := 1; i < len(parents); i++ {
-        if grandparent != parents[i].Parents() {
-            return false
-		}
-	}
-
-	numTickets := len(ts.Blocks[0].Tickets())
-    for i := 1; i < len(ts.Blocks); i++ {
-        if numTickets != len(ts.Blocks[i].Tickets()) {
-            return false
-		}
-	}
-
-	return true
-}
-
-func (tipset *TipsetI) StateTree() StateTree {
-	var currTree StateTree = nil
-	for _, block := range tipset.Blocks() {
-		if currTree == nil {
-			currTree = block.StateTree()
-		} else {
-			Assert(block.StateTree().CID().Equals(currTree.CID()))
-		}
-	}
-	Assert(currTree != nil)
-	for _, block := range tipset.Blocks() {
-		currTree = UpdateStateTree(currTree, block)
-	}
-	return currTree
-}
-
-type BlockWeight BigInt
-
-*/

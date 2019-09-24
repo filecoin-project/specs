@@ -1,28 +1,4 @@
 /*
-package blockchain
-
-
-type VRFKeyPair struct {
-	PublicKey    VRFPublicKey
-	SecretKey    VRFSecretKey
-
-	Generate(input Bytes)    VRFResult    @(static)
-}
-
-type VRFResult struct {
-	Output    Bytes    @(internal)
-
-	VerifyOutput(pk VRFPublicKey, input Bytes)    Bytes?
-}
-
-type Ticket struct {
-	ElectionVRFResult    VRFResult
-	ElectionVDFResult    VDFResult
-
-	Generate(k VRFKeyPair, seed ElectionSeed)    Ticket    @(static)
-	IsWinning(power Fraction)                    bool
-}
-
 func SmallerBytes(a, b Bytes) Bytes {
     if CompareBytesStrict(a, b) > 0 {
         return b
@@ -65,5 +41,13 @@ func GenerateElectionTicket(k VRFKeyPair, seed ElectionSeed) Ticket {
 		vrfResult,
 		vdfResult,
 	}
+}
+
+type Ticket struct {
+	ElectionVRFResult    VRFResult
+	ElectionVDFResult    VDFResult
+
+	Generate(k VRFKeyPair, seed ElectionSeed)    Ticket    @(static)
+	IsWinning(power Fraction)                    bool
 }
 */
