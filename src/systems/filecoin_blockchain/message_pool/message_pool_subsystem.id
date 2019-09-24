@@ -42,7 +42,7 @@ type MessagePoolSubsystem struct {
 
 type MessagePoolStats struct {
   // Size is the amount of messages in the MessagePool
-  Size Uint
+  Size UInt
 }
 
 // MessageQuery is a descriptor used to find messages matching one or more

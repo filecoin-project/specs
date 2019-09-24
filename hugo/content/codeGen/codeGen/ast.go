@@ -437,6 +437,27 @@ func GenGoMethodCall(obj GoNode, methodName string, args []GoNode) GoNode {
 	return ret
 }
 
+func TranslateGoIdent(name string, ctx GoGenContext) GoIdent {
+	ret := name
+	utilNames := []string {
+		"Assert",
+		"BigInt",
+		"Bytes",
+		"CID",
+		"Float",
+		"UInt",
+		"UVarint",
+	}
+	for _, utilName := range utilNames {
+		if name == utilName {
+			ret = "util." + name
+			*ctx.usesUtil = []bool{true}
+			break
+		}
+	}
+	return GoIdent { name: ret }
+}
+
 func GoTypeToIdent(typeName string) GoIdent {
 	return GoIdent { name: strings.ToLower(typeName)[0:1] }
 }
@@ -472,7 +493,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 		xr := x.(*NamedType)
 		goTypeDecl := GoTypeDecl{
 			name: name,
-			type_: GoIdent {name: xr.name},
+			type_: TranslateGoIdent(xr.name, ctx),
 		}
 		*ctx.retDecls = append(*ctx.retDecls, goTypeDecl)
 		return GoIdent {name: name}
@@ -561,7 +582,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 
 			*ctx.retDecls = append(*ctx.retDecls, GoTypeDecl {
 				name: caseTypeName,
-				type_: GoIdent { name: "UVarint" },
+				type_: TranslateGoIdent("UVarint", ctx),
 			})
 
 			for _, field := range xr.fields {
@@ -587,7 +608,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) GoNode {
 				caseAsDeclBody := []GoNode {
 					GoStmtExpr {
 						expr: GoExprCall {
-							f: GoIdent { name: "Assert" },
+							f: TranslateGoIdent("Assert", ctx),
 							args: []GoNode {
 								GoExprEq {
 									GenGoMethodCall(caseAsDeclArg, "Which", []GoNode{}),
@@ -891,9 +912,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) GoNode {
 
 	case Type_Case_NamedType:
 		xr := x.(*NamedType)
-		return GoIdent {
-			name: xr.name,
-		}
+		return TranslateGoIdent(xr.name, ctx.Concrete(false))
 
 	case Type_Case_OptionType:
 		typeName := strings.Join(ctx.tokens, "_")

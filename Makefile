@@ -117,6 +117,13 @@ build/%.gen.go: src/%.id bin/codeGen
 
 gen-code: bin/codeGen $(GEN_GO_FILES) $(GO_OUTPUT_FILES) $(GO_UTIL_OUTPUT_FILE)
 
+build/go.mod: src/build_go.mod
+	mkdir -p $(dir $@)
+	cp $< $@
+
+build-code: gen-code build/go.mod
+	cd build && go build -gcflags="-e" ./...
+
 go-test: $(shell find hugo/content/ | grep .go)
 	# testing should have the side effect that all go is compiled
 	cd hugo/content/codeGen && go build && go test ./...
