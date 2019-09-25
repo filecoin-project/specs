@@ -24,7 +24,7 @@ type SectorIndexerSubsystem struct {
     SectorStore    SectorStore
     SectorBuilders  { SectorConfig : SectorBuilder }
     StorageProofs  StorageProofs
-    
+
 	// call by StorageMiningSubsystem when adding a deal to sector
 	// trigger getPieceInclusionProof
 	AddDealToSector(deal StorageDeal) AddDealToSectorResponse
@@ -39,7 +39,7 @@ type SectorIndexerSubsystem struct {
 
 	lookupSectorByExpiry(currentEpoch Epoch) [SectorID]
 
-	purgeSectorWithNoLiveDeals(sectorIDs [SectorID]) struct{}	
+	purgeSectorWithNoLiveDeals(sectorIDs [SectorID]) struct{}
 
 	selectSectorBuilderByDeal(deal StorageDeal) SectorBuilder
 

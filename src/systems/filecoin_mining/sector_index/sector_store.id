@@ -1,5 +1,5 @@
 // Opaque identifier allowing read/write access to storage.
-type Path String 
+type Path String
 
 // This is MetaData required to generate a PoSt proof for a sector.
 // These should be stored and indexed somewhere by CommR.
@@ -35,7 +35,7 @@ type SectorStore struct {
     CommR       Commitment,
     NewMetaData SectorMetaData
   ) bool // This may not actually be needed.
-  
+
   RemoveMetaData(CommR Commitment) struct {}
 
 }
