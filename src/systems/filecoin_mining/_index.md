@@ -3,8 +3,8 @@ menuTitle: ⛏ **Storage Mining**
 title: "Storage Mining System - proving storage for producing blocks"
 entries:
 - storage_mining
-- storage_indexing
-- storage_proving
+- storage_indexer
+- storage_proofs
 ---
 
 The Storage Mining System is the part of the Filecoin Protocol that deals with storing Client's
@@ -14,7 +14,7 @@ involved.
 Storing data and producing proofs is a complex, highly optimizable process, with lots of tunable
 choices. Miners should explore the design space to arrive at something that (a) satisfies protocol
 and network-wide constraints, (b) satisfies clients' requests and expectations (as expressed in
-`Deals`), and (c) gives them the most cost-effective operation. This part of the Filecoin Spec
+`Deals`), and \(c) gives them the most cost-effective operation. This part of the Filecoin Spec
 primarily describes in detail what MUST and SHOULD happen here, and leaves ample room for
 various optimizations for implementers, miners, and users to make. In some parts, we describe
 algorithms that could be replaced by other, more optimized versions, but in those cases it is
