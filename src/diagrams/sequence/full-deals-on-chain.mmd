@@ -1,16 +1,3 @@
----
-title: "Architecture Diagram"
----
-
-## Overview Diagram
-
-<img src="overview.svg" />
-
-## Storage Flow
-
-With deals
-
-{{% mermaid %}}
 sequenceDiagram
 
     participant RetrievalClient
@@ -63,15 +50,15 @@ sequenceDiagram
         Note left of StorageClient: Piece, PieceCID
         StorageClient ->> StorageProvider: ProposeStorageDeal(StorageDealProposal)
         StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
-        StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealAccepted, Deal} 
-         
+        StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealAccepted, Deal}
+
         Note left of StorageClient: Piece, PieceCID, Deal
         Note right of StorageProvider: Piece, PieceCID, Deal
         StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
         StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealStarted, Deal}
         alt StorageClient notifies network
             StorageClient ->> StorageMarketActor: NotifyOfDeal(Deal, DealStatusPending)
-        else 
+        else
             StorageProvider ->>  StorageMarketActor: NotifyOfDeal(Deal, DealStatusPending)
         end
         StorageMarketActor -->>- StorageMarketActor: AddDeal(Deal, DealStatusPending)
@@ -168,13 +155,13 @@ sequenceDiagram
         StoragePowerConsensusSubsystem ->> StoragePowerConsensusSubsystem: TK ← TicketAtEpoch(Chain, Epoch-k)
         StoragePowerConsensusSubsystem ->> StoragePowerConsensusSubsystem: T1 ← TicketAtEpoch(Chain, Epoch-1)
         StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: TK, T1
-       
+
         loop forEach StorageMiningSubsystem.StorageMiner
             StorageMiningSubsystem ->> StorageMiningSubsystem: EP ← DrawElectionProof(TK.randomness(), StorageMiner.WorkerKey)
             alt New Tipset
-                StorageMiningSubsystem ->> StorageMiningSubsystem: T0 ← GenerateNextTicket(T1.randomness(), StorageMiner.WorkerKey)            
+                StorageMiningSubsystem ->> StorageMiningSubsystem: T0 ← GenerateNextTicket(T1.randomness(), StorageMiner.WorkerKey)
             else Null block last round
-                StorageMiningSubsystem ->> StorageMiningSubsystem: T1 ← GenerateNextTicket(T0.randomness(), StorageMiner.WorkerKey)   
+                StorageMiningSubsystem ->> StorageMiningSubsystem: T1 ← GenerateNextTicket(T0.randomness(), StorageMiner.WorkerKey)
                 Note Right of StorageMiningSubsystem: Using tickets derived in failed election proof in last epoch
             end
             StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: TryLeaderElection(EP)
@@ -188,7 +175,7 @@ sequenceDiagram
             end
         end
     end
-    
+
      opt MiningScheduler
         opt Expired deals
             BlockchainSubsystem ->> SectorIndexerSubsystem: OnNewTipset(Chain, Epoch)
@@ -200,7 +187,7 @@ sequenceDiagram
         Note Right of MiningScheduler: Maintain FaultSet
         Note Right of MiningScheduler: Maintain DoneSet
     end
-    
+
     opt ClockSubsystem
         Note Right of ClockSubsystem: Process expired deals
     end
@@ -209,7 +196,7 @@ sequenceDiagram
         opt Declaration within a Proving Period
             StorageMinerSubsystem ->> StorageMinerActor: UpdateSectorStatus([FaultSet], SectorStateSets)
             StorageMinerActor ->> StoragePowerActor: RecomputeMinerPower()
-            Note SectorStateSets := (FaultSet, RecoverSet, ExpireSet)
+            Note Right of StorageMinerActor: SectorStateSets := (FaultSet, RecoverSet, ExpireSet)
         end
 
         opt Miner DID NOT win blocks this proving period -- deadline challenge
@@ -242,4 +229,3 @@ sequenceDiagram
             StoragePowerConsensusSubsystem -->- StorageMinerActor: UpdateBalance(Reward)
         end
     end
-{{% /mermaid %}}
