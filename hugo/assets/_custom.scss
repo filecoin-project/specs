@@ -117,3 +117,47 @@ h1.nocount:before, h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.n
   content : "";
   counter-increment : none;
 }
+
+// diagram
+
+.diagram {
+  text-align: center;
+}
+
+// header links
+
+h1:after, h2:after, h3:after, h4:after, h5:after, h6:after {
+  float:right;
+  content: "🔗";
+  opacity: 0.25;
+}
+
+h1:after, h2:after, h3:after, h4:after, h5:after, h6:after {
+  float:right;
+  content: "🔗";
+  opacity: 0.25;
+}
+
+h1:hover:after, h2:hover:after, h3:hover:after, h4:hover:after, h5:hover:after, h6:hover:after {
+  opacity: 1.0;
+  cursor: pointer;
+}
+
+
+
+.header-link {
+  position: absolute;
+  left: -0.5em;
+  opacity: 0;
+
+  transition: opacity 0.2s ease-in-out 0.1s;
+}
+
+h1:hover .header-link,
+h2:hover .header-link,
+h3:hover .header-link,
+h4:hover .header-link,
+h5:hover .header-link,
+h6:hover .header-link {
+  opacity: 1;
+}

@@ -1,4 +1,12 @@
 
+function onReady() {
+  onMenuDetailChange()
+  addHeaderLinks()
+}
+// lead this at the beginning to set the slider correctly
+window.addEventListener('DOMContentLoaded', onReady, false)
+
+
 function onMenuDetailChange(event) {
   var $slider = document.querySelector('#menu-detail-slider')
   var $label = document.querySelector('#menu-detail-slider-label')
@@ -23,5 +31,12 @@ function onMenuDetailChange(event) {
   }
 }
 
-// lead this at the beginning to set the slider correctly
-window.addEventListener('DOMContentLoaded', onMenuDetailChange, false)
+function addHeaderLinks() {
+  var $elems = document.querySelectorAll("h1, h2, h3, h4, h5, h6")
+  $elems.forEach(function(el) {
+    el.onclick = function() {
+      var id = el.getAttribute('id') || el.parentElement.getAttribute('id')
+      window.location.hash = id
+    }
+  })
+}
