@@ -1,0 +1,20 @@
+
+type Ticket struct {
+	VRFResult() filcrypto.VRFResult
+	VDFResult() filcrypto.VDFResult
+
+	// Generate(k VRFKeyPair, seed ElectionSeed) Ticket
+	ValidateSyntax() 	bool
+	Validate()			bool
+}
+
+type ElectionProof struct {
+	VRFResult() filcrypto.VRFResult
+	IsWinning(minerPower PowerFraction) bool	@(cached)
+
+	ValidateSyntax(ep &ElectionProof) bool
+}
+
+type ElectionSeed VDFResult
+
+type ChainWeight UVarint
