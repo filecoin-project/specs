@@ -1,3 +1,5 @@
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+
 type ErrInvalidBlock error
 type PubSubTopic struct {}
 

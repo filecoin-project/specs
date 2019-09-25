@@ -33,12 +33,12 @@ type SigKeyPair struct {
     PublicKey       SigPublicKey
     SecretKey       SigSecretKey      
 
-    Generate(input Bytes, type SigType)   Signature
+    Generate(input Bytes, _type SigType)   Signature
 }
 
 type Signature struct {
     Signature       Bytes               @(internal)
-    type            SigType             @(internal)
+    sigType         SigType             @(internal)
 
     Verify(pk SigPublicKey, input Bytes)   bool
 }

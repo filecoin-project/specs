@@ -1,10 +1,10 @@
-package blockchain 
+package blockchain
 
 func SmallerBytes(a, b Bytes) Bytes {
-    if CompareBytesStrict(a, b) > 0 {
-        return b
-    }
-    return a
+	if CompareBytesStrict(a, b) > 0 {
+		return b
+	}
+	return a
 }
 
 func ExtractElectionSeed(lookbackTipset *TipsetI) ElectionSeed {
@@ -22,15 +22,14 @@ func ExtractElectionSeed(lookbackTipset *TipsetI) ElectionSeed {
 	// 		if ret == nil {
 	// 			ret = currSeed
 	// 		} else {
-    //             ret = SmallerBytes(currSeed, ret)
-    //         }
+	//             ret = SmallerBytes(currSeed, ret)
+	//         }
 	// 	}
 	// }
 
 	// Assert(ret != nil)
 	// return ElectionSeed.FromBytesInternal(nil, ret)
 }
-
 
 // func GenerateElectionTicket(k VRFKeyPair, seed ElectionSeed) Ticket {
 // 	var vrfResult VRFResult = VRFEval(k, seed.ToBytesInternal())
@@ -47,64 +46,64 @@ func ExtractElectionSeed(lookbackTipset *TipsetI) ElectionSeed {
 // 	}
 // }
 
-func (self *Block) ValidateTickets() bool {
-	for _, tix := self.Tickets() {
+func (self *Block_I) ValidateTickets() bool {
+	for _, tix := range self.Tickets() {
 		panic("TODO")
 		// tix.Validate()
 	}
 }
 
-func (tix *Ticket) ValidateSyntax() bool {
+func (tix *Ticket_I) ValidateSyntax() bool {
 
+	return VRFResult.validateSyntax() &&
+		VDFResult.validateSyntax()
+
+}
+
+func (tix *Ticket_I) Validate(input Bytes, pk VRFPublicKey) bool {
+	return tix.VRFResult.Verify(input, pk) &&
+		tix.VDFResult.Verify(tix.VDFResult.GetOutput())
+}
+
+func (ep *ElectionProof_I) ValidateSyntax() bool {
 	return VRFResult.validateSyntax()
-		&& VDFResult.validateSyntax()
-
 }
 
-func (tix *Ticket) Validate(input Bytes, pk VRFPublicKey) bool {
-	return tix.VRFResult.Verify(input, pk)
-		&& tix.VDFResult.Verify(tix.VDFResult.GetOutput())
-}
-
-func (ep *ElectionProof) ValidateSyntax() bool {
-	return VRFResult.validateSyntax()
-}
-
-func (ep *ElectionProof) Validate(input Bytes, pk VRFPublicKey) bool {
+func (ep *ElectionProof_I) Validate(input Bytes, pk VRFPublicKey) bool {
 	return tix.VRFResult.Verify(input, pk)
 }
 
-func (ep *ElectionProof) IsWinning(power PowerFraction) bool {
+func (ep *ElectionProof_I) IsWinning(power PowerFraction) bool {
 	Panic("TODO")
 }
 
-func (ts *Tipset) ValidateSyntax() bool {
+func (ts *Tipset_I) ValidateSyntax() bool {
 
-    if !len(ts.Blocks) > 0 {
-        return false
-    }
+	if !len(ts.Blocks) > 0 {
+		return false
+	}
 
 	parents := ts.Parents()
 	grandparent := parents[0].Parents()
-    for i := 1; i < len(parents); i++ {
-        if grandparent != parents[i].Parents() {
-            return false
+	for i := 1; i < len(parents); i++ {
+		if grandparent != parents[i].Parents() {
+			return false
 		}
 	}
 
 	numTickets := len(ts.Blocks[0].Tickets())
-    for i := 1; i < len(ts.Blocks); i++ {
-        if numTickets != len(ts.Blocks[i].Tickets()) {
-            return false
+	for i := 1; i < len(ts.Blocks); i++ {
+		if numTickets != len(ts.Blocks[i].Tickets()) {
+			return false
 		}
 	}
 
 	return true
 }
 
-func (ts *Tipset) LatestTimestamp() {
+func (ts *Tipset_I) LatestTimestamp() {
 	var latest Time
-	for _, blk := ts.Blocks {
+	for _, blk := range ts.Blocks {
 		if blk.Timestamp().After(latest) || latest.IsZero() {
 			latest = blk.Timestamp()
 		}
@@ -112,7 +111,7 @@ func (ts *Tipset) LatestTimestamp() {
 	return latest
 }
 
-func (tipset *TipsetI) StateTree() StateTree {
+func (tipset *Tipset_I) StateTree() StateTree {
 	var currTree StateTree = nil
 	for _, block := range tipset.Blocks() {
 		if currTree == nil {
