@@ -4,25 +4,25 @@
 // and then call UpdateSignedStorageDeal on StorageProvider
 
 type StorageDealProposal struct {
-	PieceRef              CID
-	PieceSize             UInt
-	PiecePath             Path
-	Provider              Address
-	Client 				  Address
-	StartEpoch	          Epoch
-	ExpiryEpoch           Epoch
+  PieceRef         CID
+  PieceSize        UInt
+  PiecePath        Path
+  Provider         Address
+  Client           Address
+  StartEpoch       Epoch
+  ExpiryEpoch      Epoch
 }
 
 type SignedStorageDeal struct {
-	AckStorageDealProposal    AckStorageDealProposal
-	StorageFee                TokenAmount
-	ClientSignature           Signature
+  AckStorageDealProposal    AckStorageDealProposal
+  StorageFee                TokenAmount
+  ClientSignature           Signature
 }
 
 type AckStorageDealProposalError String
 type AckStorageDealProposalResponse union {
-	AckStorageDealProposalError
-	SignedStorageDeal
+  AckStorageDealProposalError
+  SignedStorageDeal
 }
 
 type StorageClient struct {

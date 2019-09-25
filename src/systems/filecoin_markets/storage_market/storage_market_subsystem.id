@@ -1,107 +1,51 @@
-/*
-type StorageDealID BigInt
+// Assumptions:
+//    - Deals are on Chain
+//    - Storage Payment is done on PoSt submission
+//    - Updatable Filecoin Storage Deals
 
-type StorageDeal struct {
-	ID StorageDealID
-	Provider Address
-	Client Address
-	StartTime	Epoch
-	Duration UVarint
-	StorageCollateral UVarint
-}
+// Miners can pledge and commit sectors and participate
+// in expected consensus to earn block rewards
+// However, block rewards earned are vested for a year
+// over an exponentially increasing schedule
+// meaning that miners can only withdraw all of their
+// block rewards from mining a particular block after a year
 
-type StorageProviderInfo struct {
-	Address Address
-	Balance BigInt
-	FreeCapacity BigInt
-	Collateral BigInt
-	BlackList [CID] // list of contents that providers reject
-}
+// The goals of the storage market subsystem are thus to
+// 1) facilitate deal addition to an existing sector
+// 2) update existing deal 
+
+// A clean separation of concern is also resulted
+// pledgeCollateral is now solely for consensus and pledging storage
+// storageDealCollateral is for each deal and up to the transacting parties
+// In the event that miners do not add deals to a sector,
+// full block rewards are earned after maintaining that sector for a year
 
 type StorageMarketSubsystem struct {
-	// need access to:
-	// - DataTransferSubsystem
-	//   - transfer data
-	// - BlockchainSubsystem
-	//   - needs access to StateTree
-	//     to verify storage capacity and pledge amount
-	//     and slash storage providers for storage faults
-	// 	 - needs access to access to MessagePool if deals on chain
-	// - NetworkSubsystem
-	//   - needs access to MessagePubsub
+  // need access to:
+  // - DataTransferSubsystem
+  //   - transfer data
+  // - BlockchainSubsystem
+  //   - needs access to StateTree
+  //     to verify storage capacity and pledge amount
+  //     and slash storage providers for storage faults
+  //    - needs access to access to MessagePool if deals on chain
+  // - NetworkSubsystem
+  //   - needs access to MessagePubsub
 
-	// Assumption: Market Making is off chain
-	// 			   Storage deals are on chain
-	ActiveDeals() {StorageDealID:StorageDeal}
+  // call by StorageProvider to publish a storaga deal on chain
+  PublishSignedStorageDeal(newSignedStorageDeal SignedStorageDeal) struct {}
 
-	// AddNewStorageDeal is called to add storage deal
-	// potentially a storage market actor is called
-	// to include the storage deal
-	AddNewStorageDeal(StorageDeal) bool
+  // call by StorageProvider to update signed storage deal for a sector
+  UpdateSignedStorageDeal(newSignedStorageDeal SignedStorageDeal) struct {}
 
-	// RemoveStorageDeal is called to remove storage deal
-	// from chain by calling the storage market actor
-	RemoveStorageDeal(StorageDealID) bool
+  // call by CronActor on ExpiredSet
+  CloseSignedStorageDeal(targetStorageDeal SignedStorageDeal)
 
-	// ExtendStorageDeal is called to extend the duration
-	// of a storage deal by depositing FIL tokens into a
-	// storage deal
-	ExtendStorageDeal(StorageDealID, TokenAmount) bool
+  // call by CronActor on FaultSet
+  SlashStorageDealCollateral(targetStorageDeal SignedStorageDeal) struct {}
 
-	// VerifyStorageProvider is called to retrieve information
-	// about a storage provider as verified by the blockchain
-	VerifyStorageProvider(Address) StorageProviderInfo
-
-	// SlashStorageProvider is called to slash a provider
-	// for violating a storage deal
-	SlashStorageProvider(StorageDealID) bool
-
-
-
-	// Assumption: Market Making is on chain
-	type Price UVarint
-	// this can be potentially changed to an enum
-	type StorageQuality struct {
-		BlackList [CID]
-		Availability BigInt // integer representation of percentage
-		RetrievalTime BigInt // denoted in milliseconds
-	}
-
-	type UnitStorageCommodity struct {
-		// for example, 1TB/hour of highly available data
-		UnitSize UVarint // should be made a constant
-		UnitDuration UVarint // should be made a constant
-		Quality StorageQuality
-	}
-
-	// type StorageCommodity struct {
-	// 	Quantity UVarint
-	// 	Storage UnitStorageCommodity
-	// }
-
-	type MarketSide union {
-		| Bid
-		| Ask
-	}
-
-	type StorageMarketOrder struct {
-		Side MarketSide
-		Price BigInt
-		Quantity BigInt
-	}
-
-	type StorageMarketOrderBook struct {
-		Grade UnitStorageCommodity
-		Bids PQueue(StorageMarketOrder)
-		Asks PQueue(StorageMarketOrder)
-	}
-
-	StorageMarkets() {UnitStorageCommodity:StorageMarketOrderBook}
-	GetStorageMarketForCommodity(UnitStorageCommodity) StorageMarketOrderBook
-
-	// for simplicity, no distinction between limit and market orders
-	AddBid(UnitStorageCommodity, StorageMarketOrder)
-	AddAsk(UnitStorageCommodity, StorageMarketOrder)
+  // VerifyStorageProvider is called to retrieve information
+  // about a storage provider as verified by the blockchain
+  VerifyStorageProvider(ProviderAddress Address) StorageProvider
 
 }
-*/
