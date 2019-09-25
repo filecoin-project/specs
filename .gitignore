@@ -8,3 +8,5 @@ hugo/content/docs
 hugo/content/codeGen/main
 .DS_Store
 *.gen.go
+*.mmd.svg
+*.dot.svg
