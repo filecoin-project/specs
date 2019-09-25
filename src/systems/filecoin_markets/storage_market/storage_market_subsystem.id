@@ -39,7 +39,7 @@ type StorageMarketSubsystem struct {
   UpdateSignedStorageDeal(newSignedStorageDeal SignedStorageDeal) struct {}
 
   // call by CronActor on ExpiredSet
-  CloseSignedStorageDeal(targetStorageDeal SignedStorageDeal)
+  CloseSignedStorageDeal(targetStorageDeal SignedStorageDeal) struct {}
 
   // call by CronActor on FaultSet
   SlashStorageDealCollateral(targetStorageDeal SignedStorageDeal) struct {}
