@@ -1,8 +1,8 @@
 package util
 
 import (
-	"unsafe"
 	"log"
+	"unsafe"
 )
 
 // TODO: finish
@@ -16,8 +16,8 @@ type BigInt struct {
 type Word = int
 
 // Check that sizeof(Word) == 8 (we only support 64-bit builds for now)
-type _UnusedCompileAssert1 = [unsafe.Sizeof(Word(0))-8]byte
-type _UnusedCompileAssert2 = [8-unsafe.Sizeof(Word(0))]byte
+type _UnusedCompileAssert1 = [unsafe.Sizeof(Word(0)) - 8]byte
+type _UnusedCompileAssert2 = [8 - unsafe.Sizeof(Word(0))]byte
 
 type UVarint = uint64
 type Varint = int64
@@ -48,6 +48,7 @@ func HashBlake2bInternal(x []byte) []byte {
 }
 
 type Timestamp UVarint
+
 func CurrentTime() Timestamp {
 	panic("TODO")
 }
