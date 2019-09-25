@@ -1,0 +1,3 @@
+
+type PoStChallenge Bytes
+type SealSeed     Bytes

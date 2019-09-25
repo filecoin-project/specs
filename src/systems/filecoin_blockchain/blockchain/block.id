@@ -1,19 +1,20 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
 import clock 	 "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+import base 	 "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 type Block struct {
-	MinerAddress()               stateTree.Address
-	Tickets()                    [Ticket]
-	ParentTipset()               Tipset
-	ParentWeight()               BlockWeight
-	Height()                     Word
-	StateTree()                  stateTree.StateTree
-	Messages()                   [Message]
-//	BLSAggregate()               Signature
- 	MessageReceipts()            [MessageReceipt]
-	Timestamp()                  clock.Time
-	BlockSig()                   Signature
+	MinerAddress	             base.Address
+	Tickets	  	                 [base.Ticket]
+	ParentTipset  	  	         Tipset
+	ParentWeight		         base.ChainWeight
+	Height	                     base.ChainHeight
+	StateTree	                 stateTree.StateTree
+	Messages	                 [base.Message]
+//	BLSAggregate 	             filcrypto.Signature
+ 	MessageReceipts		         [base.MessageReceipt]
+	Timestamp	                 clock.Time
+	BlockSig 	                 filcrypto.Signature
 
 //	SerializeSigned()            []byte
 //	ComputeUnsignedFingerprint() []
@@ -21,16 +22,29 @@ type Block struct {
 	VerifyTickets()				bool
 }
 
+type SignedBlock struct {
+	block 			&Block
+	sig				filcrypto.Signature
+}
+
 type Tipset struct {
-	Blocks            [Block]
+	Blocks            	[Block]
 
-    Has(block Block)  bool			 			@(cached)
-    Parents()         Tipset      		   		@(cached)
+    Has(block Block)  	bool			 		@(cached)
+    Parents         	Tipset      		   	@(cached)
 	// StateTree should live in VM
-	StateTree()       stateTree.StateTree      	@(cached)
-    Epoch()           Epoch          			@(cached)
-    Weight()          ChainWeight    			@(cached)
+	StateTree       	stateTree.StateTree     @(cached)
+    Epoch           	Epoch          			@(cached)
+    Weight          	base.ChainWeight    	@(cached)
 
-	ValidateSyntax()			 	bool		@(cached)
-	LatestTimestamp()				clock.Time	@(cached)
+	ValidateSyntax()	bool					@(cached)
+	LatestTimestamp()	clock.Time				@(cached)
+}
+
+type Chain struct {
+    HeadEpoch() Epoch
+    FinalizedEpoch() Epoch
+    LatestCheckpoint() Epoch
+
+    TipsetAtEpoch(epoch Epoch) Tipset
 }

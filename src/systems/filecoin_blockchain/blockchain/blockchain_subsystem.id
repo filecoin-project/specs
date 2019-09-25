@@ -1,18 +1,21 @@
+import clock 	 "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
+
 type Epoch UVarint
 type SectorID struct {}
 type Randomness struct {}
 
 type BlockchainSubsystem struct @(mutable) {
-    Clock           WallClock
-    SPCSubsystem    StoragePowerConsensusSubsystem
+    Clock           &clock.WallClock
 
     LatestEpoch()   Epoch
     BestChain()     Chain
     CandidateChains() [Chain]
 
     // // Receiving blocks and tipset
-    NewTipsets()    TipsetChan
-    NewBestTipset() TipsetChan
+    // should be channels
+    NewTipsets()    struct {}
+    NewBestTipset() struct {}
 
     // validateBlockSemantics(Block)
     SyncState() union {
@@ -22,7 +25,7 @@ type BlockchainSubsystem struct @(mutable) {
     }
 
     // time of round cutoff time for accepting new blocks
-    epochCutoffTime() Timestamp
+    epochCutoffTime() clock.Time
 
     // call by StorageClient in StorageDealMake
     VerifySectorExists(sectorId SectorID) bool
@@ -36,7 +39,7 @@ type BlockchainSubsystem struct @(mutable) {
     // call by BlockchainSubsystem itself in BlockProduction
     // apply messages in the parent tipset to the StateTree
     // and verify state root
-    TryGenerateStateTree(block Block) union { StateTree, Error }
+    TryGenerateStateTree(block Block) stateTree.StateTree
 
     // call by clock in BlockReception after Round Cutoff
     // TODO define clock here

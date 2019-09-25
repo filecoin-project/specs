@@ -2,6 +2,7 @@ type VRFPublicKey Bytes
 type VRFSecretKey Bytes
 type SigPublicKey Bytes
 type SigSecretKey Bytes
+type PubKey Bytes
 
 type VRFKeyPair struct {
 	PublicKey    VRFPublicKey
@@ -14,7 +15,6 @@ type VRFResult struct {
 	Output    Bytes    @(internal)
     Proof     Bytes    @(internal)
 
-    GetOutput() Bytes
 	Verify(input Bytes, pk VRFPublicKey)    bool
     ValidateSyntax()    bool
 }

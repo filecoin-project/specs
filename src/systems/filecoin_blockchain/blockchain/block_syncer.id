@@ -1,3 +1,5 @@
+import base 	 "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+
 type ErrInvalidBlock error
 type PubSubTopic struct {}
 
@@ -8,7 +10,7 @@ type BlockSyncer struct {
     // fork from Block.Parents, but do not include Block.
     LatestCheckpoint        &Block
 
-    blockchainSubsystem     &blockchainSubsystem
+    blockchainSubsystem     &BlockchainSubsystem
 
     validationGraph         BlockValidationGraph
     validateBlockSyntax()   bool
@@ -26,18 +28,17 @@ type BlockSyncer struct {
 
 }
 
-    /*
 type BlockValidationGraph struct {
 
     // ValidatedBlocks contains all the blocks we have validated.
     // This means all the blocks connected into the main blockchain.
-    ValidatedBlocks BlockStore
+    ValidatedBlocks SubchainQueue
 
     // ValidationFringe is the set of unvalidated partial chains fully connected
     // to the validated blockchain. These are ready to be validated, and
     // ordered by total ChainWeight. Their ancestors are all in either the
     // ValidationFringe or in the ValidatedBlocks
-    ValidationFringe SubchainOrganizer
+    ValidationFringe SubchainQueue
 
     // UnconnectedBlocks is the set of disconnected blocks, which
     // may or may not connect back to the growing blockchain. This set
@@ -45,38 +46,35 @@ type BlockValidationGraph struct {
     // blocks.
     UnconnectedBlocks AncestryGraph
 
-    ConsiderBlock(Block) error
+    ConsiderBlock(block Block) error
 }
-
-////////////////////
-// Implementation //
-////////////////////
-/*
 
 // SubchainQueue keeps track of a set of blocks, organized into tipsets,
 // and with a set of tipsets tracked and sorted by a function
 type SubchainQueue struct {
     // Chains keeps subchains sorted to validate by chain weight
-    Chains PQueue<Subchain>
+    Chains                          [Subchain]
+    // Chains PQueue<Subchain>
 
     // ChainMembership provides efficient access from any block to the
     // Subchain in question
-    ChainMembership {Block:Subchain}
+    ChainMembership                 {Block:Subchain}
 
-    HasTipset(Block) // todo
-    AddBlock(Block) // todo (recalc weights)
-    RemoveTipset(Tipset)
+    HasTipset(block Block)          bool
+    AddBlock(block Block)           struct {}
+    RemoveTipset(tipset Tipset)     struct {}
 }
 
 type AncestryGraph struct {
-    Parents {Block:Tipset}
-    Children {Block:[Block]}
+    Parents                         {Block:Tipset}
+    Children                        {Block:[Block]}
+    AddBlock(block Block)           struct {}
 }
 
 type Subchain struct {
     Head    Tipset
     Tail    Tipset
-    Weight  ChainWeight
+    Weight  base.ChainWeight
     Tipsets {Block:Tipset}
 }
 
@@ -84,10 +82,5 @@ type BlockPubSub struct {}
 
 type BlockPropagator struct {
 
-    PropagateBlock(SignedBlock)
+    PropagateBlock(signedBlock SignedBlock)     struct {}
 }
-
-func (b *BlockPropagator) PropagateBlock(block SignedBlock) {
-    NetworkBroadcast(BlockPubSub, block)
-}
-*/

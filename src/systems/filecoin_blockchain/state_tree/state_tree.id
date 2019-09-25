@@ -1,3 +1,5 @@
+import base 	 "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+
 type ActorName union {
 	StoragePowerActor
 	StorageMarketActor
@@ -9,8 +11,8 @@ type ActorName union {
 }
 
 type StateTree struct {
-    SystemActors {ActorName:Address}
-    ActorStates {Address:ActorState}
+    SystemActors {ActorName:base.Address}
+    ActorStates {base.Address:ActorState}
 
     // TODO: API ConvenienceAPI
 }
@@ -46,22 +48,7 @@ type ActorState struct {
 
 type ActorSubState union {
 	Init struct {
-		AddressMap    {Address:ActorID}
+		AddressMap    {base.Address:ActorID}
 		NextID        ActorID
 	}
-}
-
-type Address struct {
- 	NetworkID union {
- 		Testnet
- 		Mainnet
- 	}
- 	Protocol union {
- 		ID
- 		Secp256k1
- 		Actor
- 		BLS
-     }
-
-    VerifySyntax(addrType Address_Protocol) bool
 }
