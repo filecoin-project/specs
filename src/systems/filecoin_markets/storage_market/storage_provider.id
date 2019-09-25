@@ -1,9 +1,58 @@
-type StorageDealProposal struct{}
-type StorageDealResponse struct{}
-type StorageDealQuery struct{}
+// StorageClient sends a StorageDealProposal to StorageProvider
+// StorageProvider generates a PieceInclusionProof of the PieceRef
+// and sends back an AckStorageDealProposal with a miner Signature
+// and a StorageDealCollateralAmount
+// Note that StorageProvider can call a different StorageMiner to add this deal
+// StorageClient commits Filecoin token to the deal
+// and includes a client signature
+// Miner then either seal the deal in a new sector
+// or update an existing sector with this storage deal
+// Note that deal negotiation should happen off chain
+// and the following protocol describes steps to add deals on chain
+
+type StorageDealID struct {}
+
+type AckStorageDealProposal struct {
+	DealID     		      StorageDealID // should be returned by StorageMarketActor
+	Proposal              StorageDealProposal
+	StorageDealCollateral TokenAmount
+	ProviderSignature     Signature
+	SectorID              SectorID
+	PieceInclusionProof   PieceInclusionProof
+}
+
+type SealedStorageDeal struct {
+	SealOutput        SealOutputArtifact // unclear
+	SignedStorageDeal SignedStorageDeal
+}
+
+type StorageDealQuery struct {
+	DealID StorageDealID
+}
+
+type StorageDealStatus union {
+	AckStorageDealProposal
+	SignedStorageDeal
+	SealedStorageDeal
+}
 
 type StorageProvider struct {
-	ProposeStorageDeal(proposal StorageDealProposal) StorageDealResponse
-	QueryStorageDealStatus(query StorageDealQuery) StorageDealResponse
-	NotifyStorageDealStaged(deal StorageDeal, pieceRef CID, pip PieceInclusionProof, sectorID SectorID) struct{}
+	ProviderAddress   Address
+	Balance           BigInt
+	// FreeCapacity BigInt
+	// Collateral BigInt
+	// Sectors   [Sector]
+	BlackList [CID] // list of contents that providers reject
+
+	// call StorageMiningSubsystem to generate PIP, SectorID, and PIP
+	NewStorageDealProposal(proposal StorageDealProposal) AckStorageDealProposal
+
+	// call StorageMiningSubsystem to either add new sector and start sealing
+	// or update a deal in a sector on chain
+	UpdateSignedStorageDeal(newSignedStorageDeal SignedStorageDeal) bool
+
+	// call by client to query the status of their files
+	NewStorageDealQuery(query StorageDealQuery) StorageDealStatus
+
+	// NotifyStorageDealStaged(deal StorageDeal, pieceRef CID, pip PieceInclusionProof, sectorID SectorID) struct{}
 }

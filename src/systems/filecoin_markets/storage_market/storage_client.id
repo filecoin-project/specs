@@ -1,5 +1,44 @@
+// StorageClient calls NewStorageDealProposal on StorageProvider
+// to submit a new StorageDealProposal
+// Upon receiving AckStorageDealProposal, StorageClient calls SignStorageDeal
+// and then call UpdateSignedStorageDeal on StorageProvider
+
+type StorageDealProposal struct {
+	PieceRef              CID
+	PieceSize             UInt
+	PiecePath             Path
+	Provider              Address
+	Client 				  Address
+	StartEpoch	          Epoch
+	ExpiryEpoch           Epoch
+}
+
+type SignedStorageDeal struct {
+	AckStorageDealProposal    AckStorageDealProposal
+	StorageFee                TokenAmount
+	ClientSignature           Signature
+}
+
+type AckStorageDealProposalError String
+type AckStorageDealProposalResponse union {
+	AckStorageDealProposalError
+	SignedStorageDeal
+}
+
 type StorageClient struct {
-    RequestVouchersApproval(deal StorageDeal, vouchers [Voucher]) VouchersApprovalResponse
+    // RequestVouchersApproval(deal StorageDeal, vouchers [Voucher]) VouchersApprovalResponse
+    // ApproveVouchers(vouchers [Voucher]) VouchersApprovalResponse
+
+    // call by StorageProvider when StorageDealProposal is acked
+    // and a PieceInclusionProof is contained in AckStorageDealProposal
+    // call VerifyPIP and SignAckStorageDealProposal
+    NotifyOfAckStorageDealProposal(ackStorageDealProposal AckStorageDealProposal) struct {}
+
     VerifyPIP(sectorID SectorID, pip PieceInclusionProof) bool
-    ApproveVouchers(vouchers [Voucher]) VouchersApprovalResponse
+
+    SignAckStorageDealProposal(ackStorageDealProposal AckStorageDealProposal) SignedStorageDeal
+
+    // call by StorageProvider when a deal is sealed or added to a sector
+    NotifyOfSealedStorageDeal(sealedStorageDeal SealedStorageDeal) struct {}
+
 }
