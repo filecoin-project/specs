@@ -128,6 +128,29 @@ digraph Filecoin {
       }
 
     }
+  }
+
+  subgraph cluster_filesdata {
+    color=lavender
+    style=filled
+
+    subgraph cluster_pieces {
+      style=filled
+      color=lightgrey
+      label = "Data Transfers"
+
+      { // components
+        node [shape=box]
+        "Data Transfers"
+        "Data Transfers Scheduler"
+      }
+      // "Disks" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
+
+      { // libp2p protocols
+        node [shape=Msquare]
+        "AuthSwap" [label="data\ntransfer\nprotocol\n(unnamed)"]
+      }
+    }
 
     subgraph cluster_datatransfers {
       style=filled
@@ -146,6 +169,24 @@ digraph Filecoin {
         "AuthSwap" [label="data\ntransfer\nprotocol\n(unnamed)"]
       }
     }
+
+
+    subgraph cluster_files {
+      style=filled
+      color=lightgrey
+      label = "Local File Storage"
+
+      { // components
+        node [shape=box]
+        "FileStore"
+        "PieceStore"
+      }
+
+      "Disk2" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
+
+      PieceStore -> FileStore -> Disk2
+    }
+
   }
 
   subgraph cluster_storageminerprocess {
@@ -178,7 +219,7 @@ digraph Filecoin {
         "Sector Store"
         "Sector Builder"
       }
-      
+
       // "Sector Store"
       // "Sector Builder"
     }
@@ -263,7 +304,7 @@ digraph Filecoin {
   subgraph cluster_net {
     color=lightcyan1
     style=filled
-    
+
     subgraph cluster_clock {
       style=filled
       color=lightgrey
@@ -350,14 +391,6 @@ digraph Filecoin {
   "Message Syncer" -> "Filecoin Network Node" [style=invis]
   "Filecoin Network Node" -> "Gossipsub" [style=invis]
 
-
-  subgraph cluster_libp2p {
-    style=filled
-    color=lightgrey
-    label = "File Storage"
-    "Disk2" [shape=cylinder, label="Data Storage System\n(Disks, etc)"]
-  }
-
   // cross module links
   {
     edge [minlen=3]
@@ -382,8 +415,8 @@ digraph Filecoin {
     "Block Producer" -> "Message Storage" [lhead=cluster_messagepool]
     "Pledge Prover" -> "ZigZag-Porep" [ltail=cluster_filproofs_subsystem, lhead=cluster_filproofs_lib]
     "Wallet" -> "KeyStore"
-    "Data Transfers" -> "Disk2"
-    "Sector Store" -> "Disk2"
+    "Data Transfers" -> "PieceStore"
+    "Sector Store" -> "PieceStore"
     // "Block Producer" -> "PoSt Generator" [style=dashed]
   }
 }
