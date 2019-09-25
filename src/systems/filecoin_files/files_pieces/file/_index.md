@@ -1,7 +1,7 @@
 ---
 title: File
 entries:
-- store
+- filestore
 ---
 
 {{< readfile file="file.id" code="true" lang="go" >}}

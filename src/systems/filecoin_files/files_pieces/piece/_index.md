@@ -1,6 +1,8 @@
 ---
 menuTitle: Piece
 title: Piece - a part of a file
+entries:
+- piece_store
 ---
 
 

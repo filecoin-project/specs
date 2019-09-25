@@ -1,5 +1,5 @@
 
-type CID Bytes
+type CID util.BytesKey // TODO: remove util.
 
 // imported as ipld.Object
 type Object struct {

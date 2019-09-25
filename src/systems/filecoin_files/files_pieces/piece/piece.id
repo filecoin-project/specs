@@ -6,7 +6,11 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 type PieceID ipld.CID
 
 // Piece represents the basic unit of tradeable data in Filecoin. Clients
-// break files and data up into Pieces, and hire Miners to store them.
+// break files and data up into Pieces, maybe apply some transformations,
+// and then hire Miners to store the Pieces.
+//
+// The kinds of transformations that may ocurr include erasure coding,
+// encryption, and more.
 //
 // Note: pieces are well formed.
 type Piece struct {

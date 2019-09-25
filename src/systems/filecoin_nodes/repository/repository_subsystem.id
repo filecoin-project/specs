@@ -13,4 +13,3 @@ type Repository struct {
   GetKeyStore() key.Store
   GetConfig() config.Config
 }
-

@@ -24,6 +24,7 @@ type Varint = int64
 type UInt = uint64
 type Float = float64
 type Bytes = []byte
+type BytesKey = string // to use Bytes in map keys.
 type String = string
 
 func Assert(b bool) {

@@ -2,8 +2,9 @@
 menuTitle: 📑 Files & Data
 title: Files & Data
 entries:
-- file
-- piece
+- files_pieces
+# - error_correction # TODO
+- data_transfer
 ---
 
 Filecoin's primary aim is to store client's Files and Data.
