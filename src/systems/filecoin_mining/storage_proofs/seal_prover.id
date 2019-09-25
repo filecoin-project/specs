@@ -25,7 +25,7 @@ type FilecoinSNARKProof struct {} //<bls12-381, Groth16>
 
 type SealProof struct {
      snarkProof      SNARKProof,
-     susbsectorCount Uvarint,
+     susbsectorCount UVarint,
 }
 
 type SealProver struct {

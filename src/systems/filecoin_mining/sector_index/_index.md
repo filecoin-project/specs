@@ -2,7 +2,7 @@
 title: Sector Index
 entries:
 - sector
-- sector_base
+- sector_index
 - sector_builder
 - sector_store
 ---

@@ -2,9 +2,10 @@
 menuTitle: ⛏ **Storage Mining**
 title: "Storage Mining System - proving storage for producing blocks"
 entries:
-- storage_mining
+- sector
 - sector_index
 - storage_proofs
+- storage_mining
 ---
 
 The Storage Mining System is the part of the Filecoin Protocol that deals with storing Client's
