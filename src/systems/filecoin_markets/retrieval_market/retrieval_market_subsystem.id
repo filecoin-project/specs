@@ -1,55 +1,51 @@
-/*
-type RetrievalDeal struct {
-	File CID
-	CounterParty Address
-	MinPrice TokenAmount
+type FileAvailable struct {
+  MinPrice TokenAmount
+  Miner Address
 }
 
-type RetrievalDealResponse union {
-	| DealAccepted
-	| DealRejected
-	| DealError
+type RetrievalDealProposal struct {
+  File CID
+  Payment  PaymentChannelInfo
+  MinPrice TokenAmount
 }
 
-type DealAccepted struct {
-	CounterParty Address
-	Payment PaymentChannelInfo
+type RetrievalDealProposalResponse union {
+  DealAccepted
+  DealRejected
+  DealError
 }
 
 type RetrievalQuery struct {
-	File CID
+  File CID
 }
 
 type RetrievalQueryResponse union {
-	| FileAvailable
-	| FileUnavailable
+  FileAvailable
+  FileUnavailable
 }
 
-type FileAvailable struct {
-	MinPrice TokenAmount
-	Miner Address
+type FileAvailable struct {}
+type FileUnavailable struct {}
+type DealRejected struct {}
+type DealAccepted struct {
+  CounterParty Address
+  Payment PaymentChannelInfo
 }
 
 type RetrievalMarketSubsystem struct {
-	// need access to:
-	// - DataTransferSubsystem
-	//   - transfer data
-	// - BlockchainSubsystem?
-	//   - verify data stored on chain?
-	// - NetworkSubsystem
-	// 	 - needs access to pubsub
+  // need access to:
+  // - DataTransferSubsystem
+  //   - transfer data
+  // - BlockchainSubsystem?
+  //   - verify data stored on chain?
+  // - NetworkSubsystem
+  //    - needs access to pubsub
 
-	// SubmitRetrievalQuery is call by users
-	// to query miners who have the file
-	SubmitRetrievalQuery(CID) RetrievalQueryResponse
+  // NewRetrievalDealProposal is called to propose a retrieval
+  NewRetrievalDealProposal(proposal RetrievalDealProposal) RetrievalDealProposalResponse
 
-	// ProposeRetrievalDeal is called by both users and miners
-	// to propose a retrieval deal
-	ProposeRetrievalDeal(RetrievalDeal) RetrievalDealResponse
+  NewRetrievalQuery(query RetrievalQuery) RetrievalQueryResponse
 
-	// AcceptRetrievalDeal is called by both users and miners
-	// to accept a retrieval deal
-	AcceptRetrievalDeal(RetrievalDeal) RetrievalDealResponse
-
+  // AcceptRetrievalDeal is called to accept a retrieval deal
+  AcceptRetrievalDealProposal(deal RetrievalDealProposal) RetrievalDealProposalResponse
 }
-*/
