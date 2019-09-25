@@ -1,0 +1,16 @@
+{
+  "name": "filecoin-spec-deps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "mermaid.cli": "^0.5.1",
+    "phantomjs-prebuilt": "^2.1.16"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

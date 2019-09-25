@@ -49,10 +49,10 @@ main() {
 
   # npm deps
   # we don't use package.json in spec yet. we may not.
+  echo "> installing npm deps"
   cwd=$(pwd)
   cd deps
-  npm_install phantomjs-prebuilt
-  npm_install mermaid.cli
+  npm install || die "npm install failed"
   cd "$cwd"
 }
 main

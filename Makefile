@@ -71,6 +71,7 @@ clean-deps: .PHONY
 	@echo "WARNING: this does not uninstall global packages, sorry."
 	@echo "         If you would like to remove them, see bin/install-deps.sh"
 	-rm -r deps
+	-git checkout ./deps/package.json
 	-rm -r .slime
 	-rm -r bin/.emacs
 
