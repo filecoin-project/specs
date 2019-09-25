@@ -54,9 +54,7 @@ type StackedDRGAlgorithm struct{}
 type StackedDRG struct {
   Layers            StackedDRGLayers
   NodeSize          StackedDRGNodeSize
-  Algorithm         struct {
-
-  }
+  Algorithm         struct {}
   DRGCfg            DRGCfg
   ExpanderGraphCfg  ExpanderGraphCfg
   // invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize

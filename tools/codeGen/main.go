@@ -1,38 +1,82 @@
 package main
 
 import (
+	"fmt"
 	"flag"
-	codeGen "github.com/filecoin-project/specs/codeGen/codeGen"
-	util "github.com/filecoin-project/specs/codeGen/util"
 	"os"
 	"strings"
+	codeGen "github.com/filecoin-project/specs/codeGen/codeGen"
+	util "github.com/filecoin-project/specs/codeGen/util"
 )
+
+var Assert = util.Assert
+var CheckErr = util.CheckErr
 
 func replaceExt(filePath string, srcExt string, dstExt string) string {
 	n := len(filePath)
-	util.Assert(n >= len(srcExt))
-	util.Assert(filePath[n-len(srcExt):] == srcExt)
+	Assert(n >= len(srcExt))
+	Assert(filePath[n-len(srcExt):] == srcExt)
 	return filePath[:n-len(srcExt)] + dstExt
 }
 
 func main() {
 	flag.Parse()
-	args := flag.Args()
-	util.Assert(len(args) == 2)
+	argsOrig := flag.Args()
+	Assert(len(argsOrig) > 1)
+	cmd := argsOrig[0]
+	args := argsOrig[1:]
 
-	inputFilePath := args[0]
-	outputFilePath := args[1]
+	var inputFilePath, outputFilePath string
+	var inputFile, outputFile *os.File
+	var err error
 
-	inputFilePathTokens := strings.Split(inputFilePath, "/")
-	util.Assert(len(inputFilePathTokens) >= 2)
-	packageName := inputFilePathTokens[len(inputFilePathTokens)-2]
+	if cmd == "gen" || cmd == "fmt" || cmd == "sym" {
+		inputFilePath = args[0]
+		inputFile, err = os.Open(inputFilePath)
+		CheckErr(err)
 
-	// fmt.Printf(" ===== Parsing: %v\n\n", filePath)
-	inputFile, err := os.Open(inputFilePath)
-	util.CheckErr(err)
-	goMod := codeGen.GenGoModFromFile(inputFile, packageName)
+		if cmd == "gen" || cmd == "fmt" {
+			Assert(len(args) == 2)
+			outputFilePath = args[1]
+			outputFile, err = os.Create(outputFilePath)
+			CheckErr(err)
+		}
+	}
 
-	outputFile, err := os.Create(outputFilePath)
-	util.CheckErr(err)
-	codeGen.WriteGoMod(goMod, outputFile)
+	switch cmd {
+	case "gen":
+		inputFilePathTokens := strings.Split(inputFilePath, "/")
+		Assert(len(inputFilePathTokens) >= 2)
+		packageName := inputFilePathTokens[len(inputFilePathTokens)-2]
+		goMod := codeGen.GenGoModFromFile(inputFile, packageName)
+		codeGen.WriteGoMod(goMod, outputFile)
+
+	case "fmt":
+		mod := codeGen.ParseDSLModuleFromFile(inputFile)
+		codeGen.WriteDSLModule(outputFile, mod)
+
+	case "sym":
+		Assert(len(args) >= 2)
+		mod := codeGen.ParseDSLModuleFromFile(inputFile)
+		decls := mod.Decls()
+		declsMap := map[string]codeGen.Decl{}
+		for _, decl := range decls {
+			declsMap[decl.Name()] = decl
+		}
+		declsPrint := []codeGen.Entry{}
+		for i, sym := range(args[1:]) {
+			if i > 0 {
+				declsPrint = append(declsPrint, codeGen.EntryEmpty())
+			}
+			decl, ok := declsMap[sym]
+			if !ok {
+				panic(fmt.Sprintf("Error: symbol not found: %v\n", sym))
+			}
+			declsPrint = append(declsPrint, codeGen.EntryDecl(decl))
+		}
+		codeGen.WriteDSLBlockEntries(os.Stdout, declsPrint, codeGen.WriteDSLContextInit())
+
+	default:
+		Assert(false)
+	}
 }
