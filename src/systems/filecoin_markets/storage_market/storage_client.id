@@ -19,7 +19,7 @@ type SignedStorageDeal struct {
   ClientSignature           Signature
 }
 
-type AckStorageDealProposalError String
+type AckStorageDealProposalError struct {}
 type AckStorageDealProposalResponse union {
   AckStorageDealProposalError
   SignedStorageDeal

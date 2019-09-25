@@ -1,3 +1,7 @@
+type TokenAmount struct {}
+type Address struct {}
+type PaymentChannelInfo struct {}
+
 type FileAvailable struct {
   MinPrice TokenAmount
   Miner Address
@@ -36,8 +40,8 @@ type RetrievalMarketSubsystem struct {
   // need access to:
   // - DataTransferSubsystem
   //   - transfer data
-  // - BlockchainSubsystem?
-  //   - verify data stored on chain?
+  // - BlockchainSubsystem
+  //   - verify data stored on chain
   // - NetworkSubsystem
   //    - needs access to pubsub
 
