@@ -35,6 +35,7 @@ help:
 	@echo "	make hugo-build  run the hugo part of the pipeline"
 	@echo "	make gen-code    generate code artifacts (eg id -> go)"
 	@echo "	make build-code  build all src go code (test it)"
+	@echo "	make diagrams    build diagram artifacts ({dot, mmd} -> svg)"
 	@echo "	make org2md      run org mode to markdown compilation"
 	@echo "	make go-test     run test cases in code artifacts"
 	@echo ""
@@ -43,7 +44,7 @@ help:
 	@echo "	make serve       start hugo in serving mode -- must run make build on changes manually"
 
 # main Targets
-build: build-code website
+build: diagrams build-code website
 
 deps: submodules
 	bin/install-deps.sh
@@ -74,13 +75,13 @@ clean-deps: .PHONY
 	-rm -r bin/.emacs
 
 # intermediate targets
-website: org2md hugo-build
+website: diagrams org2md hugo-build
 	mkdir -p build/website
 	-rm -rf build/website/*
 	mv hugo/public/* build/website
 	@echo TODO: add generate-code to this target
 
-pdf: org2md hugo-build
+pdf: diagrams org2md hugo-build
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
@@ -176,3 +177,19 @@ test-code: build-code
 	# testing should have the side effect that all go is compiled
 	cd tools/codeGen && go build && go test ./...
 	cd build/code && go build && go test ./...
+
+## diagrams
+
+DOTs=$(shell find src -name '*.dot')
+MMDs=$(shell find src -name '*.mmd')
+SVGs=$(DOTs:%=%.svg) $(MMDs:%=%.svg)
+
+diagrams: ${SVGs}
+
+%.dot.svg: %.dot
+	@which dot >/dev/null || echo "requires dot (graphviz) -- run make deps" && exit
+	dot -Tsvg $< >$@
+
+%.mmd.svg: %.mmd
+	@which dot >/dev/null || echo "requires mmdc -- run make deps" && exit
+	deps/node_modules/.bin/mmdc -i $< -o $@

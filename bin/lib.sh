@@ -56,6 +56,10 @@ tryinstall() {
   prun "$pkgmgr" install "$2"
 }
 
+npm_install() {
+  npm install "$1" || die "npm install phantomjs failed"
+}
+
 get_user_confirmation() {
   while : ; do
     read -p "Continue (y/n)? " choice

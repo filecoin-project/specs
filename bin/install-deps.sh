@@ -33,15 +33,26 @@ main() {
   tryinstall hugo hugo
   tryinstall dot graphviz
   tryinstall rsync rsync
+  tryinstall node node
 
   # other packages
   require_version "$(emacs -version)" emacs 26.3 "recommended install from you package manager"
   require_version "$(go version)" go 1.12 "recommended install from https://golang.org/dl/"
+  require_version "$(node --version)" node 10.10 "recommended install from https://nodejs.org/en/"
+  require_version "$(npm --version)" npm 5.0 "recommended install from https://nodejs.org/en/"
 
   # git repos
   prun git submodule update --init --recursive
 
   # orient
   prun bin/install-deps-orient.sh -y
+
+  # npm deps
+  # we don't use package.json in spec yet. we may not.
+  cwd=$(pwd)
+  cd deps
+  npm_install phantomjs-prebuilt
+  npm_install mermaid.cli
+  cd "$cwd"
 }
 main
