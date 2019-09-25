@@ -1,11 +1,11 @@
 type DataTransferSubsystem struct @(mutable) {
 	dataTransfers {UInt: DataTransferChannel}
-	volumes				[Storage]
+	volumes       [Storage]
 
 	OpenDataTransferChannel(x StorageDealID) UInt
 	CloseDataTransferChannel(x UInt)         struct{}
 	TransferChannelStatus(x UInt)            DataTransferStatus
-	ReportDataTransferEvent(x Function)			 union { Ret DataTransferStatus, Err error }
+	ReportDataTransferEvent(x Function)      union { Ret DataTransferStatus, Err error }
 
 	findData(x CID) Piece
 }
@@ -27,14 +27,14 @@ type DataTransferChannel struct {
 	sent          UVarint
 	received      UVarint
 
-	channelType()	DataTransferType  @(cached)
-	transferNum()	Float             @(cached)
+	channelType() DataTransferType  @(cached)
+	transferNum() Float             @(cached)
 }
 
 type DataTransferParams struct {
 	channelType   DataTransferType
 	contentID     CID
-	dataIncrement	UVarint
+	dataIncrement UVarint
 	sender        Address
 	recipient     Address
 	totalSize     Address
