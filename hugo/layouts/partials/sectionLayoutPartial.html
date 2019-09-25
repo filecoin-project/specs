@@ -10,7 +10,7 @@
 <div id="{{ $tag }}">
 
 {{ printf "<h%d>" $depth | safeHTML }}
-  {{ $page.Param "title" }}
+  {{ $page.Param "title" | markdownify }}
 {{ printf "</h%d>" $depth | safeHTML }}
 
 {{ $page.Content }}
