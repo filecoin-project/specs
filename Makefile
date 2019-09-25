@@ -94,14 +94,14 @@ hugo-src: $(shell find src | grep '.md')
 	cp -r src hugo/content/docs
 
 # this is used to get "serve-and-watch" working. trick is to use
-hugo-src-rsync: $(shell find src | grep '.md')
+hugo-src-rsync: $(shell find src | grep '.md') gen-code diagrams
 	@mkdir -p hugo/content/docs
 	rsync -av --inplace src/ hugo/content/docs
 	printf " " >> hugo/content/_index.md # force reload
 	printf " " >> hugo/content/menu/index.md # force reload
 
 hugo-watch: .PHONY
-	bin/watcher --cmd="make hugo-src-rsync gen-code" --startcmd src 2>/dev/null
+	bin/watcher --cmd="make hugo-src-rsync" --startcmd src 2>/dev/null
 
 orient: .PHONY
 	bin/build-spec-orient.sh
