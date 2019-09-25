@@ -1,4 +1,4 @@
-type Epoch Uvarint
+type Epoch UVarint
 type SectorID struct {}
 type Randomness struct {}
 

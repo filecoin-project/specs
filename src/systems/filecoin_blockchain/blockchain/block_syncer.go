@@ -1,7 +1,5 @@
 package blockchain
 
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-
 func (self *BlockSyncer) OnNewBlock(block Block) error {
 	err := self.validateBlockSyntax(block)
 	if err {

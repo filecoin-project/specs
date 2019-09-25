@@ -1,5 +1,12 @@
-
-
+type ActorName union {
+	StoragePowerActor
+	StorageMarketActor
+	StorageMinerActor
+	PaymentChannelActor
+	InitActor
+	AccountActor
+	CronActor
+}
 
 type StateTree struct {
     SystemActors {ActorName:Address}
@@ -42,4 +49,19 @@ type ActorSubState union {
 		AddressMap    {Address:ActorID}
 		NextID        ActorID
 	}
+}
+
+type Address struct {
+ 	NetworkID union {
+ 		Testnet
+ 		Mainnet
+ 	}
+ 	Protocol union {
+ 		ID
+ 		Secp256k1
+ 		Actor
+ 		BLS
+     }
+
+    VerifySyntax(addrType Address_Protocol) bool
 }

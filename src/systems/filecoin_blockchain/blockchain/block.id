@@ -1,14 +1,18 @@
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
+import clock 	 "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+
 type Block struct {
-	MinerAddress()               Address
+	MinerAddress()               stateTree.Address
 	Tickets()                    [Ticket]
 	ParentTipset()               Tipset
 	ParentWeight()               BlockWeight
 	Height()                     Word
-	StateTree()                  StateTree
+	StateTree()                  stateTree.StateTree
 	Messages()                   [Message]
 //	BLSAggregate()               Signature
  	MessageReceipts()            [MessageReceipt]
-	Timestamp()                  Timestamp
+	Timestamp()                  clock.Time
 	BlockSig()                   Signature
 
 //	SerializeSigned()            []byte
@@ -23,19 +27,17 @@ type Tipset struct {
     Has(block Block)  bool			 			@(cached)
     Parents()         Tipset      		   		@(cached)
 	// StateTree should live in VM
-	StateTree()       StateTree      			@(cached)
+	StateTree()       stateTree.StateTree      	@(cached)
     Epoch()           Epoch          			@(cached)
     Weight()          ChainWeight    			@(cached)
 
 	ValidateSyntax()			 	bool		@(cached)
-	LatestTimestamp()				Timestamp 	@(cached)
+	LatestTimestamp()				clock.Time	@(cached)
 }
 
-type Timestamp Time
-
 type Ticket struct {
-	VRFResult() VRFResult
-	VDFResult() VDFResult
+	VRFResult() filcrypto.VRFResult
+	VDFResult() filcrypto.VDFResult
 
 	// Generate(k VRFKeyPair, seed ElectionSeed) Ticket
 	ValidateSyntax() 	bool
@@ -43,7 +45,7 @@ type Ticket struct {
 }
 
 type ElectionProof struct {
-	VRFResult() VRFResult
+	VRFResult() filcrypto.VRFResult
 	IsWinning(minerPower PowerFraction) bool	@(cached)
 
 	ValidateSyntax(ep &ElectionProof) bool
@@ -59,19 +61,4 @@ type Chain struct {
     LatestCheckpoint() Epoch
 
     TipsetAtEpoch(epoch Epoch) Tipset
-}
-
-type Address struct {
- 	NetworkID union {
- 		Testnet
- 		Mainnet
- 	}
- 	Protocol union {
- 		ID
- 		Secp256k1
- 		Actor
- 		BLS
-     }
-
-    VerifySyntax(addrType Protocol) bool
 }
