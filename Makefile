@@ -93,11 +93,12 @@ hugo-src: $(shell find src | grep '.md')
 	rm -rf hugo/content/docs
 	cp -r src hugo/content/docs
 
+# this is used to get "serve-and-watch" working. trick is to use
 hugo-src-rsync: $(shell find src | grep '.md')
 	@mkdir -p hugo/content/docs
 	rsync -av --inplace src/ hugo/content/docs
-	echo "" >> hugo/content/_index.md # force reload
-	echo "" >> hugo/content/menu/index.md # force reload
+	printf " " >> hugo/content/_index.md # force reload
+	printf " " >> hugo/content/menu/index.md # force reload
 
 hugo-watch: .PHONY
 	bin/watcher --cmd="make hugo-src-rsync" --startcmd src 2>/dev/null
