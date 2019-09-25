@@ -101,7 +101,7 @@ hugo-src-rsync: $(shell find src | grep '.md')
 	printf " " >> hugo/content/menu/index.md # force reload
 
 hugo-watch: .PHONY
-	bin/watcher --cmd="make hugo-src-rsync" --startcmd src 2>/dev/null
+	bin/watcher --cmd="make hugo-src-rsync gen-code" --startcmd src 2>/dev/null
 
 orient: .PHONY
 	bin/build-spec-orient.sh
