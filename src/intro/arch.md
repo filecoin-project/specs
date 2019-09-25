@@ -1,17 +1,16 @@
 ---
-title: "Architecture Diagram"
+title: "Architecture Diagrams"
 ---
 
-## Overview Diagram
+#### Overview Diagram
 
-![](../docs/diagrams/overview1/overview.dot.svg)
+{{< diagram src="../docs/diagrams/overview1/overview.dot.svg" title="Protocol Overview Diagram" >}}
 
-## Storage Flow
 
-With deals off chain
+#### Protocol Flow Diagram -- deals off chain
 
-![](../docs/diagrams/sequence/full-deals-off-chain.mmd.svg)
+{{< diagram src="../docs/diagrams/sequence/full-deals-off-chain.mmd.svg" title="Protocol Sequence Diagram - Deals off Chain" >}}
 
-With deals on chain
+#### Protocol Flow Diagram -- deals on chain
 
-![](../docs/diagrams/sequence/full-deals-on-chain.mmd.svg)
+{{< diagram src="../docs/diagrams/sequence/full-deals-on-chain.mmd.svg" title="Protocol Sequence Diagram - Deals on Chain" >}}
