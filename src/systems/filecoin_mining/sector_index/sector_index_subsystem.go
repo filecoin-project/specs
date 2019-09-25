@@ -1,4 +1,4 @@
-package storage_indexer
+package sector_index
 
 func (sis *SectorIndexerSubsystem) AddDealToSector(deal StorageDeal) AddDealToSectorResponse {
 	addPieceResponse := sis.SectorBuilder.AddPiece(deal.PiecePath)

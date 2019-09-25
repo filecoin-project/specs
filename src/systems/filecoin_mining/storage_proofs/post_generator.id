@@ -1,14 +1,18 @@
+
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+type UInt64 UInt
 type Challenge   UInt64
 
 type PostGenerator struct {
 
-	GeneratePoSt(challenge Challenge, sectorIDs [SectorIDs]) PoStProof
+	GeneratePoSt(challenge Challenge, IDs [sector.SectorID]) PoStProof
 }
 
 // // this must  GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
 //   GetChallenge(minerActor &StorageMinerActor, currBlock) Challenge
 
-//   GeneratePoSt(challenge Challenge, sectors &[&Sector]) PoStProof {
+//   GeneratePoSt(challenge Challenge, sectors [Sector]) PoStProof {
 //       sectorsMetadata := sectors.map(func(sector) { SectorStorage.GetMetadata(sector.CommR) });
 
 //       // Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
