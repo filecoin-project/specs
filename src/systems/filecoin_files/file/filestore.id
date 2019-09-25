@@ -1,0 +1,11 @@
+
+// FileStore is an object that can store and retrieve files by path.
+type FileStore struct {
+  Open(p Path) union{ f File, e error }
+  Create(p Path) union{ f File, e error }
+  Store(p Path, f File) error
+  Delete(p Path) error
+
+  // maybe add:
+  // Copy(SrcPath, DstPath)
+}
