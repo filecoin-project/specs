@@ -4,14 +4,14 @@ title: "Architecture Diagram"
 
 ## Overview Diagram
 
-![](diagrams/overview.dot.svg)
+![](../docs/diagrams/overview1/overview.dot.svg)
 
 ## Storage Flow
 
 With deals off chain
 
-<iframe src="diagrams/sequence/full-off-chain.mmd.svg" />
+![](../docs/diagrams/sequence/full-deals-off-chain.mmd.svg)
 
 With deals on chain
 
-<iframe src="diagrams/sequence/full-on-chain.mmd.svg" />
+![](../docs/diagrams/sequence/full-deals-on-chain.mmd.svg)
