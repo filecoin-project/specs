@@ -1,9 +1,9 @@
 package filcrypto
 
-func (self *VRFResult) ValidateSyntax() bool {
+func (self *VRFResult_I) ValidateSyntax() bool {
 	panic("TODO")
 }
 
-func (self *VDFResult) ValidateSyntax() bool {
+func (self *VDFResult_I) ValidateSyntax() bool {
 	panic("TODO")
 }
