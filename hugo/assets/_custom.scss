@@ -161,3 +161,8 @@ h5:hover .header-link,
 h6:hover .header-link {
   opacity: 1;
 }
+
+// remove scrolling
+html {
+  scroll-behavior: auto;
+}
