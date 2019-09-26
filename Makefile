@@ -107,8 +107,8 @@ orient: .PHONY
 	bin/build-spec-orient.sh
 
 # convert orgmode to markdown
-ORG_FILES=$(shell find hugo/content | grep .org)
-ORG_MD_FILES=$(patsubt %.md, %.org, $(ORG_FILES))
+ORG_FILES=$(shell find src | grep .org)
+ORG_MD_FILES=$(patsubst %.org, %.md, $(ORG_FILES))
 org2md: $(ORG_MD_FILES)
 %.md: %.org
 	# use emacs to compile.

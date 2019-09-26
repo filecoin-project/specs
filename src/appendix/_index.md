@@ -3,5 +3,6 @@ title: Appendix
 entries:
   - sharray
   - address
-suppressMenu: true
+  - orient.md
+suppressMenu: false
 ---
