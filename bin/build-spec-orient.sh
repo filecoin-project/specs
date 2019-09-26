@@ -1,6 +1,8 @@
 output_dir=build/orient
 input_dir=src/orient
 
+mkdir -p $output_dir
+
 orient/bin/orient solve --system=$input_dir/filecoin.orient --in=$input_dir/params.json | jq > $output_dir/solved-parameters.json
 
 orient/bin/orient report --system=$input_dir/filecoin.orient --in=$input_dir/params.json  > $output_dir/filecoin-report.html
