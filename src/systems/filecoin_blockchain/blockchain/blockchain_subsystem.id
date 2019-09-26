@@ -1,5 +1,6 @@
 import clock 	 "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
+import spc       "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 
 type Epoch UVarint
 type SectorID struct {}
@@ -7,6 +8,7 @@ type Randomness struct {}
 
 type BlockchainSubsystem struct @(mutable) {
     Clock           &clock.WallClock
+    spc             &spc
 
     LatestEpoch()   Epoch
     BestChain()     Chain
