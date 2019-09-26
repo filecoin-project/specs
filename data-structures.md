@@ -55,9 +55,9 @@ type BlockHeader struct {
 	## Height is the chain height of this block.
 	height UInt
 
-	## StateRoot is a cid pointer to the state tree after application of the
-	## transactions state transitions.
-	stateRoot &StateTree
+	## ParentStateRoot is a cid pointer to the state tree after application of the
+	## messages in the parent tip set.
+	parentStateRoot &StateTree
 
 	## Messages is the set of messages included in this block. This field is the Cid
 	## of the TxMeta object that contains the bls and secpk signed message trees
@@ -67,9 +67,9 @@ type BlockHeader struct {
 	## were signed using BLS signatures
 	blsAggregate Signature
 
-	## MessageReceipts is a set of receipts matching to the sending of the `Messages`.
+	## MessageReceipts is a set of receipts from the execution of messagse in the parent tipset
 	## This field is the Cid of the root of a sharray of MessageReceipts.
-	messageReceipts &[MessageReceipt]
+	parentReceipts &[MessageReceipt]
 
 	## The block Timestamp is used to enforce a form of block delay by honest miners.
 	## Unix time UTC timestamp (in seconds) stored as an unsigned integer.

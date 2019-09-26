@@ -146,8 +146,17 @@ func VerifyBlock(blk Block) {
         Fatal("election was invalid")
     }
 
-    // 6. Verify Message Signatures
-    state := GetParentState(blk.Parents)
+    // 6. Verify parent state root and receipt trie 
+    state, recpts := GetParentState(blk.Parents)
+    if blk.ParentStateRoot != state {
+      Fatal("parent state root was invalid")
+    }
+
+    if blk.MessageReceipts != recpts {
+      Fatal("receipts trie was incorrect")
+    }
+
+    // 7. Verify Message Signatures
     blsMessages := LoadMessages(blk.Messages.blsMsgs)
 
     var blsPubKeys []PublicKey
@@ -166,24 +175,9 @@ func VerifyBlock(blk Block) {
       }
     }
 
-    // 7. Validate State Transitions
-    receipts := LoadReceipts(blk.MessageReceipts)
-    for i, msg := range blsMessages {
-        receipt := ApplyMessage(state, msg)
-        if receipt != receipts[i] {
-            Fatal("message receipt mismatch")
-        }
-    }
-    for i, msg := range secpkMessages {
-      receipt := ApplyMessage(state, msg.Message)
-      if receipt != receipts[i + len(blsMessages)] {
-        Fatal("message receipt mismatch")
-      }
-    }
-
-    if state.Cid() != blk.StateRoot {
-        Fatal("state roots mismatch")
-    }
+    // 8. Validate State Transitions
+    // TODO: validate that the messages arent invalid (don't have to execute,
+    // just check for obvious bad things like not enough funds and bad nonces)
 }
 
 func (state StateTree) LookupPublicKey(a Address) PubKey {
@@ -357,13 +351,17 @@ To create a block, the eligible miner must compute a few fields:
 - `ElectionProof` - A signature over the final ticket from the `Tickets` array proving. See [checking election results](expected-consensus.md#checking-election-results).
 - `ParentWeight` - As described in [Chain Weighting](expected-consensus.md#chain-weighting).
 - `Parents` - the CIDs of the parent blocks.
-- `ParentState` - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
+- `ParentState` - To compute this:
   - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
   - For each block in the parent set, ordered by their tickets:
     - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.
     - Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
     - It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state.
     - TODO: define message conflicts in the state-machine doc, and link to it from here
+    - Retain all receipts from message execution
+- `ParentReceiptsRoot` - To compute this:
+  - Take all the receipts from message execution for the `ParentState` and insert them into an AMT
+  - Take the root of that AMT and set this field to its CID
 - `MsgRoot` - To compute this:
   - Select a set of messages from the mempool to include in the block.
   - Separate the messages into BLS signed messages and secpk signed messages
@@ -377,11 +375,6 @@ To create a block, the eligible miner must compute a few fields:
     - `secpkMessages`: the root cid of the secp messages sharray
   - The cid of this `TxMeta` object should be used to fill the `MsgRoot` field of the block header.
 - `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
-- `StateRoot` - Apply each chosen message to the `ParentState` to get this.
-  - Note: first apply bls messages in the order that they appear in the blsMsgs sharray, then apply secpk messages in the order that they appear in the secpkMessages sharray.
-- `ReceiptsRoot` - To compute this:
-  - Apply the set of messages to the parent state as described above, collecting invocation receipts as this happens.
-  - Insert them into a sharray and take its root.
 - `Timestamp` - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
   - the timestamp on the block is not in the future (with ALLOWABLE_CLOCK_DRIFT grace to account for relative asynchrony)
   - the timestamp on the block is at least BLOCK_DELAY * len(block.Tickets) higher than the latest of its parents, with BLOCK_DELAY taking on the same value as that needed to generate a valid VDF proof for a new Ticket (currently set to 30 seconds).
