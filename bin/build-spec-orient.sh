@@ -7,5 +7,7 @@ orient/bin/orient report --system=$input_dir/filecoin.orient --in=$input_dir/par
 
 orient/bin/orient dump --system=$input_dir/filecoin.orient | jq > $output_dir/filecoin.json
 
-orient/bin/orient graph --system=$input_dir/filecoin.orient $input_dir/params.json | dot -Tsvg > $output_dir/filecoin.svg
+orient/bin/orient graph --system=$input_dir/filecoin.orient --in=$input_dir/params.json > $output_dir/filecoin.dot
+
+cat $output_dir/filecoin.dot | dot -Tsvg > $output_dir/filecoin.svg
 

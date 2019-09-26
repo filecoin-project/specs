@@ -1,23 +1,4 @@
 
-type DRGDepth struct{}  // TODO: finish
-type DRGFraction struct{}  // TODO: finish
-type DRGSeed struct{}  // TODO: finish
-type DRGNodeCount struct{}  // TODO: finish
-type DRGNodeSize struct{}  // TODO: finish
-type DRGDegree struct{}  // TODO: finish
-type StackedDRGLayers struct{}  // TODO: finish
-type StackedDRGNodeSize struct{}  // TODO: finish
-
-type ExpanderGraphDegree struct{}  // TODO: finish
-type ExpanderGraphSeed struct{}  // TODO: finish
-type ChungExpanderAlpha struct{}  // TODO: finish
-type ChungExpanderBeta struct{}  // TODO: finish
-type ChungExpanderPermutationFeistelSeed struct{}  // TODO: finish
-type ChungExpanderPermutationFeistelRound struct{}  // TODO: finish
-type ChungExpanderPermutationFeistelHashFunction struct{}  // TODO: finish
-
-
-
 type SealAlgorithmArtifacts struct { // ZigZagPoRep
 
   AlgorithmWideSetupArtifacts struct {
@@ -30,7 +11,7 @@ type SealAlgorithmArtifacts struct { // ZigZagPoRep
     // per-sector setup artifacts go here
   }
 
-  // ProveArtifacts or
+  ProveArtifacts or
   ChallengeArtifacts struct {
     // inputs into prove() go here
   }
@@ -47,6 +28,7 @@ type PoRep union {
 type PoSpace union {
   PoRep
 }
+
 
 type ZigZagPoRep StackedDRG
 

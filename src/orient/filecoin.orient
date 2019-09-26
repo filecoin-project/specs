@@ -34,7 +34,7 @@ Blockchain:
     block_framing_size = block_header_size + messages_size + receipts_size
 
     Messages:
-      declare(messages, integer) // TODO
+      // declare(messages, integer) // TODO
       messages_size = messages * message_size
       messages_root_cid = cid_size
 
@@ -62,17 +62,18 @@ Blockchain:
           actor_method = u64
 
     Receipts:
-      declare(receipts, integer) // TODO
+      receipts = messages // TODO check
+      // declare(receipts, integer) // TODO
       receipts_size = receipts * message_receipt
       message_receipts_cid = cid_size
 
       Receipt:
         message_receipt = exit_code + return + gas_used
-        declare(exit_code, bytes) // TODO
+        // declare(exit_code, bytes) // TODO
         exit_code = varint
-        declare(return, bytes) // TODO
+        // declare(return, bytes) // TODO
         return = varint
-        declare(gas_used, bytes) // TODO
+        // declare(gas_used, bytes) // TODO
         gas_used = u64
 
     BlockHeader (EC):
@@ -107,7 +108,7 @@ Blockchain:
       //   election_proof_size = 80
 
       Parents [CID]:
-        declare(parents, integer) // TODO
+        // declare(parents, integer) // TODO
         parents = expected_winning_miners
         parents_cids = parents * cid_size
 
@@ -116,19 +117,19 @@ Blockchain:
         bls_agg_size = 96
 
       Timestamp:
-        declare(timestamp_size, integer) // TODO
+        // declare(timestamp_size, integer) // TODO
         timestamp_size = u64
 
       // BlockSig (BlockSigSecpk):
-        declare(block_sig_size, integer) // TODO
-      //    block_sig_size = 80
+        // declare(block_sig_size, integer) // TODO
+        // block_sig_size = 80
 
       BlockSig (BlockSigBls):
         declare(block_sig_size, integer) // TODO
         block_sig_size = 96
 
       Tickets:
-        declare(tickets, integer)
+        // declare(tickets, integer)
         declare(tickets_size, bytes)
         tickets_size = ticket_size * tickets
         ticket_size = election_proof_size + vdf_proof_size + vdf_output_size
@@ -149,27 +150,27 @@ VDF (VDFRSA):
 Proofs:
   ProofOfReplication:
     Graph:
-      declare(node_size, integer)
-      declare(sector_size, integer)
-      declare(nodes, integer)
+      // declare(node_size, integer)
+      // declare(sector_size, integer)
+      // declare(nodes, integer)
       nodes = sector_size / node_size
       degree = degree_base + degree_expander
       sector_size_gib = sector_size / gib
 
       DRG (DRSample) [DRGAssumption]:
-        declare(degree_base, integer)
+        // declare(degree_base, integer)
         drg_e = 0.80
         drg_d = 1/4
 
       ExpanderParents (Chung) [ChungAssumption]:
-        declare(degree_expander, integer)
+        // declare(degree_expander, integer)
 
       Layers:
         // declare(layers, integer)
         assume(layers > 0)
 
     Soundness:
-      declare(lambda, integer)
+      // declare(lambda, integer)
       assume(soundness > 0)
       assume(soundness < 0.5)
       soundness = 1/(2^lambda)
@@ -181,7 +182,7 @@ Proofs:
     Challenges:
       OfflineChallenges:
         // declare(offline_challenges, integer)
-        declare(offline_challenges_all, integer)
+        // declare(offline_challenges_all, integer)
         assume(offline_challenges > 0)
 
       OnlineChallenges:
@@ -194,7 +195,8 @@ Proofs:
         assume(encoding_time > 0)
         assume(polling_time > 0)
         kdf_content = degree + 1
-        encoding_time = layers * nodes * (kdf_content * node_size) * kdf_hash_time
+        encoding_time = layers * nodes * (kdf_content - 1) * kdf_hash_time * (node_size / kdf_hash_size)
+        encoding_time_mins = encoding_time / 60
         malicious_encoding = encoding_time / encoding_amax
         polling_time = malicious_encoding * drg_d
 
@@ -215,23 +217,23 @@ Proofs:
 
       Inclusion (MerkleVC) [CRH]:
         // declare(tree_depth, integer)
-        tree_depth = log2(nodes)
+        tree_depth = (log2(nodes))
         inclusion_circuit_time = tree_depth * merkle_hash_time_circuit
         inclusion_constraints = tree_depth * merkle_hash_constraints
         commit_time = nodes * merkle_hash_time
 
       SNARK [SNARKAssumptions]:
-        comm_d_openings = degree_base + 1
-        comm_d_time = offline_challenges * (comm_d_openings * inclusion_circuit_time + leaf_circuit_time)
-        comm_d_constraints = offline_challenges * (comm_d_openings * inclusion_constraints + leaf_constraints)
+        comm_d_openings = 1
+        comm_d_time = offline_challenges * (comm_d_openings * inclusion_circuit_time)
+        comm_d_constraints = offline_challenges * (comm_d_openings * inclusion_constraints)
 
-        comm_r_openings = opening_per_challenge
-        comm_r_time = offline_challenges * (comm_r_openings * inclusion_circuit_time + leaf_circuit_time)
-        comm_r_constraints = offline_challenges * (comm_r_openings * inclusion_constraints + leaf_constraints)
+        comm_r_openings = degree_base
+        comm_r_time = offline_challenges * (comm_r_openings * inclusion_circuit_time)
+        comm_r_constraints = offline_challenges * (comm_r_openings * inclusion_constraints)
 
         comm_c_openings = opening_per_challenge
-        comm_c_time = offline_challenges * (comm_c_openings * inclusion_circuit_time + leaf_circuit_time)
-        comm_c_constraints = offline_challenges * (comm_c_openings * inclusion_constraints + leaf_constraints)
+        comm_c_time = offline_challenges * (comm_c_openings * (inclusion_circuit_time + leaf_circuit_time))
+        comm_c_constraints = offline_challenges * (comm_c_openings * (inclusion_constraints + leaf_constraints))
 
         porep_snark_time = comm_d_time + comm_r_time + comm_c_time
         porep_snark_constraints = comm_d_constraints + comm_r_constraints + comm_c_constraints
@@ -256,18 +258,21 @@ Proofs:
   ProofOfReplication (SDR):
     Graph:
       Layers:
-        layers = max(layers_a, layers_b) + 1
+        layers = layers_b // TODO max(layers_a, layers_b) + 1
         layers_a = (0.68 - epsilon + delta) / (0.12 - delta)
-        layers_b = log2(1 / (3 * (epsilon - 2 * delta))) + 0.12 / (0.12 - delta) + 1
+        layers_b = (log2(1 / (3 * (epsilon - 2 * delta)))) + 0.12 / (0.12 - delta) + 1
 
     SpaceGap:
       assume(epsilon <= 0.24)
-      // delta = epsilon/2 <-- FIXME uncoomment.
-      spacegap = epsilon + 2 * delta
+      // delta < epsilon/2
+      // delta = epsilon/2 + 0.001
+      // spacegap = epsilon + 2 * delta
+      spacegap = 2 * epsilon - 0.001
+      delta = epsilon/2 - 0.001
 
     Challenges:
       OfflineChallenges:
-        offline_challenges = (- lambda) / log2(1 - delta)
+        offline_challenges = (- lambda) / (log2(1 - delta))
 
       OnlineChallenges:
         online_challenges = (- lambda) / (log2(2 - epsilon - 2 * delta) - 1)
@@ -299,73 +304,65 @@ Proofs:
       post_snark_proof_size = post_snark_proof_partitions * snark_single_proof_size
 
 
-  Consensus [ProofOfReplication, ProofOfSpacetime]:
-    declare(expected_winning_miners, integer)
-    declare(finality_height, integer)
-    Tickets:
-      tickets = avg_tickets
-      avg_tickets = 1
-      min_tickets = 0
-      max_tickets = log(one_block_in_ten_years)/log(0.36) + 1 // 0.36^(max_tickets-1) = one_block_in_ten_years
-      blocks_in_a_year = (year_in_seconds / block_time) * expected_winning_miners
-      blocks_in_ten_years = blocks_in_a_year * 10
-      one_block_in_ten_years = 1/blocks_in_ten_years
+Consensus [ProofOfReplication, ProofOfSpacetime]:
+  // declare(expected_winning_miners, integer)
+  // declare(finality_height, integer)
+  Tickets:
+    tickets = avg_tickets
+    avg_tickets = 1
+    min_tickets = 0
+    max_tickets = log(one_block_in_ten_years)/log(0.36) + 1 // 0.36^(max_tickets-1) = one_block_in_ten_years
+    blocks_in_a_year = (year_in_seconds / block_time) * expected_winning_miners
+    blocks_in_ten_years = blocks_in_a_year * 10
+    one_block_in_ten_years = 1/blocks_in_ten_years
+
+StorageMarket:
+  declare(min_storing_time)
+  Deals (OnChainDeals):
+    comm_p_size = cid_size
+    declare(p_size, 1)
+    p_size = (log2(sector_size))
+    sector_manifest_size = pieces * comm_p_size + p_size
+    max_sector_manifest_hashes = sector_size / min_piece_size
+
 
 Mining:
-  declare(power_table_lookback)
-  declare(slashing_post_time)
-  declare(reseal, integer)
+  proving_period_seconds = proving_period_hours * 60 * 60
 
   seals_per_sector_per_year = reseal+1
   posts_per_sector_per_year = year_in_seconds / proving_period_seconds
-  OnChainFootprint:
-    proving_period_seconds = proving_period_hours * 60 * 60
-    seals_size_per_sector_per_year = seals_per_sector_per_year * seal_proof_size
-    posts_size_per_sector_per_year = posts_per_sector_per_year * post_proof_size
-    proofs_size_per_sector_per_year = seals_size_per_sector_per_year + posts_size_per_sector_per_year
-    messages_per_sector_per_year = seals_per_sector_per_year + posts_per_sector_per_year
-    // assert(proofs_messages_per_year * )
-
-  StorageMarket:
-    declare(min_storing_time)
-    Deals (OnChainDeals):
-      comm_p_size = cid_size
-      declare(p_size, 1)
-      p_size = log2(sector_size)
-      sector_manifest_size = pieces * comm_p_size + p_size
-      max_sector_manifest_hashes = sector_size / min_piece_size
-
-
-NetworkGoals:
-  DataPropagation: // TODO some network assumptions here
-    // block_time = ...
-    // block_framing_size = ...
-    declare(block_propagation_time)
-    declare(block_delay)
 
 ScalingRequirements:
-  declare(max_storage_network_capacity_year)
-  declare(seal_time)
-  declare(unseal_time)
-  declare(max_network_throughput_year)
+  storage_network_capacity = 10 * eix
 
-  StorageCapacity:
-    max_storage_network_capacity_year = 10 * eix
-    max_sectors = max_storage_network_capacity_year / sector_size
+ChainBandwidth:
+  sectors_count = storage_network_capacity / sector_size
+  all_seal_size_per_year = all_seal_messages_per_year
+  all_seal_messages_per_year = sectors_count * seals_per_sector_per_year
+  all_post_messages_per_year = sectors_count * posts_per_sector_per_year / miners
 
-    max_proofs_size_per_year = proofs_size_per_sector_per_year * max_sectors
-    max_proofs_messages_per_year = messages_per_sector_per_year * max_sectors
+  Chain Size:
 
-    proofs_size_per_block = max_proofs_size_per_year / blocks_in_a_year
-    proofs_messages_per_block = max_proofs_messages_per_year / blocks_in_a_year
+  Block Size:
+    chain_size_year = block_size * blocks_in_a_year
+    chain_size_year_gib = chain_size_year / gib
+    block_size_kib = block_size / kib
 
+  Block Content:
     block_size = block_framing_size + proofs_size_per_block
-    messages = proofs_messages_per_block + tx_messages_per_block + actors_messages_per_block // TODO
+    messages = avg_proofs_messages_per_block + tx_messages_per_block + actors_messages_per_block // TODO messages dont include deals
 
-    // TODO deal
+    Proofs:
+      avg_proofs_messages_per_block = avg_seals_messages_per_block + avg_posts_messages_per_block
+      avg_seals_messages_per_block = all_seal_messages_per_year / blocks_in_a_year
+      avg_posts_messages_per_block = all_post_messages_per_year / blocks_in_a_year
 
-EconomicsRequirements:
-  declare(seal_cost)
-  declare(unseal_cost)
-  declare(year_mining_reward)
-  declare(min_hardware_cost)
+      seal_size_per_block = avg_seals_messages_per_block * seal_proof_size
+      post_size_per_block = avg_posts_messages_per_block * post_proof_size
+      proofs_size_per_block = seal_size_per_block + post_size_per_block
+      proofs_size_per_block_kib = proofs_size_per_block / kib
+
+    Composition:
+      avg_proofs_messages_per_block = proof_messages_fraction * messages
+      tx_messages_per_block = tx_messages_fraction * messages
+      actors_messages_per_block = actors_messages_fraction * messages

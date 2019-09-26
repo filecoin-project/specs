@@ -1,12 +1,8 @@
-import filecoin_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import vm "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm"
-
-
 type DataTransferSubsystem struct @(mutable) {
 	dataTransfers {UInt: DataTransferChannel}
-	volumes       [vm.Storage]
+	volumes       [Storage]
 
-	OpenDataTransferChannel(x vm.StorageDealID) UInt
+	OpenDataTransferChannel(x StorageDealID) UInt
 	CloseDataTransferChannel(x UInt)         struct{}
 	TransferChannelStatus(x UInt)            DataTransferStatus
 	ReportDataTransferEvent(x Function)      union { Ret DataTransferStatus, Err error }
@@ -25,8 +21,8 @@ type DataTransferChannel struct {
 	channelID     UInt
 	contentID     CID
 	dataIncrement	UVarint
-	sender        filecoin_blockchain.Address
-	recipient     filecoin_blockchain.Address
+	sender        Address
+	recipient     Address
 	totalSize     UVarint
 	sent          UVarint
 	received      UVarint
@@ -39,9 +35,9 @@ type DataTransferParams struct {
 	channelType   DataTransferType
 	contentID     CID
 	dataIncrement UVarint
-	sender        filecoin_blockchain.Address
-	recipient     filecoin_blockchain.Address
-	totalSize     filecoin_blockchain.Address
+	sender        Address
+	recipient     Address
+	totalSize     Address
 }
 
 type DataTransferType union {

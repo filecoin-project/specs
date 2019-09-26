@@ -1,9 +1,7 @@
-import storage_proofs "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs"
-
 type Voucher struct {}
 type VouchersApprovalResponse struct {}
 
 type PaymentChannelActor struct {
     RedeemVoucherWithApproval(voucher Voucher) struct {}
-    RedeemVoucherWithPIP(voucher Voucher, pip storage_proofs.PieceInclusionProof) struct {}
+    RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof) struct {}
 }

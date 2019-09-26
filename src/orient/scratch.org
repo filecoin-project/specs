@@ -1,0 +1,31 @@
+#+begin_src lisp :package orient.lang
+(asdf:load-system :orient)
+(in-package orient.lang)
+#+end_src
+
+#+RESULTS:
+: #<PACKAGE "ORIENT.LANG">
+
+#+begin_src lisp :package orient.lang
+
+(defparameter *filecoin*  (get-system "filecoin.orient"))
+(defparameter *input* (interface:get-json-relation-list "params.json"))
+#+end_src
+
+#+RESULTS:
+: *INPUT*
+
+#+begin_src lisp :package lang
+(org-present (ask *filecoin* '(sector-size lambda block-size-kib) *input*) *filecoin*)
+#+end_src
+
+#+RESULTS:
+| LAMBDA |  SECTOR-SIZE | BLOCK-SIZE-KIB |
+|     10 |   1073741824 |       908397.4 |
+|     10 |  34359738368 |       28397.75 |
+|     10 |  68719476736 |      14200.415 |
+|     10 | 137438953472 |       7101.292 |
+|     80 |   1073741824 |       920761.0 |
+|     80 |  34359738368 |       28847.91 |
+|     80 |  68719476736 |      14431.875 |
+|     80 | 137438953472 |      7220.2114 |

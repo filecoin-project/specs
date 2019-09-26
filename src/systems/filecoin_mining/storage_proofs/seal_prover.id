@@ -46,8 +46,8 @@ type SealProver struct {
 
   GeneratePieceInclusionProof(
     Tree          MerkleTree, //MerkleTree<Rephash>,
-    PieceStart    UInt,
-    PieceLength   UInt,
+    PieceStart    Uint,
+    PieceLength   Uint,
   ) union { error, PieceInclusionProofs }
 
   VerifyPieceInclusionProof() struct {}
