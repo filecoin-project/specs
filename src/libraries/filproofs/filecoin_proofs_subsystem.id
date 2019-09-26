@@ -1,7 +1,8 @@
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+
 type SectorInfo struct {}
 
 type FilecoinProofsSubsystem struct {
-
-    VerifySeal(sectorID SectorID, sectorInfo SectorInfo) bool
-    ValidateBlock(block Block) bool
+    VerifySeal(sectorID blockchain.SectorID, sectorInfo SectorInfo) bool
+    ValidateBlock(block blockchain.Block) bool
 }

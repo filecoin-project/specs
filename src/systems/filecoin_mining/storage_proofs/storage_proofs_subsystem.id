@@ -1,10 +1,13 @@
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+import vm "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm"
+
 type PoStProof struct {}
-type SealOuput struct {}
+type SealOutput struct {}
 
 type StorageProofsSubsystem struct {
 
-  SealProver SealProver
-  SectorSealer SectorSealer
+  SealProver vm.SealProver
+  SectorSealer vm.SectorSealer
 
   SealSector(
     seed Seed,
@@ -22,7 +25,7 @@ type StorageProofsSubsystem struct {
   ) union { error, bool }
 
   ValidateBlock(
-      block Block
+      block blockchain.Block
   ) struct {}
 
   GetPieceInclusionProof(pieceRef CID) union { Error, PieceInclusionProofs }

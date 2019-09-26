@@ -71,7 +71,6 @@ func (vmi *VMInterpreter) ApplyMessage(inTree InputTree, msg Message, minerAddr 
     GasLimit:  msg.GasLimit,
   })
 
-  var outTree StateTree
   if out.ExitCode != 0 {
     // error -- revert all state changes -- ie drop updates. burn used gas.
     outTree = inTree // wipe!

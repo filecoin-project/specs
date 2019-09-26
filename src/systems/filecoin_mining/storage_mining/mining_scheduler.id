@@ -1,11 +1,11 @@
-import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
+import storage_proofs "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs"
 
 type SectorSet       [Sector]
 type SealedSectorSet [Sector]
 type ReplicaID       CID
 
 type ProveStorageArtifact struct {
-	PoStProof PoStProof
+	PoStProof storage_proofs.PoStProof
 	BitField  Bytes // TODO verify type here
 }
 
