@@ -1,5 +1,5 @@
 ---
-menuTitle: 📑 Files & Data
+menuTitle: 📑 **Files & Data**
 title: Files & Data
 entries:
 - files_pieces
