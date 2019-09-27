@@ -1,12 +1,3 @@
-type Address struct {}
-type Path struct {}
-type Epoch struct {}
-type TokenAmount struct {}
-type Signature struct {}
-type SectorID struct {}
-type PieceInclusionProof struct {}
-type SealOutputArtifact struct {}
-
 // StorageClient sends a StorageDealProposal to StorageProvider
 // StorageProvider generates a PieceInclusionProof of the PieceRef
 // and sends back an AckStorageDealProposal with a miner Signature

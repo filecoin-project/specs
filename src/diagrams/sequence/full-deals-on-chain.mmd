@@ -4,6 +4,7 @@ sequenceDiagram
     participant RetrievalProvider
 
     participant StorageClient
+    participant StorageMarketActor
     participant StorageProvider
 
     participant PaymentChannelActor
@@ -48,28 +49,32 @@ sequenceDiagram
 
     opt StorageDealMake
         Note left of StorageClient: Piece, PieceCID
-        StorageClient ->> StorageProvider: ProposeStorageDeal(StorageDealProposal)
-        StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
-        StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealAccepted, Deal}
+        StorageProvider -->> StorageMarketActor: RegisterParticipant(TokenAmount)
+        StorageClient -->> StorageMarketActor: RegisterParticipant(TokenAmount)
 
-        Note left of StorageClient: Piece, PieceCID, Deal
-        Note right of StorageProvider: Piece, PieceCID, Deal
-        StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
-        StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealStarted, Deal}
-        alt StorageClient notifies network
-            StorageClient ->> StorageMarketActor: NotifyOfDeal(Deal, DealStatusPending)
-        else
-            StorageProvider ->>  StorageMarketActor: NotifyOfDeal(Deal, DealStatusPending)
+        alt 1 - Client Initiates
+            StorageClient -->+ StorageProvider: NewStorageDealProposal(StorageDealProposal)
+            StorageProvider --> StorageMarketActor: VerifyBalance(ClientAddr)
+            StorageProvider -->> StorageProvider: SignStorageDealProposal(StorageDealProposal)
+            StorageProvider -->- StorageClient: NewStorageDeal(StorageDeal)
+            StorageClient -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
+            StorageProvider -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
+        else 0 - Provider Initiates
+            StorageProvider -->+ StorageClient: NewStorageDealProposal(StorageDealProposal)
+            StorageClient --> StorageMarketActor: VerifyBalance(ProviderAddr)
+            StorageClient -->> StorageClient: SignStorageDealProposal(StorageDealProposal)
+            StorageClient -->- StorageProvider: NewStorageDeal(StorageDeal)
+            StorageProvider -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
+            StorageClient -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
         end
-        StorageMarketActor -->> StorageMarketActor: AddDeal(Deal, DealStatusPending)
     end
 
     opt AddingDealToSector
-        StorageProvider ->>+ StorageMiningSubsystem: HandleStorageDeal(Deal, PieceRef)
+        StorageProvider ->>+ StorageMiningSubsystem: HandleStorageDeal(Deal)
         StorageMiningSubsystem ->>+ SectorIndexerSubsystem: AddPieceToSector(Deal, SectorID)
         SectorIndexerSubsystem ->> SectorIndexerSubsystem: IndexSectorByDealExpiration(SectorID, Deal)
         SectorIndexerSubsystem -->>- StorageMiningSubsystem: (SectorID, Deal)
-        StorageMiningSubsystem ->>- StorageProvider: NotifyStorageDealStaged(Deal,PieceRef,SectorID)
+        StorageMiningSubsystem ->>- StorageProvider: NotifyStorageDealStaged(Deal,SectorID)
     end
 
     opt ClientQuery
@@ -89,8 +94,8 @@ sequenceDiagram
             StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifySeal(SectorID, OnSectorInfo)
             FilecoinProofsSubsystem -->>- StorageMinerActor: {1,0}
             alt 1 - success
-                StorageMinerActor ->> StorageMinerActor: AddDeal(SectorID, [&Deal], DealStatusOnChain)
-                StorageMinerActor ->> StorageMinerActor: AddDeal(SectorID, [Deal], DealStatusPending)
+                StorageMinerActor ->> StorageMarketActor: AddDeal(SectorID, [&Deal], DealStatusOnChain)
+                StorageMinerActor ->> StorageMarketActor: AddDeal(SectorID, [Deal], DealStatusPending)
                 StorageMinerActor ->> StoragePowerActor: IncrementPower(StorageMiner.WorkerPubKey)
             else 0 - failure
                 StorageMinerActor -->> StorageMiningSubsystem: CommitSectorError

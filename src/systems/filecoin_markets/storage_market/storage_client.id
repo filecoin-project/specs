@@ -3,28 +3,6 @@
 // Upon receiving AckStorageDealProposal, StorageClient calls SignStorageDeal
 // and then call UpdateSignedStorageDeal on StorageProvider
 
-type StorageDealProposal struct {
-  PieceRef         CID
-  PieceSize        UInt
-  PiecePath        Path
-  Provider         Address
-  Client           Address
-  StartEpoch       Epoch
-  ExpiryEpoch      Epoch
-}
-
-type SignedStorageDeal struct {
-  AckStorageDealProposal    AckStorageDealProposal
-  StorageFee                TokenAmount
-  ClientSignature           Signature
-}
-
-type AckStorageDealProposalError struct {}
-type AckStorageDealProposalResponse union {
-  AckStorageDealProposalError
-  SignedStorageDeal
-}
-
 type StorageClient struct {
     // RequestVouchersApproval(deal StorageDeal, vouchers [Voucher]) VouchersApprovalResponse
     // ApproveVouchers(vouchers [Voucher]) VouchersApprovalResponse

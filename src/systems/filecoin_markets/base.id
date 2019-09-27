@@ -1,0 +1,66 @@
+type Address struct {}
+type Path struct {}
+type Epoch struct {}
+type TokenAmount struct {}
+type Signature struct {}
+type SectorID struct {}
+type PieceInclusionProof struct {}
+type SealOutputArtifact struct {}
+
+type StorageDealProposal struct {
+  PieceRef         CID
+  PieceSize        UInt
+  PiecePath        Path
+  Provider         Address
+  Client           Address
+  StartEpoch       Epoch
+  ExpiryEpoch      Epoch
+}
+
+type SignedStorageDeal struct {
+  AckStorageDealProposal    AckStorageDealProposal
+  StorageFee                TokenAmount
+  ClientSignature           Signature
+}
+
+type AckStorageDealProposalError struct {}
+type AckStorageDealProposalResponse union {
+  AckStorageDealProposalError
+  SignedStorageDeal
+}
+
+type FileAvailable struct {
+  MinPrice TokenAmount
+  Miner Address
+}
+
+type RetrievalDealProposal struct {
+  File CID
+  Payment  PaymentChannelInfo
+  MinPrice TokenAmount
+}
+
+type RetrievalDealProposalResponse union {
+  RetrievalDealAccepted
+  RetrievalDealRejected
+  RetrievalDealError
+}
+
+type RetrievalQuery struct {
+  File CID
+}
+
+type RetrievalQueryResponse union {
+  FileRetrievalAvailable
+  FileRetrievalUnavailable
+}
+
+type FileRetrievalAvailable struct {}
+type FileRetrievalUnavailable struct {}
+
+type RetrievalDealError struct {}
+type RetrievalDealRejected struct {}
+type RetrievalDealAccepted struct {
+  CounterParty Address
+  Payment PaymentChannelInfo
+}

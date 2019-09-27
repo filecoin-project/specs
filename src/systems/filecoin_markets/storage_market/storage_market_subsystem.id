@@ -20,6 +20,8 @@
 // In the event that miners do not add deals to a sector,
 // full block rewards are earned after maintaining that sector for a year
 
+import base "github.com/filecoin-project/specs/systems/filecoin_markets"
+
 type StorageMarketSubsystem struct {
   // need access to:
   // - DataTransferSubsystem
