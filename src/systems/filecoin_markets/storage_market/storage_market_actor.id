@@ -22,7 +22,17 @@
 
 import base "github.com/filecoin-project/specs/systems/filecoin_markets"
 
-type StorageMarketSubsystem struct {
+type StorageDeal   base.StorageDeal
+type StorageDealID base.StorageDealID
+type TokenAmount   base.TokenAmount
+type Address       base.Address
+
+type StorageParticipantBalance struct {
+  Locked    TokenAmount
+  Available TokenAmount
+}
+
+type StorageMarketActor struct {
   // need access to:
   // - DataTransferSubsystem
   //   - transfer data
@@ -34,20 +44,25 @@ type StorageMarketSubsystem struct {
   // - NetworkSubsystem
   //   - needs access to MessagePubsub
 
+  ParticipantBalances { Address : StorageParticipantBalance }
+  StorageDeals { StorageDealID : StorageDeal }
+
   RegisterParticipant(lockedBalance TokenAmount) bool
+  WithdrawBalance(balance TokenAmount) struct {}
+  AddBalance(balance TokenAmount) struct {}
+  CheckLockedBalance(participantAddr Address) TokenAmount
 
-  VerifyLockedBalance(participantAddr Address) TokenAmount
-
-  // call by StorageProvider to publish a storaga deal on chain
+  // TODO: There should be some punishment for publishing a deal too late
+  // call by countersigner or CommitSector
   PublishStorageDeal(newStorageDeal StorageDeal) struct {}
 
-  // call by StorageProvider to update signed storage deal for a sector
+  // TODO: StorageDeals should be renewable
   UpdateStorageDeal(newStorageDeal StorageDeal) struct {}
 
   // call by CronActor on ExpiredSet
-  CloseStorageDeal(targetStorageDeal StorageDeal) struct {}
+  CloseExpiredStorageDeal(targetStorageDeal StorageDeal) struct {}
 
-  // call by CronActor on FaultSet
+  // call by StorageMarketActor or CronActor to slash deal collateral
   SlashStorageDealCollateral(targetStorageDeal StorageDeal) struct {}
 
 }

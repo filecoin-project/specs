@@ -3,31 +3,28 @@ type Path struct {}
 type Epoch struct {}
 type TokenAmount struct {}
 type Signature struct {}
-type SectorID struct {}
-type PieceInclusionProof struct {}
-type SealOutputArtifact struct {}
+type StorageDealID struct {}
+type PaymentChannelInfo struct {}
+
+// Storage Market
 
 type StorageDealProposal struct {
-  PieceRef         CID
-  PieceSize        UInt
-  PiecePath        Path
-  Provider         Address
-  Client           Address
-  StartEpoch       Epoch
-  ExpiryEpoch      Epoch
+  PieceRef          CID
+  PieceSize         UInt
+  Provider          Address
+  Client            Address
+  ExpiryEpoch       Epoch
+  StoragePrice      TokenAmount
+  StorageCollateral TokenAmount
+  ProposerSignature Signature
 }
 
-type SignedStorageDeal struct {
-  AckStorageDealProposal    AckStorageDealProposal
-  StorageFee                TokenAmount
-  ClientSignature           Signature
+type StorageDeal struct {
+  Proposal           StorageDealProposal
+  CounterSignature   Signature
 }
 
-type AckStorageDealProposalError struct {}
-type AckStorageDealProposalResponse union {
-  AckStorageDealProposalError
-  SignedStorageDeal
-}
+// Retrieval Market
 
 type FileAvailable struct {
   MinPrice TokenAmount

@@ -1,11 +1,28 @@
+import base "github.com/filecoin-project/specs/systems/filecoin_markets"
+
+type StorageDealProposal              base.StorageDealProposal
+
+type StorageDealProposalQuery         struct {}
+type StorageDealProposalQueryResponse struct {}
+type StorageDealQuery                 struct {}
+type StorageDealQueryResponse         struct {}
+
 type StorageMarketParticipant struct {
 
-  NewStorageDealProposal(storageDealProposal StorageDealPropsal) struct {}
+  // Participants call each other to submit StorageDealProposal
+  NewStorageDealProposal(storageDealProposal StorageDealProposal) struct {}
 
+  // When both parties sign on a StorageDealProposal
+  // counter signer call this function to return the signed deal
   NewStorageDeal(storageDeal StorageDeal) struct {}
 
+  // call by StorageMarketPariticipant itself to sign a StorageDealProposal
   SignStorageDealProposal(storageDealProposal StorageDealProposal) StorageDeal
 
+  // call by proposer
   QueryStorageDealProposalStatus(storageDealProposalQuery StorageDealProposalQuery) StorageDealProposalQueryResponse
   
+  // call by countersigner
+  QueryStorageDealStatus(storageDeal StorageDeal) StorageDealQueryResponse
+
 }
