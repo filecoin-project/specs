@@ -8,7 +8,7 @@ sequenceDiagram
     participant StorageProvider
 
     participant PaymentChannelActor
-    participant PaymentsSubsystem
+    participant PaymentSubsystem
 
     participant BlockchainSubsystem
     participant BlockSyncer
@@ -117,9 +117,10 @@ sequenceDiagram
             alt 1 - success
                 StorageMinerActor ->> StorageMinerActor:  UpdateDoneSet()
                 StorageMinerActor ->> MarketMinerActor:  EnsureDealsAreAccountedFor()
-                StorageMarketActor ->> StorageMarketActor: ProcessDealPayment(Deal.Frequency, Deal.Expiration, Deal.Amount)
+                StorageMarketActor ->> StorageMarketActor: ProcessDealPayment()
             else 0 - failure
                 StorageMinerActor -->> StorageMiningSubsystem: PoStError
+                StorageMarketActor -->> StorageMarketActor: SlashStorageCollateral()
             end
         end
     end
@@ -127,6 +128,8 @@ sequenceDiagram
     opt ClientQuery
         StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
         StorageProvider -->>- StorageClient: StorageDealResponse{SealingParams,DealComplete,...}
+        StorageClient ->>+ StorageMarketActor: QueryStorageDealStatus(StorgeDealQuery)
+        StorageMarketActor -->>- StorageClient: StorageDealStatus
     end
 
     loop BlockReception
@@ -230,5 +233,6 @@ sequenceDiagram
             StoragePowerConsensusSubsystem -->> StoragePowerActor: TerminateMiner(Address)
             StoragePowerConsensusSubsystem -->> StoragePowerActor: SlashPledgeCollateral(Address)
             StoragePowerConsensusSubsystem -->- StorageMinerActor: UpdateBalance(Reward)
+
         end
     end

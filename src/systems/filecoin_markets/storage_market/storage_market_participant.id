@@ -1,0 +1,11 @@
+type StorageMarketParticipant struct {
+
+  NewStorageDealProposal(storageDealProposal StorageDealPropsal) struct {}
+
+  NewStorageDeal(storageDeal StorageDeal) struct {}
+
+  SignStorageDealProposal(storageDealProposal StorageDealProposal) StorageDeal
+
+  QueryStorageDealProposalStatus(storageDealProposalQuery StorageDealProposalQuery) StorageDealProposalQueryResponse
+  
+}

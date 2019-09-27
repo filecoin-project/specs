@@ -1,7 +1,7 @@
 // Assumptions:
-//    - Deals are on Chain
+//    - Deals are on Chain 
 //    - Storage Payment is done on PoSt submission
-//    - Updatable Filecoin Storage Deals
+//    - Updatable Filecoin Storage Deals (Not in current version)
 
 // Miners can pledge and commit sectors and participate
 // in expected consensus to earn block rewards
@@ -34,20 +34,20 @@ type StorageMarketSubsystem struct {
   // - NetworkSubsystem
   //   - needs access to MessagePubsub
 
+  RegisterParticipant(lockedBalance TokenAmount) bool
+
+  VerifyLockedBalance(participantAddr Address) TokenAmount
+
   // call by StorageProvider to publish a storaga deal on chain
-  PublishSignedStorageDeal(newSignedStorageDeal SignedStorageDeal) struct {}
+  PublishStorageDeal(newStorageDeal StorageDeal) struct {}
 
   // call by StorageProvider to update signed storage deal for a sector
-  UpdateSignedStorageDeal(newSignedStorageDeal SignedStorageDeal) struct {}
+  UpdateStorageDeal(newStorageDeal StorageDeal) struct {}
 
   // call by CronActor on ExpiredSet
-  CloseSignedStorageDeal(targetStorageDeal SignedStorageDeal) struct {}
+  CloseStorageDeal(targetStorageDeal StorageDeal) struct {}
 
   // call by CronActor on FaultSet
-  SlashStorageDealCollateral(targetStorageDeal SignedStorageDeal) struct {}
-
-  // VerifyStorageProvider is called to retrieve information
-  // about a storage provider as verified by the blockchain
-  VerifyStorageProvider(ProviderAddress Address) StorageProvider
+  SlashStorageDealCollateral(targetStorageDeal StorageDeal) struct {}
 
 }
