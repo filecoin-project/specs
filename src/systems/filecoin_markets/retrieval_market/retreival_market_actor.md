@@ -1,3 +1,0 @@
----
-title: Storage Market Actor
----

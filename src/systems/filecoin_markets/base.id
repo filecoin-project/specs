@@ -4,7 +4,6 @@ type Epoch struct {}
 type TokenAmount struct {}
 type Signature struct {}
 type StorageDealID struct {}
-type PaymentChannelInfo struct {}
 
 // Storage Market
 
@@ -22,42 +21,4 @@ type StorageDealProposal struct {
 type StorageDeal struct {
   Proposal           StorageDealProposal
   CounterSignature   Signature
-}
-
-// Retrieval Market
-
-type FileAvailable struct {
-  MinPrice TokenAmount
-  Miner Address
-}
-
-type RetrievalDealProposal struct {
-  File CID
-  Payment  PaymentChannelInfo
-  MinPrice TokenAmount
-}
-
-type RetrievalDealProposalResponse union {
-  RetrievalDealAccepted
-  RetrievalDealRejected
-  RetrievalDealError
-}
-
-type RetrievalQuery struct {
-  File CID
-}
-
-type RetrievalQueryResponse union {
-  FileRetrievalAvailable
-  FileRetrievalUnavailable
-}
-
-type FileRetrievalAvailable struct {}
-type FileRetrievalUnavailable struct {}
-
-type RetrievalDealError struct {}
-type RetrievalDealRejected struct {}
-type RetrievalDealAccepted struct {
-  CounterParty Address
-  Payment PaymentChannelInfo
 }
