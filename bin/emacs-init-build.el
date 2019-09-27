@@ -30,3 +30,8 @@
   (load (expand-file-name "deps/quicklisp/slime-helper.el"))
   (setq inferior-lisp-program "bin/sbclw")
   (add-to-list 'slime-contribs 'slime-repl))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((lisp . t)))
+

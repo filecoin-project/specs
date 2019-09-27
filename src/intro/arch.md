@@ -14,3 +14,8 @@ title: "Architecture Diagrams"
 #### Protocol Flow Diagram -- deals on chain
 
 {{< diagram src="../docs/diagrams/sequence/full-deals-on-chain.mmd.svg" title="Protocol Sequence Diagram - Deals on Chain" >}}
+
+#### Parameter Calculation Dependency Graph
+
+{{< diagram src="../docs/diagrams/orient/filecoin.dot.svg" title="Parameter Calculation Dependency Graph" >}}
+

@@ -76,13 +76,14 @@ clean-deps: .PHONY
 	-rm -r bin/.emacs
 
 # intermediate targets
-website: diagrams org2md hugo-build
+# NOTE: For now, disable org2md — must manually generate until batch-mode build issues are resolved.
+website: diagrams hugo-build # org2md
 	mkdir -p build/website
 	-rm -rf build/website/*
 	mv hugo/public/* build/website
 	@echo TODO: add generate-code to this target
 
-pdf: diagrams org2md hugo-build
+pdf: diagrams hugo-build # org2md
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
@@ -92,6 +93,10 @@ hugo-build: hugo-src $(shell find hugo/content | grep '.md')
 hugo-src: $(shell find src | grep '.md')
 	rm -rf hugo/content/docs
 	cp -r src hugo/content/docs
+	# ox-hugo exports to src/content, so we need to copy that also. 	
+	cp -r src/content/ hugo/content/docs
+	mkdir -p hugo/content/ox-hugo
+	cp src/static/ox-hugo/* hugo/content/ox-hugo
 
 # this is used to get "serve-and-watch" working. trick is to use
 hugo-src-rsync: $(shell find src | grep '.md') gen-code diagrams
@@ -115,7 +120,9 @@ org2md: $(ORG_MD_FILES)
 	# cd to each target's directory, run there
 	# this should invoke orient
 	# this should produce hugo markdown output
-	bin/org2hugomd.el <$< >$@
+
+        # Skip this until batch-mode build issues are resolve.
+	# bin/org2hugomd.el <$< >$@
 
 
 # building our tools
