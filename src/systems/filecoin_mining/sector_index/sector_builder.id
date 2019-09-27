@@ -1,3 +1,6 @@
+type Sector struct {}
+type ProverID struct {}
+
 type ReplicaConfig struct {
   SectorSize     UInt
   SubsectorCount UInt

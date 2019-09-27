@@ -1,3 +1,18 @@
+type StackedDRGLayers struct {}
+type StackedDRGNodeSize struct {}
+type DRGDepth struct {}
+type DRGFraction struct {}
+type DRGDegree struct {}
+type DRGSeed struct {}
+type DRGNodeCount struct {}
+type ChungExpanderPermutationFeistelSeed struct {}
+type ChungExpanderPermutationFeistelRound struct {}
+type ChungExpanderPermutationFeistelHashFunction struct {}
+type ChungExpanderAlpha struct {}
+type ChungExpanderBeta struct {}
+type ExpanderGraphDegree struct {}
+type ExpanderGraphSeed struct {}
+type DRGNodeSize struct {}
 
 type SealAlgorithmArtifacts struct { // ZigZagPoRep
 
@@ -11,7 +26,7 @@ type SealAlgorithmArtifacts struct { // ZigZagPoRep
     // per-sector setup artifacts go here
   }
 
-  ProveArtifacts or
+  // ProveArtifacts or
   ChallengeArtifacts struct {
     // inputs into prove() go here
   }

@@ -1,4 +1,5 @@
 // Opaque identifier allowing read/write access to storage.
+type String struct {}
 type Path String
 
 // This is MetaData required to generate a PoSt proof for a sector.

@@ -1,5 +1,14 @@
 package vm
 
+type InputTree struct {}
+type Message struct {}
+type StateTree struct {}
+type MessageReceipt struct {}
+type Params struct {}
+type GasAmount struct {}
+type Bytes struct {}
+
+
 type VMInterpreter interface {
   ApplyMessage(inTree InputTree, msg Message) (outTree StateTree, ret MessageReceipt)
 }
@@ -71,7 +80,7 @@ func (vmi *VMInterpreter) ApplyMessage(inTree InputTree, msg Message, minerAddr 
     GasLimit:  msg.GasLimit,
   })
 
-  var outTree StateTree
+  // var outTree StateTree
   if out.ExitCode != 0 {
     // error -- revert all state changes -- ie drop updates. burn used gas.
     outTree = inTree // wipe!

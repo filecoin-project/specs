@@ -1,5 +1,14 @@
 type PoStProof struct {}
-type SealOuput struct {}
+type SealOutput struct {}
+type SectorSealer struct {}
+type Seed struct {}
+type SectorID struct {}
+type ReplicaConfig struct {}
+type Commitment struct {}
+type ProverID struct {}
+type Ticket struct {}
+type Block struct {}
+type SectorSealer struct {}
 
 type StorageProofsSubsystem struct {
 

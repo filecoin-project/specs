@@ -1,5 +1,6 @@
 type Voucher struct {}
 type VouchersApprovalResponse struct {}
+type PieceInclusionProof struct {}
 
 type PaymentChannelActor struct {
     RedeemVoucherWithApproval(voucher Voucher) struct {}

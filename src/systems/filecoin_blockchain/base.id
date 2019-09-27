@@ -1,5 +1,7 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 
+type BlockHeight struct {}
+
 type Ticket struct {
 	vrfResult filcrypto.VRFResult
 	vdfResult filcrypto.VDFResult

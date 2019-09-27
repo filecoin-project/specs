@@ -2,6 +2,10 @@ package vm
 
 import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
+type Storage struct {}
+type AttoFIL struct {}
+type CID struct {}
+
 type VMMessage struct {
 	To     base.Address
 	Method string
@@ -62,11 +66,11 @@ type VMContext interface {
 
 type VMStorage interface {
 	// Put writes the given object to the storage staging area and returns its CID
-	Put(interface{}) (Cid, error)
+	Put(interface{}) (CID, error)
 
 	// Get fetches the given object from storage (either staging, or local) and returns
 	// the serialized data.
-	Get(Cid) ([]byte, error)
+	Get(CID) ([]byte, error)
 
 	// Commit updates the actual stored state for the actor. This is a compare and swap
 	// operation, and will fail if 'old' is not equal to the current return value of `Head`.
@@ -74,10 +78,10 @@ type VMStorage interface {
 	//
 	// TODO: YIKES i dont think we need commit to prevent re-entrancy. if we do, the model
 	// is wrong.
-	Commit(old Cid, new Cid) error
+	Commit(old CID, new CID) error
 
 	// Head returns the CID of the current actor state
-	Head() Cid
+	Head() CID
 }
 
 // VMChainState is Chain state accessible to all contracts via the VM interface

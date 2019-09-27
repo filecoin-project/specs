@@ -1,3 +1,9 @@
+type Address struct {}
+type Storage struct {}
+type StorageDealID struct {}
+type Function struct {}
+type Piece struct {}
+
 type DataTransferSubsystem struct @(mutable) {
 	dataTransfers {UInt: DataTransferChannel}
 	volumes       [Storage]

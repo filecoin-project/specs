@@ -1,4 +1,6 @@
 type SectorInfo struct {}
+type Block struct {}
+type SectorID struct {}
 
 type FilecoinProofsSubsystem struct {
 

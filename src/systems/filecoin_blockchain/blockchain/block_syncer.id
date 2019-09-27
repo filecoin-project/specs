@@ -13,7 +13,6 @@ type BlockSyncer struct {
     blockchainSubsystem     &BlockchainSubsystem
 
     validationGraph         BlockValidationGraph
-    validateBlockSyntax()   bool
 
     // on receiving newBlock event from libp2p
     // call by BlockSyncer itself

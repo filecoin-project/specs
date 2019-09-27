@@ -1,4 +1,4 @@
-import storage_proofs "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs"
+// import storage_proofs "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs"
 
 type AddDealToSectorResponse struct {
 	sectorID SectorID,

@@ -5,7 +5,7 @@ func (sis *SectorIndexerSubsystem) AddDealToSector(deal StorageDeal) AddDealToSe
 	pip := sis.StorageProofs.GetPieceInclusionProof(deal.PieceRef)
 
 	return AddDealToSectorResponse{
-		sectorID: addPieceResponse.SectorInfo.ID
+		sectorID: addPieceResponse.SectorInfo.ID,
 		pip: pip,
 	}
 

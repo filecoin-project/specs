@@ -55,6 +55,7 @@ func ExtractElectionSeed(lookbackTipset *Tipset_I) base.ElectionSeed {
 func (self *Block_I) ValidateTickets() bool {
 	for _, tix := range self.Tickets_ {
 		panic("TODO")
+		panic(tix)
 		// tix.Validate()
 	}
 
