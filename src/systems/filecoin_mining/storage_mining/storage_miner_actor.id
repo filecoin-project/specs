@@ -10,15 +10,31 @@ type StorageMinerActor struct {
     // // contains mostly static info about this miner
     // info &MinerInfo
 
-    // call by StorageMiningSubsystem after sealing a sector
-    CommitSector(seed Seed, sectorID SectorID, sectorCommitment SectorCommitment , proof SealProof) bool
-
-    // call by StorageMiningSubsystem every PoSt submission
-    SubmitPoSt(post PoStProof, doneSet DoneSet) struct{}
+    UpdateDoneSet() struct {}
+    UpdateSectorStatus(sectorStateSets SectorStateSets, faultSets [FaultSet]) struct {}
+    SubmitPoSt(postProof base.PoStProof, sectorStateSets SectorStateSets) struct {}
+    computeProvingPeriodEndSectorState() struct {}
+    CommitSector(seed Seed, sector SectorID, sealCommitment SealCommitment, sealProof SealProof) struct {}
 }
 
-type DoneSet struct {}
-type FaultSet struct {}
+type MinerInfo struct {
+  // Account that owns this miner.
+  // - Income and returned collateral are paid to this address.
+  // - This address is also allowed to change the worker address for the miner.
+  owner Address
+
+  // Worker account for this miner.
+  // This will be the key that is used to sign blocks created by this miner, and
+  // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+  // other day to day miner activities.
+  worker Address
+
+  // Libp2p identity that should be used when connecting to this miner.
+  peerId PeerId
+
+  // Amount of space in each sector committed to the network by this miner.
+  sectorSize BytesAmount
+}
 
 /*
 type CollateralVault struct {
@@ -47,25 +63,6 @@ type Fault union {
     | None
     | GracePeriod
     | Fault
-}
-
-type MinerInfo struct {
-    // Account that owns this miner.
-  // - Income and returned collateral are paid to this address.
-  // - This address is also allowed to change the worker address for the miner.
-  owner Address
-
-    // Worker account for this miner.
-    // This will be the key that is used to sign blocks created by this miner, and
-    // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
-    // other day to day miner activities.
-  worker Address
-
-  // Libp2p identity that should be used when connecting to this miner.
-  peerId PeerId
-
-  // Amount of space in each sector committed to the network by this miner.
-  sectorSize BytesAmount
 }
 */
 
@@ -116,7 +113,7 @@ ype StorageMinerActor struct {
 
   // Internal methods
   verifySeal(sectorID SectorID, comm SealCommitment, proof SealProof)
-  verifyPoSt(proofs PoStProof, doneSet Bitfield)
+  verifyPoSt(proofs base.PoStProof, doneSet Bitfield)
 
   // Getters
   GetOwner() Address
@@ -127,7 +124,7 @@ ype StorageMinerActor struct {
   GetCurrentProvingSet() BitField
 
   // SubmitPost verifies the PoSt
-  SubmitPost(proofs PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
+  SubmitPost(proofs base.PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
   DePledge(amt TokenAmount)
 
   AddCollateral()

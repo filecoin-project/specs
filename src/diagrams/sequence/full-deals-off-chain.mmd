@@ -100,7 +100,7 @@ sequenceDiagram
         StorageProvingSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
         StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
         StorageProvingSubsystem -->>- StorageMiningSubsystem: PoStProof
-        StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+        StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, SectorStateSets)
     end
 
     opt ClientQuery
@@ -196,7 +196,7 @@ sequenceDiagram
 
     opt Storage Fault
         opt Declaration within a Proving Period
-            StorageMinerSubsystem ->> StorageMinerActor: UpdateSectorStatus([FaultSet], SectorStateSets)
+            StorageMinerSubsystem ->> StorageMinerActor: UpdateSectorStatus(sectorStateUpdatedWithFaults)
             StorageMinerActor ->> StoragePowerActor: RecomputeMinerPower()
             Note Right of StorageMinerActor: SectorStateSets := (FaultSet, RecoverSet, ExpireSet)
         end
