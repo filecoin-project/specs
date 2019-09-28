@@ -7,19 +7,6 @@ This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
 ## Rational PoSt
 
-
-
-### Definitions
-
-| Name | Value |Description |
-|------|-------|------------|
-| `POST_PROVING_PERIOD` | `2880` blocks  (~24h) | The time interval in which a PoSt has to be submitted. |
-| `POST_CHALLENGE_TIME` | `240` blocks (~2h) | The time offset at which the actual work of generating the PoSt **can not** be started earlier than. This is some delta before the end of the `Proving Period`, and as such less then a single `Proving Period`. |
-
-{{% notice todo %}}
-**TODO**: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.
-{{% /notice %}}
-
 ### High Level API
 
 #### Fault Detection

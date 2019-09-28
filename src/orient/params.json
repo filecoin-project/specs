@@ -21,5 +21,6 @@
   "spacegap": 0.1,
   "expected_winning_miners": 5,
   "lambda": 10,
-  "sector_size_gib": 32
+  "sector_size_gib": 32,
+  "post_challenge_hours": 2
 }

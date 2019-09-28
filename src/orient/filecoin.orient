@@ -328,13 +328,22 @@ Proofs:
       declare(post_randomness_lookback)
 
     Parameters:
-      declare(proving_period_time)
+      declare(proving_period_hours)
       declare(max_proving_sectors)
 
+      declare(post_challenge_blocks)
+      describe(post_challenge_blocks, "The time offset at which the actual work of generating the PoSt can not be started earlier than. This is some delta before the end of the Proving Period, and as such less then a single Proving Period.", blocks)
+
+      describe(post_challenge_time, "PoSt challenge time (see POST_CHALLENGE_BLOCKS).", seconds)
+      post_challenge_time = post_challenge_blocks * block_time
+      post_challenge_time = post_challenge_hours * 60 * 60
+      
   ProofOfSpacetime (RationalPoSt):
     Parameters:
       post_challenges = online_challenges
-
+      post_proving_period = proving_period_seconds / block_time
+      describe(post_proving_period, "The time interval in which a PoSt has to be submitted", blocks)
+      
     Cost:
       declare(post_proving_cost)
 
