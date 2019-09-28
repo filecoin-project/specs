@@ -1,0 +1,37 @@
+{{/* get the Markdown without front matter  */}}
+{{ $c := .page.Content }}
+
+{{/* set var to heading level + .level */}}
+{{ $l1 := (add .level 1) }}
+{{ $l2 := (add .level 2) }}
+{{ $l3 := (add .level 3) }}
+{{ $l4 := (add .level 4) }}
+{{ $l5 := (add .level 5) }}
+{{ $l6 := (add .level 6) }}
+
+
+{{/* min/max */}}
+{{ $l1 := cond (lt $l1 1) 1 (cond (gt $l1 6) 6 $l1) }}
+{{ $l2 := cond (lt $l2 1) 1 (cond (gt $l2 6) 6 $l2) }}
+{{ $l3 := cond (lt $l3 1) 1 (cond (gt $l3 6) 6 $l3) }}
+{{ $l4 := cond (lt $l4 1) 1 (cond (gt $l4 6) 6 $l4) }}
+{{ $l5 := cond (lt $l5 1) 1 (cond (gt $l5 6) 6 $l5) }}
+{{ $l6 := cond (lt $l6 1) 1 (cond (gt $l6 6) 6 $l6) }}
+
+{{ $c := replace $c "<h6 " (printf "<h%d " $l6) }}
+{{ $c := replace $c "<h5 " (printf "<h%d " $l5) }}
+{{ $c := replace $c "<h4 " (printf "<h%d " $l4) }}
+{{ $c := replace $c "<h3 " (printf "<h%d " $l3) }}
+{{ $c := replace $c "<h2 " (printf "<h%d " $l2) }}
+{{ $c := replace $c "<h1 " (printf "<h%d " $l1) }}
+
+{{ $c := replace $c "</h6>" (printf "</h%d>" $l6) }}
+{{ $c := replace $c "</h5>" (printf "</h%d>" $l5) }}
+{{ $c := replace $c "</h4>" (printf "</h%d>" $l4) }}
+{{ $c := replace $c "</h3>" (printf "</h%d>" $l3) }}
+{{ $c := replace $c "</h2>" (printf "</h%d>" $l2) }}
+{{ $c := replace $c "</h1>" (printf "</h%d>" $l1) }}
+
+
+{{/* render the content */}}
+{{ $c | safeHTML }}

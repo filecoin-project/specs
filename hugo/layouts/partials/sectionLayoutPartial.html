@@ -9,15 +9,17 @@
 
 <div id="{{ $tag }}">
 
-{{ printf "<h%d>" $depth | safeHTML }}
+{{ printf "<h%d class=\"section-header\">" $depth | safeHTML }}
   {{ $page.Param "title" | markdownify }}
 {{ printf "</h%d>" $depth | safeHTML }}
 
-{{ $page.Content }}
+<div class="section-content">
+{{ partial "shiftHeadings.html" (dict "page" $page "level" $depth ) }}
+</div>
 
 {{ range ($page.Param "entries") }}
   {{ with $page.GetPage . }}
-    {{ partial "sectionLayoutPartial.html" (dict "page" .) }}
+    {{ partial "sectionLayoutPartial.html" (dict "page" . ) }}
   {{ end }}
 {{ end }}
 

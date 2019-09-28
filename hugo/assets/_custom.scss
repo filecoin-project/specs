@@ -18,7 +18,7 @@
 
 $header-highlight: #e6fbfd;
 
-h1, h2, h3, h4, h5 {
+h1, h2, h3, h4, h5, h6 {
   background: $header-highlight;
 }
 
@@ -43,6 +43,11 @@ h5 {
   padding: 12px;
 }
 
+h6 {
+  padding: 10px;
+  font-size: 14px;
+  font-weight: normal;
+}
 
 // section numbering
 
@@ -54,23 +59,23 @@ body, .book-menu, .book-page {
   counter-reset : h1;
 }
 
-h1, .menu-item.depth-1 {
+h1.section-header, .menu-item.depth-1 {
   counter-reset : h2;
 }
 
-h2, .menu-item.depth-2 {
+h2.section-header, .menu-item.depth-2 {
   counter-reset : h3;
 }
 
-h3, .menu-item.depth-3 {
+h3.section-header, .menu-item.depth-3 {
   counter-reset : h4;
 }
 
-h4, .menu-item.depth-4 {
+h4.section-header, .menu-item.depth-4 {
   counter-reset : h5;
 }
 
-h5, .menu-item.depth-5 {
+h5.section-header, .menu-item.depth-5 {
   counter-reset : h6;
 }
 
@@ -82,37 +87,37 @@ h5, .menu-item.depth-5 {
 //  background: rgb(231, 252, 255); // probably not needed. here if we do
 }
 
-article h1:before, .menu-item.depth-1:before {
+article h1.section-header:before, .menu-item.depth-1:before {
   content : counter(h1,decimal) ". ";
   counter-increment : h1;
 }
 
-article h2:before, .menu-item.depth-2:before {
+article h2.section-header:before, .menu-item.depth-2:before {
   content : counter(h1,decimal) "." counter(h2,decimal) ". ";
   counter-increment : h2;
 }
 
-article h3:before, .menu-item.depth-3:before {
+article h3.section-header:before, .menu-item.depth-3:before {
   content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) ". ";
   counter-increment : h3;
 }
 
-article h4:before, .menu-item.depth-4:before {
+article h4.section-header:before, .menu-item.depth-4:before {
   content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) "." counter(h4,decimal) ". ";
   counter-increment : h4;
 }
 
-article h5:before, .menu-item.depth-5:before {
+article h5.section-header:before, .menu-item.depth-5:before {
   content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) "." counter(h4,decimal) "." counter(h5,decimal) ". ";
   counter-increment : h5;
 }
 
-article h6:before, .menu-item.depth-6:before {
+article h6.section-header:before, .menu-item.depth-6:before {
   content : counter(h1,decimal) "." counter(h2,decimal) "." counter(h3,decimal) "." counter(h4,decimal) "." counter(h5,decimal) "." counter(h6,decimal) ". ";
   counter-increment : h6;
 }
 
-h1.nocount:before, h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before,
+h1.section-header.nocount:before, h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before,
 .menu-item.nocount:before {
   content : "";
   counter-increment : none;
