@@ -1,7 +1,7 @@
 ---
 title: Libraries used in Filecoin
 entries:
-- filproofs
+- filcrypto
 - fcs
 - ipld
 - libp2p
