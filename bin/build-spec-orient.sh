@@ -6,6 +6,7 @@ mkdir -p $output_dir
 mkdir -p $diagram_dir
 
 orient/bin/orient solve --system=$input_dir/filecoin.orient --in=$input_dir/params.json | jq > $output_dir/solved-parameters.json
+orient/bin/orient solve --system=$input_dir/filecoin.orient --in=$input_dir/multi-params.json | jq > $output_dir/multi-solved-parameters.json
 
 orient/bin/orient report --system=$input_dir/filecoin.orient --in=$input_dir/params.json  > $output_dir/filecoin-report.html
 
