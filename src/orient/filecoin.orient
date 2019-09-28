@@ -332,7 +332,7 @@ Proofs:
       declare(max_proving_sectors)
 
       declare(post_challenge_blocks)
-      describe(post_challenge_blocks, "The time offset at which the actual work of generating the PoSt can not be started earlier than. This is some delta before the end of the Proving Period, and as such less then a single Proving Period.", blocks)
+      describe(post_challenge_blocks, "The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.", blocks)
 
       describe(post_challenge_time, "PoSt challenge time (see POST_CHALLENGE_BLOCKS).", seconds)
       post_challenge_time = post_challenge_blocks * block_time
