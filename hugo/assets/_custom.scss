@@ -83,6 +83,10 @@ h5, .menu-item.depth-5 {
   color: $section-number-menu-color;
 }
 
+h1:before, h2:before, h3:before, h4:before, h5:before, h6:before {
+  color: $section-number-menu-color;
+}
+
 .menu-item.highlight {
 //  background: rgb(231, 252, 255); // probably not needed. here if we do
 }
