@@ -5,7 +5,7 @@ title: Block Receiver
 A node must decode and perform syntactic validation for every block received
 before passing it on (e.g. in a lipbp2p pubsub validator).
 
-{{<hd 1 "Syntactic Validation">}}
+# Syntactic Validation
 
 {{<goFile Block>}}
 

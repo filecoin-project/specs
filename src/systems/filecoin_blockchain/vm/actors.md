@@ -6,7 +6,7 @@ entries:
 # suppressMenu: true
 ---
 
-{{<hd 1 "ActorState">}}
+# ActorState
 
 The following data structures use _kinded_ representations for their IPLD
 encodings, since the types can be inferred from the context in which they are used

@@ -2,7 +2,7 @@
 title: Chain Manager
 ---
 
-{{<hd 1 "Semantic Validation">}}
+# Semantic Validation
 
 A semantically valid block:
 

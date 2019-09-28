@@ -9,7 +9,7 @@ title: "Expected Consensus"
 - [Storage market](storage-market.md#the-power-table) on how the `power table` is created and maintained.
 - [Block data structure](data-structures.md#block) for details on fields and encoding.
 
-{{<hd 1 "Important concepts and definitions">}}
+# Important concepts and definitions
 
 Some important concepts relevant to expected consensus are:
 
@@ -24,7 +24,7 @@ Some important concepts relevant to expected consensus are:
 - [Power Fraction](definitions.md#power-fraction)
 - [ElectionProof](definitions.md#electionproof)
 
-{{<hd 1 "Algorithm">}}
+# Algorithm
 
 Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high
 level, it operates by running a leader election every round in which, on expectation, one
@@ -99,7 +99,8 @@ The EC algorithm can be better understood by looking at its two major components
 - {{<sref chain_selection>}}
 
 {{<label secret_leader_election>}}
-{{<hd 1 "Secret Leader Election">}}
+
+# Secret Leader Election
 
 Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](storage-market.md#the-power-table), where power is equivalent to storage provided through time.
 
@@ -111,7 +112,7 @@ In order to pressure the network to converge on a single chain, each miner may o
 
 TODO: pictures of ticket chain and block chain
 
-{{<hd 2 "Tickets">}}
+## Tickets
 
 One may think of leader election in EC as a verifiable lottery, in which participants win in proportion to the power they have within the network.
 
@@ -169,7 +170,7 @@ decreasing the cost of running a targeted attack (given they have local predicta
 more space on-chain.
 ```
 
-{{<hd 3 "Ticket generation">}}
+ ### Ticket generation
 
 This section discusses how tickets are generated for the `Tickets` array. For how tickets are validated, see [ticket validation](mining.md#ticket-validation).
 
@@ -177,7 +178,7 @@ At round `N`, new tickets are generated using tickets drawn from the [TipSet](#t
 
 TODO: pictures of TipSet ticket drawing
 
-The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output. This output is then used as input into a Verifiable Delay Function (VDF), with the VRFProof, VDFProof and VDFOutput generating a new ticket for future use. 
+The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output. This output is then used as input into a Verifiable Delay Function (VDF), with the VRFProof, VDFProof and VDFOutput generating a new ticket for future use.
 
 The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
 The VDF approximates clock synchrony for miners, thereby ensuring miners have waited an appropriate delay ahead of drawing a new ticket. It ensures network liveness, allowing miners to run a new election if no winner is found in a given round.
@@ -219,7 +220,7 @@ Output: newTicket
 4. Return the new ticket
 ```
 
-{{<hd 2 "Running a leader election">}}
+## Running a leader election
 
 Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see [election validation](mining.md#election-validation).
 
@@ -249,7 +250,7 @@ Output: 1 or 0
         p_m <-- GetMinersPowerAt(N-1, self.PK)
     iii. # Get power fraction
   		p_f <-- p_m/p_n
-2. Draw parentTicket from K blocks back (see ticket creation above for example, using 1 block back) 
+2. Draw parentTicket from K blocks back (see ticket creation above for example, using 1 block back)
 3. Run it through VRF and get determinstic output
     i. # take the VDFOutput of that ticket as input, specified for the appropriate operation type
         input <-- VRFPersonalization.ElectionProof | parentTicket.VDFOutput
@@ -267,7 +268,7 @@ Output: 1 or 0
         if readLittleEndian(VRFOutput) <= normalized_power
             return newEP
         # otherwise parentTicket is not a winning lottery ticket
-        else 
+        else
             Return 0
 ```
 
@@ -275,7 +276,7 @@ If the miner scratches a winning ticket in this round, it can use newEP, along w
 
 It is important to note that every block contains two artifacts: one, a ticket derived from last block's ticket to prove that they have waited the appropriate delay, and two, an election proof derived from the ticket `K` rounds back used to run leader election.
 
-{{<hd 3 "Losing Tickets">}}
+### Losing Tickets
 
 In the case that everybody draws a losing ticket in a given round (i.e. no miner is eligible to produce a block), every miner can run leader election again by "scratching" (attempting to generate a new `ElectionProof` from) the next ticket in the chain. That is, miners will now use the ticket sampled `K-1` rounds back to generate a new `ElectionProof`. They can then compare that proof with their current power fraction. This is repeated until a miner scratches a winning ticket and can publish a block (see [Block Generation](#block-generation)).
 
@@ -292,7 +293,7 @@ New blocks (with multiple tickets) will have a few key properties:
 
 This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array.
 
-{{<hd 3 "A note on miners' 'power fraction'">}}
+### A note on miners' 'power fraction'
 
 The portion of blocks a given miner generates (and so the block rewards they earn) is proportional to their `Power Fraction` over time.
 
@@ -308,16 +309,17 @@ Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 39. Their next `
 
 At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 39 for their own power (and an actor from Y for total network power); at height 68, M1 will use the storage market actor from height 67 for their own power, and the storage market actor from height 68 for total power and so on.
 
-{{<hd 2 "Block Generation">}}
+## Block Generation
 
 Once a miner has a winning election proof generated over `i` rounds and `i` corresponding tickets, they may create a block. For more on this, see the [Mining spec](mining.md#block-creation).
 
 {{<label chain_selection>}}
-{{<hd 1 "Chain Selection">}}
+
+# Chain Selection
 
 Just as there can be 0 miners win in a round, multiple miners can be elected in a given round. This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round.
 
-{{<hd 2 "Tipsets">}}
+## Tipsets
 
 All valid blocks generated in a round form a `TipSet` that participants will attempt to mine off of in the subsequent round (see above). TipSets are valid so long as:
 
@@ -331,7 +333,7 @@ The blocks in a tipset have no defined order in representation. During state com
 Due to network propagation delay, it is possible for a miner in round N+1 to omit valid blocks mined at round N from their TipSet. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol.
 
 {{<label chain_weighting>}}
-{{<hd 2 "Chain Weighting">}}
+## Chain Weighting
 
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
 
@@ -359,7 +361,7 @@ the same `ParentWeight` value) plus the delta weight of each parent. To make the
 computation a bit easier, a block's `ParentWeight` is stored in the block itself (otherwise
 potentially long chain scans would be required to compute a given block's weight).
 
-{{<hd 2 "Selecting between TipSets with equal weight">}}
+## Selecting between TipSets with equal weight
 
 When selecting between TipSets of equal weight, a miner chooses the one with the smallest min ticket (by bytewise comparison).
 
@@ -371,7 +373,7 @@ Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but 
 
 The probability that two TipSets with different blocks would have all the same tickets can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes.
 
-{{<hd 2 "Slashing">}}
+## Slashing
 
 See the [Faults spec](faults.md) for implementation details.
 
@@ -391,11 +393,11 @@ TODO: It is unclear that rewarding the reporter any more than gas fees is the ri
 
 Note: One may wonder what prevents miners from simply breaking up their power into multiple unlinkable miner actors  (or sybils) that will be able to mine on multiple chains without being caught mining at the same round at the same time. Read more about this [here](https://github.com/filecoin-project/consensus/issues/32).
 
-{{<hd 1 "Implementation Notes">}}
+# Implementation Notes
 
 - When selecting messages from the mempool to include in the block, be aware that other miners may also generate blocks during this round, and to maximize fee earnings it may be best to select some messages at random (second in a duplicate earns no fees).
 
-{{<hd 1 "Open Questions">}}
+# Open Questions
 
 - Parameter K
 - VDF difficulty adjustment
