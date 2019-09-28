@@ -1,16 +1,16 @@
 Assumptions:
   CID [CRH]:
     declare(cid_size, bytes)
-    describe(cid_size, "The size of a CID, in bytes.")
+    describe(cid_size, "The size of a CID.", bytes)
     cid_size = 32 + 1 + 1 + 1
 
   SLE [VRF]:
     declare(vrf_proof_size) // TODO
-    describe(vrf_proof_size, "The size of a VRF proof, in bytes.")
+    describe(vrf_proof_size, "The size of a VRF proof.", bytes)
 
 Primitives:
   declare(varint, bytes)
-  describe(varint, "The size of a VarInt, in bytes.")
+  describe(varint, "The size of a VarInt.", bytes)
   varint = 4
 
   u64 = 8
@@ -19,82 +19,82 @@ Primitives:
   Dimensions:
     Size:
       kib = 1024
-      describe (kib, "The number of bytes in one KiB.")
+      describe (kib, "The number of bytes in one KiB.", bytes)
 
       mib = 1024 * kib
-      describe (mib, "The number of bytes in one MiB.")
+      describe (mib, "The number of bytes in one MiB.", bytes)
 
       gib = 1024 * mib
-      describe (mib, "The number of bytes in one GiB.")
+      describe (mib, "The number of bytes in one GiB.", bytes)
 
       tib = 1024 * gib
-      describe (mib, "The number of bytes in one TiB.")
+      describe (mib, "The number of bytes in one TiB.", bytes)
 
       pib = 1024 * tib
-      describe (mib, "The number of bytes in one PiB.")
+      describe (mib, "The number of bytes in one PiB.", bytes)
 
       eix = 1024 * pib
-      describe (mib, "The number of bytes in one EiX.")
+      describe (mib, "The number of bytes in one EiX.", bytes)
     Time:
       year_in_seconds = 365.25 * 24 * 60 * 60
-      describe(year_in_seconds, "The number of seconds in one year.")
+      describe(year_in_seconds, "The number of seconds in one year.", seconds)
 
 VDFRSA:
   declare(rsa_element, bytes)
-  describe(rsa_element, "The size of an RSA element, in bytes.")
+  describe(rsa_element, "The size of an RSA element.", bytes)
   rsa_element = (2048/8)
 
 Blockchain:
   declare(block_time, seconds)
   Address:
     address_size = cid_size
-    describe(address_size, "The size of an address, in bytes.")
+    describe(address_size, "The size of an address.", bytes)
 
   Block:
     block_framing_size = block_header_size + messages_size + receipts_size
-    describe(block_framing_size, "The total amount of block framing, in bytes.")
+    describe(block_framing_size, "The total amount of block framing.", bytes)
 
     Messages:
       // declare(messages, integer) // TODO
       messages_size = messages * message_size
-      describe(messages_size, "The total size of the messages in a block, in bytes.")
+      describe(messages_size, "The total size of the messages in a block.", bytes)
 
       messages_root_cid = cid_size
-      describe(messages_root_cid, "The size of a message's root CID, in bytes.")
+      describe(messages_root_cid, "Size of the CID of the root merkle tree of the messages.", bytes)
 
       Message:
         message_size = to_address + from_address + message_nonce + value + gas_price + gas_limit + actor_method
-        describe(message_size, "The size of a single message, in bytes.")
+        describe(message_size, "The size of a single message.", bytes)
 
         to_address = address_size
-        describe(to_address, "The size of a message's 'to address', in bytes.")
+        describe(to_address, "The size of a message's 'to address'.", bytes)
 
         from_address = address_size
-        describe(to_address, "The size of a message's 'from address', in bytes.")
+        describe(to_address, "The size of a message's 'from address'.", bytes)
 
         Nonce:
           declare(message_nonce, bytes) // TODO
-          describe(message_nonce, "The size of a message's nonce, in bytes.")
+          describe(message_nonce, "The size of a message's nonce.", bytes)
           message_nonce = varint
 
         Value:
           declare(value, bytes)
-          describe(value, "The size of a 'value' element, in bytes.")
+          describe(value, "The size of a 'value' element.", bytes)
           value = u64
 
         Gas:
           declare(gas_price, bytes)
-          describe(gas_price, "The size required to represent the gas price, in bytes.")
+          describe(gas_price, "The size required to represent the gas price.", bytes)
           gas_price = u64
           
           declare(gas_limit, bytes)
-          describe(gas_price, "The size required to represent the gas limit, in bytes.")
+          describe(gas_price, "The size required to represent the gas limit.", bytes)
           gas_limit = u64
 
         ActorMethod:
           declare(actor_method, bytes) // TODO: actor_method what is it? how big is it?
           actor_method = u64
-          describe(actor_method, "The size required to represent an actor method, in bytes.")
+          describe(actor_method, "The size required to represent an actor method.", bytes)
 
     Receipts:
       receipts = messages // TODO check
@@ -102,22 +102,22 @@ Blockchain:
       receipts_size = receipts * message_receipt
       describe(receipts_size, "The total size of all message receipts, in bytes.")
       message_receipts_cid = cid_size
-      describe(message_receipts_cid, "The size of one message receipt's CID, in bytes.")
+      describe(message_receipts_cid, "The size of one message receipt's CID.", bytes)
 
       Receipt:
         message_receipt = exit_code + return + gas_used
-        describe(message_receipt, "The size of one message receipt, in bytes.")
+        describe(message_receipt, "The size of one message receipt.", bytes)
         
         // declare(exit_code, bytes) // TODO
         exit_code = varint
-        describe(exit_code, "The size of an exit code, in bytes.")
+        describe(exit_code, "The size of an exit code.", bytes)
         // declare(return, bytes) // TODO
         return = varint
-        describe(return, "The size of a message's return value, in bytes.")
+        describe(return, "The size of a message's return value.", bytes)
 
         // declare(gas_used, bytes) // TODO
         gas_used = u64
-        describe(gas_used, "The size required to represent the amount of gas used by a message, in bytes.")
+        describe(gas_used, "The size required to represent the amount of gas used by a message.", bytes)
 
     BlockHeader (EC):
       declare(block_header_size, bytes)
