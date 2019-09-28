@@ -337,6 +337,7 @@ Proofs:
       describe(post_challenge_time, "PoSt challenge time (see POST_CHALLENGE_BLOCKS).", seconds)
       post_challenge_time = post_challenge_blocks * block_time
       post_challenge_time = post_challenge_hours * 60 * 60
+      describe(post_challenge_hours "PoSt challenge time (see POST_CHALLENGE_BLOCKS).", hours)
       
   ProofOfSpacetime (RationalPoSt):
     Parameters:
