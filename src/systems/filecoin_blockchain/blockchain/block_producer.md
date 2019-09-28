@@ -2,14 +2,14 @@
 title: Block Producer
 ---
 
-## Mining Blocks
+# Mining Blocks
 
 Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [TipSets](expected-consensus.md#tipsets) seen on the network.
 
 For additional details around how consensus works in Filecoin, see the [expected consensus spec](expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
 
-### Ticket Generation
+## Ticket Generation
 
 For details of ticket generation, see the [expected consensus spec](expected-consensus.md#ticket-generation).
 
@@ -53,7 +53,7 @@ Heaviest tipset at H-1 is {B0}
 
 Anytime a miner receives new blocks, it should evaluate which is the heaviest TipSet it knows about and mine atop it.
 
-### Block Creation
+## Block Creation
 
 Scratching a winning ticket, and armed with a valid `ElectionProof`, a miner can now publish a new block!
 
@@ -118,11 +118,11 @@ The miner will wait until BLOCK_DELAY has passed since the latest block in the p
 
 Now the block is complete, all that's left is to sign it. The miner serializes the block now (without the signature field), takes the sha256 hash of it, and signs that hash. They place the resultant signature in the `BlockSig` field.
 
-#### Block Broadcast
+## Block Broadcast
 
 An eligible miner broadcasts the completed block to the network (via [block propagation](data-propagation.md)), and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!
 
-### Block Rewards
+# Block Rewards
 
 Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. The reward amount remains fixed for a period of 1 week (given our 30 second block time, this  is 20,160 blocks, the `AdjustmentPeriod`) and is then adjusted. Over time, the reward will eventually become zero as the fractional amount given out at each step shrinks the network account's balance to 0.
 
@@ -153,7 +153,7 @@ Note: Due to jitter in EC, and the gregorian calendar, there may be some error i
 
 TODO: Ensure that if a miner earns a block reward while undercollateralized, then `min(blockReward, requiredCollateral-availableBalance)` is garnished (transfered to the miner actor instead of the owner).
 
-### Notes on Block Reward Application
+## Notes on Block Reward Application
 
 As mentioned above, every round, a miner checks to see if they have been selected as the leader for that particular round (see [Secret Leader Election](expected-consensus.md#secret-leader-election) in the Expected Consensus spec for more detail). Thus, it is possible that multiple miners may be selected as winners in a given round, and thus, that there will be multiple blocks with the same parents that are produced at the same block height (forming a TipSet). Each of the winning miners will apply the block reward directly to their actor's state in their state tree.
 
@@ -163,6 +163,6 @@ Thus, each of the miners who produced a block in the TipSet will receive a block
 
 Messages in Filecoin also have an associated transaction fee (based on the gas costs of executing the message). In the case where multiple winning miners included the same message in their blocks, only the first miner will be paid this transaction fee. The first miner is the miner with the lowest ticket value (sorted lexicographically). More details on message execution can be found in the [State Machine spec](state-machine.md#execution-calling-a-method-on-an-actor).
 
-### Open Questions
+# Open Questions
 
 - How should receipts for tipsets 'virtual blocks' be referenced? It is common for applications to provide the merkleproof of a receipt to prove that a transaction was successfully executed.
