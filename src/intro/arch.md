@@ -2,7 +2,15 @@
 title: "Architecture Diagrams"
 ---
 
-#### Overview Diagram
+# Overview Diagram
+
+TODO:
+
+- cleanup / reorganize
+  - this diagram is accurate, and helps lots to navigate, but it's still a bit confusing
+  - the arrows and lines make it a bit hard to follow. We should have a much cleaner version (maybe based on [C4](https://c4model.com))
+- reflect addition of Token system
+  - move data_transfers into Token
 
 {{< diagram src="../docs/diagrams/overview1/overview.dot.svg" title="Protocol Overview Diagram" >}}
 
