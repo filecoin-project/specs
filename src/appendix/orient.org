@@ -296,4 +296,6 @@
 
 
 * Parameter Definitions
+#+INCLUDE: "../orient/filecoin.orient" src text
+* Parsed Parameter Definitions
 #+INCLUDE: "../../build/orient/filecoin.json" src json

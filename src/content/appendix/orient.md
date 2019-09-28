@@ -273,6 +273,433 @@ draft = false
 
 ## Parameter Definitions {#parameter-definitions}
 
+```text
+Assumptions:
+  CID [CRH]:
+    declare(cid_size, bytes)
+    describe(cid_size, "The size of a CID.", bytes)
+    cid_size = 32 + 1 + 1 + 1
+
+  SLE [VRF]:
+    declare(vrf_proof_size) // TODO
+    describe(vrf_proof_size, "The size of a VRF proof.", bytes)
+
+Primitives:
+  declare(varint, bytes)
+  describe(varint, "The size of a VarInt.", bytes)
+  varint = 4
+
+  u64 = 8
+  describe(u64, "The size of a U64, in bytes.")
+
+  Dimensions:
+    Size:
+      kib = 1024
+      describe (kib, "The number of bytes in one KiB.", bytes)
+
+      mib = 1024 * kib
+      describe (mib, "The number of bytes in one MiB.", bytes)
+
+      gib = 1024 * mib
+      describe (mib, "The number of bytes in one GiB.", bytes)
+
+      tib = 1024 * gib
+      describe (mib, "The number of bytes in one TiB.", bytes)
+
+      pib = 1024 * tib
+      describe (mib, "The number of bytes in one PiB.", bytes)
+
+      eix = 1024 * pib
+      describe (mib, "The number of bytes in one EiX.", bytes)
+    Time:
+      year_in_seconds = 365.25 * 24 * 60 * 60
+      describe(year_in_seconds, "The number of seconds in one year.", seconds)
+
+VDFRSA:
+  declare(rsa_element, bytes)
+  describe(rsa_element, "The size of an RSA element.", bytes)
+  rsa_element = (2048/8)
+
+Blockchain:
+  declare(block_time, seconds)
+  Address:
+    address_size = cid_size
+    describe(address_size, "The size of an address.", bytes)
+
+  Block:
+    block_framing_size = block_header_size + messages_size + receipts_size
+    describe(block_framing_size, "The total amount of block framing.", bytes)
+
+    Messages:
+      // declare(messages, integer) // TODO
+      messages_size = messages * message_size
+      describe(messages_size, "The total size of the messages in a block.", bytes)
+
+      messages_root_cid = cid_size
+      describe(messages_root_cid, "Size of the CID of the root merkle tree of the messages.", bytes)
+
+      Message:
+        message_size = to_address + from_address + message_nonce + value + gas_price + gas_limit + actor_method
+        describe(message_size, "The size of a single message.", bytes)
+
+        to_address = address_size
+        describe(to_address, "The size of a message's 'to address'.", bytes)
+
+        from_address = address_size
+        describe(to_address, "The size of a message's 'from address'.", bytes)
+
+        Nonce:
+          declare(message_nonce, bytes) // TODO
+          describe(message_nonce, "The size of a message's nonce.", bytes)
+          message_nonce = varint
+
+        Value:
+          declare(value, bytes)
+          describe(value, "The size of a 'value' element.", bytes)
+          value = u64
+
+        Gas:
+          declare(gas_price, bytes)
+          describe(gas_price, "The size required to represent the gas price.", bytes)
+          gas_price = u64
+
+          declare(gas_limit, bytes)
+          describe(gas_price, "The size required to represent the gas limit.", bytes)
+          gas_limit = u64
+
+        ActorMethod:
+          declare(actor_method, bytes) // TODO: actor_method what is it? how big is it?
+          actor_method = u64
+          describe(actor_method, "The size required to represent an actor method.", bytes)
+
+    Receipts:
+      receipts = messages // TODO check
+      // declare(receipts, integer) // TODO
+      receipts_size = receipts * message_receipt
+      describe(receipts_size, "The total size of all message receipts, in bytes.")
+      message_receipts_cid = cid_size
+      describe(message_receipts_cid, "The size of one message receipt's CID.", bytes)
+
+      Receipt:
+        message_receipt = exit_code + return + gas_used
+        describe(message_receipt, "The size of one message receipt.", bytes)
+
+        // declare(exit_code, bytes) // TODO
+        exit_code = varint
+        describe(exit_code, "The size of an exit code.", bytes)
+        // declare(return, bytes) // TODO
+        return = varint
+        describe(return, "The size of a message's return value.", bytes)
+
+        // declare(gas_used, bytes) // TODO
+        gas_used = u64
+        describe(gas_used, "The size required to represent the amount of gas used by a message.", bytes)
+
+    BlockHeader (EC):
+      declare(block_header_size, bytes)
+      assume(block_header_size > 0)
+      assume(block_header_size < 1024*1024*10) // assume max is 10MB
+
+      block_header_size = block_header_fixed_size + block_header_variable_size
+      block_header_fixed_size = miner_address_size + election_proof_size + parent_weight_size + block_height_size + state_root_cid + messages_root_cid + bls_agg_size + message_receipts_cid + timestamp_size + block_sig_size
+      block_header_variable_size = tickets_size + parents_cids
+
+      StateTree:
+        state_root_cid = cid_size
+
+      Weight:
+        declare(parent_weight_size, bytes) // TODO
+        parent_weight_size = u64
+
+      Height:
+        declare(block_height_size, bytes) // TODO
+        block_height_size = u64
+
+      MinerAddress [CID]:
+        miner_address_size = address_size
+
+      ElectionProof (VRFBls) [SLE, BLSSig]:
+        declare(election_proof_size, bytes) // TODO
+        election_proof_size = 64
+
+      // ElectionProof (VRFSecpk) [SLE, Secpk]:
+      //   declare(election_proof_size, bytes) // TODO
+      //   election_proof_size = 80
+
+      Parents [CID]:
+        // declare(parents, integer) // TODO
+        parents = expected_winning_miners
+        parents_cids = parents * cid_size
+
+      BLSSignatures (BLSSigAgg) [BLSSigAgg]:
+        declare(bls_agg_size, bytes) // TODO
+        bls_agg_size = 96
+
+      Timestamp:
+        // declare(timestamp_size, integer) // TODO
+        timestamp_size = u64
+
+      // BlockSig (BlockSigSecpk):
+        // declare(block_sig_size, integer) // TODO
+        // block_sig_size = 80
+
+      BlockSig (BlockSigBls):
+        declare(block_sig_size, integer) // TODO
+        block_sig_size = 96
+
+      Tickets:
+        // declare(tickets, integer)
+        declare(tickets_size, bytes)
+        tickets_size = ticket_size * tickets
+        ticket_size = election_proof_size + vdf_proof_size + vdf_output_size
+
+SNARK [SNARKAssumptions]:
+  declare(snark_single_proof_size, bytes)
+  snark_single_proof_size = 192
+  snark_max_constraints = 100000000
+
+// VDF (VDFStorageBased):
+//   vdf_proof_size = (vdf_snark_circuit / snark_max_constraints) * snark_single_proof_size
+//   vdf_output_size = hash_size
+
+VDF (VDFRSA):
+  vdf_proof_size = 3 * rsa_element
+  vdf_output_size = 0
+
+Proofs:
+  ProofOfReplication:
+    Graph:
+      // declare(node_size, integer)
+      // declare(sector_size, integer)
+      // declare(nodes, integer)
+      nodes = sector_size / node_size
+      degree = degree_base + degree_expander
+      sector_size_gib = sector_size / gib
+
+      DRG (DRSample) [DRGAssumption]:
+        // declare(degree_base, integer)
+        drg_e = 0.80
+        drg_d = 1/4
+
+      ExpanderParents (Chung) [ChungAssumption]:
+        // declare(degree_expander, integer)
+
+      Layers:
+        // declare(layers, integer)
+        assume(layers > 0)
+
+    Soundness:
+      // declare(lambda, integer)
+      assume(soundness > 0)
+      assume(soundness < 0.5)
+      soundness = 1/(2^lambda)
+
+    SpaceGap:
+      assume(spacegap > 0)
+      assume(spacegap < 0.5)
+
+    Challenges:
+      OfflineChallenges:
+        // declare(offline_challenges, integer)
+        // declare(offline_challenges_all, integer)
+        assume(offline_challenges > 0)
+
+      OnlineChallenges:
+        // declare(online_challenges, integer)
+        assume(online_challenges > 0)
+
+    Seal:
+      Encoding [KDFTiming]:
+        assume(kdf_content > 0)
+        assume(encoding_time > 0)
+        assume(polling_time > 0)
+        kdf_content = degree + 1
+        encoding_time = layers * nodes * (kdf_content - 1) * kdf_hash_time * (node_size / kdf_hash_size)
+        encoding_time_mins = encoding_time / 60
+        malicious_encoding = encoding_time / encoding_amax
+        polling_time = malicious_encoding * drg_d
+
+    Commitment (ColumnCommitments) [CRH]:
+      commit_size = cid_size
+      assume(replica_commit_time > 0)
+      replica_commit_time = commit_time * 3 + leaf_time * nodes
+      seal_commitments_size = commit_size * 2 // 1 commD, 1 CommR
+
+    ProofGeneration (ColumnCommitments):
+      assume(opening_time > 0)
+      openings = offline_challenges * opening_per_challenge
+
+      Leaf:
+        leaf_constraints =  layers * leaf_hash_constraints
+        leaf_circuit_time = layers * leaf_hash_circuit_time
+        leaf_time = layers * leaf_hash_time
+
+      Inclusion (MerkleVC) [CRH]:
+        // declare(tree_depth, integer)
+        tree_depth = (log2(nodes))
+        inclusion_circuit_time = tree_depth * merkle_hash_time_circuit
+        inclusion_constraints = tree_depth * merkle_hash_constraints
+        commit_time = nodes * merkle_hash_time
+
+      SNARK [SNARKAssumptions]:
+        comm_d_openings = 1
+        comm_d_time = offline_challenges * (comm_d_openings * inclusion_circuit_time)
+        comm_d_constraints = offline_challenges * (comm_d_openings * inclusion_constraints)
+
+        comm_r_openings = degree_base
+        comm_r_time = offline_challenges * (comm_r_openings * inclusion_circuit_time)
+        comm_r_constraints = offline_challenges * (comm_r_openings * inclusion_constraints)
+
+        comm_c_openings = opening_per_challenge
+        comm_c_time = offline_challenges * (comm_c_openings * (inclusion_circuit_time + leaf_circuit_time))
+        comm_c_constraints = offline_challenges * (comm_c_openings * (inclusion_constraints + leaf_constraints))
+
+        porep_snark_time = comm_d_time + comm_r_time + comm_c_time
+        porep_snark_constraints = comm_d_constraints + comm_r_constraints + comm_c_constraints
+
+        porep_snark_partitions = porep_snark_constraints / snark_max_constraints
+        porep_snark_proof_size = porep_snark_partitions * snark_single_proof_size
+
+        proofgen_time = porep_snark_time
+
+    Size:
+      seal_proof_size = porep_snark_proof_size + seal_commitments_size
+
+    Time:
+      seal_time = replica_commit_time + proofgen_time + encoding_time
+      parallel_seal_time = (porep_snark_time + commit_time)/cores + encoding_time
+      declare(unseal_time) // TODO
+
+    Cost:
+      seal_cost = seal_time * (cpu_cost_per_second + memory_cost_per_second)
+      declare(unseal_cost) // TODO
+
+  ProofOfReplication (SDR):
+    Graph:
+      Layers:
+        layers = layers_b // TODO max(layers_a, layers_b) + 1
+        layers_a = (0.68 - epsilon + delta) / (0.12 - delta)
+        layers_b = (log2(1 / (3 * (epsilon - 2 * delta)))) + 0.12 / (0.12 - delta) + 1
+
+    SpaceGap:
+      assume(epsilon <= 0.24)
+      // delta < epsilon/2
+      // delta = epsilon/2 + 0.001
+      // spacegap = epsilon + 2 * delta
+      spacegap = 2 * epsilon - 0.001
+      delta = epsilon/2 - 0.001
+
+    Challenges:
+      OfflineChallenges:
+        offline_challenges = (- lambda) / (log2(1 - delta))
+
+      OnlineChallenges:
+        online_challenges = (- lambda) / (log2(2 - epsilon - 2 * delta) - 1)
+
+    ProofGeneration (ColumnCommitments):
+      opening_per_challenge = degree_base + degree_expander + 1
+
+  ProofOfSpacetime:
+    Randomness [RandomBeacon]:
+      declare(post_randomness_lookback)
+
+    Parameters:
+      declare(proving_period_hours)
+      declare(max_proving_sectors)
+
+      declare(post_challenge_blocks)
+      describe(post_challenge_blocks, "The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.", blocks)
+
+      describe(post_challenge_time, "PoSt challenge time (see POST_CHALLENGE_BLOCKS).", seconds)
+      post_challenge_time = post_challenge_blocks * block_time
+      post_challenge_time = post_challenge_hours * 60 * 60
+      describe(post_challenge_hours "PoSt challenge time (see POST_CHALLENGE_BLOCKS).", hours)
+
+  ProofOfSpacetime (RationalPoSt):
+    Parameters:
+      post_challenges = online_challenges
+      post_proving_period = proving_period_seconds / block_time
+      describe(post_proving_period, "The time interval in which a PoSt has to be submitted", blocks)
+
+    Cost:
+      declare(post_proving_cost)
+
+    SNARK:
+      post_snark_circuit = online_challenges * inclusion_constraints
+
+    Size:
+      post_proof_size = post_snark_proof_size
+      post_snark_proof_partitions = 1 // TODO post_snark_circuit / snark_max_constraints
+      post_snark_proof_size = post_snark_proof_partitions * snark_single_proof_size
+
+
+Consensus [ProofOfReplication, ProofOfSpacetime]:
+  // declare(expected_winning_miners, integer)
+  // declare(finality_height, integer)
+  Tickets:
+    tickets = avg_tickets
+    avg_tickets = 1
+    min_tickets = 0
+    max_tickets = log(one_block_in_ten_years)/log(0.36) + 1 // 0.36^(max_tickets-1) = one_block_in_ten_years
+    blocks_in_a_year = (year_in_seconds / block_time) * expected_winning_miners
+    blocks_in_ten_years = blocks_in_a_year * 10
+    one_block_in_ten_years = 1/blocks_in_ten_years
+
+StorageMarket:
+  declare(min_storing_time)
+  Deals (OnChainDeals):
+    comm_p_size = cid_size
+    declare(p_size, 1)
+    p_size = (log2(sector_size))
+    sector_manifest_size = pieces * comm_p_size + p_size
+    max_sector_manifest_hashes = sector_size / min_piece_size
+
+
+Mining:
+  proving_period_seconds = proving_period_hours * 60 * 60
+
+  seals_per_sector_per_year = reseal+1
+  posts_per_sector_per_year = year_in_seconds / proving_period_seconds
+
+ScalingRequirements:
+  storage_network_capacity = 10 * eix
+
+ChainBandwidth:
+  sectors_count = storage_network_capacity / sector_size
+  all_seal_size_per_year = all_seal_messages_per_year
+  all_seal_messages_per_year = sectors_count * seals_per_sector_per_year
+  all_post_messages_per_year = sectors_count * posts_per_sector_per_year / miners
+
+  Chain Size:
+
+  Block Size:
+    chain_size_year = block_size * blocks_in_a_year
+    chain_size_year_gib = chain_size_year / gib
+    block_size_kib = block_size / kib
+
+  Block Content:
+    block_size = block_framing_size + proofs_size_per_block
+    messages = avg_proofs_messages_per_block + tx_messages_per_block + actors_messages_per_block // TODO messages dont include deals
+
+    Proofs:
+      avg_proofs_messages_per_block = avg_seals_messages_per_block + avg_posts_messages_per_block
+      avg_seals_messages_per_block = all_seal_messages_per_year / blocks_in_a_year
+      avg_posts_messages_per_block = all_post_messages_per_year / blocks_in_a_year
+
+      seal_size_per_block = avg_seals_messages_per_block * seal_proof_size
+      post_size_per_block = avg_posts_messages_per_block * post_proof_size
+      proofs_size_per_block = seal_size_per_block + post_size_per_block
+      proofs_size_per_block_kib = proofs_size_per_block / kib
+
+    Composition:
+      avg_proofs_messages_per_block = proof_messages_fraction * messages
+      tx_messages_per_block = tx_messages_fraction * messages
+      actors_messages_per_block = actors_messages_fraction * messages
+```
+
+
+## Parsed Parameter Definitions {#parsed-parameter-definitions}
+
 ```json
 {
   "subsystems": [
