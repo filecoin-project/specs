@@ -1,8 +1,5 @@
 package vm
 
-type Message struct{}
-type StateTree struct{}
-type MessageReceipt struct{}
 type Params struct{}
 type GasAmount struct{}
 type Bytes struct{}
@@ -26,7 +23,7 @@ type InvocationOutput struct {
   GasUsed     GasAmount
 }
 
-func (vmi *VMInterpreter) ApplyMessageBatch(inTree StateTree, msgs []MessageRef) (outTree StateTree, ret []MessageReceipt) {
+func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree StateTree, msgs []MessageRef) (outTree StateTree, ret []MessageReceipt) {
   compTree := inTree
   for _, m := range msgs {
     oT, r := vmi.ApplyMessage(compTree, m.Message(), m.Miner())
@@ -36,7 +33,7 @@ func (vmi *VMInterpreter) ApplyMessageBatch(inTree StateTree, msgs []MessageRef)
   return compTree, ret
 }
 
-func (vmi *VMInterpreter) ApplyMessage(inTree StateTree, msg Message, minerAddr Address) (outTree StateTree, ret MessageReceipt) {
+func (vmi *VMInterpreter_I) ApplyMessage(inTree StateTree, msg Message, minerAddr Address) (outTree StateTree, ret MessageReceipt) {
 
   compTree := inTree
   fromActor, found := compTree.GetActor(msg.From)

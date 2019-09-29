@@ -10,6 +10,6 @@ type MessageRef struct {
 }
 
 type VMInterpreter struct {
-  ApplyMessageBatch(inTree InputTree, msgs [MessageRef]) struct{ outTree StateTree, ret [MessageReceipt]}
-  ApplyMessage(inTree InputTree, msg Message, minerAddr Address) struct{outTree StateTree, ret MessageReceipt}
+  ApplyMessageBatch(inTree StateTree, msgs [MessageRef]) struct{ outTree StateTree, ret [MessageReceipt]}
+  ApplyMessage(inTree StateTree, msg Message, minerAddr Address) struct{outTree StateTree, ret MessageReceipt}
 }

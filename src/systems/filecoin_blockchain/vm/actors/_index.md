@@ -1,16 +1,13 @@
 ---
 title: Filecoin VM Actors
 entries:
-  - standard
-  - singleton
-# suppressMenu: true
+- init_actor
+- cron_actor
+- account_actor
 ---
 
-# ActorState
-
-The following data structures use _kinded_ representations for their IPLD
-encodings, since the types can be inferred from the context in which they are used
-(`Actor` or `UnsignedMessage`).
-
-{{<goFile ActorState>}}
-{{<goFile ActorMethod>}}
+- There are two system actors required for VM processing:
+  - [CronActor](#CronActor) - runs critical functions at every epoch
+  - [InitActor](#InitActor) - initializes new actors
+- There is one more VM level actor:
+  - [AccountActor](#AccountActor) - for user accounts.

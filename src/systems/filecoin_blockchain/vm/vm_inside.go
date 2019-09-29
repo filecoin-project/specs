@@ -2,9 +2,9 @@ package vm
 
 import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
-type Storage struct {}
-type AttoFIL struct {}
-type CID struct {}
+type Storage struct{}
+type AttoFIL struct{}
+type CID struct{}
 
 type VMMessage struct {
 	To     base.Address

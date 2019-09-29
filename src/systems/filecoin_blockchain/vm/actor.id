@@ -9,6 +9,8 @@ type ActorMethod UVarint
 type Address Bytes
 
 type CallSeqNo UVarint
+type CodeCID CID
+type Code Bytes
 
 // Question for language:
 // - we should not do inheritance, we should do composition.
@@ -22,33 +24,23 @@ type Actor struct {
   SeqNo   CallSeqNo // FKA Nonce
 }
 
-type ActorState union {
-  SystemActorState SystemActorState
-  // UserActorState UserActorState
-}
+// type SystemActor union {
+// //  InitActor           InitActor
+// //  AccountActor        AccountActor
+// //  StoragePowerActor   StoragePowerActor
+// //  StorageMinerActor   StorageMinerActor
+// //  CronActor           CronActor
+// //  PaymentChannelActor PaymentChannelActor
+// }
 
-type SystemActorState union {
-	InitActorState           InitActorState
-//	AccountActorState        AccountActorState
-//	StoragePowerActorState   StoragePowerActorState
-//	StorageMinerActorState   StorageMinerActorState
-//	CronActorState           CronActorState
-//	PaymentChannelActorState PaymentChannelActorState
-}
-
+type ActorState struct{} // TODO: remove stub
+// type ActorState union {
+// SystemActor SystemActor
+// UserActor UserActor
+// }
 
 // state := actor.State.as_SystemActorState().as_InitActorState()
 // var actor, state := getInitActor()
-
-
-
-
-
-
-
-
-
-
 
 // type StoragePowerActorState struct {
 // 	// maintain storage power over time
