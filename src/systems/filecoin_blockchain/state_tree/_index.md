@@ -9,3 +9,7 @@ type StateTree struct {
   Actors map[ActorID]ActorStorage
 }
 ```
+
+TODO
+
+- Add ConvenienceAPI state to provide more user-friendly views.

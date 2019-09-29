@@ -9,7 +9,7 @@ entries:
 - storage_power_consensus
 ---
 
-The Filecoin blockchain is a distributed ledger that accounts for the state of storage in the Filecoin system.
+The Filecoin Blockchain is a distributed virtual machine that achieves consensus, processes messages, accounts for storage, and maintains security in the Filecoin Protocol.
 
 It includes:
 
@@ -23,11 +23,11 @@ At a high-level, the Filecoin blockchain grows through successive rounds of lead
 
 Most of the functions of the Filecoin blockchain system are detailed in the code below. We focus here on particular points of interest.
 
-# Storage Power
+## Storage Power
 
 Filecoin's blockchain runs on storage power. That is, its consensus algorithm by which miners agree on which subchain to mine is predicated on the amount of storage backing that subchain. At a high-level, the {{<sref storage_power_consensus>}} subsystem maintains a _Power Table_ that tracks the amount of storage {{<sref storage_miner_actor>}}s have contributed to the network through _Sector commitments_ and _Proofs of Spacetime_.
 
-# Leader Election and Expected Consensus
+## Leader Election and Expected Consensus
 
 The leader election process is likewise handled by the {{<sref storage_power_consensus>}} subsystem (SPC). Using the _Power Table_ it maintains, this subsystem runs a Nakamoto-style leader election process called Expected Consensus at every round to elect miners who can extend the block chain by generating new blocks.
 
@@ -35,7 +35,7 @@ Beyond participating in the Storage Market (see the sref storage_market_subsyste
 
 {{<sref expected_consensus>}} has two main components: a leader election process and a chain selection algorithm dependent on a weight function.
 
-# Tipsets
+## Tipsets
 
 EC can elect multiple leaders in a given round meaning Filecoin chains can contain multiple blocks in any given round (one per winning miner). This greatly increases chain throughput by allowing blocks to propagate through the network graph more efficiently.
 Accordingly, blocks from a given round are assembled into Tipsets according to certain rules (they must share the same parents and have been mined at the same height). The Filecoin state tree is modified by the execution of all messages in a given Tipset. Different miners may mine on different Tipsets because of network propagation delay.
