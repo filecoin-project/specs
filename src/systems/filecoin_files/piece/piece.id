@@ -5,6 +5,15 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 // of the Piece.
 type PieceID ipld.CID
 
+
+// PieceInfo is an object that describes details about a piece, and allows
+// decoupling storage of this information from the piece itself.
+type PieceInfo struct {
+  ID   PieceID
+  Size UVarint
+  // TODO: store which algorithms were used to construct this piece.
+}
+
 // Piece represents the basic unit of tradeable data in Filecoin. Clients
 // break files and data up into Pieces, maybe apply some transformations,
 // and then hire Miners to store the Pieces.
@@ -30,13 +39,6 @@ type Piece struct {
   Data() Bytes
 }
 
-// PieceInfo is an object that describes details about a piece, and allows
-// decoupling storage of this information from the piece itself.
-type PieceInfo struct {
-  ID   PieceID
-  Size UVarint
-  // TODO: store which algorithms were used to construct this piece.
-}
 
 // // LocalPieceRef is an object used to refer to pieces in local storage.
 // // This is used by subsystems to store and locate pieces.
@@ -44,7 +46,6 @@ type PieceInfo struct {
 //   ID   PieceID
 //   Path file.Path
 // }
-
 
 // PieceTree is a data structure used to form pieces. The algorithms involved
 // in the storage proofs determine the shape of PieceTree and how it must be

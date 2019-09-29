@@ -19,6 +19,7 @@ New tickets are generated using the last ticket in the ticket-chain. Generating 
 Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block (see [block creation](#block-creation)).
 
 At any height `H`, there are three possible situations:
+
 - The miner is eligible to mine a block: they produce their block and form a Tipset with it and other blocks received in this round (if there are any), and resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block but has received blocks: they form a Tipset with them and resume mining at the next height `H+1`.
 - The miner is not eligible to mine a block and has received no blocks: they run leader election again, using:
@@ -31,6 +32,7 @@ Let's illustrate this with an example.
 
 Miner M is mining at Height H.
 Heaviest tipset at H-1 is {B0}
+
 - New Round:
     - M produces a ticket at H, from B0's ticket (the min ticket at H-1)
     - M draws the ticket from height H-K to generate an ElectionProof

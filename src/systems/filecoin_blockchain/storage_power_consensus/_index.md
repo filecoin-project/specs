@@ -5,7 +5,7 @@ entries:
 - storage_power_actor
 ---
 
-The Storage Power Consensus subsystem tracks individual storage miners' storage-based power through given chains in an associated _Power Table_. It exposes methods to the rest of the blockchain system enabling it to update miner power based on their behavior (such as proving or committing sectors or misbehaving), as well as enabling it to run successive trials of leader election through Expected Consensus. 
+The Storage Power Consensus subsystem tracks individual storage miners' storage-based power through given chains in an associated _Power Table_. It exposes methods to the rest of the blockchain system enabling it to update miner power based on their behavior (such as proving or committing sectors or misbehaving), as well as enabling it to run successive trials of leader election through Expected Consensus.
 
 Much of the Storage Power Consensus' subsystem functionality is detailed in the code below but we touch upon some of its behaviors in more detail.
 
@@ -41,20 +41,20 @@ New blocks (with multiple tickets) will have a few key properties:
 
 This means that valid `ElectionProof`s can be generated from tickets in the middle of the `Tickets` array. In cases where there are multiple tickets to choose from (i.e. a `Tipset` made up of multiple blocks mined atop losing tickets), a miner must use tickets from the `Tickets` array in the block whose final ticket is the min-ticket (though that may not be the min ticket in that round).
 
-                                     
-                  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                 
-                                         │                
-                  │                                       
-                   ┌────┬────┬────┐      │                
-                  ││T1-A│T2-A│T3-A│    A                  
-                   ┴────┴────┴────┘─ ─ ─ ┘   T1-A < T1-B  
-                                             T2-A < T2-B  
-                  ┌──────────────────────┐   T3-A > T3-B  
-                  │                      │                
-                  │                      │                
-                  │┌────┬────┬────┐      │                
-                  ││T1-B│T2-B│T3-B│    B │                
-                  └┴────┴────┴────┴──────┘                
+
+                  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                                         │
+                  │
+                   ┌────┬────┬────┐      │
+                  ││T1-A│T2-A│T3-A│    A
+                   ┴────┴────┴────┘─ ─ ─ ┘   T1-A < T1-B
+                                             T2-A < T2-B
+                  ┌──────────────────────┐   T3-A > T3-B
+                  │                      │
+                  │                      │
+                  │┌────┬────┬────┐      │
+                  ││T1-B│T2-B│T3-B│    B │
+                  └┴────┴────┴────┴──────┘
 In the above case, because T3-B < T3-A, then a miner will use T*-B to generate election proofs, even if T1-A < T1-B.
 
 ## The Ticket chain
@@ -67,39 +67,40 @@ Namely, tickets are used throughout the Filecoin system as sources of on-chain r
 - They are drawn by the Storage Power subsystem as randomness in leader election to determine their eligibility to mine a block
 - They are drawn by the Storage Power subsystem in order to generate new tickets for future use.
 
-Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin's Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height. 
+Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin's Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.
 
 This ticket chain will track one-to-one with a block at each height in a given subchain, but omits certain details including other blocks mined at that height.
 
 Simply, it is composed inductively as follows:
+
 - At height 0, take the genesis block, return its ticket
 - At height n+1, take the block used at height n.
   - If the ticket it returned in the previous step is not the final ticket in its ticket array, return the next one.
   - If the ticket it returned in the previous step is the final ticket in its ticket array,
-    - use EC to select the next heaviest tipset in the subchain. 
+    - use EC to select the next heaviest tipset in the subchain.
     - select the block in that tipset with the smallest final ticket, return its first ticket
 
 We illustrate this below:
 ```
-                     ┌────────────────────────────────────────────────────────────────────────────────────┐                                                
-                      │                                                                                    │                                                
-                      ▼                                  ◀─────────────────────────────────────────────────┼────────────────────────────────────────────┐   
-          ┌─┐        ┌─┐        ┌─┐        ┌─┐          ┌─┐                                       ┌─┐      │    ┌─┐         ┌─┐         ┌─┐           ┌─┤   
-   ◀──────│T1◀───────│T2◀───────│T3◀───────│T4◀─────────│T5◀───────────────    ...    ◀───────────T1+k─────┼───T2+k◀────────T3+k────────T4+k──────────T5│k  
-          └─┘        └─┘        └─┘        └─┘          └─┘                                       └─┘      │    └─┘         └─┘         └─┘           └─┤   
-                                 ▲                       │                                                 │                 │           │             ││   
-           │          │          │          │                                                      │       │     │                                      │   
-                                 ├───────────────────────┼─────────────────────────────────────────────────┼─────────────────┼────┐      │             ││   
-           │          │                     │                                                      │       │     │                │                     │   
-                       ─ ─ ─ ─ ─ ┴ ─   ─ ─ ─             ┘                                            ─ ─ ─│─ ─ ─          ─ ┘    │      └ ─ ─ ─   ─ ─ ┘│   
-        ┌──┼──────┬─┬┐         ┌──┼─┼─┼──┬─┬┐        ┌──┼──────┬─┬┐                             ┌──┼─┼────┬─┬┐         ┌──┼──────┬─┬┐        ┌──┼─┼────┬─┬┐ 
-        │         │E1│         │         │E2│        │         │E3│                             │         E1+l         │         E2+l        │         E3+l 
-        │  │      └─┘│         │  │ │ │  └─┘│        │  │      └─┘│                             │  │ │    └─┘│         │  │      └─┘│        │  │ │    └─┘│ 
-        │            │         │            │        │            │                             │            │         │            │        │            │ 
- ◀──────│  ▼         │◀────────│  ▼ ▼ ▼     │◀───────│  ▼         │◀──────     ...     ◀────────│  ▼ ▼       │◀────────│  ▼         │◀───────│  ▼ ▼       │ 
-        │ ┌─┐        │         │ ┌─┬─┬─┐    │        │ ┌─┐        │                             │ ┌─┬─┐      │         │ ┌─┐        │        │ ┌─┬─┐      │ 
-        │ │T1     B1 │         │ │T2 │ │ B2 │        │ │T5     B3 │                             │ │ │ │  B1+l│         │ │ │    B2+l│        │ │ │ │  B3+l│ 
-        └─┴─┴────────┘         └─┴─┴─┴─┴────┘        └─┴─┴────────┘                             └─┴─┴─┴──────┘         └─┴─┴────────┘        └─┴─┴─┴──────┘ 
+                     ┌────────────────────────────────────────────────────────────────────────────────────┐
+                      │                                                                                    │
+                      ▼                                  ◀─────────────────────────────────────────────────┼────────────────────────────────────────────┐
+          ┌─┐        ┌─┐        ┌─┐        ┌─┐          ┌─┐                                       ┌─┐      │    ┌─┐         ┌─┐         ┌─┐           ┌─┤
+   ◀──────│T1◀───────│T2◀───────│T3◀───────│T4◀─────────│T5◀───────────────    ...    ◀───────────T1+k─────┼───T2+k◀────────T3+k────────T4+k──────────T5│k
+          └─┘        └─┘        └─┘        └─┘          └─┘                                       └─┘      │    └─┘         └─┘         └─┘           └─┤
+                                 ▲                       │                                                 │                 │           │             ││
+           │          │          │          │                                                      │       │     │                                      │
+                                 ├───────────────────────┼─────────────────────────────────────────────────┼─────────────────┼────┐      │             ││
+           │          │                     │                                                      │       │     │                │                     │
+                       ─ ─ ─ ─ ─ ┴ ─   ─ ─ ─             ┘                                            ─ ─ ─│─ ─ ─          ─ ┘    │      └ ─ ─ ─   ─ ─ ┘│
+        ┌──┼──────┬─┬┐         ┌──┼─┼─┼──┬─┬┐        ┌──┼──────┬─┬┐                             ┌──┼─┼────┬─┬┐         ┌──┼──────┬─┬┐        ┌──┼─┼────┬─┬┐
+        │         │E1│         │         │E2│        │         │E3│                             │         E1+l         │         E2+l        │         E3+l
+        │  │      └─┘│         │  │ │ │  └─┘│        │  │      └─┘│                             │  │ │    └─┘│         │  │      └─┘│        │  │ │    └─┘│
+        │            │         │            │        │            │                             │            │         │            │        │            │
+ ◀──────│  ▼         │◀────────│  ▼ ▼ ▼     │◀───────│  ▼         │◀──────     ...     ◀────────│  ▼ ▼       │◀────────│  ▼         │◀───────│  ▼ ▼       │
+        │ ┌─┐        │         │ ┌─┬─┬─┐    │        │ ┌─┐        │                             │ ┌─┬─┐      │         │ ┌─┐        │        │ ┌─┬─┐      │
+        │ │T1     B1 │         │ │T2 │ │ B2 │        │ │T5     B3 │                             │ │ │ │  B1+l│         │ │ │    B2+l│        │ │ │ │  B3+l│
+        └─┴─┴────────┘         └─┴─┴─┴─┴────┘        └─┴─┴────────┘                             └─┴─┴─┴──────┘         └─┴─┴────────┘        └─┴─┴─┴──────┘
 ```
 
 

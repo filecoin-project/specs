@@ -2018,6 +2018,7 @@ A fault is what happens when partcipants in the protocol are behaving incorrectl
 Filecoin includes a concept of "Pledge Collateral", which is FIL collateral that storage miners must lock up when participating as miners.
 
 Pledge collateral serves several functions in Filecoin. It:
+
 - makes it possible to slash misbehaving or slow miners
 - ensures that miners have skin in the game (for the Filecoin network as a whole)
 - increases the cost of launching a 51% attack
