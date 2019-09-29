@@ -42,6 +42,11 @@ help:
 	@echo "OTHER TARGETS"
 	@echo "	make bins        compile some build tools whose source is in this repo"
 	@echo "	make serve       start hugo in serving mode -- must run make build on changes manually"
+	@echo ""
+	@echo "CLEAN TARGETS"
+	@echo "	make clean       remove all build artifacts"
+	@echo "	make clean-deps  remove (some of) the dependencies installed in this repo"
+	@echo "	make clean-hugo  remove intermediate hugo artifacts"
 
 # main Targets
 build: diagrams build-code website
@@ -107,6 +112,9 @@ hugo-src-rsync: $(shell find src | grep '.md') gen-code diagrams
 
 watch-hugo: .PHONY
 	bin/watcher --cmd="make hugo-src-rsync" --startcmd src 2>/dev/null
+
+clean-hugo: .PHONY
+	rm -rf hugo/content/docs
 
 orient: .PHONY
 	bin/build-spec-orient.sh
