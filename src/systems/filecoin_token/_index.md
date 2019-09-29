@@ -1,5 +1,6 @@
 ---
-title: 📀 **Token**
+menuIcon: 📀
+title: "**Token**"
 entries:
 - wallets
 - payments

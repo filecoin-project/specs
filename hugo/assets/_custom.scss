@@ -175,3 +175,126 @@ h6:hover .header-link {
 html {
   scroll-behavior: auto;
 }
+
+// TocMap
+
+.tocMap {
+  position: relative;
+  width: 100%;
+  text-align: center;
+}
+
+// hide the first label
+.tocMap > .tocMap-item > .tocMap-item-label {
+  display: none;
+}
+
+.tocMap-item {
+  background-color: inherit;
+  background-blend-mode: screen;
+  margin: 10px;
+  padding: 10px;
+  width: 120px;
+  font-size: 16px;
+  font-weight: bold;
+  height: 80px;
+
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.tocMap-item.expanded {
+  width: 100%;
+  height: auto;
+  min-height: 80px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+
+.tocMap-children {
+//  position: absolute;
+//  right: 0px;
+//  top:0px;
+//  bottom:0px;
+  height: 100%;
+  display: none;
+}
+
+.tocMap-item.expanded > .tocMap-children {
+  width: calc(100% - 120px);
+  flex-grow: 3;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.tocMap-item-label {
+  font-size: 18px;
+  font-weight: bold;
+  width: 140px;
+  height: 100%;
+  color: #000;
+  line-height: 1.2em;
+
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tocMap-item-label i.menuIcon {
+  font-size: 30px;
+  font-style: inherit;
+}
+
+.tocMap-item-label > a {
+  margin:0 auto;
+  flex: 1;
+}
+
+.tocMap-item-label > a,
+.tocMap-item-label > a:visited,
+.tocMap-item-label > a:hover,
+.tocMap-item-label > a:active {
+  margin:0 auto;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+1),
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+1) .tocMap-item {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+2),
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+2) .tocMap-item {
+    background-color: rgba(255, 255, 0, 0.2);
+}
+
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+3),
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+3) .tocMap-item {
+    background-color: rgba(255, 0, 255, 0.2);
+}
+
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+4),
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+4) .tocMap-item {
+    background-color: rgba(0, 0, 255, 0.2);
+}
+
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+5),
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+5) .tocMap-item {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+6),
+.tocMap-item .tocMap-item.expanded:nth-of-type(6n+6) .tocMap-item {
+    background-color: rgba(0, 255, 255, 0.2);
+}
+
+
+.tocMap > .tocMap-item.expanded {
+  margin: 0px;
+  padding: 0px;
+  background: none;
+}

@@ -1,6 +1,7 @@
 ---
 title: Introduction
 entries:
+#  - specmap
   - arch
   - concepts
   - filecoin_vm

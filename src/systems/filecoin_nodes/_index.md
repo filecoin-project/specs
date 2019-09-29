@@ -1,5 +1,6 @@
 ---
-title: ⚙️ **Filecoin Nodes**
+menuIcon: ⚙️
+title: "**Filecoin Nodes**"
 entries:
 - node_types
 - repository

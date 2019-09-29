@@ -1,5 +1,6 @@
 ---
-menuTitle: ⛏ **Storage Mining**
+menuIcon: ⛏
+menuTitle: "**Storage Mining**"
 title: "Storage Mining System - proving storage for producing blocks"
 entries:
 - sector

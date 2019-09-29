@@ -1,0 +1,14 @@
+<div class="tocMap">
+
+<!--   <div>
+    <input id="toc-map-detail-slider" type="range" onchange="onTocMapDetailChange();"
+      min="1" value="3" max="5" step="1" />
+
+    <span id="toc-map-detail-slider-label">3</span>
+  </div>
+ -->
+  {{ with .Site.GetPage (.Get 0) }}
+    {{ partial "tocMapPartial.html" (dict "Page" . "Depth" 1) }}
+  {{ end }}
+
+</div>

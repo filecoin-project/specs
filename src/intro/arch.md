@@ -2,6 +2,12 @@
 title: "Architecture Diagrams"
 ---
 
+
+# Filecoin Systems
+
+{{< incTocMap "/docs/systems" >}}
+
+
 # Overview Diagram
 
 TODO:

@@ -1,5 +1,6 @@
 ---
-title: 📦 **Blockchain**
+menuIcon: 📦
+title: "**Blockchain**"
 entries:
 - state_tree
 - vm

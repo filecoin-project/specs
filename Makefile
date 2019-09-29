@@ -105,7 +105,7 @@ hugo-src-rsync: $(shell find src | grep '.md') gen-code diagrams
 	printf " " >> hugo/content/_index.md # force reload
 	printf " " >> hugo/content/menu/index.md # force reload
 
-hugo-watch: .PHONY
+watch-hugo: .PHONY
 	bin/watcher --cmd="make hugo-src-rsync" --startcmd src 2>/dev/null
 
 orient: .PHONY
@@ -146,7 +146,7 @@ serve-website: website .PHONY
 	echo "run `make website` and refresh to update"
 	cd build/website && python -m SimpleHTTPServer 1313
 
-serve-and-watch: serve hugo-watch
+serve-and-watch: serve watch-hugo
 	echo "make sure you run this with `make -j2`"
 
 .PHONY:
@@ -195,10 +195,13 @@ SVGs=$(DOTs:%=%.svg) $(MMDs:%=%.svg)
 
 diagrams: ${SVGs}
 
+watch-diagrams: diagrams
+	bin/watcher --cmd="make diagrams" --startcmd src 2>/dev/null
+
 %.dot.svg: %.dot
 	@which dot >/dev/null || echo "requires dot (graphviz) -- run make deps" && exit
 	dot -Tsvg $< >$@
 
-%.mmd.svg: %.mmd
+%.mmd.svg: %.mmd %.mmd.css
 	@which dot >/dev/null || echo "requires mmdc -- run make deps" && exit
-	deps/node_modules/.bin/mmdc -i $< -o $@
+	deps/node_modules/.bin/mmdc -i $< -o $@ --cssFile $(word 2,$^)

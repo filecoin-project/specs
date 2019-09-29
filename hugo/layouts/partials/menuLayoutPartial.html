@@ -13,6 +13,7 @@
 {{ end }}
 
 <a href="/#{{ $tag }}" class="menu-item depth-{{ $depth }}">
+    {{ $page.Param "menuIcon" }}
     {{ if (eq $depth 1) }}
     <strong>
     {{ end }}
