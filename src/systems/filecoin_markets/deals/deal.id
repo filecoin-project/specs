@@ -1,0 +1,11 @@
+type Deal struct {
+
+}
+
+type StorageDeal struct {
+
+}
+
+type RetrievalDeal struct {
+
+}
