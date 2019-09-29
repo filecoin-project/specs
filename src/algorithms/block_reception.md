@@ -2,6 +2,7 @@
 title: "Block Reception"
 ---
 
+{{<label block-reception>}}
 func (g *BlockValidationGraph_I) ConsiderBlock(block Block) {
 	panic("TODO")
 	// g.UnconnectedBlocks.AddBlock(block)

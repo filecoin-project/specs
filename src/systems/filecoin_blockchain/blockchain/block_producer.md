@@ -2,6 +2,8 @@
 title: Block Producer
 ---
 
+{{<label block_producer>}}
+
 # Mining Blocks
 
 Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [Tipsets](expected-consensus.md#tipsets) seen on the network.

@@ -63,7 +63,7 @@ That is, for every incoming block, even if the incoming block is not added to th
 - it is able to do so, through the reception of another block in that subchain
 - it is able to discard it, as that block was mined before finality
 
-We give an example of how this could work in the {{<sref block-reception>}} algorithm.
+We give an example of how this could work in the block reception algorithm.
 
 ### ChainTipsManager
 
