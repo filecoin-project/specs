@@ -1,11 +1,11 @@
 
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 
 type Bytes32     Bytes
-type Address     Bytes
-type MinerID     Address
+type MinerID     base_blockchain.Address
 type Commitment  Bytes32
 
 type Deal struct{} // TODO: remove
@@ -61,13 +61,14 @@ type SectorInDetail struct {
   }
 }
 
-// SectorInfo is a small object that keeps some information about sectors
-// around, meant for a local index.
+// SectorInfo is an object that gathers all the information miners know about their
+// sectors. This is meant to be used for a local index.
 type SectorInfo struct {
   ID             SectorID
   UnsealedInfo   UnsealedSectorInfo
   SealedInfo     SealedSectorInfo
-  OnChainSeal    OnChainSealInfo
+  SealVerifyInfo SealVerifyInfo
+  ProofAux       ProofAux
 }
 
 // UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector

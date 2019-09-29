@@ -1,8 +1,8 @@
 ---
 title: Storage Proving
 entries:
-- post_generator
-- sector_sealer
+- sealer
+- poster
 ---
 
 Filecoin Poving Subsystem

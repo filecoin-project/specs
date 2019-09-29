@@ -1,0 +1,34 @@
+
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+
+type SealInputs struct {
+  SectorID     sector.SectorID
+  SealCfg      sector.SealCfg
+  MinerID      base_blockchain.Address
+  RandomSeed   sector.SealRandomSeed
+  UnsealedPath file.Path
+  SealedPath   file.Path
+}
+
+type SealOutputs struct {
+  SealInfo       sector.SealVerifyInfo
+  ProofAux       sector.ProofAux
+}
+
+type SectorSealer struct {
+
+  SealSector(inputs SealInputs) union { SealOutputs, error }
+  VerifySeal(SealVerifyInfo sector.SealVerifyInfo) union { bool, error }
+
+//  GeneratePieceInclusionProof(
+//    Tree          MerkleTree, //MerkleTree<Rephash>,
+//    PieceStart    UInt,
+//    PieceLength   UInt,
+//  ) union { error, PieceInclusionProofs }
+//
+//  VerifyPieceInclusionProof() struct {}
+
+  MaxUnsealedBytesPerSector(SectorSize UInt) UInt
+}
