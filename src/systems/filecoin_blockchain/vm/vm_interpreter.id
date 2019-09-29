@@ -1,0 +1,9 @@
+
+// TODO: import these
+type StateTree struct{}
+type Message struct{}
+type MessageReceipt struct{}
+
+type VMInterpreter interface {
+  ApplyMessage(inTree InputTree, msg Message) (outTree StateTree, ret MessageReceipt)
+}

@@ -1,17 +1,11 @@
 package vm
 
-type InputTree struct {}
-type Message struct {}
-type StateTree struct {}
-type MessageReceipt struct {}
-type Params struct {}
-type GasAmount struct {}
-type Bytes struct {}
-
-
-type VMInterpreter interface {
-  ApplyMessage(inTree InputTree, msg Message) (outTree StateTree, ret MessageReceipt)
-}
+type Message struct{}
+type StateTree struct{}
+type MessageReceipt struct{}
+type Params struct{}
+type GasAmount struct{}
+type Bytes struct{}
 
 type InvocationInput struct {
   InTree    StateTree
@@ -32,7 +26,7 @@ type InvocationOutput struct {
   GasUsed     GasAmount
 }
 
-func (vmi *VMInterpreter) ApplyMessage(inTree InputTree, msg Message, minerAddr Address) (outTree StateTree, ret MessageReceipt) {
+func (vmi *VMInterpreter) ApplyMessage(inTree StateTree, msg Message, minerAddr Address) (outTree StateTree, ret MessageReceipt) {
 
   compTree := inTree
   fromActor, found := compTree.GetActor(msg.From)
