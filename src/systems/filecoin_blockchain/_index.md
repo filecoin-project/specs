@@ -28,7 +28,7 @@ Most of the functions of the Filecoin blockchain system are detailed in the code
 
 ## Storage Power
 
-Filecoin's blockchain runs on storage power. That is, its consensus algorithm by which miners agree on which subchain to mine is predicated on the amount of storage backing that subchain. At a high-level, the {{<sref storage_power_consensus>}} subsystem maintains a _Power Table_ that tracks the amount of storage {{<sref storage_miner_actor>}}s have contributed to the network through _Sector commitments_ and _Proofs of Spacetime_.
+Filecoin's blockchain runs on storage power. That is, its consensus algorithm by which miners agree on which subchain to mine is predicated on the amount of storage backing that subchain. At a high-level, the {{<sref storage_power_consensus>}} subsystem maintains a _Power Table_ that tracks the amount of storage {{<sref storage_mining "storage miner actors">}} have contributed to the network through _Sector commitments_ and _Proofs of Spacetime_.
 
 ## Leader Election and Expected Consensus
 
@@ -40,7 +40,21 @@ Beyond participating in the Storage Market (see the sref storage_market_subsyste
 
 ## Tipsets
 
-EC can elect multiple leaders in a given round meaning Filecoin chains can contain multiple blocks in any given round (one per winning miner). This greatly increases chain throughput by allowing blocks to propagate through the network graph more efficiently.
+EC can elect multiple leaders in a given round meaning Filecoin chains can contain multiple blocks at each height (one per winning miner). This greatly increases chain throughput by allowing blocks to propagate through the network of nodes more efficiently but also means miners should coordinate how they select messages for inclusion in their blocks in order to avoid duplicates and maximize their earnings from transaction fees (see {{<sref message_pool>}}).
+
 Accordingly, blocks from a given round are assembled into Tipsets according to certain rules (they must share the same parents and have been mined at the same height). The Filecoin state tree is modified by the execution of all messages in a given Tipset. Different miners may mine on different Tipsets because of network propagation delay.
 
 Due to this fact, adding new blocks to the chain actually validate those blocks' parent Tipsets, that is: executing the messages of a new block, a miner cannot know exactly what state tree this will yield. That state tree is only known once all messages in that block's Tipset have been executed. Accordingly, it is in the next round (and based on the number of blocks mined on a given Tipset) that a miner will be able to choose which state tree to extend.
+
+## Tipsets
+
+All valid blocks generated in a round form a `Tipset` that participants will attempt to mine off of in the subsequent round (see above). Tipsets are valid so long as:
+
+- All blocks in a Tipset have the same parent Tipset
+- All blocks in a Tipset have the same number of tickets in their `Tickets` array
+
+These conditions imply that all blocks in a Tipset were mined at the same height. This rule is key to helping ensure that EC converges over time. While multiple new blocks can be mined in a round, subsequent blocks all mine off of a Tipset bringing these blocks together. The second rule means blocks in a Tipset are mined in a same round.
+
+The blocks in a tipset have no defined order in representation. During state computation, blocks in a tipset are processed in order of block ticket, breaking ties with the block CID bytes.
+
+Due to network propagation delay, it is possible for a miner in round N+1 to omit valid blocks mined at round N from their Tipset. This does not make the newly generated block invalid, it does however reduce its weight and chances of being part of the canonical chain in the protocol as defined by EC's {{<sref chain_selection>}} function.

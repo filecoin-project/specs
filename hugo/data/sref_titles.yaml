@@ -1,5 +1,33 @@
-app_address: "Address"
-chain_selection: "Chain Selection"
-chain_weighting: "Chain Weighting"
+# general
+crypto_signatures: "Signatures"
 ds_address: "Address"
-secret_leader_election: "Secret Leader Election"
+app_address: "Address"
+
+# blockchain
+sys_vm: "VM"
+
+### SPC
+storage_power_consensus: "Storage Power Consensus"
+expected_consensus: "Expected Consensus"
+tickets: "Tickets"
+leader_election: "Secret Leader Election"
+chain_selection: "Chain Selection"
+finality: "EC Finality"
+### Message Pool
+message_pool: "Message Pool"
+message_syncer: "Message Syncer"
+message_storage: "Message Storage"
+
+# files
+
+# markets
+retrieval_market: "Retrieval Market"
+storage_market: "Storage Market"
+
+# mining
+storage_mining: "Storage Mining Subsystem"
+post: "Proof of Spacetime"
+
+# nodes
+
+# token

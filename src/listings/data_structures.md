@@ -21,8 +21,8 @@ A block header contains information relevant to a particular point in time over 
 
 - The address of the miner that mined the block
 - An array of the tickets that led to this particular miner being selected as the leader for this round (see
-{{<sref secret_leader_election>}} for more details), as well as a signature on the winning ticket
-- The set of parent blocks and aggregate {{<sref chain_weighting "chain weight">}} of the parents
+{{<sref leader_election>}} for more details), as well as a signature on the winning ticket
+- The set of parent blocks and aggregate {{<sref chain_selection "chain weight">}} of the parents
 - This block's height
 - Merkle root of the state tree (after applying the messages -- state transitions -- included in this block)
 - Merkle root of the messages (state transitions) in this block

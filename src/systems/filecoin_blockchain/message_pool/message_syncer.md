@@ -2,10 +2,13 @@
 title: Message Syncer
 ---
 
+{{<label message_syncer>}}
+
 TODO:
 
 - explain message syncer works
 - include the message syncer code
+
 # Message Propagation
 
 Messages are propagated over the libp2p pubsub channel `/fil/messages`. On this channel, every [serialised `SignedMessage`](data-structures.md#messages) is announced.

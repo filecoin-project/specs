@@ -2,20 +2,19 @@
 title: "Expected Consensus"
 ---
 
+{{<label expected_consensus>}}
 ## Algorithm
 
 Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an `Election Proof`). All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](#chain-selection).
 
-EC is called by the {{<sref storage_power_consensus>}} subsystem in order to run a new round of leader election and validate incoming blocks' election proofs.
+EC is accessible by the {{<sref storage_power_consensus>}} subsystem and provides it with the following facilities:
+- Access to verifiable randomness for the protocol, derived from the ticket chain.
+- Running and verifying leader elections for block generation.
+- Access to a weighting function enabling a choice of which chains to extend.
+- Access to the most recently finalized tipset available to all protocol participants.
 
-{{<label secret_leader_election>}}
-## Secret Leader Election
-
-Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](storage-market.md#the-power-table), where power is equivalent to storage provided through time.
-
-Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness inputs for Leader Election. Every block generated references an `ElectionProof` derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.
-
-### Tickets
+{{<label tickets>}}
+## Tickets
 
 One may think of leader election in EC as a verifiable lottery, in which participants win in proportion to the power they have within the network.
 
@@ -136,6 +135,67 @@ For each ticket, idx: tickets
 
 Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner.
 
+## The Ticket chain
+
+While each Filecoin block header contains a ticket array, it is useful to provide nodes with a ticket chain abstraction.
+
+Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
+- They are drawn by Storage Miners as SealSeeds to commit new sectors
+- They are drawn by Storage Miners as PoStChallenges to generate PoSts
+- They are drawn by the Storage Power subsystem as randomness in leader election to determine their eligibility to mine a block
+- They are drawn by the Storage Power subsystem in order to generate new tickets for future use.
+
+Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin's Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.
+
+This ticket chain will track one-to-one with a block at each height in a given subchain, but omits certain details including other blocks mined at that height.
+
+Simply, it is composed inductively as follows:
+
+- At height 0, take the genesis block, return its ticket
+- At height n+1, take the block used at height n.
+  - If the ticket it returned in the previous step is not the final ticket in its ticket array, return the next one.
+  - If the ticket it returned in the previous step is the final ticket in its ticket array,
+    - use EC to select the next heaviest tipset in the subchain.
+    - select the block in that tipset with the smallest final ticket, return its first ticket
+
+We illustrate this below:
+```
+                     ┌────────────────────────────────────────────────────────────────────────────────────┐
+                      │                                                                                    │
+                      ▼                                  ◀─────────────────────────────────────────────────┼────────────────────────────────────────────┐
+          ┌─┐        ┌─┐        ┌─┐        ┌─┐          ┌─┐                                       ┌─┐      │    ┌─┐         ┌─┐         ┌─┐           ┌─┤
+   ◀──────│T1◀───────│T2◀───────│T3◀───────│T4◀─────────│T5◀───────────────    ...    ◀───────────T1+k─────┼───T2+k◀────────T3+k────────T4+k──────────T5│k
+          └─┘        └─┘        └─┘        └─┘          └─┘                                       └─┘      │    └─┘         └─┘         └─┘           └─┤
+                                 ▲                       │                                                 │                 │           │             ││
+           │          │          │          │                                                      │       │     │                                      │
+                                 ├───────────────────────┼─────────────────────────────────────────────────┼─────────────────┼────┐      │             ││
+           │          │                     │                                                      │       │     │                │                     │
+                       ─ ─ ─ ─ ─ ┴ ─   ─ ─ ─             ┘                                            ─ ─ ─│─ ─ ─          ─ ┘    │      └ ─ ─ ─   ─ ─ ┘│
+        ┌──┼──────┬─┬┐         ┌──┼─┼─┼──┬─┬┐        ┌──┼──────┬─┬┐                             ┌──┼─┼────┬─┬┐         ┌──┼──────┬─┬┐        ┌──┼─┼────┬─┬┐
+        │         │E1│         │         │E2│        │         │E3│                             │         E1+l         │         E2+l        │         E3+l
+        │  │      └─┘│         │  │ │ │  └─┘│        │  │      └─┘│                             │  │ │    └─┘│         │  │      └─┘│        │  │ │    └─┘│
+        │            │         │            │        │            │                             │            │         │            │        │            │
+ ◀──────│  ▼         │◀────────│  ▼ ▼ ▼     │◀───────│  ▼         │◀──────     ...     ◀────────│  ▼ ▼       │◀────────│  ▼         │◀───────│  ▼ ▼       │
+        │ ┌─┐        │         │ ┌─┬─┬─┐    │        │ ┌─┐        │                             │ ┌─┬─┐      │         │ ┌─┐        │        │ ┌─┬─┐      │
+        │ │T1     B1 │         │ │T2 │ │ B2 │        │ │T5     B3 │                             │ │ │ │  B1+l│         │ │ │    B2+l│        │ │ │ │  B3+l│
+        └─┴─┴────────┘         └─┴─┴─┴─┴────┘        └─┴─┴────────┘                             └─┴─┴─┴──────┘         └─┴─┴────────┘        └─┴─┴─┴──────┘
+```
+
+
+
+The above represents an instance of a block-chain, and its associated ticket-chain. The details of how it works should be clear by the end of this section, but quickly, some observations:
+
+- Block 1 contains a single ticket T1
+- Block 2 contains 3 tickets T2, T3, T4 meaning it was likely generated after 2 failed leader election attempts in the network.
+- Block B1+l has two tickets and an Election Proof E1+l that was generated using T2. This means B1+l's miner tried to generate an election proof using T1 and failed, succeeding on their second attempt with T2.
+
+{{<label leader_election>}}
+## Secret Leader Election
+
+Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage [power table](storage-market.md#the-power-table), where power is equivalent to storage provided through time.
+
+Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin's EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness inputs for Leader Election. Every block generated references an `ElectionProof` derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.
+
 ### Running a leader election
 
 Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see [election validation](mining.md#election-validation).
@@ -206,7 +266,6 @@ Output: 0, 1
 
 Just as there can be 0 miners win in a round, multiple miners can be elected in a given round. This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round.
 
-{{<label chain_weighting>}}
 ### Chain Weighting
 
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
@@ -258,7 +317,12 @@ Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but 
 
 The probability that two Tipsets with different blocks would have all the same tickets can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes.
 
-### Slashing in EC
+{{<label finality>}}
+## Finality in EC
+
+
+
+## Slashing in EC
 
 Due to the existence of potential forks, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
 
@@ -271,7 +335,3 @@ This is detectable when a miner submits two blocks that satisfy either of the fo
 
 Any node that detects this occurring should take both block headers, and call [`storagemarket.SlashConsensusFault`](actors.md#slashconsensusfault). The network will then take all of that node's collateral, give a portion of it to
 the reporter, and keep the rest.
-
-## Implementation Notes
-
-- When selecting messages from the mempool to include in the block, be aware that other miners may also generate blocks during this round, and to maximize fee earnings it may be best to select some messages at random (second in a duplicate earns no fees).
