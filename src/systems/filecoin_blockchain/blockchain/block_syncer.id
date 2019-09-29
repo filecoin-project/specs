@@ -1,4 +1,4 @@
-import base 	 "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 type ErrInvalidBlock error
 type PubSubTopic struct {}
@@ -73,7 +73,7 @@ type AncestryGraph struct {
 type Subchain struct {
     Head    Tipset
     Tail    Tipset
-    Weight  base.ChainWeight
+    Weight  base_blockchain.ChainWeight
     Tipsets {Block:Tipset}
 }
 

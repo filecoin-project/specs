@@ -1,35 +1,24 @@
-// Assumptions:
-//    - Deals are on Chain 
-//    - Storage Payment is done on PoSt submission
-//    - Updatable Filecoin Storage Deals (Not in current version)
+import base_markets    "github.com/filecoin-project/specs/systems/filecoin_markets"
 
-// Miners can pledge and commit sectors and participate
-// in expected consensus to earn block rewards
-// However, block rewards earned are vested for a year
-// over an exponentially increasing schedule
-// meaning that miners can only withdraw all of their
-// block rewards from mining a particular block after a year
-
-// The goals of the storage market subsystem are thus to
-// 1) facilitate deal addition to an existing sector
-// 2) update existing deal 
-
-// A clean separation of concern is also resulted
-// pledgeCollateral is now solely for consensus and pledging storage
-// storageDealCollateral is for each deal and up to the transacting parties
-// In the event that miners do not add deals to a sector,
-// full block rewards are earned after maintaining that sector for a year
-
-import base "github.com/filecoin-project/specs/systems/filecoin_markets"
-
-type StorageDeal   base.StorageDeal
-type StorageDealID base.StorageDealID
-type TokenAmount   base.TokenAmount
-type Address       base.Address
+type StorageDeal   base_markets.StorageDeal
+type StorageDealID base_markets.StorageDealID
+type Address       base_markets.Address
+type Epoch         base_markets.Epoch
+type PoStProof     base_markets.PoStProof
+type TokenAmount   base_markets.TokenAmount
 
 type StorageParticipantBalance struct {
   Locked    TokenAmount
   Available TokenAmount
+}
+
+type PublishStorageDealSuccess  struct {
+  StorageDealID StorageDealID
+}
+type PublishStorageDealError    struct {}
+type PublishStorageDealResponse struct {
+  Success PublishStorageDealSuccess
+  Error   PublishStorageDealError
 }
 
 type StorageMarketActor struct {
@@ -53,16 +42,25 @@ type StorageMarketActor struct {
   CheckLockedBalance(participantAddr Address) TokenAmount
 
   // TODO: There should be some punishment for publishing a deal too late
-  // call by countersigner or CommitSector
-  PublishStorageDeal(newStorageDeal StorageDeal) struct {}
+  // call by CommitSector in StorageMiningSubsystem
+  // a StorageDeal is only published on chain when it passes VerifyStorageDeal
+  PublishStorageDeal(newStorageDeal StorageDeal) PublishStorageDealResponse
+
+  // check if StorageDeal is still valid
+  // check if StorageDeal has the right signature
+  // check if provider and client have sufficient balances
+  VerifyStorageDeal(newStorageDeal StorageDeal) bool
 
   // TODO: StorageDeals should be renewable
   UpdateStorageDeal(newStorageDeal StorageDeal) struct {}
 
-  // call by CronActor on ExpiredSet
+  // call by StorageMarketActor on ExpiredSet
   CloseExpiredStorageDeal(targetStorageDeal StorageDeal) struct {}
 
-  // call by StorageMarketActor or CronActor to slash deal collateral
+  // call by StorageMinerActor on successful PoSt Submission
+  HandleStorageDealPayment(storageDeal StorageDeal, currEpoch Epoch) struct {}
+
+  // call by StorageMinerActor or CronActor to slash deal collateral
   SlashStorageDealCollateral(targetStorageDeal StorageDeal) struct {}
 
 }

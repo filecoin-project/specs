@@ -1,6 +1,6 @@
-import base "github.com/filecoin-project/specs/systems/filecoin_markets"
+import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 
-type StorageDealProposal              base.StorageDealProposal
+type StorageDealProposal              base_markets.StorageDealProposal
 
 type StorageDealProposalQuery         struct {}
 type StorageDealProposalQueryResponse struct {}

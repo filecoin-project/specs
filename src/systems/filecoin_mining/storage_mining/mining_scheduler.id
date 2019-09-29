@@ -1,4 +1,4 @@
-import base "github.com/filecoin-project/specs/systems/filecoin_mining"
+import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 
 // import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
 
@@ -7,7 +7,7 @@ type SealedSectorSet [Sector]
 type ReplicaID       CID
 
 type ProveStorageArtifact struct {
-	PoStProof base.PoStProof
+	PoStProof base_mining.PoStProof
 	BitField  Bytes // TODO verify type here
 }
 
