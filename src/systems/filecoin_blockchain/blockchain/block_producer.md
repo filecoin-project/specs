@@ -8,7 +8,6 @@ Having registered as a miner, it's time to start making and checking tickets. At
 
 For additional details around how consensus works in Filecoin, see the [expected consensus spec](expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
-
 ## Ticket Generation
 
 For details of ticket generation, see the [expected consensus spec](expected-consensus.md#ticket-generation).
