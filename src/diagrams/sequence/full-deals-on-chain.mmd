@@ -3,9 +3,9 @@ sequenceDiagram
     participant RetrievalClient
     participant RetrievalProvider
 
-    participant StorageClient
+    participant StorageMarketParticipant1
+    participant StorageMarketParticipant2
     participant StorageMarketActor
-    participant StorageProvider
 
     participant PaymentChannelActor
     participant PaymentSubsystem
@@ -27,18 +27,16 @@ sequenceDiagram
     participant libp2p
 
     Note over RetrievalClient,RetrievalProvider: RetrievalMarketSubsystem
-    Note over StorageClient,StorageProvider: StorageMarketSubsystem
+    Note over StorageMarketParticipant,StorageMarketActor: StorageMarketSubsystem
     Note over BlockchainSubsystem,StoragePowerActor: BlockchainGroup
     Note over StorageMiningSubsystem,StorageProvingSubsystem: MiningGroup
 
-    opt RetrievalDealMake
-        RetrievalClient ->>+ RetrievalProvider: DealProposal
-        RetrievalProvider -->>- RetrievalClient: {Accepted, Rejected}
-    end
-
-    opt RetrievalQuery
-        RetrievalClient ->>+ RetrievalProvider: Query(CID)
-        RetrievalProvider -->>- RetrievalClient: MinPrice, Unavail
+    opt RetrievalMarket
+        RetrievalClient ->>+ RetrievalProvider: NewRetrievalQuery(RetreivalQuery)
+        RetrievalProvider -->>- RetrievalClient: RetrievalQueryResponse
+        RetrievalClient ->>+ RetrievalProvider: NewRetrievalDealProposal(RetrievalDealProposal)
+        RetrievalProvider -->> RetrievalProvider: AcceptRetrievalDealProposal(RetrievalDealPropsal)
+        RetrievalProvider -->>- RetrievalClient: NewPaymentChannel
     end
 
     opt RegisterStorageMiner
@@ -48,38 +46,35 @@ sequenceDiagram
     end
 
     opt StorageDealMake
-        Note left of StorageClient: Piece, PieceCID
-        StorageProvider -->> StorageMarketActor: RegisterParticipant(TokenAmount)
-        StorageClient -->> StorageMarketActor: RegisterParticipant(TokenAmount)
+        StorageMarketParticipant1 -->> StorageMarketActor: RegisterParticipant(TokenAmount)
+        StorageMarketParticipant1 -->> StorageMarketActor: AddBalance(TokenAmount)
+        StorageMarketParticipant1 -->> StorageMarketActor: WithdrawBalance(TokenAmount)
+        StorageMarketParticipant1 -->+ StorageMarketActor: CheckLockedBalance(Address)
+        StorageMarketActor -->- StorageMarketParticipant1: TokenAmount
 
-        alt 1 - Client Initiates
-            StorageClient -->+ StorageProvider: NewStorageDealProposal(StorageDealProposal)
-            StorageProvider --> StorageMarketActor: VerifyBalance(ClientAddr)
-            StorageProvider -->> StorageProvider: SignStorageDealProposal(StorageDealProposal)
-            StorageProvider -->- StorageClient: NewStorageDeal(StorageDeal)
-            StorageClient -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
-            StorageProvider -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
-        else 0 - Provider Initiates
-            StorageProvider -->+ StorageClient: NewStorageDealProposal(StorageDealProposal)
-            StorageClient --> StorageMarketActor: VerifyBalance(ProviderAddr)
-            StorageClient -->> StorageClient: SignStorageDealProposal(StorageDealProposal)
-            StorageClient -->- StorageProvider: NewStorageDeal(StorageDeal)
-            StorageProvider -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
-            StorageClient -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
-        end
+
+        StorageMarketParticipant1 -->+ StorageMarketParticipant2: NewStorageDealProposal(StorageDealProposal)
+        StorageMarketParticipant2 --> StorageMarketActor: VerifyBalance(StorageMarketParticipant1)
+        StorageMarketParticipant2 -->> StorageMarketParticipant2: SignStorageDealProposal(StorageDealProposal)
+        StorageMarketParticipant2 -->- StorageMarketParticipant1: NewStorageDeal(StorageDeal)
+        StorageMarketParticipant2 -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
+        StorageMarketParticipant1 -->> StorageMarketActor: PublishStorageDeal(StorageDeal)
+
     end
 
     opt AddingDealToSector
-        StorageProvider ->>+ StorageMiningSubsystem: HandleStorageDeal(Deal)
-        StorageMiningSubsystem ->>+ SectorIndexerSubsystem: AddPieceToSector(Deal, SectorID)
+        StorageMarketActor ->>+ StorageMiningSubsystem: HandleStorageDeal(Deal)
+        StorageMiningSubsystem ->>+ SectorIndexerSubsystem: AddDealToSector(Deal, SectorID)
         SectorIndexerSubsystem ->> SectorIndexerSubsystem: IndexSectorByDealExpiration(SectorID, Deal)
         SectorIndexerSubsystem -->>- StorageMiningSubsystem: (SectorID, Deal)
-        StorageMiningSubsystem ->>- StorageProvider: NotifyStorageDealStaged(Deal,SectorID)
+        StorageMiningSubsystem ->>- StorageMarketActor: NotifyStorageDealStaged(Deal,SectorID)
     end
 
     opt ClientQuery
-        StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
-        StorageProvider -->>- StorageClient: StorageDealResponse{StorageDealStaged,Deal}
+        StorageMarketParticipant1 ->>+ StorageMarketParticipant2: QueryStorageDealProposalStatus(StorageDealProposalQuery)
+        StorageMarketParticipant1 -->>- StorageMarketParticipant2: StorageDealProposalQueryResponse
+        StorageMarketParticipant1 ->>+ StorageMarketParticipant2: QueryStorageDealStatus(StorageDealQuery)
+        StorageMarketParticipant1 -->>- StorageMarketParticipant2: StorageDealQueryResponse
     end
 
     opt SealingSector
@@ -101,35 +96,6 @@ sequenceDiagram
                 StorageMinerActor -->> StorageMiningSubsystem: CommitSectorError
             end
         end
-    end
-
-    loop PoStSubmission
-        Note Right of PoStSubmission: in every proving period
-        Note Right of PoStSubmission: DoneSet
-        StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: GetPoStChallenge(Chain, Epoch)
-        StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: challenge
-        StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
-        StorageProvingSubsystem -->>- StorageMiningSubsystem: PoStProof
-        opt SubmitPoSt
-            StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
-            StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifyPoSt(PoStProof)
-            FilecoinProofsSubsystem -->>- StorageMinerActor: {1,0}
-            alt 1 - success
-                StorageMinerActor ->> StorageMinerActor:  UpdateDoneSet()
-                StorageMinerActor ->> MarketMinerActor:  EnsureDealsAreAccountedFor()
-                StorageMarketActor ->> StorageMarketActor: ProcessDealPayment()
-            else 0 - failure
-                StorageMinerActor -->> StorageMiningSubsystem: PoStError
-                StorageMarketActor -->> StorageMarketActor: SlashStorageCollateral()
-            end
-        end
-    end
-
-    opt ClientQuery
-        StorageClient ->>+ StorageProvider: QueryStorageDealStatus(StorageDealQuery)
-        StorageProvider -->>- StorageClient: StorageDealResponse{SealingParams,DealComplete,...}
-        StorageClient ->>+ StorageMarketActor: QueryStorageDealStatus(StorgeDealQuery)
-        StorageMarketActor -->>- StorageClient: StorageDealStatus
     end
 
     loop BlockReception
@@ -173,10 +139,29 @@ sequenceDiagram
             StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: TryLeaderElection(EP)
             StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: {1, 0}
             opt 1- success
+                StorageMiningSubsystem ->>+ StoragePowerConsensusSubsystem: GetPoStChallenge(Chain, Epoch)
+                StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: challenge
+                StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
+                StorageProvingSubsystem -->>- StorageMiningSubsystem: PoStProof
+                opt SubmitPoSt
+                    StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+                    StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifyPoSt(PoStProof)
+                    FilecoinProofsSubsystem -->>- StorageMinerActor: {1,0}
+                    alt 1 - success
+                        StorageMinerActor ->> StorageMinerActor:  UpdateDoneSet()
+                        StorageMinerActor ->> StorageMarketActor: HandleStorageDealPayment()
+                        StorageMarketActor ->> StorageMarketActor: CloseExpiredStorageDeal() 
+                    else 0 - failure
+                        StorageMinerActor -->> StorageMiningSubsystem: PoStError
+                        StorageMarketActor -->> StorageMarketActor: SlashStorageCollateral()
+                    end
+                end
+
                 StorageMiningSubsystem ->> BlockProducer: GenerateBlock(EP, T0, Tipset, StorageMiner.Address)
                 BlockProducer ->>+ MessagePool: GetMostProfitableMessages(StorageMiner.Address)
                 MessagePool -->>- BlockProducer: [Message]
                 BlockProducer ->> BlockProducer: block ← AssembleBlock([Message], Tipset, EP, T0, StorageMiner.Address)
+
                 BlockProducer ->> BlockSyncer: PropagateBlock(block)
             end
         end
@@ -187,6 +172,8 @@ sequenceDiagram
             BlockchainSubsystem ->> SectorIndexerSubsystem: OnNewTipset(Chain, Epoch)
             SectorIndexerSubsystem ->> SectorIndexerSubsystem: [SectorID] ← LookupSectorByDealExpiry(Epoch)
             SectorIndexerSubsystem ->> SectorIndexerSubsystem: PurgeSectorsWithNoLiveDeals([SectorID])
+            SectorIndexerSubsystem ->>+ StorageMiningSubsystem: HandleExpiredDeals([SectorID])
+            StorageMiningSubsystem ->>- StorageMarketActor: CloseExpiredStorageDeal(StorageDeal)
         end
         Note Right of MiningScheduler: Schedule and resume PoSts
         Note Right of MiningScheduler: Schedule and resume SEALs
@@ -195,22 +182,35 @@ sequenceDiagram
     end
 
     opt ClockSubsystem
-        Note Right of ClockSubsystem: Process expired deals
+        Note Right of ClockSubsystem: PoSt challenge if a node has not mined a block in a ProvingPeriod
+        ClockSubsystem ->>+ StoragePowerConsensusSubsystem: GetPoStChallenge(Chain, Epoch)
+        StoragePowerConsensusSubsystem -->>- StorageMiningSubsystem: challenge
+        StorageMiningSubsystem ->>+ StorageProvingSubsystem: GeneratePoSt(challenge, [SectorID])
+        StorageProvingSubsystem -->>- StorageMiningSubsystem: PoStProof
+        opt SubmitPoSt
+            StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, DoneSet)
+            StorageMinerActor ->>+ FilecoinProofsSubsystem: VerifyPoSt(PoStProof)
+            FilecoinProofsSubsystem -->>- StorageMinerActor: {1,0}
+            alt 1 - success
+                StorageMinerActor ->> StorageMinerActor:  UpdateDoneSet()
+                StorageMinerActor ->> StorageMarketActor: HandleStorageDealPayment()
+                StorageMarketActor ->> StorageMarketActor: CloseExpiredStorageDeal() 
+            else 0 - failure
+                StorageMinerActor -->> StorageMiningSubsystem: PoStError
+                StorageMarketActor -->> StorageMarketActor: SlashStorageCollateral()
+            end
+        end
     end
 
     opt Storage Fault
-        opt Declaration within a Proving Period
+        opt Declaration before receiving a challenge
             StorageMinerSubsystem ->> StorageMinerActor: UpdateSectorStatus([FaultSet], SectorStateSets)
             StorageMinerActor ->> StoragePowerActor: RecomputeMinerPower()
+            StorageMarketActor -->> StorageMarketActor: SlashStorageCollateral()
             Note Right of StorageMinerActor: SectorStateSets := (FaultSet, RecoverSet, ExpireSet)
         end
 
-        opt Miner DID NOT win blocks this proving period -- deadline challenge
-            StorageMiningSubsystem ->> StorageMinerActor: SubmitPoSt(PoStProof, SectorStateSets)
-        end
-
         loop EveryBlock
-            CronActor ->> StoragePowerActor: VerifyPosts()
             loop forEach StorageMinerActor in StoragePowerActor.Miners
                 alt if miner ProvingPeriod ends
                     StoragePowerActor ->> StorageMinerActor: ProvingPeriodUpdate()

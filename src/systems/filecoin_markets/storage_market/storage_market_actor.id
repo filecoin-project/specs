@@ -55,6 +55,8 @@ type StorageMarketActor struct {
   UpdateStorageDeal(newStorageDeal StorageDeal) struct {}
 
   // call by StorageMarketActor on ExpiredSet
+  // remove StorageDeal from StorageMarketActor
+  // return StorageCollateral to miners
   CloseExpiredStorageDeal(targetStorageDeal StorageDeal) struct {}
 
   // call by StorageMinerActor on successful PoSt Submission
