@@ -1,6 +1,6 @@
 
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import file "github.com/filecoin-project/specs/systems/filecoin_files/files_pieces/file"
+import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 
 type SealPublicInputs struct {}
 type MerkleTree struct {}

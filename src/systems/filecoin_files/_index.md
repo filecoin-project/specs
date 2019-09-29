@@ -3,7 +3,8 @@ menuIcon: 📑
 menuTitle: "**Files & Data**"
 title: Files & Data
 entries:
-- files_pieces
+- file
+- piece
 # - error_correction # TODO
 - data_transfer
 ---
