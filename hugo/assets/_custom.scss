@@ -262,34 +262,40 @@ html {
   color: inherit;
 }
 
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+1),
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+1) .tocMap-item {
-    background-color: rgba(255, 0, 0, 0.2);
+.tocMap .tocMap-item .tocMap-item.expanded,
+.tocMap .tocMap-item .tocMap-item.expanded .tocMap-item {
+    background-color: rgba(50, 50, 50, 0.10);
 }
 
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+2),
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+2) .tocMap-item {
-    background-color: rgba(255, 255, 0, 0.2);
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+1),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+1) .tocMap-item {
+    background-color: rgba(255, 0, 0, 0.10);
 }
 
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+3),
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+3) .tocMap-item {
-    background-color: rgba(255, 0, 255, 0.2);
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+2),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+2) .tocMap-item {
+    background-color: rgba(255, 255, 0, 0.25);
 }
 
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+4),
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+4) .tocMap-item {
-    background-color: rgba(0, 0, 255, 0.2);
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+3),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+3) .tocMap-item {
+    background-color: rgba(255, 0, 255, 0.10);
 }
 
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+5),
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+5) .tocMap-item {
-    background-color: rgba(0, 255, 0, 0.2);
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+4),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+4) .tocMap-item {
+    background-color: rgba(0, 0, 255, 0.10);
 }
 
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+6),
-.tocMap-item .tocMap-item.expanded:nth-of-type(6n+6) .tocMap-item {
-    background-color: rgba(0, 255, 255, 0.2);
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+5),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+5) .tocMap-item {
+    background-color: rgba(0, 255, 0, 0.10);
+}
+
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+6),
+.tocMap.colorful .tocMap-item .tocMap-item.expanded:nth-of-type(6n+6) .tocMap-item {
+    background-color: rgba(0, 255, 255, 0.15);
 }
 
 

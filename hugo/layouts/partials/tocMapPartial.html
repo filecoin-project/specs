@@ -1,6 +1,10 @@
 
 {{ $page := .Page }}
 {{ $depth := .Depth }}
+{{ $expand := 2 }}
+{{ if (gt 0 .Expand) }}
+    {{ $expand = .Expand }}
+{{ end }}
 
 {{ $tokens := partial "tokensFromPagePath" .Page.Path }}
 {{ $name := partial "nameFromPagePath" .Page.Path }}
@@ -14,7 +18,7 @@
 {{ end }}
 
 {{ $expandedclass := "expanded" }}
-{{ if (gt $depth 2) }}
+{{ if (gt $depth $expand) }}
     {{ $expandedclass = "" }}
 {{ end }}
 
@@ -31,10 +35,10 @@
     </div>
 
     <div class="tocMap-children">
-        {{ if (le $depth 2) }}
+        {{ if (le $depth $expand) }}
             {{ range (.Page.Param "entries") }}
                 {{ with $page.GetPage . }}
-                  {{ partial "tocMapPartial.html" (dict "Page" . "Depth" (add $depth 1)) }}
+                  {{ partial "tocMapPartial.html" (dict "Page" . "Depth" (add $depth 1) "Expand" $expand) }}
                 {{ end }}
             {{ end }}
         {{ end }}

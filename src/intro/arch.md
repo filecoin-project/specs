@@ -5,7 +5,7 @@ title: "Architecture Diagrams"
 
 # Filecoin Systems
 
-{{< incTocMap "/docs/systems" >}}
+{{< incTocMap "/docs/systems" 2 "colorful" >}}
 
 
 # Overview Diagram

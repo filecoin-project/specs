@@ -7,3 +7,5 @@ entries:
 - payment_channels
 - multisig
 ---
+
+{{< incTocMap "/docs/systems/filecoin_token" 1 >}}

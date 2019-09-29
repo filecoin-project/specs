@@ -1,4 +1,5 @@
-<div class="tocMap">
+
+<div class="tocMap {{.Get 2}}">
 
 <!--   <div>
     <input id="toc-map-detail-slider" type="range" onchange="onTocMapDetailChange();"
@@ -7,8 +8,9 @@
     <span id="toc-map-detail-slider-label">3</span>
   </div>
  -->
+  {{ $expand := (.Get 1) }}
   {{ with .Site.GetPage (.Get 0) }}
-    {{ partial "tocMapPartial.html" (dict "Page" . "Depth" 1) }}
+    {{ partial "tocMapPartial.html" (dict "Page" . "Depth" 1 "Expand" $expand) }}
   {{ end }}
 
 </div>

@@ -9,6 +9,9 @@ entries:
 - storage_mining
 ---
 
+{{< incTocMap "/docs/systems/filecoin_mining" 2 >}}
+
+
 The Storage Mining System is the part of the Filecoin Protocol that deals with storing Client's
 data, producing proof artifacts that demonstrate correct storage behavior, and managing the work
 involved.

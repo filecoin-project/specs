@@ -9,6 +9,9 @@ entries:
 - storage_power_consensus
 ---
 
+{{< incTocMap "/docs/systems/filecoin_blockchain" 3 >}}
+
+
 The Filecoin Blockchain is a distributed virtual machine that achieves consensus, processes messages, accounts for storage, and maintains security in the Filecoin Protocol.
 
 It includes:
