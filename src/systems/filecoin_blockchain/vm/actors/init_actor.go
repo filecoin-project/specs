@@ -1,4 +1,4 @@
-package vm
+package actors
 
 type InitActor struct {
     VM    *VMSyscalls

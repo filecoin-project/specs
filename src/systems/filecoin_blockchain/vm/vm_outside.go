@@ -26,6 +26,16 @@ type InvocationOutput struct {
   GasUsed     GasAmount
 }
 
+func (vmi *VMInterpreter) ApplyMessageBatch(inTree StateTree, msgs []MessageRef) (outTree StateTree, ret []MessageReceipt) {
+  compTree := inTree
+  for _, m := range msgs {
+    oT, r := vmi.ApplyMessage(compTree, m.Message(), m.Miner())
+    compTree = oT        // assign the current tree. (this call always succeeds)
+    ret = append(ret, r) // add message receipt
+  }
+  return compTree, ret
+}
+
 func (vmi *VMInterpreter) ApplyMessage(inTree StateTree, msg Message, minerAddr Address) (outTree StateTree, ret MessageReceipt) {
 
   compTree := inTree
