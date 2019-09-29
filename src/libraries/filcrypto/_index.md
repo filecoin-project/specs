@@ -1,5 +1,5 @@
 ---
-menuTitle: filcrypto - Cryptographic Primitives
+menuTitle: filcrypto
 title: filcrypto - Filecoin Cryptographic Primitives
 entries:
 - filproofs

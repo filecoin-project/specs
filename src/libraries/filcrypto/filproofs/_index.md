@@ -1,5 +1,5 @@
 ---
-menuTitle: filproofs - Storage Proofs
+menuTitle: filproofs
 title: filproofs - Filecoin Storage Proofs
 ---
 

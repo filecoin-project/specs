@@ -1,4 +1,5 @@
 ---
+menuTitle: Libraries
 title: Libraries used in Filecoin
 entries:
 - filcrypto
@@ -8,3 +9,5 @@ entries:
 - ipfs
 - multiformats
 ---
+
+{{< incTocMap "/docs/libraries" >}}
