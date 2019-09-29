@@ -19,8 +19,8 @@ type SealOutputs struct {
 
 type SectorSealer struct {
 
-  SealSector(inputs SealInputs) union { SealOutputs, error }
-  VerifySeal(SealVerifyInfo sector.SealVerifyInfo) union { bool, error }
+  SealSector(si SealInputs) union { so SealOutputs, err error }
+  VerifySeal(sv sector.SealVerifyInfo) union { ok bool, err error }
 
 //  GeneratePieceInclusionProof(
 //    Tree          MerkleTree, //MerkleTree<Rephash>,
