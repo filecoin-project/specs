@@ -5,4 +5,5 @@ entries:
 - wallets
 - payments
 - payment_channels
+- multisig
 ---
