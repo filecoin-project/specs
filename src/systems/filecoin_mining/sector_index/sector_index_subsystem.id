@@ -1,46 +1,44 @@
 // import storage_proofs "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs"
 
 type AddDealToSectorResponse struct {
-	sectorID SectorID,
-	pip PieceInclusionProof,
+    sectorID  SectorID
+    pip       PieceInclusionProof
 }
 
 // TODO import this from StorageMarket
 type StorageDeal struct {
-	ID                String
-	Provider          Address
-	Client            Address
-	StartTime	      Epoch
-	Duration          UVarint
-	StorageCollateral UVarint
-	PieceSize         UInt
-	PiecePath		  Path
-	PieceRef          CID
+    ID                 String
+    Provider           Address
+    Client             Address
+    StartTime          Epoch
+    Duration           UVarint
+    StorageCollateral  UVarint
+    PieceSize          UInt
+    PiecePath          Path
+    PieceRef           CID
 }
 
 type SectorIndexerSubsystem struct {
+    ProverID
+    SectorStore
+    SectorBuilders {SectorConfig: SectorBuilder}
+    StorageProofs
 
-	ProverID       ProverID
-    SectorStore    SectorStore
-    SectorBuilders  { SectorConfig : SectorBuilder }
-    StorageProofs  StorageProofs
+    // call by StorageMiningSubsystem when adding a deal to sector
+    // trigger getPieceInclusionProof
+    AddDealToSector(deal StorageDeal) AddDealToSectorResponse
 
-	// call by StorageMiningSubsystem when adding a deal to sector
-	// trigger getPieceInclusionProof
-	AddDealToSector(deal StorageDeal) AddDealToSectorResponse
+    // potentially change to selectSectorByDealExpiry
+    selectStagedSectorBySize(deal StorageDeal) StagedSector
 
-	// potentially change to selectSectorByDealExpiry
-	selectStagedSectorBySize(deal StorageDeal) StagedSector
+    // call by SectorIndexer itself to get pip of a deal
+    getPieceInclusionProof(deal StorageDeal) PieceInclusionProof
 
-	// call by SectorIndexer itself to get pip of a deal
-	getPieceInclusionProof(deal StorageDeal) PieceInclusionProof
+    OnNewTipset(chain Chain, epoch Epoch)
 
-	OnNewTipset(chain Chain, epoch Epoch) struct {}
+    lookupSectorByExpiry(currentEpoch Epoch) [SectorID]
 
-	lookupSectorByExpiry(currentEpoch Epoch) [SectorID]
+    purgeSectorWithNoLiveDeals(sectorIDs [SectorID])
 
-	purgeSectorWithNoLiveDeals(sectorIDs [SectorID]) struct{}
-
-	selectSectorBuilderByDeal(deal StorageDeal) SectorBuilder
-
+    selectSectorBuilderByDeal(deal StorageDeal) SectorBuilder
 }

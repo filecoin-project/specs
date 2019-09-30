@@ -3,19 +3,19 @@ import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 type BlockHeight struct {}
 
 type Ticket struct {
-	vrfResult filcrypto.VRFResult
-	vdfResult filcrypto.VDFResult
+    vrfResult         filcrypto.VRFResult
+    vdfResult         filcrypto.VDFResult
 
-	// Generate(k VRFKeyPair, seed ElectionSeed) Ticket
-	ValidateSyntax() 	bool
-	Validate()			bool
+    // Generate(k VRFKeyPair, seed ElectionSeed) Ticket
+    ValidateSyntax()  bool
+    Validate()        bool
 }
 
 type ElectionProof struct {
-	vrfResult filcrypto.VRFResult
-	IsWinning(minerPower PowerFraction) bool	@(cached)
+    vrfResult filcrypto.VRFResult
+    IsWinning(minerPower PowerFraction) bool @(cached)
 
-	ValidateSyntax() bool
+    ValidateSyntax() bool
 }
 
 type ElectionSeed filcrypto.VDFResult
@@ -24,60 +24,56 @@ type ChainWeight UVarint
 type ChainHeight UVarint
 type Epoch UVarint
 
-type PowerFraction 	Float
-type StoragePower	UVarint
+type PowerFraction Float
+type StoragePower UVarint
 type ElectionArtifacts struct {
-	TK Ticket
-	T1 Ticket
+    TK Ticket
+    T1 Ticket
 }
-
 
 type Message union {
     UnsignedMessage
     SignedMessage
-} // representation keyed
-
+}  // representation keyed
 
 type UnsignedMessage struct {
-    to Address
-    from Address
+    to        Address
+    from      Address
 
     // When receiving a message from a user account the nonce in the message must match
     // the expected nonce in the "from" actor. This prevents replay attacks.
-    nonce UInt
-    value UInt
+    nonce     UInt
+    value     UInt
 
-    gasPrice UInt
-    gasLimit UInt
+    gasPrice  UInt
+    gasLimit  UInt
 
-    method UInt
-    params Bytes  // Serialized parameters to the method.
-} // representation tuple
-
+    method    UInt
+    params    Bytes  // Serialized parameters to the method.
+}  // representation tuple
 
 type SignedMessage struct {
-    message   UnsignedMessage
-    signature filcrypto.Signature
-} // representation tuple
-
+    message    UnsignedMessage
+    signature  filcrypto.Signature
+}  // representation tuple
 
 type MessageReceipt struct {
-    exitCode UInt
-    returnValue Bytes
-    gasUsed UInt
-} // representation tuple
+    exitCode     UInt
+    returnValue  Bytes
+    gasUsed      UInt
+}  // representation tuple
 
 type Address struct {
- 	NetworkID union {
- 		Testnet
- 		Mainnet
- 	}
- 	Protocol union {
- 		ID
- 		Secp256k1
- 		Actor
- 		BLS
-     }
+    NetworkID union {
+        Testnet
+        Mainnet
+    }
+    Protocol union {
+        ID
+        Secp256k1
+        Actor
+        BLS
+    }
 
     VerifySyntax(addrType Address_Protocol) bool
 }

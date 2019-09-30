@@ -1,7 +1,6 @@
-
 type Key struct {
-//  Algo Algorithm
-  Data Bytes
+    //  Algo Algorithm
+    Data Bytes
 }
 
 // key.Name
@@ -9,18 +8,18 @@ type Name string
 
 // key.Store
 type Store struct {
-  Put(n Name, key Key) error
-  Get(n Name) union { k Key, e error }
-//  Sign(n Name, data Bytes) Signature
+    Put(n Name, key Key) error
+    Get(n Name) union {k Key, e error}
+    //  Sign(n Name, data Bytes) Signature
 }
 
 type Algorithm union {
-  Sig SignatureAlgorithm
+    Sig SignatureAlgorithm
 }
 
 type SignatureAlgoC struct {
-  Sign(b Bytes) union { s Signature, e error }
-  Verify(b Bytes, s Signature) union { b bool, e error }
+    Sign(b Bytes) union {s Signature, e error}
+    Verify(b Bytes, s Signature) union {b bool, e error}
 }
 
 type EdDSASignatureAlgorithm SignatureAlgoC
@@ -28,14 +27,14 @@ type Secp256k1SignatureAlgorithm SignatureAlgoC
 type BLSAggregateSignatureAlgorithm SignatureAlgoC
 
 type SignatureAlgorithm union {
-  EdDSASigAlgo     EdDSASignatureAlgorithm
-  Secp256k1SigAlgo Secp256k1SignatureAlgorithm
-  BLSSigAlgo       BLSAggregateSignatureAlgorithm
+    EdDSASigAlgo      EdDSASignatureAlgorithm
+    Secp256k1SigAlgo  Secp256k1SignatureAlgorithm
+    BLSSigAlgo        BLSAggregateSignatureAlgorithm
 }
 
 type Signature struct {
-  Algo SignatureAlgorithm
-  Data Bytes
+    Algo           SignatureAlgorithm
+    Data           Bytes
 
-  Verify(k Key) union { b bool, e error }
+    Verify(k Key)  union {b bool, e error}
 }

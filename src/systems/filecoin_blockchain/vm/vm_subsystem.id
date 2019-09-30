@@ -1,8 +1,6 @@
-
 // VMSubsystem controls VM execution.
 // It uses no local storage
 type VMSubsystem struct {
-
     // Execute computes and returns outTree, a new StateTree which is the
     // application of msgs to inTree.
     //
@@ -19,6 +17,5 @@ type VMSubsystem struct {
     // local storage, and intermediate storage. It is definitely the case that
     // implementations may want to operate on this differently, depending on
     // how their IpldStores work.
-    Execute(inTree StateTree, msgs [Message]) union { outTree StateTree, err error }
-
+    Execute(inTree StateTree, msgs [Message]) union {outTree StateTree, err error}
 }

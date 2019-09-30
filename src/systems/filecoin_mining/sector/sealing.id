@@ -1,70 +1,67 @@
-
 // OnChainSealInfo is the structure of information that must go on chain.
 type OnChainSealInfo struct {
-  SectorID            SectorID
-  UnsealedCID         UnsealedSectorCID // CommD
-  SealedCID           SealedSectorCID   // CommR
-//  SealVerifyArtifacts struct {}
-//  SealVerifyArtifacts union {
-//    ZigZagSealVerifyArtifacts struct {
-//      Proof ZigZagSealProof
-//    }
+    SectorID
+    UnsealedCID  UnsealedSectorCID  // CommD
+    SealedCID    SealedSectorCID  // CommR
+    //  SealVerifyArtifacts struct {}
+    //  SealVerifyArtifacts union {
+    //    ZigZagSealVerifyArtifacts struct {
+    //      Proof ZigZagSealProof
+    //    }
 }
 
 type SealCfg struct {
-  SectorSize     UInt
-  SubsectorCount UInt
-  Partitions     UInt
+    SectorSize      UInt
+    SubsectorCount  UInt
+    Partitions      UInt
 }
 
 type SealArguments struct {
-  Algorithm          SealAlgorithm
-  OutputArtifacts    SealOutputArtifacts
+    Algorithm        SealAlgorithm
+    OutputArtifacts  SealOutputArtifacts
 }
 
 type SealAlgorithm union {
-  // ZigZagPoRep
-  StackedDRG
+    // ZigZagPoRep
+    StackedDRG
 }
 
-
 // type SealAlgorithmArtifacts struct {
-  // AlgorithmWideArtifacts struct {
-  //   // trusted setup output parameters go here
-  //   // updates to public parameters go here
+// AlgorithmWideArtifacts struct {
+//   // trusted setup output parameters go here
+//   // updates to public parameters go here
 
-  // }
-
-  // SealSetupArtifacts struct {
-  //   // per-sector setup artifacts go here
-  // }
-
-  // ProveArtifacts or
-  // ChallengeArtifacts struct {
-  //   // inputs into prove() go here
-  // }
-
-  // VerifyArtifacts struct {
-  //   // inputs into verify() go here
-  // }
 // }
 
+// SealSetupArtifacts struct {
+//   // per-sector setup artifacts go here
+// }
+
+// ProveArtifacts or
+// ChallengeArtifacts struct {
+//   // inputs into prove() go here
+// }
+
+// VerifyArtifacts struct {
+//   // inputs into verify() go here
+// }
+// }
 
 // type SealAlgorithm struct {}
-  // SealAlgorithm union {
-  //   SuperSectorPorep struct { // TODO Porcu names it
-  //     SectorSize SuperSectorPorepSectorSize
-  //     Partitions SuperSectorPorepPartitions
-  //     Subsectors SuperSectorPorepSubsectorCount
-  //   }
-  // }
+// SealAlgorithm union {
+//   SuperSectorPorep struct { // TODO Porcu names it
+//     SectorSize SuperSectorPorepSectorSize
+//     Partitions SuperSectorPorepPartitions
+//     Subsectors SuperSectorPorepSubsectorCount
+//   }
+// }
 
 type SealOutputArtifacts struct {}
-  // SealOutputArtifacts union {
-  //   SuperSectorPorepOutputArtifacts struct {
-  //     Proof       ZigZagSealProof
-  //     ReplicaTree ReplicaTree
-  //     CommRLast   ZigZagCommRLast
-  //     CommC       ZigZagCommC
-  //   }
-  // }
+// SealOutputArtifacts union {
+//   SuperSectorPorepOutputArtifacts struct {
+//     Proof       ZigZagSealProof
+//     ReplicaTree ReplicaTree
+//     CommRLast   ZigZagCommRLast
+//     CommC       ZigZagCommC
+//   }
+// }

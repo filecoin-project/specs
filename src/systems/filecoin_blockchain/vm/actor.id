@@ -17,11 +17,11 @@ type Code Bytes
 //   but we should make including actor state nicer.
 // -
 type Actor struct {
-  // common fields for all actors
-  // CodeCID CID
-  State   ActorState
-  Balance TokenAmount
-  SeqNo   CallSeqNo // FKA Nonce
+    // common fields for all actors
+    // CodeCID CID
+    State    ActorState
+    Balance  TokenAmount
+    SeqNo    CallSeqNo  // FKA Nonce
 }
 
 // type SystemActor union {
@@ -33,7 +33,7 @@ type Actor struct {
 // //  PaymentChannelActor PaymentChannelActor
 // }
 
-type ActorState struct{} // TODO: remove stub
+type ActorState struct {}  // TODO: remove stub
 // type ActorState union {
 // SystemActor SystemActor
 // UserActor UserActor

@@ -2,33 +2,38 @@ import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 
 // import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
 
-type SectorSet       [Sector]
+type SectorSet [Sector]
 type SealedSectorSet [Sector]
-type ReplicaID       CID
+type ReplicaID CID
 
 type ProveStorageArtifact struct {
-	PoStProof base_mining.PoStProof
-	BitField  Bytes // TODO verify type here
+    PoStProof  base_mining.PoStProof
+    BitField   Bytes  // TODO verify type here
 }
 
 type MiningScheduler struct {
-  getStagedSectors()   SectorSet
-  getSealedSectors()   SealedSectorSet
-  getFaultySectors()   SectorSet
-  getRepairedSectors() SectorSet
-  getExpiredSectors()  SectorSet // same as completedSectors/doneSectors
+    getStagedSectors()                        SectorSet
+    getSealedSectors()                        SealedSectorSet
+    getFaultySectors()                        SectorSet
+    getRepairedSectors()                      SectorSet
+    getExpiredSectors()                       SectorSet  // same as completedSectors/doneSectors
 
-  ProveStorage(sectors SectorSet) ProveStorageArtifact
-  ReportFaults(actor &StorageMinerActor) bool
-  RemoveSectors(sectorsToRemove SectorSet) bool
-  DePledge(amount TokenAmount) bool
-  SealedSector(sealedSector SealedSector) bool // receives from sector storage subsystem
-  AddSector(pledge TokenAmount, sectorID &SectorID, comm &SealCommitment, proof SealProof) SectorID
+    ProveStorage(sectors SectorSet)           ProveStorageArtifact
+    ReportFaults(actor &StorageMinerActor)    bool
+    RemoveSectors(sectorsToRemove SectorSet)  bool
+    DePledge(amount TokenAmount)              bool
+    SealedSector(sealedSector SealedSector)   bool  // receives from sector storage subsystem
+    AddSector(
+        pledge    TokenAmount
+        sectorID  &SectorID
+        comm      &SealCommitment
+        proof     SealProof
+    ) SectorID
 
-  // generateReplicaID(CommD Commitment, block Block)
+    // generateReplicaID(CommD Commitment, block Block)
 }
 
 type SealCommitment struct {
-  CommD     Commitment
-  CommR     Commitment
+    CommD  Commitment
+    CommR  Commitment
 }

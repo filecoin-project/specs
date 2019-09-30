@@ -1,4 +1,3 @@
-
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 
@@ -8,50 +7,50 @@ type PieceInclusionProof struct {}
 type SectorConfig struct {}
 
 type SealResponse struct {
-     UnsealedCID           sector.UnsealedSectorCID
-     SealedCID             sector.SealedSectorCID
-     Proof                 SealProof
-//      PersistentAux         SectorPersistentAux
-     MerkleTreePath        file.Path // TODO: This may be a partially-cached tree.
+    UnsealedCID     sector.UnsealedSectorCID
+    SealedCID       sector.SealedSectorCID
+    Proof           SealProof
+    //      PersistentAux         SectorPersistentAux
+    MerkleTreePath  file.Path  // TODO: This may be a partially-cached tree.
 }
 
 type SealProofConfig struct {
-    partitionCount UInt
-    subsectorsCount UInt
+    partitionCount   UInt
+    subsectorsCount  UInt
 }
 
-type SNARKProof struct { //<curve, system> {
-     config SealProofConfig
-     proofBytes Bytes
+type SNARKProof struct {//<curve, system> {
+    config      SealProofConfig
+    proofBytes  Bytes
 }
 
-type FilecoinSNARKProof struct {} //<bls12-381, Groth16>
+type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
 
 type SealProof struct {
-     snarkProof      SNARKProof,
-     susbsectorCount UVarint,
+    snarkProof       SNARKProof
+    susbsectorCount  UVarint
 }
 
 type SealProver struct {
-  GenerateCommP() CID
-  GenerateCommD() CID
+    GenerateCommP()  CID
+    GenerateCommD()  CID
 
-  SealSector(
-		SectorConfig   SectorConfig,
-		unsealedPath   file.Path,
-		sealedPath     file.Path,
-		proverID       ProverID,
-		ticket         Ticket, // Assuming this is defined  elsewhere.
-		sectorID       union { SectorID, error, SealResponse }
-  ) struct {}
+    SealSector(
+        SectorConfig
+        unsealedPath  file.Path
+        sealedPath    file.Path
+        proverID      ProverID
+        ticket        Ticket  // Assuming this is defined  elsewhere.
+        sectorID      union {SectorID, error, SealResponse}
+    )
 
-  GeneratePieceInclusionProof(
-    Tree          MerkleTree, //MerkleTree<Rephash>,
-    PieceStart    UInt,
-    PieceLength   UInt,
-  ) union { error, PieceInclusionProofs }
+    GeneratePieceInclusionProof(
+        Tree         MerkleTree  //MerkleTree<Rephash>,
+        PieceStart   UInt
+        PieceLength  UInt
+    ) union {error, PieceInclusionProofs}
 
-  VerifyPieceInclusionProof() struct {}
+    VerifyPieceInclusionProof()
 
-  MaxUnsealedBytesPerSector(SectorSize UInt) UInt
+    MaxUnsealedBytesPerSector(SectorSize UInt) UInt
 }
