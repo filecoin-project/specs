@@ -6,18 +6,18 @@ func (sms *StorageMiningSubsystem) CreateMiner(ownerPubKey PubKey, workerPubKey 
 }
 
 type StorageDealStagedNotification = struct {
-	Deal StorageDeal
+	Deal     StorageDeal
 	PieceRef CID
-	Pip PieceInclusionProof
+	Pip      PieceInclusionProof
 	SectorID SectorID
 }
 
 func (sms *StorageMiningSubsystem) HandleStorageDeal(deal StorageDeal, pieceRef CID) {
 	AddDealToSectorResponse := sms.sectorIndexer.AddDealToSector(deal)
-	storageProvider.NotifyStorageDealStaged(StorageDealStagedNotification {
-		Deal: deal,
+	storageProvider.NotifyStorageDealStaged(StorageDealStagedNotification{
+		Deal:     deal,
 		PieceRef: pieceRef,
-		Pip: AddDealToSectorResponse.pip,
+		Pip:      AddDealToSectorResponse.pip,
 		SectorID: AddDealToSectorResponse.sectorID,
 	})
 }
@@ -30,15 +30,15 @@ func (sms *StorageMiningSubsystem) CommitSectorError() StorageDeal {
 
 }
 
-func (sms *StorageMiningSubsystem) OnNewTipset(chain Chain, epoch Epoch, tipset Tipset) struct {} {
+func (sms *StorageMiningSubsystem) OnNewTipset(chain Chain, epoch Epoch, tipset Tipset) struct{} {
 	sms.CurrentChain = chain
 	sms.CurrentEpoch = epoch
 	sms.CurrentTipset = tipset
 }
 
 func (sms *StorageMiningSubsystem) OnNewRound(newTipset Tipset) ElectionArtifacts {
-	TK := storagePowerConsensus.TicketAtEpoch(sms.CurrentChain, sms.CurrentEpoch - k)
-	T1 := storagePowerConsensus.TicketAtEpoch(sms.CurrentChain, sms.CurrentEpoch - 1)
+	TK := storagePowerConsensus.TicketAtEpoch(sms.CurrentChain, sms.CurrentEpoch-k)
+	T1 := storagePowerConsensus.TicketAtEpoch(sms.CurrentChain, sms.CurrentEpoch-1)
 	EP := DrawElectionProof(TK, workerPrivateKey)
 	if newTipset {
 		T0 := GenerateNextTicket(T1, workerPrivateKey)
@@ -49,7 +49,7 @@ func (sms *StorageMiningSubsystem) OnNewRound(newTipset Tipset) ElectionArtifact
 		BlockProducer.GenerateBlock(EP, T0, sms.CurrentTipset, workerKey)
 	} else {
 		// TODO when not elected
-	}	
+	}
 }
 
 func (sms *StorageMiningSubsystem) DrawElectionProof(tk Ticket, workerKey PrivateKey) ElectionProof {

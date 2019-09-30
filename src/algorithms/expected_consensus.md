@@ -5,137 +5,34 @@ title: "Expected Consensus"
 {{<label expected_consensus>}}
 ## Algorithm
 
-Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an `Election Proof`). All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see [Chain Selection](#chain-selection).
+Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an `Election Proof`). All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see {{<sref chain_selection>}}.
 
-EC is accessible by the {{<sref storage_power_consensus>}} subsystem and provides it with the following facilities:
-- Access to verifiable randomness for the protocol, derived from the ticket chain.
-- Running and verifying leader elections for block generation.
-- Access to a weighting function enabling a choice of which chains to extend.
-- Access to the most recently finalized tipset available to all protocol participants.
+The {{<sref storage_power_consensus>}} subsystem uses access to EC to use the following facilities:
+- Access to verifiable randomness for the protocol, derived from {{<sref tickets>}}.
+- Running and verifying {{<sref leader_election "leader election">}} for block generation.
+- Access to a weighting function enabling {{<sref chain_selection>}} by the chain manager.
+- Access to the most recently {{<sref finality "finalized tipset">}} available to all protocol participants.
 
 {{<label tickets>}}
 ## Tickets
 
 One may think of leader election in EC as a verifiable lottery, in which participants win in proportion to the power they have within the network.
 
-A ticket is drawn from the past at the beginning of each new round, and a new ticket is generated in every round. Tickets are chained independently of the main blockchain. A ticket only depends on the ticket before it, and not any other data in the block. Nonetheless, in Filecoin, every block header contains one or more new tickets, thereby extending the ticket chain. A miner generates a new ticket in their block for every ticket they scratch running leader election, thereby ensuring the ticket chain is at least as long as the block chain.
+A ticket is drawn from the past at the beginning of each new round to perform leader election. EC also generates a new ticket in every round for future use. Tickets are chained independently of the main blockchain. A ticket only depends on the ticket before it, and not any other data in the block.
+On expectation, in Filecoin, every block header contains one ticket, though it could contain more if that block was generated over multiple rounds.
 
-At a high-level, tickets are used as sources of randomness in EC in order to achieve the following:
+Tickets are used across the protocol as sources of randomness:
+- The {{<sref sector_sealer>}} uses tickets to bind sector commitments to a given subchain.
+- The {{<sref post_generator>}} likewise uses tickets to prove sectors remain committed as of a given block.
+- EC uses them to run leader election and generates new ones for use by the protocol, as detailed below.
 
-- Ensure leader secrecy -- meaning a block producer will not be known until they release their block to the network.
-- Prove leader election -- meaning a block producer can be verified by any participant in the network.
+You can find the Ticket data structure {{<sref data_structures "here">}}.
 
-You can find the Ticket data structure [here](data-structures.md#tickets).
+### Comparing Tickets in a Tipset
 
-In practice, EC defines two different fields within a block:
+Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the "min ticket" in a Tipset, the comparison is that of the little endian representation of the ticket's VFOutput bytes.
 
-- A `Tickets` array — this stores new tickets generated during this block generation attempt. It proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` rounds. See [Ticket generation](#ticket-generation).
-- An `ElectionProof` — this stores a proof that a given miner scratched a winning lottery ticket using the appropriate ticket `K` rounds back. It proves that the leader was elected in this round. See [Checking election results](#checking-election-results).
-
-On expectation, the `Tickets` array will contain a single ticket. For cases in which it contains more than one, see [Losing Tickets](#losing-tickets).
-
-```
-But why the randomness lookback?
-
-The randomness lookback helps turn independent lotteries (ticket drawings from a block one round back)
-into a global lottery instead. Rather than having a distinct chance of winning or losing
-for each potential fork in a given round, a miner will either win on all or lose on all
-forks descended from the block in which the ticket is sampled.
-
-This is useful as it reduces opportunities for grinding, across forks or sybil identities.
-
-However this introduces a tradeoff:
-- The randomness lookback means that a miner can know K rounds in advance that they will win,
-decreasing the cost of running a targeted attack (given they have local predictability).
-- It means electionProofs are stored separately from new tickets on a block, taking up
-more space on-chain.
-```
-
-##### Comparing Tickets
-
-Whenever comparing tickets is evoked, for instance when discussing selecting the "min ticket" in a Tipset, the comparison is that of the little endian representation of the ticket's VDFOutput bytes.
-
-#### Ticket generation
-
-This section discusses how tickets are generated by EC for the `Tickets` array. For how tickets are validated, see [ticket validation](mining.md#ticket-validation).
-
-At round `N`, new tickets are generated using tickets drawn from the [Tipset](#tipsets) at round `N-1`. This ensures the miner cannot publish a new block (corresponding to the `ElectionProof` generated by a winning ticket `K` rounds back) until the correct round. Because a Tipset can contain multiple blocks (see [Chain Selection](#chain-selection) below), the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.
-
-```
-   ┌──────────────────────┐                     
-   │                      │                     
-   │                      │                     
-   │┌────┐                │                     
-   ││ TA │              A │                     
-   └┴────┴────────────────┘                     
-                                                
-   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
-                          │                     
-   │                                            
-    ┌────┐                │       TA < TB < TC  
-   ││ TB │              B                       
-    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
-                                                
-   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
-                          │                     
-   │                                            
-    ┌────┐                │                     
-   ││ TC │              C                       
-    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
-```
-
-In the above diagram, a miner will use block A's Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.
-
-The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output.
-
-The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
-
-We use the ECVRF algorithm from [Goldberg et al. Section 5](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10), with:
-  - Sha256 for our hashing function
-  - Secp256k1 for our curve
-  - Note that the operation type in step 2.1 is necessary to prevent an adversary from guessing an election proof for a miner ahead of time.
-
-#### Ticket Validation
-
-For ticket generation, see [ticket generation](expected-consensus.md#ticket-generation).
-
-A ticket can be verified to have been generated in the appropriate number of rounds by looking at the `Tickets` array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array (or in the prior block if the array is empty). Note that this has implications on block size, and client memory requirements, though on expectation, the `Tickets` array should only contain one Ticket. Put another way, each Ticket should be generated from the prior one in the ticket-chain.
-
-Succinctly, the process of verifying a block's tickets is as follows.
-```text
-Input: received block, storage market actor S, miner's public key PK, a public VDF validation key vk
-Output: 0, 1
-
-0. Get the tickets
-    i. tickets <-- block.tickets
-For each ticket, idx: tickets
-1. Verify its VRF Proof
-    i. # get the appropriate parent
-        if idx == 0:
-            # the first was derived from the prior block's last ticket
-            parent = parentBlock.lastTicket
-        else:
-            parent = tickets[idx - 1]
-    ii. # generate the VRFInput
-        input <-- VRFPersonalization.Ticket | parent.VDFOutput
-    iii. # verify the VRF
-        VRFState <-- ECVRF_Verify(PK, ticket.VRFProof, input)
-        if VRFState == "INVALID":
-            return 0
-2. Verify its VDF Proof
-    i. # generate the VDF input
-        VRFOutput <-- ECVRF_proof_to_hash(ticket.VRFProof)
-    ii. # verify
-        VDFState <-- VDF_verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
-        if VDFState == "NO":
-            return 0
-3. Return results
-    return 1
-```
-
-Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner.
-
-## The Ticket chain
+### The Ticket chain
 
 While each Filecoin block header contains a ticket array, it is useful to provide nodes with a ticket chain abstraction.
 
@@ -189,6 +86,119 @@ The above represents an instance of a block-chain, and its associated ticket-cha
 - Block 2 contains 3 tickets T2, T3, T4 meaning it was likely generated after 2 failed leader election attempts in the network.
 - Block B1+l has two tickets and an Election Proof E1+l that was generated using T2. This means B1+l's miner tried to generate an election proof using T1 and failed, succeeding on their second attempt with T2.
 
+## Tickets in EC
+
+Within EC, a miner generates a new ticket in their block for every ticket they use (or "scratch") running leader election, thereby ensuring the ticket chain is always at least as long as the block chain.
+
+Tickets are used to achieve the following:
+- Ensure leader secrecy -- meaning a block producer will not be known until they release their block to the network.
+- Prove leader election -- meaning a block producer can be verified by any participant in the network.
+
+
+In practice, EC defines two different fields within a block:
+
+- A `Tickets` array — this stores new tickets generated during this block generation attempt. It proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` rounds. See [Ticket generation](#ticket-generation).
+- An `ElectionProof` — this stores a proof that a given miner scratched a winning lottery ticket using the appropriate ticket `K` rounds back. It proves that the leader was elected in this round. See [Checking election results](#checking-election-results).
+
+On expectation, the `Tickets` array will contain a single ticket. For cases in which it contains more than one, see [Losing Tickets](#losing-tickets).
+
+```
+But why the randomness lookback?
+
+The randomness lookback helps turn independent lotteries (ticket drawings from a block one round back)
+into a global lottery instead. Rather than having a distinct chance of winning or losing
+for each potential fork in a given round, a miner will either win on all or lose on all
+forks descended from the block in which the ticket is sampled.
+
+This is useful as it reduces opportunities for grinding, across forks or sybil identities.
+
+However this introduces a tradeoff:
+- The randomness lookback means that a miner can know K rounds in advance that they will win,
+decreasing the cost of running a targeted attack (given they have local predictability).
+- It means electionProofs are stored separately from new tickets on a block, taking up
+more space on-chain.
+```
+
+### Ticket generation
+
+This section discusses how tickets are generated by EC for the `Tickets` array. For how tickets are validated, see [ticket validation](mining.md#ticket-validation).
+
+At round `N`, new tickets are generated using tickets drawn from the [Tipset](#tipsets) at round `N-1`. This ensures the miner cannot publish a new block (corresponding to the `ElectionProof` generated by a winning ticket `K` rounds back) until the correct round. Because a Tipset can contain multiple blocks (see [Chain Selection](#chain-selection) below), the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.
+
+```
+   ┌──────────────────────┐                     
+   │                      │                     
+   │                      │                     
+   │┌────┐                │                     
+   ││ TA │              A │                     
+   └┴────┴────────────────┘                     
+                                                
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
+                          │                     
+   │                                            
+    ┌────┐                │       TA < TB < TC  
+   ││ TB │              B                       
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
+                                                
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
+                          │                     
+   │                                            
+    ┌────┐                │                     
+   ││ TC │              C                       
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
+```
+
+In the above diagram, a miner will use block A's Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.
+
+The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output.
+
+The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
+
+We use the ECVRF algorithm from [Goldberg et al. Section 5](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10), with:
+  - Sha256 for our hashing function
+  - Secp256k1 for our curve
+  - Note that the operation type in step 2.1 is necessary to prevent an adversary from guessing an election proof for a miner ahead of time.
+
+### Ticket Validation
+
+For ticket generation, see [ticket generation](expected-consensus.md#ticket-generation).
+
+A ticket can be verified to have been generated in the appropriate number of rounds by looking at the `Tickets` array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array (or in the prior block if the array is empty). Note that this has implications on block size, and client memory requirements, though on expectation, the `Tickets` array should only contain one Ticket. Put another way, each Ticket should be generated from the prior one in the ticket-chain.
+
+Succinctly, the process of verifying a block's tickets is as follows.
+```text
+Input: received block, storage market actor S, miner's public key PK, a public VDF validation key vk
+Output: 0, 1
+
+0. Get the tickets
+    i. tickets <-- block.tickets
+For each ticket, idx: tickets
+1. Verify its VRF Proof
+    i. # get the appropriate parent
+        if idx == 0:
+            # the first was derived from the prior block's last ticket
+            parent = parentBlock.lastTicket
+        else:
+            parent = tickets[idx - 1]
+    ii. # generate the VRFInput
+        input <-- VRFPersonalization.Ticket | parent.VDFOutput
+    iii. # verify the VRF
+        VRFState <-- ECVRF_Verify(PK, ticket.VRFProof, input)
+        if VRFState == "INVALID":
+            return 0
+2. Verify its VDF Proof
+    i. # generate the VDF input
+        VRFOutput <-- ECVRF_proof_to_hash(ticket.VRFProof)
+    ii. # verify
+        VDFState <-- VDF_verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
+        if VDFState == "NO":
+            return 0
+3. Return results
+    return 1
+```
+
+Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner.
+
 {{<label leader_election>}}
 ## Secret Leader Election
 
@@ -210,7 +220,7 @@ If the miner scratches a winning ticket in this round, it can use newEP, along w
 
 It is important to note that every block contains two artifacts: one, a ticket derived from last block's ticket to prove that they have waited the appropriate delay, and two, an election proof derived from the ticket `K` rounds back used to run leader election.
 
-#### Election Validation
+### Election Validation
 
 For election proof generation, see [checking election results](expected-consensus.md#checking-election-results).
 
@@ -319,8 +329,7 @@ The probability that two Tipsets with different blocks would have all the same t
 
 {{<label finality>}}
 ## Finality in EC
-
-
+TODO
 
 ## Slashing in EC
 

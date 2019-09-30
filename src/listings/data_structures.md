@@ -36,11 +36,11 @@ A block header contains information relevant to a particular point in time over 
 {{<goFile Block>}}
 
 
-# TipSet
+# Tipset
 
-For more on TipSets, see [the Expected Consensus spec](expected-consensus.md#tipsets). Implementations may choose not to create a TipSet data structure, instead representing its operations in terms of the underlying blocks.
+For more on Tipsets, see {{<sref expected_consensus "the Expected Consensus spec">}}. Implementations may choose not to create a Tipset data structure, instead representing its operations in terms of the underlying blocks.
 
-{{<goFile TipSet>}}
+{{<goFile Tipset>}}
 
 
 # VRF Personalization
@@ -67,7 +67,6 @@ we use an [EC-VRF per Goldberg et al.](https://tools.ietf.org/html/draft-irtf-cf
 with Secp256k1 and SHA-256 to obtain a deterministic, pseudorandom output.
 
 {{<goFile Ticket>}}
-
 
 ## Ticket Comparison
 

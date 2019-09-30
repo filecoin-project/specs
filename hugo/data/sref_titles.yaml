@@ -1,13 +1,16 @@
 # general
 crypto_signatures: "Signatures"
+data_structures: "Data Structures"
 ds_address: "Address"
 app_address: "Address"
 
 # blockchain
 sys_vm: "VM"
-
+### blockchain
+block_producer: "Block Producer"
 ### SPC
 storage_power_consensus: "Storage Power Consensus"
+power_table: "Power Table"
 expected_consensus: "Expected Consensus"
 tickets: "Tickets"
 leader_election: "Secret Leader Election"
@@ -25,8 +28,13 @@ retrieval_market: "Retrieval Market"
 storage_market: "Storage Market"
 
 # mining
-storage_mining: "Storage Mining Subsystem"
+
+### Storage Mining
+storage_mining_subsystem: "Storage Mining Subsystem"
+sector_sealer: "Sector Sealer"
+post_generator: "PoSt Generator"
 post: "Proof of Spacetime"
+
 
 # nodes
 

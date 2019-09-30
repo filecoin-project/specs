@@ -1,7 +1,8 @@
 ---
-title: Proof Generator
+title: PoSt Generator
 ---
 
+{{<label post_generator>}}
 Block miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning `ticket` to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
 
 
