@@ -196,7 +196,7 @@ build/code/go.mod: src/build_go.mod
 	cp $< $@
 
 build-code: gen-code
-	cd build/code && go build -gcflags="-e" ./...
+	@cd build/code && go build -gcflags="-e" ./...
 
 test-code: build-code
 	# testing should have the side effect that all go is compiled
@@ -225,5 +225,4 @@ watch-diagrams: diagrams
 	dot -Tsvg $< >$@
 
 %.mmd.svg: %.mmd %.mmd.css
-	@which dot >/dev/null || echo "requires mmdc -- run make deps" && exit
 	deps/node_modules/.bin/mmdc -i $< -o $@ --cssFile $(word 2,$^)
