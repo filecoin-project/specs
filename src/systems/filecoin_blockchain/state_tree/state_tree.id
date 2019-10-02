@@ -1,21 +1,22 @@
-import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import base 	 "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 type ActorName union {
-    StoragePowerActor
-    StorageMarketActor
-    StorageMinerActor
-    PaymentChannelActor
-    InitActor
-    AccountActor
-    CronActor
+	StoragePowerActor
+	StorageMarketActor
+	StorageMinerActor
+	PaymentChannelActor
+	InitActor
+	AccountActor
+	CronActor
 }
 
 type StateTree struct {
-    SystemActors  {ActorName: base.Address}
-    ActorStates   {base.Address: ActorState}
+    SystemActors {ActorName:base.Address}
+    ActorStates {base.Address:ActorState}
 
     // TODO: API ConvenienceAPI
 }
+
 
 // Things we may add:
 //
@@ -36,17 +37,18 @@ type StateTree struct {
 // $head/state/pieces/count
 // $head/state/pieces/<num> (cid)
 
+
 type ActorID UVarint
 
 type ActorState struct {
-    Head     ActorSubState
-    SeqNo    UVarint
-    Balance  BigInt
+	Head       ActorSubState
+	SeqNo      UVarint
+	Balance    BigInt
 }
 
 type ActorSubState union {
-    Init struct {
-        AddressMap  {base.Address: ActorID}
-        NextID      ActorID
-    }
+	Init struct {
+		AddressMap    {base.Address:ActorID}
+		NextID        ActorID
+	}
 }

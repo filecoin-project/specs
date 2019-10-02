@@ -1,8 +1,9 @@
+
 type Store GraphStore
 
 // imported as ipld.Object
 type Object struct {
-    CID() CID
+  CID() CID
 
-    // Populate(v interface{}) error
+  // Populate(v interface{}) error
 }

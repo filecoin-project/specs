@@ -1,5 +1,6 @@
+
 type Time int64
 
 type WallClock struct {
-    NowUTC() Time
+	NowUTC() Time
 }

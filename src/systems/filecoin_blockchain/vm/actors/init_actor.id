@@ -1,15 +1,16 @@
+
 type InitActor struct {
-    // responsible for create new actors
-    AddressMap         {Address: ActorID}
-    IDMap              {ActorID: Address}
-    NextID             ActorID
+	// responsible for create new actors
+	AddressMap {Address:ActorID}
+  IDMap {ActorID:Address}
+	NextID ActorID
 
-    // 0
-    InitConstructor()
+  // 0
+  InitConstructor() struct{}
 
-    // 1
-    Exec(code CodeCID, params ActorMethod) Address
+  // 1
+  Exec(code CodeCID, params ActorMethod) Address
 
-    // 2
-    GetActorIDForAddress(address Address) ActorID
+  // 2
+  GetActorIDForAddress(address Address) ActorID
 }

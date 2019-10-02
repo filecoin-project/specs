@@ -3,6 +3,7 @@ type Block struct {}
 type SectorID struct {}
 
 type FilecoinProofsSubsystem struct {
+
     VerifySeal(sectorID SectorID, sectorInfo SectorInfo) bool
     ValidateBlock(block Block) bool
 }

@@ -11,27 +11,28 @@ type Block struct {}
 type SectorSealer struct {}
 
 type StorageProofsSubsystem struct {
-    SealProver
-    SectorSealer
 
-    SealSector(
-        seed           Seed
-        sectorID       SectorID
-        replicaConfig  ReplicaConfig
-    ) SealOutput
+  SealProver SealProver
+  SectorSealer SectorSealer
 
-    VerifySeal(
-        CommD     Commitment
-        CommR     Commitment
-        Proof     SNARKProof
-        ProverID
-        Ticket
-        SectorID
-    ) union {error, bool}
+  SealSector(
+    seed Seed,
+    sectorID SectorID,
+    replicaConfig ReplicaConfig,
+  ) SealOutput
 
-    ValidateBlock(
-        block Block
-    )
+  VerifySeal(
+      CommD    Commitment,
+      CommR    Commitment,
+      Proof    SNARKProof,
+      ProverID ProverID,
+      Ticket   Ticket,
+      SectorID SectorID,
+  ) union { error, bool }
 
-    GetPieceInclusionProof(pieceRef CID) union {Error, PieceInclusionProofs}
+  ValidateBlock(
+      block Block
+  ) struct {}
+
+  GetPieceInclusionProof(pieceRef CID) union { Error, PieceInclusionProofs }
 }

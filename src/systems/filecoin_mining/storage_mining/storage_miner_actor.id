@@ -10,35 +10,30 @@ type StorageMinerActor struct {
     // // contains mostly static info about this miner
     // info &MinerInfo
 
-    UpdateDoneSet()
-    UpdateSectorStatus(sectorStateSets SectorStateSets, faultSets [FaultSet])
-    SubmitPoSt(postProof base.PoStProof, sectorStateSets SectorStateSets)
-    computeProvingPeriodEndSectorState()
-    CommitSector(
-        seed            Seed
-        sector          SectorID
-        sealCommitment  SealCommitment
-        sealProof       SealProof
-    )
+    UpdateDoneSet() struct {}
+    UpdateSectorStatus(sectorStateSets SectorStateSets, faultSets [FaultSet]) struct {}
+    SubmitPoSt(postProof base.PoStProof, sectorStateSets SectorStateSets) struct {}
+    computeProvingPeriodEndSectorState() struct {}
+    CommitSector(seed Seed, sector SectorID, sealCommitment SealCommitment, sealProof SealProof) struct {}
 }
 
 type MinerInfo struct {
-    // Account that owns this miner.
-    // - Income and returned collateral are paid to this address.
-    // - This address is also allowed to change the worker address for the miner.
-    owner       Address
+  // Account that owns this miner.
+  // - Income and returned collateral are paid to this address.
+  // - This address is also allowed to change the worker address for the miner.
+  owner Address
 
-    // Worker account for this miner.
-    // This will be the key that is used to sign blocks created by this miner, and
-    // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
-    // other day to day miner activities.
-    worker      Address
+  // Worker account for this miner.
+  // This will be the key that is used to sign blocks created by this miner, and
+  // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
+  // other day to day miner activities.
+  worker Address
 
-    // Libp2p identity that should be used when connecting to this miner.
-    peerId      PeerId
+  // Libp2p identity that should be used when connecting to this miner.
+  peerId PeerId
 
-    // Amount of space in each sector committed to the network by this miner.
-    sectorSize  BytesAmount
+  // Amount of space in each sector committed to the network by this miner.
+  sectorSize BytesAmount
 }
 
 /*

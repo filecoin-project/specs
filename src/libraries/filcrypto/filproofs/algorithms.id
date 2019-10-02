@@ -14,80 +14,82 @@ type ExpanderGraphDegree struct {}
 type ExpanderGraphSeed struct {}
 type DRGNodeSize struct {}
 
-type SealAlgorithmArtifacts struct {// ZigZagPoRep
+type SealAlgorithmArtifacts struct { // ZigZagPoRep
 
-    AlgorithmWideSetupArtifacts struct {
-        // trusted setup output parameters go here
-        // updates to public parameters go here
-    }
+  AlgorithmWideSetupArtifacts struct {
+    // trusted setup output parameters go here
+    // updates to public parameters go here
 
-    SealSetupArtifacts struct {
-        // per-sector setup artifacts go here
-    }
+  }
 
-    // ProveArtifacts or
-    ChallengeArtifacts struct {
-        // inputs into prove() go here
-    }
+  SealSetupArtifacts struct {
+    // per-sector setup artifacts go here
+  }
 
-    VerifyArtifacts struct {
-        // inputs into verify() go here
-    }
+  // ProveArtifacts or
+  ChallengeArtifacts struct {
+    // inputs into prove() go here
+  }
+
+  VerifyArtifacts struct {
+    // inputs into verify() go here
+  }
 }
 
 type PoRep union {
-    ZigZagPoRep
+  ZigZagPoRep
 }
 
 type PoSpace union {
-    PoRep
+  PoRep
 }
+
 
 type ZigZagPoRep StackedDRG
 
 type SDRPoSpace StackedDRG
 
-type StackedDRGAlgorithm struct {}
+type StackedDRGAlgorithm struct{}
 
 type StackedDRG struct {
-    Layers            StackedDRGLayers
-    NodeSize          StackedDRGNodeSize
-    Algorithm         struct {}
-    DRGCfg
-    ExpanderGraphCfg
-    // invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
+  Layers            StackedDRGLayers
+  NodeSize          StackedDRGNodeSize
+  Algorithm         struct {}
+  DRGCfg            DRGCfg
+  ExpanderGraphCfg  ExpanderGraphCfg
+  // invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
 }
 
 type DRGCfg struct {
-    Algorithm struct {
-        Depth     DRGDepth  // D
-        Fraction  DRGFraction  // E
+  Algorithm struct {
+    Depth    DRGDepth    // D
+    Fraction DRGFraction // E
 
-        ParentsAlgorithm enum {
-            DRSample
-        }
+    ParentsAlgorithm union {
+      DRSample struct {}
     }
-    Degree DRGDegree
-    Seed DRGSeed
-    Nodes DRGNodeCount
+  }
+  Degree DRGDegree
+  Seed   DRGSeed
+  Nodes  DRGNodeCount
 }
 
 type ExpanderGraphCfg struct {
-    Algorithm union {
-        ChungExpanderAlgorithm struct {
-            Alpha  ChungExpanderAlpha
-            Beta   ChungExpanderBeta
-            PermutationAlgorithm union {
-                Feistel struct {
-                    Seed          ChungExpanderPermutationFeistelSeed
-                    Round         ChungExpanderPermutationFeistelRound
-                    HashFunction  ChungExpanderPermutationFeistelHashFunction
-                }
-            }
+  Algorithm union {
+    ChungExpanderAlgorithm struct {
+      Alpha ChungExpanderAlpha
+      Beta  ChungExpanderBeta
+      PermutationAlgorithm union {
+        Feistel struct {
+          Seed         ChungExpanderPermutationFeistelSeed
+          Round        ChungExpanderPermutationFeistelRound
+          HashFunction ChungExpanderPermutationFeistelHashFunction
         }
+      }
     }
+  }
 
-    Degree    ExpanderGraphDegree
-    Seed      ExpanderGraphSeed
-    NodeSize  DRGNodeSize
+  Degree   ExpanderGraphDegree
+  Seed     ExpanderGraphSeed
+  NodeSize DRGNodeSize
 }

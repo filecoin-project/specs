@@ -1,32 +1,33 @@
 type StorageMiningSubsystem struct {
-    storageMinerActors            [&StorageMinerActor]
-    sectorIndexer                 SectorIndexerSubsystem
-    storagePowerConsensus         StoragePowerConsensusSubsystem
 
-    CurrentChain()                Chain
-    CurrentEpoch()                Epoch
-    CurrentTipset()               Tipset
+    storageMinerActors [&StorageMinerActor]
+    sectorIndexer SectorIndexerSubsystem
+    storagePowerConsensus StoragePowerConsensusSubsystem
 
-    StartMining()
-    StopMining()
+    CurrentChain() Chain
+    CurrentEpoch() Epoch
+    CurrentTipset() Tipset
+    
+    StartMining() struct {}
+    StopMining() struct {}
 
-    InitStorageMiningSubsystem()
+    InitStorageMiningSubsystem() struct{}
 
     // call by StorageMiningSubsystem itself to create miner
-    CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount)
+    CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) struct {}
 
     // get miner key by address
     GetMinerKeyByAddress(addr Address) PubKey
 
     // call by StorageProvider at the start of a deal
     // and trigger AddPieceToSector on SectorIndexer
-    HandleStorageDeal(deal StorageDeal)
+    HandleStorageDeal(deal StorageDeal) struct{}
 
     // call by StorageMinerActor when error in sealing
-    CommitSectorError()
+    CommitSectorError() struct{}
 
     // call by BlockChain when a new block is produced
-    OnNewTipset(chain Chain, epoch Epoch)
+    OnNewTipset(chain Chain, epoch Epoch) struct{}
 
     // call by clock during BlockProduction
     // TODO: define clock better

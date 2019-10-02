@@ -4,10 +4,10 @@ type Path string
 // File is a variable length data container.
 // It is a unix style file.
 type File struct {
-    Path()            Path
-    Size()            int
-    Seek(offset int)  error
-    Read(buf Bytes)   struct {size int, e error}
-    Write(buf Bytes)  struct {size int, e error}
-    Close()           error
+  Path() Path
+  Size() int
+  Seek(offset int) error
+  Read(buf Bytes) struct { size int, e error }
+  Write(buf Bytes) struct { size int, e error }
+  Close() error
 }

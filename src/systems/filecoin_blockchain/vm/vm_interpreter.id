@@ -1,14 +1,15 @@
+
 // TODO: import these
-type StateTree struct {}
-type Message struct {}
-type MessageReceipt struct {}
+type StateTree struct{}
+type Message struct{}
+type MessageReceipt struct{}
 
 type MessageRef struct {
-    Message
-    Miner Address
+  Message Message
+  Miner   Address
 }
 
 type VMInterpreter struct {
-    ApplyMessageBatch(inTree StateTree, msgs [MessageRef]) struct {outTree StateTree, ret [MessageReceipt]}
-    ApplyMessage(inTree StateTree, msg Message, minerAddr Address) struct {outTree StateTree, ret MessageReceipt}
+  ApplyMessageBatch(inTree StateTree, msgs [MessageRef]) struct{ outTree StateTree, ret [MessageReceipt]}
+  ApplyMessage(inTree StateTree, msg Message, minerAddr Address) struct{outTree StateTree, ret MessageReceipt}
 }

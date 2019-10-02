@@ -5,36 +5,38 @@ type Path String
 // This is MetaData required to generate a PoSt proof for a sector.
 // These should be stored and indexed somewhere by CommR.
 type SectorPersistentAux struct {
-    CommRLast  Commitment
-    CommC      Commitment
+  CommRLast      Commitment
+  CommC          Commitment
 }
 
 // Indexed by CommR
 type SectorMetaData struct {
-    CommR           Commitment
-    PersistentAux   SectorPersistentAux
-    MerkleTreePath  Path
+  CommR                   Commitment
+  PersistentAux           SectorPersistentAux
+  MerkleTreePath          Path
 }
 
 // commR to SectorMetaData
-type SectorMetaDataStore {SealedSectorID: SectorMetaData}
+type SectorMetaDataStore { SealedSectorID : SectorMetaData }
 
 type SectorStore struct {
-    SectorMetaDataStore
 
-    WritePiece(Piece) Path  // path - temp storage for pieces not yet sealed.
-    PlacePiece(From Path, To StagedSector, Position UInt)
+  SectorMetaDataStore SectorMetaDataStore
 
-    AllocateSealedSector(SectorSize UInt) Path
-    AllocateStagedSector(SectorSize UInt) Path
+  WritePiece(Piece Piece) Path // path - temp storage for pieces not yet sealed.
+  PlacePiece(From Path, To StagedSector, Position UInt) struct {}
 
-    RegisterMetadata(SectorMetadata SectorMetaData) bool
-    GetMetaData(CommR Commitment) SectorMetaData
+  AllocateSealedSector(SectorSize UInt) Path
+  AllocateStagedSector(SectorSize UInt) Path
 
-    UpdateMetaData(
-        CommR        Commitment
-        NewMetaData  SectorMetaData
-    ) bool  // This may not actually be needed.
+  RegisterMetadata(SectorMetadata SectorMetaData) bool
+  GetMetaData(CommR Commitment) SectorMetaData
 
-    RemoveMetaData(CommR Commitment)
+  UpdateMetaData(
+    CommR       Commitment,
+    NewMetaData SectorMetaData
+  ) bool // This may not actually be needed.
+
+  RemoveMetaData(CommR Commitment) struct {}
+
 }

@@ -1,26 +1,28 @@
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 
-type StorageDealProposal base_markets.StorageDealProposal
+type StorageDealProposal              base_markets.StorageDealProposal
 
-type StorageDealProposalQuery struct {}
+type StorageDealProposalQuery         struct {}
 type StorageDealProposalQueryResponse struct {}
-type StorageDealQuery struct {}
-type StorageDealQueryResponse struct {}
+type StorageDealQuery                 struct {}
+type StorageDealQueryResponse         struct {}
 
 type StorageMarketParticipant struct {
-    // Participants call each other to submit StorageDealProposal
-    NewStorageDealProposal(storageDealProposal StorageDealProposal)
 
-    // When both parties sign on a StorageDealProposal
-    // counter signer call this function to return the signed deal
-    NewStorageDeal(storageDeal StorageDeal)
+  // Participants call each other to submit StorageDealProposal
+  NewStorageDealProposal(storageDealProposal StorageDealProposal) struct {}
 
-    // call by StorageMarketPariticipant itself to sign a StorageDealProposal
-    SignStorageDealProposal(storageDealProposal StorageDealProposal) StorageDeal
+  // When both parties sign on a StorageDealProposal
+  // counter signer call this function to return the signed deal
+  NewStorageDeal(storageDeal StorageDeal) struct {}
 
-    // call by proposer
-    QueryStorageDealProposalStatus(storageDealProposalQuery StorageDealProposalQuery) StorageDealProposalQueryResponse
+  // call by StorageMarketPariticipant itself to sign a StorageDealProposal
+  SignStorageDealProposal(storageDealProposal StorageDealProposal) StorageDeal
 
-    // call by countersigner
-    QueryStorageDealStatus(storageDeal StorageDeal) StorageDealQueryResponse
+  // call by proposer
+  QueryStorageDealProposalStatus(storageDealProposalQuery StorageDealProposalQuery) StorageDealProposalQueryResponse
+  
+  // call by countersigner
+  QueryStorageDealStatus(storageDeal StorageDeal) StorageDealQueryResponse
+
 }

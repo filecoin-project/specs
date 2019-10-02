@@ -1,4 +1,5 @@
+
 type CronActor struct {
-    // Tick executes built-in periodic actions.
-    Tick()
+  // Tick executes built-in periodic actions.
+  Tick() struct{}
 }

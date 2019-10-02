@@ -1,56 +1,56 @@
 import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 type MessagePoolSubsystem struct {
-    // needs access to:
-    // - BlockchainSubsystem
-    //   - needs access to StateTree
-    //   - needs access to Messages mined into blocks (probably past finality)
-    //     to remove from the MessagePool
-    // - NetworkSubsystem
-    //   - needs access to MessagePubsub
-    //
-    // Important remaining questions:
-    // - how does BlockchainSubsystem.BlockReceiver handle asking for messages?
-    // - how do we note messages are now part of the blockchain
-    //   - how are they cleared from the mempool
-    // - do we need to have some sort of purge?
+  // needs access to:
+  // - BlockchainSubsystem
+  //   - needs access to StateTree
+  //   - needs access to Messages mined into blocks (probably past finality)
+  //     to remove from the MessagePool
+  // - NetworkSubsystem
+  //   - needs access to MessagePubsub
+  //
+  // Important remaining questions:
+  // - how does BlockchainSubsystem.BlockReceiver handle asking for messages?
+  // - how do we note messages are now part of the blockchain
+  //   - how are they cleared from the mempool
+  // - do we need to have some sort of purge?
 
-    // AddNewMessage is called to add messages created at this node,
-    // or to be propagated by this node. All messages enter the network
-    // through one of these calls, in at least one filecoin node. They
-    // are then propagated to other filecoin nodes via the MessagePool
-    // subsystem. Other nodes receive and propagate Messages via their
-    // own MessagePools.
-    AddNewMessage(msg base.Message)
+  // AddNewMessage is called to add messages created at this node,
+  // or to be propagated by this node. All messages enter the network
+  // through one of these calls, in at least one filecoin node. They
+  // are then propagated to other filecoin nodes via the MessagePool
+  // subsystem. Other nodes receive and propagate Messages via their
+  // own MessagePools.
+  AddNewMessage(msg base.Message) struct {}
 
-    // Stats returns information about the MessagePool contents.
-    Stats() MessagePoolStats
+  // Stats returns information about the MessagePool contents.
+  Stats() MessagePoolStats
 
-    // FindMessage receives a descriptor query q, and returns a set of
-    // messages currently in the mempool that match the Query constraints.
-    // q may have all, any, or no constraints specified.
-    // FindMessage(q MessageQuery) union {
-    //  [base.Message],
-    //  Error
-    // }
+  // FindMessage receives a descriptor query q, and returns a set of
+  // messages currently in the mempool that match the Query constraints.
+  // q may have all, any, or no constraints specified.
+  // FindMessage(q MessageQuery) union {
+  //  [base.Message],
+  //  Error
+  // }
 
-    // MostProfitableMessages returns messages that are most profitable
-    // to mine for this miner.
-    //
-    // Note: This is where algorithms about chosing best messages given
-    //       many leaders should go.
-    GetMostProfitableMessages(miner base.Address) [base.Message]
+  // MostProfitableMessages returns messages that are most profitable
+  // to mine for this miner.
+  //
+  // Note: This is where algorithms about chosing best messages given
+  //       many leaders should go.
+  GetMostProfitableMessages(miner base.Address) [base.Message]
 }
 
 type MessagePoolStats struct {
-    // Size is the amount of messages in the MessagePool
-    Size UInt
+  // Size is the amount of messages in the MessagePool
+  Size UInt
 }
 
 // MessageQuery is a descriptor used to find messages matching one or more
 // of the constraints specified.
 type MessageQuery struct {
-    /*
+  /*
   From   base.Address
   To     base.Address
   Method ActorMethodId

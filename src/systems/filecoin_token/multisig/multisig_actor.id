@@ -1,3 +1,4 @@
+
 type TokenAmount UVarint
 type TxSeqNo UVarint
 type NumRequired UVarint
@@ -5,25 +6,21 @@ type EpochDuration UVarint
 type Epoch UVarint
 
 type MultisigActor struct {
-    signers         [Address]
-    required        NumRequired
-    nextTxId        TxSeqNo
-    initialBalance  TokenAmount
-    startingBlock   Epoch
-    unlockDuration  EpochDuration
-    transactions    {TxSeqNo: Transaction}
+  signers [Address]
+  required NumRequired
+  nextTxId TxSeqNo
+  initialBalance TokenAmount
+  startingBlock Epoch
+  unlockDuration EpochDuration
+  transactions {TxSeqNo:Transaction}
 
-    Construct(
-        signers         [Address]
-        required        NumRequired
-        unlockDuration  EpochDuration
-    )
-    Propose(to Address, value TokenAmount, method String, params Bytes) TxSeqNo
-    Approve(txid TxSeqNo)
-    Cancel(txid TxSeqNo)
-    ClearCompleted()
-    AddSigner(signer Address, increaseReq bool)
-    RemoveSigner(signer Address, decreaseReq bool)
-    SwapSigner(old Address, new Address)
-    ChangeRequirement(req NumRequired)
+  Construct(signers [Address], required NumRequired, unlockDuration EpochDuration)
+  Propose(to Address, value TokenAmount, method String, params Bytes) TxSeqNo
+  Approve(txid TxSeqNo)
+  Cancel(txid TxSeqNo)
+  ClearCompleted()
+  AddSigner(signer Address, increaseReq bool)
+  RemoveSigner(signer Address, decreaseReq bool)
+  SwapSigner(old Address, new Address)
+  ChangeRequirement(req NumRequired)
 }

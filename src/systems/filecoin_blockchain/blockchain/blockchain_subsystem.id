@@ -1,4 +1,4 @@
-import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+import clock 	 "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
 
 type Epoch UVarint
@@ -6,16 +6,16 @@ type SectorID struct {}
 type Randomness struct {}
 
 type BlockchainSubsystem struct @(mutable) {
-    Clock              &clock.WallClock
+    Clock           &clock.WallClock
 
-    LatestEpoch()      Epoch
-    BestChain()        Chain
-    CandidateChains()  [Chain]
+    LatestEpoch()   Epoch
+    BestChain()     Chain
+    CandidateChains() [Chain]
 
     // // Receiving blocks and tipset
     // should be channels
-    NewTipsets()
-    NewBestTipset()
+    NewTipsets()    struct {}
+    NewBestTipset() struct {}
 
     // validateBlockSemantics(Block)
     SyncState() union {
@@ -50,4 +50,5 @@ type BlockchainSubsystem struct @(mutable) {
 
     // call by StorageMining
     GetPostRandomness() Randomness
+
 }

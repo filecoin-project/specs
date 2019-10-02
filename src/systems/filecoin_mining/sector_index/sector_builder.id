@@ -2,37 +2,37 @@ type Sector struct {}
 type ProverID struct {}
 
 type ReplicaConfig struct {
-    SectorSize      UInt
-    SubsectorCount  UInt
-    Partitions      UInt
+  SectorSize     UInt
+  SubsectorCount UInt
+  Partitions     UInt
 }
 
 type StagedSector struct {
-    Sector
-    ReplicaConfig
-    BytesUsed            UInt  // Size of data in sector after preprocessing and padding.
-    Path
+  Sector        Sector
+  ReplicaConfig ReplicaConfig
+  BytesUsed     UInt // Size of data in sector after preprocessing and padding.
+  Path          Path
 
-    CapacityRemaining()  UInt  // How many more bytes of raw data can this sector hold, at most?
+  CapacityRemaining() UInt // How many more bytes of raw data can this sector hold, at most?
 }
 
 type SectorBuilder struct {
-    ReplicaConfig
-    ProverID
-    StagedSectors                [StagedSector]
+  ReplicaConfig   ReplicaConfig
+  ProverID        ProverID
+  StagedSectors   [StagedSector]
 
-    MaxUnsealedBytesPerSector()  UInt
-    AddPiece(piecePath Path)     AddPieceResponse
-    selectStagedSectorBySize(pieceSize UInt) [StagedSector]
+  MaxUnsealedBytesPerSector()        UInt
+  AddPiece(piecePath Path)         AddPieceResponse
+  selectStagedSectorBySize(pieceSize UInt) [StagedSector]
 }
 
 type AddPieceError String
 type AddPieceSuccess struct {
-    StagedSector
-    BytesRemaining UInt  // Raw byte capacity remaining in StagedSector, after adding piece.
+  StagedSector StagedSector
+  BytesRemaining  UInt // Raw byte capacity remaining in StagedSector, after adding piece.
 }
 
 type AddPieceResponse union {
-    AddPieceSuccess
-    AddPieceError
+  AddPieceSuccess
+  AddPieceError
 }
