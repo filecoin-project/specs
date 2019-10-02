@@ -47,6 +47,14 @@ help:
 	@echo "	make clean       remove all build artifacts"
 	@echo "	make clean-deps  remove (some of) the dependencies installed in this repo"
 	@echo "	make clean-hugo  remove intermediate hugo artifacts"
+	@echo "	make clean-code  remove build code artifacts"
+	@echo ""
+	@echo "WATCH TARGETS"
+	@echo "	make watch-code  watch and rebuild code
+	@echo "	make watch-hugo  watch and rebuild hugo
+
+
+
 
 # main Targets
 build: diagrams build-code website
@@ -181,19 +189,25 @@ build/code/%.gen.go: src/%.id bin/codeGen
 	mkdir -p $(dir $@)
 	-bin/codeGen gen $< $@
 
-gen-code: bin/codeGen $(GEN_GO_FILES) $(GO_OUTPUT_FILES) $(GO_UTIL_OUTPUT_FILE)
+gen-code: bin/codeGen build/code/go.mod $(GEN_GO_FILES) $(GO_OUTPUT_FILES) $(GO_UTIL_OUTPUT_FILE)
 
 build/code/go.mod: src/build_go.mod
 	mkdir -p $(dir $@)
 	cp $< $@
 
-build-code: gen-code build/code/go.mod
+build-code: gen-code
 	cd build/code && go build -gcflags="-e" ./...
 
 test-code: build-code
 	# testing should have the side effect that all go is compiled
 	cd tools/codeGen && go build && go test ./...
 	cd build/code && go build && go test ./...
+
+clean-code:
+	rm -rf build/code
+
+watch-code: .PHONY
+	bin/watcher --cmd="make gen-code" --startcmd src 2>/dev/null
 
 ## diagrams
 
