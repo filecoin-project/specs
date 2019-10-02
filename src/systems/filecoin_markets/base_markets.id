@@ -1,9 +1,7 @@
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import base_mining     "github.com/filecoin-project/specs/systems/filecoin_mining"
 
 type Address       base_blockchain.Address
 type Epoch         base_blockchain.Epoch
-type PoStProof     base_mining.PoStProof
 type Path struct {}
 type Signature struct {}
 type StorageDealID struct {}

@@ -16,11 +16,11 @@ type MultisigActor struct {
 
   Construct(signers [Address], required NumRequired, unlockDuration EpochDuration)
   Propose(to Address, value TokenAmount, method String, params Bytes) TxSeqNo
-  Approve(txid TxSeqNo)
-  Cancel(txid TxSeqNo)
-  ClearCompleted()
-  AddSigner(signer Address, increaseReq bool)
-  RemoveSigner(signer Address, decreaseReq bool)
-  SwapSigner(old Address, new Address)
-  ChangeRequirement(req NumRequired)
+  Approve(txid TxSeqNo) struct{}
+  Cancel(txid TxSeqNo) struct{}
+  ClearCompleted() struct{}
+  AddSigner(signer Address, increaseReq bool) struct{}
+  RemoveSigner(signer Address, decreaseReq bool) struct{}
+  SwapSigner(old Address, new Address) struct{}
+  ChangeRequirement(req NumRequired) struct{}
 }
