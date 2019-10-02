@@ -50,8 +50,8 @@ help:
 	@echo "	make clean-code  remove build code artifacts"
 	@echo ""
 	@echo "WATCH TARGETS"
-	@echo "	make watch-code  watch and rebuild code
-	@echo "	make watch-hugo  watch and rebuild hugo
+	@echo "	make watch-code  watch and rebuild code"
+	@echo "	make watch-hugo  watch and rebuild hugo"
 
 
 
