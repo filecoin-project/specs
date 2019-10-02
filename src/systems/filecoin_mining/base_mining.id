@@ -1,3 +1,0 @@
-type PoStProof struct {}
-type PoStChallenge Bytes
-type SealSeed     Bytes

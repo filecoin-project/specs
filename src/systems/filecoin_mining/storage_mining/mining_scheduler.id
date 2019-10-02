@@ -1,15 +1,9 @@
-import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
-
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs/poster"
 // import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
 
 type SectorSet       [Sector]
 type SealedSectorSet [Sector]
 type ReplicaID       CID
-
-type ProveStorageArtifact struct {
-	PoStProof base_mining.PoStProof
-	BitField  Bytes // TODO verify type here
-}
 
 type MiningScheduler struct {
   getStagedSectors()   SectorSet
@@ -18,7 +12,10 @@ type MiningScheduler struct {
   getRepairedSectors() SectorSet
   getExpiredSectors()  SectorSet // same as completedSectors/doneSectors
 
-  ProveStorage(sectors SectorSet) ProveStorageArtifact
+  ProducePost(sectors SectorSet) poster.PoStSubmission
+  VerifyPost(sectors SectorSet) poster.PoStSubmission
+
+
   ReportFaults(actor &StorageMinerActor) bool
   RemoveSectors(sectorsToRemove SectorSet) bool
   DePledge(amount TokenAmount) bool

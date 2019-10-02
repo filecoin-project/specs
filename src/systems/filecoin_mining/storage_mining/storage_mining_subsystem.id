@@ -4,10 +4,12 @@ type StorageMiningSubsystem struct {
     sectorIndexer SectorIndexerSubsystem
     storagePowerConsensus StoragePowerConsensusSubsystem
 
+    // TODO: why are these here? are they needed by its components?
+    // Also, Chain gives us the others. we should reduce this interface.
     CurrentChain() Chain
     CurrentEpoch() Epoch
     CurrentTipset() Tipset
-    
+
     StartMining() struct {}
     StopMining() struct {}
 
