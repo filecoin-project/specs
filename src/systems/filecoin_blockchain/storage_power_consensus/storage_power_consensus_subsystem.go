@@ -1,6 +1,16 @@
 package storage_power_consensus
 
-func (self *StoragePowerConsensusSubsystem) ValidateBlock(block Block) {
+import (
+	base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+	blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+)
+
+const (
+	SPC_LOOKBACK_RANDOMNESS = 300 // this is EC.K maybe move it there. TODO
+	SPC_LOOKBACK_TICKET     = 1   // we chain blocks together one after the other
+)
+
+func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block Block) {
 
 	// 1. Verify miner has not been slashed and is still valid miner
 	if self.PowerTable.LookupMinerStorage(block.MinerAddress()) <= 0 {
@@ -33,10 +43,17 @@ func (self *StoragePowerConsensusSubsystem) ValidateBlock(block Block) {
 	return nil
 }
 
-func (self *StoragePowerConsensusSubsystem) computeTipsetWeight(tipset *Tipset) ChainWeight {
+func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset *Tipset) ChainWeight {
 	panic("TODO")
 }
 
-func (self *StoragePowerConsensusSubsystem) StoragePowerConsensusError(string errMsg) StoragePowerConsensusError {
+func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(string errMsg) StoragePowerConsensusError {
 	return Error(errMsg)
+}
+
+func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts {
+	return base.ElectionArtifacts{
+		TK: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_RANDOMNESS),
+		T1: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_TICKET),
+	}
 }
