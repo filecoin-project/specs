@@ -85,3 +85,12 @@ type SealedSectorInfo struct {
   Size      UVarint
   SealArgs  SealArguments
 }
+
+// TODO: move this into a different file.
+// sector sets
+type SectorSet [Sector]
+
+// compact sector sets
+type Bitfield Bytes        // TODO: move to the right place -- a lib?
+type RLEpBitfield Bitfield // TODO: move to the right place -- a lib?
+type CompactSectorSet RLEpBitfield
