@@ -327,22 +327,20 @@ Due to network propagation delay, it is possible for a miner in round N+1 to omi
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
 
 The weight at each block is equal to its `ParentWeight` plus that block's delta weight. Delta
-weight is a term P times the sum of a constant `V` times the number of blocks included in that TipSet in the given round (can only be calculated in the next round), and `X` - a function of the total power in the network as reported in the Power Table. P will be equal to some term P_i^P_n and seeks to punish selfish mining. So we have:
+weight is a term P times the sum of a constant `V` times the number of blocks included in that TipSet in the given round (can only be calculated in the next round), and `X` - a function of the total power in the network as reported in the Power Table. P is separated into numerator and denominator to make the integer arithmetic well defined. `P_num(n)/P_den(n)` will be equal to some term P^n and seeks to punish selfish mining. So we have:
 
-`Weight = ParentWeight + P(V*NumBlocksMinedInThisRound + X)`
+`Weight = ParentWeight + (1000*P_num(n)*(V*NumBlocksMinedInThisRound + X))/P_den(n)`
 
-The weight should be rounded down to its fourth decimal at each height (i.e. each time it is recalculated).
+The weight should be calculated using big integer arithmetic with order of operations defined above.
 
-```sh
-Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
-```
+The exact value for these parameters remain to be determined, but for illustration, we can set:
 
- The exact value for these parameters remain to be determined, but for illustration, we can set:
+- `V = 2`
+- `X = floor(log2(TotalPower in Power Table))` - length of TotalPower in bits
+- `n = the number of tickets in this block's Ticket array` if that number is  >= 3, `0` otherwise
+- `P_num(n) = 87^n`
+- `P_den(n) = 100^n
 
-- `V = 2 * number of blocks in the round`
-- `X = log(TotalPower in Power Table)`
-- `P_i = .87`
-- `P_n = the number of tickets in this block's Ticket array` if that number is  >= 3, 0 otherwise.
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given TipSet should have
