@@ -1,58 +1,124 @@
 type Address struct {}
-type Storage struct {}
+type PieceStore struct {}
 type StorageDealID struct {}
+type RetrievalDealID struct {}
 type Function struct {}
 type Piece struct {}
+type ChannelID UInt
+type LibP2PHost struct {}
 
 type DataTransferSubsystem struct @(mutable) {
-    dataTransfers  {UInt: DataTransferChannel}
-    volumes        [Storage]
+	dataTransfers {ChannelID: DataTransferChannel}
+	pushValidator PushValidator
+	pullValidator PullValidator
+	pieceStore    PieceStore
 
-    OpenDataTransferChannel(x StorageDealID) UInt
-    CloseDataTransferChannel(x UInt)
-    TransferChannelStatus(x UInt) DataTransferStatus
-    ReportDataTransferEvent(x Function) union {Ret DataTransferStatus, Err error}
+  // open a data transfer that will send data to the recipient address
+	OpenPushDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
+	Selector IPLDSelector) ChannelID
 
-    findData(x CID) Piece
+  // open a data transfer that will request data from the sending address
+	OpenPullDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
+	Selector IPLDSelector) ChannelID
+	
+	// close an open channel
+	CloseDataTransferChannel(x ChannelID)         struct{}
+	
+	// get status of a transfer
+	TransferChannelStatus(x ChannelID)            DataTransferStatus
+	
+	// get notified when certain types of events happen
+	RegisterDataTransferListener(listener DataTransferListener)
+
+  // respond to a pull data transfer request from the network
+	onReceivedPullDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
+	Selector IPLDSelector) ChannelID
+
+  // respond to a push data transfer request from the network
+	onReceivedPushDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
+	Selector IPLDSelector) ChannelID
+	
 }
 
+// A DataTransferVoucher is a ticket that is used to validate
+// a data transfer request against the underlying storage or retrieval deal
+// that precipitated it
+type DataTransferVoucher union {
+	StorageDealVoucher 
+	RetrievalDealVoucher
+}
+
+type StorageDealVoucher struct {
+	id StorageDealID
+}
+
+type RetrievalDealVoucher struct {
+	id RetrievalDealID
+}
+
+// A PushValidator validates an incoming push request from the network
+type PushValidator struct {
+	ValidatePush(
+		sender address.Address, 
+		voucher DataTransferVoucher, 
+		PieceRef CID, 
+		Selector IPLDSelector)
+}
+
+// A PullValidator validates an incoming pull request from the network
+type PullValidator struct {
+	ValidatePull(		
+		receiver address.Address, 
+		voucher DataTransferVoucher, 
+		PieceRef CID, 
+		Selector IPLDSelector)
+}
+
+// a data transfer listener specifies a callback that happens
+// when certain types of events occur
+type DataTransferListener struct {
+	eventType DataTransferEvent
+	Callback(dataTransfer DataTransferChannel, metadata EventMetadata)
+}
+
+type DataTransferEvent union {
+	Open
+	Progress
+	Error
+	Complete
+}
+
+type EventMetadata struct {}
+
+// A Scheduler manages actually scheduling data transfer requests on the network
 // Assumes access to error-checked, ordered, reliable transmission protocol
 type Scheduler struct {
-    ScheduleTransfer(x UInt, y Piece)
-    requestData(x DataTransferChannel) union {Ret Bytes, Err error}
-    sendData(x DataTransferChannel, y Bytes) error?
+	ScheduleTransfer(x ChannelID)        struct{}
+	requestData(x DataTransferChannel)       union { Ret Bytes, Err error }
+	sendData(x DataTransferChannel, y Bytes) error?
 }
 
+// Data tracked for a data transfer
+// TODO: Needs work
 type DataTransferChannel struct {
-    channelID      UInt
-    contentID      CID
-    dataIncrement  UVarint
-    sender         Address
-    recipient      Address
-    totalSize      UVarint
-    sent           UVarint
-    received       UVarint
+	channelID     ChannelID
+	PieceRef      CID
+	voucher       DataTransferVoucher
+	offset			  UVarint
+	sender        Address
+	recipient     Address
+	totalSize     UVarint
+	sent          UVarint
+	received      UVarint
 
-    channelType()  DataTransferType  @(cached)
-    transferNum()  Float             @(cached)
-}
-
-type DataTransferParams struct {
-    channelType    DataTransferType
-    contentID      CID
-    dataIncrement  UVarint
-    sender         Address
-    recipient      Address
-    totalSize      Address
+	channelType() DataTransferType  @(cached)
+	transferNum() Float             @(cached)
 }
 
 type DataTransferType union {
     Sender
     Recipient
 }
-
-type Sender struct {}  // TODO: remove this
-type Recipient struct {}  // TODO: remove this
 
 type Ongoing struct {}
 type Completed struct {}
