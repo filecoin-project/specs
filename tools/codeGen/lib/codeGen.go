@@ -214,7 +214,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 		name := strings.Join(ctx.tokens, "_")
 
 		xr := x.(*AlgType)
-	
+
 		interfaceName := name
 		interfaceID := GoIdent {name: interfaceName}
 

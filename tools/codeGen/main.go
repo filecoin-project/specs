@@ -5,7 +5,7 @@ import (
 	"flag"
 	"os"
 	"strings"
-	codeGen "github.com/filecoin-project/specs/codeGen/codeGen"
+ codeGen "github.com/filecoin-project/specs/codeGen/lib"
 	util "github.com/filecoin-project/specs/codeGen/util"
 )
 
