@@ -41,12 +41,12 @@ func WriteDSLDecl(dst io.Writer, decl Decl, ctx WriteDSLContext) {
 }
 
 func WriteDSLContextInit() WriteDSLContext {
-	return WriteDSLContext {
-		indent: 0,
-		useNewlines: true,
+	return WriteDSLContext{
+		indent:            0,
+		useNewlines:       true,
 		useFieldAlignment: false,
-		alignment: WriteDSLAlignmentNone(),
-		isEnum: false,
+		alignment:         WriteDSLAlignmentNone(),
+		isEnum:            false,
 	}
 }
 
@@ -59,11 +59,12 @@ func WriteGoMod(goMod GoMod, outputFile *os.File) {
 }
 
 const (
-	ALIGN_IND_SYM   int = 0
-	ALIGN_IND_TYPE  int = 1
+	ALIGN_IND_SYM  int = 0
+	ALIGN_IND_TYPE int = 1
 
-	ALIGN_NUM_INDS  int = 2
+	ALIGN_NUM_INDS int = 2
 )
+
 type WriteDSLAlignment = [ALIGN_NUM_INDS]IntOption
 
 func WriteDSLAlignmentNone() WriteDSLAlignment {
@@ -127,7 +128,7 @@ func WriteDSLAlignmentRes(xMin, xMax *WriteDSLAlignment, n []int) (ret *WriteDSL
 				ret[i] = IntOptionNone()
 			} else {
 				gap := 1
-				if iMax > 2 || (iMax - iMin >= 1) {
+				if iMax > 2 || (iMax-iMin >= 1) {
 					gap = 2
 				}
 				// if iMax >= 12 {
@@ -141,11 +142,11 @@ func WriteDSLAlignmentRes(xMin, xMax *WriteDSLAlignment, n []int) (ret *WriteDSL
 }
 
 type WriteDSLContext struct {
-	indent int
-	useNewlines bool
+	indent            int
+	useNewlines       bool
 	useFieldAlignment bool
-	alignment WriteDSLAlignment
-	isEnum bool
+	alignment         WriteDSLAlignment
+	isEnum            bool
 }
 
 func (ctx WriteDSLContext) Indent() WriteDSLContext {
@@ -185,7 +186,7 @@ func WriteDSLAlignGap(xLen IntOption, xAlign IntOption) int {
 	}
 	iLen := xLen.Get()
 	iAlign := xAlign.Get()
-	return IntMax(iAlign - iLen, 0)
+	return IntMax(iAlign-iLen, 0)
 }
 
 func WriteDSLFieldSym(dst io.Writer, field Field, ctx WriteDSLContext) {
@@ -366,9 +367,9 @@ func AlignDSLBlockEntries(entries []Entry, ctx WriteDSLContext) []WriteDSLAlignm
 				alignFlush()
 				break
 			}
-			if (len(method.methodArgs) > 0 &&
+			if len(method.methodArgs) > 0 &&
 				alignLengthsMax[ALIGN_IND_SYM].IsSome() &&
-					symLen.Get() > alignLengthsMax[ALIGN_IND_SYM].Get() + ALIGN_METHOD_ARGS_MARGIN) {
+				symLen.Get() > alignLengthsMax[ALIGN_IND_SYM].Get()+ALIGN_METHOD_ARGS_MARGIN {
 				alignFlush()
 				break
 			}
@@ -499,14 +500,14 @@ func WriteDSLBlockEntries(
 			panic("Entry case not supported")
 		}
 
-		holdEntryNewline = (i + 1 < len(entries) && EntryIsInlineComment(entries[i+1]))
+		holdEntryNewline = (i+1 < len(entries) && EntryIsInlineComment(entries[i+1]))
 
 		if ctx.useNewlines {
 			if !holdEntryNewline {
 				fmt.Fprintf(dst, "\n")
 			}
 		} else {
-			if i < len(entries) - 1 {
+			if i < len(entries)-1 {
 				fmt.Fprintf(dst, ", ")
 			}
 		}
@@ -548,12 +549,12 @@ func WriteDSLBlock(
 
 func WriteDSLMethodSym(dst io.Writer, method Method, ctx WriteDSLContext) {
 	fmt.Fprintf(dst, "%s", method.methodName)
-	ctxSub := WriteDSLContext {
-		indent: ctx.indent,
-		useNewlines: EntriesReqNewlines(method.argsFmtInfo, method.methodArgs, ctx),
+	ctxSub := WriteDSLContext{
+		indent:            ctx.indent,
+		useNewlines:       EntriesReqNewlines(method.argsFmtInfo, method.methodArgs, ctx),
 		useFieldAlignment: true,
-		alignment: WriteDSLAlignmentNone(),
-		isEnum: false,
+		alignment:         WriteDSLAlignmentNone(),
+		isEnum:            false,
 	}
 	WriteDSLBlock(dst, method.methodArgs, ctxSub, "(", ")")
 }
@@ -662,12 +663,12 @@ func WriteDSLType(dst io.Writer, type_ Type, ctx WriteDSLContext) {
 			fmt.Fprintf(dst, " ")
 		}
 
-		ctxSub := WriteDSLContext {
-			indent: ctx.indent,
-			useNewlines: EntriesReqNewlines(xr.entriesFmtInfo, xr.entries, ctx),
+		ctxSub := WriteDSLContext{
+			indent:            ctx.indent,
+			useNewlines:       EntriesReqNewlines(xr.entriesFmtInfo, xr.entries, ctx),
 			useFieldAlignment: true,
-			alignment: WriteDSLAlignmentNone(),
-			isEnum: isEnum,
+			alignment:         WriteDSLAlignmentNone(),
+			isEnum:            isEnum,
 		}
 		WriteDSLBlock(dst, xr.entries, ctxSub, "{", "}")
 

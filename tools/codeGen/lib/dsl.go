@@ -3,14 +3,14 @@ package codeGen
 type Decl_Case = int
 
 const (
-	Decl_Case_Type     Decl_Case = 1
-	Decl_Case_Package  Decl_Case = 2
-	Decl_Case_Import   Decl_Case = 3
+	Decl_Case_Type    Decl_Case = 1
+	Decl_Case_Package Decl_Case = 2
+	Decl_Case_Import  Decl_Case = 3
 )
 
 type Module struct {
-	entries []Entry
-	parseFmtInfo  *ParseFmtInfo
+	entries      []Entry
+	parseFmtInfo *ParseFmtInfo
 }
 
 func (mod Module) Decls() []Decl {
@@ -29,20 +29,20 @@ type Decl interface {
 }
 
 type TypeDecl struct {
-	name  string
-	type_ Type
-	parseFmtInfo  *ParseFmtInfo
+	name         string
+	type_        Type
+	parseFmtInfo *ParseFmtInfo
 }
 
 type PackageDecl struct {
-	name  string
-	parseFmtInfo  *ParseFmtInfo
+	name         string
+	parseFmtInfo *ParseFmtInfo
 }
 
 type ImportDecl struct {
-	name  string
-	path  string
-	parseFmtInfo  *ParseFmtInfo
+	name         string
+	path         string
+	parseFmtInfo *ParseFmtInfo
 }
 
 func (x TypeDecl) Name() string {
@@ -69,7 +69,6 @@ func (ImportDecl) Case() Decl_Case {
 	return Decl_Case_Import
 }
 
-
 type Type interface {
 	Case() Type_Case
 }
@@ -77,13 +76,13 @@ type Type interface {
 type Type_Case = int
 
 const (
-	Type_Case_NamedType    Type_Case = 1
-	Type_Case_AlgType      Type_Case = 2
-	Type_Case_ArrayType    Type_Case = 3
-	Type_Case_FunType      Type_Case = 4
-	Type_Case_RefType      Type_Case = 5
-	Type_Case_OptionType   Type_Case = 6
-	Type_Case_MapType      Type_Case = 7
+	Type_Case_NamedType  Type_Case = 1
+	Type_Case_AlgType    Type_Case = 2
+	Type_Case_ArrayType  Type_Case = 3
+	Type_Case_FunType    Type_Case = 4
+	Type_Case_RefType    Type_Case = 5
+	Type_Case_OptionType Type_Case = 6
+	Type_Case_MapType    Type_Case = 7
 )
 
 func (NamedType) Case() Type_Case {
@@ -132,12 +131,12 @@ type Method struct {
 }
 
 func DSLTrivialStruct() Type {
-	return RefAlgType(AlgType {
-		sort: AlgSort_Prod,
-		entries: []Entry{},
+	return RefAlgType(AlgType{
+		sort:          AlgSort_Prod,
+		entries:       []Entry{},
 		attributeList: []string{},
-		parseFmtInfo: nil,
-		isInterface: false,
+		parseFmtInfo:  nil,
+		isInterface:   false,
 	})
 }
 
@@ -156,11 +155,11 @@ func DSLTypeIsTrivialStruct(type_ Type) bool {
 }
 
 func DSLTrivialStructField(fieldName *string, info *ParseFmtInfo) *Field {
-	return RefField(Field {
-		fieldName: fieldName,
-		fieldType: DSLTrivialStruct(),
+	return RefField(Field{
+		fieldName:     fieldName,
+		fieldType:     DSLTrivialStruct(),
 		attributeList: []string{},
-		parseFmtInfo: info,
+		parseFmtInfo:  info,
 	})
 }
 
@@ -188,63 +187,64 @@ func (method Method) MethodType() *FunType {
 		}
 	}
 	retType := method.methodRetType
-	return RefFunType(FunType {
-		args: args,
+	return RefFunType(FunType{
+		args:    args,
 		retType: retType,
 	})
 }
+
 type Comment struct {
-	isInline bool
-	isBlock bool
+	isInline    bool
+	isBlock     bool
 	commentText string
-	endPos int
+	endPos      int
 }
 
 type Entry_Case = int
 
 const (
-	Entry_Case_Empty    Entry_Case = 1
-	Entry_Case_Field    Entry_Case = 2
-	Entry_Case_Method   Entry_Case = 3
-	Entry_Case_Comment  Entry_Case = 4
-	Entry_Case_Decl     Entry_Case = 5
+	Entry_Case_Empty   Entry_Case = 1
+	Entry_Case_Field   Entry_Case = 2
+	Entry_Case_Method  Entry_Case = 3
+	Entry_Case_Comment Entry_Case = 4
+	Entry_Case_Decl    Entry_Case = 5
 )
 
 type Entry struct {
-	case_   Entry_Case
-	value   interface{}
+	case_ Entry_Case
+	value interface{}
 }
 
 func EntryField(field Field) Entry {
-	return Entry {
+	return Entry{
 		case_: Entry_Case_Field,
 		value: field,
 	}
 }
 
 func EntryMethod(method Method) Entry {
-	return Entry {
+	return Entry{
 		case_: Entry_Case_Method,
 		value: method,
 	}
 }
 
 func EntryComment(comment Comment) Entry {
-	return Entry {
+	return Entry{
 		case_: Entry_Case_Comment,
 		value: comment,
 	}
 }
 
 func EntryDecl(decl Decl) Entry {
-	return Entry {
+	return Entry{
 		case_: Entry_Case_Decl,
 		value: decl,
 	}
 }
 
 func EntryEmpty() Entry {
-	return Entry {
+	return Entry{
 		case_: Entry_Case_Empty,
 		value: nil,
 	}
@@ -284,33 +284,33 @@ func (x *AlgType) Fields() []Field {
 }
 
 type ArrayType struct {
-	elementType   Type
-	parseFmtInfo  *ParseFmtInfo
+	elementType  Type
+	parseFmtInfo *ParseFmtInfo
 }
 
 type RefType struct {
-	targetType    Type
-	parseFmtInfo  *ParseFmtInfo
+	targetType   Type
+	parseFmtInfo *ParseFmtInfo
 }
 
 type FunType struct {
-	args          []Field
-	retType       Type
-	parseFmtInfo  *ParseFmtInfo
+	args         []Field
+	retType      Type
+	parseFmtInfo *ParseFmtInfo
 }
 
 type NamedType struct {
-	name          string
-	parseFmtInfo  *ParseFmtInfo
+	name         string
+	parseFmtInfo *ParseFmtInfo
 }
 
 type OptionType struct {
-	valueType     Type
-	parseFmtInfo  *ParseFmtInfo
+	valueType    Type
+	parseFmtInfo *ParseFmtInfo
 }
 
 type MapType struct {
-	keyType       Type
-	valueType     Type
-	parseFmtInfo  *ParseFmtInfo
+	keyType      Type
+	valueType    Type
+	parseFmtInfo *ParseFmtInfo
 }

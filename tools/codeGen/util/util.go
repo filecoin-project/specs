@@ -77,20 +77,20 @@ func IntMax(x, y int) int {
 
 type IntOption struct {
 	isSome bool
-	value int
+	value  int
 }
 
 func IntOptionSome(x int) IntOption {
-	return IntOption {
+	return IntOption{
 		isSome: true,
-		value: x,
+		value:  x,
 	}
 }
 
 func IntOptionNone() IntOption {
-	return IntOption {
+	return IntOption{
 		isSome: false,
-		value: -1,
+		value:  -1,
 	}
 }
 

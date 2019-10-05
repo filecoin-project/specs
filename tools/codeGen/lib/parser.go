@@ -19,24 +19,24 @@ type ParseFmtInfo struct {
 	// startPos, endPos int
 	hitNewlineAny bool
 	hitNewlineTop bool
-	noopEntries []Entry  // Comment or Empty
+	noopEntries   []Entry // Comment or Empty
 }
 
 func ParseFmtInfoInit() ParseFmtInfo {
-	return ParseFmtInfo {
-		err: nil,
+	return ParseFmtInfo{
+		err:           nil,
 		hitNewlineAny: false,
 		hitNewlineTop: false,
-		noopEntries: []Entry{},
+		noopEntries:   []Entry{},
 	}
 }
 
 func ParseFmtInfoError(err *ParseError_S) ParseFmtInfo {
-	return ParseFmtInfo {
-		err: err,
+	return ParseFmtInfo{
+		err:           err,
 		hitNewlineAny: false,
 		hitNewlineTop: false,
-		noopEntries: []Entry{},
+		noopEntries:   []Entry{},
 	}
 }
 
@@ -72,10 +72,10 @@ func (err *ParseError_S) UnifyError(errOther *ParseError_S) *ParseError_S {
 	if subsumed {
 		return err
 	}
-	return RefParseError(ParseError_S {
+	return RefParseError(ParseError_S{
 		msgAbbrev: append(err.msgAbbrev, errOther.msgAbbrev...),
-		msg: append(err.msg, errOther.msg...),
-		pos: err.pos,
+		msg:       append(err.msg, errOther.msg...),
+		pos:       err.pos,
 	})
 }
 
@@ -121,13 +121,13 @@ func (info ParseFmtInfo) UnifyFmtInfoExt(
 
 	noopEntriesRet := append(info.noopEntries, infoOther.noopEntries...)
 	hitNewlineTop := info.hitNewlineTop || (infoOther.hitNewlineTop && !shieldNewlines)
-	ret := ParseFmtInfo {
+	ret := ParseFmtInfo{
 		err: info.err.UnifyError(infoOther.err),
 		// startPos: IntMin(info.startPos, infoOther.startPos),
 		// endPos: IntMax(info.endPos, infoOther.endPos),
 		hitNewlineAny: info.hitNewlineAny || infoOther.hitNewlineAny,
 		hitNewlineTop: hitNewlineTop,
-		noopEntries: noopEntriesRet,
+		noopEntries:   noopEntriesRet,
 	}
 	return ret
 }
@@ -137,8 +137,8 @@ func (info ParseFmtInfo) UnifyFmtInfo(r *ParseStream, infoOther ParseFmtInfo) Pa
 }
 
 type LineInfo struct {
-	line  int
-	col   int
+	line int
+	col  int
 }
 
 type ParseStreamState struct {
@@ -146,11 +146,11 @@ type ParseStreamState struct {
 }
 
 type ParseStream struct {
-	rs          io.ReadSeeker
-	state       ParseStreamState
-	stateStack  []ParseStreamState
-	lineMap     []LineInfo
-	buffer      *bytes.Buffer
+	rs         io.ReadSeeker
+	state      ParseStreamState
+	stateStack []ParseStreamState
+	lineMap    []LineInfo
+	buffer     *bytes.Buffer
 }
 
 func (r *ParseStream) Push() {
@@ -172,7 +172,7 @@ func (r *ParseStream) Pop(restore bool) {
 		r.Seek(r.stateStack[n-1].pos - r.state.pos)
 		r.state = r.stateStack[n-1]
 	}
-	r.stateStack = r.stateStack[0:n-1]
+	r.stateStack = r.stateStack[0 : n-1]
 }
 
 func (r *ParseStream) Seek(offset int) {
@@ -187,7 +187,7 @@ func (r *ParseStream) Seek(offset int) {
 func (r *ParseStream) GetLineInfo(pos int) LineInfo {
 	var ret LineInfo
 	if pos < 0 {
-		ret = LineInfo { line: 0, col: 0 }
+		ret = LineInfo{line: 0, col: 0}
 	} else {
 		ret = r.lineMap[pos]
 	}
@@ -196,7 +196,7 @@ func (r *ParseStream) GetLineInfo(pos int) LineInfo {
 
 func (r *ParseStream) PosDebugExt(pos int) string {
 	lineInfo := r.GetLineInfo(pos)
-	return fmt.Sprintf("line %v, column %v", lineInfo.line + 1, lineInfo.col + 1)
+	return fmt.Sprintf("line %v, column %v", lineInfo.line+1, lineInfo.col+1)
 }
 
 func (r *ParseStream) PosDebug() string {
@@ -233,7 +233,7 @@ func (r *ParseStream) GenExcerptExt(pos int) string {
 		}
 	}
 	for i++; i < len(r.buffer.Bytes()); i++ {
-		c := string(r.buffer.Bytes()[i:i+1])
+		c := string(r.buffer.Bytes()[i : i+1])
 		ret += c
 		if c == "\n" {
 			break
@@ -246,7 +246,7 @@ func (r *ParseStream) GenExcerptExt(pos int) string {
 		ret += "\u2196\n"
 	} else {
 		Assert(lineInfo.col > 0)
-		ret += WriteRepeatString(" ", lineInfo.col - 1) + "\u2191\n"
+		ret += WriteRepeatString(" ", lineInfo.col-1) + "\u2191\n"
 	}
 	return ret
 }
@@ -284,16 +284,16 @@ func (r *ParseStream) Get(lenMax int, advance bool) string {
 		p := r.state.pos + i
 		if p >= len(r.lineMap) {
 			Assert(p == len(r.lineMap))
-			prevLineInfo := LineInfo { line: 0, col: 0 }
+			prevLineInfo := LineInfo{line: 0, col: 0}
 			if p >= 1 {
 				prevLineInfo = r.lineMap[p-1]
 			}
-			newLineInfo := LineInfo {
+			newLineInfo := LineInfo{
 				line: prevLineInfo.line,
 				col:  prevLineInfo.col + 1,
 			}
 			if c == '\n' {
-				newLineInfo = LineInfo {
+				newLineInfo = LineInfo{
 					line: prevLineInfo.line + 1,
 					col:  0,
 				}
@@ -319,7 +319,6 @@ func (r *ParseStream) Get(lenMax int, advance bool) string {
 	return ret
 }
 
-
 func (r *ParseStream) Read(lenMax int) string {
 	return r.Get(lenMax, true)
 }
@@ -327,7 +326,6 @@ func (r *ParseStream) Read(lenMax int) string {
 func (r *ParseStream) Peek(lenMax int) string {
 	return r.Get(lenMax, false)
 }
-
 
 func (r *ParseStream) ParseComments() (info ParseFmtInfo) {
 	info.noopEntries = []Entry{}
@@ -363,11 +361,11 @@ func (r *ParseStream) ParseComments() (info ParseFmtInfo) {
 					info.noopEntries = append(info.noopEntries, EntryEmpty())
 				}
 				if singleLineComment {
-					info.noopEntries = append(info.noopEntries, EntryComment(Comment {
+					info.noopEntries = append(info.noopEntries, EntryComment(Comment{
 						commentText: commentText,
-						isBlock: false,
-						isInline: !info.hitNewlineAny,
-						endPos: r.state.pos,
+						isBlock:     false,
+						isInline:    !info.hitNewlineAny,
+						endPos:      r.state.pos,
 					}))
 					commentText = ""
 				}
@@ -405,11 +403,11 @@ func (r *ParseStream) ParseComments() (info ParseFmtInfo) {
 			r.Seek(2)
 			depth -= 1
 			if depth == 0 {
-				info.noopEntries = append(info.noopEntries, EntryComment(Comment {
+				info.noopEntries = append(info.noopEntries, EntryComment(Comment{
 					commentText: commentText,
-					isBlock: true,
-					isInline: false,
-					endPos: r.state.pos,
+					isBlock:     true,
+					isInline:    false,
+					endPos:      r.state.pos,
 				}))
 				commentText = ""
 			} else {
@@ -425,7 +423,6 @@ func (r *ParseStream) ParseComments() (info ParseFmtInfo) {
 		}
 	}
 }
-
 
 func ReadToken(r *ParseStream) (ret string, info ParseFmtInfo) {
 	var infoSub ParseFmtInfo
@@ -488,12 +485,12 @@ func ReadToken(r *ParseStream) (ret string, info ParseFmtInfo) {
 
 type ParseError_S struct {
 	msgAbbrev []string
-	msg []string
-	pos int
+	msg       []string
+	pos       int
 }
 
 func ParseError(msgAbbrev string, msg string, pos int) ParseError_S {
-	return ParseError_S {msgAbbrev: []string{msgAbbrev}, msg: []string{msg}, pos: pos}
+	return ParseError_S{msgAbbrev: []string{msgAbbrev}, msg: []string{msg}, pos: pos}
 }
 
 func IsLower(c byte) bool {
@@ -652,11 +649,11 @@ func ParseAttributeList(r *ParseStream) (ret []string, info ParseFmtInfo) {
 
 	if tok, ok := PeekToken(r, false); ok && (tok == "@") {
 		_, _ = ReadTokenCheck(r, []string{"@"})
-		fTryParse := func (rr *ParseStream) (interface{}, ParseFmtInfo) {
+		fTryParse := func(rr *ParseStream) (interface{}, ParseFmtInfo) {
 			tok, info := ReadToken(rr)
 			return tok, info
 		}
-		fAppend := func (x interface{}) {
+		fAppend := func(x interface{}) {
 			ret = append(ret, x.(string))
 		}
 		infoSub = ParseDelimitedList(r, "(", []string{","}, ")", fTryParse, fAppend, false)
@@ -674,10 +671,10 @@ func ParseAttributeList(r *ParseStream) (ret []string, info ParseFmtInfo) {
 type EntryParseSpec int
 
 const (
-	EntryParseSpec_Case        EntryParseSpec = 1
-	EntryParseSpec_DataField   EntryParseSpec = 2
-	EntryParseSpec_ArgField    EntryParseSpec = 3
-	EntryParseSpec_Method      EntryParseSpec = 4
+	EntryParseSpec_Case      EntryParseSpec = 1
+	EntryParseSpec_DataField EntryParseSpec = 2
+	EntryParseSpec_ArgField  EntryParseSpec = 3
+	EntryParseSpec_Method    EntryParseSpec = 4
 )
 
 func EntryParseSpec_MayOmitName(spec EntryParseSpec) bool {
@@ -871,7 +868,7 @@ func ParseEntry(
 
 			var argsFmtInfo *ParseFmtInfo = nil
 			if EntryParseSpec_HasArgs(spec) {
-				specsSub := []EntryParseSpec { EntryParseSpec_ArgField }
+				specsSub := []EntryParseSpec{EntryParseSpec_ArgField}
 				argsEntriesSub, infoSub = ParseEntryList(r, "(", []string{",", "\n"}, ")", false, specsSub)
 				argsFmtInfo = RefParseFmtInfo(infoSub)
 
@@ -947,22 +944,22 @@ func ParseEntry(
 				Assert(argsEntriesSub != nil)
 				Assert(argsFmtInfo != nil)
 
-				retEntry := EntryMethod(Method {
-					methodName: *entryName,
-					methodArgs: argsEntriesSub,
-					argsFmtInfo: argsFmtInfo,
+				retEntry := EntryMethod(Method{
+					methodName:    *entryName,
+					methodArgs:    argsEntriesSub,
+					argsFmtInfo:   argsFmtInfo,
 					methodRetType: entryRetType,
 					attributeList: attributeList,
-					parseFmtInfo: RefParseFmtInfo(info),
+					parseFmtInfo:  RefParseFmtInfo(info),
 				})
 				ret = RefEntry(retEntry)
 
 			case spec == EntryParseSpec_DataField || spec == EntryParseSpec_ArgField || spec == EntryParseSpec_Case:
-				retEntry := EntryField(Field {
-					fieldName: entryName,
-					fieldType: entryRetType,
+				retEntry := EntryField(Field{
+					fieldName:     entryName,
+					fieldType:     entryRetType,
 					attributeList: attributeList,
-					parseFmtInfo: RefParseFmtInfo(info),
+					parseFmtInfo:  RefParseFmtInfo(info),
 				})
 				ret = RefEntry(retEntry)
 
@@ -982,7 +979,7 @@ func ParseEntry(
 
 func TryParseEntry(r *ParseStream, spec EntryParseSpec, delimSet []string) (ret *Entry, info ParseFmtInfo) {
 	r.Push()
-	defer func(){ r.Pop(info.err != nil) }()
+	defer func() { r.Pop(info.err != nil) }()
 
 	ret, info = ParseEntry(r, spec, delimSet)
 	return
@@ -993,8 +990,8 @@ func ParseDelimitedList(
 	start string,
 	validDelims []string,
 	end string,
-	fTryParse func(*ParseStream)(interface{}, ParseFmtInfo),
-	fAppend func(interface{})(),
+	fTryParse func(*ParseStream) (interface{}, ParseFmtInfo),
+	fAppend func(interface{}),
 	allowInitDelim bool) (info ParseFmtInfo) {
 
 	var infoSub ParseFmtInfo
@@ -1100,11 +1097,11 @@ func ParseEntryList(
 	end string,
 	allowInitDelim bool,
 	specs []EntryParseSpec,
-	) (retEntries []Entry, info ParseFmtInfo) {
+) (retEntries []Entry, info ParseFmtInfo) {
 
 	retEntries = []Entry{}
 
-	fTryParse := func (r *ParseStream) (ret interface{}, info ParseFmtInfo) {
+	fTryParse := func(r *ParseStream) (ret interface{}, info ParseFmtInfo) {
 		var retSub *Entry
 		var infoSub ParseFmtInfo
 		var errAcc *ParseError_S = nil
@@ -1126,7 +1123,7 @@ func ParseEntryList(
 		return
 	}
 
-	fAppend := func (x interface{}) {
+	fAppend := func(x interface{}) {
 		retEntries = append(retEntries, *x.(*Entry))
 	}
 
@@ -1163,13 +1160,13 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 	case tok == "interface" || tok == "struct" || tok == "union" || tok == "enum":
 		algSort := AlgSort_Prod
 		validDelims := []string{"\n", ","}
-		specs := []EntryParseSpec { EntryParseSpec_DataField, EntryParseSpec_Method }
+		specs := []EntryParseSpec{EntryParseSpec_DataField, EntryParseSpec_Method}
 
 		if tok == "union" || tok == "enum" {
 			algSort = AlgSort_Sum
 			validDelims = append(validDelims, "|")
 			if tok == "enum" {
-				specs = []EntryParseSpec { EntryParseSpec_Case }
+				specs = []EntryParseSpec{EntryParseSpec_Case}
 			}
 		}
 
@@ -1190,7 +1187,7 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 			return
 		}
 
-		ret = RefAlgType(AlgType {
+		ret = RefAlgType(AlgType{
 			sort:           algSort,
 			entries:        entriesSub,
 			entriesFmtInfo: RefParseFmtInfo(entriesFmtInfo),
@@ -1213,8 +1210,8 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 			ret = nil
 			return
 		}
-		ret = RefArrayType(ArrayType {
-			elementType: elementType,
+		ret = RefArrayType(ArrayType{
+			elementType:  elementType,
 			parseFmtInfo: RefParseFmtInfo(info),
 		})
 
@@ -1225,8 +1222,8 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 			ret = nil
 			return
 		}
-		ret = RefDSLRefType(RefType {
-			targetType: targetType,
+		ret = RefDSLRefType(RefType{
+			targetType:   targetType,
 			parseFmtInfo: RefParseFmtInfo(info),
 		})
 
@@ -1255,15 +1252,15 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 			ret = nil
 			return
 		}
-		ret = RefMapType(MapType {
-			keyType: keyType,
-			valueType: valueType,
+		ret = RefMapType(MapType{
+			keyType:      keyType,
+			valueType:    valueType,
 			parseFmtInfo: RefParseFmtInfo(info),
 		})
 
 	default:
 		if IsIdent(tok) {
-			ret = RefNamedType(NamedType {name: tok})
+			ret = RefNamedType(NamedType{name: tok})
 		} else {
 			ret = nil
 			info.err = r.GenParseError(fmt.Sprintf("Expected type; received \"%v\"", tok))
@@ -1275,8 +1272,8 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 		if tok, ok := PeekToken(r, false); ok && (tok == "?") {
 			_, infoSub = ReadTokenCheck(r, []string{"?"})
 			info = info.UnifyFmtInfo(r, infoSub)
-			ret = RefOptionType(OptionType {
-				valueType: ret,
+			ret = RefOptionType(OptionType{
+				valueType:    ret,
 				parseFmtInfo: RefParseFmtInfo(info),
 			})
 		} else {
@@ -1312,7 +1309,7 @@ func ParseTypeDecl(r *ParseStream) (ret *TypeDecl, info ParseFmtInfo) {
 		ret = nil
 		return
 	} else {
-		ret = RefTypeDecl(TypeDecl {
+		ret = RefTypeDecl(TypeDecl{
 			name:  declName,
 			type_: declType,
 		})
@@ -1322,7 +1319,7 @@ func ParseTypeDecl(r *ParseStream) (ret *TypeDecl, info ParseFmtInfo) {
 
 func TryParseTypeDecl(r *ParseStream) (ret *TypeDecl, info ParseFmtInfo) {
 	r.Push()
-	defer func(){ r.Pop(info.err != nil) }()
+	defer func() { r.Pop(info.err != nil) }()
 
 	ret, info = ParseTypeDecl(r)
 	return
@@ -1341,15 +1338,15 @@ func ParsePackageDecl(r *ParseStream) (ret *PackageDecl, info ParseFmtInfo) {
 
 	packageName, infoSub = ReadToken(r)
 	info = info.UnifyFmtInfo(r, infoSub)
-	ret = RefPackageDecl(PackageDecl {
-		name:  packageName,
+	ret = RefPackageDecl(PackageDecl{
+		name: packageName,
 	})
 	return
 }
 
 func TryParsePackageDecl(r *ParseStream) (ret *PackageDecl, info ParseFmtInfo) {
 	r.Push()
-	defer func(){ r.Pop(info.err != nil) }()
+	defer func() { r.Pop(info.err != nil) }()
 
 	ret, info = ParsePackageDecl(r)
 	return
@@ -1409,16 +1406,16 @@ func ParseImportDecl(r *ParseStream) (ret *ImportDecl, info ParseFmtInfo) {
 		return
 	}
 
-	ret = RefImportDecl(ImportDecl {
-		name:  importName,
-		path:  importPath,
+	ret = RefImportDecl(ImportDecl{
+		name: importName,
+		path: importPath,
 	})
 	return
 }
 
 func TryParseImportDecl(r *ParseStream) (ret *ImportDecl, info ParseFmtInfo) {
 	r.Push()
-	defer func(){ r.Pop(info.err != nil) }()
+	defer func() { r.Pop(info.err != nil) }()
 
 	ret, info = ParseImportDecl(r)
 	return
@@ -1444,7 +1441,7 @@ func ParseDSLModuleFromStream(r *ParseStream) Module {
 
 		if _, ok := PeekToken(r, false); !ok {
 			Assert(info.err == nil)
-			return Module { entries: ret }
+			return Module{entries: ret}
 		}
 
 		decl, infoSub = TryParseTypeDecl(r)
@@ -1489,13 +1486,13 @@ func ParseDSLModuleFromStream(r *ParseStream) Module {
 }
 
 func ParseDSLModuleFromFile(file *os.File) Module {
-	r := RefParseStream(ParseStream {
+	r := RefParseStream(ParseStream{
 		rs: file,
-		state: ParseStreamState {
+		state: ParseStreamState{
 			pos: 0,
 		},
 		lineMap: []LineInfo{},
-		buffer: bytes.NewBuffer([]byte{}),
+		buffer:  bytes.NewBuffer([]byte{}),
 	})
 	return ParseDSLModuleFromStream(r)
 }

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
+	codeGen "github.com/filecoin-project/specs/codeGen/lib"
+	util "github.com/filecoin-project/specs/codeGen/util"
 	"os"
 	"strings"
- codeGen "github.com/filecoin-project/specs/codeGen/lib"
-	util "github.com/filecoin-project/specs/codeGen/util"
 )
 
 var Assert = util.Assert
@@ -64,7 +64,7 @@ func main() {
 			declsMap[decl.Name()] = decl
 		}
 		declsPrint := []codeGen.Entry{}
-		for i, sym := range(args[1:]) {
+		for i, sym := range args[1:] {
 			if i > 0 {
 				declsPrint = append(declsPrint, codeGen.EntryEmpty())
 			}
