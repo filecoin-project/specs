@@ -1,10 +1,12 @@
 
-// import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-//
-// // sector sets
-// type SectorSet [sector.Sector]
-//
-// // compact sector sets
-// type Bitfield Bytes        // TODO: move to the right place -- a lib?
-// type RLEpBitfield Bitfield // TODO: move to the right place -- a lib?
-// type CompactSectorSet RLEpBitfield
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+// sector sets
+type SectorSet [sector.Sector]
+type UnsealedSectorSet SectorSet
+type SealedSectorSet SectorSet
+
+// compact sector sets
+type Bitfield Bytes        // TODO: move to the right place -- a lib?
+type RLEpBitfield Bitfield // TODO: move to the right place -- a lib?
+type CompactSectorSet RLEpBitfield
