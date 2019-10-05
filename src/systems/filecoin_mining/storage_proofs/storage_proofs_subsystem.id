@@ -24,5 +24,6 @@ type StorageProvingSubsystem struct {
 
   ValidateBlock(block Block) struct {}
 
-  GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
+  // TODO: remove this?
+  // GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
 }
