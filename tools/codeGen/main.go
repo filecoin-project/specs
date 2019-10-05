@@ -57,18 +57,26 @@ func main() {
 	var inputFile, outputFile *os.File
 	var err error
 
+	// first argument
 	if cmd == "gen" || cmd == "fmt" || cmd == "sym" {
 		inputFilePath = args[0]
 		inputFile, err = os.Open(inputFilePath)
 		CheckErr(err)
+	}
 
-		if cmd == "gen" || cmd == "fmt" {
-			Assert(len(args) == 2)
+	// second argument
+	if cmd == "gen" {
+		Assert(len(args) == 2)
+		outputFilePath = args[1]
+	} else if cmd == "fmt" {
+		outputFilePath = args[0] // replace file
+		if len(args) == 2 {
 			outputFilePath = args[1]
-			outputFile, err = os.Create(outputFilePath)
-			CheckErr(err)
 		}
 	}
+	// open files last
+	// defer opening outputFile until the end (after parsing)
+	// so that fmt can output to the input filename
 
 	switch cmd {
 	case "gen":
@@ -76,10 +84,14 @@ func main() {
 		Assert(len(inputFilePathTokens) >= 2)
 		packageName := inputFilePathTokens[len(inputFilePathTokens)-2]
 		goMod := codeGen.GenGoModFromFile(inputFile, packageName)
+		outputFile, err = os.Create(outputFilePath)
+		CheckErr(err)
 		codeGen.WriteGoMod(goMod, outputFile)
 
 	case "fmt":
 		mod := codeGen.ParseDSLModuleFromFile(inputFile)
+		outputFile, err = os.Create(outputFilePath)
+		CheckErr(err)
 		codeGen.WriteDSLModule(outputFile, mod)
 
 	case "sym":
