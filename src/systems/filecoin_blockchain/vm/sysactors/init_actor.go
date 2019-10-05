@@ -1,16 +1,16 @@
-package actors
+package sysactors
 
-type InitActor struct {
-    VM    *VMSyscalls
-    Actor *Actor
-    State *InitActorState
+import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
+import util "github.com/filecoin-project/specs/util"
+
+func (self *InitActor) InitConstructor() {
+
 }
 
-func (a *InitActor) InitConstructor() {
-
-}
-
-func (self *InitActor) Exec(codeCID CID, method ActorMethod) Address {
+func (self *InitActor) Exec(codeCID actor.CodeCID, method actor.MethodNum) addr.Address {
     // Make sure that only the actors defined in the spec can be launched.
     if !self._isBuiltinActor(code) {
         self.VM.Fatal("cannot launch actor instance that is not a builtin actor")
@@ -31,10 +31,10 @@ func (self *InitActor) Exec(codeCID CID, method ActorMethod) Address {
     addr := self.VM.ComputeActorAddress(creator, nonce)
 
     // Set up the actor itself
-    actor := Actor{
-        Code:    codeCID,
+    actor := actor.Actor{
+        CodeCid: codeCID,
         Balance: msg.Value,
-        Head:    nil,
+        State:   nil,
         Nonce:   0,
     }
 

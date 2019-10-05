@@ -1,22 +1,26 @@
-package vm
+package interpreter
 
 import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import util "github.com/filecoin-project/specs/util"
 
 type Storage struct{}
 type AttoFIL struct{}
 type CID struct{}
 
 type VMMessage struct {
-	To     base.Address
+	To     addr.Address
 	Method string
-	Value  TokenAmount
+	Value  actor.TokenAmount
 	Params []interface{}
 }
 
 type VMMessageReceipt struct {
 }
 
-type MessageNumber UVarint
+type MessageNumber util.UVarint
 
 // VMSyscalls is the interface of functions callable from within an actor.
 // This defines all the functions an actor may call on the VM.
@@ -29,7 +33,7 @@ type VMSyscalls interface {
 
 	// ComputeActorAddress computes the address of the contract,
 	// based on the creator (invoking address) and nonce given.
-	ComputeActorAddress(creator base.Address, nonce CallSeqNo) base.Address
+	ComputeActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Address
 
 	// Storage provides access to the VM storage layer
 	Storage() VMStorage
@@ -43,22 +47,22 @@ type VMSyscalls interface {
 	//       do definied callback methods, with maybe a glue closure to align params or carry intermediate state.
 	//
 	// TODO: what are the return values here?
-	SendMsg(to base.Address, method string, value TokenAmount, params []interface{}) ([][]byte, uint8, error)
+	SendMsg(to addr.Address, method string, value actor.TokenAmount, params []interface{}) ([][]byte, uint8, error)
 }
 
 // VMContext is the old syscalls version. not sure we need it.
 type VMContext interface {
 	// Message is the message that kicked off the current invocation
-	Message() base.Message
+	Message() msg.Message
 
 	// Origin is the address of the account that initiated the top level invocation
-	Origin() base.Address
+	Origin() addr.Address
 
 	// Storage provides access to the VM storage layer
 	Storage() Storage
 
 	// Send allows the current execution context to invoke methods on other actors in the system
-	Send(to base.Address, method string, value AttoFIL, params []interface{}) ([][]byte, uint8, error)
+	Send(to addr.Address, method string, value AttoFIL, params []interface{}) ([][]byte, uint8, error)
 
 	// BlockHeight returns the height of the block this message was added to the chain in
 	BlockHeight() base.BlockHeight

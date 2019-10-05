@@ -4,11 +4,8 @@ title: VM State Tree
 
 The State Tree is the output of applying operations on the Filecoin Blockchain.
 
-```go
-type StateTree struct {
-  Actors map[ActorID]ActorStorage
-}
-```
+{{< readfile file="state_tree.id" code="true" lang="go" >}}
+
 
 TODO
 

@@ -1,7 +1,12 @@
 
-// VMSubsystem controls VM execution.
-// It uses no local storage
-type VMSubsystem struct {
+import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
+import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
+
+// VM is the object that controls execution.
+// It is a stateless, pure function. It uses no local storage.
+//
+// TODO: make it just a function: VMExec(...) ?
+type VM struct {
 
     // Execute computes and returns outTree, a new StateTree which is the
     // application of msgs to inTree.
@@ -19,6 +24,5 @@ type VMSubsystem struct {
     // local storage, and intermediate storage. It is definitely the case that
     // implementations may want to operate on this differently, depending on
     // how their IpldStores work.
-    Execute(inTree StateTree, msgs [Message]) union { outTree StateTree, err error }
-
+    Execute(inTree st.StateTree, msgs [msg.Message]) union { outTree st.StateTree, err error }
 }

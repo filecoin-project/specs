@@ -1,6 +1,8 @@
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/address"
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
 
+// TODO: move this into a directory w/ all the actors + states
 type ActorName enum {
 	StoragePowerActor
 	StorageMarketActor
@@ -13,7 +15,7 @@ type ActorName enum {
 
 type StateTree struct {
     SystemActors {ActorName:addr.Address}
-    ActorStates {addr.Address:ActorState}
+    ActorStates {addr.Address:actor.ActorState}
 
     // TODO: API ConvenienceAPI
 }
@@ -36,19 +38,3 @@ type StateTree struct {
 // $head/state/sectors/<num>/pieces/<num> (cid)
 // $head/state/pieces/count
 // $head/state/pieces/<num> (cid)
-
-
-type ActorID UVarint
-
-type ActorState struct {
-	Head       ActorSubState
-	SeqNo      UVarint
-	Balance    BigInt
-}
-
-type ActorSubState union {
-	Init struct {
-		AddressMap    {addr.Address:ActorID}
-		NextID        ActorID
-	}
-}

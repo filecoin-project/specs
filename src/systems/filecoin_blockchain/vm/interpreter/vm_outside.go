@@ -1,29 +1,34 @@
-package vm
+package interpreter
+
+import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
 
 type Params struct{}
 type GasAmount struct{}
 type Bytes struct{}
 
 type InvocationInput struct {
-  InTree    StateTree
+  InTree    st.StateTree
   VMContext VMContext
-  FromActor Actor
-  ToActor   Actor
-  Method    ActorMethod
-  Params    Params
-  Value     TokenAmount
-  GasLimit  GasAmount
+  FromActor actor.Actor
+  ToActor   actor.Actor
+  Method    actor.MethodNum
+  Params    actor.MethodParams
+  Value     actor.TokenAmount
+  GasLimit  msg.GasAmount
   // GasPrice  GasPrice
 }
 
 type InvocationOutput struct {
-  OutTree     StateTree
-  ExitCode    UVarint
+  OutTree     st.StateTree
+  ExitCode    msg.ExitCode
   ReturnValue Bytes
   GasUsed     GasAmount
 }
 
-func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree StateTree, msgs []MessageRef) (outTree StateTree, ret []MessageReceipt) {
+func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree st.StateTree, msgs []MessageRef) (outTree st.StateTree, ret []msg.MessageReceipt) {
   compTree := inTree
   for _, m := range msgs {
     oT, r := vmi.ApplyMessage(compTree, m.Message(), m.Miner())
@@ -33,7 +38,7 @@ func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree StateTree, msgs []MessageRe
   return compTree, ret
 }
 
-func (vmi *VMInterpreter_I) ApplyMessage(inTree StateTree, msg Message, minerAddr Address) (outTree StateTree, ret MessageReceipt) {
+func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, msg msg.Message, minerAddr addr.Address) (outTree st.StateTree, ret msg.MessageReceipt) {
 
   compTree := inTree
   fromActor, found := compTree.GetActor(msg.From)
@@ -121,11 +126,11 @@ func invocationMethodDispatch(input InvocationInput) InvocationOutput {
   output := input.ToActor.Call(input.StateTree, input.Method, input.Params)
 }
 
-func treeDeductFunds(inTree StateTree, a Actor, amt TokenAmount) (outTree StateTree) {
+func treeDeductFunds(inTree st.StateTree, a actor.Actor, amt actor.TokenAmount) (outTree st.StateTree) {
   panic("todo")
 }
 
-func treeDepositFunds(inTree StateTree, a Actor, amt TokenAmount) (outTree StateTree) {
+func treeDepositFunds(inTree st.StateTree, a actor.Actor, amt actor.TokenAmount) (outTree st.StateTree) {
   panic("todo")
 }
 
@@ -133,7 +138,7 @@ func calcGas(gasUsed GasAmount, gasPrice GasPrice) {
   return gasUsed * gasPrice
 }
 
-func treeGetOrCreateAccountActor(inTree StateTree, addr Address) (outTree StateTree, _ Actor) {
+func treeGetOrCreateAccountActor(inTree st.StateTree, addr addr.Address) (outTree st.StateTree, _ actor.Actor) {
 
   toActor, found := inTree.GetActor(msg.To)
   if found {

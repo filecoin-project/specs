@@ -35,8 +35,8 @@ type ElectionArtifacts struct {
 type StoragePowerConsensusError error
 
 // TODO: remove type aliases below. here to not break import refs.
-import vmmsg "github.com/filecoin-project/specs/systems/filecoin_blockchain/message"
-import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/address"
+import vmmsg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 
 type Message vmmsg.Message
 type UnsignedMessage vmmsg.UnsignedMessage

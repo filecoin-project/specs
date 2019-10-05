@@ -1,5 +1,5 @@
 ---
-title: Filecoin VM Actors
+title: VM System Actors
 entries:
 - init_actor
 - cron_actor
