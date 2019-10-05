@@ -7,6 +7,7 @@ entries:
 - message
 - sysactors
 - interpreter
+- runtime
 ---
 
 {{< readfile file="vm.id" code="true" lang="go" >}}

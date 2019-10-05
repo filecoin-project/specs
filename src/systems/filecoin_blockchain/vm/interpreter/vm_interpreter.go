@@ -4,6 +4,7 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/mes
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
 import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
+import runtime "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime"
 
 type Params struct{}
 type GasAmount struct{}
@@ -11,7 +12,7 @@ type Bytes struct{}
 
 type InvocationInput struct {
   InTree    st.StateTree
-  VMContext VMContext
+  VMContext runtime.VMContext
   FromActor actor.Actor
   ToActor   actor.Actor
   Method    actor.MethodNum
