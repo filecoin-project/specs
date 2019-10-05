@@ -99,10 +99,17 @@ main() {
   tryinstall emacs emacs
   tryinstall sbcl sbcl
   mkdir -p deps/bin
+
+  # lisp / emacs
   install_quicklisp
   install_slime
   install_cllaunch
   install_emacs_deps
+
+  # git repos
+  prun git submodule update --init --recursive
+
+  # orient
   link_orient_to_quicklisp
 
   # TODO: make this automated.
@@ -120,6 +127,6 @@ main() {
   Your emacs user init file is usually ~/.emacs, or ~/.emacs.el, or ~/emacs.d/init.el
   (TODO automate this)
 EOF
-
+  return 0
 }
 main $1

@@ -16,32 +16,43 @@ help:
 	@echo "	make -- filecoin spec build toolchain commands"
 	@echo ""
 	@echo "USAGE"
-	@echo "	make deps        # run this once, to install & build dependencies"
-	@echo "	make build       # run this every time you want to re-build artifacts"
+	@echo "	make deps-basic  run this once, to install & build basic dependencies"
+	@echo "	make build       run this every time you want to re-build artifacts"
 	@echo ""
 	@echo "MAIN TARGETS"
 	@echo "	make help        description of the targets (this message)"
-	@echo "	make deps        install all dependencies of this tool chain"
-	@echo "	make deps-user   install dependencies for user tooling"
 	@echo "	make build       build all final artifacts (website only for now)"
-	@echo "	make test        run all test cases (go-test only for now)"
+	@echo "	make test        run all test cases (test-code only for now)"
 	@echo "	make drafts      publish artifacts to ipfs and show an address"
 	@echo "	make publish     publish final artifacts to spec website (github pages)"
 	@echo "	make clean       removes all build artifacts. you shouldn't need this"
+	@echo "	make serve       start hugo in serving mode -- must run 'make build' on changes manually"
+	@echo ""
+	@echo "INSTALL DEPENDENCIES"
+	@echo "	make deps        install ALL dependencies of this tool chain"
+	@echo "	make deps-basic  install minimal dependencies of this tool chain"
+	@echo "	make deps-diag   install dependencies for rendering diagrams"
+	@echo "	make deps-orient install dependencies for running orient"
+	@echo "	make deps-ouser  install dependencies for orient user-environment tooling"
+	@echo "	make bins        compile some build tools whose source is in this repo"
 	@echo ""
 	@echo "INTERMEDIATE TARGETS"
 	@echo "	make website     build the website artifact"
 	@#echo "	make pdf         build the pdf artifact"
-	@echo "	make hugo-build  run the hugo part of the pipeline"
-	@echo "	make gen-code    generate code artifacts (eg id -> go)"
-	@echo "	make build-code  build all src go code (test it)"
 	@echo "	make diagrams    build diagram artifacts ({dot, mmd} -> svg)"
 	@echo "	make org2md      run org mode to markdown compilation"
-	@echo "	make go-test     run test cases in code artifacts"
 	@echo ""
-	@echo "OTHER TARGETS"
-	@echo "	make bins        compile some build tools whose source is in this repo"
-	@echo "	make serve       start hugo in serving mode -- must run make build on changes manually"
+	@echo "HUGO TARGETS"
+	@echo "	make hugo-src    copy sources into hugo dir"
+	@echo "	make build-hugo  run the hugo part of the pipeline"
+	@echo "	make watch-hugo  watch and rebuild hugo"
+	@echo ""
+	@echo "CODE TARGETS"
+	@echo "	make gen-code    generate code artifacts (eg id -> go)"
+	@echo "	make test-code   run test cases in code artifacts"
+	@echo "	make build-code  build all src go code (test it)"
+	@echo "	make clean-code  remove build code artifacts"
+	@echo "	make watch-code  watch and rebuild code"
 	@echo ""
 	@echo "CLEAN TARGETS"
 	@echo "	make clean       remove all build artifacts"
@@ -50,26 +61,15 @@ help:
 	@echo "	make clean-code  remove build code artifacts"
 	@echo ""
 	@echo "WATCH TARGETS"
-	@echo "	make watch-code  watch and rebuild code"
-	@echo "	make watch-hugo  watch and rebuild hugo"
-
-
-
+	@echo "	make serve-and-watch -j2  serve, watch, and rebuild all - works for live edit"
+	@echo "	make watch-code           watch and rebuild code"
+	@echo "	make watch-hugo           watch and rebuild hugo"
+	@echo ""
 
 # main Targets
 build: diagrams build-code website
 
-deps: submodules
-	bin/install-deps.sh
-	@# make bins last, after installing other deps
-	@# so we re-invoke make.
-	make bins
-
-submodules:
-	git submodule update --init --recursive
-
-deps-user: deps
-	bin/install-deps-orient-user.sh
+test: test-code test-codeGen
 
 drafts: website
 	bin/publish-to-ipfs.sh
@@ -79,6 +79,28 @@ publish: website
 
 clean: .PHONY
 	rm -rf build
+
+# install dependencies
+
+deps: deps-basic deps-diag deps-orient
+	@# make bins last, after installing other deps
+	@# so we re-invoke make.
+	make bins
+
+deps-basic:
+	bin/install-deps-basic.sh -y
+
+deps-ouser:
+	bin/install-deps-orient-user.sh -y
+
+deps-orient: submodules
+	bin/install-deps-orient.sh -y
+
+deps-diag:
+	bin/install-deps-diagrams.sh -y
+
+submodules:
+	git submodule update --init --recursive
 
 clean-deps: .PHONY
 	@echo "WARNING: this does not uninstall global packages, sorry."
@@ -90,23 +112,23 @@ clean-deps: .PHONY
 
 # intermediate targets
 # NOTE: For now, disable org2md — must manually generate until batch-mode build issues are resolved.
-website: diagrams hugo-build # org2md
+website: diagrams build-hugo # org2md
 	mkdir -p build/website
 	-rm -rf build/website/*
 	mv hugo/public/* build/website
 	@echo TODO: add generate-code to this target
 
-pdf: diagrams hugo-build # org2md
+pdf: diagrams build-hugo # org2md
 	@echo TODO: add generate-code to this target
 	bin/build-pdf.sh
 
-hugo-build: hugo-src $(shell find hugo/content | grep '.md')
+build-hugo: hugo-src $(shell find hugo/content | grep '.md')
 	cd hugo && hugo
 
 hugo-src: $(shell find src | grep '.md')
 	rm -rf hugo/content/docs
 	cp -r src hugo/content/docs
-	# ox-hugo exports to src/content, so we need to copy that also. 	
+	# ox-hugo exports to src/content, so we need to copy that also.
 	cp -r src/content/ hugo/content/docs
 	mkdir -p hugo/content/ox-hugo
 	cp src/static/ox-hugo/* hugo/content/ox-hugo
@@ -151,19 +173,22 @@ bin/watcher:
 	go get -u github.com/radovskyb/watcher/...
 	go build -o $@ github.com/radovskyb/watcher/cmd/watcher
 
+test-codeGen: bin/codeGen
+	cd tools/codeGen && go build && go test ./...
+
 # other
 
-serve: hugo-build .PHONY
-	echo "run `make website` and refresh to update"
+serve: build-hugo .PHONY
+	echo "run 'make website' and refresh to update"
 	cd hugo && hugo serve --noHTTPCache
 
 serve-website: website .PHONY
 	# use this if `make serve` breaks
-	echo "run `make website` and refresh to update"
+	echo "run 'make website' and refresh to update"
 	cd build/website && python -m SimpleHTTPServer 1313
 
 serve-and-watch: serve watch-hugo
-	echo "make sure you run this with `make -j2`"
+	echo "make sure you run this with 'make -j2'"
 
 .PHONY:
 
@@ -199,9 +224,7 @@ build-code: gen-code
 	@cd build/code && go build -gcflags="-e" ./...
 
 test-code: build-code
-	# testing should have the side effect that all go is compiled
-	cd tools/codeGen && go build && go test ./...
-	cd build/code && go build && go test ./...
+	cd build/code && go test ./...
 
 clean-code:
 	rm -rf build/code
