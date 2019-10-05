@@ -6,7 +6,7 @@ entries:
 - storage_mining
 - sector
 - sector_index
-- storage_proofs
+- storage_proving
 ---
 
 {{< incTocMap "/docs/systems/filecoin_mining" 2 >}}
