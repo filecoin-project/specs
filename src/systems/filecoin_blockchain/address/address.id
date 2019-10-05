@@ -1,0 +1,22 @@
+
+// Address is defined here because this is where addresses start to make sense.
+// Addresses refer to actors defined in the StateTree, so Addresses are defined
+// on top of the StateTree.
+//
+// TODO: potentially move into a library, or its own directory.
+type Address struct {
+
+  NetworkID enum {
+    Testnet
+    Mainnet
+  }
+
+  Protocol enum {
+    ID
+    Secp256k1
+    Actor
+    BLS
+  }
+
+  VerifySyntax(addrType Address_Protocol) bool
+}

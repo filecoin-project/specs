@@ -2,7 +2,9 @@
 menuIcon: 📦
 title: "**Blockchain**"
 entries:
+- address
 - state_tree
+- message
 - vm
 - message_pool
 - blockchain

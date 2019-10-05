@@ -1,5 +1,5 @@
 ---
-title: Virtual Machine
+title: VM
 entries:
 - vm_outside
 - vm_inside

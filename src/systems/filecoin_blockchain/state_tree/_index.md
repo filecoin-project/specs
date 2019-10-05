@@ -1,5 +1,5 @@
 ---
-title: State Tree
+title: VM State Tree
 ---
 
 The State Tree is the output of applying operations on the Filecoin Blockchain.

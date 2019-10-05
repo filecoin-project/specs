@@ -1,6 +1,7 @@
-import base 	 "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
-type ActorName union {
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/address"
+
+type ActorName enum {
 	StoragePowerActor
 	StorageMarketActor
 	StorageMinerActor
@@ -11,12 +12,11 @@ type ActorName union {
 }
 
 type StateTree struct {
-    SystemActors {ActorName:base.Address}
-    ActorStates {base.Address:ActorState}
+    SystemActors {ActorName:addr.Address}
+    ActorStates {addr.Address:ActorState}
 
     // TODO: API ConvenienceAPI
 }
-
 
 // Things we may add:
 //
@@ -48,7 +48,7 @@ type ActorState struct {
 
 type ActorSubState union {
 	Init struct {
-		AddressMap    {base.Address:ActorID}
+		AddressMap    {addr.Address:ActorID}
 		NextID        ActorID
 	}
 }

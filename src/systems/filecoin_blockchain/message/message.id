@@ -1,0 +1,38 @@
+
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/address"
+
+type Message union {
+    UnsignedMessage
+    SignedMessage
+} // representation keyed
+
+
+type UnsignedMessage struct {
+    to addr.Address
+    from addr.Address
+
+    // When receiving a message from a user account the nonce in the message must match
+    // the expected nonce in the "from" actor. This prevents replay attacks.
+    nonce UInt
+    value UInt
+
+    gasPrice UInt
+    gasLimit UInt
+
+    method UInt
+    params Bytes  // Serialized parameters to the method.
+} // representation tuple
+
+
+type SignedMessage struct {
+    message   UnsignedMessage
+    signature filcrypto.Signature
+} // representation tuple
+
+
+type MessageReceipt struct {
+    exitCode UInt
+    returnValue Bytes
+    gasUsed UInt
+} // representation tuple
