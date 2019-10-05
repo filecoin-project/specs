@@ -45,21 +45,18 @@ type SealArguments struct {
   OutputArtifacts    SealOutputArtifacts
 }
 
-type SealProofConfig struct { // TODO
+type SealProof struct { //<curve, system> {
+  Config       SealProofConfig
+  ProofBytes   Bytes
 }
 
-type SealProof struct { //<curve, system> {
-  config       SealProofConfig
-  proofBytes   Bytes
-  verification struct {
-
-  }
+type SealProofConfig struct { // TODO
 }
 
 // TODO: move into proofs lib
 type FilecoinSNARKProof struct {} //<bls12-381, Groth16>
 
-type SealAlgorithm union {
+type SealAlgorithm enum {
   // ZigZagPoRep
   StackedDRG
 }

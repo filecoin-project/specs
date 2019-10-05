@@ -6,7 +6,7 @@ import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_block
 
 type Bytes32     Bytes
 type MinerID     base_blockchain.Address
-type Commitment  Bytes32
+type Commitment  Bytes32 // TODO
 
 type Deal struct{} // TODO: remove
 
