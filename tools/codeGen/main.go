@@ -19,7 +19,34 @@ func replaceExt(filePath string, srcExt string, dstExt string) string {
 	return filePath[:n-len(srcExt)] + dstExt
 }
 
+const USAGE = `SYNOPSIS
+	%[1]s <command> src.id [out.go]
+
+COMMANDS
+	gen <idsrc> <goout>     parse contents of <idsrc>, compile, and output to <goout>
+	fmt <idsrc> [<idsrc2>]  parse <idsrc>, and write formatted output to <idsrc2> (or <idsrc>)
+	sym <idsrc>             parse contents of <idsrc>, and write symbol table to STDOUT
+
+EXAMPLES
+	# compile file.id to file.gen.go
+	%[1]s gen a/b/file.id a/b/file.gen.go
+
+	# format file.id
+	%[1]s fmt a/b/file.id
+
+	# format file.id to file2.id
+	%[1]s fmt a/b/file.id a/b/file2.id
+
+	# output symbol table of file.id
+	%[1]s sym a/b/file.id
+`
+
 func main() {
+	flag.Usage = func() {
+		fmt.Printf(USAGE, os.Args[0])
+		os.Exit(0)
+	}
+
 	flag.Parse()
 	argsOrig := flag.Args()
 	Assert(len(argsOrig) > 1)
