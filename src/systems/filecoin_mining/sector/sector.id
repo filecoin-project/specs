@@ -74,14 +74,17 @@ type SectorInfo struct {
 // UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector
 type UnsealedSectorInfo struct {
   UnsealedCID UnsealedSectorCID // CommD
-  Size        UVarint
-  PieceCount  UVarint            // number of pieces in this sector (can get it from len(Pieces) too)
-  Pieces      [piece.PieceInfo]  // wont get externalized easy, -- it's big
+  Size        SectorSize
+  PieceCount  UVarint           // number of pieces in this sector (can get it from len(Pieces) too)
+  Pieces      [piece.PieceInfo] // wont get externalized easy, -- it's big
+  SealCfg     SealCfg           // this will be here as well. it's determined.
+  // Deals       [deal.StorageDeal]
 }
 
 // SealedSectorInfo keeps around information about a sector that has been sealed.
 type SealedSectorInfo struct {
   SealedCID SealedSectorCID
-  Size      UVarint
+  Size      SectorSize
+  SealCfg   SealCfg
   SealArgs  SealArguments
 }

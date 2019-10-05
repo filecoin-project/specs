@@ -8,7 +8,7 @@ type VRFKeyPair struct {
 	PublicKey    VRFPublicKey
 	SecretKey    VRFSecretKey
 
-	Generate(input Bytes)    VRFResult    @(static)    
+	Generate(input Bytes)    VRFResult    @(static)
 }
 
 type VRFResult struct {
@@ -22,13 +22,13 @@ type VRFResult struct {
 type VDF struct {
     evalKey     Bytes   @(internal)
     VerifKey    Bytes   @(internal)
-    
+
     Eval(input Bytes)   VDFResult       @(static)
 }
 
 type VDFResult struct {
     Output      Bytes   @(internal)
-    Proof       Bytes   @(internal)   
+    Proof       Bytes   @(internal)
 
     Verify(input Bytes) bool            @(static)
     ValidateSyntax()    bool
@@ -36,7 +36,7 @@ type VDFResult struct {
 
 type SigKeyPair struct {
     PublicKey       SigPublicKey
-    SecretKey       SigSecretKey      
+    SecretKey       SigSecretKey
 
     Generate(input Bytes, _type SigType)   Signature
 }
@@ -48,6 +48,8 @@ type Signature struct {
     Verify(pk SigPublicKey, input Bytes)   bool
 }
 
-type SigType union {
-    RandomSigType
+type SigType enum {
+    RSASigType
+    BLSSigType
+    EdDSASigType
 }

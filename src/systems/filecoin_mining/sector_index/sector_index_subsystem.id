@@ -1,42 +1,34 @@
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-// import storage_proofs "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 
-type PieceInclusionProof struct {} // TODO
-
-type AddDealToSectorResponse struct {
-	sectorID sector.SectorID
-	pip PieceInclusionProof
+// TODO import this from StorageMarket
+type SectorIndex struct {
+  BySectorID    {sector.SectorID : sector.SectorInfo}
+  ByUnsealedCID {sector.UnsealedSectorCID : sector.SectorInfo}
+  BySealedCID   {sector.SealedSectorCID : sector.SectorInfo}
+  ByPieceID     {piece.PieceID : sector.SectorInfo}
+  ByDealID      {mkt.StorageDealID : sector.SectorInfo}
 }
 
-// TODO import this from StorageMarket
-
-
 type SectorIndexerSubsystem struct {
+	Index   SectorIndex
+	Store   SectorStore
+	Builder SectorBuilder
 
-	ProverID       ProverID
-	SectorStore    SectorStore
-	SectorBuilder  [SectorBuilder]
-	StorageProofs  StorageProofs
+	// AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
+	// has made a deal. AddNewDeal returns an error when:
+	// - there is no capacity to store more deals and their pieces
+	AddNewDeal(deal mkt.StorageDeal) error
 
-	// call by StorageMiningSubsystem when adding a deal to sector
-	// should return PieceInclusionProof
-	AddDealToSector(deal mkt.StorageDeal) AddDealToSectorResponse
+	// bring back if needed.
+	// OnNewTipset(chain Chain, epoch blockchain.Epoch) struct {}
 
-	// potentially change to selectSectorByDealExpiry
-	selectStagedSectorBySize(deal mkt.StorageDeal) StagedSector
+	// SectorsExpiredAtEpoch returns the set of sectors that expire
+	// at a particular epoch.
+	SectorsExpiredAtEpoch(epoch blockchain.Epoch) [sector.SectorID]
 
-	// call by SectorIndexer itself to get pip of a deal
-	// TODO: not sure this should be here
-	// getPieceInclusionProof(deal mkt.StorageDeal) PieceInclusionProof
-
-	OnNewTipset(chain Chain, epoch blockchain.Epoch) struct {}
-
-	lookupSectorByExpiry(currentEpoch blockchain.Epoch) [sector.SectorID]
-
-	purgeSectorWithNoLiveDeals(sectorIDs [sector.SectorID]) struct{}
-
-	selectSectorBuilderByDeal(deal mkt.StorageDeal) SectorBuilder
-
+	// removeSectors removes the given sectorIDs from storage.
+	removeSectors(sectorIDs [sector.SectorID]) struct{}
 }

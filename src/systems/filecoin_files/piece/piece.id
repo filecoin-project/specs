@@ -5,6 +5,15 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 // of the Piece.
 type PieceID ipld.CID
 
+type NumBytes UVarint // TODO: move into util
+
+// PieceSize is the size of a piece, in bytes
+type PieceSize struct {
+  PayloadSize  NumBytes
+  OverheadSize NumBytes
+
+  Total() NumBytes
+}
 
 // PieceInfo is an object that describes details about a piece, and allows
 // decoupling storage of this information from the piece itself.

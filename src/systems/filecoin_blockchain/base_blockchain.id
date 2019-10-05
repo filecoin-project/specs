@@ -68,16 +68,16 @@ type MessageReceipt struct {
 } // representation tuple
 
 type Address struct {
- 	NetworkID union {
- 		Testnet
- 		Mainnet
- 	}
- 	Protocol union {
- 		ID
- 		Secp256k1
- 		Actor
- 		BLS
-     }
+	NetworkID enum {
+		Testnet
+		Mainnet
+	}
+	Protocol enum {
+		ID
+		Secp256k1
+		Actor
+		BLS
+    }
 
     VerifySyntax(addrType Address_Protocol) bool
 }

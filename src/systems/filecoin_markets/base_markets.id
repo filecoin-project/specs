@@ -4,7 +4,7 @@ type Address       base_blockchain.Address
 type Epoch         base_blockchain.Epoch
 type Path struct {}
 type Signature struct {}
-type StorageDealID struct {}
+type StorageDealID CID
 type TokenAmount struct {}
 
 // Storage Market

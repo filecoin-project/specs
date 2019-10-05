@@ -7,7 +7,7 @@ type Path struct{} // TODO
 type SealRandomSeed Bytes
 
 type SealCfg struct {
-  SectorSize     UInt
+  SectorSize     SectorSize
   SubsectorCount UInt
   Partitions     UInt
 }
