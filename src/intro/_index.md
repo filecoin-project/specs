@@ -2,10 +2,11 @@
 title: Introduction
 entries:
 #  - specmap
-  - arch
-  - concepts
-  - filecoin_vm
-  - process
+- arch
+- concepts
+- filecoin_vm
+- process
+- system
 ---
 
 {{% notice warning %}}

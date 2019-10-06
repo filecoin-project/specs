@@ -8,6 +8,7 @@ type Key struct {
 type Name string
 
 // key.Store
+// TODO: redo this providing access to enc, dec, sign, sigverify operations, and not the keys.
 type Store struct {
   Put(n Name, key Key) error
   Get(n Name) union { k Key, e error }
