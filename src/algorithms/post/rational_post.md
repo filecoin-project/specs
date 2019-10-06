@@ -1,15 +1,12 @@
 ---
-title: "Proof of Spacetime"
+title: Rational-PoSt
 ---
-
 
 This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
-## Rational PoSt
+# High Level API
 
-### High Level API
-
-#### Fault Detection
+## Fault Detection
 
 Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to submit the known `faults`, before the PoSt challenge begins. (Using the `AddFaults` message to the chain).
 Only faults which have been reported at challenge time, will be accounted for. If any other faults have occured the miner can not submit a valid PoSt for this proving period.
@@ -29,7 +26,7 @@ If the miner knows that the sectors are permanently lost, they can submit them a
 **TODO**: The penalization for faults is not clear yet.
 {{% /notice %}}
 
-#### Fault Penalization
+## Fault Penalization
 
 Each reported fault carries a penality with it.
 
@@ -37,7 +34,7 @@ Each reported fault carries a penality with it.
 **TODO**: Define the exact penality structure for this.
 {{% /notice %}}
 
-#### Generation
+## Generation
 
 `GeneratePoSt` generates a __*Proof of Spacetime*__ over all  __*sealed sectors*__ of a single miner— identified by their `commR` commitments. This is accomplished by performing a series of merkle inclusion proofs (__*Proofs of Retrievability*__). Each proof is of a challenged node in a challenged sector. The challenges are generated pseudo-randomly, based on the provided `seed`. At each time step, a number of __*Proofs of Retrievability*__ are performed.
 
@@ -71,7 +68,7 @@ func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults F
 }
 ```
 
-#### Verification
+## Verification
 
 `VerifyPoSt` is the functional counterpart to `GeneratePoSt`. It takes all of `GeneratePoSt`'s output, along with those of `GeneratePost`'s inputs required to identify the claimed proof. All inputs are required because verification requires sufficient context to determine not only that a proof is valid but also that the proof indeed corresponds to what it purports to prove.
 
@@ -91,8 +88,7 @@ func VerifyPoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, proof PoSt
 }
 ```
 
-
-#### Types
+## Types
 
 ```go
 // The random challenge seed, provided by the chain.
@@ -106,7 +102,7 @@ type Challenge struct {
 }
 ```
 
-#### Challenge Derivation
+## Challenge Derivation
 
 ```go
 // Derive the full set of challenges for PoSt.
@@ -155,9 +151,9 @@ func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sorte
 ```
 
 
-### PoSt Circuit
+# PoSt Circuit
 
-#### Public Parameters
+## Public Parameters
 
 *Parameters that are embeded in the circuits or used to generate the circuit*
 
@@ -165,14 +161,14 @@ func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sorte
 - `POST_TREE_DEPTH: UInt`: Depth of the Merkle tree. Note, this is `(log_2(Size of original data in bytes/32 bytes per leaf))`.
 - `SECTOR_SIZE: UInt`: The size of a single sector in bytes.
 
-#### Public Inputs
+## Public Inputs
 
 *Inputs that the prover uses to generate a SNARK proof and that the verifier uses to verify it*
 
 - `CommRs: [POST_CHALLENGES_COUNT]Fr`: The Merkle tree root hashes of all replicas, ordered to match the inclusion paths and challenge order.
 - `InclusionPaths: [POST_CHALLENGES_COUNT]Fr`: Inclusion paths for the replica leafs, ordered to match the `CommRs` and challenge order. (Binary packed bools)
 
-#### Private Inputs
+## Private Inputs
 
 *Inputs that the prover uses to generate a SNARK proof, these are not needed by the verifier to verify the proof*
 
@@ -180,15 +176,15 @@ func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sorte
 - `InclusionValues: [POST_CHALLENGES_COUNT]Fr`: Value of the encoded leaves for each challenge, ordered to match challenge order.
 
 
-#### Circuit
+## Circuit
 
-##### High Level
+### High Level
 
 In high level, we do 1 check:
 
 1. **Inclusion Proofs Checks**: Check the inclusion proofs
 
-##### Details
+### Details
 
 ```go
 for c in range POST_CHALLENGES_COUNT {
@@ -197,6 +193,6 @@ for c in range POST_CHALLENGES_COUNT {
 }
 ```
 
-#### Verification of PoSt proof
+## Verification of PoSt proof
 
 - SNARK proof check: **Check** that given the SNARK proof and the public inputs, the SNARK verification outputs true
