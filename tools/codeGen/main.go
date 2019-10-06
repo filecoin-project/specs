@@ -97,6 +97,7 @@ func main() {
 			outf, err := os.Create(outpath)
 			CheckErr(err)
 			codeGen.WriteDSLModule(outf, mod)
+			// fmt.Println(outpath)
 		}
 
 		if strings.HasSuffix(inputFilePath, "/...") {
@@ -104,8 +105,7 @@ func main() {
 				return filepath.Ext(path) == ".id"
 			})
 			for _, f := range files {
-				fmt.Println(f)
-				// fmtFile(f, f)
+				fmtFile(f, f)
 			}
 		} else {
 			fmtFile(inputFilePath, outputFilePath)

@@ -229,6 +229,11 @@ test-code: build-code
 clean-code:
 	rm -rf build/code
 
+fmt-code:
+	go fmt ./src/...
+	go fmt ./build/code/...
+	bin/codeGen fmt ./src/...
+
 watch-code: .PHONY
 	bin/watcher --cmd="make gen-code" --startcmd src 2>/dev/null
 
