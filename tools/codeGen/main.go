@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	codeGen "github.com/filecoin-project/specs/codeGen/lib"
 	util "github.com/filecoin-project/specs/codeGen/util"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -90,25 +92,14 @@ func main() {
 		codeGen.WriteGoMod(goMod, outputFile)
 
 	case "fmt":
-		fmtFile := func(inpath, outpath string) {
-			inf, err := os.Open(inpath)
-			CheckErr(err)
-			mod := codeGen.ParseDSLModuleFromFile(inf)
-			outf, err := os.Create(outpath)
-			CheckErr(err)
-			codeGen.WriteDSLModule(outf, mod)
-			// fmt.Println(outpath)
-		}
-
 		if strings.HasSuffix(inputFilePath, "/...") {
 			files := findFiles(filepath.Dir(inputFilePath), func(path string) bool {
 				return filepath.Ext(path) == ".id"
 			})
-			for _, f := range files {
-				fmtFile(f, f)
-			}
+			fmtFiles(files)
 		} else {
-			fmtFile(inputFilePath, outputFilePath)
+			err := fmtFile(inputFilePath, outputFilePath)
+			CheckErr(err)
 		}
 
 	case "sym":
@@ -157,4 +148,43 @@ func findFiles(dirpath string, filter func(path string) bool) []string {
 		return nil
 	})
 	return files
+}
+
+func fmtFile(inpath, outpath string) error {
+	inf, err := os.Open(inpath)
+	if err != nil {
+		return err
+	}
+	defer inf.Close()
+
+	mod := codeGen.ParseDSLModuleFromFile(inf)
+	outb := bytes.NewBuffer(nil)
+	codeGen.WriteDSLModule(outb, mod)
+
+	// only write if there are differences.
+	// TODO: make this faster. interleaved io + cpu. goroutines maybe
+	// TODO: read src once. we read src twice because ParseDSLModuleFromFile
+	// 			 only takes files.
+	inb, err := ioutil.ReadFile(inpath)
+	if err != nil {
+		return err
+	}
+
+	if !bytes.Equal(outb.Bytes(), inb) {
+		err := ioutil.WriteFile(outpath, outb.Bytes(), 0777)
+		if err != nil {
+			return err
+		}
+		fmt.Println(outpath) // go fmt ./... prints which files it wrote
+	} else {
+		// fmt.Println(inpath, "ignored")
+	}
+	return nil
+}
+
+func fmtFiles(files []string) {
+	for _, f := range files {
+		err := fmtFile(f, f)
+		CheckErr(err)
+	}
 }
