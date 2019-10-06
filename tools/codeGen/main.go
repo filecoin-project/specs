@@ -6,6 +6,7 @@ import (
 	codeGen "github.com/filecoin-project/specs/codeGen/lib"
 	util "github.com/filecoin-project/specs/codeGen/util"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -60,8 +61,6 @@ func main() {
 	// first argument
 	if cmd == "gen" || cmd == "fmt" || cmd == "sym" {
 		inputFilePath = args[0]
-		inputFile, err = os.Open(inputFilePath)
-		CheckErr(err)
 	}
 
 	// second argument
@@ -74,12 +73,14 @@ func main() {
 			outputFilePath = args[1]
 		}
 	}
-	// open files last
-	// defer opening outputFile until the end (after parsing)
-	// so that fmt can output to the input filename
+	// defer opening files until they're needed
+	// so that fmt can output to the input filename,
+	// and so that it can handle codeGen fmt ./...
 
 	switch cmd {
 	case "gen":
+		inputFile, err = os.Open(inputFilePath)
+		CheckErr(err)
 		inputFilePathTokens := strings.Split(inputFilePath, "/")
 		Assert(len(inputFilePathTokens) >= 2)
 		packageName := inputFilePathTokens[len(inputFilePathTokens)-2]
@@ -89,12 +90,30 @@ func main() {
 		codeGen.WriteGoMod(goMod, outputFile)
 
 	case "fmt":
-		mod := codeGen.ParseDSLModuleFromFile(inputFile)
-		outputFile, err = os.Create(outputFilePath)
-		CheckErr(err)
-		codeGen.WriteDSLModule(outputFile, mod)
+		fmtFile := func(inpath, outpath string) {
+			inf, err := os.Open(inpath)
+			CheckErr(err)
+			mod := codeGen.ParseDSLModuleFromFile(inf)
+			outf, err := os.Create(outpath)
+			CheckErr(err)
+			codeGen.WriteDSLModule(outf, mod)
+		}
+
+		if strings.HasSuffix(inputFilePath, "/...") {
+			files := findFiles(filepath.Dir(inputFilePath), func(path string) bool {
+				return filepath.Ext(path) == ".id"
+			})
+			for _, f := range files {
+				fmt.Println(f)
+				// fmtFile(f, f)
+			}
+		} else {
+			fmtFile(inputFilePath, outputFilePath)
+		}
 
 	case "sym":
+		inputFile, err = os.Open(inputFilePath)
+		CheckErr(err)
 		Assert(len(args) >= 2)
 		mod := codeGen.ParseDSLModuleFromFile(inputFile)
 		decls := mod.Decls()
@@ -118,4 +137,24 @@ func main() {
 	default:
 		Assert(false)
 	}
+}
+
+func findFiles(dirpath string, filter func(path string) bool) []string {
+	var files []string
+	filepath.Walk(dirpath, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			if strings.HasPrefix(info.Name(), ".") && len(info.Name()) > 1 {
+				return filepath.SkipDir // skip hidden directories
+			}
+			return nil // keep going into dir
+		}
+		if !info.Mode().IsRegular() {
+			return nil // not sure what it is, skip
+		}
+		if filter(path) { // run through user filter
+			files = append(files, path)
+		}
+		return nil
+	})
+	return files
 }
