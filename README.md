@@ -6,6 +6,10 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 
 You can view and explore the Filecoin Specification via its [website rendering](https://filecoin-project.github.io/specs). You do not need to download and work with this repository.
 
+## Contributing
+
+Please [read the spec proces](https://filecoin-project.github.io/specs/#intro__process). Please file PRs on github with fixes.
+
 ## Develop
 
 ### Install

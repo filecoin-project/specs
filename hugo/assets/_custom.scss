@@ -1,3 +1,20 @@
+// Colors
+$darkGray: #373f52;
+$mediumGray: #959595;
+$gray: #e1e1e1;
+$lightestGray: #d5dae6;
+$white: #ffffff;
+$black: #000000;
+$purple: #8f6cd6;
+$lightPurple: #7f60be;
+$codeBackground: #f7f9fc;
+$detailGray: #f7f7f7;
+$groupGray: #dddddd;
+$yellow: #f1c40f;
+$orange: #e67e22;
+$red: #e74c3c;
+$darkBlue: #1f5b83;
+$blue: #3498db;
 
 // width
 
@@ -303,4 +320,44 @@ html {
   margin: 0px;
   padding: 0px;
   background: none;
+}
+
+// -- Notices
+
+.todo_inline {
+  font-style: italic;
+}
+
+.notices {
+  font-style: italic;
+  margin: .5em 0;
+  padding: .25em 1.5em;
+  border-left: 3px solid $gray;
+  display: inline-block;
+
+  *:first-child {
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  *:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  &.warning {
+    border-left: 3px solid $red;
+  }
+
+  &.info {
+    border-left: 3px solid $blue;
+  }
+
+  &.note {
+    border-left: 3px solid $yellow;
+  }
+
+  &.todo {
+    border-left: 3px solid $orange;
+  }
 }
