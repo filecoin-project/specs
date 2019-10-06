@@ -1,52 +1,51 @@
-import base 	 	"github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import filcrypto 	"github.com/filecoin-project/specs/libraries/filcrypto"
-import blockchain 	"github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
-import stateTree 	"github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
-import minBase 	 	"github.com/filecoin-project/specs/systems/filecoin_mining"
+import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
+import minBase "github.com/filecoin-project/specs/systems/filecoin_mining"
 
-type StoragePowerConsensusSubsystem struct  { //(@mutable)
-	powerTable									PowerTable
-	actor										StoragePowerActor
-	associatedStateTree		 					&stateTree.StateTree
-	GenerateElectionProof(tipset blockchain.Tipset)		base.ElectionProof
-	ChooseTipsetToMine(tipsets [blockchain.Tipset])		[blockchain.Tipset]
+type StoragePowerConsensusSubsystem struct {//(@mutable)
+    powerTable           PowerTable
+    actor                StoragePowerActor
+    associatedStateTree  &stateTree.StateTree
+    GenerateElectionProof(tipset blockchain.Tipset) base.ElectionProof
+    ChooseTipsetToMine(tipsets [blockchain.Tipset]) [blockchain.Tipset]
 
-	// call by StorageMiningSubsystem in sealing sector
-	GetSealSeed(chain blockchain.Chain, epoch base.Epoch) minBase.SealSeed
+    // call by StorageMiningSubsystem in sealing sector
+    GetSealSeed(chain blockchain.Chain, epoch base.Epoch) minBase.SealSeed
 
-	// call by StorageMiningSubsystem after sealing
-	GetPoStChallenge(chain blockchain.Chain, epoch base.Epoch) minBase.PoStChallenge
+    // call by StorageMiningSubsystem after sealing
+    GetPoStChallenge(chain blockchain.Chain, epoch base.Epoch) minBase.PoStChallenge
 
-	// call by BlockchainSubsystem during block reception
-	ValidateBlock(block blockchain.Block) StoragePowerConsensusError
+    // call by BlockchainSubsystem during block reception
+    ValidateBlock(block blockchain.Block) StoragePowerConsensusError
 
-	// call by StorageMiningSubsystem during block production
-	GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts
+    // call by StorageMiningSubsystem during block production
+    GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts
 
-	// call by StoragePowerConsensusSubsystem itself during block production
-	TicketAtEpoch(chain blockchain.Chain, epoch base.Epoch) base.Ticket
+    // call by StoragePowerConsensusSubsystem itself during block production
+    TicketAtEpoch(chain blockchain.Chain, epoch base.Epoch) base.Ticket
 
-	// call by StorageMiningSubsystem during block production
-	TryLeaderElection(electionProof base.ElectionProof) bool
+    // call by StorageMiningSubsystem during block production
+    TryLeaderElection(electionProof base.ElectionProof) bool
 
-	StoragePowerConsensusError() StoragePowerConsensusError
+    StoragePowerConsensusError() StoragePowerConsensusError
 
-	computeTipsetWeight(tipset blockchain.Tipset) base.ChainWeight
+    computeTipsetWeight(tipset blockchain.Tipset) base.ChainWeight
 }
 
-
 type PowerTable struct {
-	// all power here is always verified
-	minerPower										{base.Address:StorageMiner}
-	LookupMinerStorage(addr base.Address)			UVarint
-	LookupMinerPowerFraction(addr base.Address)		Float
-	RemovePower(addr base.Address)					struct {}
+    // all power here is always verified
+    minerPower {base.Address: StorageMiner}
+    LookupMinerStorage(addr base.Address) UVarint
+    LookupMinerPowerFraction(addr base.Address) Float
+    RemovePower(addr base.Address)
 }
 
 type StorageMiner struct {
-	minerAddress	base.Address
-	minerStorage	minerStorage
-	VRFKeyPair		filcrypto.VRFKeyPair
+    minerAddress  base.Address
+    minerStorage
+    VRFKeyPair    filcrypto.VRFKeyPair
 }
 
 type minerStorage UVarint

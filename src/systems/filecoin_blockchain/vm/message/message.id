@@ -1,4 +1,3 @@
-
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
@@ -12,36 +11,33 @@ type GasPrice actor.TokenAmount
 type Message union {
     UnsignedMessage
     SignedMessage
-} // representation keyed
-
+}  // representation keyed
 
 type UnsignedMessage struct {
-    to addr.Address
-    from addr.Address
+    to        addr.Address
+    from      addr.Address
 
     // When receiving a message from a user account the nonce in the message must match
     // the expected nonce in the "from" actor. This prevents replay attacks.
-    nonce actor.CallSeqNum
-    value actor.TokenAmount
+    nonce     actor.CallSeqNum
+    value     actor.TokenAmount
 
-    gasPrice actor.TokenAmount
-    gasLimit actor.TokenAmount
+    gasPrice  actor.TokenAmount
+    gasLimit  actor.TokenAmount
 
-    method actor.MethodNum
-    params actor.MethodParams  // Serialized parameters to the method.
-} // representation tuple
-
+    method    actor.MethodNum
+    params    actor.MethodParams  // Serialized parameters to the method.
+}  // representation tuple
 
 type SignedMessage struct {
-    message   UnsignedMessage
-    signature filcrypto.Signature
-} // representation tuple
-
+    message    UnsignedMessage
+    signature  filcrypto.Signature
+}  // representation tuple
 
 type ExitCode UVarint
 
 type MessageReceipt struct {
-    ExitCode ExitCode
-    ReturnValue Bytes
-    GasUsed actor.TokenAmount
-} // representation tuple
+    ExitCode
+    ReturnValue  Bytes
+    GasUsed      actor.TokenAmount
+}  // representation tuple

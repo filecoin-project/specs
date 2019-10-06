@@ -5,30 +5,30 @@ import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 
 // TODO import this from StorageMarket
 type SectorIndex struct {
-  BySectorID    {sector.SectorID : sector.SectorInfo}
-  ByUnsealedCID {sector.UnsealedSectorCID : sector.SectorInfo}
-  BySealedCID   {sector.SealedSectorCID : sector.SectorInfo}
-  ByPieceID     {piece.PieceID : sector.SectorInfo}
-  ByDealID      {mkt.StorageDealID : sector.SectorInfo}
+    BySectorID     {sector.SectorID: sector.SectorInfo}
+    ByUnsealedCID  {sector.UnsealedSectorCID: sector.SectorInfo}
+    BySealedCID    {sector.SealedSectorCID: sector.SectorInfo}
+    ByPieceID      {piece.PieceID: sector.SectorInfo}
+    ByDealID       {mkt.StorageDealID: sector.SectorInfo}
 }
 
 type SectorIndexerSubsystem struct {
-	Index   SectorIndex
-	Store   SectorStore
-	Builder SectorBuilder
+    Index    SectorIndex
+    Store    SectorStore
+    Builder  SectorBuilder
 
-	// AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
-	// has made a deal. AddNewDeal returns an error when:
-	// - there is no capacity to store more deals and their pieces
-	AddNewDeal(deal mkt.StorageDeal) error
+    // AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
+    // has made a deal. AddNewDeal returns an error when:
+    // - there is no capacity to store more deals and their pieces
+    AddNewDeal(deal mkt.StorageDeal) error
 
-	// bring back if needed.
-	// OnNewTipset(chain Chain, epoch blockchain.Epoch) struct {}
+    // bring back if needed.
+    // OnNewTipset(chain Chain, epoch blockchain.Epoch) struct {}
 
-	// SectorsExpiredAtEpoch returns the set of sectors that expire
-	// at a particular epoch.
-	SectorsExpiredAtEpoch(epoch blockchain.Epoch) [sector.SectorID]
+    // SectorsExpiredAtEpoch returns the set of sectors that expire
+    // at a particular epoch.
+    SectorsExpiredAtEpoch(epoch blockchain.Epoch) [sector.SectorID]
 
-	// removeSectors removes the given sectorIDs from storage.
-	removeSectors(sectorIDs [sector.SectorID]) struct{}
+    // removeSectors removes the given sectorIDs from storage.
+    removeSectors(sectorIDs [sector.SectorID])
 }

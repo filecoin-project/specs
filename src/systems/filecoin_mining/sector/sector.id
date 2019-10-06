@@ -1,14 +1,12 @@
-
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
+type Bytes32 Bytes
+type MinerID base_blockchain.Address
+type Commitment Bytes32  // TODO
 
-type Bytes32     Bytes
-type MinerID     base_blockchain.Address
-type Commitment  Bytes32 // TODO
-
-type Deal struct{} // TODO: remove
+type Deal struct {}  // TODO: remove
 
 type UnsealedSectorCID ipld.CID
 type SealedSectorCID ipld.CID
@@ -29,11 +27,10 @@ type SectorSize UInt
 //   1PB = Uint 1000000000000000
 // }
 
-
 // TODO make sure this is globally unique
 type SectorID struct {
-  MinerID MinerID
-  Number  SectorNumber
+    MinerID
+    Number SectorNumber
 }
 
 // SectorInDetail describes all the bits of information associated
@@ -43,48 +40,48 @@ type SectorID struct {
 //
 // NOTE: do not use this struct. It is for illustrative purposes only.
 type SectorInDetail struct {
-  ID   SectorID
-  Size SectorSize
+    ID    SectorID
+    Size  SectorSize
 
-  Unsealed struct {
-    CID    UnsealedSectorCID
-    Deals  [Deal]
-    Pieces [piece.Piece]
-    // Pieces Tree<Piece> // some tree for proofs
-    Bytes  Bytes
-  }
+    Unsealed struct {
+        CID     UnsealedSectorCID
+        Deals   [Deal]
+        Pieces  [piece.Piece]
+        // Pieces Tree<Piece> // some tree for proofs
+        Bytes
+    }
 
-  Sealed struct {
-    CID     SealedSectorCID
-    Bytes   Bytes
-    SealCfg SealCfg
-  }
+    Sealed struct {
+        CID SealedSectorCID
+        Bytes
+        SealCfg
+    }
 }
 
 // SectorInfo is an object that gathers all the information miners know about their
 // sectors. This is meant to be used for a local index.
 type SectorInfo struct {
-  ID             SectorID
-  UnsealedInfo   UnsealedSectorInfo
-  SealedInfo     SealedSectorInfo
-  SealVerifyInfo SealVerifyInfo
-  ProofAux       ProofAux
+    ID              SectorID
+    UnsealedInfo    UnsealedSectorInfo
+    SealedInfo      SealedSectorInfo
+    SealVerifyInfo
+    ProofAux
 }
 
 // UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector
 type UnsealedSectorInfo struct {
-  UnsealedCID UnsealedSectorCID // CommD
-  Size        SectorSize
-  PieceCount  UVarint           // number of pieces in this sector (can get it from len(Pieces) too)
-  Pieces      [piece.PieceInfo] // wont get externalized easy, -- it's big
-  SealCfg     SealCfg           // this will be here as well. it's determined.
-  // Deals       [deal.StorageDeal]
+    UnsealedCID  UnsealedSectorCID  // CommD
+    Size         SectorSize
+    PieceCount   UVarint  // number of pieces in this sector (can get it from len(Pieces) too)
+    Pieces       [piece.PieceInfo]  // wont get externalized easy, -- it's big
+    SealCfg  // this will be here as well. it's determined.
+    // Deals       [deal.StorageDeal]
 }
 
 // SealedSectorInfo keeps around information about a sector that has been sealed.
 type SealedSectorInfo struct {
-  SealedCID SealedSectorCID
-  Size      SectorSize
-  SealCfg   SealCfg
-  SealArgs  SealArguments
+    SealedCID  SealedSectorCID
+    Size       SectorSize
+    SealCfg
+    SealArgs   SealArguments
 }

@@ -3,6 +3,6 @@ type VouchersApprovalResponse struct {}
 type PieceInclusionProof struct {}
 
 type PaymentChannelActor struct {
-    RedeemVoucherWithApproval(voucher Voucher) struct {}
-    RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof) struct {}
+    RedeemVoucherWithApproval(voucher Voucher)
+    RedeemVoucherWithPIP(voucher Voucher, pip PieceInclusionProof)
 }

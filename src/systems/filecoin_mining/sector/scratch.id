@@ -4,7 +4,6 @@
 //      Proof ZigZagSealProof
 //    }
 
-
 // type SealAlgorithmArtifacts struct {
 // AlgorithmWideArtifacts struct {
 //   // trusted setup output parameters go here
@@ -25,7 +24,6 @@
 //   // inputs into verify() go here
 // }
 // }
-
 
 // type SealAlgorithm struct {}
 // SealAlgorithm union {

@@ -1,30 +1,29 @@
-
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 
 type SectorStore struct {
-  // FileStore stores all the unsealed and sealed sectors.
-  FileStore file.FileStore
+    // FileStore stores all the unsealed and sealed sectors.
+    FileStore   file.FileStore
 
-  // PieceStore is shared with DataTransfer, and is a way to store or read
-  // pieces temporarily. This may or may not be backed by the FileStore above.
-  PieceStore piece.PieceStore
+    // PieceStore is shared with DataTransfer, and is a way to store or read
+    // pieces temporarily. This may or may not be backed by the FileStore above.
+    PieceStore  piece.PieceStore
 
-  // GetSectorFile returns the file for a given sector id.
-  // If the SectorID does not have any sector files associated yet, GetSectorFiles
-  // returns an error.
-  GetSectorFiles(id sector.SectorID) union { f SectorFiles, err error }
+    // GetSectorFile returns the file for a given sector id.
+    // If the SectorID does not have any sector files associated yet, GetSectorFiles
+    // returns an error.
+    GetSectorFiles(id sector.SectorID) union {f SectorFiles, err error}
 
-  // CreateSectorFiles allocates two sector files, one for unsealed and one for
-  // sealed sector.
-  CreateSectorFiles(id sector.SectorID) union { f SectorFiles, err error }
+    // CreateSectorFiles allocates two sector files, one for unsealed and one for
+    // sealed sector.
+    CreateSectorFiles(id sector.SectorID) union {f SectorFiles, err error}
 }
 
 // SectorFiles is a datastructure that groups two file objects and a sectorID.
 // These files are where unsealed and sealed sectors should go.
 type SectorFiles struct {
-  SectorID sector.SectorID
-  Unsealed file.File
-  Sealed   file.File
+    SectorID  sector.SectorID
+    Unsealed  file.File
+    Sealed    file.File
 }

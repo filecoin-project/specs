@@ -1,64 +1,63 @@
-
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
-type Path struct{} // TODO
+type Path struct {}  // TODO
 
 type SealRandomSeed Bytes
 
 type SealCfg struct {
-  SectorSize     SectorSize
-  SubsectorCount UInt
-  Partitions     UInt
+    SectorSize
+    SubsectorCount  UInt
+    Partitions      UInt
 }
 
 // SealVerifyInfo is the structure of all thte information a verifier
 // needs to verify a Seal.
 type SealVerifyInfo struct {
-  SectorID SectorID
-  MinerID  base_blockchain.Address
-  OnChain  OnChainSealVerifyInfo
+    SectorID
+    MinerID   base_blockchain.Address
+    OnChain   OnChainSealVerifyInfo
 }
 
 // OnChainSealVerifyInfo is the structure of information that must go on chain.
 type OnChainSealVerifyInfo struct {
-  UnsealedCID UnsealedSectorCID // CommD
-  SealedCID   SealedSectorCID   // CommR
-  RandomSeed  SealRandomSeed
-  Proof       SealProof
+    UnsealedCID  UnsealedSectorCID  // CommD
+    SealedCID    SealedSectorCID  // CommR
+    RandomSeed   SealRandomSeed
+    Proof        SealProof
 }
 
 // ProofAux is meta data required to generate certain proofs
 // for a sector, for example PoSt.
 // These should be stored and indexed somewhere by CommR.
 type ProofAux struct {
-  CommRLast SealedSectorCID
-  CommC     Commitment
+    CommRLast             SealedSectorCID
+    CommC                 Commitment
 
-  // TODO: This may be a partially-cached tree.
-  // this may be empty
-  CachedMerkleTreePath file.Path
+    // TODO: This may be a partially-cached tree.
+    // this may be empty
+    CachedMerkleTreePath  file.Path
 }
 
 type SealArguments struct {
-  Algorithm          SealAlgorithm
-  OutputArtifacts    SealOutputArtifacts
+    Algorithm        SealAlgorithm
+    OutputArtifacts  SealOutputArtifacts
 }
 
-type SealProof struct { //<curve, system> {
-  Config       SealProofConfig
-  ProofBytes   Bytes
+type SealProof struct {//<curve, system> {
+    Config      SealProofConfig
+    ProofBytes  Bytes
 }
 
-type SealProofConfig struct { // TODO
+type SealProofConfig struct {// TODO
 }
 
 // TODO: move into proofs lib
-type FilecoinSNARKProof struct {} //<bls12-381, Groth16>
+type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
 
 type SealAlgorithm enum {
-  // ZigZagPoRep
-  StackedDRG
+    // ZigZagPoRep
+    StackedDRG
 }
 
 // TODO

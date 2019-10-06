@@ -3,19 +3,19 @@ import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 type BlockHeight struct {}
 
 type Ticket struct {
-	vrfResult filcrypto.VRFResult
-	vdfResult filcrypto.VDFResult
+    vrfResult         filcrypto.VRFResult
+    vdfResult         filcrypto.VDFResult
 
-	// Generate(k VRFKeyPair, seed ElectionSeed) Ticket
-	ValidateSyntax() 	bool
-	Validate()			bool
+    // Generate(k VRFKeyPair, seed ElectionSeed) Ticket
+    ValidateSyntax()  bool
+    Validate()        bool
 }
 
 type ElectionProof struct {
-	vrfResult filcrypto.VRFResult
-	IsWinning(minerPower PowerFraction) bool	@(cached)
+    vrfResult filcrypto.VRFResult
+    IsWinning(minerPower PowerFraction) bool @(cached)
 
-	ValidateSyntax() bool
+    ValidateSyntax() bool
 }
 
 type ElectionSeed filcrypto.VDFResult
@@ -24,13 +24,12 @@ type ChainWeight UVarint
 type ChainHeight UVarint
 type Epoch UVarint
 
-type PowerFraction 	Float
-type StoragePower	UVarint
+type PowerFraction Float
+type StoragePower UVarint
 type ElectionArtifacts struct {
-	TK Ticket
-	T1 Ticket
+    TK Ticket
+    T1 Ticket
 }
-
 
 type StoragePowerConsensusError error
 

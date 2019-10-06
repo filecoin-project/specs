@@ -1,15 +1,14 @@
-
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import key "github.com/filecoin-project/specs/systems/filecoin_nodes/repository/key"
 import config "github.com/filecoin-project/specs/systems/filecoin_nodes/repository/config"
 
 type Repository struct {
-  config    config.Config
-  ipldStore ipld.Store
-  keyStore  key.Store
+    config          config.Config
+    ipldStore       ipld.Store
+    keyStore        key.Store
 
-  // CreateRepository(config Config, ipldStore IPLDDagStore, keyStore KeyStore) &Repository
-  GetIPLDStore() ipld.Store
-  GetKeyStore() key.Store
-  GetConfig() config.Config
+    // CreateRepository(config Config, ipldStore IPLDDagStore, keyStore KeyStore) &Repository
+    GetIPLDStore()  ipld.Store
+    GetKeyStore()   key.Store
+    GetConfig()     config.Config
 }

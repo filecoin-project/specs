@@ -1,13 +1,12 @@
-
 import repo "github.com/filecoin-project/specs/systems/filecoin_nodes/repository"
 import filestore "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 
 type FilecoinNode struct {
-  Node libp2p.Node
+    Node        libp2p.Node
 
-  Repository repo.Repository
-  FileStore filestore.FileStore
-  Clock clock.WallClock
+    Repository  repo.Repository
+    FileStore   filestore.FileStore
+    Clock       clock.WallClock
 }

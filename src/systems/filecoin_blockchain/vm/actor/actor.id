@@ -6,7 +6,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/ad
 // TokenAmount is an amount of Filecoin tokens. This type is used within
 // the VM in message execution, to account movement of tokens, payment
 // of VM gas, and more.
-type TokenAmount UVarint // TODO: bigint or varint?
+type TokenAmount UVarint  // TODO: bigint or varint?
 
 // MethodNum is an integer that represents a particular method
 // in an actor's function table. These numbers are used to compress
@@ -63,11 +63,11 @@ type CodeCID CID
 // - we should not do inheritance, we should do composition.
 //   but we should make including actor state nicer.
 type Actor struct {
-  // common fields for all actors
-  CodeCID CodeCID
-  State   ActorState
-  Balance TokenAmount
-  SeqNum  CallSeqNum // FKA Nonce
+    // common fields for all actors
+    CodeCID
+    State    ActorState
+    Balance  TokenAmount
+    SeqNum   CallSeqNum  // FKA Nonce
 }
 
 // ActorID is a sequential number assigned to actors in a Filecoin Chain.
@@ -89,8 +89,8 @@ type ActorID UVarint
 // the actors from across the system. this will be where we declare/mount
 // all actors in the VM.
 type ActorState union {
-  Init struct {
-    AddressMap    {addr.Address:ActorID}
-    NextID        ActorID
-  }
+    Init struct {
+        AddressMap  {addr.Address: ActorID}
+        NextID      ActorID
+    }
 }

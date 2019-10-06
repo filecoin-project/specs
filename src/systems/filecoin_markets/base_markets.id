@@ -1,7 +1,7 @@
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
-type Address       base_blockchain.Address
-type Epoch         base_blockchain.Epoch
+type Address base_blockchain.Address
+type Epoch base_blockchain.Epoch
 type Path struct {}
 type Signature struct {}
 type StorageDealID CID
@@ -9,21 +9,21 @@ type TokenAmount struct {}
 
 // Storage Market
 type StorageDealProposal struct {
-  PieceRef            CID
-  PieceSize           UInt
-  Client              Address
-  Provider            Address
-  ProposalExpiryEpoch Epoch
-  DealExpiryEpoch     Epoch
-  StoragePrice        TokenAmount
-  StorageCollateral   TokenAmount
+    PieceRef             CID
+    PieceSize            UInt
+    Client               Address
+    Provider             Address
+    ProposalExpiryEpoch  Epoch
+    DealExpiryEpoch      Epoch
+    StoragePrice         TokenAmount
+    StorageCollateral    TokenAmount
 
-  ProposerSignature Signature
+    ProposerSignature    Signature
 }
 
 // StorageDeal should minimize onchain footprint
 // as much as possible
 type StorageDeal struct {
-  Proposal           StorageDealProposal
-  CounterSignature   Signature
+    Proposal          StorageDealProposal
+    CounterSignature  Signature
 }

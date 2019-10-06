@@ -1,13 +1,12 @@
-
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 // PieceStore is an object that stores pieces into some local storage.
 // it is internally backed by an IpldStore.
 type PieceStore struct {
-  Store ipld.Store
-  Index {PieceID: Piece}
+    Store              ipld.Store
+    Index              {PieceID: Piece}
 
-  Get(i PieceID) struct{ p Piece, e error}
-  Put(p Piece) error
-  Delete(i PieceID) error
+    Get(i PieceID)     struct {p Piece, e error}
+    Put(p Piece)       error
+    Delete(i PieceID)  error
 }

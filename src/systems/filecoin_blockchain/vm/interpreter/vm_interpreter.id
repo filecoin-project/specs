@@ -1,15 +1,13 @@
-
-
 import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
 import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 
 type MessageRef struct {
-  Message msg.Message
-  Miner   addr.Address
+    Message  msg.Message
+    Miner    addr.Address
 }
 
 type VMInterpreter struct {
-  ApplyMessageBatch(inTree st.StateTree, msgs [MessageRef]) struct{ outTree st.StateTree, ret [msg.MessageReceipt]}
-  ApplyMessage(inTree st.StateTree, msg msg.Message, minerAddr addr.Address) struct{outTree st.StateTree, ret msg.MessageReceipt}
+    ApplyMessageBatch(inTree st.StateTree, msgs [MessageRef]) struct {outTree st.StateTree, ret [msg.MessageReceipt]}
+    ApplyMessage(inTree st.StateTree, msg msg.Message, minerAddr addr.Address) struct {outTree st.StateTree, ret msg.MessageReceipt}
 }

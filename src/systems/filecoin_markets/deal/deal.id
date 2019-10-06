@@ -1,4 +1,3 @@
-
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 type DealCID ipld.CID

@@ -1,21 +1,20 @@
-
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
 
 // TODO: move this into a directory w/ all the actors + states
 type ActorName enum {
-	StoragePowerActor
-	StorageMarketActor
-	StorageMinerActor
-	PaymentChannelActor
-	InitActor
-	AccountActor
-	CronActor
+    StoragePowerActor
+    StorageMarketActor
+    StorageMinerActor
+    PaymentChannelActor
+    InitActor
+    AccountActor
+    CronActor
 }
 
 type StateTree struct {
-    SystemActors {ActorName:addr.Address}
-    ActorStates {addr.Address:actor.ActorState}
+    SystemActors  {ActorName: addr.Address}
+    ActorStates   {addr.Address: actor.ActorState}
 
     // TODO: API ConvenienceAPI
 }

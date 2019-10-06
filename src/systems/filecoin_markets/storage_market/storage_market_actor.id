@@ -1,68 +1,67 @@
-import base_markets    "github.com/filecoin-project/specs/systems/filecoin_markets"
+import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 
-type StorageDeal   base_markets.StorageDeal
+type StorageDeal base_markets.StorageDeal
 type StorageDealID base_markets.StorageDealID
-type Address       base_markets.Address
-type Epoch         base_markets.Epoch
-type PoStProof     base_markets.PoStProof
-type TokenAmount   base_markets.TokenAmount
+type Address base_markets.Address
+type Epoch base_markets.Epoch
+type PoStProof base_markets.PoStProof
+type TokenAmount base_markets.TokenAmount
 
 type StorageParticipantBalance struct {
-  Locked    TokenAmount
-  Available TokenAmount
+    Locked     TokenAmount
+    Available  TokenAmount
 }
 
-type PublishStorageDealSuccess  struct {
-  StorageDealID StorageDealID
+type PublishStorageDealSuccess struct {
+    StorageDealID
 }
-type PublishStorageDealError    struct {}
+type PublishStorageDealError struct {}
 type PublishStorageDealResponse struct {
-  Success PublishStorageDealSuccess
-  Error   PublishStorageDealError
+    Success  PublishStorageDealSuccess
+    Error    PublishStorageDealError
 }
 
 type StorageMarketActor struct {
-  // need access to:
-  // - DataTransferSubsystem
-  //   - transfer data
-  // - BlockchainSubsystem
-  //   - needs access to StateTree
-  //     to verify storage capacity and pledge amount
-  //     and slash storage providers for storage faults
-  //    - needs access to access to MessagePool if deals on chain
-  // - NetworkSubsystem
-  //   - needs access to MessagePubsub
+    // need access to:
+    // - DataTransferSubsystem
+    //   - transfer data
+    // - BlockchainSubsystem
+    //   - needs access to StateTree
+    //     to verify storage capacity and pledge amount
+    //     and slash storage providers for storage faults
+    //    - needs access to access to MessagePool if deals on chain
+    // - NetworkSubsystem
+    //   - needs access to MessagePubsub
 
-  ParticipantBalances { Address : StorageParticipantBalance }
-  StorageDeals { StorageDealID : StorageDeal }
+    ParticipantBalances  {Address: StorageParticipantBalance}
+    StorageDeals         {StorageDealID: StorageDeal}
 
-  RegisterParticipant(lockedBalance TokenAmount) bool
-  WithdrawBalance(balance TokenAmount) struct {}
-  AddBalance(balance TokenAmount) struct {}
-  CheckLockedBalance(participantAddr Address) TokenAmount
+    RegisterParticipant(lockedBalance TokenAmount) bool
+    WithdrawBalance(balance TokenAmount)
+    AddBalance(balance TokenAmount)
+    CheckLockedBalance(participantAddr Address) TokenAmount
 
-  // TODO: There should be some punishment for publishing a deal too late
-  // call by CommitSector in StorageMiningSubsystem
-  // a StorageDeal is only published on chain when it passes VerifyStorageDeal
-  PublishStorageDeal(newStorageDeal StorageDeal) PublishStorageDealResponse
+    // TODO: There should be some punishment for publishing a deal too late
+    // call by CommitSector in StorageMiningSubsystem
+    // a StorageDeal is only published on chain when it passes VerifyStorageDeal
+    PublishStorageDeal(newStorageDeal StorageDeal) PublishStorageDealResponse
 
-  // check if StorageDeal is still valid
-  // check if StorageDeal has the right signature
-  // check if provider and client have sufficient balances
-  VerifyStorageDeal(newStorageDeal StorageDeal) bool
+    // check if StorageDeal is still valid
+    // check if StorageDeal has the right signature
+    // check if provider and client have sufficient balances
+    VerifyStorageDeal(newStorageDeal StorageDeal) bool
 
-  // TODO: StorageDeals should be renewable
-  UpdateStorageDeal(newStorageDeal StorageDeal) struct {}
+    // TODO: StorageDeals should be renewable
+    UpdateStorageDeal(newStorageDeal StorageDeal)
 
-  // call by StorageMarketActor on ExpiredSet
-  // remove StorageDeal from StorageMarketActor
-  // return StorageCollateral to miners
-  CloseExpiredStorageDeal(targetStorageDeal StorageDeal) struct {}
+    // call by StorageMarketActor on ExpiredSet
+    // remove StorageDeal from StorageMarketActor
+    // return StorageCollateral to miners
+    CloseExpiredStorageDeal(targetStorageDeal StorageDeal)
 
-  // call by StorageMinerActor on successful PoSt Submission
-  HandleStorageDealPayment(storageDeal StorageDeal, currEpoch Epoch) struct {}
+    // call by StorageMinerActor on successful PoSt Submission
+    HandleStorageDealPayment(storageDeal StorageDeal, currEpoch Epoch)
 
-  // call by StorageMinerActor or CronActor to slash deal collateral
-  SlashStorageDealCollateral(targetStorageDeal StorageDeal) struct {}
-
+    // call by StorageMinerActor or CronActor to slash deal collateral
+    SlashStorageDealCollateral(targetStorageDeal StorageDeal)
 }
