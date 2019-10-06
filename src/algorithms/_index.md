@@ -2,8 +2,7 @@
 title: Algorithms
 entries:
   - expected_consensus
-  - proof_of_replication
-  - porep_commitments
+  - porep
   - post
   - payment_channels
   - block_sync

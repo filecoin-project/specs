@@ -1,8 +1,8 @@
 ---
-title: "Proof of Replication"
+title: ZigZag-PoRep
 ---
 
-This section describes the specific Proof-of-Replication used in Filecoin called *ZigZag*. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
+This section describes the specific Proof-of-Replication (PoRep) used in Filecoin called *ZigZag*. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
 
 ZigZag has been presented by [Ben Fisch at EUROCRYPT19](https://eprint.iacr.org/2018/702.pdf).
 
