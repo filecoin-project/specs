@@ -1,0 +1,6 @@
+{{- $inputPath := . -}}
+
+{{- $tokens := partial "tokensFromPagePath" $inputPath -}}
+{{- $ret := delimit $tokens "__" -}}
+
+{{- return $ret -}}

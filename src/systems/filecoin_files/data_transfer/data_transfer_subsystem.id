@@ -1,0 +1,59 @@
+type Address struct {}
+type Storage struct {}
+type StorageDealID struct {}
+type Function struct {}
+type Piece struct {}
+
+type DataTransferSubsystem struct @(mutable) {
+    dataTransfers  {UInt: DataTransferChannel}
+    volumes        [Storage]
+
+    OpenDataTransferChannel(x StorageDealID) UInt
+    CloseDataTransferChannel(x UInt)
+    TransferChannelStatus(x UInt) DataTransferStatus
+    ReportDataTransferEvent(x Function) union {Ret DataTransferStatus, Err error}
+
+    findData(x CID) Piece
+}
+
+// Assumes access to error-checked, ordered, reliable transmission protocol
+type Scheduler struct {
+    ScheduleTransfer(x UInt, y Piece)
+    requestData(x DataTransferChannel) union {Ret Bytes, Err error}
+    sendData(x DataTransferChannel, y Bytes) error?
+}
+
+type DataTransferChannel struct {
+    channelID      UInt
+    contentID      CID
+    dataIncrement  UVarint
+    sender         Address
+    recipient      Address
+    totalSize      UVarint
+    sent           UVarint
+    received       UVarint
+
+    channelType()  DataTransferType  @(cached)
+    transferNum()  Float             @(cached)
+}
+
+type DataTransferParams struct {
+    channelType    DataTransferType
+    contentID      CID
+    dataIncrement  UVarint
+    sender         Address
+    recipient      Address
+    totalSize      Address
+}
+
+type DataTransferType union {
+    Sender
+    Recipient
+}
+
+type DataTransferStatus union {
+    Ongoing
+    Completed
+    Failed
+    ChannelNotFoundError
+}

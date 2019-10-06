@@ -1,0 +1,40 @@
+# general
+crypto_signatures: [algorithms, crypto, signatures]
+data_structures: [data_structures]
+ds_address: [data_structures, address]
+app_address: [appendix, address]
+
+# blockchain
+sys_vm: [systems, filecoin_blockchain, vm]
+### blockchain
+block_producer: [systems, filecoin_blockchain, blockchain]
+### SPC
+storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
+power_table: [systems, filecoin_blockchain, storage_power_consensus]
+expected_consensus: [algorithms, expected_consensus]
+tickets: [algorithms, expected_consenus, tickets]
+leader_election: [algorithms, expected_consensus, leader_election]
+chain_selection: [algorithms, expected_consensus, chain_selection]
+finality: [algorithms, expected_consensus, finality]
+### Message Pool
+message_pool: [systems, filecoin_blockchain, message_pool]
+message_syncer: [systems, filecoin_blockchain, message_syncer]
+message_storage: [systems, filecoin_blockchain, message_storage]
+
+# files
+
+# markets
+retrieval_market: [systems, filecoin_markets, retrieval_market]
+storage_market: [systems, filecoin_markets, storage_market]
+
+# mining
+
+### Storage Mining
+storage_mining_subsystem: [systems, filecoin_mining, storage_mining]
+sector_sealer: [systems, filecoin_mining, storage_mining]
+post_generator: [systems, filecoin_mining, storage_mining]
+post: [algorithms, proof_of_spacetime]
+
+# nodes
+
+# token

@@ -1,0 +1,3 @@
+{{- $tag := partial "tagFromPagePath" .pagePath -}}
+<div id="{{ print $tag "__" .labelToken }}"></div>
+{{- $unused := 17 -}}

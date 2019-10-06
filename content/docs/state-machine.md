@@ -1,1 +1,0 @@
-../../state-machine.md

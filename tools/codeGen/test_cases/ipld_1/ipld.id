@@ -1,0 +1,15 @@
+
+type CID Bytes
+
+// imported as ipld.Object
+type Object struct {
+  CID() CID
+
+  // Populate(v interface{}) error
+}
+
+// imported as ipld.Store
+type Store struct {
+  Get(cid CID) union { o Object, err error }
+  Put(o Object) union { cid CID, err error }
+}

@@ -1,0 +1,25 @@
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+// import smkt "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
+
+// SectorBuilder accumulates deals, keeping track of their
+// sector configuration requirements and the piece sizes.
+// Once there is a sector ready to be sealed, NextSector
+// will return a sector.
+type SectorBuilder struct {
+    // DealsToSeal keeps a set of StorageDeal objects.
+    // These include the info for the relevant pieces.
+    // This builder just accumulates deals, keeping track of their
+    // sector configuration requirements, and the piece sizes.
+    DealsToSeal [mkt.StorageDeal]
+
+    // StageDeal adds a deal to be packed into a sector.
+    StageDeal(d mkt.StorageDeal) error
+
+    // NextSector returns an UnsealedSectorInfo, which includes the (ordered) set of
+    // pieces, and the SealCfg. An error may be returned if SectorBuilder is not
+    // ready to produce a Sector.
+    //
+    // TODO: use go channels? or notifications?
+    NextSector() union {i sector.UnsealedSectorInfo, err error}
+}

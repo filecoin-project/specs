@@ -1,0 +1,8 @@
+import base "github.com/filecoin-project/specs/systems/filecoin_markets"
+
+type TokenAmount base.TokenAmount
+type Address base.Address
+
+type RetrievalClient struct {
+    CreatePaymentChannel(provider Address, payment TokenAmount) PaymentChannel
+}

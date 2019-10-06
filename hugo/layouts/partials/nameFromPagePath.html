@@ -1,0 +1,7 @@
+{{ $inputPath := . }}
+
+{{ $tokens := partial "tokensFromPagePath" $inputPath }}
+
+{{ $pathLast := index $tokens (sub (len $tokens) 1) }}
+
+{{ return $pathLast }}

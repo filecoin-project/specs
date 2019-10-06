@@ -1,1 +1,0 @@
-../../proof-of-spacetime.md

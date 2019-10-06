@@ -1,0 +1,92 @@
+<script>
+  structSet = new Set([
+    "Actor",
+    "Address",
+    "Bitfield",
+    "Block",
+    "BytesAmount",
+    "ElectionProof",
+    "FaultSet",
+    "Message",
+    "MessageReceipt",
+    "PeerId",
+    "PoSTProof",
+    "PublicKey",
+    "SealProof",
+    "SectorID",
+    "SectorSet",
+    "Signature",
+    "SignedMessage",
+    "StateTree",
+    "Ticket",
+    "TipSet",
+    "TokenAmount",
+    "UnsignedMessage",
+  ]);
+
+  structRefs = {
+    "AddressId":               "Address",
+    "AddressSecp256k1":        "Address",
+    "AddressActor":            "Address",
+    "AddressBLS12_381":        "Address",
+    "Bls12_381Signature":      "Signature",
+    "Secp256k1Signature":      "Signature",
+    "TxMeta":                  "Block",
+    "VDFProof":                "Ticket",
+    "VDFResult":               "Ticket",
+    "VRFProof":                "Ticket",
+  };
+
+  fillSingleCodeRef = (x, isTokenDef) => {
+    let origKey = x.innerText;
+    let key = origKey;
+    let newKey = structRefs[key];
+    if (newKey !== undefined) {
+      key = newKey;
+    }
+    if (structSet.has(key)) {
+      if (x.className == "nx" && isTokenDef) {
+        x.innerHTML = "<span id=go__" + origKey + "><a class=codeLink href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a></div>";
+      } else {
+        x.innerHTML = "<a class=codeLink href=\"/#go__" + origKey + "\">" + x.innerHTML + "</a>";
+      }
+    }
+  };
+
+  fillCodeRefs = (xs, parent) => {
+    if (xs.length == 0 && parent.innerText.length != 0) {
+      fillSingleCodeRef(parent);
+      return;
+    }
+
+    let isTokenDef = false;
+
+    for (let x of xs) {
+      if (x.className == "kd" && x.innerHTML == "type") {
+        isTokenDef = true;
+        continue;
+      }
+
+      if (x.className != "nx" && x.className != "codeRef") {
+        isTokenDef = false;
+        continue;
+      }
+
+      fillSingleCodeRef(x, isTokenDef);
+      isTokenDef = false;
+    }
+  };
+
+  window.onload = (event) => {
+    let codeBlocks = document.getElementsByTagName("code");
+    for (let codeBlock of codeBlocks) {
+      fillCodeRefs(codeBlock.children, codeBlock);
+    }
+
+    let hashPrev = location.hash;
+    if ((typeof hashPrev) == "string" && hashPrev != "") {
+      location.hash = "";
+      location.hash = hashPrev;
+    }
+  };
+</script>

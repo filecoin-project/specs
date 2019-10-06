@@ -1,0 +1,4 @@
+---
+menuTitle: Payments
+title: Payments
+---

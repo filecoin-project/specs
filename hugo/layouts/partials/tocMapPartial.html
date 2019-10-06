@@ -1,0 +1,46 @@
+
+{{ $page := .Page }}
+{{ $depth := .Depth }}
+{{ $expand := 2 }}
+{{ if (gt 0 .Expand) }}
+    {{ $expand = .Expand }}
+{{ end }}
+
+{{ $tokens := partial "tokensFromPagePath" .Page.Path }}
+{{ $name := partial "nameFromPagePath" .Page.Path }}
+{{ $tag := partial "tagFromPagePath" .Page.Path }}
+
+{{ $title := .Page.Param "title" }}
+{{ if (not (eq nil (.Page.Param "tocMapTitle"))) }}
+  {{ $title = (.Page.Param "tocMapTitle") }}
+{{ else if (not (eq nil (.Page.Param "menuTitle"))) }}
+  {{ $title = (.Page.Param "menuTitle") }}
+{{ end }}
+
+{{ $expandedclass := "expanded" }}
+{{ if (gt $depth $expand) }}
+    {{ $expandedclass = "" }}
+{{ end }}
+
+<div class="tocMap-item {{ $expandedclass }}">
+    <div class="tocMap-item-label">
+        <a href="/#{{ $tag }}">
+            {{ $title | markdownify }}
+
+
+        {{ if (not (eq nil (.Page.Param "menuIcon"))) }}
+            <br /><br /><i class="menuIcon">{{ $page.Param "menuIcon" }}</i>
+        {{ end }}
+        </a>
+    </div>
+
+    <div class="tocMap-children">
+        {{ if (le $depth $expand) }}
+            {{ range (.Page.Param "entries") }}
+                {{ with $page.GetPage . }}
+                  {{ partial "tocMapPartial.html" (dict "Page" . "Depth" (add $depth 1) "Expand" $expand) }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    </div>
+</div>

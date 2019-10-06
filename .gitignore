@@ -1,6 +1,13 @@
-# Build outbook from `gitbook serve`
-_book
-public
-resources/_gen
-pdf-build
-.pdfworking
+.vscode
+public/
+deps/
+.slime/
+build/
+hugo/resources
+hugo/content/docs
+hugo/content/ox-hugo
+hugo/content/codeGen/main
+.DS_Store
+*.gen.go
+*.mmd.svg
+*.dot.svg

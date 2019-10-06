@@ -1,0 +1,41 @@
+# general
+crypto_signatures: "Signatures"
+data_structures: "Data Structures"
+ds_address: "Address"
+app_address: "Address"
+
+# blockchain
+sys_vm: "VM"
+### blockchain
+block_producer: "Block Producer"
+### SPC
+storage_power_consensus: "Storage Power Consensus"
+power_table: "Power Table"
+expected_consensus: "Expected Consensus"
+tickets: "Tickets"
+leader_election: "Secret Leader Election"
+chain_selection: "Chain Selection"
+finality: "EC Finality"
+### Message Pool
+message_pool: "Message Pool"
+message_syncer: "Message Syncer"
+message_storage: "Message Storage"
+
+# files
+
+# markets
+retrieval_market: "Retrieval Market"
+storage_market: "Storage Market"
+
+# mining
+
+### Storage Mining
+storage_mining_subsystem: "Storage Mining Subsystem"
+sector_sealer: "Sector Sealer"
+post_generator: "PoSt Generator"
+post: "Proof of Spacetime"
+
+
+# nodes
+
+# token
