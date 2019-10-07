@@ -20,8 +20,9 @@ For more detail, see the full {{<sref app_address "address spec">}}.
 A block header contains information relevant to a particular point in time over which the network may achieve consensus. The block header contains:
 
 - The address of the miner that mined the block
-- An array of the tickets that led to this particular miner being selected as the leader for this round (see
-{{<sref leader_election>}} for more details), as well as a signature on the winning ticket
+- A ticket associated to this block's creation to be used as randomness elsewhere in the protocol (see
+{{<sref leader_election>}} for more details)
+- An electionProof showing this miner was eligible to mine, as well as a Nonce relating the number of rounds over which the block was mined (on expectation 1)
 - The set of parent blocks and aggregate {{<sref chain_selection "chain weight">}} of the parents
 - This block's height
 - Merkle root of the state tree (after applying the messages -- state transitions -- included in this block)
@@ -57,10 +58,7 @@ We define VRF personalizations as follow, to enable domain separation across ope
 # Ticket
 
 A ticket contains a shared random value referenced by a particular `Block` in the Filecoin blockchain.
-Every miner must produce a new `Ticket` each time they run a leader election attempt.
-In that sense, every new block produced will have one or more associated tickets
-(specifically, the block may contain more than one ticket if it corresponds to
-one or more zero-winner epochs of {{<sref expected_consensus>}}).
+Every miner must produce a new `Ticket` for each ticket used in a leader election attempt.
 
 To produce the ticket values,
 we use an [EC-VRF per Goldberg et al.](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10)
@@ -73,9 +71,9 @@ with Secp256k1 and SHA-256 to obtain a deterministic, pseudorandom output.
 The ticket is represented concretely by the `Ticket` data structure.
 Whenever the Filecoin protocol refers to ticket values
 (notably in crafting {{<sref post "PoSTs">}} or running leader election),
-what is meant is that the bytes of the `VDFResult` field in the `Ticket` struct are used.
+what is meant is that the bytes of the `VRFResult` field in the `Ticket` struct are used.
 Specifically, tickets are compared lexicographically,
-interpreting the bytes of the `VDFResult` as an unsigned integer value (little-endian).
+interpreting the bytes of the `VRFResult.Output` as an unsigned integer value (little-endian).
 
 # ElectionProof
 
@@ -84,7 +82,9 @@ by a miner during the leader election process.
 Its output value determines whether the miner is elected as one of the leaders,
 and hence is eligible to produce a block for the current epoch.
 The inclusion of the `ElectionProof` in the block allows other network participants
-to verify that the block was mined by a valid leader.
+to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket,
+(in cases where no blocks are found in a round) a miner increments that ElectionProof's associated `Nonce`, marking
+increased block height.
 
 {{<goFile ElectionProof>}}
 

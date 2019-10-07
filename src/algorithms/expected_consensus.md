@@ -2,12 +2,12 @@
 title: "Expected Consensus"
 ---
 
-TODO: move pseudocode to id files entirely
-
 {{<label expected_consensus>}}
 ## Algorithm
 
 Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an `Election Proof`). All valid blocks submitted in a given round form a `Tipset`. Every block in a Tipset adds weight to its chain. The 'best' chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see {{<sref chain_selection>}}.
+
+At a very high level, with every new block generated, a miner will craft a new ticket from the prior one in the chain. While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner may increment a given nonce as part of the input with which they attempt to run leader election in order to ensure liveness in the protocol. These nonces help mark block height. Every block in a given Tipset will contain election proofs with the same nonce (i.e. they are mined at the same height).
 
 The {{<sref storage_power_consensus>}} subsystem uses access to EC to use the following facilities:
 - Access to verifiable randomness for the protocol, derived from {{<sref tickets>}}.
@@ -36,7 +36,7 @@ Whenever comparing tickets is evoked in Filecoin, for instance when discussing s
 
 ### The Ticket chain
 
-While each Filecoin block header contains a ticket array, it is useful to provide nodes with a ticket chain abstraction.
+While each Filecoin block header contains a ticket field, it is useful to provide nodes with a ticket chain abstraction.
 
 Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
 - They are drawn by Storage Miners as SealSeeds to commit new sectors
@@ -48,49 +48,15 @@ Each of these ticket uses may require drawing tickets at different chain heights
 
 This ticket chain will track one-to-one with a block at each height in a given subchain, but omits certain details including other blocks mined at that height.
 
-Simply, it is composed inductively as follows:
+Simply, it is composed inductively as follows. For a given chain:
 
 - At height 0, take the genesis block, return its ticket
-- At height n+1, take the block used at height n.
-  - If the ticket it returned in the previous step is not the final ticket in its ticket array, return the next one.
-  - If the ticket it returned in the previous step is the final ticket in its ticket array,
-    - use EC to select the next heaviest tipset in the subchain.
-    - select the block in that tipset with the smallest final ticket, return its first ticket
-
-We illustrate this below:
-```
-                     ┌────────────────────────────────────────────────────────────────────────────────────┐
-                      │                                                                                    │
-                      ▼                                  ◀─────────────────────────────────────────────────┼────────────────────────────────────────────┐
-          ┌─┐        ┌─┐        ┌─┐        ┌─┐          ┌─┐                                       ┌─┐      │    ┌─┐         ┌─┐         ┌─┐           ┌─┤
-   ◀──────│T1◀───────│T2◀───────│T3◀───────│T4◀─────────│T5◀───────────────    ...    ◀───────────T1+k─────┼───T2+k◀────────T3+k────────T4+k──────────T5│k
-          └─┘        └─┘        └─┘        └─┘          └─┘                                       └─┘      │    └─┘         └─┘         └─┘           └─┤
-                                 ▲                       │                                                 │                 │           │             ││
-           │          │          │          │                                                      │       │     │                                      │
-                                 ├───────────────────────┼─────────────────────────────────────────────────┼─────────────────┼────┐      │             ││
-           │          │                     │                                                      │       │     │                │                     │
-                       ─ ─ ─ ─ ─ ┴ ─   ─ ─ ─             ┘                                            ─ ─ ─│─ ─ ─          ─ ┘    │      └ ─ ─ ─   ─ ─ ┘│
-        ┌──┼──────┬─┬┐         ┌──┼─┼─┼──┬─┬┐        ┌──┼──────┬─┬┐                             ┌──┼─┼────┬─┬┐         ┌──┼──────┬─┬┐        ┌──┼─┼────┬─┬┐
-        │         │E1│         │         │E2│        │         │E3│                             │         E1+l         │         E2+l        │         E3+l
-        │  │      └─┘│         │  │ │ │  └─┘│        │  │      └─┘│                             │  │ │    └─┘│         │  │      └─┘│        │  │ │    └─┘│
-        │            │         │            │        │            │                             │            │         │            │        │            │
- ◀──────│  ▼         │◀────────│  ▼ ▼ ▼     │◀───────│  ▼         │◀──────     ...     ◀────────│  ▼ ▼       │◀────────│  ▼         │◀───────│  ▼ ▼       │
-        │ ┌─┐        │         │ ┌─┬─┬─┐    │        │ ┌─┐        │                             │ ┌─┬─┐      │         │ ┌─┐        │        │ ┌─┬─┐      │
-        │ │T1     B1 │         │ │T2 │ │ B2 │        │ │T5     B3 │                             │ │ │ │  B1+l│         │ │ │    B2+l│        │ │ │ │  B3+l│
-        └─┴─┴────────┘         └─┴─┴─┴─┴────┘        └─┴─┴────────┘                             └─┴─┴─┴──────┘         └─┴─┴────────┘        └─┴─┴─┴──────┘
-```
-
-
-
-The above represents an instance of a block-chain, and its associated ticket-chain. The details of how it works should be clear by the end of this section, but quickly, some observations:
-
-- Block 1 contains a single ticket T1
-- Block 2 contains 3 tickets T2, T3, T4 meaning it was likely generated after 2 failed leader election attempts in the network.
-- Block B1+l has two tickets and an Election Proof E1+l that was generated using T2. This means B1+l's miner tried to generate an election proof using T1 and failed, succeeding on their second attempt with T2.
+- At height n+1, take the heaviest tipset in our chain at height n.
+    - select the block in that tipset with the smallest final ticket, return its ticket
 
 ## Tickets in EC
 
-Within EC, a miner generates a new ticket in their block for every ticket they use (or "scratch") running leader election, thereby ensuring the ticket chain is always at least as long as the block chain.
+Within EC, a miner generates a new ticket in their block for every ticket they use (or "scratch") running leader election, thereby ensuring the ticket chain is always as long as the block chain.
 
 Tickets are used to achieve the following:
 - Ensure leader secrecy -- meaning a block producer will not be known until they release their block to the network.
@@ -99,10 +65,8 @@ Tickets are used to achieve the following:
 
 In practice, EC defines two different fields within a block:
 
-- A `Tickets` array — this stores new tickets generated during this block generation attempt. It proves appropriate delay. It is from this array that miners will sample randomness to run leader election in `K` rounds. See [Ticket generation](#ticket-generation).
-- An `ElectionProof` — this stores a proof that a given miner scratched a winning lottery ticket using the appropriate ticket `K` rounds back. It proves that the leader was elected in this round. See [Checking election results](#checking-election-results).
-
-On expectation, the `Tickets` array will contain a single ticket. For cases in which it contains more than one, see [Losing Tickets](#losing-tickets).
+- A `Ticket` field — this stores the new ticket generated during this block generation attempt. It is from this ticket that miners will sample randomness to run leader election in `K` rounds.
+- An `ElectionProof` — this stores a proof that a given miner scratched a winning lottery ticket using the appropriate ticket `K` rounds back along with a nonce showing how many rounds generating the EP took. It proves that the leader was elected in this round.
 
 ```
 But why the randomness lookback?
@@ -123,9 +87,9 @@ more space on-chain.
 
 ### Ticket generation
 
-This section discusses how tickets are generated by EC for the `Tickets` array. For how tickets are validated, see [ticket validation](mining.md#ticket-validation).
+This section discusses how tickets are generated by EC for the `Ticket` field.
 
-At round `N`, new tickets are generated using tickets drawn from the [Tipset](#tipsets) at round `N-1`. This ensures the miner cannot publish a new block (corresponding to the `ElectionProof` generated by a winning ticket `K` rounds back) until the correct round. Because a Tipset can contain multiple blocks (see [Chain Selection](#chain-selection) below), the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.
+At round `N`, a new ticket is generated using tickets drawn from the Tipset at round `N-1`. Because a Tipset can contain multiple blocks (see [Chain Selection](#chain-selection) below), the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.
 
 ```
    ┌──────────────────────┐                     
@@ -181,25 +145,18 @@ Output: newTicket
 
 ### Ticket Validation
 
-For ticket generation, see [ticket generation](expected-consensus.md#ticket-generation).
-
-A ticket can be verified to have been generated in the appropriate number of rounds by looking at the `Tickets` array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array (or in the prior block if the array is empty). Note that this has implications on block size, and client memory requirements, though on expectation, the `Tickets` array should only contain one Ticket. Put another way, each Ticket should be generated from the prior one in the ticket-chain.
+Each Ticket should be generated from the prior one in the ticket-chain.
 
 Succinctly, the process of verifying a block's tickets is as follows.
 ```text
 Input: received block, storage market actor S, miner's public key PK, a public VDF validation key vk
 Output: 0, 1
 
-0. Get the tickets
-    i. tickets <-- block.tickets
-For each ticket, idx: tickets
+0. Get the ticket
+    i. ticket <-- block.ticket
 1. Verify its VRF Proof
     i. # get the appropriate parent
-        if idx == 0:
-            # the first was derived from the prior block's last ticket
-            parent = parentBlock.lastTicket
-        else:
-            parent = tickets[idx - 1]
+        parent = chain.TicketAtEpoch(N-1)
     ii. # generate the VRFInput
         input <-- VRFPersonalization.Ticket | parent.Output
     iii. # verify the VRF
@@ -209,8 +166,6 @@ For each ticket, idx: tickets
 2. Return results
     return 1
 ```
-
-Notice that there is an implicit check that all tickets in the `Tickets` array are signed by the same miner.
 
 {{<label leader_election>}}
 ## Secret Leader Election
@@ -244,18 +199,19 @@ Note: We draw the miner power from the prior round. This means that if a miner w
 At round N:
 
 ```
-Input: parentTickets from N-K, miner's public key PK, miner's secret key SK, the Storage Power actor S
+Input: electionSeed from N-K, miner's public key PK, miner's secret key SK, the Storage Power actor S, a Nonce nonce starting with value 0
 Output: 1 or 0
 
 0. Prepare new election proof
     i. newEP <-- New()
-1. Draw parentTicket from K blocks back
+1. Draw electionSeed from K blocks back
     i. electionSeed <-- chain.TicketAtEpoch(N-K)
 2. Run it through VRF and get determinstic output
     i. # take the VRFOutput of that ticket as input, specified for the appropriate operation type
-        input <-- VRFPersonalization.ElectionProof | parentTicket.Output
+        input <-- VRFPersonalization.ElectionProof | electionSeed.Output | nonce
     ii. # run it through the VRF and store the VRFProof in the new ticket
         newEP.VrfResult <-- self.VRFKeyPair.Generate(input)
+        newEP.Nonce <-- nonce
 3. Determine the miner's power fraction
     i. # Determine total storage this round
         S <-- storageMarket(N)
@@ -276,11 +232,13 @@ Output: 1 or 0
         # otherwise parentTicket is not a winning lottery ticket
         else
             Return 0
+Return 1
 ```
 
-### Election Validation
+If successful, the miner can craft a block, passing it to the block producer. If unsuccessful, it will wait to hear of another block mined this round to try again. In the case no other block was found in this round the miner can increment nonce and try again.
+While a miner could try to run through multiple nonces in parallel in order to quickly generate a block, this effort will be futile as the honest majority of miners will reject blocks crafted with ElectionProofs whose nonces prove too high (see below).
 
-For election proof generation, see [checking election results](expected-consensus.md#checking-election-results).
+### Election Validation
 
 In order to determine that the mined block was generated by an eligible miner, one must check its `ElectionProof`.
 
@@ -290,19 +248,26 @@ Succinctly, the process of verifying a block's election proof at round N, is as 
 Input: received block, storage power actor S, miner's public key PK, a public parameter K
 Output: 0, 1
 
-0. Get the election proof, total power, miner power
+0. Get the election proof
         i. electionProof <-- block.electionProof
-        ii. # get total market power
+1. Verify it was generated in the appropriate round, specifically, for a block generated at round N, if the last block was generated at round N-L, the EP's nonce value should be L. Any EP with a nonce L' > L should be rejected.
+        i. # get nonce
+            Nonce <-- electionProof.Nonce
+            cur_round <-- chain.Current_Round()
+            if block.Parents.Height() + Nonce > cur_round:
+                return 0
+2. Get the total power, miner power
+        i. # get total market power
             S <-- storageMarket(N)
             p_n <-- S.GetTotalPower()
-        iii. # get miner power
+        ii. # get miner power
             p_m <-- LookupMinerPower(miner.addr)
-        iv. # Get power fraction
+        iii. # Get power fraction
               p_f <-- p_m/p_n
-4. Get the appropriate ticket from the ticket chain
+3. Get the appropriate ticket from the ticket chain
         i. # Get the tipset K rounds back
             ticket <-- chain.TicketAtEpoch(N-K)
-5. Verify Election Proof validity
+4. Verify Election Proof validity
         i. # generate the VRFInput from the scratched ticket
             input <-- VRFPersonalization.ElectionProof | scratchedTicket.VDFOutput
         ii. # Check that the election proof was correctly generated by the miner
@@ -348,8 +313,9 @@ X -> Bin(eNumberOfBlocksPerRound * 10,000, 1/10,000). We have:
 
 with:
     - stdDev[X] = sqrt(eNumberOfBlocksPerRound * (1 - 1/10,000))
-    - CDF(X, |blocksInTipset(ts)) = Sum_i=0^k ((10,000*eNumberOfBlocksPerRound choose i) (1/10,000)^i (9,999/10,000)^(eNumberOfBlocksPerRound - i))
+    - CDF(X, |blocksInTipset(ts)) = Sum_i=0^k ((10,000* choose i) (1/10,000)^i (9,999/10,000)n- i
 
+CDF(X, k) with
 The weight should be calculated using big integer arithmetic with order of operations defined above. The multiplication by 1,000 and flooring is meant to help generate uniform weights across implementations.
 
 ```sh
@@ -382,7 +348,7 @@ The probability that two Tipsets with different blocks would have all the same t
 
 {{<label finality>}}
 ## Finality in EC
-TODO
+EC enforces a version of soft finality whereby all miners at round N will reject all blocks coming in prior to round N-F. For illustrative purposes, we can take F to be 500. While strictly speaking EC is a probabilistically final protocol, choosing such an F simplifies miner implementations and enforces a socially-bound finality at no cost to liveness in the chain.
 
 ## Slashing in EC
 
@@ -390,7 +356,7 @@ Due to the existence of potential forks, a miner can try to unduly influence pro
 
 This is detectable when a miner submits two blocks that satisfy either of the following "slashing conditions":
 
-(1) one block contains at least one ticket in its ticket array generated at the same round as one of the tickets in the other block's ticket array.
+(1) one block contains the same electionProof nonce as one of the other blocks'.
 (2) one block's parent is a Tipset that could have validly included the other block according to Tipset validity rules, however the parent of the first block does not include the other block.
 
   - While it cannot be proven that a miner omits known blocks from a Tipset in general (i.e. network latency could simply mean the miner did not receive a particular block) in this case it can be proven because a miner must be aware of a block they mined in a previous round.

@@ -11,7 +11,6 @@ type Ticket struct {
 }
 
 type StoragePower UVarint
-type PowerFraction Float
 
 type ElectionSeed filcrypto.VDFResult
 
@@ -19,6 +18,7 @@ type ElectionProof struct {
     vrfResult filcrypto.VRFResult
     IsWinning(minerPower PowerFraction) bool @(cached)
     Verify(input Bytes, pk VRFPublicKey) bool
+    Nonce             UVarint
 
     ValidateSyntax() bool
     Verify(seed ElectionSeed, minerPK filcrypto.PubKey) bool

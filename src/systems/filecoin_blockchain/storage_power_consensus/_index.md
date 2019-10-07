@@ -11,7 +11,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 Succinctly, the SPC subsystem offers the following services:
 - Access to the _Power Table_ for every subchain, accounting for individual storage miner power and total power on-chain.
 - Access to {{<sref expected_consensus>}} for individual storage miners, enabling:
-    - Access to verifiable randomness {{<sref tickets>}}as needed in the rest of the protocol. 
+    - Access to verifiable randomness {{<sref tickets>}} as needed in the rest of the protocol.
     - Running  {{<sref leader_election>}} to produce new blocks.
     - Running {{<sref chain_selection>}} across subchains using EC's weighting function. 
     - Identification of {{<sref finality "the most recently finalized tipset">}}, for use by all protocol participants.
@@ -44,12 +44,6 @@ Conversely, storage faults only lead to power loss once they are detected (up to
 
 Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
 
-To illustrate this, an example:
-
-Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 39. Their next `provingPeriodEnd` will be 69, but M1 can submit a new PoST at any height X, for X in (39, 69]. Let's assume X is 67.
-
-At height Y in (39, 67], M1 will attempt to generate an `ElectionProof` using the storage market actor from height 39 for their own power (and an actor from Y for total network power); at height 68, M1 will use the storage market actor from height 67 for their own power, and the storage market actor from height 68 for total power and so on.
-
 ## Repeated leader election attempts
 
-In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election.
+In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid `ElectionProof`
