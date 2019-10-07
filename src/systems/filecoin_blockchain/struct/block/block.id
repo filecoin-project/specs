@@ -29,8 +29,8 @@ type BlockHeader struct {
 
     // Consensus things
     Timestamp        clock.Time
-    Tickets          [Ticket]
-    ElectionProof
+    Ticket           Ticket
+    ElectionProof    ElectionProof
 
     // Signatures
     BlockSig         filcrypto.Signature
@@ -40,7 +40,6 @@ type BlockHeader struct {
     //	ComputeUnsignedFingerprint() []
 
     ValidateTickets(pubKey filcrypto.PubKey) bool
-    ExtractElectionSeed() ElectionSeed
 }
 
 // TODO: remove this. header is signed

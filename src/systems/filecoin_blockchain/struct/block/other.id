@@ -3,12 +3,11 @@ import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 // TODO: move all this stuff elsewhere. a consensus lib?
 
 type Ticket struct {
-    vrfResult         filcrypto.VRFResult
-    vdfResult         filcrypto.VDFResult
+    VrfResult         filcrypto.VRFResult
 
-    // Generate(k VRFKeyPair, seed ElectionSeed) Ticket
+    Output            Bytes     @(cached)
     ValidateSyntax()  bool
-    Validate()        bool
+    Verify(input Bytes, pk VRFPublicKey) bool
 }
 
 type StoragePower UVarint
@@ -16,14 +15,10 @@ type PowerFraction Float
 
 type ElectionSeed filcrypto.VDFResult
 
-type ElectionArtifacts struct {
-    TK Ticket
-    T1 Ticket
-}
-
 type ElectionProof struct {
     vrfResult filcrypto.VRFResult
     IsWinning(minerPower PowerFraction) bool @(cached)
+    Verify(input Bytes, pk VRFPublicKey) bool
 
     ValidateSyntax() bool
     Verify(seed ElectionSeed, minerPK filcrypto.PubKey) bool

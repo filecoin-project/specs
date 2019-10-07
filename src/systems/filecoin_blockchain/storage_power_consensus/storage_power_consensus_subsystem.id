@@ -37,10 +37,10 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
 type PowerTable struct {
     // all power here is always verified
-    minerPower {addr.Address: StorageMiner}
-    LookupMinerStorage(a addr.Address) UVarint
-    LookupMinerPowerFraction(a addr.Address) block.PowerFraction
-    RemovePower(a addr.Address)
+    minerPower {base.Address: StorageMiner}
+    LookupMinerPower(addr base.Address) UVarint
+    GetTotalPower() UVarint
+    RemovePower(addr base.Address)
 }
 
 type StorageMiner struct {

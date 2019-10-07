@@ -8,4 +8,5 @@ type Chain struct {
     LatestCheckpoint()  block.ChainEpoch
 
     TipsetAtEpoch(epoch block.ChainEpoch) block.Tipset
+    TicketAtEpoch(epoch Epoch)  Ticket
 }
