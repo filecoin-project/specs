@@ -1,0 +1,1 @@
+type SealProof Bytes

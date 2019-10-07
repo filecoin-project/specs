@@ -1,0 +1,50 @@
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
+import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+
+type Block struct {
+    MinerAddress     base_blockchain.Address
+    Tickets          [base_blockchain.Ticket]
+    ParentTipset     Tipset
+    ParentWeight     base_blockchain.ChainWeight
+    Height           base_blockchain.ChainHeight
+    StateTree        stateTree.StateTree
+    Messages         [base_blockchain.Message]
+    //	BLSAggregate 	             filcrypto.Signature
+    MessageReceipts  [base_blockchain.MessageReceipt]
+    Timestamp        clock.Time
+    BlockSig         filcrypto.Signature
+
+    //	SerializeSigned()            []byte
+    //	ComputeUnsignedFingerprint() []
+
+    VerifyTickets()  bool
+}
+
+type SignedBlock struct {
+    block  &Block
+    sig    filcrypto.Signature
+}
+
+type Tipset struct {
+    Blocks             [Block]
+
+    Has(block Block)   bool                         @(cached)
+    Parents            Tipset                       @(cached)
+    // StateTree should live in VM
+    StateTree          stateTree.StateTree          @(cached)
+    Epoch                                           @(cached)
+    Weight             base_blockchain.ChainWeight  @(cached)
+
+    ValidateSyntax()   bool                         @(cached)
+    LatestTimestamp()  clock.Time                   @(cached)
+}
+
+type Chain struct {
+    HeadEpoch()                 Epoch
+    FinalizedEpoch()            Epoch
+    LatestCheckpoint()          Epoch
+
+    TipsetAtEpoch(epoch Epoch)  Tipset
+}

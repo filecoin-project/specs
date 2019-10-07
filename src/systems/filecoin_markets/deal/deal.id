@@ -1,0 +1,15 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+
+type DealCID ipld.CID
+
+type Deal struct {
+
+}
+
+type StorageDeal struct {
+
+}
+
+type RetrievalDeal struct {
+
+}

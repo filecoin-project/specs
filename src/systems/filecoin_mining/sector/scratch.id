@@ -1,0 +1,44 @@
+//  SealVerifyArtifacts struct {}
+//  SealVerifyArtifacts union {
+//    ZigZagSealVerifyArtifacts struct {
+//      Proof ZigZagSealProof
+//    }
+
+// type SealAlgorithmArtifacts struct {
+// AlgorithmWideArtifacts struct {
+//   // trusted setup output parameters go here
+//   // updates to public parameters go here
+
+// }
+
+// SealSetupArtifacts struct {
+//   // per-sector setup artifacts go here
+// }
+
+// ProveArtifacts or
+// ChallengeArtifacts struct {
+//   // inputs into prove() go here
+// }
+
+// VerifyArtifacts struct {
+//   // inputs into verify() go here
+// }
+// }
+
+// type SealAlgorithm struct {}
+// SealAlgorithm union {
+//   SuperSectorPorep struct { // TODO Porcu names it
+//     SectorSize SuperSectorPorepSectorSize
+//     Partitions SuperSectorPorepPartitions
+//     Subsectors SuperSectorPorepSubsectorCount
+//   }
+// }
+
+// SealOutputArtifacts union {
+//   SuperSectorPorepOutputArtifacts struct {
+//     Proof       ZigZagSealProof
+//     ReplicaTree ReplicaTree
+//     CommRLast   ZigZagCommRLast
+//     CommC       ZigZagCommC
+//   }
+// }

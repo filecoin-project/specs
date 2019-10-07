@@ -1,43 +1,116 @@
-# The Filecoin Spec
+# Filecoin Specification
 
-This repo contains the documents that comprise the Filecoin spec.
+This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
 
-Every document in the top level of the repo is part of the official spec, and
-is canon. Documents in the 'drafts' folder are work-in-progress draft documents
-that aren't yet accepted as part of the spec, but exist here for discussion.
-Documents in the notes repo are various notes from different meetings and
-discussions.
+## View Website
 
-### Viewing the spec
+You can view and explore the Filecoin Specification via its [website rendering](https://filecoin-project.github.io/specs). You do not need to download and work with this repository.
 
-*Recommended:* You can view the spec [here](https://filecoin-project.github.io/specs).
+## Contributing
 
-You can also view it locally by using [hugo](https://gohugo.io/).
+Please [read the spec proces](https://filecoin-project.github.io/specs/#intro__process). Please file PRs on github with fixes.
+
+## Develop
+
+### Install
 
 ```
-> git submodule update --init --recursive
-> hugo serve
+git clone https://github.com/filecoin-project/spec filecoin-specs
+cd filecoin-specs
+make deps-basic
 ```
 
+### Build
 
-If you're just browsing on GitHub, start with [INTRO.md](INTRO.md). But really, we recommend using
-the rendered output. It is much easier to read and use.
+```
+make build
+```
 
-## Updates process for specs
+### Serve
 
-For info on how this spec changes, please see [the process doc](process.md).
+```
+make serve
+```
 
-## Questions on the spec?
+This will write out an HTTP address to check out with your browser. Most likely: http://localhost:1313
 
-Issues are a great way to ask these questions. In general, your issue is much more likely to get a response
-if you tag an interested party in your question. Some folks you may consider tagging (based on subject):
-- [@whyrusleeping](https://github.com/whyrusleeping) - node behavior, storage market, networking behavior, protocol stewardship (upgrading, versioning, governance, etc)
-- [@dignifiedquire](https://github.com/dignifiedquire) - PoSTs, proofs, data structures
-- [@nicola](https://github.com/nicola) - PoSTs, proofs
-- [@pooja](https://github.com/pooja) - protocol stewardship, project status
-- [@henri](https://github.com/sternhenri) - chain sync, consensus
+### Website
 
-## Owners/ Points of Contact
+```
+make website
+```
 
-- [@whyrusleeping](https://github.com/whyrusleeping)
-- [@dignifiedquire](https://github.com/dignifiedquire)
+## Overviews
+
+### Build System Overview
+
+Given the complexity of the protocol, a build system is introduced to leverage the power of modern programs and improve understanding, efficiency, consistency, and velocity of Filecoin spec development. The Filecoin spec is organized into subcomponents as defined in `src/` with high-level and introductory sections in `Introduction` and `Algorithmns`, detailed spec on different Filecoin systems in `Systems`, followed by `Listings`, `Glossary`, and `Appendix`.
+
+For every subsystem in the Filecoin spec, it must always have a markdown file that specifies the component. Wherever possible and necessary, an `.id` file should be included to automatically generate compiled `.go` files that can be tested to ensure build consistency and served from `hugo`. Similarly, contributors should include an `.orient` file that describes mathematical constraints in a component of the system. `Orient`, a language created to write constraints and models about the system, is used to perform ubercalc and generate artifacts about the system. To facilitate in line code display, an `.org` file can also be included to interweave output from ubercalc and markdown.
+
+ <!--
+ An architectural diagram of the build system can be found below.
+  This is outdated. fix it and bring back.
+<img src="src/diagrams/buildsys/buildsys.svg" width="50%">
+-->
+
+### System Overview
+
+<img src="src/diagrams/overview1/overview.svg" />
+
+## Detailed Build Usage
+
+```makefile
+> make help
+SYNOPSIS
+  make -- filecoin spec build toolchain commands
+
+USAGE
+  make deps-basic  run this once, to install & build basic dependencies
+  make build       run this every time you want to re-build artifacts
+
+MAIN TARGETS
+  make help        description of the targets (this message)
+  make build       build all final artifacts (website only for now)
+  make test        run all test cases (test-code only for now)
+  make drafts      publish artifacts to ipfs and show an address
+  make publish     publish final artifacts to spec website (github pages)
+  make clean       removes all build artifacts. you shouldn't need this
+  make serve       start hugo in serving mode -- must run 'make build' on changes manually
+
+INSTALL DEPENDENCIES
+  make deps        install ALL dependencies of this tool chain
+  make deps-basic  install minimal dependencies of this tool chain
+  make deps-diag   install dependencies for rendering diagrams
+  make deps-orient install dependencies for running orient
+  make deps-ouser  install dependencies for orient user-environment tooling
+  make bins        compile some build tools whose source is in this repo
+
+INTERMEDIATE TARGETS
+  make website     build the website artifact
+  make diagrams    build diagram artifacts ({dot, mmd} -> svg)
+  make org2md      run org mode to markdown compilation
+
+HUGO TARGETS
+  make hugo-src    copy sources into hugo dir
+  make build-hugo  run the hugo part of the pipeline
+  make watch-hugo  watch and rebuild hugo
+
+CODE TARGETS
+  make gen-code    generate code artifacts (eg id -> go)
+  make test-code   run test cases in code artifacts
+  make build-code  build all src go code (test it)
+  make clean-code  remove build code artifacts
+  make watch-code  watch and rebuild code
+
+CLEAN TARGETS
+  make clean       remove all build artifacts
+  make clean-deps  remove (some of) the dependencies installed in this repo
+  make clean-hugo  remove intermediate hugo artifacts
+  make clean-code  remove build code artifacts
+
+WATCH TARGETS
+  make serve-and-watch -j2  serve, watch, and rebuild all - works for live edit
+  make watch-code           watch and rebuild code
+  make watch-hugo           watch and rebuild hugo
+```

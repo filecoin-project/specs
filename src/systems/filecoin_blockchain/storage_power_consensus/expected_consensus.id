@@ -1,0 +1,8 @@
+type ChainWeight UVarint
+
+type ExpectedConsensus struct {
+    // ComputeWeight(Chain)							ChainWeight
+    // TryElection(StorageMiner, TipSet)				ElectionProof
+    // VerifyElection(StorageMiner, ElectionProof)		bool
+    // IsConsensusFault([Block])						bool
+}

@@ -1,0 +1,328 @@
+@import url('https://fonts.googleapis.com/css?family=Lato:300,700|Merriweather:300italic,300|Inconsolata:400,700');
+
+// Font Families
+$serifFontFamily: 'Merriweather', 'Book Antiqua', Georgia, 'Century Schoolbook', serif;
+$sansFontFamily: 'Lato', sans-serif;
+$monoFontFamily: 'Inconsolata', Menlo, Courier, monospace;
+
+// Typography
+$baseFontSize: 18px;
+$baseLineHeight: 1.5em;
+
+
+// Colors
+$darkGray: #373f52;
+$mediumGray: #959595;
+$gray: #e1e1e1;
+$lightestGray: #d5dae6;
+$white: #ffffff;
+$black: #000000;
+$purple: #8f6cd6;
+$lightPurple: #7f60be;
+$codeBackground: #f7f9fc;
+$detailGray: #f7f7f7;
+$groupGray: #dddddd;
+$yellow: #f1c40f;
+$orange: #e67e22;
+$red: #e74c3c;
+$darkBlue: #1f5b83;
+$blue: #3498db;
+
+
+html {
+  font-size: $font-size-base;
+  scroll-behavior: auto;
+}
+
+html,
+body {
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  overflow-x: inherit;
+}
+
+body {
+  background-color: $white;
+  font-size: 16px;
+  font-family: $sansFontFamily;
+  line-height: 1em;
+}
+
+
+.book-page {
+  font-family: $serifFontFamily;
+  font-size: 1em;
+  line-height: 1.6875em;
+}
+
+.book-menu {
+  font-family: $sansFontFamily;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+.book-toc {
+  font-family: $sansFontFamily;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.markdown {
+  max-width: 90%;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: $sansFontFamily;
+    font-weight: 700;
+    line-height: 1.5em;
+    word-wrap: break-word;
+  }
+
+  h1 {
+    font-size: 2.5em;
+    margin: 1em 0 .5em;
+
+    &.signature {
+      margin: 0;
+    }
+
+    &.section-heading {
+      margin: 1.5em 0 .5em;
+    }
+
+    & small {
+      font-weight: 300;
+    }
+
+    a.view-source {
+      font-size: 1.2rem;
+    }
+  }
+
+  h2 {
+    font-size: 2.0em;
+    margin: 1em 0 .5em;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.6em;
+    margin: 1em 0 .5em;
+    font-weight: 700;
+  }
+
+  h4 {
+    font-size: 1.3em;
+    margin: 1em 0 .5em;
+    font-weight: 700;
+  }
+
+  h5 {
+    font-size: 1.15em;
+    margin: 1em 0 .5em;
+    font-weight: 700;
+  }
+
+  h6 {
+    font-size: 1.0em;
+    margin: 1em 0 .5em;
+    font-weight: 700;
+  }
+
+  a.no-underline {
+    text-decoration: none;
+  }
+
+  a.view-source {
+    float: right;
+    color: $mediumGray;
+    text-decoration: none;
+    border: none;
+    transition: color 0.3s ease-in-out;
+    margin-top: 1px;
+
+    &:hover {
+      color: $darkGray;
+    }
+  }
+
+  .note {
+    color: #959595;
+    margin-right: 5px;
+    font-size: 14px;
+    font-weight: normal;
+  }
+
+  blockquote {
+    font-style: italic;
+    margin: .5em 0;
+    padding: .25em 1.5em;
+    border-left: 3px solid $gray;
+    display: inline-block;
+
+    *:first-child {
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    *:last-child {
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  table {
+    margin: 2em 0;
+    table-layout:fixed;
+    width: 100%;
+    display: block;
+
+    th {
+      text-align: left;
+      font-family: $sansFontFamily;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding-bottom: .5em;
+    }
+
+    tr {
+      border-bottom: 1px solid $lightestGray;
+      vertical-align: bottom;
+      height: 2.5em;
+
+      td, th {
+        padding-left: 1em;
+        line-height: 1.5em;
+        vertical-align: top;
+      }
+    }
+  }
+}
+
+img {
+  max-width: 100%;
+}
+
+
+
+
+// -- Code
+
+.markdown a:not(.codeLink), a:not(.codeLink), pre a:not(.codeLink) {
+  color: $darkBlue;
+  text-shadow: none;
+  text-decoration: none;
+  background-image: none;
+
+  &:active,
+  &:focus,
+  &:hover {
+    color: $blue;
+    text-decoration: underline;
+  }
+}
+
+.markdown {
+  pre {
+    background-color: transparent;
+    padding: 0;
+    margin: $baseLineHeight 0;
+
+    code {
+      display: block;
+      overflow-x: auto;
+      white-space: inherit;
+      padding: 0.5em 1em;
+      background-color: $codeBackground;
+    }
+  }
+
+  code {
+    font-family: $monoFontFamily;
+    font-style: normal;
+    line-height: 24px;
+    font-weight: 400;
+    background-color: $codeBackground;
+    vertical-align: baseline;
+    border-radius: 2px;
+    padding: .1em .2em;
+    border: 1px solid darken($codeBackground, 10%);
+    text-transform: none;
+    word-wrap: break-word;
+  }
+}
+
+a.codeLink {
+  color: $darkBlue;
+
+  &:active,
+  &:focus,
+  &:hover {
+    color: $purple;
+    text-decoration: none;
+  }
+}
+
+
+// -- Notices
+
+.todo_inline {
+  font-style: italic;
+}
+
+.notices {
+  font-style: italic;
+  margin: .5em 0;
+  padding: .25em 1.5em;
+  border-left: 3px solid $gray;
+  display: inline-block;
+
+  *:first-child {
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  *:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  &.warning {
+    border-left: 3px solid $red;
+  }
+
+  &.info {
+    border-left: 3px solid $blue;
+  }
+
+  &.note {
+    border-left: 3px solid $yellow;
+  }
+
+  &.todo {
+    border-left: 3px solid $orange;
+  }
+}
+
+.definition {
+  font-style: italic;
+  margin: .5em 0;
+  padding: .25em 1.5em;
+  border-left: 3px solid $darkGray;
+  display: inline-block;
+  background-color: $detailGray;
+}
+
+
+.book-git-footer {
+  margin-top: 4em;
+
+  img {
+    vertical-align: middle !important;
+  }
+}

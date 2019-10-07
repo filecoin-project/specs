@@ -1,0 +1,39 @@
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+
+// TODO: move this into a directory w/ all the actors + states
+type ActorName enum {
+    StoragePowerActor
+    StorageMarketActor
+    StorageMinerActor
+    PaymentChannelActor
+    InitActor
+    AccountActor
+    CronActor
+}
+
+type StateTree struct {
+    SystemActors  {ActorName: addr.Address}
+    ActorStates   {addr.Address: actor.ActorState}
+
+    // TODO: API ConvenienceAPI
+}
+
+// Things we may add:
+//
+// number of sectors
+// number of miners
+// number of deals?
+// number of actors
+//
+// number of addresses
+// token stats
+// storage power stats
+//
+// $head/state/sectors/count
+// $head/state/sectors/<num> (cid)
+// $head/state/sectors/<num>/size
+// $head/state/sectors/<num>/pieces/count
+// $head/state/sectors/<num>/pieces/<num> (cid)
+// $head/state/pieces/count
+// $head/state/pieces/<num> (cid)

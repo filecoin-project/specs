@@ -1,0 +1,38 @@
+// type SystemActor union {
+// //  InitActor           InitActor
+// //  AccountActor        AccountActor
+// //  StoragePowerActor   StoragePowerActor
+// //  StorageMinerActor   StorageMinerActor
+// //  CronActor           CronActor
+// //  PaymentChannelActor PaymentChannelActor
+// }
+
+// type ActorState union {
+// SystemActor SystemActor
+// UserActor UserActor
+// }
+
+// state := actor.State.as_SystemActorState().as_InitActorState()
+// var actor, state := getInitActor()
+
+// type StoragePowerActorState struct {
+//  // maintain storage power over time
+//  Meta ActorMeta
+//  PowerTableMap {Address:BytesAmount}
+
+//  GetPowerForMiner(Address) BytesAmount
+//  PutPowerForMiner(Address, BytesAmount) bool
+// }
+
+// type StorageMinerActorState struct {
+//  Meta ActorMeta
+//  RegisterMiner(PublicKey, BytesAmount) Address
+// }
+
+// type CronActorState struct {
+//  Meta ActorMeta
+// }
+
+// type PaymentChannelActorState struct {
+//  Meta ActorMeta
+// }

@@ -1,1 +1,0 @@
-../../zigzag-circuit.md

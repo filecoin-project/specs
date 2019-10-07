@@ -1,0 +1,5 @@
+<div>
+  {{ with $x := (readFile (print "content/code/" (.Get 0) ".go") | safeHTML) }}
+    {{ highlight $x "go" "" }}
+  {{ end }}
+</div>

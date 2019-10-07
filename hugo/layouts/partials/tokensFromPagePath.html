@@ -1,0 +1,13 @@
+{{- $inputPath := . -}}
+
+{{- $pathTokens := split $inputPath "/" -}}
+
+{{- $ret := slice -}}
+
+{{- range $pathTokens -}}
+  {{- if (not (eq . "_index.md")) -}}
+    {{- $ret = append (index (split . ".") 0) $ret -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return (after 1 $ret) -}}

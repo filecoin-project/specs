@@ -1,0 +1,28 @@
+import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+
+type BytesAmount UVarint
+
+type StoragePowerActor struct {
+    // call by StorageMiningSubsytem on miner creation
+    RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey)
+
+    // call by StorageMinerActor on successful seal
+    // TODO: workerKey of type StorageMiner.WorkerPubKey
+    IncrementPower(minerAddress base.Address)
+    UpdatePower(address base.Address, newPower minerStorage)
+    SuspendMiner(address base.Address)
+
+    // UpdateStoragePowerSubsystem(Tipset, StateTree)
+
+    // VerifyElectionProof(base.Address, base.ElectionProof)	bool
+    TotalStorage() BytesAmount
+
+    // // What does graceful removal look like?
+    // NotifyConsensusFault(base.Address, [Block])
+    // NotifyStorageFault(base.Address)
+    // TryPublishBlock(StateTree)					Block
+
+    // RegisterStorageMiner(SealProof)				Address
+    // TryUpdateStorage(base.Address, newPower)			error
+}
