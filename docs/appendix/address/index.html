@@ -1,0 +1,4758 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Address | Filecoin Spec</title>
+
+
+
+<link rel="stylesheet" href="../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+
+
+<link rel="icon" href="../../../favicon.png" type="image/x-icon">
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="../../../css/syntax.css">
+<link href="../../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="../../../mermaid/mermaid.js"></script>
+<script src="../../../spec.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" class="hidden" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href=""><span>Filecoin Spec</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" placeholder="Search" id="book-search-input" maxlength="64" readonly />
+  <div class="book-search-spinner spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f appendix\2f address\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+
+  <div>
+
+  <div>
+    
+    <input id="menu-detail-slider" type="range" onchange="onMenuDetailChange();"
+      min="1" value="3" max="5" step="1" />
+
+    <span id="menu-detail-slider-label">3</span>
+  </div>
+
+  
+  
+  <ul class="menu-item-section depth-0">
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Introduction
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__arch" class="menu-item depth-2">
+    
+    
+        Architecture Diagrams
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__concepts" class="menu-item depth-2">
+    
+    
+        Key Concepts
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__filecoin_vm" class="menu-item depth-2">
+    
+    
+        Filecoin VM
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process" class="menu-item depth-2">
+    
+    
+        Process
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__about" class="menu-item depth-3">
+    
+    
+        About
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__fip" class="menu-item depth-3">
+    
+    
+        FIPs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__contributing" class="menu-item depth-3">
+    
+    
+        Contributing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources" class="menu-item depth-3">
+    
+    
+        Related Resources
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__research_portal" class="menu-item depth-4">
+    
+    
+        Research portal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__network_tooling" class="menu-item depth-4">
+    
+    
+        Network tooling
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__testing" class="menu-item depth-4">
+    
+    
+        Testing and implementation compliance
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system" class="menu-item depth-2">
+    
+    
+        System Decomposition
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system__why_systems" class="menu-item depth-3">
+    
+    
+        What are Systems?
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system__impl_systems" class="menu-item depth-3">
+    
+    
+        Implementing Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Systems
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes" class="menu-item depth-2">
+    ⚙️
+    
+        <strong>Filecoin Nodes</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types" class="menu-item depth-3">
+    
+    
+        Node Types
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__node" class="menu-item depth-4">
+    
+    
+        Node Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__node_types" class="menu-item depth-4">
+    
+    
+        Examples
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__verifier_node" class="menu-item depth-4">
+    
+    
+        Chain Verifier Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__client_node" class="menu-item depth-4">
+    
+    
+        Client Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__storage_miner_node" class="menu-item depth-4">
+    
+    
+        Storage Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__retrieval_miner_node" class="menu-item depth-4">
+    
+    
+        Retrieval Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__relayer_node" class="menu-item depth-4">
+    
+    
+        Relayer Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository" class="menu-item depth-3">
+    
+    
+        Repository
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository__config" class="menu-item depth-4">
+    
+    
+        Config
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+    
+    
+        KeyStore &amp; user keys
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository__ipldstore" class="menu-item depth-4">
+    
+    
+        IpldStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
+    
+    
+        Usage in Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__network" class="menu-item depth-3">
+    
+    
+        Network Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__clock" class="menu-item depth-3">
+    
+    
+        Clock
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files" class="menu-item depth-2">
+    📑
+    
+        <strong>Files &amp; Data</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_files__file" class="menu-item depth-3">
+    
+    
+        File
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__file__filestore" class="menu-item depth-4">
+    
+    
+        FileStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__piece" class="menu-item depth-3">
+    
+    
+        Piece
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__piece__piece_store" class="menu-item depth-4">
+    
+    
+        PieceStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__data_transfer" class="menu-item depth-3">
+    
+    
+        Data Transfer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain" class="menu-item depth-2">
+    📦
+    
+        <strong>Blockchain</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm" class="menu-item depth-3">
+    
+    
+        Virtual Machine
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__address" class="menu-item depth-4">
+    
+    
+        VM Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__actor" class="menu-item depth-4">
+    
+    
+        VM Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__state_tree" class="menu-item depth-4">
+    
+    
+        VM State Tree
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__message" class="menu-item depth-4">
+    
+    
+        VM Message
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors" class="menu-item depth-4">
+    
+    
+        VM System Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__init_actor" class="menu-item depth-5">
+    
+    
+        InitActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__cron_actor" class="menu-item depth-5">
+    
+    
+        CronActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__account_actor" class="menu-item depth-5">
+    
+    
+        AccountActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__interpreter" class="menu-item depth-4">
+    
+    
+        VM Interpreter
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__runtime" class="menu-item depth-4">
+    
+    
+        VM Runtime Environment
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool" class="menu-item depth-3">
+    
+    
+        Message Pool
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool__message_syncer" class="menu-item depth-4">
+    
+    
+        Message Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool__message_storage" class="menu-item depth-4">
+    
+    
+        Message Storage
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain" class="menu-item depth-3">
+    
+    
+        Blockchain Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__block_syncer" class="menu-item depth-4">
+    
+    
+        Block Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__chain_manager" class="menu-item depth-4">
+    
+    
+        Chain Manager
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__block_producer" class="menu-item depth-4">
+    
+    
+        Block Producer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus" class="menu-item depth-3">
+    
+    
+        Storage Power Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
+    
+    
+        Storage Power Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token" class="menu-item depth-2">
+    📀
+    
+        <strong>Token</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__wallets" class="menu-item depth-3">
+    
+    
+        Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__payments" class="menu-item depth-3">
+    
+    
+        Payments
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__payment_channels" class="menu-item depth-3">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token__payment_channels__payment_channel_actor" class="menu-item depth-4">
+    
+    
+        Payment Channel Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__multisig" class="menu-item depth-3">
+    
+    
+        Multisig Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token__multisig__multisig_actor" class="menu-item depth-4">
+    
+    
+        Multisig Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining" class="menu-item depth-2">
+    ⛏
+    
+        <strong>Storage Mining</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining" class="menu-item depth-3">
+    
+    
+        Storage Miner
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__mining_cycle" class="menu-item depth-4">
+    
+    
+        Storage Mining Cycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__storage_miner_actor" class="menu-item depth-4">
+    
+    
+        Storage Miner Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
+    
+    
+        Mining Scheduler
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector" class="menu-item depth-3">
+    
+    
+        Sector
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__sectorset" class="menu-item depth-4">
+    
+    
+        Sector Set
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
+    
+    
+        Sector Sealing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index" class="menu-item depth-3">
+    
+    
+        Sector Index
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index__sector_builder" class="menu-item depth-4">
+    
+    
+        Sector Builder
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index__sector_store" class="menu-item depth-4">
+    
+    
+        SectorStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving" class="menu-item depth-3">
+    
+    
+        Storage Proving
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving__sealer" class="menu-item depth-4">
+    
+    
+        Sector Sealer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving__poster" class="menu-item depth-4">
+    
+    
+        Sector Poster
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets" class="menu-item depth-2">
+    ⚖️
+    
+        <strong>Market</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__order" class="menu-item depth-3">
+    
+    
+        Orders
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
+    
+    
+        Deals
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
+    
+    
+        Storage Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__storage_market_actor" class="menu-item depth-4">
+    
+    
+        Storage Market Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market" class="menu-item depth-3">
+    
+    
+        Retrieval Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market__retrieval_client" class="menu-item depth-4">
+    
+    
+        Retrieval Client
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market__retrieval_provider" class="menu-item depth-4">
+    
+    
+        Retrieval Provider (Miner)
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Libraries
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__fcs" class="menu-item depth-2">
+    
+    
+        FCS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld" class="menu-item depth-2">
+    
+    
+        IPLD
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld__cid" class="menu-item depth-3">
+    
+    
+        CID
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipld__datamodel" class="menu-item depth-3">
+    
+    
+        Data Model
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipld__selectors" class="menu-item depth-3">
+    
+    
+        Selectors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld__graphstore" class="menu-item depth-3">
+    
+    
+        GraphStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p" class="menu-item depth-2">
+    
+    
+        libp2p
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__gossipsub" class="menu-item depth-3">
+    
+    
+        gossipsub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__kad_dht" class="menu-item depth-3">
+    
+    
+        kad-dht
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__fil_libp2p_nodes" class="menu-item depth-3">
+    
+    
+        fil-libp2p Nodes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipfs" class="menu-item depth-2">
+    
+    
+        IPFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__bitswap" class="menu-item depth-3">
+    
+    
+        BitSwap
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__graphsync" class="menu-item depth-3">
+    
+    
+        GraphSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__unixfs" class="menu-item depth-3">
+    
+    
+        UnixFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__multiformats" class="menu-item depth-2">
+    
+    
+        Multiformats
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Algorithms
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__expected_consensus" class="menu-item depth-2">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep" class="menu-item depth-2">
+    
+    
+        Proof-of-Replication
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep__zigzag" class="menu-item depth-3">
+    
+    
+        ZigZag-PoRep
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep__porep_commitments" class="menu-item depth-3">
+    
+    
+        PoRep Commitments
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post" class="menu-item depth-2">
+    
+    
+        Proof-of-Spacetime
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post__rational_post" class="menu-item depth-3">
+    
+    
+        Rational-PoSt
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
+    
+    
+        PoSt Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__payment_channels" class="menu-item depth-2">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__block_sync" class="menu-item depth-2">
+    
+    
+        BlockSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__gossip_sub" class="menu-item depth-2">
+    
+    
+        GossipSub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__crypto" class="menu-item depth-2">
+    
+    
+        Cryptographic Primitives
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Listings
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__actors" class="menu-item depth-2">
+    
+    
+        Filecoin VM Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__data_structures" class="menu-item depth-2">
+    
+    
+        Data Structures
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__system_map" class="menu-item depth-2">
+    
+    
+        Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__libp2p_protocols" class="menu-item depth-2">
+    
+    
+        libp2p Protocols
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#glossary" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Glossary
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Appendix
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__sharray" class="menu-item depth-2">
+    
+    
+        Sharded IPLD Array
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__orient" class="menu-item depth-2">
+    
+    
+        Filecoin Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+  </ul>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+<script>
+(function() {
+  var menu = document.querySelector("aside.book-menu nav");
+  addEventListener("beforeunload", function(event) {
+    localStorage.setItem("menu.scrollTop", menu.scrollTop);
+  });
+  menu.scrollTop = localStorage.getItem("menu.scrollTop");
+})();
+</script>
+
+    </aside>
+
+    <div class="book-page">
+      <header class="flex align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>Address</strong>
+</header>
+
+      
+<article class="markdown">
+  
+
+<p>A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.</p>
+
+<h1 id="design-criteria">Design criteria</h1>
+
+<ol>
+<li><strong>Identifiable</strong>: The address must be easily identifiable as a Filecoin address.</li>
+<li><strong>Reliable</strong>: Addresses must provide a mechanism for error detection when they might be transmitted outside the network.</li>
+<li><strong>Upgradable</strong>: Addresses must be versioned to permit the introduction of new address formats.</li>
+<li><strong>Compact</strong>: Given the above constraints, addresses must be as short as possible.</li>
+</ol>
+
+<h1 id="specification">Specification</h1>
+
+<p>There are 2 ways a filecoin address can be represented. An address appearing on chain will always be formatted as raw bytes. An address may also be encoded to a string, this encoding includes a checksum and network prefix. An address encoded as a string will never appear on chain, this format is used for sharing among humans.</p>
+
+<h2 id="bytes">Bytes</h2>
+
+<p>When represented as bytes a filecoin address contains the following:</p>
+
+<ul>
+<li>A <strong>protocol indicator</strong> byte that identifies the type and version of this address.</li>
+
+<li><p>The <strong>payload</strong> used to uniquely identify the actor according to the protocol.</p>
+
+<pre><code>|----------|---------|
+| protocol | payload |
+|----------|---------|
+|  1 byte  | n bytes |
+</code></pre></li>
+</ul>
+
+<h2 id="string">String</h2>
+
+<p>When encoded to a string a filecoin address contains the following:</p>
+
+<ul>
+<li>A <strong>network prefix</strong> character that identifies the network the address belongs to.</li>
+<li>A <strong>protocol indicator</strong> byte that identifies the type and version of this address.</li>
+<li>A <strong>payload</strong> used to uniquely identify the actor according to the protocol.</li>
+
+<li><p>A <strong>checksum</strong> used to validate the address.</p>
+
+<pre><code>|------------|----------|---------|----------|
+|  network   | protocol | payload | checksum |
+|------------|----------|---------|----------|
+| 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
+</code></pre></li>
+</ul>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Address</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="p">|</span> <span class="nx">AddressId</span> <span class="mi">0</span>
+    <span class="p">|</span> <span class="nx">AddressSecp256k1</span> <span class="mi">1</span>
+    <span class="p">|</span> <span class="nx">AddressActor</span> <span class="mi">2</span>
+    <span class="p">|</span> <span class="nx">AddressBLS12_381</span> <span class="mi">3</span>
+<span class="p">}</span> <span class="c1">// representation byteprefix
+</span><span class="c1"></span>
+<span class="c1">// ID
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressId</span> <span class="nx">UInt</span>
+
+<span class="c1">// Blake2b-160 Hash
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressSecp256k1</span> <span class="nx">Bytes</span>
+
+<span class="c1">// Blake2b-160 Hash
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressActor</span> <span class="nx">Bytes</span>
+
+<span class="c1">// 48 byte PublicKey
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressBLS12_381</span> <span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+
+
+<h2 id="network-prefix">Network Prefix</h2>
+
+<p>The <strong>network prefix</strong> is prepended to an address when encoding to a string. The network prefix indicates which network an address belongs in. The network prefix may either be <code>f</code> for filecoin mainnet or <code>t</code> for filecoin testnet. It is worth noting that a network prefix will never appear on chain and is only used when encoding an address to a human readable format.</p>
+
+<h2 id="protocol-indicator">Protocol Indicator</h2>
+
+<p>The <strong>protocol indicator</strong> byte describes how a method should interpret the information in the payload field of an address. Any deviation for the algorithms and data types specified by the protocol must be assigned a new protocol number. In this way, protocols also act as versions.</p>
+
+<ul>
+<li><code>0</code> : ID</li>
+<li><code>1</code> : SECP256K1 Public Key</li>
+<li><code>2</code> : Actor</li>
+<li><code>3</code> : BLS Public Key</li>
+</ul>
+
+<p>An example description in golang:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// Protocol byte
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Protocol</span> <span class="p">=</span> <span class="kt">byte</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+    <span class="nx">ID</span> <span class="nx">Protocol</span> <span class="p">=</span> <span class="kc">iota</span>
+    <span class="nx">SECP256K1</span>
+    <span class="nx">Actor</span>
+    <span class="nx">BLS</span>
+<span class="p">)</span></code></pre></div>
+<h3 id="protocol-0-ids">Protocol 0: IDs</h3>
+
+<p><strong>Protocol 0</strong> addresses are simple IDs.  All actors have a numeric ID even if they don&rsquo;t have public keys. The payload of an ID address is base10 encoded. IDs are not hashed and do not have a checksum.</p>
+
+<p><strong>Bytes</strong></p>
+
+<pre><code>|----------|---------------|
+| protocol |    payload    |
+|----------|---------------|
+|    0     | leb128-varint |
+</code></pre>
+
+<p><strong>String</strong></p>
+
+<pre><code>|------------|----------|---------------|
+|  network   | protocol |    payload    |
+|------------|----------|---------------|
+| 'f' or 't' |    '0'   | leb128-varint |
+                  base10[...............]
+</code></pre>
+
+<h3 id="protocol-1-libsecpk1-elliptic-curve-public-keys">Protocol 1: libsecpk1 Elliptic Curve Public Keys</h3>
+
+<p><strong>Protocol 1</strong> addresses represent secp256k1 public encryption keys. The payload field contains the <a href="https://blake2.net/">Blake2b 160</a> hash of the public key.</p>
+
+<p><strong>Bytes</strong></p>
+
+<pre><code>|----------|---------------------|
+| protocol |        payload      |
+|----------|---------------------|
+|    1     | blake2b-160(PubKey) |
+</code></pre>
+
+<p><strong>String</strong></p>
+
+<pre><code>|------------|----------|---------------------|----------|
+|  network   | protocol |      payload        | checksum |
+|------------|----------|---------------------|----------|
+| 'f' or 't' |    '1'   | blake2b-160(PubKey) |  4 bytes |
+                  base32[................................]
+</code></pre>
+
+<h3 id="protocol-2-actor">Protocol 2: Actor</h3>
+
+<p><strong>Protocol 2</strong> addresses representing an Actor. The payload field contains the <a href="https://blake2.net/">Blake2b 160</a> hash of meaningful data produced as a result of creating the actor.</p>
+
+<p><strong>Bytes</strong></p>
+
+<pre><code>|----------|---------------------|
+| protocol |        payload      |
+|----------|---------------------|
+|    2     | blake2b-160(Random) |
+</code></pre>
+
+<p><strong>String</strong></p>
+
+<pre><code>|------------|----------|-----------------------|----------|
+|  network   | protocol |         payload       | checksum |
+|------------|----------|-----------------------|----------|
+| 'f' or 't' |    '2'   |  blake2b-160(Random)  |  4 bytes |
+                  base32[..................................]
+</code></pre>
+
+<h3 id="protocol-3-bls">Protocol 3: BLS</h3>
+
+<p><strong>Protocol 3</strong> addresses represent BLS public encryption keys. The payload field contains the BLS public key.</p>
+
+<p><strong>Bytes</strong></p>
+
+<pre><code>|----------|---------------------|
+| protocol |        payload      |
+|----------|---------------------|
+|    3     | 48 byte BLS PubKey  |
+</code></pre>
+
+<p><strong>String</strong></p>
+
+<pre><code>|------------|----------|---------------------|----------|
+|  network   | protocol |      payload        | checksum |
+|------------|----------|---------------------|----------|
+| 'f' or 't' |    '3'   |  48 byte BLS PubKey |  4 bytes |
+                  base32[................................]
+</code></pre>
+
+<h2 id="payload">Payload</h2>
+
+<p>The payload represents the data specified by the protocol. All payloads except the payload of the ID protocol are <a href="https://tools.ietf.org/html/rfc4648#section-6">base32</a> encoded using the lowercase alphabet when seralized to their human readable format.</p>
+
+<h2 id="checksum">Checksum</h2>
+
+<p>Filecoin checksums are calculated over the address protocol and payload using blake2b-4. Checksums are base32 encoded and only added to an address when encoding to a string. Addresses following the ID Protocol do not have a checksum.</p>
+
+<h2 id="expected-methods">Expected Methods</h2>
+
+<p>All implementations in Filecoin must have methods for creating, encoding, and decoding addresses in addition to checksum creation and validation. The follwing is a golang version of the Address Interface:</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span>
+
+<span class="kd">type</span> <span class="nx">Address</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nf">Encode</span><span class="p">(</span><span class="nx">network</span> <span class="nx">Network</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">Adress</span><span class="p">)</span> <span class="kt">string</span>
+    <span class="nf">Decode</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span>
+    <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span>
+    <span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="new">New()</h3>
+
+<p>New returns an Address for the specified protocol encapsulating corresponding payload. New fails for unknown protocols.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">New</span><span class="p">(</span><span class="nx">protocol</span> <span class="kt">byte</span><span class="p">,</span> <span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">protocol</span> <span class="p">&lt;</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="p">&gt;</span> <span class="nx">BLS</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrUnknownType</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
+        <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
+        <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="encode">Encode()</h3>
+
+<p>Software encoding a Filecoin address must:</p>
+
+<ul>
+<li>produce an address encoded to a known network</li>
+<li>produce an address encoded to a known protocol</li>
+<li>produce an address with a valid checksum (if applicable)</li>
+</ul>
+
+<p>Encodes an Address as a string, prepending the network prefix, calculating the checksum, and encoding the payload and checksum to <a href="https://tools.ietf.org/html/rfc4648">base32</a>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Encode</span><span class="p">(</span><span class="nx">network</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;f&#34;</span> <span class="o">&amp;&amp;</span> <span class="nx">network</span> <span class="o">!=</span> <span class="s">&#34;t&#34;</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Invalid Network&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">switch</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">SECP256K1</span><span class="p">,</span> <span class="nx">Actor</span><span class="p">,</span> <span class="nx">BLS</span><span class="p">:</span>
+        <span class="nx">cksm</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="o">+</span><span class="nx">cksm</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">ID</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nx">network</span> <span class="o">+</span> <span class="nb">string</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span><span class="p">)</span> <span class="o">+</span> <span class="nx">base10</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">leb128</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">))</span>
+    <span class="k">default</span><span class="p">:</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid address protocol&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="decode">Decode()</h3>
+
+<p>Software decoding a Filecoin address must:
+* verify the network is a known network.
+* verify the protocol is a number of a known protocol.
+* verify the checksum is valid</p>
+
+<p>Decode an Address from a string by removing the network prefix, validating the address is of a know protocol, decoding the payload and checksum, and validating the checksum.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Decode</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">Address</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">&lt;</span> <span class="mi">3</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidLength</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#34;f&#34;</span> <span class="o">&amp;&amp;</span> <span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#34;t&#34;</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrUnknownNetwork</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">protocol</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nx">raw</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">ID</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
+            <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
+            <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">leb128</span><span class="p">.</span><span class="nf">Encode</span><span class="p">(</span><span class="nx">base10</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)),</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nx">raw</span> <span class="p">=</span> <span class="nx">base32</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span>
+    <span class="nx">payload</span> <span class="p">=</span> <span class="nx">raw</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">SECP256K1</span> <span class="o">||</span> <span class="nx">protocol</span> <span class="o">==</span> <span class="nx">Actor</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">20</span> <span class="p">{</span>
+            <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidBytes</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nx">cksm</span> <span class="o">:=</span> <span class="nx">payload</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span><span class="o">-</span><span class="nx">CksmLen</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">cksm</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="nx">ErrInvalidChecksum</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">Address</span><span class="p">{</span>
+        <span class="nx">Protocol</span><span class="p">:</span> <span class="nx">protocol</span><span class="p">,</span>
+        <span class="nx">Payload</span><span class="p">:</span>  <span class="nx">payload</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="checksum-1">Checksum()</h3>
+
+<p>Checksum produces a byte array by taking the blake2b-4 hash of an address protocol and payload.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">a</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">byte</span> <span class="p">{</span>
+    <span class="nf">blake2b4</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Protocol</span> <span class="o">+</span> <span class="nx">a</span><span class="p">.</span><span class="nx">Payload</span><span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="validatechecksum">ValidateChecksum()</h3>
+
+<p>ValidateChecksum returns true if the Checksum of data matches the expected checksum.</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ValidateChecksum</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">expected</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nx">digest</span> <span class="o">:=</span> <span class="nf">Checksum</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">digest</span> <span class="o">==</span> <span class="nx">expected</span>
+<span class="p">}</span></code></pre></div>
+<h1 id="test-vectors">Test Vectors</h1>
+
+<p>These are a set of test vectors that can be used to test an implementation of
+this address spec. Test vectors are presented as newline-delimited address/hex
+fields. The &lsquo;address&rsquo; field, when parsed, should produce raw bytes that match
+the corresponding item in the &lsquo;hex&rsquo; field. For example:</p>
+
+<pre><code>address1
+hex1
+
+address2
+hex2
+</code></pre>
+
+<h2 id="id-type-addresses">ID Type Addresses</h2>
+
+<pre><code>f00
+0000
+
+f0150
+009601
+
+f01024
+008008
+
+f01729
+00c10d
+
+f018446744073709551615
+00ffffffffffffffffff01
+</code></pre>
+
+<h2 id="secp256k1-type-addresses">Secp256k1 Type Addresses</h2>
+
+<pre><code>f17uoq6tp427uzv7fztkbsnn64iwotfrristwpryy
+01fd1d0f4dfcd7e99afcb99a8326b7dc459d32c628
+
+f1xcbgdhkgkwht3hrrnui3jdopeejsoatkzmoltqy
+01b882619d46558f3d9e316d11b48dcf211327026a
+
+f1xtwapqc6nh4si2hcwpr3656iotzmlwumogqbuaa
+01bcec07c05e69f92468e2b3e3bf77c874f2c5da8c
+
+f1wbxhu3ypkuo6eyp6hjx6davuelxaxrvwb2kuwva
+01b06e7a6f0f551de261fe3a6fe182b422ee0bc6b6
+
+f12fiakbhe2gwd5cnmrenekasyn6v5tnaxaqizq6a
+01d1500504e4d1ac3e89ac891a4502586fabd9b417
+</code></pre>
+
+<h2 id="actor-type-addresses">Actor Type Addresses</h2>
+
+<pre><code>f24vg6ut43yw2h2jqydgbg2xq7x6f4kub3bg6as6i
+02e54dea4f9bc5b47d261819826d5e1fbf8bc5503b
+
+f25nml2cfbljvn4goqtclhifepvfnicv6g7mfmmvq
+02eb58bd08a15a6ade19d0989674148fa95a8157c6
+
+f2nuqrg7vuysaue2pistjjnt3fadsdzvyuatqtfei
+026d21137eb4c4814269e894d296cf6500e43cd714
+
+f24dd4ox4c2vpf5vk5wkadgyyn6qtuvgcpxxon64a
+02e0c7c75f82d55e5ed55db28033630df4274a984f
+
+f2gfvuyh7v2sx3patm5k23wdzmhyhtmqctasbr23y
+02316b4c1ff5d4afb7826ceab5bb0f2c3e0f364053
+</code></pre>
+
+<h2 id="bls-type-addresses">BLS Type Addresses</h2>
+
+<p>To aid in readability, these addresses are line-wrapped. Address and hex pairs
+are separated by <code>---</code>.</p>
+
+<pre><code>f3vvmn62lofvhjd2ugzca6sof2j2ubwok6cj4xxbfzz
+4yuxfkgobpihhd2thlanmsh3w2ptld2gqkn2jvlss4a
+---
+03ad58df696e2d4e91ea86c881e938ba4ea81b395e12
+797b84b9cf314b9546705e839c7a99d606b247ddb4f9
+ac7a3414dd
+
+f3wmuu6crofhqmm3v4enos73okk2l366ck6yc4owxwb
+dtkmpk42ohkqxfitcpa57pjdcftql4tojda2poeruwa
+---
+03b3294f0a2e29e0c66ebc235d2fedca5697bf784af
+605c75af608e6a63d5cd38ea85ca8989e0efde9188b
+382f9372460d
+
+f3s2q2hzhkpiknjgmf4zq3ejab2rh62qbndueslmsdz
+ervrhapxr7dftie4kpnpdiv2n6tvkr743ndhrsw6d3a
+---
+0396a1a3e4ea7a14d49985e661b22401d44fed402d1
+d0925b243c923589c0fbc7e32cd04e29ed78d15d37d
+3aaa3fe6da33
+
+f3q22fijmmlckhl56rn5nkyamkph3mcfu5ed6dheq53
+c244hfmnq2i7efdma3cj5voxenwiummf2ajlsbxc65a
+---
+0386b454258c589475f7d16f5aac018a79f6c1169d2
+0fc33921dd8b5ce1cac6c348f90a3603624f6aeb91b
+64518c2e8095
+
+f3u5zgwa4ael3vuocgc5mfgygo4yuqocrntuuhcklf4
+xzg5tcaqwbyfabxetwtj4tsam3pbhnwghyhijr5mixa
+---
+03a7726b038022f75a384617585360cee629070a2d9
+d28712965e5f26ecc40858382803724ed34f2720336
+f09db631f074
+</code></pre>
+
+</article>
+
+      
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#design-criteria">Design criteria</a></li>
+<li><a href="#specification">Specification</a>
+<ul>
+<li><a href="#bytes">Bytes</a></li>
+<li><a href="#string">String</a></li>
+<li><a href="#network-prefix">Network Prefix</a></li>
+<li><a href="#protocol-indicator">Protocol Indicator</a>
+<ul>
+<li><a href="#protocol-0-ids">Protocol 0: IDs</a></li>
+<li><a href="#protocol-1-libsecpk1-elliptic-curve-public-keys">Protocol 1: libsecpk1 Elliptic Curve Public Keys</a></li>
+<li><a href="#protocol-2-actor">Protocol 2: Actor</a></li>
+<li><a href="#protocol-3-bls">Protocol 3: BLS</a></li>
+</ul></li>
+<li><a href="#payload">Payload</a></li>
+<li><a href="#checksum">Checksum</a></li>
+<li><a href="#expected-methods">Expected Methods</a>
+<ul>
+<li><a href="#new">New()</a></li>
+<li><a href="#encode">Encode()</a></li>
+<li><a href="#decode">Decode()</a></li>
+<li><a href="#checksum-1">Checksum()</a></li>
+<li><a href="#validatechecksum">ValidateChecksum()</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#test-vectors">Test Vectors</a>
+<ul>
+<li><a href="#id-type-addresses">ID Type Addresses</a></li>
+<li><a href="#secp256k1-type-addresses">Secp256k1 Type Addresses</a></li>
+<li><a href="#actor-type-addresses">Actor Type Addresses</a></li>
+<li><a href="#bls-type-addresses">BLS Type Addresses</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+
+  
+  
+</body>
+
+</html>

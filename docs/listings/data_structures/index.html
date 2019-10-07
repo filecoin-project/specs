@@ -1,0 +1,4889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Structures | Filecoin Spec</title>
+
+
+
+<link rel="stylesheet" href="../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+
+
+<link rel="icon" href="../../../favicon.png" type="image/x-icon">
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="../../../css/syntax.css">
+<link href="../../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="../../../mermaid/mermaid.js"></script>
+<script src="../../../spec.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" class="hidden" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href=""><span>Filecoin Spec</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" placeholder="Search" id="book-search-input" maxlength="64" readonly />
+  <div class="book-search-spinner spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2flistings\2f data_structures\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+
+  <div>
+
+  <div>
+    
+    <input id="menu-detail-slider" type="range" onchange="onMenuDetailChange();"
+      min="1" value="3" max="5" step="1" />
+
+    <span id="menu-detail-slider-label">3</span>
+  </div>
+
+  
+  
+  <ul class="menu-item-section depth-0">
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Introduction
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__arch" class="menu-item depth-2">
+    
+    
+        Architecture Diagrams
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__concepts" class="menu-item depth-2">
+    
+    
+        Key Concepts
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__filecoin_vm" class="menu-item depth-2">
+    
+    
+        Filecoin VM
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process" class="menu-item depth-2">
+    
+    
+        Process
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__about" class="menu-item depth-3">
+    
+    
+        About
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__fip" class="menu-item depth-3">
+    
+    
+        FIPs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__contributing" class="menu-item depth-3">
+    
+    
+        Contributing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources" class="menu-item depth-3">
+    
+    
+        Related Resources
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__research_portal" class="menu-item depth-4">
+    
+    
+        Research portal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__network_tooling" class="menu-item depth-4">
+    
+    
+        Network tooling
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__testing" class="menu-item depth-4">
+    
+    
+        Testing and implementation compliance
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system" class="menu-item depth-2">
+    
+    
+        System Decomposition
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system__why_systems" class="menu-item depth-3">
+    
+    
+        What are Systems?
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system__impl_systems" class="menu-item depth-3">
+    
+    
+        Implementing Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Systems
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes" class="menu-item depth-2">
+    ⚙️
+    
+        <strong>Filecoin Nodes</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types" class="menu-item depth-3">
+    
+    
+        Node Types
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__node" class="menu-item depth-4">
+    
+    
+        Node Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__node_types" class="menu-item depth-4">
+    
+    
+        Examples
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__verifier_node" class="menu-item depth-4">
+    
+    
+        Chain Verifier Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__client_node" class="menu-item depth-4">
+    
+    
+        Client Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__storage_miner_node" class="menu-item depth-4">
+    
+    
+        Storage Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__retrieval_miner_node" class="menu-item depth-4">
+    
+    
+        Retrieval Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__relayer_node" class="menu-item depth-4">
+    
+    
+        Relayer Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository" class="menu-item depth-3">
+    
+    
+        Repository
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository__config" class="menu-item depth-4">
+    
+    
+        Config
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+    
+    
+        KeyStore &amp; user keys
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository__ipldstore" class="menu-item depth-4">
+    
+    
+        IpldStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
+    
+    
+        Usage in Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__network" class="menu-item depth-3">
+    
+    
+        Network Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__clock" class="menu-item depth-3">
+    
+    
+        Clock
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files" class="menu-item depth-2">
+    📑
+    
+        <strong>Files &amp; Data</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_files__file" class="menu-item depth-3">
+    
+    
+        File
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__file__filestore" class="menu-item depth-4">
+    
+    
+        FileStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__piece" class="menu-item depth-3">
+    
+    
+        Piece
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__piece__piece_store" class="menu-item depth-4">
+    
+    
+        PieceStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__data_transfer" class="menu-item depth-3">
+    
+    
+        Data Transfer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain" class="menu-item depth-2">
+    📦
+    
+        <strong>Blockchain</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm" class="menu-item depth-3">
+    
+    
+        Virtual Machine
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__address" class="menu-item depth-4">
+    
+    
+        VM Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__actor" class="menu-item depth-4">
+    
+    
+        VM Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__state_tree" class="menu-item depth-4">
+    
+    
+        VM State Tree
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__message" class="menu-item depth-4">
+    
+    
+        VM Message
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors" class="menu-item depth-4">
+    
+    
+        VM System Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__init_actor" class="menu-item depth-5">
+    
+    
+        InitActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__cron_actor" class="menu-item depth-5">
+    
+    
+        CronActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__account_actor" class="menu-item depth-5">
+    
+    
+        AccountActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__interpreter" class="menu-item depth-4">
+    
+    
+        VM Interpreter
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__runtime" class="menu-item depth-4">
+    
+    
+        VM Runtime Environment
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool" class="menu-item depth-3">
+    
+    
+        Message Pool
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool__message_syncer" class="menu-item depth-4">
+    
+    
+        Message Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool__message_storage" class="menu-item depth-4">
+    
+    
+        Message Storage
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain" class="menu-item depth-3">
+    
+    
+        Blockchain Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__block_syncer" class="menu-item depth-4">
+    
+    
+        Block Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__chain_manager" class="menu-item depth-4">
+    
+    
+        Chain Manager
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__block_producer" class="menu-item depth-4">
+    
+    
+        Block Producer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus" class="menu-item depth-3">
+    
+    
+        Storage Power Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
+    
+    
+        Storage Power Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token" class="menu-item depth-2">
+    📀
+    
+        <strong>Token</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__wallets" class="menu-item depth-3">
+    
+    
+        Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__payments" class="menu-item depth-3">
+    
+    
+        Payments
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__payment_channels" class="menu-item depth-3">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token__payment_channels__payment_channel_actor" class="menu-item depth-4">
+    
+    
+        Payment Channel Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__multisig" class="menu-item depth-3">
+    
+    
+        Multisig Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token__multisig__multisig_actor" class="menu-item depth-4">
+    
+    
+        Multisig Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining" class="menu-item depth-2">
+    ⛏
+    
+        <strong>Storage Mining</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining" class="menu-item depth-3">
+    
+    
+        Storage Miner
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__mining_cycle" class="menu-item depth-4">
+    
+    
+        Storage Mining Cycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__storage_miner_actor" class="menu-item depth-4">
+    
+    
+        Storage Miner Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
+    
+    
+        Mining Scheduler
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector" class="menu-item depth-3">
+    
+    
+        Sector
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__sectorset" class="menu-item depth-4">
+    
+    
+        Sector Set
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
+    
+    
+        Sector Sealing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index" class="menu-item depth-3">
+    
+    
+        Sector Index
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index__sector_builder" class="menu-item depth-4">
+    
+    
+        Sector Builder
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index__sector_store" class="menu-item depth-4">
+    
+    
+        SectorStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving" class="menu-item depth-3">
+    
+    
+        Storage Proving
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving__sealer" class="menu-item depth-4">
+    
+    
+        Sector Sealer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving__poster" class="menu-item depth-4">
+    
+    
+        Sector Poster
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets" class="menu-item depth-2">
+    ⚖️
+    
+        <strong>Market</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__order" class="menu-item depth-3">
+    
+    
+        Orders
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
+    
+    
+        Deals
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
+    
+    
+        Storage Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__storage_market_actor" class="menu-item depth-4">
+    
+    
+        Storage Market Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market" class="menu-item depth-3">
+    
+    
+        Retrieval Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market__retrieval_client" class="menu-item depth-4">
+    
+    
+        Retrieval Client
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market__retrieval_provider" class="menu-item depth-4">
+    
+    
+        Retrieval Provider (Miner)
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Libraries
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__fcs" class="menu-item depth-2">
+    
+    
+        FCS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld" class="menu-item depth-2">
+    
+    
+        IPLD
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld__cid" class="menu-item depth-3">
+    
+    
+        CID
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipld__datamodel" class="menu-item depth-3">
+    
+    
+        Data Model
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipld__selectors" class="menu-item depth-3">
+    
+    
+        Selectors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld__graphstore" class="menu-item depth-3">
+    
+    
+        GraphStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p" class="menu-item depth-2">
+    
+    
+        libp2p
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__gossipsub" class="menu-item depth-3">
+    
+    
+        gossipsub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__kad_dht" class="menu-item depth-3">
+    
+    
+        kad-dht
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__fil_libp2p_nodes" class="menu-item depth-3">
+    
+    
+        fil-libp2p Nodes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipfs" class="menu-item depth-2">
+    
+    
+        IPFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__bitswap" class="menu-item depth-3">
+    
+    
+        BitSwap
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__graphsync" class="menu-item depth-3">
+    
+    
+        GraphSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__unixfs" class="menu-item depth-3">
+    
+    
+        UnixFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__multiformats" class="menu-item depth-2">
+    
+    
+        Multiformats
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Algorithms
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__expected_consensus" class="menu-item depth-2">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep" class="menu-item depth-2">
+    
+    
+        Proof-of-Replication
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep__zigzag" class="menu-item depth-3">
+    
+    
+        ZigZag-PoRep
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep__porep_commitments" class="menu-item depth-3">
+    
+    
+        PoRep Commitments
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post" class="menu-item depth-2">
+    
+    
+        Proof-of-Spacetime
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post__rational_post" class="menu-item depth-3">
+    
+    
+        Rational-PoSt
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
+    
+    
+        PoSt Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__payment_channels" class="menu-item depth-2">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__block_sync" class="menu-item depth-2">
+    
+    
+        BlockSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__gossip_sub" class="menu-item depth-2">
+    
+    
+        GossipSub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__crypto" class="menu-item depth-2">
+    
+    
+        Cryptographic Primitives
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Listings
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__actors" class="menu-item depth-2">
+    
+    
+        Filecoin VM Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__data_structures" class="menu-item depth-2">
+    
+    
+        Data Structures
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__system_map" class="menu-item depth-2">
+    
+    
+        Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__libp2p_protocols" class="menu-item depth-2">
+    
+    
+        libp2p Protocols
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#glossary" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Glossary
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Appendix
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__sharray" class="menu-item depth-2">
+    
+    
+        Sharded IPLD Array
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__orient" class="menu-item depth-2">
+    
+    
+        Filecoin Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+  </ul>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+<script>
+(function() {
+  var menu = document.querySelector("aside.book-menu nav");
+  addEventListener("beforeunload", function(event) {
+    localStorage.setItem("menu.scrollTop", menu.scrollTop);
+  });
+  menu.scrollTop = localStorage.getItem("menu.scrollTop");
+})();
+</script>
+
+    </aside>
+
+    <div class="book-page">
+      <header class="flex align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>Data Structures</strong>
+</header>
+
+      
+<article class="markdown">
+  
+
+<h1 id="address">Address</h1>
+
+<p>An address is an identifier that refers to an actor in the Filecoin state. All <a href="../actors">actors</a> (miner actors, the storage market actor, account actors) have an address. An address encodes information about:</p>
+
+<ul>
+<li>Network this address belongs to</li>
+<li>Type of data the address contains</li>
+<li>The data itself</li>
+<li>Checksum (depending on the type of address)</li>
+</ul>
+
+<p>For more detail, see the full <a href="../../../#appendix__address">address spec</a>.</p>
+
+<h1 id="block">Block</h1>
+
+<p>A block header contains information relevant to a particular point in time over which the network may achieve consensus. The block header contains:</p>
+
+<ul>
+<li>The address of the miner that mined the block</li>
+<li>An array of the tickets that led to this particular miner being selected as the leader for this round (see
+<a href="../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> for more details), as well as a signature on the winning ticket</li>
+<li>The set of parent blocks and aggregate <a href="../../../#algorithms__expected_consensus__chain_selection">chain weight</a> of the parents</li>
+<li>This block&rsquo;s height</li>
+<li>Merkle root of the state tree (after applying the messages &ndash; state transitions &ndash; included in this block)</li>
+<li>Merkle root of the messages (state transitions) in this block</li>
+<li>Merkle root of the message receipts in this block</li>
+<li>Timestamp</li>
+</ul>
+
+<div class="notices note" ><strong>Note:</strong> A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms <code>block</code> and <code>block header</code> interchangeably.</div>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Miner is the address of the miner actor that mined this block.
+</span><span class="c1"></span>    <span class="nx">miner</span> <span class="nx">Address</span>
+
+    <span class="c1">// Tickets is a chain (possibly singleton) of tickets ending with a winning ticket
+</span><span class="c1"></span>    <span class="c1">// submitted with this block.
+</span><span class="c1"></span>    <span class="nx">tickets</span> <span class="p">[</span><span class="nx">Ticket</span><span class="p">]</span>
+
+    <span class="c1">// ElectionProof is generated from a past ticket and proves this miner is a leader
+</span><span class="c1"></span>    <span class="c1">// in this block&#39;s round.
+</span><span class="c1"></span>    <span class="nx">electionProof</span> <span class="nx">ElectionProof</span>
+
+    <span class="c1">// Parents is an array of distinct CIDs of parents on which this block was based.
+</span><span class="c1"></span>    <span class="c1">// Typically one, but can be several in the case where there were multiple winning
+</span><span class="c1"></span>    <span class="c1">// ticket-holders for a given round. The order of parent CIDs is not defined.
+</span><span class="c1"></span>    <span class="nx">parents</span> <span class="p">[</span><span class="o">&amp;</span><span class="nx">Block</span><span class="p">]</span>
+
+    <span class="c1">// ParentWeight is the aggregate chain weight of the parent set.
+</span><span class="c1"></span>    <span class="nx">parentWeight</span> <span class="nx">UInt</span>
+
+    <span class="c1">// Height is the chain height of this block.
+</span><span class="c1"></span>    <span class="nx">height</span> <span class="nx">UInt</span>
+
+    <span class="c1">// StateRoot is a CID pointer to the VM state tree after application of the state
+</span><span class="c1"></span>    <span class="c1">// transitions corresponding to this block&#39;s messages.
+</span><span class="c1"></span>    <span class="nx">stateRoot</span> <span class="o">&amp;</span><span class="nx">StateTree</span>
+
+    <span class="c1">// Messages is the set of messages included in this block. This field is the CID
+</span><span class="c1"></span>    <span class="c1">// of the TxMeta object that contains the bls and secpk signed message trees.
+</span><span class="c1"></span>    <span class="nx">messages</span> <span class="o">&amp;</span><span class="nx">TxMeta</span>
+
+    <span class="c1">// BLSAggregate is an aggregated BLS signature for all the messages in this block
+</span><span class="c1"></span>    <span class="c1">// that were signed using BLS signatures.
+</span><span class="c1"></span>    <span class="nx">blsAggregate</span> <span class="nx">Signature</span>
+
+    <span class="c1">// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
+</span><span class="c1"></span>    <span class="c1">// This field is the CID of the root of a sharray of MessageReceipts.
+</span><span class="c1"></span>    <span class="nx">messageReceipts</span> <span class="o">&amp;</span><span class="p">[</span><span class="nx">MessageReceipt</span><span class="p">]</span>
+
+    <span class="c1">// The block Timestamp is used to enforce a form of block delay by honest miners.
+</span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp (in seconds) stored as an unsigned integer.
+</span><span class="c1"></span>    <span class="nx">timestamp</span> <span class="nx">Timestamp</span>
+
+    <span class="c1">// BlockSig is a signature over the hash of the entire block with the miners
+</span><span class="c1"></span>    <span class="c1">// worker key to ensure that it is not tampered with after creation
+</span><span class="c1"></span>    <span class="nx">blockSig</span> <span class="nx">Signature</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">TxMeta</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">blsMessages</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">Message</span><span class="p">]&lt;</span><span class="nx">Sharray</span><span class="p">&gt;</span>
+    <span class="nx">secpkMessages</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">SignedMessage</span><span class="p">]&lt;</span><span class="nx">Sharray</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div>
+  
+</div>
+
+
+<h1 id="tipset">Tipset</h1>
+
+<p>For more on Tipsets, see <a href="../../../#algorithms__expected_consensus">the Expected Consensus spec</a>. Implementations may choose not to create a Tipset data structure, instead representing its operations in terms of the underlying blocks.</p>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">TipSet</span> <span class="p">[</span><span class="o">&amp;</span><span class="nx">Block</span><span class="p">]</span>
+</code></pre></div>
+  
+</div>
+
+
+<h1 id="vrf-personalization">VRF Personalization</h1>
+
+<p>We define VRF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. <code>Ticket</code> and
+<code>ElectionProof</code>).</p>
+
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Prefix</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Ticket</td>
+<td><code>0x01</code></td>
+</tr>
+
+<tr>
+<td>ElectionProof</td>
+<td><code>0x02</code></td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="ticket">Ticket</h1>
+
+<p>A ticket contains a shared random value referenced by a particular <code>Block</code> in the Filecoin blockchain.
+Every miner must produce a new <code>Ticket</code> each time they run a leader election attempt.
+In that sense, every new block produced will have one or more associated tickets
+(specifically, the block may contain more than one ticket if it corresponds to
+one or more zero-winner epochs of <a href="../../../#algorithms__expected_consensus">Expected Consensus</a>).</p>
+
+<p>To produce the ticket values,
+we use an <a href="https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10">EC-VRF per Goldberg et al.</a>
+with Secp256k1 and SHA-256 to obtain a deterministic, pseudorandom output.</p>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// The VRFProof (pi_string in the RFC) is generated by running our VRF on a past ticket
+</span><span class="c1"></span>    <span class="c1">// in the ticket chain signed with the miner&#39;s keypair. This field is 97 bytes long
+</span><span class="c1"></span>    <span class="c1">// (may be compressible to 80).
+</span><span class="c1"></span>    <span class="nx">VRFProof</span> <span class="nx">Bytes</span>
+
+    <span class="c1">// The VDFResult is derived from the VRFResult of the ticket. It is the value that
+</span><span class="c1"></span>    <span class="c1">// will be used to generate future tickets or ElectionProofs.
+</span><span class="c1"></span>    <span class="nx">VDFResult</span> <span class="nx">Bytes</span>
+
+    <span class="c1">// The VDF proves a delay between tickets generated.
+</span><span class="c1"></span>    <span class="nx">VDFProof</span> <span class="nx">Bytes</span>
+<span class="p">}</span> <span class="c1">// representation tuple
+</span></code></pre></div>
+  
+</div>
+
+
+<h2 id="ticket-comparison">Ticket Comparison</h2>
+
+<p>The ticket is represented concretely by the <code>Ticket</code> data structure.
+Whenever the Filecoin protocol refers to ticket values
+(notably in crafting <a href="../../../#algorithms__post___index">PoSTs</a> or running leader election),
+what is meant is that the bytes of the <code>VDFResult</code> field in the <code>Ticket</code> struct are used.
+Specifically, tickets are compared lexicographically,
+interpreting the bytes of the <code>VDFResult</code> as an unsigned integer value (little-endian).</p>
+
+<h1 id="electionproof">ElectionProof</h1>
+
+<p>An election proof is generated from a past ticket (chosen based on public network parameters)
+by a miner during the leader election process.
+Its output value determines whether the miner is elected as one of the leaders,
+and hence is eligible to produce a block for the current epoch.
+The inclusion of the <code>ElectionProof</code> in the block allows other network participants
+to verify that the block was mined by a valid leader.</p>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ElectionProof</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// The VRFProof is generated by running our VRF on a past ticket in the ticket chain
+</span><span class="c1"></span>    <span class="c1">// signed with the miner&#39;s keypair. This field is 97 bytes long (may be compressible
+</span><span class="c1"></span>    <span class="c1">// to 80).
+</span><span class="c1"></span>    <span class="nx">VRFProof</span> <span class="nx">Bytes</span>
+<span class="p">}</span>
+</code></pre></div>
+  
+</div>
+
+
+<h1 id="message">Message</h1>
+
+<p><code>Message</code> data structures in Filecoin describe operations that can be performed on the Filecoin VM state
+(e.g., FIL transactions between accounts).
+To facilitate the process of producing secure protocol implementations,
+we explicitly distinguish between
+<a href="../../../#algorithms__crypto__signatures">signed and unsigned</a> <code>Message</code> structures.</p>
+
+<p><div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Message</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="p">|</span> <span class="nx">UnsignedMessage</span> <span class="mi">0</span>
+    <span class="p">|</span> <span class="nx">SignedMessage</span> <span class="mi">1</span>
+<span class="p">}</span> <span class="c1">// representation keyed
+</span></code></pre></div>
+  
+</div>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">UnsignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">to</span> <span class="nx">Address</span>
+    <span class="nx">from</span> <span class="nx">Address</span>
+
+    <span class="c1">// When receiving a message from a user account the nonce in the message must match
+</span><span class="c1"></span>    <span class="c1">// the expected nonce in the &#34;from&#34; actor. This prevents replay attacks.
+</span><span class="c1"></span>    <span class="nx">nonce</span> <span class="nx">UInt</span>
+    <span class="nx">value</span> <span class="nx">UInt</span>
+
+    <span class="nx">gasPrice</span> <span class="nx">UInt</span>
+    <span class="nx">gasLimit</span> <span class="nx">UInt</span>
+
+    <span class="nx">method</span> <span class="nx">Uint</span>
+    <span class="nx">params</span> <span class="nx">Bytes</span>  <span class="c1">// Serialized parameters to the method.
+</span><span class="c1"></span><span class="p">}</span> <span class="c1">// representation tuple
+</span></code></pre></div>
+  
+</div>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">message</span>   <span class="nx">UnsignedMessage</span>
+    <span class="nx">signature</span> <span class="nx">Signature</span>
+<span class="p">}</span> <span class="c1">// representation tuple
+</span></code></pre></div>
+  
+</div>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">exitCode</span> <span class="nx">UInt</span>
+    <span class="nx">returnValue</span> <span class="nx">Bytes</span>
+    <span class="nx">gasUsed</span> <span class="nx">UInt</span>
+<span class="p">}</span> <span class="c1">// representation tuple
+</span></code></pre></div>
+  
+</div>
+</p>
+
+<h1 id="state-tree">State Tree</h1>
+
+<p>The state tree keeps track of the entire state of the <a href="../../../#systems__filecoin_blockchain__vm___index"></a> at any given point.
+It is a map from <code>Address</code> structures to <code>Actor</code> structures, where each <code>Actor</code>
+may also contain some additional <code>ActorState</code> that is specific to a given actor
+type.</p>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">map</span><span class="p">[</span><span class="nx">Address</span><span class="p">]</span><span class="nx">Actor</span>
+</code></pre></div>
+  
+</div>
+
+
+<h1 id="actor">Actor</h1>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Actor</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// CID of the code object for this actor
+</span><span class="c1"></span>    <span class="nx">code</span> <span class="nx">CID</span>
+
+    <span class="c1">// Reference to the root of this actor&#39;s state
+</span><span class="c1"></span>    <span class="nx">head</span> <span class="o">&amp;</span><span class="nx">ActorState</span>
+
+    <span class="c1">// Counter of the number of messages this actor has sent
+</span><span class="c1"></span>    <span class="nx">nonce</span> <span class="nx">UInt</span>
+
+    <span class="c1">// Current Filecoin balance of this actor
+</span><span class="c1"></span>    <span class="nx">balance</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+</code></pre></div>
+  
+</div>
+
+
+<h1 id="signature">Signature</h1>
+
+<p><a href="../../../#algorithms__crypto__signatures">Cryptographic signatures</a> in Filecoin are represented
+as byte arrays, and come with a tag that signifies what key type was used to create
+the signature.</p>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Signature</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="p">|</span> <span class="nx">Secp256k1Signature</span> <span class="mi">0</span>
+    <span class="p">|</span> <span class="nx">Bls12_381Signature</span> <span class="mi">1</span>
+<span class="p">}</span> <span class="c1">// representation byteprefix
+</span><span class="c1"></span>
+<span class="kd">type</span> <span class="nx">Secp256k1Signature</span> <span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">Bls12_381Signature</span> <span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+
+
+<h1 id="faultset">FaultSet</h1>
+
+<p><code>FaultSet</code> data structures are used to denote which sectors failed at which block heights.</p>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">FaultSet</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">index</span>    <span class="nx">UInt</span>
+    <span class="nx">bitField</span> <span class="nx">BitField</span>
+<span class="p">}</span>
+</code></pre></div>
+  
+</div>
+
+
+<p>In order to make the serialization more compact,
+the <code>index</code> field denotes a block height offset from the start of the corresponding
+miner&rsquo;s proving period.</p>
+
+<h1 id="basic-types">Basic Types</h1>
+
+<h2 id="cid">CID</h2>
+
+<p>For most objects referenced by Filecoin, a Content Identifier (CID for short) is used.
+This is effectively a hash value, prefixed with its hash function (multihash)
+as well as extra labels to inform applications about how to deserialize the given data.
+For a more detailed specification, we refer the reader to the
+<a href="https://github.com/ipld/cid">IPLD repository</a>.</p>
+
+<h2 id="timestamp">Timestamp</h2>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Timestamp</span> <span class="nx">UInt</span>
+</code></pre></div>
+  
+</div>
+
+
+<h2 id="publickey">PublicKey</h2>
+
+<p>The public key type is simply an array of bytes.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PublicKey</span> <span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<h2 id="bytesamount">BytesAmount</h2>
+
+<p>BytesAmount is just a re-typed Integer.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UInt</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<h2 id="peerid">PeerId</h2>
+
+<p>The serialized bytes of a libp2p peer ID.
+<div class="notices todo">
+  <strong>TODO</strong>:  Spec incomplete; take a look at <a href="https://github.com/libp2p/specs/pull/100">this PR</a>.
+</div></p>
+
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PeerId</span> <span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+
+
+<h2 id="bitfield">Bitfield</h2>
+
+<p>Bitfields are a set encoded using a custom run length encoding: RLE+.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Bitfield</span> <span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<h2 id="sectorset">SectorSet</h2>
+
+<p>A sector set stores a mapping of sector IDs to the respective <code>commR</code>s.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SectorSet</span> <span class="kd">map</span><span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span><span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<div class="notices todo">
+  <strong>TODO</strong>: 
+Improve on this; see https://github.com/filecoin-project/specs/issues/116.
+
+</div>
+
+<h2 id="sealproof">SealProof</h2>
+
+<p>SealProof is an opaque, dynamically-sized array of bytes.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SealProof</span> <span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<h2 id="postproof">PoSTProof</h2>
+
+<p>PoSTProof is an opaque, dynamically-sized array of bytes.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PoSTProof</span> <span class="nx">Bytes</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<h2 id="tokenamount">TokenAmount</h2>
+
+<p>A type to represent an amount of Filecoin tokens.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">TokenAmount</span> <span class="nx">UInt</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<h2 id="sectorid">SectorID</h2>
+
+<p>Uniquely identifies a miner&rsquo;s sector.
+<div>
+  
+    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SectorID</span> <span class="kt">uint64</span>
+</code></pre></div>
+  
+</div>
+</p>
+
+<h1 id="rle-bitset-encoding">RLE+ Bitset Encoding</h1>
+
+<p>RLE+ is a lossless compression format based on <a href="https://en.wikipedia.org/wiki/Run-length_encoding">RLE</a>.
+Its primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly,
+while keeping the same level of compression for large sets of contiugous bits.</p>
+
+<p>In tests it has shown to be more compact than RLE itself, as well as <a href="https://arxiv.org/pdf/1004.0403.pdf">Concise</a> and <a href="https://roaringbitmap.org/">Roaring</a>.</p>
+
+<h2 id="format">Format</h2>
+
+<p>The format consists of a header, followed by a series of blocks, of which there are three different types.</p>
+
+<p>The format can be expressed as the following <a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">BNF</a> grammar.</p>
+
+<pre><code>    &lt;encoding&gt; ::= &lt;header&gt; &lt;blocks&gt;
+      &lt;header&gt; ::= &lt;version&gt; &lt;bit&gt;
+     &lt;version&gt; ::= &quot;00&quot;
+      &lt;blocks&gt; ::= &lt;block&gt; &lt;blocks&gt; | &quot;&quot;
+       &lt;block&gt; ::= &lt;block_single&gt; | &lt;block_short&gt; | &lt;block_long&gt;
+&lt;block_single&gt; ::= &quot;1&quot;
+ &lt;block_short&gt; ::= &quot;01&quot; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt;
+  &lt;block_long&gt; ::= &quot;00&quot; &lt;unsigned_varint&gt;
+         &lt;bit&gt; ::= &quot;0&quot; | &quot;1&quot;
+</code></pre>
+
+<p>An <code>&lt;unsigned_varint&gt;</code> is defined as specified <a href="https://github.com/multiformats/unsigned-varint">here</a>.</p>
+
+<h3 id="header">Header</h3>
+
+<p>The header indicates the very first bit of the bit vector to encode. This means the first bit is always
+the same for the encoded and non-encoded form.</p>
+
+<h3 id="blocks">Blocks</h3>
+
+<p>The blocks represent how many bits, of the current bit type there are. As <code>0</code> and <code>1</code> alternate in a bit vector
+the inital bit, which is stored in the header, is enough to determine if a length is currently referencing
+a set of <code>0</code>s, or <code>1</code>s.</p>
+
+<h4 id="block-single">Block Single</h4>
+
+<p>If the running length of the current bit is only <code>1</code>, it is encoded as a single set bit.</p>
+
+<h4 id="block-short">Block Short</h4>
+
+<p>If the running length is less than <code>16</code>, it can be encoded into up to four bits, which a short block
+represents. The length is encoded into a 4 bits, and prefixed with <code>01</code>, to indicate a short block.</p>
+
+<h4 id="block-long">Block Long</h4>
+
+<p>If the running length is <code>16</code> or larger, it is encoded into a varint, and then prefixed with <code>00</code> to indicate
+a long block.</p>
+
+<blockquote>
+<p><strong>Note:</strong> The encoding is unique, so no matter which algorithm for encoding is used, it should produce
+the same encoding, given the same input.</p>
+</blockquote>
+
+<h4 id="bit-numbering">Bit Numbering</h4>
+
+<p>For Filecoin, byte arrays representing RLE+ bitstreams are encoded using <a href="https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering">LSB 0</a> bit numbering.</p>
+
+<h1 id="other-considerations">Other Considerations</h1>
+
+<ul>
+<li>The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.</li>
+<li>Hashes should use a blake2b-256 multihash.</li>
+</ul>
+
+</article>
+
+      
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#address">Address</a></li>
+<li><a href="#block">Block</a></li>
+<li><a href="#tipset">Tipset</a></li>
+<li><a href="#vrf-personalization">VRF Personalization</a></li>
+<li><a href="#ticket">Ticket</a>
+<ul>
+<li><a href="#ticket-comparison">Ticket Comparison</a></li>
+</ul></li>
+<li><a href="#electionproof">ElectionProof</a></li>
+<li><a href="#message">Message</a></li>
+<li><a href="#state-tree">State Tree</a></li>
+<li><a href="#actor">Actor</a></li>
+<li><a href="#signature">Signature</a></li>
+<li><a href="#faultset">FaultSet</a></li>
+<li><a href="#basic-types">Basic Types</a>
+<ul>
+<li><a href="#cid">CID</a></li>
+<li><a href="#timestamp">Timestamp</a></li>
+<li><a href="#publickey">PublicKey</a></li>
+<li><a href="#bytesamount">BytesAmount</a></li>
+<li><a href="#peerid">PeerId</a></li>
+<li><a href="#bitfield">Bitfield</a></li>
+<li><a href="#sectorset">SectorSet</a></li>
+<li><a href="#sealproof">SealProof</a></li>
+<li><a href="#postproof">PoSTProof</a></li>
+<li><a href="#tokenamount">TokenAmount</a></li>
+<li><a href="#sectorid">SectorID</a></li>
+</ul></li>
+<li><a href="#rle-bitset-encoding">RLE+ Bitset Encoding</a>
+<ul>
+<li><a href="#format">Format</a>
+<ul>
+<li><a href="#header">Header</a></li>
+<li><a href="#blocks">Blocks</a>
+<ul>
+<li><a href="#block-single">Block Single</a></li>
+<li><a href="#block-short">Block Short</a></li>
+<li><a href="#block-long">Block Long</a></li>
+<li><a href="#bit-numbering">Bit Numbering</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#other-considerations">Other Considerations</a></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+
+  
+  
+</body>
+
+</html>

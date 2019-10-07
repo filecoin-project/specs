@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Multisig - Wallet requiring multiple signatures on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_token/multisig/</link>
+    <description>Recent content in Multisig - Wallet requiring multiple signatures on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_token/multisig/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>/docs/systems/filecoin_token/multisig/multisig_actor_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_token/multisig/multisig_actor_old/</guid>
+      <description>Multisig Account Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;multisig&amp;quot;&amp;gt;  A basic multisig account actor. Allows sending of messages like a normal account actor, but with the requirement of M of N parties agreeing to the operation. Completed and/or cancelled operations stick around in the actors state until explicitly cleared out. Proposers may cancel transactions they propose, or transactions by proposers who are no longer approved signers.
+Self modification methods (add/remove signer, change requirement) are called by doing a multisig transaction invoking the desired method on the contract itself.</description>
+    </item>
+    
+    <item>
+      <title>Multisig Actor</title>
+      <link>/docs/systems/filecoin_token/multisig/multisig_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_token/multisig/multisig_actor/</guid>
+      <description>(You can see the old Multisig Actor here )
+type TokenAmount UVarint type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [Address] required NumRequired nextTxId TxSeqNo initialBalance TokenAmount startingBlock Epoch unlockDuration EpochDuration transactions {TxSeqNo: Transaction} Construct( signers [Address] required NumRequired unlockDuration EpochDuration ) Propose(to Address, value TokenAmount, method String, params Bytes) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer Address, increaseReq bool) RemoveSigner(signer Address, decreaseReq bool) SwapSigner(old Address, new Address) ChangeRequirement(req NumRequired) }  </description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,4989 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storage Miner Actor Old | Filecoin Spec</title>
+
+
+
+<link rel="stylesheet" href="../../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+
+
+<link rel="icon" href="../../../../../favicon.png" type="image/x-icon">
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="../../../../../css/syntax.css">
+<link href="../../../../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="../../../../../mermaid/mermaid.js"></script>
+<script src="../../../../../spec.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" class="hidden" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href=""><span>Filecoin Spec</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" placeholder="Search" id="book-search-input" maxlength="64" readonly />
+  <div class="book-search-spinner spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fsystems\2f filecoin_mining\2fstorage_mining\2fstorage_miner_actor_old\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+
+  <div>
+
+  <div>
+    
+    <input id="menu-detail-slider" type="range" onchange="onMenuDetailChange();"
+      min="1" value="3" max="5" step="1" />
+
+    <span id="menu-detail-slider-label">3</span>
+  </div>
+
+  
+  
+  <ul class="menu-item-section depth-0">
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Introduction
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro__arch" class="menu-item depth-2">
+    
+    
+        Architecture Diagrams
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro__concepts" class="menu-item depth-2">
+    
+    
+        Key Concepts
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro__filecoin_vm" class="menu-item depth-2">
+    
+    
+        Filecoin VM
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__process" class="menu-item depth-2">
+    
+    
+        Process
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__process__about" class="menu-item depth-3">
+    
+    
+        About
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__process__fip" class="menu-item depth-3">
+    
+    
+        FIPs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__process__contributing" class="menu-item depth-3">
+    
+    
+        Contributing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro__process__related_resources" class="menu-item depth-3">
+    
+    
+        Related Resources
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro__process__related_resources__research_portal" class="menu-item depth-4">
+    
+    
+        Research portal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro__process__related_resources__network_tooling" class="menu-item depth-4">
+    
+    
+        Network tooling
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#intro__process__related_resources__testing" class="menu-item depth-4">
+    
+    
+        Testing and implementation compliance
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__system" class="menu-item depth-2">
+    
+    
+        System Decomposition
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__system__why_systems" class="menu-item depth-3">
+    
+    
+        What are Systems?
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__system__impl_systems" class="menu-item depth-3">
+    
+    
+        Implementing Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Systems
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes" class="menu-item depth-2">
+    ⚙️
+    
+        <strong>Filecoin Nodes</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types" class="menu-item depth-3">
+    
+    
+        Node Types
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types__node" class="menu-item depth-4">
+    
+    
+        Node Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types__node_types" class="menu-item depth-4">
+    
+    
+        Examples
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types__verifier_node" class="menu-item depth-4">
+    
+    
+        Chain Verifier Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types__client_node" class="menu-item depth-4">
+    
+    
+        Client Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types__storage_miner_node" class="menu-item depth-4">
+    
+    
+        Storage Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types__retrieval_miner_node" class="menu-item depth-4">
+    
+    
+        Retrieval Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__node_types__relayer_node" class="menu-item depth-4">
+    
+    
+        Relayer Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_nodes__repository" class="menu-item depth-3">
+    
+    
+        Repository
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_nodes__repository__config" class="menu-item depth-4">
+    
+    
+        Config
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+    
+    
+        KeyStore &amp; user keys
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_nodes__repository__ipldstore" class="menu-item depth-4">
+    
+    
+        IpldStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
+    
+    
+        Usage in Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__network" class="menu-item depth-3">
+    
+    
+        Network Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__clock" class="menu-item depth-3">
+    
+    
+        Clock
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files" class="menu-item depth-2">
+    📑
+    
+        <strong>Files &amp; Data</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_files__file" class="menu-item depth-3">
+    
+    
+        File
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files__file__filestore" class="menu-item depth-4">
+    
+    
+        FileStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files__piece" class="menu-item depth-3">
+    
+    
+        Piece
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files__piece__piece_store" class="menu-item depth-4">
+    
+    
+        PieceStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_files__data_transfer" class="menu-item depth-3">
+    
+    
+        Data Transfer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain" class="menu-item depth-2">
+    📦
+    
+        <strong>Blockchain</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm" class="menu-item depth-3">
+    
+    
+        Virtual Machine
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__address" class="menu-item depth-4">
+    
+    
+        VM Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__actor" class="menu-item depth-4">
+    
+    
+        VM Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__state_tree" class="menu-item depth-4">
+    
+    
+        VM State Tree
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__message" class="menu-item depth-4">
+    
+    
+        VM Message
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__sysactors" class="menu-item depth-4">
+    
+    
+        VM System Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__sysactors__init_actor" class="menu-item depth-5">
+    
+    
+        InitActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__sysactors__cron_actor" class="menu-item depth-5">
+    
+    
+        CronActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__sysactors__account_actor" class="menu-item depth-5">
+    
+    
+        AccountActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__interpreter" class="menu-item depth-4">
+    
+    
+        VM Interpreter
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime" class="menu-item depth-4">
+    
+    
+        VM Runtime Environment
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__message_pool" class="menu-item depth-3">
+    
+    
+        Message Pool
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__message_pool__message_syncer" class="menu-item depth-4">
+    
+    
+        Message Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__message_pool__message_storage" class="menu-item depth-4">
+    
+    
+        Message Storage
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__blockchain" class="menu-item depth-3">
+    
+    
+        Blockchain Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__blockchain__block_syncer" class="menu-item depth-4">
+    
+    
+        Block Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__blockchain__chain_manager" class="menu-item depth-4">
+    
+    
+        Chain Manager
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__blockchain__block_producer" class="menu-item depth-4">
+    
+    
+        Block Producer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus" class="menu-item depth-3">
+    
+    
+        Storage Power Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
+    
+    
+        Storage Power Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_token" class="menu-item depth-2">
+    📀
+    
+        <strong>Token</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_token__wallets" class="menu-item depth-3">
+    
+    
+        Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_token__payments" class="menu-item depth-3">
+    
+    
+        Payments
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_token__payment_channels" class="menu-item depth-3">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_token__payment_channels__payment_channel_actor" class="menu-item depth-4">
+    
+    
+        Payment Channel Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_token__multisig" class="menu-item depth-3">
+    
+    
+        Multisig Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_token__multisig__multisig_actor" class="menu-item depth-4">
+    
+    
+        Multisig Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_mining" class="menu-item depth-2">
+    ⛏
+    
+        <strong>Storage Mining</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_mining__storage_mining" class="menu-item depth-3">
+    
+    
+        Storage Miner
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__storage_mining__mining_cycle" class="menu-item depth-4">
+    
+    
+        Storage Mining Cycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor" class="menu-item depth-4">
+    
+    
+        Storage Miner Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
+    
+    
+        Mining Scheduler
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector" class="menu-item depth-3">
+    
+    
+        Sector
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector__sectorset" class="menu-item depth-4">
+    
+    
+        Sector Set
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
+    
+    
+        Sector Sealing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector_index" class="menu-item depth-3">
+    
+    
+        Sector Index
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector_index__sector_builder" class="menu-item depth-4">
+    
+    
+        Sector Builder
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__sector_index__sector_store" class="menu-item depth-4">
+    
+    
+        SectorStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_mining__storage_proving" class="menu-item depth-3">
+    
+    
+        Storage Proving
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_mining__storage_proving__sealer" class="menu-item depth-4">
+    
+    
+        Sector Sealer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_mining__storage_proving__poster" class="menu-item depth-4">
+    
+    
+        Sector Poster
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets" class="menu-item depth-2">
+    ⚖️
+    
+        <strong>Market</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
+    
+    
+        Orders
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
+    
+    
+        Deals
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
+    
+    
+        Storage Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__storage_market_actor" class="menu-item depth-4">
+    
+    
+        Storage Market Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_markets__retrieval_market" class="menu-item depth-3">
+    
+    
+        Retrieval Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_client" class="menu-item depth-4">
+    
+    
+        Retrieval Client
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_provider" class="menu-item depth-4">
+    
+    
+        Retrieval Provider (Miner)
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Libraries
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#libraries__fcs" class="menu-item depth-2">
+    
+    
+        FCS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__ipld" class="menu-item depth-2">
+    
+    
+        IPLD
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__ipld__cid" class="menu-item depth-3">
+    
+    
+        CID
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#libraries__ipld__datamodel" class="menu-item depth-3">
+    
+    
+        Data Model
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#libraries__ipld__selectors" class="menu-item depth-3">
+    
+    
+        Selectors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
+    
+    
+        GraphStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__libp2p" class="menu-item depth-2">
+    
+    
+        libp2p
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__libp2p__gossipsub" class="menu-item depth-3">
+    
+    
+        gossipsub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__libp2p__kad_dht" class="menu-item depth-3">
+    
+    
+        kad-dht
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__libp2p__fil_libp2p_nodes" class="menu-item depth-3">
+    
+    
+        fil-libp2p Nodes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__ipfs" class="menu-item depth-2">
+    
+    
+        IPFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#libraries__ipfs__bitswap" class="menu-item depth-3">
+    
+    
+        BitSwap
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#libraries__ipfs__graphsync" class="menu-item depth-3">
+    
+    
+        GraphSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#libraries__ipfs__unixfs" class="menu-item depth-3">
+    
+    
+        UnixFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#libraries__multiformats" class="menu-item depth-2">
+    
+    
+        Multiformats
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Algorithms
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__porep" class="menu-item depth-2">
+    
+    
+        Proof-of-Replication
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__porep__zigzag" class="menu-item depth-3">
+    
+    
+        ZigZag-PoRep
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__porep__porep_commitments" class="menu-item depth-3">
+    
+    
+        PoRep Commitments
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__post" class="menu-item depth-2">
+    
+    
+        Proof-of-Spacetime
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+    
+    
+        Rational-PoSt
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
+    
+    
+        PoSt Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__payment_channels" class="menu-item depth-2">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__block_sync" class="menu-item depth-2">
+    
+    
+        BlockSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__gossip_sub" class="menu-item depth-2">
+    
+    
+        GossipSub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#algorithms__crypto" class="menu-item depth-2">
+    
+    
+        Cryptographic Primitives
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Listings
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings__actors" class="menu-item depth-2">
+    
+    
+        Filecoin VM Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings__data_structures" class="menu-item depth-2">
+    
+    
+        Data Structures
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings__system_map" class="menu-item depth-2">
+    
+    
+        Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings__libp2p_protocols" class="menu-item depth-2">
+    
+    
+        libp2p Protocols
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#glossary" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Glossary
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Appendix
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix__sharray" class="menu-item depth-2">
+    
+    
+        Sharded IPLD Array
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#appendix__orient" class="menu-item depth-2">
+    
+    
+        Filecoin Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+  </ul>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+<script>
+(function() {
+  var menu = document.querySelector("aside.book-menu nav");
+  addEventListener("beforeunload", function(event) {
+    localStorage.setItem("menu.scrollTop", menu.scrollTop);
+  });
+  menu.scrollTop = localStorage.getItem("menu.scrollTop");
+})();
+</script>
+
+    </aside>
+
+    <div class="book-page">
+      <header class="flex align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../../../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>Storage Miner Actor Old</strong>
+</header>
+
+      
+<article class="markdown">
+  
+
+<h1 id="storage-miner-actor-deprecated">Storage Miner Actor (DEPRECATED)</h1>
+
+<ul>
+<li><p><strong>Code Cid</strong>: <code>&lt;codec:raw&gt;&lt;mhType:identity&gt;&lt;&quot;sminer&quot;&gt;</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMinerActorState struct <span class="o">{</span>
+<span class="c1">## contains mostly static info about this miner</span>
+info <span class="p">&amp;</span>MinerInfo
+
+
+<span class="c1">## Collateral that is waiting to be withdrawn.</span>
+dePledgedCollateral TokenAmount
+
+<span class="c1">## Time at which the depledged collateral may be withdrawn.</span>
+dePledgeTime BlockHeight
+
+<span class="c1">## All sectors this miner has committed.</span>
+sectors <span class="p">&amp;</span>SectorSet
+
+<span class="c1">## Sectors this miner is currently mining. It is only updated</span>
+<span class="c1">## when a PoSt is submitted (not as each new sector commitment is added).</span>
+provingSet <span class="p">&amp;</span>SectorSet
+
+<span class="c1">## Faulty sectors reported since last SubmitPost, up to the current proving period&#39;s challenge time.</span>
+currentFaultSet BitField
+
+<span class="c1">## Faults submitted after the current proving period&#39;s challenge time, but before the PoSt for that period</span>
+<span class="c1">## is submitted. These become the currentFaultSet when a PoSt is submitted.</span>
+nextFaultSet BitField
+
+<span class="c1">## Sectors reported during the last PoSt submission as being &#39;done&#39;. The collateral</span>
+<span class="c1">## for them is still being held until the next PoSt submission in case early sector</span>
+<span class="c1">## removal penalization is needed.</span>
+nextDoneSet BitField
+
+<span class="c1">## Deals this miner has been slashed for since the last post submission.</span>
+arbitratedDeals <span class="o">{</span>Cid:Null<span class="o">}</span>
+
+<span class="c1">## Amount of power this miner has.</span>
+power UInt
+
+<span class="c1">## List of sectors that this miner was slashed for.</span>
+slashedSet optional <span class="p">&amp;</span>SectorSet
+
+<span class="c1">## The height at which this miner was slashed at.</span>
+slashedAt optional BlockHeight
+
+<span class="c1">## The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.</span>
+owedStorageCollateral TokenAmount
+
+provingPeriodEnd BlockHeight
+<span class="o">}</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> MinerInfo struct <span class="o">{</span>
+<span class="c1">## Account that owns this miner.</span>
+<span class="c1">## - Income and returned collateral are paid to this address.</span>
+<span class="c1">## - This address is also allowed to change the worker address for the miner.</span>
+owner Address
+
+<span class="c1">## Worker account for this miner.</span>
+<span class="c1">## This will be the key that is used to sign blocks created by this miner, and</span>
+<span class="c1">## sign messages sent on behalf of this miner to commit sectors, submit PoSts, and</span>
+<span class="c1">## other day to day miner activities.</span>
+worker Address
+
+<span class="c1">## Libp2p identity that should be used when connecting to this miner.</span>
+peerId PeerId
+
+<span class="c1">## Amount of space in each sector committed to the network by this miner.</span>
+sectorSize BytesAmount
+
+<span class="o">}</span></code></pre></div></li>
+</ul>
+
+<h2 id="methods">Methods</h2>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Method ID</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><code>StorageMinerConstructor</code></td>
+<td>1</td>
+</tr>
+
+<tr>
+<td><code>CommitSector</code></td>
+<td>2</td>
+</tr>
+
+<tr>
+<td><code>SubmitPost</code></td>
+<td>3</td>
+</tr>
+
+<tr>
+<td><code>SlashStorageFault</code></td>
+<td>4</td>
+</tr>
+
+<tr>
+<td><code>GetCurrentProvingSet</code></td>
+<td>5</td>
+</tr>
+
+<tr>
+<td><code>ArbitrateDeal</code></td>
+<td>6</td>
+</tr>
+
+<tr>
+<td><code>DePledge</code></td>
+<td>7</td>
+</tr>
+
+<tr>
+<td><code>GetOwner</code></td>
+<td>8</td>
+</tr>
+
+<tr>
+<td><code>GetWorkerAddr</code></td>
+<td>9</td>
+</tr>
+
+<tr>
+<td><code>GetPower</code></td>
+<td>10</td>
+</tr>
+
+<tr>
+<td><code>GetPeerID</code></td>
+<td>11</td>
+</tr>
+
+<tr>
+<td><code>GetSectorSize</code></td>
+<td>12</td>
+</tr>
+
+<tr>
+<td><code>UpdatePeerID</code></td>
+<td>13</td>
+</tr>
+
+<tr>
+<td><code>ChangeWorker</code></td>
+<td>14</td>
+</tr>
+
+<tr>
+<td><code>IsSlashed</code></td>
+<td>15</td>
+</tr>
+
+<tr>
+<td><code>IsLate</code></td>
+<td>16</td>
+</tr>
+
+<tr>
+<td><code>PaymentVerifyInclusion</code></td>
+<td>17</td>
+</tr>
+
+<tr>
+<td><code>PaymentVerifySector</code></td>
+<td>18</td>
+</tr>
+
+<tr>
+<td><code>AddFaults</code></td>
+<td>19</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="constructor"><code>Constructor</code></h2>
+
+<p>Along with the call, the actor must be created with exactly enough filecoin for the collateral necessary for the pledge.</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> StorageMinerConstructor struct <span class="o">{</span>
+    worker Address
+    owner Address
+    sectorSize BytesAmount
+    peerId PeerId
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">StorageMinerActor</span><span class="p">(</span><span class="nx">worker</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">owner</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">owner</span> <span class="p">=</span> <span class="nx">message</span><span class="p">.</span><span class="nx">From</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">worker</span> <span class="p">=</span> <span class="nx">worker</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">peerID</span> <span class="p">=</span> <span class="nx">pid</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">sectorSize</span> <span class="p">=</span> <span class="nx">sectorSize</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">sectors</span> <span class="p">=</span> <span class="nf">EmptySectorSet</span><span class="p">()</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">provingSet</span> <span class="p">=</span> <span class="nf">EmptySectorSet</span><span class="p">()</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="commitsector"><code>CommitSector</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> CommitSector struct <span class="o">{</span>
+    sectorId SectorID
+    commD Bytes
+    commR Bytes
+    commRStar Bytes
+    proof SealProof
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+
+<div class="notices todo" >TODO: ValidatePoRep, EnsureSectorIsUnique, CollateralForSector, Commitment</div>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">sectorID</span> <span class="nx">SectorID</span><span class="p">,</span> <span class="nx">commD</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">commRStar</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">SealProof</span><span class="p">)</span> <span class="nx">SectorID</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nf">ValidatePoRep</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">comm</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">worker</span><span class="p">,</span> <span class="nx">proof</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;bad proof!&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// make sure the miner isnt trying to submit a pre-existing sector
+</span><span class="c1"></span>  <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nf">EnsureSectorIsUnique</span><span class="p">(</span><span class="nx">comm</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;sector already committed!&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Power of the miner after adding this sector
+</span><span class="c1"></span>  <span class="nx">futurePower</span> <span class="p">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">power</span> <span class="o">+</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">sectorSize</span>
+  <span class="nx">collateralRequired</span> <span class="p">=</span> <span class="nf">CollateralForPower</span><span class="p">(</span><span class="nx">futurePower</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nx">collateralRequired</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough collateral&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Note: There must exist a unique index in the miner&#39;s sector set for each
+</span><span class="c1"></span>  <span class="c1">// sector ID. The `faults`, `recovered`, and `done` parameters of the
+</span><span class="c1"></span>  <span class="c1">// SubmitPoSt method express indices into this sector set.
+</span><span class="c1"></span>  <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">sectorID</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">commD</span><span class="p">)</span>
+
+  <span class="c1">// if miner is not mining, start their proving period now
+</span><span class="c1"></span>  <span class="c1">// Note: As written here, every miners first PoSt will only be over one sector.
+</span><span class="c1"></span>  <span class="c1">// We could set up a &#39;grace period&#39; for starting mining that would allow miners
+</span><span class="c1"></span>  <span class="c1">// to submit several sectors for their first proving period. Alternatively, we
+</span><span class="c1"></span>  <span class="c1">// could simply make the &#39;CommitSector&#39; call take multiple sectors at a time.
+</span><span class="c1"></span>  <span class="c1">//
+</span><span class="c1"></span>  <span class="c1">// Note: Proving period is a function of sector size; small sectors take less
+</span><span class="c1"></span>  <span class="c1">// time to prove than large sectors do. Sector size is selected when pledging.
+</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingSet</span> <span class="p">=</span> <span class="nx">miner</span><span class="p">.</span><span class="nx">Sectors</span>
+    <span class="nx">miner</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">+</span> <span class="nf">ProvingPeriodDuration</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">CollateralForPower</span><span class="p">(</span><span class="nx">power</span> <span class="nx">BytesAmount</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
+  <span class="nx">availableFil</span> <span class="p">=</span> <span class="nx">FakeGlobalMethods</span><span class="p">.</span><span class="nf">GetAvailableFil</span><span class="p">()</span>
+  <span class="nx">totalNetworkPower</span> <span class="p">=</span> <span class="nx">StorageMinerActor</span><span class="p">.</span><span class="nf">GetTotalStorage</span><span class="p">()</span>
+  <span class="nx">numMiners</span> <span class="p">=</span> <span class="nx">StorageMarket</span><span class="p">.</span><span class="nf">GetMinerCount</span><span class="p">()</span>
+  <span class="nx">powerCollateral</span> <span class="p">=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="nx">NetworkConstants</span><span class="p">.</span><span class="nx">POWER_COLLATERAL_PROPORTION</span> <span class="o">*</span> <span class="nx">power</span> <span class="o">/</span> <span class="nx">totalNetworkPower</span>
+  <span class="nx">perCapitaCollateral</span> <span class="p">=</span> <span class="nx">availableFil</span> <span class="o">*</span> <span class="nx">NetworkConstants</span><span class="p">.</span><span class="nx">PER_CAPITA_COLLATERAL_PROPORTION</span> <span class="o">/</span> <span class="nx">numMiners</span>
+  <span class="nx">collateralRequired</span> <span class="p">=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Ceil</span><span class="p">(</span><span class="nx">minerPowerCollateral</span> <span class="o">+</span> <span class="nx">minerPerCapitaCollateral</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nx">collateralRequired</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="submitpost"><code>SubmitPoSt</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SubmitPost struct <span class="o">{</span>
+    proofs PoStProof
+    doneSet Bitfield
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SubmitPost</span><span class="p">(</span><span class="nx">proofs</span> <span class="nx">PoStProof</span><span class="p">,</span> <span class="nx">doneSet</span> <span class="nx">Bitfield</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not authorized to submit post for miner&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nx">feesRequired</span> <span class="o">:=</span> <span class="mi">0</span>
+    <span class="nx">nextProvingPeriodEnd</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="o">+</span> <span class="nf">ProvingPeriodDuration</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span>
+
+    <span class="c1">// TODO: rework fault handling, for now anything later than 2 proving periods is invalid
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">nextProvingPeriodEnd</span> <span class="p">{</span>
+        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;PoSt submited too late&#34;</span><span class="p">)</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">{</span>
+    <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">power</span><span class="p">,</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">self</span><span class="p">.</span><span class="nx">provingPeriodEnd</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nx">feesRequired</span> <span class="o">+=</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">sectorSize</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">currentFaultSet</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="p">&lt;</span> <span class="nx">feesRequired</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;not enough funds to pay post submission fees&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// we want to ensure that the miner can submit more fees than required, just in case
+</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span> <span class="p">&gt;</span> <span class="nx">feesRequired</span> <span class="p">{</span>
+    <span class="nf">TransferFunds</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">From</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span><span class="o">-</span><span class="nx">feesRequired</span><span class="p">)</span>
+  <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">seed</span>
+    <span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">{</span>
+      <span class="c1">// good case, submitted in time
+</span><span class="c1"></span>      <span class="nx">seed</span> <span class="p">=</span> <span class="nf">GetRandFromBlock</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="o">-</span> <span class="nx">POST_CHALLENGE_TIME</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// bad case, submitted late, need to take new proving period end as reference
+</span><span class="c1"></span>      <span class="nx">seed</span> <span class="p">=</span> <span class="nf">GetRandFromBlock</span><span class="p">(</span><span class="nx">nextPovingPeriodEnd</span> <span class="o">-</span> <span class="nx">POST_CHALLENGE_TIME</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">faultSet</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">currentFaultSet</span>
+
+  <span class="k">if</span> <span class="p">!</span><span class="nf">VerifyPoSt</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">provingSet</span><span class="p">,</span> <span class="nx">seed</span><span class="p">,</span> <span class="nx">proof</span><span class="p">,</span> <span class="nx">faultSet</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;proof invalid&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+    <span class="c1">// The next fault set becomes the current one
+</span><span class="c1"></span>    <span class="nx">self</span><span class="p">.</span><span class="nx">currentFaultSet</span> <span class="p">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">nextFaultSet</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">nextFaultSet</span> <span class="p">=</span> <span class="nf">EmptySectorSet</span><span class="p">()</span>
+
+    <span class="c1">// TODO: penalize for faults
+</span><span class="c1"></span>
+  <span class="c1">// Remove doneSet from the current sectors
+</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">Sectors</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">doneSet</span><span class="p">)</span>
+
+  <span class="c1">// Update miner power to the amount of data actually proved during the last proving period.
+</span><span class="c1"></span>  <span class="nx">oldPower</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Power</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">Power</span> <span class="p">=</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">ProvingSet</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">-</span> <span class="nx">faultSet</span><span class="p">.</span><span class="nf">Count</span><span class="p">())</span> <span class="o">*</span> <span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span>
+  <span class="nx">StorageMarket</span><span class="p">.</span><span class="nf">UpdateStorage</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">Power</span> <span class="o">-</span> <span class="nx">oldPower</span><span class="p">)</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingSet</span> <span class="p">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Sectors</span>
+
+  <span class="c1">// Updating proving period given a fixed schedule, independent of late submissions.
+</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="p">=</span> <span class="nx">nextProvingPeriodEnd</span>
+
+  <span class="c1">// update next done set
+</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">NextDoneSet</span> <span class="p">=</span> <span class="nx">done</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">ArbitratedDeals</span><span class="p">.</span><span class="nf">Clear</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ProvingPeriodDuration</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="kt">uint64</span><span class="p">)</span> <span class="nx">Integer</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">2</span> <span class="c1">// number of blocks in one day
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ComputeLateFee</span><span class="p">(</span><span class="nx">power</span> <span class="nx">Integer</span><span class="p">,</span> <span class="nx">blocksLate</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: real collateral calculation, obviously
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ComputeTemporarySectorFailureFee</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">BytesAmount</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">Integer</span><span class="p">)</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="mi">4</span> <span class="c1">// TODO: something tells me that 4 might not work in all situations. probably should find a better way to compute this
+</span><span class="c1"></span><span class="p">}</span></code></pre></div>
+<h2 id="slashstoragefault"><code>SlashStorageFault</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> SlashStorageFault struct <span class="o">{</span>
+    miner Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SlashStorageFault</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// You can only be slashed once for missing your PoSt.
+</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">SlashedAt</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner already slashed&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Only if the miner is actually late, they can be slashed.
+</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span><span class="o">+</span><span class="nf">GenerationAttackTime</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner is not yet tardy&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Only a miner who is expected to prove, can be slashed.
+</span><span class="c1"></span>  <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingSet</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner is inactive&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Strip the miner of their power.
+</span><span class="c1"></span>  <span class="nx">StorageMarketActor</span><span class="p">.</span><span class="nf">UpdateStorage</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Power</span><span class="p">)</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">Power</span> <span class="p">=</span> <span class="mi">0</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">slashedSet</span> <span class="p">=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingSet</span>
+  <span class="c1">// remove proving set from our sectors
+</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">sectors</span><span class="p">.</span><span class="nf">Substract</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">slashedSet</span><span class="p">)</span>
+
+  <span class="c1">// clear proving set
+</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingSet</span> <span class="p">=</span> <span class="kc">nil</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">owedStorageCollateral</span> <span class="p">=</span> <span class="nx">StorageMarketActor</span><span class="p">.</span><span class="nf">StorageCollateralForSize</span><span class="p">(</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">slashedSet</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">*</span> <span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span>
+  <span class="p">)</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">SlashedAt</span> <span class="p">=</span> <span class="nx">CurrentBlockHeight</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="getcurrentprovingset"><code>GetCurrentProvingSet</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetCurrentProvingSet struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetCurrentProvingSet</span><span class="p">()</span> <span class="p">[][]</span><span class="kt">byte</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingSet</span>
+<span class="p">}</span></code></pre></div>
+<div class="notices note" ><strong>Note</strong>: this is unlikely to ever be called on-chain, and will be a very large amount of data. We should reconsider the need for a list of all sector commitments (maybe fixing with accumulators?)</div>
+
+<h2 id="arbitratedeal"><code>ArbitrateDeal</code></h2>
+
+<p>This may be called by anyone to penalize a miner for dropping the data of a deal they committed to before the deal expires. Note: in order to call this, the caller must have the signed deal between the client and the miner in question, this would require out of band communication of this information from the client to acquire.</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ArbitrateDeal struct <span class="o">{</span>
+    deal Deal
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AbitrateDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">Deal</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">!</span><span class="nx">VM</span><span class="p">.</span><span class="nf">ValidateSignature</span><span class="p">(</span><span class="nx">deal</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Worker</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid signature on deal&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="nx">VM</span><span class="p">.</span><span class="nf">CurrentBlockHeight</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StartTime</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Deal not yet started&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Expiry</span> <span class="p">&lt;</span> <span class="nx">VM</span><span class="p">.</span><span class="nf">CurrentBlockHeight</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Deal is expired&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nx">NextDoneSet</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">deal</span><span class="p">.</span><span class="nx">pieceInclusionProof</span><span class="p">.</span><span class="nx">sectorID</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Deal agreement not broken, or arbitration too late&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ArbitratedDeals</span><span class="p">.</span><span class="nf">Has</span><span class="p">(</span><span class="nx">deal</span><span class="p">.</span><span class="nx">commP</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot slash miner twice for same deal&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">!</span><span class="nx">deal</span><span class="p">.</span><span class="nx">pieceInclusionProof</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">deal</span><span class="p">.</span><span class="nx">commP</span><span class="p">,</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;invalid piece inclusion proof or size&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nx">storageCollateral</span> <span class="o">:=</span> <span class="nx">StorageMarketActor</span><span class="p">.</span><span class="nf">StorageCollateralForSize</span><span class="p">(</span><span class="nx">deal</span><span class="p">.</span><span class="nx">size</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">owedStorageCollateral</span> <span class="p">&lt;</span> <span class="nx">storageCollateral</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;math is hard, and we didnt do it right&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// pay the client the storage collateral
+</span><span class="c1"></span>  <span class="nx">VM</span><span class="p">.</span><span class="nf">TransferFunds</span><span class="p">(</span><span class="nx">storageCollateral</span><span class="p">,</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">client</span><span class="p">)</span>
+
+  <span class="c1">// keep track of how much we have payed out
+</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">owedStorageCollateral</span> <span class="o">-=</span> <span class="nx">storageCollateral</span>
+
+  <span class="c1">// make sure the miner can&#39;t be slashed twice for this deal
+</span><span class="c1"></span>  <span class="nx">self</span><span class="p">.</span><span class="nx">ArbitratedDeals</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">deal</span><span class="p">.</span><span class="nx">commP</span><span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+<div class="notices todo" ><strong>TODO(scaling)</strong>: This method, as currently designed, must be called once per sector. If a miner agrees to store 1TB (1000 sectors) for a particular client, and loses all that data, the client must then call this method 1000 times, which will be really expensive.</div>
+
+<h2 id="depledge"><code>DePledge</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> DePledge struct <span class="o">{</span>
+    amount TokenAmount
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">DePledge</span><span class="p">(</span><span class="nx">amt</span> <span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">Worker</span> <span class="o">&amp;&amp;</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">owner</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Not authorized to call DePledge&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">DePledgeTime</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nx">DePledgeTime</span> <span class="p">&gt;</span> <span class="nx">VM</span><span class="p">.</span><span class="nf">CurrentBlockHeight</span><span class="p">()</span> <span class="p">{</span>
+      <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;too early to withdraw collateral&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nf">TransferFunds</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">owner</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">DePledgedCollateral</span><span class="p">)</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">DePledgeTime</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">DePledgedCollateral</span> <span class="p">=</span> <span class="mi">0</span>
+    <span class="k">return</span>
+  <span class="p">}</span>
+
+  <span class="nx">collateralRequired</span> <span class="p">=</span> <span class="nf">CollateralForPower</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">power</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nx">amt</span><span class="o">+</span><span class="nx">collateralRequired</span> <span class="p">&gt;</span> <span class="nx">vm</span><span class="p">.</span><span class="nf">MyBalance</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;Not enough free collateral to withdraw that much&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">DePledgedCollateral</span> <span class="p">=</span> <span class="nx">amt</span>
+  <span class="nx">self</span><span class="p">.</span><span class="nx">DePledgeTime</span> <span class="p">=</span> <span class="nx">CurrentBlockHeight</span> <span class="o">+</span> <span class="nx">DePledgeCooldown</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="getowner"><code>GetOwner</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetOwner struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetOwner</span><span class="p">()</span> <span class="nx">Address</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">owner</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="getworkeraddr"><code>GetWorkerAddr</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetWorkerAddr struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetWorkerAddr</span><span class="p">()</span> <span class="nx">Address</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">worker</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="getpower"><code>GetPower</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetPower struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetPower</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">power</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="getpeerid"><code>GetPeerID</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetPeerID struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetPeerID</span><span class="p">()</span> <span class="nx">PeerID</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">peerID</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="getsectorsize"><code>GetSectorSize</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> GetSectorSize struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">GetSectorSize</span><span class="p">()</span> <span class="nx">BytesAmount</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">sectorSize</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="updatepeerid"><code>UpdatePeerID</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> UpdatePeerID struct <span class="o">{</span>
+    peerId PeerId
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">UpdatePeerID</span><span class="p">(</span><span class="nx">pid</span> <span class="nx">PeerID</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">worker</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;only the mine worker may update the peer ID&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">peerID</span> <span class="p">=</span> <span class="nx">pid</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="changeworker"><code>ChangeWorker</code></h2>
+
+<p>Changes the worker address. Note that since Sector Commitments take the miners worker key as an input, any sectors sealed with the old key but not yet submitted to the chain will be invalid. All future sectors must be sealed with the new worker key.</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> ChangeWorker struct <span class="o">{</span>
+    addr Address
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ChangeWorker</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">From</span> <span class="o">!=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">owner</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;only the owner can change the worker address&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">worker</span> <span class="p">=</span> <span class="nx">addr</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="islate"><code>IsLate</code></h2>
+
+<p>IsLate checks whether the miner has submitted their PoSt on time (i.e. not after ProvingPeriodEnd).</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> IsLate struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">IsLate</span><span class="p">()</span> <span class="p">(</span><span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">provingPeriodEnd</span> <span class="p">&lt;</span> <span class="nx">VM</span><span class="p">.</span><span class="nf">CurrentBlockHeight</span><span class="p">()</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="isslashed"><code>IsSlashed</code></h2>
+
+<p>Checks whether the miner has been slashed and not recovered. Note that if the miner is slashed and recovers, this will return False: it checks current state rather than historical occurence.</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> IsSlashed struct <span class="o">{</span>
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">IsSlashed</span><span class="p">()</span> <span class="p">(</span><span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+    <span class="err">#</span> <span class="nx">SlashedAt</span> <span class="nx">is</span> <span class="nx">reset</span> <span class="nx">on</span> <span class="nx">recovery</span>
+    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">SlashedAt</span> <span class="p">&gt;</span> <span class="mi">0</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="paymentverifyinclusion"><code>PaymentVerifyInclusion</code></h2>
+
+<p>Verifies a storage market payment channel voucher&rsquo;s &lsquo;Extra&rsquo; data by validating piece inclusion proof.</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> PaymentVerify struct <span class="o">{</span>
+    Extra Bytes
+    Proof Bytes
+<span class="o">}</span> representation tuple
+
+<span class="nb">type</span> PieceInclusionVoucherData struct <span class="o">{</span>
+    CommP Bytes
+    PieceSize BigInt
+<span class="o">}</span> representation tuple
+
+<span class="nb">type</span> InclusionProof struct <span class="o">{</span>
+    Sector BigInt // <span class="k">for</span> CommD, also verifies the sector is in sector <span class="nb">set</span>
+    Proof  Bytes
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">PaymentVerifyInclusion</span><span class="p">(</span><span class="nx">extra</span> <span class="nx">PieceInclusionVoucherData</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">InclusionProof</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">has</span><span class="p">,</span> <span class="nx">commD</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nf">GetSector</span><span class="p">(</span><span class="nx">proof</span><span class="p">.</span><span class="nx">Sector</span><span class="p">)</span>
+  <span class="k">if</span> <span class="p">!</span><span class="nx">has</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;miner does not have required sector&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nf">ValidatePIP</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">SectorSize</span><span class="p">,</span> <span class="nx">extra</span><span class="p">.</span><span class="nx">PieceSize</span><span class="p">,</span> <span class="nx">extra</span><span class="p">.</span><span class="nx">CommP</span><span class="p">,</span> <span class="nx">commD</span><span class="p">,</span> <span class="nx">proof</span><span class="p">.</span><span class="nx">Proof</span><span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="paymentverifysector"><code>PaymentVerifySector</code></h2>
+
+<p>Verifies a storage market payment channel voucher&rsquo;s &lsquo;Extra&rsquo; data by checking for presence of a specified sector in miner&rsquo;s sector set.</p>
+
+<p>Miners should prefer payment vouchers with this method used for validation over <code>PaymentVerifyInclusion</code>, because posting them to the chain will be much cheaper.</p>
+
+<p>Clients should only create such vouchers after verifying that miners have related sectors in their sector set, and after checking piece inclusion proof.</p>
+
+<p>Miners can incentivize clients to produce such vouchers by applying small &lsquo;discount&rsquo; to amount of token clients have to pay.</p>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> PaymentVerify struct <span class="o">{</span>
+    Extra Bytes
+    Proof Bytes
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">PaymentVerifyInclusion</span><span class="p">(</span><span class="nx">extra</span> <span class="nx">BigInt</span><span class="p">,</span> <span class="nx">proof</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">proof</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+    <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;unexpected proof bytes&#34;</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nf">HasSector</span><span class="p">(</span><span class="nx">extra</span><span class="p">)</span>
+<span class="p">}</span></code></pre></div>
+<h2 id="addfaults"><code>AddFaults</code></h2>
+
+<p><strong>Parameters</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> AddFaults struct <span class="o">{</span>
+    faults FaultSet
+<span class="o">}</span> representation tuple</code></pre></div>
+<p><strong>Algorithm</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">AddFaults</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">FaultSet</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">challengeBlockHeight</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">ProvingPeriodEnd</span> <span class="o">-</span> <span class="nx">POST_CHALLENGE_TIME</span>
+
+    <span class="k">if</span> <span class="nx">VM</span><span class="p">.</span><span class="nf">CurrentBlockHeight</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">challengeBlockHeight</span> <span class="p">{</span>
+        <span class="c1">// Up to the challenge time new faults can be added.
+</span><span class="c1"></span>        <span class="nx">self</span><span class="p">.</span><span class="nx">currentFaultSet</span> <span class="p">=</span> <span class="nf">Merge</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">currentFaultSet</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// After that they are only accounted for in the next proving period
+</span><span class="c1"></span>        <span class="nx">self</span><span class="p">.</span><span class="nx">nextFaultSet</span> <span class="p">=</span> <span class="nf">Merge</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">nextFaultSet</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+</article>
+
+      
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#storage-miner-actor-deprecated">Storage Miner Actor (DEPRECATED)</a>
+<ul>
+<li><a href="#methods">Methods</a></li>
+<li><a href="#constructor"><code>Constructor</code></a></li>
+<li><a href="#commitsector"><code>CommitSector</code></a></li>
+<li><a href="#submitpost"><code>SubmitPoSt</code></a></li>
+<li><a href="#slashstoragefault"><code>SlashStorageFault</code></a></li>
+<li><a href="#getcurrentprovingset"><code>GetCurrentProvingSet</code></a></li>
+<li><a href="#arbitratedeal"><code>ArbitrateDeal</code></a></li>
+<li><a href="#depledge"><code>DePledge</code></a></li>
+<li><a href="#getowner"><code>GetOwner</code></a></li>
+<li><a href="#getworkeraddr"><code>GetWorkerAddr</code></a></li>
+<li><a href="#getpower"><code>GetPower</code></a></li>
+<li><a href="#getpeerid"><code>GetPeerID</code></a></li>
+<li><a href="#getsectorsize"><code>GetSectorSize</code></a></li>
+<li><a href="#updatepeerid"><code>UpdatePeerID</code></a></li>
+<li><a href="#changeworker"><code>ChangeWorker</code></a></li>
+<li><a href="#islate"><code>IsLate</code></a></li>
+<li><a href="#isslashed"><code>IsSlashed</code></a></li>
+<li><a href="#paymentverifyinclusion"><code>PaymentVerifyInclusion</code></a></li>
+<li><a href="#paymentverifysector"><code>PaymentVerifySector</code></a></li>
+<li><a href="#addfaults"><code>AddFaults</code></a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,45 @@
+[
+  {
+    "degree_expander": 8,
+    "degree_base": 6,
+    "node_size": 32,
+    "reseal": 0,
+    "proving_period_hours": 24,
+    "block_time": 15,
+    "kdf_hash_time": 0.000000045608,
+    "leaf_hash_time": 0.000000045608,
+    "encoding_amax": 2,
+    "cores": 16,
+    "leaf_hash_constraints": 1300,
+    "merkle_hash_time_circuit": 0.076994,
+    "merkle_hash_time": 0.000013078,
+    "leaf_hash_circuit_time": 0.076994,
+    "merkle_hash_constraints": 1300,
+    "kdf_hash_size": 32,
+    "proof_messages_fraction": 0.4,
+    "tx_messages_fraction": 0.3,
+    "miners": 1000
+  },
+  [
+    { "spacegap": 0.03 },
+    { "spacegap": 0.06 },
+    { "spacegap": 0.1 },
+    { "spacegap": 0.2 }
+  ]
+  ,
+  [
+    { "expected_winning_miners": 1 },
+    { "expected_winning_miners": 5 },
+    { "expected_winning_miners": 15 }
+  ],
+  [
+    { "lambda": 10 },
+    { "lambda": 80 }
+  ],
+  [
+    { "sector_size_gib": 32 },
+    { "sector_size_gib": 128 },
+    { "sector_size_gib": 256 },
+    { "sector_size_gib": 1024 }
+  ]
+]

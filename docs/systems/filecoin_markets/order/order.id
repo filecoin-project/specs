@@ -1,0 +1,7 @@
+type Ask struct {
+
+}
+
+type Bid struct {
+
+}

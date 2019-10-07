@@ -1,0 +1,4696 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expected Consensus | Filecoin Spec</title>
+
+
+
+<link rel="stylesheet" href="../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+
+
+<link rel="icon" href="../../../favicon.png" type="image/x-icon">
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="../../../css/syntax.css">
+<link href="../../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="../../../mermaid/mermaid.js"></script>
+<script src="../../../spec.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" class="hidden" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href=""><span>Filecoin Spec</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" placeholder="Search" id="book-search-input" maxlength="64" readonly />
+  <div class="book-search-spinner spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f algorithms\2f expected_consensus\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+
+  <div>
+
+  <div>
+    
+    <input id="menu-detail-slider" type="range" onchange="onMenuDetailChange();"
+      min="1" value="3" max="5" step="1" />
+
+    <span id="menu-detail-slider-label">3</span>
+  </div>
+
+  
+  
+  <ul class="menu-item-section depth-0">
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Introduction
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__arch" class="menu-item depth-2">
+    
+    
+        Architecture Diagrams
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__concepts" class="menu-item depth-2">
+    
+    
+        Key Concepts
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__filecoin_vm" class="menu-item depth-2">
+    
+    
+        Filecoin VM
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process" class="menu-item depth-2">
+    
+    
+        Process
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__about" class="menu-item depth-3">
+    
+    
+        About
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__fip" class="menu-item depth-3">
+    
+    
+        FIPs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__process__contributing" class="menu-item depth-3">
+    
+    
+        Contributing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources" class="menu-item depth-3">
+    
+    
+        Related Resources
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__research_portal" class="menu-item depth-4">
+    
+    
+        Research portal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__network_tooling" class="menu-item depth-4">
+    
+    
+        Network tooling
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#intro__process__related_resources__testing" class="menu-item depth-4">
+    
+    
+        Testing and implementation compliance
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system" class="menu-item depth-2">
+    
+    
+        System Decomposition
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system__why_systems" class="menu-item depth-3">
+    
+    
+        What are Systems?
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__system__impl_systems" class="menu-item depth-3">
+    
+    
+        Implementing Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Systems
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes" class="menu-item depth-2">
+    ⚙️
+    
+        <strong>Filecoin Nodes</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types" class="menu-item depth-3">
+    
+    
+        Node Types
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__node" class="menu-item depth-4">
+    
+    
+        Node Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__node_types" class="menu-item depth-4">
+    
+    
+        Examples
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__verifier_node" class="menu-item depth-4">
+    
+    
+        Chain Verifier Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__client_node" class="menu-item depth-4">
+    
+    
+        Client Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__storage_miner_node" class="menu-item depth-4">
+    
+    
+        Storage Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__retrieval_miner_node" class="menu-item depth-4">
+    
+    
+        Retrieval Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__node_types__relayer_node" class="menu-item depth-4">
+    
+    
+        Relayer Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository" class="menu-item depth-3">
+    
+    
+        Repository
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository__config" class="menu-item depth-4">
+    
+    
+        Config
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+    
+    
+        KeyStore &amp; user keys
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_nodes__repository__ipldstore" class="menu-item depth-4">
+    
+    
+        IpldStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
+    
+    
+        Usage in Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__network" class="menu-item depth-3">
+    
+    
+        Network Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_nodes__clock" class="menu-item depth-3">
+    
+    
+        Clock
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files" class="menu-item depth-2">
+    📑
+    
+        <strong>Files &amp; Data</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_files__file" class="menu-item depth-3">
+    
+    
+        File
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__file__filestore" class="menu-item depth-4">
+    
+    
+        FileStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__piece" class="menu-item depth-3">
+    
+    
+        Piece
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__piece__piece_store" class="menu-item depth-4">
+    
+    
+        PieceStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_files__data_transfer" class="menu-item depth-3">
+    
+    
+        Data Transfer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain" class="menu-item depth-2">
+    📦
+    
+        <strong>Blockchain</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm" class="menu-item depth-3">
+    
+    
+        Virtual Machine
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__address" class="menu-item depth-4">
+    
+    
+        VM Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__actor" class="menu-item depth-4">
+    
+    
+        VM Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__state_tree" class="menu-item depth-4">
+    
+    
+        VM State Tree
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__message" class="menu-item depth-4">
+    
+    
+        VM Message
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors" class="menu-item depth-4">
+    
+    
+        VM System Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__init_actor" class="menu-item depth-5">
+    
+    
+        InitActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__cron_actor" class="menu-item depth-5">
+    
+    
+        CronActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__sysactors__account_actor" class="menu-item depth-5">
+    
+    
+        AccountActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__interpreter" class="menu-item depth-4">
+    
+    
+        VM Interpreter
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_blockchain__vm__runtime" class="menu-item depth-4">
+    
+    
+        VM Runtime Environment
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool" class="menu-item depth-3">
+    
+    
+        Message Pool
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool__message_syncer" class="menu-item depth-4">
+    
+    
+        Message Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__message_pool__message_storage" class="menu-item depth-4">
+    
+    
+        Message Storage
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain" class="menu-item depth-3">
+    
+    
+        Blockchain Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__block_syncer" class="menu-item depth-4">
+    
+    
+        Block Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__chain_manager" class="menu-item depth-4">
+    
+    
+        Chain Manager
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__blockchain__block_producer" class="menu-item depth-4">
+    
+    
+        Block Producer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus" class="menu-item depth-3">
+    
+    
+        Storage Power Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
+    
+    
+        Storage Power Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token" class="menu-item depth-2">
+    📀
+    
+        <strong>Token</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__wallets" class="menu-item depth-3">
+    
+    
+        Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__payments" class="menu-item depth-3">
+    
+    
+        Payments
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__payment_channels" class="menu-item depth-3">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token__payment_channels__payment_channel_actor" class="menu-item depth-4">
+    
+    
+        Payment Channel Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_token__multisig" class="menu-item depth-3">
+    
+    
+        Multisig Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_token__multisig__multisig_actor" class="menu-item depth-4">
+    
+    
+        Multisig Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining" class="menu-item depth-2">
+    ⛏
+    
+        <strong>Storage Mining</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining" class="menu-item depth-3">
+    
+    
+        Storage Miner
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__mining_cycle" class="menu-item depth-4">
+    
+    
+        Storage Mining Cycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__storage_miner_actor" class="menu-item depth-4">
+    
+    
+        Storage Miner Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
+    
+    
+        Mining Scheduler
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector" class="menu-item depth-3">
+    
+    
+        Sector
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__sectorset" class="menu-item depth-4">
+    
+    
+        Sector Set
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
+    
+    
+        Sector Sealing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index" class="menu-item depth-3">
+    
+    
+        Sector Index
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index__sector_builder" class="menu-item depth-4">
+    
+    
+        Sector Builder
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__sector_index__sector_store" class="menu-item depth-4">
+    
+    
+        SectorStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving" class="menu-item depth-3">
+    
+    
+        Storage Proving
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving__sealer" class="menu-item depth-4">
+    
+    
+        Sector Sealer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_mining__storage_proving__poster" class="menu-item depth-4">
+    
+    
+        Sector Poster
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets" class="menu-item depth-2">
+    ⚖️
+    
+        <strong>Market</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__order" class="menu-item depth-3">
+    
+    
+        Orders
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
+    
+    
+        Deals
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
+    
+    
+        Storage Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__storage_market_actor" class="menu-item depth-4">
+    
+    
+        Storage Market Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market" class="menu-item depth-3">
+    
+    
+        Retrieval Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market__retrieval_client" class="menu-item depth-4">
+    
+    
+        Retrieval Client
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_markets__retrieval_market__retrieval_provider" class="menu-item depth-4">
+    
+    
+        Retrieval Provider (Miner)
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Libraries
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__fcs" class="menu-item depth-2">
+    
+    
+        FCS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld" class="menu-item depth-2">
+    
+    
+        IPLD
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld__cid" class="menu-item depth-3">
+    
+    
+        CID
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipld__datamodel" class="menu-item depth-3">
+    
+    
+        Data Model
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipld__selectors" class="menu-item depth-3">
+    
+    
+        Selectors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipld__graphstore" class="menu-item depth-3">
+    
+    
+        GraphStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p" class="menu-item depth-2">
+    
+    
+        libp2p
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__gossipsub" class="menu-item depth-3">
+    
+    
+        gossipsub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__kad_dht" class="menu-item depth-3">
+    
+    
+        kad-dht
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__libp2p__fil_libp2p_nodes" class="menu-item depth-3">
+    
+    
+        fil-libp2p Nodes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__ipfs" class="menu-item depth-2">
+    
+    
+        IPFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__bitswap" class="menu-item depth-3">
+    
+    
+        BitSwap
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__graphsync" class="menu-item depth-3">
+    
+    
+        GraphSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#libraries__ipfs__unixfs" class="menu-item depth-3">
+    
+    
+        UnixFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#libraries__multiformats" class="menu-item depth-2">
+    
+    
+        Multiformats
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Algorithms
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__expected_consensus" class="menu-item depth-2">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep" class="menu-item depth-2">
+    
+    
+        Proof-of-Replication
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep__zigzag" class="menu-item depth-3">
+    
+    
+        ZigZag-PoRep
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__porep__porep_commitments" class="menu-item depth-3">
+    
+    
+        PoRep Commitments
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post" class="menu-item depth-2">
+    
+    
+        Proof-of-Spacetime
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post__rational_post" class="menu-item depth-3">
+    
+    
+        Rational-PoSt
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
+    
+    
+        PoSt Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__payment_channels" class="menu-item depth-2">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__block_sync" class="menu-item depth-2">
+    
+    
+        BlockSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__gossip_sub" class="menu-item depth-2">
+    
+    
+        GossipSub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#algorithms__crypto" class="menu-item depth-2">
+    
+    
+        Cryptographic Primitives
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Listings
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__actors" class="menu-item depth-2">
+    
+    
+        Filecoin VM Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__data_structures" class="menu-item depth-2">
+    
+    
+        Data Structures
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__system_map" class="menu-item depth-2">
+    
+    
+        Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__libp2p_protocols" class="menu-item depth-2">
+    
+    
+        libp2p Protocols
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#glossary" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Glossary
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Appendix
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__sharray" class="menu-item depth-2">
+    
+    
+        Sharded IPLD Array
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#appendix__orient" class="menu-item depth-2">
+    
+    
+        Filecoin Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+  </ul>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+<script>
+(function() {
+  var menu = document.querySelector("aside.book-menu nav");
+  addEventListener("beforeunload", function(event) {
+    localStorage.setItem("menu.scrollTop", menu.scrollTop);
+  });
+  menu.scrollTop = localStorage.getItem("menu.scrollTop");
+})();
+</script>
+
+    </aside>
+
+    <div class="book-page">
+      <header class="flex align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>Expected Consensus</strong>
+</header>
+
+      
+<article class="markdown">
+  
+
+<div id="algorithms__expected_consensus__expected_consensus"></div>
+
+<h2 id="algorithm">Algorithm</h2>
+
+<p>Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an <code>Election Proof</code>). All valid blocks submitted in a given round form a <code>Tipset</code>. Every block in a Tipset adds weight to its chain. The &lsquo;best&rsquo; chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see <a href="../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a>.</p>
+
+<p>The <a href="../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a> subsystem uses access to EC to use the following facilities:
+- Access to verifiable randomness for the protocol, derived from <a href="../../../#algorithms__expected_consenus__tickets">Tickets</a>.
+- Running and verifying <a href="../../../#algorithms__expected_consensus__leader_election">leader election</a> for block generation.
+- Access to a weighting function enabling <a href="../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> by the chain manager.
+- Access to the most recently <a href="../../../#algorithms__expected_consensus__finality">finalized tipset</a> available to all protocol participants.</p>
+
+<div id="algorithms__expected_consensus__tickets"></div>
+
+<h2 id="tickets">Tickets</h2>
+
+<p>One may think of leader election in EC as a verifiable lottery, in which participants win in proportion to the power they have within the network.</p>
+
+<p>A ticket is drawn from the past at the beginning of each new round to perform leader election. EC also generates a new ticket in every round for future use. Tickets are chained independently of the main blockchain. A ticket only depends on the ticket before it, and not any other data in the block.
+On expectation, in Filecoin, every block header contains one ticket, though it could contain more if that block was generated over multiple rounds.</p>
+
+<p>Tickets are used across the protocol as sources of randomness:
+- The <a href="../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a> uses tickets to bind sector commitments to a given subchain.
+- The <a href="../../../#systems__filecoin_mining__storage_proving__post_generator">PoSt Generator</a> likewise uses tickets to prove sectors remain committed as of a given block.
+- EC uses them to run leader election and generates new ones for use by the protocol, as detailed below.</p>
+
+<p>You can find the Ticket data structure <a href="../../../#listings__data_structures">here</a>.</p>
+
+<h3 id="comparing-tickets-in-a-tipset">Comparing Tickets in a Tipset</h3>
+
+<p>Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the &ldquo;min ticket&rdquo; in a Tipset, the comparison is that of the little endian representation of the ticket&rsquo;s VFOutput bytes.</p>
+
+<h3 id="the-ticket-chain">The Ticket chain</h3>
+
+<p>While each Filecoin block header contains a ticket array, it is useful to provide nodes with a ticket chain abstraction.</p>
+
+<p>Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
+- They are drawn by Storage Miners as SealSeeds to commit new sectors
+- They are drawn by Storage Miners as PoStChallenges to generate PoSts
+- They are drawn by the Storage Power subsystem as randomness in leader election to determine their eligibility to mine a block
+- They are drawn by the Storage Power subsystem in order to generate new tickets for future use.</p>
+
+<p>Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.</p>
+
+<p>This ticket chain will track one-to-one with a block at each height in a given subchain, but omits certain details including other blocks mined at that height.</p>
+
+<p>Simply, it is composed inductively as follows:</p>
+
+<ul>
+<li>At height 0, take the genesis block, return its ticket</li>
+<li>At height n+1, take the block used at height n.
+
+<ul>
+<li>If the ticket it returned in the previous step is not the final ticket in its ticket array, return the next one.</li>
+<li>If the ticket it returned in the previous step is the final ticket in its ticket array,</li>
+<li>use EC to select the next heaviest tipset in the subchain.</li>
+<li>select the block in that tipset with the smallest final ticket, return its first ticket</li>
+</ul></li>
+</ul>
+
+<p>We illustrate this below:</p>
+
+<pre><code>                     ┌────────────────────────────────────────────────────────────────────────────────────┐
+                      │                                                                                    │
+                      ▼                                  ◀─────────────────────────────────────────────────┼────────────────────────────────────────────┐
+          ┌─┐        ┌─┐        ┌─┐        ┌─┐          ┌─┐                                       ┌─┐      │    ┌─┐         ┌─┐         ┌─┐           ┌─┤
+   ◀──────│T1◀───────│T2◀───────│T3◀───────│T4◀─────────│T5◀───────────────    ...    ◀───────────T1+k─────┼───T2+k◀────────T3+k────────T4+k──────────T5│k
+          └─┘        └─┘        └─┘        └─┘          └─┘                                       └─┘      │    └─┘         └─┘         └─┘           └─┤
+                                 ▲                       │                                                 │                 │           │             ││
+           │          │          │          │                                                      │       │     │                                      │
+                                 ├───────────────────────┼─────────────────────────────────────────────────┼─────────────────┼────┐      │             ││
+           │          │                     │                                                      │       │     │                │                     │
+                       ─ ─ ─ ─ ─ ┴ ─   ─ ─ ─             ┘                                            ─ ─ ─│─ ─ ─          ─ ┘    │      └ ─ ─ ─   ─ ─ ┘│
+        ┌──┼──────┬─┬┐         ┌──┼─┼─┼──┬─┬┐        ┌──┼──────┬─┬┐                             ┌──┼─┼────┬─┬┐         ┌──┼──────┬─┬┐        ┌──┼─┼────┬─┬┐
+        │         │E1│         │         │E2│        │         │E3│                             │         E1+l         │         E2+l        │         E3+l
+        │  │      └─┘│         │  │ │ │  └─┘│        │  │      └─┘│                             │  │ │    └─┘│         │  │      └─┘│        │  │ │    └─┘│
+        │            │         │            │        │            │                             │            │         │            │        │            │
+ ◀──────│  ▼         │◀────────│  ▼ ▼ ▼     │◀───────│  ▼         │◀──────     ...     ◀────────│  ▼ ▼       │◀────────│  ▼         │◀───────│  ▼ ▼       │
+        │ ┌─┐        │         │ ┌─┬─┬─┐    │        │ ┌─┐        │                             │ ┌─┬─┐      │         │ ┌─┐        │        │ ┌─┬─┐      │
+        │ │T1     B1 │         │ │T2 │ │ B2 │        │ │T5     B3 │                             │ │ │ │  B1+l│         │ │ │    B2+l│        │ │ │ │  B3+l│
+        └─┴─┴────────┘         └─┴─┴─┴─┴────┘        └─┴─┴────────┘                             └─┴─┴─┴──────┘         └─┴─┴────────┘        └─┴─┴─┴──────┘
+</code></pre>
+
+<p>The above represents an instance of a block-chain, and its associated ticket-chain. The details of how it works should be clear by the end of this section, but quickly, some observations:</p>
+
+<ul>
+<li>Block 1 contains a single ticket T1</li>
+<li>Block 2 contains 3 tickets T2, T3, T4 meaning it was likely generated after 2 failed leader election attempts in the network.</li>
+<li>Block B1+l has two tickets and an Election Proof E1+l that was generated using T2. This means B1+l&rsquo;s miner tried to generate an election proof using T1 and failed, succeeding on their second attempt with T2.</li>
+</ul>
+
+<h2 id="tickets-in-ec">Tickets in EC</h2>
+
+<p>Within EC, a miner generates a new ticket in their block for every ticket they use (or &ldquo;scratch&rdquo;) running leader election, thereby ensuring the ticket chain is always at least as long as the block chain.</p>
+
+<p>Tickets are used to achieve the following:
+- Ensure leader secrecy &ndash; meaning a block producer will not be known until they release their block to the network.
+- Prove leader election &ndash; meaning a block producer can be verified by any participant in the network.</p>
+
+<p>In practice, EC defines two different fields within a block:</p>
+
+<ul>
+<li>A <code>Tickets</code> array — this stores new tickets generated during this block generation attempt. It proves appropriate delay. It is from this array that miners will sample randomness to run leader election in <code>K</code> rounds. See <a href="#ticket-generation">Ticket generation</a>.</li>
+<li>An <code>ElectionProof</code> — this stores a proof that a given miner scratched a winning lottery ticket using the appropriate ticket <code>K</code> rounds back. It proves that the leader was elected in this round. See <a href="#checking-election-results">Checking election results</a>.</li>
+</ul>
+
+<p>On expectation, the <code>Tickets</code> array will contain a single ticket. For cases in which it contains more than one, see <a href="#losing-tickets">Losing Tickets</a>.</p>
+
+<pre><code>But why the randomness lookback?
+
+The randomness lookback helps turn independent lotteries (ticket drawings from a block one round back)
+into a global lottery instead. Rather than having a distinct chance of winning or losing
+for each potential fork in a given round, a miner will either win on all or lose on all
+forks descended from the block in which the ticket is sampled.
+
+This is useful as it reduces opportunities for grinding, across forks or sybil identities.
+
+However this introduces a tradeoff:
+- The randomness lookback means that a miner can know K rounds in advance that they will win,
+decreasing the cost of running a targeted attack (given they have local predictability).
+- It means electionProofs are stored separately from new tickets on a block, taking up
+more space on-chain.
+</code></pre>
+
+<h3 id="ticket-generation">Ticket generation</h3>
+
+<p>This section discusses how tickets are generated by EC for the <code>Tickets</code> array. For how tickets are validated, see <a href="../mining#ticket-validation">ticket validation</a>.</p>
+
+<p>At round <code>N</code>, new tickets are generated using tickets drawn from the <a href="#tipsets">Tipset</a> at round <code>N-1</code>. This ensures the miner cannot publish a new block (corresponding to the <code>ElectionProof</code> generated by a winning ticket <code>K</code> rounds back) until the correct round. Because a Tipset can contain multiple blocks (see <a href="#chain-selection">Chain Selection</a> below), the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.</p>
+
+<pre><code>   ┌──────────────────────┐                     
+   │                      │                     
+   │                      │                     
+   │┌────┐                │                     
+   ││ TA │              A │                     
+   └┴────┴────────────────┘                     
+                                                
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
+                          │                     
+   │                                            
+    ┌────┐                │       TA &lt; TB &lt; TC  
+   ││ TB │              B                       
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
+                                                
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─                      
+                          │                     
+   │                                            
+    ┌────┐                │                     
+   ││ TC │              C                       
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘                     
+</code></pre>
+
+<p>In the above diagram, a miner will use block A&rsquo;s Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.</p>
+
+<p>The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output.</p>
+
+<p>The VRF&rsquo;s deterministic output adds entropy to the ticket chain, limiting a miner&rsquo;s ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).</p>
+
+<p>We use the ECVRF algorithm from <a href="https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10">Goldberg et al. Section 5</a>, with:
+  - Sha256 for our hashing function
+  - Secp256k1 for our curve
+  - Note that the operation type in step 2.1 is necessary to prevent an adversary from guessing an election proof for a miner ahead of time.</p>
+
+<h3 id="ticket-validation">Ticket Validation</h3>
+
+<p>For ticket generation, see <a href="../expected-consensus#ticket-generation">ticket generation</a>.</p>
+
+<p>A ticket can be verified to have been generated in the appropriate number of rounds by looking at the <code>Tickets</code> array, and ensuring that each subsequent ticket (leading to the final ticket in that array) was generated using the previous one in the array (or in the prior block if the array is empty). Note that this has implications on block size, and client memory requirements, though on expectation, the <code>Tickets</code> array should only contain one Ticket. Put another way, each Ticket should be generated from the prior one in the ticket-chain.</p>
+
+<p>Succinctly, the process of verifying a block&rsquo;s tickets is as follows.</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">Input: received block, storage market actor S, miner&#39;s public key PK, a public VDF validation key vk
+Output: 0, 1
+
+0. Get the tickets
+    i. tickets &lt;-- block.tickets
+For each ticket, idx: tickets
+1. Verify its VRF Proof
+    i. # get the appropriate parent
+        if idx == 0:
+            # the first was derived from the prior block&#39;s last ticket
+            parent = parentBlock.lastTicket
+        else:
+            parent = tickets[idx - 1]
+    ii. # generate the VRFInput
+        input &lt;-- VRFPersonalization.Ticket | parent.VDFOutput
+    iii. # verify the VRF
+        VRFState &lt;-- ECVRF_Verify(PK, ticket.VRFProof, input)
+        if VRFState == &#34;INVALID&#34;:
+            return 0
+2. Verify its VDF Proof
+    i. # generate the VDF input
+        VRFOutput &lt;-- ECVRF_proof_to_hash(ticket.VRFProof)
+    ii. # verify
+        VDFState &lt;-- VDF_verify(vk, VRFOutput, ticket.VDFOutput, ticket.VDFProof)
+        if VDFState == &#34;NO&#34;:
+            return 0
+3. Return results
+    return 1</code></pre></div>
+<p>Notice that there is an implicit check that all tickets in the <code>Tickets</code> array are signed by the same miner.</p>
+
+<div id="algorithms__expected_consensus__leader_election"></div>
+
+<h2 id="secret-leader-election">Secret Leader Election</h2>
+
+<p>Expected Consensus is a consensus protocol that works by electing a miner from a weighted set in proportion to their power. In the case of Filecoin, participants and powers are drawn from the storage <a href="../storage-market#the-power-table">power table</a>, where power is equivalent to storage provided through time.</p>
+
+<p>Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This is achieved through the use of randomness used to run the election. In the case of Filecoin&rsquo;s EC, the blockchain tracks an independent ticket chain. These tickets are used as randomness inputs for Leader Election. Every block generated references an <code>ElectionProof</code> derived from a past ticket. The ticket chain is extended by the miner who generates a new ticket with each attempted election.</p>
+
+<h3 id="running-a-leader-election">Running a leader election</h3>
+
+<p>Now, a miner must also check whether they are eligible to mine a block in this round. For how Election Proofs are validated, see <a href="../mining#election-validation">election validation</a>.</p>
+
+<p>To do so, the miner will use tickets from K rounds back as randomness to uniformly draw a value from 0 to 1. Comparing this value to their power, they determine whether they are eligible to mine. A user&rsquo;s <code>power</code> is defined as the ratio of the amount of storage they proved as of their last PoSt submission to the total storage in the network as of the current block.</p>
+
+<p>We use the ECVRF algorithm (must yield a pseudorandom, deterministic output) from <a href="https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10">Goldberg et al. Section 5</a>, with:
+  - Sha256 for our hashing function
+  - Secp256k1 for our curve</p>
+
+<p>If the miner scratches a winning ticket in this round, it can use newEP, along with a newTicket to generate and publish a new block (see <a href="#block-generation">Block Generation</a>). Otherwise, it waits to hear of another block generated in this round.</p>
+
+<p>It is important to note that every block contains two artifacts: one, a ticket derived from last block&rsquo;s ticket to prove that they have waited the appropriate delay, and two, an election proof derived from the ticket <code>K</code> rounds back used to run leader election.</p>
+
+<h3 id="election-validation">Election Validation</h3>
+
+<p>For election proof generation, see <a href="../expected-consensus#checking-election-results">checking election results</a>.</p>
+
+<p>In order to determine that the mined block was generated by an eligible miner, one must check its <code>ElectionProof</code>.</p>
+
+<p>Succinctly, the process of verifying a block&rsquo;s election proof at round N, is as follows.</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">Input: received block, storage market actor S, miner&#39;s public key PK, a public parameter K
+Output: 0, 1
+
+0. Get the election proof, total power, miner power
+        i. electionProof &lt;-- block.electionProof
+        ii. # get total market power
+            S &lt;-- storageMarket(N)
+            p_n &lt;-- S.GetTotalStorage()
+        iii. # get miner power
+            p_m &lt;-- GetMinersPowerAt(N, PK)
+1. Ensure the miner was not slashed or late: in that case, their power would be 0 and can just abort.
+        i. # Check for a reported fault or late submission
+            if p_m == 0
+                return 0
+2. Determine the miner&#39;s power fraction
+        i. # Get power fraction
+              p_f &lt;-- p_m/p_n
+3. Ensure that the scratched ticket is a winner
+        i. # get the deterministic output from the election proof
+            VRFOutput &lt;-- ECVRF_proof_to_hash(electionProof.VRFProof)
+        ii. # map p_f onto [0, 2^HashLen]
+            normalized_power &lt;-- p_f * 2^HashLen
+          iii. # Compare the miner&#39;s scratchValue to the miner&#39;s normalized power fraction
+              if readLittleEndian(VRFOutput) &gt; normalized_power:
+                return 0
+4. Get the appropriate ticket from the ticket chain
+        i. # Get the tipset K rounds back
+            appropriateTipset &lt;-- lookback(K)
+        ii. # Take its min ticket (already validated)
+            scratchedTicket &lt;-- appropriateTipset.minTicket()
+5. Verify Election Proof validity
+        i. # generate the VRFInput from the scratched ticket
+            input &lt;-- VRFPersonalization.ElectionProof | scratchedTicket.VDFOutput
+        ii. # Check that the election proof was correctly generated by the miner
+            # using the appropriate ticket
+            VRFState &lt;-- ECVRF_Verify(miner.PK, electionProof.VRFProof, input)
+            if VRFState == &#34;INVALID&#34;:
+                return 0
+5. Everything checks out, it&#39;s a valid election proof
+        return 1</code></pre></div>
+<div id="algorithms__expected_consensus__chain_selection"></div>
+
+<h2 id="chain-selection">Chain Selection</h2>
+
+<p>Just as there can be 0 miners win in a round, multiple miners can be elected in a given round. This in turn means multiple blocks can be created in a round. In order to avoid wasting valid work done by miners, EC makes use of all valid blocks generated in a round.</p>
+
+<h3 id="chain-weighting">Chain Weighting</h3>
+
+<p>It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on &lsquo;one true chain&rsquo;, with every block adding to the chain&rsquo;s weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin&rsquo;s case, the most storage provided.</p>
+
+<p>In short, the weight at each block is equal to its <code>ParentWeight</code> plus that block&rsquo;s delta weight.
+Delta weight is a term composed of a few elements:
+- A wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).
+- A wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain&rsquo;s power table.
+- A wBlocksFactor: which adds weight to the chain proportional to the number of blocks mined in a given round. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).</p>
+
+<p>We have:</p>
+
+<p>w[r+1] = w[r] + floor(1000 * (wForkFactor(wPowerFactor[r+1] + wBlocksFactor[r+1])))</p>
+
+<p>with, for a given tipset ts in round r+1:</p>
+
+<ul>
+<li>wBlocksFactor[r+1] = v * |blocksInTipset(ts)|
+
+<ul>
+<li>with v = vt * log2(totalPowerAtTipset(ts) * vs)/vs</li>
+</ul></li>
+<li>wPowerFactor[r+1]  = log2(totalPowerAtTipset(ts))</li>
+<li>wForkFactor[r+1]   = CDF(X, k) with X -&gt; Bin(eNumberOfBlocksPerRound * numberOfMinersInPowerTable, 1/numberOfMinersInPowerTable)</li>
+</ul>
+
+<p>The weight should be calculated using big integer arithmetic with order of operations defined above. The multiplication by 1,000 and flooring is meant to help generate uniform weights across implementations.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Note that <span class="k">if</span> your implementation does not allow <span class="k">for</span> rounding to the fourth decimal, miners should apply the <span class="o">[</span>tie-breaker below<span class="o">](</span><span class="c1">#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.</span></code></pre></div>
+<p>Details of Filecoin&rsquo;s chain weighting function <a href="https://observablehq.com/d/3812cd65c054082d">are included here</a>.</p>
+
+<p>The exact value for these parameters remain to be determined, but for testing purposes, you may use:
+ - <code>vt = 350</code>
+ - <code>vs = E-5</code></p>
+
+<p><code>ParentWeight</code> is the aggregate chain weight of a given block&rsquo;s parent set. It is calculated as
+the <code>ParentWeight</code> of any of its parent blocks (all blocks in a given Tipset should have
+the same <code>ParentWeight</code> value) plus the delta weight of each parent. To make the
+computation a bit easier, a block&rsquo;s <code>ParentWeight</code> is stored in the block itself (otherwise
+potentially long chain scans would be required to compute a given block&rsquo;s weight).</p>
+
+<h3 id="selecting-between-tipsets-with-equal-weight">Selecting between Tipsets with equal weight</h3>
+
+<p>When selecting between Tipsets of equal weight, a miner chooses the one with the smallest final ticket.</p>
+
+<p>In the case where two Tipsets of equal weight have the same min ticket, the miner will compare the next smallest ticket (and select the Tipset with the next smaller ticket). This continues until one Tipset is selected.</p>
+
+<p>The above case may happen in situations under certain block propagation conditions. Assume three blocks B, C, and D have been mined (by miners 1, 2, and 3 respectively) off of block A, with minTicket(B) &lt; minTicket&copy; &lt; minTicket (D).</p>
+
+<p>Miner 1 outputs their block B and shuts down. Miners 2 and 3 both receive B but not each others&rsquo; blocks. We have miner 2 mining a Tipset made of B and C and miner 3 mining a Tipset made of B and D. If both succesfully mine blocks now, other miners in the network will receive new blocks built off of Tipsets with equal weight and the same smallest ticket (that of block B). They should select the block mined atop [B, C] since minTicket&copy; &lt; minTicket(D).</p>
+
+<p>The probability that two Tipsets with different blocks would have all the same tickets can be considered negligible: this would amount to finding a collision between two 256-bit (or more) collision-resistant hashes.</p>
+
+<div id="algorithms__expected_consensus__finality"></div>
+
+<h2 id="finality-in-ec">Finality in EC</h2>
+
+<p>TODO</p>
+
+<h2 id="slashing-in-ec">Slashing in EC</h2>
+
+<p>Due to the existence of potential forks, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.</p>
+
+<p>This is detectable when a miner submits two blocks that satisfy either of the following &ldquo;slashing conditions&rdquo;:</p>
+
+<p>(1) one block contains at least one ticket in its ticket array generated at the same round as one of the tickets in the other block&rsquo;s ticket array.
+(2) one block&rsquo;s parent is a Tipset that could have validly included the other block according to Tipset validity rules, however the parent of the first block does not include the other block.</p>
+
+<ul>
+<li>While it cannot be proven that a miner omits known blocks from a Tipset in general (i.e. network latency could simply mean the miner did not receive a particular block) in this case it can be proven because a miner must be aware of a block they mined in a previous round.</li>
+</ul>
+
+<p>Any node that detects this occurring should take both block headers, and call <a href="../actors#slashconsensusfault"><code>storagemarket.SlashConsensusFault</code></a>. The network will then take all of that node&rsquo;s collateral, give a portion of it to
+the reporter, and keep the rest.</p>
+
+</article>
+
+      
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#algorithm">Algorithm</a></li>
+<li><a href="#tickets">Tickets</a>
+<ul>
+<li><a href="#comparing-tickets-in-a-tipset">Comparing Tickets in a Tipset</a></li>
+<li><a href="#the-ticket-chain">The Ticket chain</a></li>
+</ul></li>
+<li><a href="#tickets-in-ec">Tickets in EC</a>
+<ul>
+<li><a href="#ticket-generation">Ticket generation</a></li>
+<li><a href="#ticket-validation">Ticket Validation</a></li>
+</ul></li>
+<li><a href="#secret-leader-election">Secret Leader Election</a>
+<ul>
+<li><a href="#running-a-leader-election">Running a leader election</a></li>
+<li><a href="#election-validation">Election Validation</a></li>
+</ul></li>
+<li><a href="#chain-selection">Chain Selection</a>
+<ul>
+<li><a href="#chain-weighting">Chain Weighting</a></li>
+<li><a href="#selecting-between-tipsets-with-equal-weight">Selecting between Tipsets with equal weight</a></li>
+</ul></li>
+<li><a href="#finality-in-ec">Finality in EC</a></li>
+<li><a href="#slashing-in-ec">Slashing in EC</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+
+  
+  
+</body>
+
+</html>

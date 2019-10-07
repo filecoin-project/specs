@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Error Correcting Codes on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_files/error_correction/error_correcting_codes/</link>
+    <description>Recent content in Error Correcting Codes on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_files/error_correction/error_correcting_codes/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+  </channel>
+</rss>

@@ -1,0 +1,7193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filecoin Parameters | Filecoin Spec</title>
+
+
+
+<link rel="stylesheet" href="../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+
+
+<link rel="icon" href="../../../../favicon.png" type="image/x-icon">
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  <link rel="stylesheet" href="../../../../css/syntax.css">
+<link href="../../../../mermaid/mermaid.css" type="text/css" rel="stylesheet" />
+<script src="../../../../mermaid/mermaid.js"></script>
+<script src="../../../../spec.js"></script>
+
+</head>
+
+<body>
+  <input type="checkbox" class="hidden" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href=""><span>Filecoin Spec</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" placeholder="Search" id="book-search-input" maxlength="64" readonly />
+  <div class="book-search-spinner spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f content\2f appendix\2forient\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+
+  <div>
+
+  <div>
+    
+    <input id="menu-detail-slider" type="range" onchange="onMenuDetailChange();"
+      min="1" value="3" max="5" step="1" />
+
+    <span id="menu-detail-slider-label">3</span>
+  </div>
+
+  
+  
+  <ul class="menu-item-section depth-0">
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Introduction
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro__arch" class="menu-item depth-2">
+    
+    
+        Architecture Diagrams
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro__concepts" class="menu-item depth-2">
+    
+    
+        Key Concepts
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro__filecoin_vm" class="menu-item depth-2">
+    
+    
+        Filecoin VM
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__process" class="menu-item depth-2">
+    
+    
+        Process
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__process__about" class="menu-item depth-3">
+    
+    
+        About
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__process__fip" class="menu-item depth-3">
+    
+    
+        FIPs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__process__contributing" class="menu-item depth-3">
+    
+    
+        Contributing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro__process__related_resources" class="menu-item depth-3">
+    
+    
+        Related Resources
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro__process__related_resources__research_portal" class="menu-item depth-4">
+    
+    
+        Research portal
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro__process__related_resources__network_tooling" class="menu-item depth-4">
+    
+    
+        Network tooling
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#intro__process__related_resources__testing" class="menu-item depth-4">
+    
+    
+        Testing and implementation compliance
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__system" class="menu-item depth-2">
+    
+    
+        System Decomposition
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__system__why_systems" class="menu-item depth-3">
+    
+    
+        What are Systems?
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__system__impl_systems" class="menu-item depth-3">
+    
+    
+        Implementing Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Systems
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes" class="menu-item depth-2">
+    ⚙️
+    
+        <strong>Filecoin Nodes</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types" class="menu-item depth-3">
+    
+    
+        Node Types
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types__node" class="menu-item depth-4">
+    
+    
+        Node Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types__node_types" class="menu-item depth-4">
+    
+    
+        Examples
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types__verifier_node" class="menu-item depth-4">
+    
+    
+        Chain Verifier Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types__client_node" class="menu-item depth-4">
+    
+    
+        Client Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types__storage_miner_node" class="menu-item depth-4">
+    
+    
+        Storage Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types__retrieval_miner_node" class="menu-item depth-4">
+    
+    
+        Retrieval Miner Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__node_types__relayer_node" class="menu-item depth-4">
+    
+    
+        Relayer Node
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_nodes__repository" class="menu-item depth-3">
+    
+    
+        Repository
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_nodes__repository__config" class="menu-item depth-4">
+    
+    
+        Config
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__repository__key" class="menu-item depth-4">
+    
+    
+        KeyStore &amp; user keys
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_nodes__repository__ipldstore" class="menu-item depth-4">
+    
+    
+        IpldStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__repository__usage" class="menu-item depth-4">
+    
+    
+        Usage in Systems
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__network" class="menu-item depth-3">
+    
+    
+        Network Interface
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__clock" class="menu-item depth-3">
+    
+    
+        Clock
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files" class="menu-item depth-2">
+    📑
+    
+        <strong>Files &amp; Data</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_files__file" class="menu-item depth-3">
+    
+    
+        File
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__file__filestore" class="menu-item depth-4">
+    
+    
+        FileStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__piece" class="menu-item depth-3">
+    
+    
+        Piece
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__piece__piece_store" class="menu-item depth-4">
+    
+    
+        PieceStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_files__data_transfer" class="menu-item depth-3">
+    
+    
+        Data Transfer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain" class="menu-item depth-2">
+    📦
+    
+        <strong>Blockchain</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm" class="menu-item depth-3">
+    
+    
+        Virtual Machine
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__address" class="menu-item depth-4">
+    
+    
+        VM Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__actor" class="menu-item depth-4">
+    
+    
+        VM Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__state_tree" class="menu-item depth-4">
+    
+    
+        VM State Tree
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__message" class="menu-item depth-4">
+    
+    
+        VM Message
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__sysactors" class="menu-item depth-4">
+    
+    
+        VM System Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__sysactors__init_actor" class="menu-item depth-5">
+    
+    
+        InitActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__sysactors__cron_actor" class="menu-item depth-5">
+    
+    
+        CronActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__sysactors__account_actor" class="menu-item depth-5">
+    
+    
+        AccountActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__interpreter" class="menu-item depth-4">
+    
+    
+        VM Interpreter
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__runtime" class="menu-item depth-4">
+    
+    
+        VM Runtime Environment
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__message_pool" class="menu-item depth-3">
+    
+    
+        Message Pool
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__message_pool__message_syncer" class="menu-item depth-4">
+    
+    
+        Message Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__message_pool__message_storage" class="menu-item depth-4">
+    
+    
+        Message Storage
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__blockchain" class="menu-item depth-3">
+    
+    
+        Blockchain Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__blockchain__block_syncer" class="menu-item depth-4">
+    
+    
+        Block Syncer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__blockchain__chain_manager" class="menu-item depth-4">
+    
+    
+        Chain Manager
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__blockchain__block_producer" class="menu-item depth-4">
+    
+    
+        Block Producer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__storage_power_consensus" class="menu-item depth-3">
+    
+    
+        Storage Power Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
+    
+    
+        Storage Power Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_token" class="menu-item depth-2">
+    📀
+    
+        <strong>Token</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_token__wallets" class="menu-item depth-3">
+    
+    
+        Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_token__payments" class="menu-item depth-3">
+    
+    
+        Payments
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_token__payment_channels" class="menu-item depth-3">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_token__payment_channels__payment_channel_actor" class="menu-item depth-4">
+    
+    
+        Payment Channel Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_token__multisig" class="menu-item depth-3">
+    
+    
+        Multisig Wallet
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_token__multisig__multisig_actor" class="menu-item depth-4">
+    
+    
+        Multisig Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_mining" class="menu-item depth-2">
+    ⛏
+    
+        <strong>Storage Mining</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_mining__storage_mining" class="menu-item depth-3">
+    
+    
+        Storage Miner
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__storage_mining__mining_cycle" class="menu-item depth-4">
+    
+    
+        Storage Mining Cycle
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor" class="menu-item depth-4">
+    
+    
+        Storage Miner Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
+    
+    
+        Mining Scheduler
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector" class="menu-item depth-3">
+    
+    
+        Sector
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__sectorset" class="menu-item depth-4">
+    
+    
+        Sector Set
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector__sealing" class="menu-item depth-4">
+    
+    
+        Sector Sealing
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector_index" class="menu-item depth-3">
+    
+    
+        Sector Index
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector_index__sector_builder" class="menu-item depth-4">
+    
+    
+        Sector Builder
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__sector_index__sector_store" class="menu-item depth-4">
+    
+    
+        SectorStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_mining__storage_proving" class="menu-item depth-3">
+    
+    
+        Storage Proving
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_mining__storage_proving__sealer" class="menu-item depth-4">
+    
+    
+        Sector Sealer
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_mining__storage_proving__poster" class="menu-item depth-4">
+    
+    
+        Sector Poster
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets" class="menu-item depth-2">
+    ⚖️
+    
+        <strong>Market</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__order" class="menu-item depth-3">
+    
+    
+        Orders
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__deal" class="menu-item depth-3">
+    
+    
+        Deals
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market" class="menu-item depth-3">
+    
+    
+        Storage Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_market_actor" class="menu-item depth-4">
+    
+    
+        Storage Market Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__faults" class="menu-item depth-4">
+    
+    
+        Faults
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_markets__retrieval_market" class="menu-item depth-3">
+    
+    
+        Retrieval Market
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_client" class="menu-item depth-4">
+    
+    
+        Retrieval Client
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_provider" class="menu-item depth-4">
+    
+    
+        Retrieval Provider (Miner)
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Libraries
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
+    
+    
+        filcrypto
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
+    
+    
+        filproofs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#libraries__fcs" class="menu-item depth-2">
+    
+    
+        FCS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__ipld" class="menu-item depth-2">
+    
+    
+        IPLD
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__ipld__cid" class="menu-item depth-3">
+    
+    
+        CID
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#libraries__ipld__datamodel" class="menu-item depth-3">
+    
+    
+        Data Model
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
+    
+    
+        Selectors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__ipld__graphstore" class="menu-item depth-3">
+    
+    
+        GraphStore
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__libp2p" class="menu-item depth-2">
+    
+    
+        libp2p
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__libp2p__gossipsub" class="menu-item depth-3">
+    
+    
+        gossipsub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__libp2p__kad_dht" class="menu-item depth-3">
+    
+    
+        kad-dht
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__libp2p__fil_libp2p_nodes" class="menu-item depth-3">
+    
+    
+        fil-libp2p Nodes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__ipfs" class="menu-item depth-2">
+    
+    
+        IPFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#libraries__ipfs__bitswap" class="menu-item depth-3">
+    
+    
+        BitSwap
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#libraries__ipfs__graphsync" class="menu-item depth-3">
+    
+    
+        GraphSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#libraries__ipfs__unixfs" class="menu-item depth-3">
+    
+    
+        UnixFS
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#libraries__multiformats" class="menu-item depth-2">
+    
+    
+        Multiformats
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Algorithms
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
+    
+    
+        Expected Consensus
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__porep" class="menu-item depth-2">
+    
+    
+        Proof-of-Replication
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__porep__zigzag" class="menu-item depth-3">
+    
+    
+        ZigZag-PoRep
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__porep__porep_commitments" class="menu-item depth-3">
+    
+    
+        PoRep Commitments
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__post" class="menu-item depth-2">
+    
+    
+        Proof-of-Spacetime
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+    
+    
+        Rational-PoSt
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__post__proof_of_spacetime_parameters" class="menu-item depth-3">
+    
+    
+        PoSt Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__payment_channels" class="menu-item depth-2">
+    
+    
+        Payment Channels
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__block_sync" class="menu-item depth-2">
+    
+    
+        BlockSync
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__gossip_sub" class="menu-item depth-2">
+    
+    
+        GossipSub
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__crypto" class="menu-item depth-2">
+    
+    
+        Cryptographic Primitives
+    
+</a>
+
+
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Listings
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__actors" class="menu-item depth-2">
+    
+    
+        Filecoin VM Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__data_structures" class="menu-item depth-2">
+    
+    
+        Data Structures
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__system_map" class="menu-item depth-2">
+    
+    
+        Components
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols" class="menu-item depth-2">
+    
+    
+        libp2p Protocols
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#glossary" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Glossary
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+</ul>
+
+
+      
+      </li>
+  
+      <li>
+      
+        
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#appendix" class="menu-item depth-1">
+    
+    
+    <strong>
+    
+        Appendix
+    
+    </strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-1">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#appendix__sharray" class="menu-item depth-2">
+    
+    
+        Sharded IPLD Array
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#appendix__address" class="menu-item depth-2">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#appendix__orient" class="menu-item depth-2">
+    
+    
+        Filecoin Parameters
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+      
+      </li>
+  
+  </ul>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+<script>
+(function() {
+  var menu = document.querySelector("aside.book-menu nav");
+  addEventListener("beforeunload", function(event) {
+    localStorage.setItem("menu.scrollTop", menu.scrollTop);
+  });
+  menu.scrollTop = localStorage.getItem("menu.scrollTop");
+})();
+</script>
+
+    </aside>
+
+    <div class="book-page">
+      <header class="flex align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>Filecoin Parameters</strong>
+</header>
+
+      
+<article class="markdown">
+  
+
+<h2 id="all-parameters">All Parameters</h2>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>ACTOR-METHOD</td>
+<td>BYTES</td>
+<td>8</td>
+<td>The size required to represent an actor method.</td>
+</tr>
+
+<tr>
+<td>ACTORS-MESSAGES-FRACTION</td>
+<td></td>
+<td>0.30000004</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ACTORS-MESSAGES-PER-BLOCK</td>
+<td></td>
+<td>32.661842</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ADDRESS-SIZE</td>
+<td>BYTES</td>
+<td>35</td>
+<td>The size of an address.</td>
+</tr>
+
+<tr>
+<td>ALL-POST-MESSAGES-PER-YEAR</td>
+<td></td>
+<td>122557560.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ALL-SEAL-MESSAGES-PER-YEAR</td>
+<td></td>
+<td>335544320</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ALL-SEAL-SIZE-PER-YEAR</td>
+<td></td>
+<td>335544320</td>
+<td></td>
+</tr>
+
+<tr>
+<td>AVG-POSTS-MESSAGES-PER-BLOCK</td>
+<td></td>
+<td>11.650845</td>
+<td></td>
+</tr>
+
+<tr>
+<td>AVG-PROOFS-MESSAGES-PER-BLOCK</td>
+<td></td>
+<td>43.549118</td>
+<td></td>
+</tr>
+
+<tr>
+<td>AVG-SEALS-MESSAGES-PER-BLOCK</td>
+<td></td>
+<td>31.898273</td>
+<td></td>
+</tr>
+
+<tr>
+<td>AVG-TICKETS</td>
+<td></td>
+<td>1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-FRAMING-SIZE</td>
+<td>BYTES</td>
+<td>14709.481</td>
+<td>The total amount of block framing.</td>
+</tr>
+
+<tr>
+<td>BLOCK-HEADER-FIXED-SIZE</td>
+<td></td>
+<td>420</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-HEADER-SIZE</td>
+<td></td>
+<td>1427</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-HEADER-VARIABLE-SIZE</td>
+<td></td>
+<td>1007</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-HEIGHT-SIZE</td>
+<td></td>
+<td>8</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-SIG-SIZE</td>
+<td></td>
+<td>96</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-SIZE</td>
+<td></td>
+<td>37265.1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-SIZE-KIB</td>
+<td></td>
+<td>36.3917</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCK-TIME</td>
+<td></td>
+<td>15</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCKS-IN-A-YEAR</td>
+<td></td>
+<td>10519200.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLOCKS-IN-TEN-YEARS</td>
+<td></td>
+<td>105192000.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>BLS-AGG-SIZE</td>
+<td></td>
+<td>96</td>
+<td></td>
+</tr>
+
+<tr>
+<td>CHAIN-SIZE-YEAR</td>
+<td></td>
+<td>391999060000.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>CHAIN-SIZE-YEAR-GIB</td>
+<td></td>
+<td>365.07758</td>
+<td></td>
+</tr>
+
+<tr>
+<td>CID-SIZE</td>
+<td>BYTES</td>
+<td>35</td>
+<td>The size of a CID.</td>
+</tr>
+
+<tr>
+<td>COMM-C-CONSTRAINTS</td>
+<td></td>
+<td>218221140.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-C-OPENINGS</td>
+<td></td>
+<td>15</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-C-TIME</td>
+<td></td>
+<td>12924.399</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-D-CONSTRAINTS</td>
+<td></td>
+<td>11011791.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-D-OPENINGS</td>
+<td></td>
+<td>1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-D-TIME</td>
+<td></td>
+<td>652.18604</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-P-SIZE</td>
+<td></td>
+<td>35</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-R-CONSTRAINTS</td>
+<td></td>
+<td>66070744.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-R-OPENINGS</td>
+<td></td>
+<td>6</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMM-R-TIME</td>
+<td></td>
+<td>3913.1165</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMMIT-SIZE</td>
+<td></td>
+<td>35</td>
+<td></td>
+</tr>
+
+<tr>
+<td>COMMIT-TIME</td>
+<td></td>
+<td>14042.3955</td>
+<td></td>
+</tr>
+
+<tr>
+<td>CORES</td>
+<td></td>
+<td>16</td>
+<td></td>
+</tr>
+
+<tr>
+<td>DEGREE</td>
+<td></td>
+<td>14</td>
+<td></td>
+</tr>
+
+<tr>
+<td>DEGREE-BASE</td>
+<td></td>
+<td>6</td>
+<td></td>
+</tr>
+
+<tr>
+<td>DEGREE-EXPANDER</td>
+<td></td>
+<td>8</td>
+<td></td>
+</tr>
+
+<tr>
+<td>DELTA</td>
+<td></td>
+<td>0.02425</td>
+<td></td>
+</tr>
+
+<tr>
+<td>DRG-D</td>
+<td></td>
+<td><sup>1</sup>&frasl;<sub>4</sub></td>
+<td></td>
+</tr>
+
+<tr>
+<td>DRG-E</td>
+<td></td>
+<td>0.8</td>
+<td></td>
+</tr>
+
+<tr>
+<td>EIX</td>
+<td></td>
+<td>1152921504606846976</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ELECTION-PROOF-SIZE</td>
+<td></td>
+<td>64</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ENCODING-AMAX</td>
+<td></td>
+<td>2</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ENCODING-TIME</td>
+<td></td>
+<td>6605.1006</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ENCODING-TIME-MINS</td>
+<td></td>
+<td>110.08501</td>
+<td></td>
+</tr>
+
+<tr>
+<td>EPSILON</td>
+<td></td>
+<td>0.0505</td>
+<td></td>
+</tr>
+
+<tr>
+<td>EXIT-CODE</td>
+<td>BYTES</td>
+<td>4</td>
+<td>The size of an exit code.</td>
+</tr>
+
+<tr>
+<td>EXPECTED-WINNING-MINERS</td>
+<td></td>
+<td>5</td>
+<td></td>
+</tr>
+
+<tr>
+<td>FROM-ADDRESS</td>
+<td></td>
+<td>35</td>
+<td></td>
+</tr>
+
+<tr>
+<td>GAS-LIMIT</td>
+<td></td>
+<td>8</td>
+<td></td>
+</tr>
+
+<tr>
+<td>GAS-PRICE</td>
+<td>BYTES</td>
+<td>8</td>
+<td>The size required to represent the gas limit.</td>
+</tr>
+
+<tr>
+<td>GAS-USED</td>
+<td>BYTES</td>
+<td>8</td>
+<td>The size required to represent the amount of gas used by a message.</td>
+</tr>
+
+<tr>
+<td>GIB</td>
+<td></td>
+<td>1073741824</td>
+<td></td>
+</tr>
+
+<tr>
+<td>INCLUSION-CIRCUIT-TIME</td>
+<td></td>
+<td>2.3098202</td>
+<td></td>
+</tr>
+
+<tr>
+<td>INCLUSION-CONSTRAINTS</td>
+<td></td>
+<td>39000.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>KDF-CONTENT</td>
+<td></td>
+<td>15</td>
+<td></td>
+</tr>
+
+<tr>
+<td>KDF-HASH-SIZE</td>
+<td></td>
+<td>32</td>
+<td></td>
+</tr>
+
+<tr>
+<td>KDF-HASH-TIME</td>
+<td></td>
+<td>4.5608e-08</td>
+<td></td>
+</tr>
+
+<tr>
+<td>KIB</td>
+<td>BYTES</td>
+<td>1024</td>
+<td>The number of bytes in one KiB.</td>
+</tr>
+
+<tr>
+<td>LAMBDA</td>
+<td></td>
+<td>10</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LAYERS</td>
+<td></td>
+<td>9.634086</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LAYERS-A</td>
+<td></td>
+<td>6.8276772</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LAYERS-B</td>
+<td></td>
+<td>9.634086</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LEAF-CIRCUIT-TIME</td>
+<td></td>
+<td>0.7417668</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LEAF-CONSTRAINTS</td>
+<td></td>
+<td>12524.312</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LEAF-HASH-CIRCUIT-TIME</td>
+<td></td>
+<td>0.076994</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LEAF-HASH-CONSTRAINTS</td>
+<td></td>
+<td>1300</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LEAF-HASH-TIME</td>
+<td></td>
+<td>4.5608e-08</td>
+<td></td>
+</tr>
+
+<tr>
+<td>LEAF-TIME</td>
+<td></td>
+<td>4.3939139e-07</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MALICIOUS-ENCODING</td>
+<td></td>
+<td>3302.5503</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MAX-TICKETS</td>
+<td></td>
+<td>19.07985</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MERKLE-HASH-CONSTRAINTS</td>
+<td></td>
+<td>1300</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MERKLE-HASH-TIME</td>
+<td></td>
+<td>1.3078e-05</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MERKLE-HASH-TIME-CIRCUIT</td>
+<td></td>
+<td>0.076994</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MESSAGE-NONCE</td>
+<td>BYTES</td>
+<td>4</td>
+<td>The size of a message&rsquo;s nonce.</td>
+</tr>
+
+<tr>
+<td>MESSAGE-RECEIPT</td>
+<td>BYTES</td>
+<td>16</td>
+<td>The size of one message receipt.</td>
+</tr>
+
+<tr>
+<td>MESSAGE-RECEIPTS-CID</td>
+<td>BYTES</td>
+<td>35</td>
+<td>The size of one message receipt&rsquo;s CID.</td>
+</tr>
+
+<tr>
+<td>MESSAGE-SIZE</td>
+<td>BYTES</td>
+<td>106</td>
+<td>The size of a single message.</td>
+</tr>
+
+<tr>
+<td>MESSAGES</td>
+<td></td>
+<td>108.872795</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MESSAGES-ROOT-CID</td>
+<td>BYTES</td>
+<td>35</td>
+<td>Size of the CID of the root merkle tree of the messages.</td>
+</tr>
+
+<tr>
+<td>MESSAGES-SIZE</td>
+<td>BYTES</td>
+<td>11540.517</td>
+<td>The total size of the messages in a block.</td>
+</tr>
+
+<tr>
+<td>MIB</td>
+<td>BYTES</td>
+<td>1048576</td>
+<td>The number of bytes in one EiX.</td>
+</tr>
+
+<tr>
+<td>MIN-TICKETS</td>
+<td></td>
+<td>0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MINER-ADDRESS-SIZE</td>
+<td></td>
+<td>35</td>
+<td></td>
+</tr>
+
+<tr>
+<td>MINERS</td>
+<td></td>
+<td>1000</td>
+<td></td>
+</tr>
+
+<tr>
+<td>NODE-SIZE</td>
+<td></td>
+<td>32</td>
+<td></td>
+</tr>
+
+<tr>
+<td>NODES</td>
+<td></td>
+<td>1073741824</td>
+<td></td>
+</tr>
+
+<tr>
+<td>OFFLINE-CHALLENGES</td>
+<td></td>
+<td>282.3536</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ONE-BLOCK-IN-TEN-YEARS</td>
+<td></td>
+<td>9.506427e-09</td>
+<td></td>
+</tr>
+
+<tr>
+<td>ONLINE-CHALLENGES</td>
+<td></td>
+<td>136.53467</td>
+<td></td>
+</tr>
+
+<tr>
+<td>OPENING-PER-CHALLENGE</td>
+<td></td>
+<td>15</td>
+<td></td>
+</tr>
+
+<tr>
+<td>OPENINGS</td>
+<td></td>
+<td>4235.304</td>
+<td></td>
+</tr>
+
+<tr>
+<td>P-SIZE</td>
+<td></td>
+<td>35.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PARALLEL-SEAL-TIME</td>
+<td></td>
+<td>8575.856</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PARENT-WEIGHT-SIZE</td>
+<td></td>
+<td>8</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PARENTS</td>
+<td></td>
+<td>5</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PARENTS-CIDS</td>
+<td></td>
+<td>175</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PIB</td>
+<td></td>
+<td>1125899906842624</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POLLING-TIME</td>
+<td></td>
+<td>825.6376</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POREP-SNARK-CONSTRAINTS</td>
+<td></td>
+<td>295303680.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POREP-SNARK-PARTITIONS</td>
+<td></td>
+<td>2.9530368</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POREP-SNARK-PROOF-SIZE</td>
+<td></td>
+<td>566.98303</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POREP-SNARK-TIME</td>
+<td></td>
+<td>17489.703</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POST-CHALLENGE-BLOCKS</td>
+<td>BLOCKS</td>
+<td>480</td>
+<td>The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.</td>
+</tr>
+
+<tr>
+<td>POST-CHALLENGE-HOURS</td>
+<td>HOURS</td>
+<td>2</td>
+<td>PoSt challenge time (see POST_CHALLENGE_BLOCKS).</td>
+</tr>
+
+<tr>
+<td>POST-CHALLENGE-TIME</td>
+<td>SECONDS</td>
+<td>7200</td>
+<td>PoSt challenge time (see POST_CHALLENGE_BLOCKS).</td>
+</tr>
+
+<tr>
+<td>POST-CHALLENGES</td>
+<td></td>
+<td>136.53467</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POST-PROOF-SIZE</td>
+<td></td>
+<td>192</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POST-PROVING-PERIOD</td>
+<td>BLOCKS</td>
+<td>5760</td>
+<td>The time interval in which a PoSt has to be submitted</td>
+</tr>
+
+<tr>
+<td>POST-SIZE-PER-BLOCK</td>
+<td></td>
+<td>2236.9622</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POST-SNARK-CIRCUIT</td>
+<td></td>
+<td>5324852.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POST-SNARK-PROOF-PARTITIONS</td>
+<td></td>
+<td>1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POST-SNARK-PROOF-SIZE</td>
+<td></td>
+<td>192</td>
+<td></td>
+</tr>
+
+<tr>
+<td>POSTS-PER-SECTOR-PER-YEAR</td>
+<td></td>
+<td>365.25</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PROOF-MESSAGES-FRACTION</td>
+<td></td>
+<td>0.4</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PROOFGEN-TIME</td>
+<td></td>
+<td>17489.703</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PROOFS-SIZE-PER-BLOCK</td>
+<td></td>
+<td>22555.621</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PROOFS-SIZE-PER-BLOCK-KIB</td>
+<td></td>
+<td>22.026974</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PROVING-PERIOD-HOURS</td>
+<td></td>
+<td>24</td>
+<td></td>
+</tr>
+
+<tr>
+<td>PROVING-PERIOD-SECONDS</td>
+<td></td>
+<td>86400</td>
+<td></td>
+</tr>
+
+<tr>
+<td>RECEIPTS</td>
+<td></td>
+<td>108.872795</td>
+<td></td>
+</tr>
+
+<tr>
+<td>RECEIPTS-SIZE</td>
+<td></td>
+<td>1741.9647</td>
+<td>The total size of all message receipts, in bytes.</td>
+</tr>
+
+<tr>
+<td>REPLICA-COMMIT-TIME</td>
+<td></td>
+<td>42598.98</td>
+<td></td>
+</tr>
+
+<tr>
+<td>RESEAL</td>
+<td></td>
+<td>0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>RETURN</td>
+<td>BYTES</td>
+<td>4</td>
+<td>The size of a message&rsquo;s return value.</td>
+</tr>
+
+<tr>
+<td>RSA-ELEMENT</td>
+<td>BYTES</td>
+<td>256</td>
+<td>The size of an RSA element.</td>
+</tr>
+
+<tr>
+<td>SEAL-COMMITMENTS-SIZE</td>
+<td></td>
+<td>70</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SEAL-PROOF-SIZE</td>
+<td></td>
+<td>636.98303</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SEAL-SIZE-PER-BLOCK</td>
+<td></td>
+<td>20318.658</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SEAL-TIME</td>
+<td></td>
+<td>66693.78</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SEALS-PER-SECTOR-PER-YEAR</td>
+<td></td>
+<td>1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SECTOR-SIZE</td>
+<td></td>
+<td>34359738368</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SECTOR-SIZE-GIB</td>
+<td></td>
+<td>32</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SECTORS-COUNT</td>
+<td></td>
+<td>335544320</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SNARK-MAX-CONSTRAINTS</td>
+<td></td>
+<td>100000000</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SNARK-SINGLE-PROOF-SIZE</td>
+<td></td>
+<td>192</td>
+<td></td>
+</tr>
+
+<tr>
+<td>SPACEGAP</td>
+<td></td>
+<td>0.1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>STATE-ROOT-CID</td>
+<td></td>
+<td>35</td>
+<td></td>
+</tr>
+
+<tr>
+<td>STORAGE-NETWORK-CAPACITY</td>
+<td></td>
+<td>1.152921504606847e+19</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TIB</td>
+<td></td>
+<td>1099511627776</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TICKET-SIZE</td>
+<td></td>
+<td>832</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TICKETS</td>
+<td></td>
+<td>1</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TICKETS-SIZE</td>
+<td></td>
+<td>832</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TIMESTAMP-SIZE</td>
+<td></td>
+<td>8</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TO-ADDRESS</td>
+<td>BYTES</td>
+<td>35</td>
+<td>The size of a message&rsquo;s &lsquo;from address&rsquo;.</td>
+</tr>
+
+<tr>
+<td>TREE-DEPTH</td>
+<td></td>
+<td>30.0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TX-MESSAGES-FRACTION</td>
+<td></td>
+<td>0.3</td>
+<td></td>
+</tr>
+
+<tr>
+<td>TX-MESSAGES-PER-BLOCK</td>
+<td></td>
+<td>32.66184</td>
+<td></td>
+</tr>
+
+<tr>
+<td>U64</td>
+<td></td>
+<td>8</td>
+<td>The size of a U64, in bytes.</td>
+</tr>
+
+<tr>
+<td>VALUE</td>
+<td>BYTES</td>
+<td>8</td>
+<td>The size of a &lsquo;value&rsquo; element.</td>
+</tr>
+
+<tr>
+<td>VARINT</td>
+<td>BYTES</td>
+<td>4</td>
+<td>The size of a VarInt.</td>
+</tr>
+
+<tr>
+<td>VDF-OUTPUT-SIZE</td>
+<td></td>
+<td>0</td>
+<td></td>
+</tr>
+
+<tr>
+<td>VDF-PROOF-SIZE</td>
+<td></td>
+<td>768</td>
+<td></td>
+</tr>
+
+<tr>
+<td>YEAR-IN-SECONDS</td>
+<td>SECONDS</td>
+<td>31557600.0</td>
+<td>The number of seconds in one year.</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="effect-of-space-gap-and-sector-size-on-block-size-dot">Effect of Space Gap and Sector Size on Block Size.</h2>
+
+<table>
+<thead>
+<tr>
+<th>LAMBDA</th>
+<th>SPACEGAP</th>
+<th>BLOCK-SIZE-KIB</th>
+<th>SECTOR-SIZE-GIB</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>2.0183308</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>2.1250708</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>2.2424922</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>2.2729497</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>2.5627122</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>2.6715527</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>2.7350836</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>2.847705</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>3.0063488</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>3.2539802</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>3.589003</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>3.8169022</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>3.9404943</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>4.2021575</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>4.3927507</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>4.730614</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>4.7323604</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>4.7720346</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>5.3342724</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>5.501524</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>5.57777</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>5.829611</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>5.94944</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>6.9545097</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>7.102623</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>7.638206</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>7.960858</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>8.008982</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>8.787309</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>8.827972</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>9.263679</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>9.3208065</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>10.384581</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>10.399412</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>10.503603</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>12.190317</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>12.920809</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>13.331349</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>13.4014015</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>13.676332</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>15.2998495</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>15.598608</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>16.252815</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>17.561655</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>17.942131</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>20.070072</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>22.549423</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>22.671417</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>23.978535</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>24.036263</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>24.376612</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>25.470312</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>27.385735</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>28.776114</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>29.061607</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>30.596579</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>32.48009</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>34.33397</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>36.181545</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>36.3917</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>42.983322</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>46.211964</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>46.80707</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>48.038197</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>48.872463</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>54.612484</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>55.240646</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>58.89311</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>62.670723</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>69.31734</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>72.59843</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>82.51584</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>87.89453</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>87.977234</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>94.63942</td>
+<td>1024</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>107.03619</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>107.64613</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>114.18173</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.2</td>
+<td>131.21773</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>140.30208</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>160.02498</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>175.19678</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.1</td>
+<td>176.24756</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>177.6102</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>209.20566</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.06</td>
+<td>238.65137</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>259.8711</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>340.8757</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>357.2812</td>
+<td>256</td>
+</tr>
+
+<tr>
+<td>10</td>
+<td>0.03</td>
+<td>406.86823</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.2</td>
+<td>434.17523</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>529.018</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>695.79944</td>
+<td>128</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.1</td>
+<td>794.4138</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.06</td>
+<td>1293.6443</td>
+<td>32</td>
+</tr>
+
+<tr>
+<td>80</td>
+<td>0.03</td>
+<td>2639.3792</td>
+<td>32</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="parameter-definitions">Parameter Definitions</h2>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">Assumptions:
+  CID [CRH]:
+    declare(cid_size, bytes)
+    describe(cid_size, &#34;The size of a CID.&#34;, bytes)
+    cid_size = 32 + 1 + 1 + 1
+
+  SLE [VRF]:
+    declare(vrf_proof_size) // TODO
+    describe(vrf_proof_size, &#34;The size of a VRF proof.&#34;, bytes)
+
+Primitives:
+  declare(varint, bytes)
+  describe(varint, &#34;The size of a VarInt.&#34;, bytes)
+  varint = 4
+
+  u64 = 8
+  describe(u64, &#34;The size of a U64, in bytes.&#34;)
+
+  Dimensions:
+    Size:
+      kib = 1024
+      describe (kib, &#34;The number of bytes in one KiB.&#34;, bytes)
+
+      mib = 1024 * kib
+      describe (mib, &#34;The number of bytes in one MiB.&#34;, bytes)
+
+      gib = 1024 * mib
+      describe (mib, &#34;The number of bytes in one GiB.&#34;, bytes)
+
+      tib = 1024 * gib
+      describe (mib, &#34;The number of bytes in one TiB.&#34;, bytes)
+
+      pib = 1024 * tib
+      describe (mib, &#34;The number of bytes in one PiB.&#34;, bytes)
+
+      eix = 1024 * pib
+      describe (mib, &#34;The number of bytes in one EiX.&#34;, bytes)
+    Time:
+      year_in_seconds = 365.25 * 24 * 60 * 60
+      describe(year_in_seconds, &#34;The number of seconds in one year.&#34;, seconds)
+
+VDFRSA:
+  declare(rsa_element, bytes)
+  describe(rsa_element, &#34;The size of an RSA element.&#34;, bytes)
+  rsa_element = (2048/8)
+
+Blockchain:
+  declare(block_time, seconds)
+  Address:
+    address_size = cid_size
+    describe(address_size, &#34;The size of an address.&#34;, bytes)
+
+  Block:
+    block_framing_size = block_header_size + messages_size + receipts_size
+    describe(block_framing_size, &#34;The total amount of block framing.&#34;, bytes)
+
+    Messages:
+      // declare(messages, integer) // TODO
+      messages_size = messages * message_size
+      describe(messages_size, &#34;The total size of the messages in a block.&#34;, bytes)
+
+      messages_root_cid = cid_size
+      describe(messages_root_cid, &#34;Size of the CID of the root merkle tree of the messages.&#34;, bytes)
+
+      Message:
+        message_size = to_address + from_address + message_nonce + value + gas_price + gas_limit + actor_method
+        describe(message_size, &#34;The size of a single message.&#34;, bytes)
+
+        to_address = address_size
+        describe(to_address, &#34;The size of a message&#39;s &#39;to address&#39;.&#34;, bytes)
+
+        from_address = address_size
+        describe(to_address, &#34;The size of a message&#39;s &#39;from address&#39;.&#34;, bytes)
+
+        Nonce:
+          declare(message_nonce, bytes) // TODO
+          describe(message_nonce, &#34;The size of a message&#39;s nonce.&#34;, bytes)
+          message_nonce = varint
+
+        Value:
+          declare(value, bytes)
+          describe(value, &#34;The size of a &#39;value&#39; element.&#34;, bytes)
+          value = u64
+
+        Gas:
+          declare(gas_price, bytes)
+          describe(gas_price, &#34;The size required to represent the gas price.&#34;, bytes)
+          gas_price = u64
+
+          declare(gas_limit, bytes)
+          describe(gas_price, &#34;The size required to represent the gas limit.&#34;, bytes)
+          gas_limit = u64
+
+        ActorMethod:
+          declare(actor_method, bytes) // TODO: actor_method what is it? how big is it?
+          actor_method = u64
+          describe(actor_method, &#34;The size required to represent an actor method.&#34;, bytes)
+
+    Receipts:
+      receipts = messages // TODO check
+      // declare(receipts, integer) // TODO
+      receipts_size = receipts * message_receipt
+      describe(receipts_size, &#34;The total size of all message receipts, in bytes.&#34;)
+      message_receipts_cid = cid_size
+      describe(message_receipts_cid, &#34;The size of one message receipt&#39;s CID.&#34;, bytes)
+
+      Receipt:
+        message_receipt = exit_code + return + gas_used
+        describe(message_receipt, &#34;The size of one message receipt.&#34;, bytes)
+
+        // declare(exit_code, bytes) // TODO
+        exit_code = varint
+        describe(exit_code, &#34;The size of an exit code.&#34;, bytes)
+        // declare(return, bytes) // TODO
+        return = varint
+        describe(return, &#34;The size of a message&#39;s return value.&#34;, bytes)
+
+        // declare(gas_used, bytes) // TODO
+        gas_used = u64
+        describe(gas_used, &#34;The size required to represent the amount of gas used by a message.&#34;, bytes)
+
+    BlockHeader (EC):
+      declare(block_header_size, bytes)
+      assume(block_header_size &gt; 0)
+      assume(block_header_size &lt; 1024*1024*10) // assume max is 10MB
+
+      block_header_size = block_header_fixed_size + block_header_variable_size
+      block_header_fixed_size = miner_address_size + election_proof_size + parent_weight_size + block_height_size + state_root_cid + messages_root_cid + bls_agg_size + message_receipts_cid + timestamp_size + block_sig_size
+      block_header_variable_size = tickets_size + parents_cids
+
+      StateTree:
+        state_root_cid = cid_size
+
+      Weight:
+        declare(parent_weight_size, bytes) // TODO
+        parent_weight_size = u64
+
+      Height:
+        declare(block_height_size, bytes) // TODO
+        block_height_size = u64
+
+      MinerAddress [CID]:
+        miner_address_size = address_size
+
+      ElectionProof (VRFBls) [SLE, BLSSig]:
+        declare(election_proof_size, bytes) // TODO
+        election_proof_size = 64
+
+      // ElectionProof (VRFSecpk) [SLE, Secpk]:
+      //   declare(election_proof_size, bytes) // TODO
+      //   election_proof_size = 80
+
+      Parents [CID]:
+        // declare(parents, integer) // TODO
+        parents = expected_winning_miners
+        parents_cids = parents * cid_size
+
+      BLSSignatures (BLSSigAgg) [BLSSigAgg]:
+        declare(bls_agg_size, bytes) // TODO
+        bls_agg_size = 96
+
+      Timestamp:
+        // declare(timestamp_size, integer) // TODO
+        timestamp_size = u64
+
+      // BlockSig (BlockSigSecpk):
+        // declare(block_sig_size, integer) // TODO
+        // block_sig_size = 80
+
+      BlockSig (BlockSigBls):
+        declare(block_sig_size, integer) // TODO
+        block_sig_size = 96
+
+      Tickets:
+        // declare(tickets, integer)
+        declare(tickets_size, bytes)
+        tickets_size = ticket_size * tickets
+        ticket_size = election_proof_size + vdf_proof_size + vdf_output_size
+
+SNARK [SNARKAssumptions]:
+  declare(snark_single_proof_size, bytes)
+  snark_single_proof_size = 192
+  snark_max_constraints = 100000000
+
+// VDF (VDFStorageBased):
+//   vdf_proof_size = (vdf_snark_circuit / snark_max_constraints) * snark_single_proof_size
+//   vdf_output_size = hash_size
+
+VDF (VDFRSA):
+  vdf_proof_size = 3 * rsa_element
+  vdf_output_size = 0
+
+Proofs:
+  ProofOfReplication:
+    Graph:
+      // declare(node_size, integer)
+      // declare(sector_size, integer)
+      // declare(nodes, integer)
+      nodes = sector_size / node_size
+      degree = degree_base + degree_expander
+      sector_size_gib = sector_size / gib
+
+      DRG (DRSample) [DRGAssumption]:
+        // declare(degree_base, integer)
+        drg_e = 0.80
+        drg_d = 1/4
+
+      ExpanderParents (Chung) [ChungAssumption]:
+        // declare(degree_expander, integer)
+
+      Layers:
+        // declare(layers, integer)
+        assume(layers &gt; 0)
+
+    Soundness:
+      // declare(lambda, integer)
+      assume(soundness &gt; 0)
+      assume(soundness &lt; 0.5)
+      soundness = 1/(2^lambda)
+
+    SpaceGap:
+      assume(spacegap &gt; 0)
+      assume(spacegap &lt; 0.5)
+
+    Challenges:
+      OfflineChallenges:
+        // declare(offline_challenges, integer)
+        // declare(offline_challenges_all, integer)
+        assume(offline_challenges &gt; 0)
+
+      OnlineChallenges:
+        // declare(online_challenges, integer)
+        assume(online_challenges &gt; 0)
+
+    Seal:
+      Encoding [KDFTiming]:
+        assume(kdf_content &gt; 0)
+        assume(encoding_time &gt; 0)
+        assume(polling_time &gt; 0)
+        kdf_content = degree + 1
+        encoding_time = layers * nodes * (kdf_content - 1) * kdf_hash_time * (node_size / kdf_hash_size)
+        encoding_time_mins = encoding_time / 60
+        malicious_encoding = encoding_time / encoding_amax
+        polling_time = malicious_encoding * drg_d
+
+    Commitment (ColumnCommitments) [CRH]:
+      commit_size = cid_size
+      assume(replica_commit_time &gt; 0)
+      replica_commit_time = commit_time * 3 + leaf_time * nodes
+      seal_commitments_size = commit_size * 2 // 1 commD, 1 CommR
+
+    ProofGeneration (ColumnCommitments):
+      assume(opening_time &gt; 0)
+      openings = offline_challenges * opening_per_challenge
+
+      Leaf:
+        leaf_constraints =  layers * leaf_hash_constraints
+        leaf_circuit_time = layers * leaf_hash_circuit_time
+        leaf_time = layers * leaf_hash_time
+
+      Inclusion (MerkleVC) [CRH]:
+        // declare(tree_depth, integer)
+        tree_depth = (log2(nodes))
+        inclusion_circuit_time = tree_depth * merkle_hash_time_circuit
+        inclusion_constraints = tree_depth * merkle_hash_constraints
+        commit_time = nodes * merkle_hash_time
+
+      SNARK [SNARKAssumptions]:
+        comm_d_openings = 1
+        comm_d_time = offline_challenges * (comm_d_openings * inclusion_circuit_time)
+        comm_d_constraints = offline_challenges * (comm_d_openings * inclusion_constraints)
+
+        comm_r_openings = degree_base
+        comm_r_time = offline_challenges * (comm_r_openings * inclusion_circuit_time)
+        comm_r_constraints = offline_challenges * (comm_r_openings * inclusion_constraints)
+
+        comm_c_openings = opening_per_challenge
+        comm_c_time = offline_challenges * (comm_c_openings * (inclusion_circuit_time + leaf_circuit_time))
+        comm_c_constraints = offline_challenges * (comm_c_openings * (inclusion_constraints + leaf_constraints))
+
+        porep_snark_time = comm_d_time + comm_r_time + comm_c_time
+        porep_snark_constraints = comm_d_constraints + comm_r_constraints + comm_c_constraints
+
+        porep_snark_partitions = porep_snark_constraints / snark_max_constraints
+        porep_snark_proof_size = porep_snark_partitions * snark_single_proof_size
+
+        proofgen_time = porep_snark_time
+
+    Size:
+      seal_proof_size = porep_snark_proof_size + seal_commitments_size
+
+    Time:
+      seal_time = replica_commit_time + proofgen_time + encoding_time
+      parallel_seal_time = (porep_snark_time + commit_time)/cores + encoding_time
+      declare(unseal_time) // TODO
+
+    Cost:
+      seal_cost = seal_time * (cpu_cost_per_second + memory_cost_per_second)
+      declare(unseal_cost) // TODO
+
+  ProofOfReplication (SDR):
+    Graph:
+      Layers:
+        layers = layers_b // TODO max(layers_a, layers_b) + 1
+        layers_a = (0.68 - epsilon + delta) / (0.12 - delta)
+        layers_b = (log2(1 / (3 * (epsilon - 2 * delta)))) + 0.12 / (0.12 - delta) + 1
+
+    SpaceGap:
+      assume(epsilon &lt;= 0.24)
+      // delta &lt; epsilon/2
+      // delta = epsilon/2 + 0.001
+      // spacegap = epsilon + 2 * delta
+      spacegap = 2 * epsilon - 0.001
+      delta = epsilon/2 - 0.001
+
+    Challenges:
+      OfflineChallenges:
+        offline_challenges = (- lambda) / (log2(1 - delta))
+
+      OnlineChallenges:
+        online_challenges = (- lambda) / (log2(2 - epsilon - 2 * delta) - 1)
+
+    ProofGeneration (ColumnCommitments):
+      opening_per_challenge = degree_base + degree_expander + 1
+
+  ProofOfSpacetime:
+    Randomness [RandomBeacon]:
+      declare(post_randomness_lookback)
+
+    Parameters:
+      declare(proving_period_hours)
+      declare(max_proving_sectors)
+
+      declare(post_challenge_blocks)
+      describe(post_challenge_blocks, &#34;The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.&#34;, blocks)
+
+      describe(post_challenge_time, &#34;PoSt challenge time (see POST_CHALLENGE_BLOCKS).&#34;, seconds)
+      post_challenge_time = post_challenge_blocks * block_time
+      post_challenge_time = post_challenge_hours * 60 * 60
+      describe(post_challenge_hours &#34;PoSt challenge time (see POST_CHALLENGE_BLOCKS).&#34;, hours)
+
+  ProofOfSpacetime (RationalPoSt):
+    Parameters:
+      post_challenges = online_challenges
+      post_proving_period = proving_period_seconds / block_time
+      describe(post_proving_period, &#34;The time interval in which a PoSt has to be submitted&#34;, blocks)
+
+    Cost:
+      declare(post_proving_cost)
+
+    SNARK:
+      post_snark_circuit = online_challenges * inclusion_constraints
+
+    Size:
+      post_proof_size = post_snark_proof_size
+      post_snark_proof_partitions = 1 // TODO post_snark_circuit / snark_max_constraints
+      post_snark_proof_size = post_snark_proof_partitions * snark_single_proof_size
+
+
+Consensus [ProofOfReplication, ProofOfSpacetime]:
+  // declare(expected_winning_miners, integer)
+  // declare(finality_height, integer)
+  Tickets:
+    tickets = avg_tickets
+    avg_tickets = 1
+    min_tickets = 0
+    max_tickets = log(one_block_in_ten_years)/log(0.36) + 1 // 0.36^(max_tickets-1) = one_block_in_ten_years
+    blocks_in_a_year = (year_in_seconds / block_time) * expected_winning_miners
+    blocks_in_ten_years = blocks_in_a_year * 10
+    one_block_in_ten_years = 1/blocks_in_ten_years
+
+StorageMarket:
+  declare(min_storing_time)
+  Deals (OnChainDeals):
+    comm_p_size = cid_size
+    declare(p_size, 1)
+    p_size = (log2(sector_size))
+    sector_manifest_size = pieces * comm_p_size + p_size
+    max_sector_manifest_hashes = sector_size / min_piece_size
+
+
+Mining:
+  proving_period_seconds = proving_period_hours * 60 * 60
+
+  seals_per_sector_per_year = reseal+1
+  posts_per_sector_per_year = year_in_seconds / proving_period_seconds
+
+ScalingRequirements:
+  storage_network_capacity = 10 * eix
+
+ChainBandwidth:
+  sectors_count = storage_network_capacity / sector_size
+  all_seal_size_per_year = all_seal_messages_per_year
+  all_seal_messages_per_year = sectors_count * seals_per_sector_per_year
+  all_post_messages_per_year = sectors_count * posts_per_sector_per_year / miners
+
+  Chain Size:
+
+  Block Size:
+    chain_size_year = block_size * blocks_in_a_year
+    chain_size_year_gib = chain_size_year / gib
+    block_size_kib = block_size / kib
+
+  Block Content:
+    block_size = block_framing_size + proofs_size_per_block
+    messages = avg_proofs_messages_per_block + tx_messages_per_block + actors_messages_per_block // TODO messages dont include deals
+
+    Proofs:
+      avg_proofs_messages_per_block = avg_seals_messages_per_block + avg_posts_messages_per_block
+      avg_seals_messages_per_block = all_seal_messages_per_year / blocks_in_a_year
+      avg_posts_messages_per_block = all_post_messages_per_year / blocks_in_a_year
+
+      seal_size_per_block = avg_seals_messages_per_block * seal_proof_size
+      post_size_per_block = avg_posts_messages_per_block * post_proof_size
+      proofs_size_per_block = seal_size_per_block + post_size_per_block
+      proofs_size_per_block_kib = proofs_size_per_block / kib
+
+    Composition:
+      avg_proofs_messages_per_block = proof_messages_fraction * messages
+      tx_messages_per_block = tx_messages_fraction * messages
+      actors_messages_per_block = actors_messages_fraction * messages</code></pre></div>
+<h2 id="parsed-parameter-definitions">Parsed Parameter Definitions</h2>
+<div class="highlight"><pre class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+  <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Assumptions&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;cid&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+            <span class="nt">&#34;parameters&#34;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="p">{</span>
+                <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;cidSize&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;The size of a CID in bytes.&#34;</span>
+              <span class="p">}</span>
+            <span class="p">]</span>
+          <span class="p">},</span>
+          <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;cidSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ 32 1)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;cidSize.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ cid-size.tmp1% 1)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;cidSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ cid-size.tmp2% 1)&#34;</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;sle&#34;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Primitives&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;varint&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 4)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;u64&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 8)&#34;</span>
+      <span class="p">},</span>
+      <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Dimensions&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Size&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;kib&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 1024)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;mib&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 kib)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;gib&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 mib)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;tib&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 gib)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;pib&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 tib)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;eix&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 1024 pib)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Time&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;yearInSeconds.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 365.25 24)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;yearInSeconds.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* year-in-seconds.tmp1% 60)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;yearInSeconds&#34;</span><span class="p">:</span> <span class="s2">&#34;(* year-in-seconds.tmp2% 60)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;vdfrsa&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;rsaElement&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 2048 8)&#34;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Blockchain&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Address&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;addressSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Block&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;blockFramingSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-size messages-size)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;blockFramingSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-framing-size.tmp1% receipts-size)&#34;</span>
+          <span class="p">},</span>
+          <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Messages&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;messagesSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* messages message-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;messagesRootCid&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
+              <span class="p">},</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Message&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;messageSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ to-address from-address)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;messageSize.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-size.tmp1% message-nonce)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;messageSize.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-size.tmp2% value)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;messageSize.tmp4%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-size.tmp3% gas-price)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;messageSize.tmp5%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-size.tmp4% gas-limit)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;messageSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-size.tmp5% actor-method)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;toAddress&#34;</span><span class="p">:</span> <span class="s2">&#34;(== address-size)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;fromAddress&#34;</span><span class="p">:</span> <span class="s2">&#34;(== address-size)&#34;</span>
+                  <span class="p">},</span>
+                  <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Nonce&#34;</span><span class="p">,</span>
+                      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;messageNonce&#34;</span><span class="p">:</span> <span class="s2">&#34;(== varint)&#34;</span>
+                      <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Value&#34;</span><span class="p">,</span>
+                      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;value&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
+                      <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Gas&#34;</span><span class="p">,</span>
+                      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;gasPrice&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span><span class="p">,</span>
+                        <span class="nt">&#34;gasLimit&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
+                      <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ActorMethod&#34;</span><span class="p">,</span>
+                      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;actorMethod&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
+                      <span class="p">}</span>
+                    <span class="p">}</span>
+                  <span class="p">]</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Receipts&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;receipts&#34;</span><span class="p">:</span> <span class="s2">&#34;(== messages)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;receiptsSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* receipts message-receipt)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;messageReceiptsCid&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
+              <span class="p">},</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Receipt&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;messageReceipt.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ exit-code return)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;messageReceipt&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ message-receipt.tmp1% gas-used)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;exitCode&#34;</span><span class="p">:</span> <span class="s2">&#34;(== varint)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;return&#34;</span><span class="p">:</span> <span class="s2">&#34;(== varint)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;gasUsed&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;BlockHeader&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;blockHeaderSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size block-header-variable-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ miner-address-size election-proof-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp1% parent-weight-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp2% block-height-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp4%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp3% state-root-cid)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp5%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp4% messages-root-cid)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp6%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp5% bls-agg-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp7%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp6% message-receipts-cid)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize.tmp8%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp7% timestamp-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderFixedSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-header-fixed-size.tmp8% block-sig-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;blockHeaderVariableSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ tickets-size parents-cids)&#34;</span>
+              <span class="p">},</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;StateTree&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;stateRootCid&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Weight&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;parentWeightSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Height&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;blockHeightSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;MinerAddress&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;minerAddressSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== address-size)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ElectionProof&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;electionProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 64)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Parents&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;parents&#34;</span><span class="p">:</span> <span class="s2">&#34;(== expected-winning-miners)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;parentsCids&#34;</span><span class="p">:</span> <span class="s2">&#34;(* parents cid-size)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;blsSignatures&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;blsAggSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 96)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Timestamp&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;timestampSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== u64)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;BlockSig&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;blockSigSizeInteger%&#34;</span><span class="p">:</span> <span class="s2">&#34;(integer block-sig-size)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;blockSigSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 96)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Tickets&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;ticketsSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* ticket-size tickets)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;ticketSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ election-proof-size vdf-proof-size)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;ticketSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ ticket-size.tmp1% vdf-output-size)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;snark&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;snarkSingleProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 192)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;snarkMaxConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 100000000)&#34;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;vdf&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;vdfProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 3 rsa-element)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;vdfOutputSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 0)&#34;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Proofs&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofOfReplication&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Graph&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;nodes&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ sector-size node-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;degree&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ degree-base degree-expander)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;sectorSizeGib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ sector-size gib)&#34;</span>
+              <span class="p">},</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;drg&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;drgE&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 0.8)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;drgD&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 1 4)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ExpanderParents&#34;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Layers&#34;</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Soundness&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;soundness&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 1 soundness.tmp1%)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;SpaceGap&#34;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Challenges&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;OfflineChallenges&#34;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;OnlineChallenges&#34;</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Seal&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Encoding&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;kdfContent&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ degree 1)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;encodingTime.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- kdf-content 1)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;encodingTime.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ node-size kdf-hash-size)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;encodingTime.tmp4%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* layers nodes)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;encodingTime.tmp5%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* encoding-time.tmp4% encoding-time.tmp1%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;encodingTime.tmp6%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* encoding-time.tmp5% kdf-hash-time)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;encodingTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* encoding-time.tmp6% encoding-time.tmp2%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;encodingTimeMins&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ encoding-time 60)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;maliciousEncoding&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ encoding-time encoding-amax)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;pollingTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* malicious-encoding drg-d)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Commitment&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;commitSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;replicaCommitTime.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* commit-time 3)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;replicaCommitTime.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* leaf-time nodes)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;replicaCommitTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ replica-commit-time.tmp1% replica-commit-time.tmp2%)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;sealCommitmentsSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* commit-size 2)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofGeneration&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;openings&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges opening-per-challenge)&#34;</span>
+              <span class="p">},</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Leaf&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;leafConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(* layers leaf-hash-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;leafCircuitTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* layers leaf-hash-circuit-time)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;leafTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* layers leaf-hash-time)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Inclusion&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;treeDepth&#34;</span><span class="p">:</span> <span class="s2">&#34;(log2 nodes)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;inclusionCircuitTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* tree-depth merkle-hash-time-circuit)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;inclusionConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(* tree-depth merkle-hash-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commitTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* nodes merkle-hash-time)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;snark&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;commDOpenings&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 1)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commDTime.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* comm-d-openings inclusion-circuit-time)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commDTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges comm-d-time.tmp1%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commDConstraints.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* comm-d-openings inclusion-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commDConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges comm-d-constraints.tmp2%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commROpenings&#34;</span><span class="p">:</span> <span class="s2">&#34;(== degree-base)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commRTime.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* comm-r-openings inclusion-circuit-time)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commRTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges comm-r-time.tmp3%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commRConstraints.tmp4%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* comm-r-openings inclusion-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commRConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges comm-r-constraints.tmp4%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commCOpenings&#34;</span><span class="p">:</span> <span class="s2">&#34;(== opening-per-challenge)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commCTime.tmp6%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ inclusion-circuit-time leaf-circuit-time)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commCTime.tmp5%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* comm-c-openings comm-c-time.tmp6%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commCTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges comm-c-time.tmp5%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commCConstraints.tmp8%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ inclusion-constraints leaf-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commCConstraints.tmp7%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* comm-c-openings comm-c-constraints.tmp8%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;commCConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(* offline-challenges comm-c-constraints.tmp7%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;porepSnarkTime.tmp9%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ comm-d-time comm-r-time)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;porepSnarkTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ porep-snark-time.tmp9% comm-c-time)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;porepSnarkConstraints.tmp10%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ comm-d-constraints comm-r-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;porepSnarkConstraints&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ porep-snark-constraints.tmp10% comm-c-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;porepSnarkPartitions&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ porep-snark-constraints snark-max-constraints)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;porepSnarkProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* porep-snark-partitions snark-single-proof-size)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;proofgenTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(== porep-snark-time)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Size&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;sealProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ porep-snark-proof-size seal-commitments-size)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Time&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;sealTime.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ replica-commit-time proofgen-time)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;sealTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ seal-time.tmp3% encoding-time)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;parallelSealTime.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ porep-snark-time commit-time)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;parallelSealTime.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ parallel-seal-time.tmp2% cores)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;parallelSealTime&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ parallel-seal-time.tmp1% encoding-time)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Cost&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;sealCost.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ cpu-cost-per-second memory-cost-per-second)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;sealCost&#34;</span><span class="p">:</span> <span class="s2">&#34;(* seal-time seal-cost.tmp1%)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofOfReplication&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Graph&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Layers&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;layers&#34;</span><span class="p">:</span> <span class="s2">&#34;(== layers-b)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersA.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- 0.68 epsilon)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersA.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ layers-a.tmp2% delta)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersA.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- 0.12 delta)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersA&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ layers-a.tmp1% layers-a.tmp3%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp8%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 2 delta)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp7%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- epsilon layers-b.tmp8%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp6%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 3 layers-b.tmp7%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp5%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 1 layers-b.tmp6%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp4%&#34;</span><span class="p">:</span> <span class="s2">&#34;(log2 layers-b.tmp5%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp10%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- 0.12 delta)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp9%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 0.12 layers-b.tmp10%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB.tmp15%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ layers-b.tmp4% layers-b.tmp9%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;layersB&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ layers-b.tmp15% 1)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;SpaceGap&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;spacegap.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 2 epsilon)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;spacegap&#34;</span><span class="p">:</span> <span class="s2">&#34;(- spacegap.tmp1% 0.001)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;delta.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ epsilon 2)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;delta&#34;</span><span class="p">:</span> <span class="s2">&#34;(- delta.tmp2% 0.001)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Challenges&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;OfflineChallenges&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;offlineChallenges.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- 0 lambda)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;offlineChallenges.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- 1 delta)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;offlineChallenges.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(log2 offline-challenges.tmp3%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;offlineChallenges&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ offline-challenges.tmp1% offline-challenges.tmp2%)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                  <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;OnlineChallenges&#34;</span><span class="p">,</span>
+                  <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;onlineChallenges.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- 0 lambda)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;onlineChallenges.tmp5%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 2 delta)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;onlineChallenges.tmp4%.tmp6%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- 2 epsilon)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;onlineChallenges.tmp4%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- online-challenges.tmp4%.tmp6% online-challenges.tmp5%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;onlineChallenges.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(log2 online-challenges.tmp4%)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;onlineChallenges.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(- online-challenges.tmp3% 1)&#34;</span><span class="p">,</span>
+                    <span class="nt">&#34;onlineChallenges&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ online-challenges.tmp1% online-challenges.tmp2%)&#34;</span>
+                  <span class="p">}</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofGeneration&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;openingPerChallenge.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ degree-base degree-expander)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;openingPerChallenge&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ opening-per-challenge.tmp1% 1)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofOfSpacetime&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Randomness&#34;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Parameters&#34;</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ProofOfSpacetime&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Parameters&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;postChallenges&#34;</span><span class="p">:</span> <span class="s2">&#34;(== online-challenges)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Cost&#34;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;snark&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;postSnarkCircuit&#34;</span><span class="p">:</span> <span class="s2">&#34;(* online-challenges inclusion-constraints)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Size&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;postProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== post-snark-proof-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;postSnarkProofPartitions&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 1)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;postSnarkProofSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(* post-snark-proof-partitions snark-single-proof-size)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Consensus&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Tickets&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;tickets&#34;</span><span class="p">:</span> <span class="s2">&#34;(== avg-tickets)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;avgTickets&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 1)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;minTickets&#34;</span><span class="p">:</span> <span class="s2">&#34;(== 0)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;maxTickets.tmp2%&#34;</span><span class="p">:</span> <span class="s2">&#34;(log one-block-in-ten-years)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;maxTickets.tmp3%&#34;</span><span class="p">:</span> <span class="s2">&#34;(log 0.36)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;maxTickets.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ max-tickets.tmp2% max-tickets.tmp3%)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;maxTickets&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ max-tickets.tmp1% 1)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;blocksInAYear.tmp4%&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ year-in-seconds block-time)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;blocksInAYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(* blocks-in-a-year.tmp4% expected-winning-miners)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;blocksInTenYears&#34;</span><span class="p">:</span> <span class="s2">&#34;(* blocks-in-a-year 10)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;oneBlockInTenYears&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ 1 blocks-in-ten-years)&#34;</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;StorageMarket&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Deals&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;commPSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(== cid-size)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;pSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(log2 sector-size)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;sectorManifestSize.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* pieces comm-p-size)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;sectorManifestSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ sector-manifest-size.tmp1% p-size)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;maxSectorManifestHashes&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ sector-size min-piece-size)&#34;</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Mining&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;provingPeriodSeconds.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* proving-period-hours 60)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;provingPeriodSeconds&#34;</span><span class="p">:</span> <span class="s2">&#34;(* proving-period-seconds.tmp1% 60)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;sealsPerSectorPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ reseal 1)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;postsPerSectorPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ year-in-seconds proving-period-seconds)&#34;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ScalingRequirements&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;storageNetworkCapacity&#34;</span><span class="p">:</span> <span class="s2">&#34;(* 10 eix)&#34;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;ChainBandwidth&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&#34;sectorsCount&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ storage-network-capacity sector-size)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;allSealSizePerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(== all-seal-messages-per-year)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;allSealMessagesPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(* sectors-count seals-per-sector-per-year)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;allPostMessagesPerYear.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(* sectors-count posts-per-sector-per-year)&#34;</span><span class="p">,</span>
+        <span class="nt">&#34;allPostMessagesPerYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ all-post-messages-per-year.tmp1% miners)&#34;</span>
+      <span class="p">},</span>
+      <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Chain&#34;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Block&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;chainSizeYear&#34;</span><span class="p">:</span> <span class="s2">&#34;(* block-size blocks-in-a-year)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;chainSizeYearGib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ chain-size-year gib)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;blockSizeKib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ block-size kib)&#34;</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Block&#34;</span><span class="p">,</span>
+          <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&#34;blockSize&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ block-framing-size proofs-size-per-block)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;messages.tmp1%&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ avg-proofs-messages-per-block tx-messages-per-block)&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;messages&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ messages.tmp1% actors-messages-per-block)&#34;</span>
+          <span class="p">},</span>
+          <span class="nt">&#34;subsystems&#34;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Proofs&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;avgProofsMessagesPerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ avg-seals-messages-per-block avg-posts-messages-per-block)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;avgSealsMessagesPerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ all-seal-messages-per-year blocks-in-a-year)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;avgPostsMessagesPerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ all-post-messages-per-year blocks-in-a-year)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;sealSizePerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(* avg-seals-messages-per-block seal-proof-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;postSizePerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(* avg-posts-messages-per-block post-proof-size)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;proofsSizePerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(+ seal-size-per-block post-size-per-block)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;proofsSizePerBlockKib&#34;</span><span class="p">:</span> <span class="s2">&#34;(/ proofs-size-per-block kib)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;Composition&#34;</span><span class="p">,</span>
+              <span class="nt">&#34;constraints&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;avgProofsMessagesPerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(* proof-messages-fraction messages)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;txMessagesPerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(* tx-messages-fraction messages)&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;actorsMessagesPerBlock&#34;</span><span class="p">:</span> <span class="s2">&#34;(* actors-messages-fraction messages)&#34;</span>
+              <span class="p">}</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span></code></pre></div>
+</article>
+
+      
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#all-parameters">All Parameters</a></li>
+<li><a href="#effect-of-space-gap-and-sector-size-on-block-size-dot">Effect of Space Gap and Sector Size on Block Size.</a></li>
+<li><a href="#parameter-definitions">Parameter Definitions</a></li>
+<li><a href="#parsed-parameter-definitions">Parsed Parameter Definitions</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+
+  
+  
+</body>
+
+</html>

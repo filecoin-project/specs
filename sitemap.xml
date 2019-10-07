@@ -3,118 +3,646 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/actors/</loc>
+    <loc>/docs/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/address/</loc>
+    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor_old/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/data-propagation/</loc>
+    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor_old/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/data-structures/</loc>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_market_actor_old/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/definitions/</loc>
+    <loc>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor_old/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/expected-consensus/</loc>
+    <loc>/docs/systems/filecoin_token/multisig/multisig_actor_old/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/faults/</loc>
+    <loc>/docs/systems/filecoin_token/payment_channels/payment_channel_actor_old/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/local-storage/</loc>
-    <priority>0</priority>
+    <loc>/docs/systems/filecoin_blockchain/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/mining/</loc>
-    <priority>0</priority>
+    <loc>/docs/systems/filecoin_nodes/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/network-protocols/</loc>
-    <priority>0</priority>
+    <loc>/docs/systems/filecoin_token/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/networking/</loc>
-    <priority>0</priority>
+    <loc>/docs/intro/process/about/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/payments/</loc>
-    <priority>0</priority>
+    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/process/</loc>
-    <priority>0</priority>
+    <loc>/docs/appendix/address/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/proofs/</loc>
-    <priority>0</priority>
+    <loc>/docs/algorithms/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/retrieval-market/</loc>
-    <priority>0</priority>
+    <loc>/docs/appendix/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/signatures/</loc>
-    <priority>0</priority>
+    <loc>/docs/intro/arch/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/state-machine/</loc>
-    <priority>0</priority>
+    <loc>/docs/libraries/ipfs/bitswap/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/storage-market/</loc>
-    <priority>0</priority>
+    <loc>/docs/systems/filecoin_blockchain/blockchain/block_producer/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/style/</loc>
-    <priority>0</priority>
+    <loc>/docs/algorithms/block_reception/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/validation/</loc>
-    <priority>0</priority>
+    <loc>/docs/systems/filecoin_blockchain/blockchain/block_syncer/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/zigzag-circuit/</loc>
-    <priority>0</priority>
+    <loc>/docs/systems/filecoin_blockchain/blockchain/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/docs/</loc>
-    <priority>0</priority>
+    <loc>/docs/algorithms/block_sync/</loc>
   </url>
   
   <url>
-    <loc>https://filecoin-project.github.io/specs/</loc>
-    <lastmod>2019-05-11T15:33:30+01:00</lastmod>
+    <loc>/docs/systems/filecoin_blockchain/blockchain/chain_manager/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/verifier_node/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipld/cid/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/client_node/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/clock/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/listings/system_map/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/repository/config/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/process/contributing/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/cron_actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/crypto/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipld/datamodel/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/listings/data_structures/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/data_transfer/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/error_correction/erasure_coding/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/error_correction/error_correcting_codes/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/node_types/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/expected_consensus/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/faults/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/fcs/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_token/wallets/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/filcrypto/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/file/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/libp2p/fil_libp2p_nodes/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/appendix/orient/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/appendix/orient/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/content/appendix/orient/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/drafts/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/process/</loc>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/filecoin_vm/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/listings/actors/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/file/filestore/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/filcrypto/filproofs/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/process/fip/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/error_correction/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/glossary/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/gossip_sub/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/libp2p/gossipsub/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipld/graphstore/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipfs/graphsync/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/system/impl_systems/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipfs/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipld/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/repository/ipldstore/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/libp2p/kad_dht/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/concepts/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/repository/key/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/libp2p/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/listings/libp2p_protocols/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/listings/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/deal/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/order/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/message_pool/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/message_pool/message_storage/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/message_pool/message_syncer/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_mining/mining_scheduler/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/multiformats/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_token/multisig/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_token/multisig/multisig_actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/network/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/process/related_resources/network_tooling/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/node/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_token/payment_channels/payment_channel_actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/payment_channels/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_token/payment_channels/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_token/payments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/piece/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_files/piece/piece_store/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/porep_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_proving/post_generator/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/post/proof_of_spacetime_parameters/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/proof_of_spacetime_parameters/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/content/algorithms/proof_of_spacetime_parameters/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/post/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/post/rational_post/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/process/related_resources/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/relayer_node/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/repository/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/process/related_resources/research_portal/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/retrieval_market/retrieval_client/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/retrieval_market/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/retrieval_miner_node/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/retrieval_market/retrieval_provider/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector_index/sector_builder/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector_index/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_proving/poster/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_proving/sealer/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_proving/sector_sealer/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector/sealing/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector/sectorset/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/sector_index/sector_store/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipld/selectors/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/appendix/sharray/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/crypto/signatures/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_market_actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_mining/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/node_types/storage_miner_node/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_mining/mining_cycle/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/storage_power_consensus/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_mining/storage_proving/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/system/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/process/related_resources/testing/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/libraries/ipfs/unixfs/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_nodes/repository/usage/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/actor/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/address/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/interpreter/vm_interpreter_old/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/interpreter/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/message/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/runtime/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/state_tree/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/intro/system/why_systems/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/porep_commitments/zigzag_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/zigzag_commitments/zigzag_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/content/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/content/algorithms/zigzag_commitments/zigzag_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/zigzag/</loc>
   </url>
   
 </urlset>

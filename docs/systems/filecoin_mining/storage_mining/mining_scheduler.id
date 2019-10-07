@@ -1,0 +1,35 @@
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs/poster"
+// import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
+
+type SectorSet [Sector]
+type SealedSectorSet [Sector]
+type ReplicaID CID
+
+type MiningScheduler struct {
+    getStagedSectors()                        SectorSet
+    getSealedSectors()                        SealedSectorSet
+    getFaultySectors()                        SectorSet
+    getRepairedSectors()                      SectorSet
+    getExpiredSectors()                       SectorSet  // same as completedSectors/doneSectors
+
+    ProducePost(sectors SectorSet)            poster.PoStSubmission
+    VerifyPost(sectors SectorSet)             poster.PoStSubmission
+
+    ReportFaults(actor &StorageMinerActor)    bool
+    RemoveSectors(sectorsToRemove SectorSet)  bool
+    DePledge(amount TokenAmount)              bool
+    SealedSector(sealedSector SealedSector)   bool  // receives from sector storage subsystem
+    AddSector(
+        pledge    TokenAmount
+        sectorID  &SectorID
+        comm      &SealCommitment
+        proof     SealProof
+    ) SectorID
+
+    // generateReplicaID(CommD Commitment, block Block)
+}
+
+type SealCommitment struct {
+    CommD  Commitment
+    CommR  Commitment
+}

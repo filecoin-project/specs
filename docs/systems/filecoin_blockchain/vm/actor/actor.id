@@ -1,0 +1,96 @@
+// This contains actor things that are _outside_ of VM exection.
+// The VM uses this to execute actors.
+
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+
+// TokenAmount is an amount of Filecoin tokens. This type is used within
+// the VM in message execution, to account movement of tokens, payment
+// of VM gas, and more.
+type TokenAmount UVarint  // TODO: bigint or varint?
+
+// MethodNum is an integer that represents a particular method
+// in an actor's function table. These numbers are used to compress
+// invocation of actor code, and to decouple human language concerns
+// about method names from the ability to uniquely refer to a particular
+// method.
+//
+// Consider MethodNum numbers to be similar in concerns as for
+// offsets in function tables (in programming languages), and for
+// tags in ProtocolBuffer fields. Tags in ProtocolBuffers recommend
+// assigning a unique tag to a field and never reusing that tag.
+// If a field is no longer used, the field name may change but should
+// still remain defined in the code to ensure the tag number is not
+// reused accidentally. The same should apply to the MethodNum
+// associated with methods in Filecoin VM Actors.
+type MethodNum UVarint
+
+// MethodParams is an array of objects to pass into a method. This
+// is the list of arguments/parameters.
+//
+// TODO: serialized or deserialized? (serialized for now)
+// TODO: force CIDs or by value is fine?
+type MethodParams [Bytes]
+
+// CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
+// This is a value used for securing against replay attacks:
+// each AccountActor (user) invocation must have a unique CallSeqNum
+// value. The sequenctiality of the numbers is used to make it
+// easy to verify, and to order messages.
+//
+// Q&A
+// - > Does it have to be sequential?
+//   No, a random nonce could work against replay attacks, but
+//   making it sequential makes it much easier to verify.
+// - > Can it be used to order events?
+//   Yes, a user may submit N separate messages with increasing
+//   sequence number, causing them to execute in order.
+//
+type CallSeqNum UVarint
+
+// Code is a serialized object that contains the code for an Actor.
+// Until we accept external user-provided contracts, this is the
+// serialized code for the actor in the Filecoin Specification.
+type Code Bytes
+
+// CodeCID represents a CID for a Code object.
+type CodeCID CID
+
+// Actor is a base computation object in the Filecoin VM. Similar
+// to Actors in the Actor Model (programming), or Objects in Object-
+// Oriented Programming, or Ethereum Contracts in the EVM.
+//
+// Questions for id language:
+// - we should not do inheritance, we should do composition.
+//   but we should make including actor state nicer.
+type Actor struct {
+    // common fields for all actors
+    CodeCID
+    State    ActorState
+    Balance  TokenAmount
+    SeqNum   CallSeqNum  // FKA Nonce
+}
+
+// ActorID is a sequential number assigned to actors in a Filecoin Chain.
+// ActorIDs are assigned by the InitActor, when an Actor is introduced into
+// the Runtime.
+type ActorID UVarint
+
+// ActorState represents the on-chain storage actors keep. This type is a
+// union of concrete types, for each of the Actors:
+// - InitActor
+// - CronActor
+// - AccountActor
+// - PaymentChannelActor
+// - StoragePowerActor
+// - StorageMinerActor
+// - StroageMarketActor
+//
+// TODO: move this into a directory inside the VM that patches in all
+// the actors from across the system. this will be where we declare/mount
+// all actors in the VM.
+type ActorState union {
+    Init struct {
+        AddressMap  {addr.Address: ActorID}
+        NextID      ActorID
+    }
+}

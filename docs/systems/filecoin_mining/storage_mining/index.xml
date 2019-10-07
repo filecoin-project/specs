@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Storage Miner on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_mining/storage_mining/</link>
+    <description>Recent content in Storage Miner on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_mining/storage_mining/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor_old/</guid>
+      <description>Storage Miner Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;sminer&amp;quot;&amp;gt;
+type StorageMinerActorState struct { ## contains mostly static info about this miner info &amp;amp;MinerInfo ## Collateral that is waiting to be withdrawn. dePledgedCollateral TokenAmount ## Time at which the depledged collateral may be withdrawn. dePledgeTime BlockHeight ## All sectors this miner has committed. sectors &amp;amp;SectorSet ## Sectors this miner is currently mining. It is only updated ## when a PoSt is submitted (not as each new sector commitment is added).</description>
+    </item>
+    
+    <item>
+      <title>Mining Scheduler</title>
+      <link>/docs/systems/filecoin_mining/storage_mining/mining_scheduler/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_mining/storage_mining/mining_scheduler/</guid>
+      <description> import poster &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs/poster&amp;#34; // import storage_indexer &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&amp;#34;  type SectorSet [Sector] type SealedSectorSet [Sector] type ReplicaID CID type MiningScheduler struct { getStagedSectors() SectorSet getSealedSectors() SealedSectorSet getFaultySectors() SectorSet getRepairedSectors() SectorSet getExpiredSectors() SectorSet // same as completedSectors/doneSectors  ProducePost(sectors SectorSet) poster.PoStSubmission VerifyPost(sectors SectorSet) poster.PoStSubmission ReportFaults(actor &amp;amp;StorageMinerActor) bool RemoveSectors(sectorsToRemove SectorSet) bool DePledge(amount TokenAmount) bool SealedSector(sealedSector SealedSector) bool // receives from sector storage subsystem  AddSector( pledge TokenAmount sectorID &amp;amp;SectorID comm &amp;amp;SealCommitment proof SealProof ) SectorID // generateReplicaID(CommD Commitment, block Block) } type SealCommitment struct { CommD Commitment CommR Commitment }  </description>
+    </item>
+    
+    <item>
+      <title>Storage Miner Actor</title>
+      <link>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
+      <description>(You can see the old Storage Miner Actor here )
+type Seed struct {} type SectorCommitment struct {} type StorageMinerActor struct { // CollateralVault CollateralVault  // Sectors {UInt:MinedSector} // sectors and faults, proving period ends  // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)  // ProvingPeriodEnd Epoch  // // contains mostly static info about this miner  // info &amp;amp;MinerInfo  UpdateDoneSet() UpdateSectorStatus(sectorStateSets SectorStateSets, faultSets [FaultSet]) SubmitPoSt(postProof base.</description>
+    </item>
+    
+    <item>
+      <title>Storage Mining Cycle</title>
+      <link>/docs/systems/filecoin_mining/storage_mining/mining_cycle/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_mining/storage_mining/mining_cycle/</guid>
+      <description>Block miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning ticket to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
+The Miner Actor After successfully calling CreateStorageMiner, a miner actor will be created on-chain, and registered in the storage market.</description>
+    </item>
+    
+  </channel>
+</rss>

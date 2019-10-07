@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Retrieval Market in Filecoin on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_markets/retrieval_market/</link>
+    <description>Recent content in Retrieval Market in Filecoin on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_markets/retrieval_market/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Retrieval Client</title>
+      <link>/docs/systems/filecoin_markets/retrieval_market/retrieval_client/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_client/</guid>
+      <description> import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; type TokenAmount base.TokenAmount type Address base.Address type RetrievalClient struct { CreatePaymentChannel(provider Address, payment TokenAmount) PaymentChannel }  </description>
+    </item>
+    
+    <item>
+      <title>Retrieval Provider (Miner)</title>
+      <link>/docs/systems/filecoin_markets/retrieval_market/retrieval_provider/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_provider/</guid>
+      <description> type PaymentChannel struct {} type CID struct {} // File Retrieval Query type FileRetrievalAvailable struct { MinPrice TokenAmount Miner Address } type FileRetrievalUnavailable struct {} type RetrievalQueryResponse union { FileRetrievalAvailable FileRetrievalUnavailable } type RetrievalQuery struct { File CID } // File Retrieval Deal Proposal and Deal type RetrievalDealProposalError struct {} type RetrievalDealProposalRejected struct {} type RetrievalDealProposalAccepted struct { CounterParty Address Payment PaymentChannel } type RetrievalDealProposalResponse union { RetrievalDealProposalAccepted RetrievalDealProposalRejected RetrievalDealProposalError } type RetrievalDealProposal struct { File CID Payment PaymentChannel MinPrice TokenAmount } type RetrievalProvider struct { NewRetrievalQuery(query RetrievalQuery) RetrievalQueryResponse // NewRetrievalDealProposal is called to propose a retrieval  NewRetrievalDealProposal(proposal RetrievalDealProposal) RetrievalDealProposalResponse // AcceptRetrievalDeal is called to accept a retrieval deal  AcceptRetrievalDealProposal(deal RetrievalDealProposal) RetrievalDealProposalResponse }  </description>
+    </item>
+    
+  </channel>
+</rss>

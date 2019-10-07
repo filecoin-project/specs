@@ -1,0 +1,27 @@
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs/poster"
+import sealer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs/sealer"
+
+// type poster.PoStProof struct {}
+// type seal.SealOutput struct {}
+// type seal.SectorSealer struct {}
+// type seal.Seed struct {}
+// type sector.SectorID struct {}
+// type sector.SealCfg struct {}
+type Commitment struct {}
+type Ticket struct {}
+type Block struct {}
+type SectorSealer struct {}
+
+type StorageProvingSubsystem struct {
+    SectorSealer   sealer.SectorSealer
+    PostGenerator  poster.PostGenerator
+
+    SealSector(si sealer.SealInputs) union {so sealer.SealOutputs, err error}
+    VerifySeal(sv sector.SealVerifyInfo) union {ok bool, err error}
+
+    ValidateBlock(block Block)
+
+    // TODO: remove this?
+    // GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
+}

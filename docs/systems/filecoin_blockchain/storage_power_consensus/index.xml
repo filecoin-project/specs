@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Storage Power Consensus on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_blockchain/storage_power_consensus/</link>
+    <description>Recent content in Storage Power Consensus on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_blockchain/storage_power_consensus/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Expected Consensus</title>
+      <link>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</guid>
+      <description> type ChainWeight UVarint type ExpectedConsensus struct { // ComputeWeight(Chain)	ChainWeight  // TryElection(StorageMiner, TipSet)	ElectionProof  // VerifyElection(StorageMiner, ElectionProof)	bool  // IsConsensusFault([Block])	bool }  </description>
+    </item>
+    
+    <item>
+      <title>Storage Power Actor</title>
+      <link>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
+      <description>import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; type BytesAmount UVarint type StoragePowerActor struct { // call by StorageMiningSubsytem on miner creation  RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) // call by StorageMinerActor on successful seal  // TODO: workerKey of type StorageMiner.WorkerPubKey  IncrementPower(minerAddress base.Address) UpdatePower(address base.Address, newPower minerStorage) SuspendMiner(address base.Address) // UpdateStoragePowerSubsystem(Tipset, StateTree)  // VerifyElectionProof(base.Address, base.ElectionProof)	bool  TotalStorage() BytesAmount // // What does graceful removal look like?  // NotifyConsensusFault(base.</description>
+    </item>
+    
+  </channel>
+</rss>

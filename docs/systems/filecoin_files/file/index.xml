@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>File on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_files/file/</link>
+    <description>Recent content in File on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_files/file/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>FileStore - Local Storage for Files</title>
+      <link>/docs/systems/filecoin_files/file/filestore/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_files/file/filestore/</guid>
+      <description> // FileStore is an object that can store and retrieve files by path. type FileStore struct { Open(p Path) union {f File, e error} Create(p Path) union {f File, e error} Store(p Path, f File) error Delete(p Path) error // maybe add:  // Copy(SrcPath, DstPath) }  TODO:
+ explain why this abstraction is needed explain OS filesystem as basic impl explain that users can replace w/ other systems give examples:  networked filesystems raw disk sectors - like haystack databases   </description>
+    </item>
+    
+  </channel>
+</rss>

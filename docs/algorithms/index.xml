@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Algorithms on Filecoin Spec</title>
+    <link>/docs/algorithms/</link>
+    <description>Recent content in Algorithms on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/algorithms/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Block Reception</title>
+      <link>/docs/algorithms/block_reception/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/block_reception/</guid>
+      <description>func (g *BlockValidationGraph_I) ConsiderBlock(block Block) { panic(&amp;ldquo;TODO&amp;rdquo;) // g.UnconnectedBlocks.AddBlock(block) // g.tryConnectBlockToFringe(block) }
+func (g *BlockValidationGraph_I) tryConnectBlockToFringe(block Block) { panic(&amp;ldquo;TODO&amp;rdquo;)
+// try to connect the block, and then try connecting its descendents. // // this algorithm should be breadth-first because we need to process the fringe // in order. Depth-first search may consider blocks whose parents are still // yet to be added // blocks := Queue &amp;lt; Block &amp;gt; // blocks.</description>
+    </item>
+    
+    <item>
+      <title>BlockSync</title>
+      <link>/docs/algorithms/block_sync/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/block_sync/</guid>
+      <description>Name: Block Sync Protocol ID: /fil/sync/blk/0.0.1  The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol.
+The request requests a chain of a given length by the hash of its highest block. The Options allow the requester to specify whether or not blocks and messages to be included.
+The response contains the requested chain in reverse iteration order.</description>
+    </item>
+    
+    <item>
+      <title>Expected Consensus</title>
+      <link>/docs/algorithms/expected_consensus/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/expected_consensus/</guid>
+      <description>Algorithm Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an Election Proof). All valid blocks submitted in a given round form a Tipset.</description>
+    </item>
+    
+    <item>
+      <title>GossipSub</title>
+      <link>/docs/algorithms/gossip_sub/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/gossip_sub/</guid>
+      <description>Messages and block headers along side the message references are propagated using the gossipsub libp2p pubsub router. Every full node must implement and run that protocol. All pubsub messages are authenticated and must be syntactically validated before being propagated further.
+Further more, every full node must implement and offer the bitswap protocol and provide all Cid Referenced objects, it knows of, through it. This allows any node to fetch missing pieces (e.</description>
+    </item>
+    
+    <item>
+      <title>Payment Channels</title>
+      <link>/docs/algorithms/payment_channels/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/payment_channels/</guid>
+      <description>Payment Channels In order for the Filecoin Markets to work in a timely manner, we need to be able to have off-chain payments. This is a solved problem (at least, for our purposes in v0). Payment channels have been implemented and used in bitcoin, ethereum and many other networks.
+The basic premise is this: User A wants to be able to send many small payments to user B. So user A locks up money in a contract that says &amp;ldquo;this money will only go to user B, and the unclaimed amount will be returned to user A after a set time period&amp;rdquo;.</description>
+    </item>
+    
+    <item>
+      <title>Proof of Spacetime Parameters</title>
+      <link>/docs/algorithms/proof_of_spacetime_parameters/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/proof_of_spacetime_parameters/</guid>
+      <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
+   Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    TODO: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.</description>
+    </item>
+    
+    <item>
+      <title>ZigZag Commitments</title>
+      <link>/docs/algorithms/zigzag_commitments/zigzag_commitments/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/zigzag_commitments/zigzag_commitments/</guid>
+      <description>Introduction This document provides a simplified visual explanation of the ZigZag Commitment algorithm described in Tight PoS - ZigZag.
+It is intended to confer intuition about the algorithm, and to serve as a reference for implementers. The author of this document and those of the linked paper believe the two are consistent; and converging on this consistent design was a third design goal of this document&amp;rsquo;s construction.
+Graph Both renumbered (DRG) and reversed (expander) parents are generated by a pseudorandom permutation and are provided only to illustrate the nature of the zigzag commitment scheme.</description>
+    </item>
+    
+  </channel>
+</rss>

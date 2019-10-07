@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Proof-of-Spacetime on Filecoin Spec</title>
+    <link>/docs/algorithms/post/</link>
+    <description>Recent content in Proof-of-Spacetime on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/algorithms/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PoSt Parameters</title>
+      <link>/docs/algorithms/post/proof_of_spacetime_parameters/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/post/proof_of_spacetime_parameters/</guid>
+      <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin. (asdf:load-system :orient) (in-package orient.lang)  #&amp;lt;PACKAGE &amp;#34;ORIENT.LANG&amp;#34;&amp;gt;  (defparameter *filecoin* (get-system &amp;#34;../orient/filecoin.orient&amp;#34;)) (defparameter *input* (interface:get-json-relation-list &amp;#34;../orient/params.json&amp;#34;)) (defparameter *multi-input* (interface:get-json-relation-list &amp;#34;../orient/multi-params.json&amp;#34;))  *MULTI-INPUT*  (let ((result-tuple (extract (ask *filecoin* &amp;#39;(post-challenge-blocks post-challenge-hours post-proving-period) *input*)))) (org-present-tuple result-tuple *filecoin*))     Parameter Type Value Description   POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started.</description>
+    </item>
+    
+    <item>
+      <title>Rational-PoSt</title>
+      <link>/docs/algorithms/post/rational_post/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/post/rational_post/</guid>
+      <description>This document describes Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
+High Level API Fault Detection Fault detection happens over the course of the life time of a sector. When the sector is for some reason unavailable, the miner is responsible to submit the known faults, before the PoSt challenge begins. (Using the AddFaults message to the chain). Only faults which have been reported at challenge time, will be accounted for. If any other faults have occured the miner can not submit a valid PoSt for this proving period.</description>
+    </item>
+    
+  </channel>
+</rss>

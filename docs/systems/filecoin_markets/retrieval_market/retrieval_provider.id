@@ -1,0 +1,45 @@
+type PaymentChannel struct {}
+type CID struct {}
+
+// File Retrieval Query
+type FileRetrievalAvailable struct {
+    MinPrice  TokenAmount
+    Miner     Address
+}
+type FileRetrievalUnavailable struct {}
+type RetrievalQueryResponse union {
+    FileRetrievalAvailable
+    FileRetrievalUnavailable
+}
+
+type RetrievalQuery struct {
+    File CID
+}
+
+// File Retrieval Deal Proposal and Deal
+type RetrievalDealProposalError struct {}
+type RetrievalDealProposalRejected struct {}
+type RetrievalDealProposalAccepted struct {
+    CounterParty  Address
+    Payment       PaymentChannel
+}
+type RetrievalDealProposalResponse union {
+    RetrievalDealProposalAccepted
+    RetrievalDealProposalRejected
+    RetrievalDealProposalError
+}
+type RetrievalDealProposal struct {
+    File      CID
+    Payment   PaymentChannel
+    MinPrice  TokenAmount
+}
+
+type RetrievalProvider struct {
+    NewRetrievalQuery(query RetrievalQuery) RetrievalQueryResponse
+
+    // NewRetrievalDealProposal is called to propose a retrieval
+    NewRetrievalDealProposal(proposal RetrievalDealProposal) RetrievalDealProposalResponse
+
+    // AcceptRetrievalDeal is called to accept a retrieval deal
+    AcceptRetrievalDealProposal(deal RetrievalDealProposal) RetrievalDealProposalResponse
+}

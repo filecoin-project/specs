@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>IPLD - InterPlanetary Linked Data on Filecoin Spec</title>
+    <link>/docs/libraries/ipld/</link>
+    <description>Recent content in IPLD - InterPlanetary Linked Data on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/libraries/ipld/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>CIDs - Content IDentifiers</title>
+      <link>/docs/libraries/ipld/cid/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/libraries/ipld/cid/</guid>
+      <description> type BytesKey string // so that we can use it in go maps  type CID BytesKey // TODO: remove util.  </description>
+    </item>
+    
+    <item>
+      <title>Data Model</title>
+      <link>/docs/libraries/ipld/datamodel/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/libraries/ipld/datamodel/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>GraphStore - IPLD Data Storage</title>
+      <link>/docs/libraries/ipld/graphstore/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/libraries/ipld/graphstore/</guid>
+      <description> // imported as ipld.Store type GraphStore struct { Get(cid CID) union {o Object, err error} Put(o Object) union {cid CID, err error} }  </description>
+    </item>
+    
+    <item>
+      <title>Selectors</title>
+      <link>/docs/libraries/ipld/selectors/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/libraries/ipld/selectors/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

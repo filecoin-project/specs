@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Storage Market in Filecoin on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_markets/storage_market/</link>
+    <description>Recent content in Storage Market in Filecoin on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_markets/storage_market/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_market_actor_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_market_actor_old/</guid>
+      <description>Storage Market Actor (DEPRECATED)  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;smarket&amp;quot;&amp;gt;  The storage market actor is the central point for the Filecoin storage market. It is responsible for registering new miners to the system, and maintaining the power table. The Filecoin storage market is a singleton that lives at a specific well-known address.
+type StorageMarketActorState struct { miners {Address:Null}&amp;lt;Hamt&amp;gt; totalStorage BytesAmount } Methods    Name Method ID     StorageMarketConstructor 1   CreateStorageMiner 2   SlashConsensusFault 3   UpdateStorage 4   GetTotalStorage 5   PowerLookup 6   IsMiner 7   StorageCollateralForSize 8    Constructor Parameters</description>
+    </item>
+    
+    <item>
+      <title>Faults</title>
+      <link>/docs/systems/filecoin_markets/storage_market/faults/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/faults/</guid>
+      <description>There are two main categories of faults in the Filecoin network.
+ ConsensusFaults StorageDealFaults  ConsensusFaults are faults that hurt network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers. PledgeCollateral is slashed for ConsensusFaults and StorageDealCollateral for StorageDealFaults.
+Any misbehavior may result in more than one fault and can lead to slashing on both collaterals. For example, missing a PoStProof will incur a penalty on both PledgeCollateral and StorageDealCollateral if there is the data is stored in a StorageDeal.</description>
+    </item>
+    
+    <item>
+      <title>Storage Market Actor</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_market_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_market_actor/</guid>
+      <description>StorageMarketActor is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of StorageDealID to StorageDeal and keeps track of locked balances of StorageClient and StorageProvider. When a deal is posted on chain through the StorageMarketActor, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain.</description>
+    </item>
+    
+    <item>
+      <title>Storage Market Participant</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</guid>
+      <description>Both StorageProvider and StorageClient are StorageMarketParticipant and the protocol does not explicitly differentiate the two roles. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain.
+import base_markets &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; type StorageDealProposal base_markets.StorageDealProposal type StorageDealProposalQuery struct {} type StorageDealProposalQueryResponse struct {} type StorageDealQuery struct {} type StorageDealQueryResponse struct {} type StorageMarketParticipant struct { // Participants call each other to submit StorageDealProposal  NewStorageDealProposal(storageDealProposal StorageDealProposal) // When both parties sign on a StorageDealProposal  // counter signer call this function to return the signed deal  NewStorageDeal(storageDeal StorageDeal) // call by StorageMarketPariticipant itself to sign a StorageDealProposal  SignStorageDealProposal(storageDealProposal StorageDealProposal) StorageDeal // call by proposer  QueryStorageDealProposalStatus(storageDealProposalQuery StorageDealProposalQuery) StorageDealProposalQueryResponse // call by countersigner  QueryStorageDealStatus(storageDeal StorageDeal) StorageDealQueryResponse }  </description>
+    </item>
+    
+  </channel>
+</rss>
