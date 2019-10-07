@@ -2,6 +2,7 @@
 function onReady() {
   onMenuDetailChange()
   addHeaderLinks()
+  scrollSpy()
 }
 // lead this at the beginning to set the slider correctly
 window.addEventListener('DOMContentLoaded', onReady, false)
@@ -22,10 +23,10 @@ function onMenuDetailChange(event) {
         if ($ul.childElementCount > 0) {
           $ul.previousElementSibling.classList.add('highlight')
         }
-        $ul.classList.remove('hidden')
+        $ul.classList.remove('maybe-hide')
       } else {
         $ul.previousElementSibling.classList.remove('highlight')
-        $ul.classList.add('hidden')
+        $ul.classList.add('maybe-hide')
       }
     }
   }
@@ -38,5 +39,12 @@ function addHeaderLinks() {
       var id = el.getAttribute('id') || el.parentElement.getAttribute('id')
       window.location.hash = id
     }
+  })
+}
+
+function scrollSpy() {
+  new Gumshoe('#menu-toc a', {
+    nested: true,
+    nestedClass: 'active-parent'
   })
 }
