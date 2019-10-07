@@ -73,7 +73,7 @@ SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 ### BLS Signatures
 
-Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. 
+Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. You can find the default Rust implementation in [Filecoin's repo](https://github.com/filecoin-project/bls-signatures/).
 
 TODO: link with bls.id file
 
@@ -91,6 +91,7 @@ signatures**.
 **Wire Format**: Filecoin uses the standard way to serialize BLS signatures as
 explained in the [RFC Section
 2.6.1](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.1). 
+
 
 **Rationale**: BLS signatures have two main characteristics that are making them ideal candidates in recent blockchain systems:
 - BLS signatures are deterministic: for a given message and a given secret key,
