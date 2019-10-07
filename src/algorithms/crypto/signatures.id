@@ -28,7 +28,7 @@ type Signature interface {
 	//    pk - the public key belonging to the signer `M`
 	//    sig - a series of bytes representing a signature usually `r`|`s`
 	//
-	Verify(m Messgage, pk PublicKey, sig SignatureBytes) (valid bool, err error)
+	Verify(m Message, pk PublicKey, sig SignatureBytes) (valid bool, err error)
 
 }
 
