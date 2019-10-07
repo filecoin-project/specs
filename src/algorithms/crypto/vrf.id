@@ -1,0 +1,17 @@
+// VRFKeyPair holds the private key and respectively the public key to create 
+// and respectively verify a VRF output.
+type VRFKeyPair struct {
+    PublicKey              PublicKey
+    SecretKey              SecretKey
+
+    // Generate a VRF from the given input with the SecretKey that can be
+    // verified with the PublicKey
+    Generate(input Bytes)  VRFResult     @(static)
+}
+
+type VRFResult struct {
+    Output  Bytes  @(internal)
+
+    Verify(input Bytes, pk PublicKey) bool
+    ValidateSyntax() bool
+}
