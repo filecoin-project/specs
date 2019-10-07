@@ -1,0 +1,35 @@
+type Message Bytes
+type PrivateKey Bytes
+type PublicKey Bytes
+type SignatureBytes Bytes
+
+type Signature interface {
+
+	// Sign generates a proof that miner `M` generate message `m`
+	//
+	// Out:
+	//    sig - a series of bytes representing a signature usually `r`|`s`
+	//    err - a standard error message indicating any process issues
+	// In:
+	//    m - a series of bytes representing a message to be signed
+	//    sk - a private key which cryptographically links `M` to `sig`
+	//
+	Sign(m Message, sk PrivateKey) (sig SignatureBytes, err error)
+
+	// Verify validates the statement: only `M` could have generated `sig`
+	// given the validator has a message `m`, a signature `sig`, and a
+	// public key `pk`.
+	//
+	// Out:
+	//    valid - a boolean value indicating the signature is valid
+	//    err - a standard error message indicating any process issues
+	// In:
+	//    m - a series of bytes representing the signed message
+	//    pk - the public key belonging to the signer `M`
+	//    sig - a series of bytes representing a signature usually `r`|`s`
+	//
+	Verify(m Messgage, pk PublicKey, sig SignatureBytes) (valid bool, err error)
+
+}
+
+

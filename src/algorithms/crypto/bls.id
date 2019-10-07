@@ -1,0 +1,22 @@
+// BLS implements the Signature interface using the BLS signature scheme
+// with the BLS12-381 group of elliptic curves.
+type BLS struct {
+    Signature
+
+    // Aggregates this BLS signature and `sig` into one BLS signature that can
+    // be verified against the aggregation of the two public key that signed
+    // the aggregated signatures.
+    Aggregate(sig2 BLS) BLS
+}
+
+// BLSPublicKey is a PublicKey with an addition method to aggregate public keys
+// together.
+type BLSPublicKey struct {
+    PublicKey
+
+    // Aggregate this public key with p2 into one public key. This aggregated
+    // public key can 
+    // - verify aggregated signatures signed by the two BLSPublicKey
+    // - be aggregated further down with other (aggregated or not) BLSPublicKey.
+    Aggregate(p2 BLSPublicKey) BLSPublicKey
+}
