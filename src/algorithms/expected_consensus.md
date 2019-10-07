@@ -288,7 +288,7 @@ Delta weight is a term composed of a few elements:
 
 We have:
 
-w[r+1] = w[r] + wForkFactor(wPowerFactor[r+1] + wBlocksFactor[r+1])
+w[r+1] = w[r] + floor(1000 * (wForkFactor(wPowerFactor[r+1] + wBlocksFactor[r+1])))
 
 with, for a given tipset ts in round r+1:
 
@@ -297,7 +297,7 @@ with, for a given tipset ts in round r+1:
 - wPowerFactor[r+1]  = log2(totalPowerAtTipset(ts))
 - wForkFactor[r+1]   = CDF(X, k) with X -> Bin(eNumberOfBlocksPerRound * numberOfMinersInPowerTable, 1/numberOfMinersInPowerTable)
 
-The weight should be rounded down to its fourth decimal at each height (i.e. each time it is recalculated).
+The weight should be calculated using big integer arithmetic with order of operations defined above. The multiplication by 1,000 and flooring is meant to help generate uniform weights across implementations.
 
 ```sh
 Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.

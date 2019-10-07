@@ -53,3 +53,6 @@ type SigType enum {
     BLSSigType
     EdDSASigType
 }
+
+type BLS struct {}
+type Secp256k1 struct {}
