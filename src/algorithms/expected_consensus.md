@@ -2,6 +2,8 @@
 title: "Expected Consensus"
 ---
 
+TODO: move pseudocode to id files entirely
+
 {{<label expected_consensus>}}
 ## Algorithm
 
@@ -235,6 +237,8 @@ Output: 1 or 0
 Return 1
 ```
 
+### Election Validation
+
 If successful, the miner can craft a block, passing it to the block producer. If unsuccessful, it will wait to hear of another block mined this round to try again. In the case no other block was found in this round the miner can increment nonce and try again.
 While a miner could try to run through multiple nonces in parallel in order to quickly generate a block, this effort will be futile as the honest majority of miners will reject blocks crafted with ElectionProofs whose nonces prove too high (see below).
 
@@ -313,7 +317,7 @@ X -> Bin(eNumberOfBlocksPerRound * 10,000, 1/10,000). We have:
 
 with:
     - stdDev[X] = sqrt(eNumberOfBlocksPerRound * (1 - 1/10,000))
-    - CDF(X, |blocksInTipset(ts)) = Sum_i=0^k ((10,000* choose i) (1/10,000)^i (9,999/10,000)n- i
+    - CDF(X, |blocksInTipset(ts)) = Sum_i=0^k ((10,000*eNumberOfBlocksPerRound choose i) (1/10,000)^i (9,999/10,000)^(eNumberOfBlocksPerRound - i))
 
 CDF(X, k) with
 The weight should be calculated using big integer arithmetic with order of operations defined above. The multiplication by 1,000 and flooring is meant to help generate uniform weights across implementations.
