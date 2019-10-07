@@ -9,6 +9,8 @@ entries:
 - system
 ---
 
+<center><img src="./docs/intro/underconstruction.gif" height="128px" /></center>
+
 {{% notice warning %}}
 **Warning:** This draft of the Filecoin protocol specification is a work in progress.
 It is intended to establish the rough overall structure of the document,

@@ -11,3 +11,4 @@ hugo/content/codeGen/main
 *.gen.go
 *.mmd.svg
 *.dot.svg
+hugo/data/version.yml

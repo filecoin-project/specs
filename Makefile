@@ -125,13 +125,17 @@ pdf: diagrams build-hugo # org2md
 build-hugo: hugo-src $(shell find hugo/content | grep '.md')
 	cd hugo && hugo
 
-hugo-src: $(shell find src | grep '.md')
+hugo-src: $(shell find src | grep '.md') hugo/data/version.yml
 	rm -rf hugo/content/docs
 	cp -r src hugo/content/docs
 	# ox-hugo exports to src/content, so we need to copy that also.
 	cp -r src/content/ hugo/content/docs
 	mkdir -p hugo/content/ox-hugo
 	cp src/static/ox-hugo/* hugo/content/ox-hugo
+
+# run this every time.
+hugo/data/version.yml: src/version.yml .PHONY
+	bin/write-spec-version.sh <$< >$@
 
 # this is used to get "serve-and-watch" working. trick is to use
 hugo-src-rsync: $(shell find src | grep '.md') gen-code diagrams
