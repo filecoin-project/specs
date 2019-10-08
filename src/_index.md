@@ -8,3 +8,5 @@ entries:
 - glossary
 - appendix
 ---
+
+{{% specSplash %}}

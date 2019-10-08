@@ -6,11 +6,11 @@ website=build/website
 ghpages=build/gh-pages
 
 ## -- warnings
-# echo "WARNING: this will publish to github pages."
+echo "WARNING: this will publish to github pages."
 # get confirmation from user
-# if [ "$1" != "-y" ]; then
-#  get_user_confirmation
-# fi
+if [ "$1" != "-y" ]; then
+  get_user_confirmation
+fi
 
 ## -- checks
 must_run_from_spec_root
@@ -46,5 +46,4 @@ cd "$ghpages" && git add --all && git commit -m "Publishing $shash ($0)"
 
 ## -- publishing
 echo "Publishing to github"
-die "cannot publish to github. this is WIP, so only dry runs."
-# git push origin gh-pages
+git push origin gh-pages

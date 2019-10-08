@@ -144,6 +144,35 @@ h1.nocount:before, h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.n
   counter-increment : none;
 }
 
+// scrollspy highlighting
+
+#menu-toc li:not(.active-parent) > ul.maybe-hide > li:not(.active) {
+  display: none;
+}
+
+#menu-toc ul li.active-parent,
+#menu-toc ul.maybe-hide li.active-parent,
+#menu-toc li.active-parent > ul.maybe-hide > li {
+  display: block;
+}
+
+#menu-toc ul.maybe-hide li.active-parent > li
+
+#menu-toc ul li.active {
+  display: block;
+}
+
+#menu-toc li > a {
+  padding-left: 5px;
+}
+
+#menu-toc li.active > a {
+  background-color: $header-highlight;
+  padding: 8px 5px;
+  margin: -8px 0px;
+  // border-left: 3px solid $header-highlight;
+}
+
 // diagram
 
 .diagram {
