@@ -295,37 +295,37 @@ Just as there can be 0 miners win in a round, multiple miners can be elected in 
 
 It is possible for forks to emerge naturally in Expected Consensus. EC relies on weighted chains in order to quickly converge on 'one true chain', with every block adding to the chain's weight. This means the heaviest chain should reflect the most amount of work performed, or in Filecoin's case, the most storage provided.
 
-In short, the weight at each block is equal to its `ParentWeight` plus that block's delta weight.
+In short, the weight at each block is equal to its `ParentWeight` plus that block's delta weight. Details of Filecoin's chain weighting function [are included here](https://observablehq.com/d/3812cd65c054082d).
+
 Delta weight is a term composed of a few elements:
-- A wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).
-- A wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain's power table. 
-- A wBlocksFactor: which adds weight to the chain proportional to the number of blocks mined in a given round. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).
+- wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).
+- wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain's power table.
+- wBlocksFactor: which adds weight to the chain proportional to the number of blocks mined in a given round. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).
 
-We have:
+The weight should be calculated using big integer arithmetic with order of operations defined above. We use brackets instead of parentheses below for legibility. We have:
 
-w[r+1] = w[r] + floor(1000 * (wForkFactor(wPowerFactor[r+1] + wBlocksFactor[r+1])))
+`w[r+1] = w[r] + (wForkFactor[r+1](wPowerFactor[r+1] + wBlocksFactor[r+1]))`
 
-with, for a given tipset ts in round r+1:
+For a given tipset `ts` in round `r+1`, we define:
 
+- wPowerFactor[r+1]  = log2b(totalPowerAtTipset(ts))
 - wBlocksFactor[r+1] = v * |blocksInTipset(ts)| = v * k
-  - with v = vt * log2(totalPowerAtTipset(ts) * vs)/vs
-- wPowerFactor[r+1]  = log2(totalPowerAtTipset(ts))
+  - with v = vt * log2b(totalPowerAtTipset(ts) * vs)/vs
+
+
 Take X -> Bin(eNumberOfBlocksPerRound * numberOfMinersInPowerTable, 1/numberOfMinersInPowerTable), for simplicity, we take:
 X -> Bin(eNumberOfBlocksPerRound * 10,000, 1/10,000). We have:
 - wForkFactor[r+1]   = 1 if |blocksInTipset(ts)| > E[X] - 2*stdDev[X], CDF(X, |blocksInTipset(ts)) otherwise.
 
 with:
+    - log2b(X) = floor(log2(x)), the binary length of X.
     - stdDev[X] = sqrt(eNumberOfBlocksPerRound * (1 - 1/10,000))
     - CDF(X, |blocksInTipset(ts)) = Sum_i=0^k ((10,000* choose i) (1/10,000)^i (9,999/10,000)n- i
 
-CDF(X, k) with
-The weight should be calculated using big integer arithmetic with order of operations defined above. The multiplication by 1,000 and flooring is meant to help generate uniform weights across implementations.
 
 ```sh
 Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
 ```
-
-Details of Filecoin's chain weighting function [are included here](https://observablehq.com/d/3812cd65c054082d).
 
  The exact value for these parameters remain to be determined, but for testing purposes, you may use:
  - `vt = 350`
