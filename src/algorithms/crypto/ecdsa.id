@@ -13,5 +13,5 @@ type ECDSA struct {
 	//    m - a series of bytes representing the signed message
 	//    sig - a series of bytes representing a signature usually `r`|`s`
 	//
-	Recover(m Message, sig SignatureBytes) (pk PublicKey, err error)
+	Recover(m Message, sig SignatureBytes) struct{pk PublicKey, err error}
 }
