@@ -19,7 +19,7 @@ type Block struct {
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
 
-    VerifyTickets()  bool
+    ValidateTickets(pubKey filcrypto.PubKey) bool
 }
 
 type SignedBlock struct {

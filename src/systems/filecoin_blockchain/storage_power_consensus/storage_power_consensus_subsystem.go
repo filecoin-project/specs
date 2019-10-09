@@ -11,7 +11,7 @@ const (
 	SPC_LOOKBACK_TICKET     = 1   // we chain blocks together one after the other
 )
 
-func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Block) error {
+func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Block_I) error {
 
 	// 1. Verify miner has not been slashed and is still valid miner
 	if spc.powerTable().LookupMinerStorage(block.MinerAddress()) <= 0 {
@@ -20,7 +20,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Bloc
 
 	minerPK := spc.StorageMiningSubsystem.GetMinerKeyByAddress(block.MinerAddress())
 	// 2. Verify ParentWeight
-	if block.ParentWeight != spc.computeTipsetWeight(block.ParentTipset()) {
+	if block.ParentWeight() != spc.computeTipsetWeight(block.ParentTipset()) {
 		return spc.StoragePowerConsensusError("invalid parent weight")
 	}
 
@@ -44,7 +44,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Bloc
 	return nil
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset *blockchain.Tipset) base.ChainWeight {
+func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset blockchain.Tipset) base.ChainWeight {
 	panic("TODO")
 }
 

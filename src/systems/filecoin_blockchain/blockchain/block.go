@@ -4,6 +4,7 @@ import (
 	base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 	clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 	util "github.com/filecoin-project/specs/util"
+	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 )
 
 func SmallerBytes(a, b util.Bytes) util.Bytes {
@@ -52,7 +53,7 @@ func ExtractElectionSeed(lookbackTipset *Tipset_I) base.ElectionSeed {
 // 	}
 // }
 
-func (self *Block_I) ValidateTickets() bool {
+func (self *Block_I) ValidateTickets(pubKey filcrypto.PubKey) bool {
 	for _, tix := range self.Tickets_ {
 		panic("TODO")
 		panic(tix)
