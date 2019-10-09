@@ -4,6 +4,7 @@ import (
 	base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 	blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
 	util "github.com/filecoin-project/specs/util"
+	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 )
 
 const (
@@ -18,7 +19,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Bloc
 		return spc.StoragePowerConsensusError("block miner not valid")
 	}
 
-	minerPK := spc.StorageMiningSubsystem.GetMinerKeyByAddress(block.MinerAddress())
+	minerPK := filcrypto.PubKey{} // TODO get the key from the state tree spc.StorageMiningSubsystem.GetMinerKeyByAddress(block.MinerAddress())
 	// 2. Verify ParentWeight
 	if block.ParentWeight() != spc.computeTipsetWeight(block.ParentTipset()) {
 		return spc.StoragePowerConsensusError("invalid parent weight")

@@ -3,10 +3,8 @@ import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
 import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
 import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
-import storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
-    StorageMiningSubsystem storage_mining.StorageMiningSubsystem
     powerTable           PowerTable
     actor                StoragePowerActor
     associatedStateTree  &stateTree.StateTree
