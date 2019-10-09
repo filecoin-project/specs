@@ -713,7 +713,8 @@ ChainBandwidth:
             "parameters": [
               {
                 "name": "cidSize",
-                "description": "The size of a CID in bytes."
+                "description": "The size of a CID.",
+                "type": "bytes"
               }
             ]
           },
@@ -724,12 +725,36 @@ ChainBandwidth:
           }
         },
         {
-          "name": "sle"
+          "name": "sle",
+          "schema": {
+            "description": null,
+            "parameters": [
+              {
+                "name": "vrfProofSize",
+                "description": "The size of a VRF proof.",
+                "type": "bytes"
+              }
+            ]
+          }
         }
       ]
     },
     {
       "name": "Primitives",
+      "schema": {
+        "description": null,
+        "parameters": [
+          {
+            "name": "u64",
+            "description": "The size of a U64, in bytes."
+          },
+          {
+            "name": "varint",
+            "description": "The size of a VarInt.",
+            "type": "bytes"
+          }
+        ]
+      },
       "constraints": {
         "varint": "(== 4)",
         "u64": "(== 8)"
@@ -740,6 +765,41 @@ ChainBandwidth:
           "subsystems": [
             {
               "name": "Size",
+              "schema": {
+                "description": null,
+                "parameters": [
+                  {
+                    "name": "mib",
+                    "description": "The number of bytes in one EiX.",
+                    "type": "bytes"
+                  },
+                  {
+                    "name": "mib",
+                    "description": "The number of bytes in one PiB.",
+                    "type": "bytes"
+                  },
+                  {
+                    "name": "mib",
+                    "description": "The number of bytes in one TiB.",
+                    "type": "bytes"
+                  },
+                  {
+                    "name": "mib",
+                    "description": "The number of bytes in one GiB.",
+                    "type": "bytes"
+                  },
+                  {
+                    "name": "mib",
+                    "description": "The number of bytes in one MiB.",
+                    "type": "bytes"
+                  },
+                  {
+                    "name": "kib",
+                    "description": "The number of bytes in one KiB.",
+                    "type": "bytes"
+                  }
+                ]
+              },
               "constraints": {
                 "kib": "(== 1024)",
                 "mib": "(* 1024 kib)",
@@ -751,6 +811,16 @@ ChainBandwidth:
             },
             {
               "name": "Time",
+              "schema": {
+                "description": null,
+                "parameters": [
+                  {
+                    "name": "yearInSeconds",
+                    "description": "The number of seconds in one year.",
+                    "type": "seconds"
+                  }
+                ]
+              },
               "constraints": {
                 "yearInSeconds.tmp1%": "(* 365.25 24)",
                 "yearInSeconds.tmp2%": "(* year-in-seconds.tmp1% 60)",
@@ -763,6 +833,16 @@ ChainBandwidth:
     },
     {
       "name": "vdfrsa",
+      "schema": {
+        "description": null,
+        "parameters": [
+          {
+            "name": "rsaElement",
+            "description": "The size of an RSA element.",
+            "type": "bytes"
+          }
+        ]
+      },
       "constraints": {
         "rsaElement": "(/ 2048 8)"
       }
@@ -772,12 +852,32 @@ ChainBandwidth:
       "subsystems": [
         {
           "name": "Address",
+          "schema": {
+            "description": null,
+            "parameters": [
+              {
+                "name": "addressSize",
+                "description": "The size of an address.",
+                "type": "bytes"
+              }
+            ]
+          },
           "constraints": {
             "addressSize": "(== cid-size)"
           }
         },
         {
           "name": "Block",
+          "schema": {
+            "description": null,
+            "parameters": [
+              {
+                "name": "blockFramingSize",
+                "description": "The total amount of block framing.",
+                "type": "bytes"
+              }
+            ]
+          },
           "constraints": {
             "blockFramingSize.tmp1%": "(+ block-header-size messages-size)",
             "blockFramingSize": "(+ block-framing-size.tmp1% receipts-size)"
@@ -785,6 +885,21 @@ ChainBandwidth:
           "subsystems": [
             {
               "name": "Messages",
+              "schema": {
+                "description": null,
+                "parameters": [
+                  {
+                    "name": "messagesRootCid",
+                    "description": "Size of the CID of the root merkle tree of the messages.",
+                    "type": "bytes"
+                  },
+                  {
+                    "name": "messagesSize",
+                    "description": "The total size of the messages in a block.",
+                    "type": "bytes"
+                  }
+                ]
+              },
               "constraints": {
                 "messagesSize": "(* messages message-size)",
                 "messagesRootCid": "(== cid-size)"
@@ -792,6 +907,26 @@ ChainBandwidth:
               "subsystems": [
                 {
                   "name": "Message",
+                  "schema": {
+                    "description": null,
+                    "parameters": [
+                      {
+                        "name": "toAddress",
+                        "description": "The size of a message's 'from address'.",
+                        "type": "bytes"
+                      },
+                      {
+                        "name": "toAddress",
+                        "description": "The size of a message's 'to address'.",
+                        "type": "bytes"
+                      },
+                      {
+                        "name": "messageSize",
+                        "description": "The size of a single message.",
+                        "type": "bytes"
+                      }
+                    ]
+                  },
                   "constraints": {
                     "messageSize.tmp1%": "(+ to-address from-address)",
                     "messageSize.tmp2%": "(+ message-size.tmp1% message-nonce)",
@@ -805,18 +940,53 @@ ChainBandwidth:
                   "subsystems": [
                     {
                       "name": "Nonce",
+                      "schema": {
+                        "description": null,
+                        "parameters": [
+                          {
+                            "name": "messageNonce",
+                            "description": "The size of a message's nonce.",
+                            "type": "bytes"
+                          }
+                        ]
+                      },
                       "constraints": {
                         "messageNonce": "(== varint)"
                       }
                     },
                     {
                       "name": "Value",
+                      "schema": {
+                        "description": null,
+                        "parameters": [
+                          {
+                            "name": "value",
+                            "description": "The size of a 'value' element.",
+                            "type": "bytes"
+                          }
+                        ]
+                      },
                       "constraints": {
                         "value": "(== u64)"
                       }
                     },
                     {
                       "name": "Gas",
+                      "schema": {
+                        "description": null,
+                        "parameters": [
+                          {
+                            "name": "gasPrice",
+                            "description": "The size required to represent the gas limit.",
+                            "type": "bytes"
+                          },
+                          {
+                            "name": "gasPrice",
+                            "description": "The size required to represent the gas price.",
+                            "type": "bytes"
+                          }
+                        ]
+                      },
                       "constraints": {
                         "gasPrice": "(== u64)",
                         "gasLimit": "(== u64)"
@@ -824,6 +994,16 @@ ChainBandwidth:
                     },
                     {
                       "name": "ActorMethod",
+                      "schema": {
+                        "description": null,
+                        "parameters": [
+                          {
+                            "name": "actorMethod",
+                            "description": "The size required to represent an actor method.",
+                            "type": "bytes"
+                          }
+                        ]
+                      },
                       "constraints": {
                         "actorMethod": "(== u64)"
                       }
@@ -834,6 +1014,20 @@ ChainBandwidth:
             },
             {
               "name": "Receipts",
+              "schema": {
+                "description": null,
+                "parameters": [
+                  {
+                    "name": "messageReceiptsCid",
+                    "description": "The size of one message receipt's CID.",
+                    "type": "bytes"
+                  },
+                  {
+                    "name": "receiptsSize",
+                    "description": "The total size of all message receipts, in bytes."
+                  }
+                ]
+              },
               "constraints": {
                 "receipts": "(== messages)",
                 "receiptsSize": "(* receipts message-receipt)",
@@ -842,6 +1036,31 @@ ChainBandwidth:
               "subsystems": [
                 {
                   "name": "Receipt",
+                  "schema": {
+                    "description": null,
+                    "parameters": [
+                      {
+                        "name": "gasUsed",
+                        "description": "The size required to represent the amount of gas used by a message.",
+                        "type": "bytes"
+                      },
+                      {
+                        "name": "return",
+                        "description": "The size of a message's return value.",
+                        "type": "bytes"
+                      },
+                      {
+                        "name": "exitCode",
+                        "description": "The size of an exit code.",
+                        "type": "bytes"
+                      },
+                      {
+                        "name": "messageReceipt",
+                        "description": "The size of one message receipt.",
+                        "type": "bytes"
+                      }
+                    ]
+                  },
                   "constraints": {
                     "messageReceipt.tmp1%": "(+ exit-code return)",
                     "messageReceipt": "(+ message-receipt.tmp1% gas-used)",
@@ -1188,7 +1407,31 @@ ChainBandwidth:
               "name": "Randomness"
             },
             {
-              "name": "Parameters"
+              "name": "Parameters",
+              "schema": {
+                "description": null,
+                "parameters": [
+                  {
+                    "name": "postChallengeHours",
+                    "description": "PoSt challenge time (see POST_CHALLENGE_BLOCKS).",
+                    "type": "hours"
+                  },
+                  {
+                    "name": "postChallengeTime",
+                    "description": "PoSt challenge time (see POST_CHALLENGE_BLOCKS).",
+                    "type": "seconds"
+                  },
+                  {
+                    "name": "postChallengeBlocks",
+                    "description": "The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.",
+                    "type": "blocks"
+                  }
+                ]
+              },
+              "constraints": {
+                "postChallengeTime": "(* post-challenge-time.tmp1% 60)",
+                "postChallengeTime.tmp1%": "(* post-challenge-hours 60)"
+              }
             }
           ]
         },
@@ -1197,8 +1440,19 @@ ChainBandwidth:
           "subsystems": [
             {
               "name": "Parameters",
+              "schema": {
+                "description": null,
+                "parameters": [
+                  {
+                    "name": "postProvingPeriod",
+                    "description": "The time interval in which a PoSt has to be submitted",
+                    "type": "blocks"
+                  }
+                ]
+              },
               "constraints": {
-                "postChallenges": "(== online-challenges)"
+                "postChallenges": "(== online-challenges)",
+                "postProvingPeriod": "(/ proving-period-seconds block-time)"
               }
             },
             {

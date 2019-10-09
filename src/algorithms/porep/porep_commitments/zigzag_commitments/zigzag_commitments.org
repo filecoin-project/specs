@@ -1,7 +1,7 @@
 #+TITLE: ZigZag Commitments
 
-#+HUGO_SECTION: algorithms/porep_commitments/zigzag_commitments
-#+HUGO_BASE_DIR: ../../..
+#+HUGO_SECTION: algorithms/porep/porep_commitments/zigzag_commitments
+#+HUGO_BASE_DIR: ../../../..
 #+OPTIONS: author:nil creator:nil timestamp:nil
 
 #+begin_src lisp :exports none
