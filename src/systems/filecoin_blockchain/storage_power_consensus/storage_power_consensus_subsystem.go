@@ -3,16 +3,15 @@ package storage_power_consensus
 import (
 	base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 	blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+	util "github.com/filecoin-project/specs/util"
 )
-
-type Block blockchain.Block
 
 const (
 	SPC_LOOKBACK_RANDOMNESS = 300 // this is EC.K maybe move it there. TODO
 	SPC_LOOKBACK_TICKET     = 1   // we chain blocks together one after the other
 )
 
-func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block Block) error {
+func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Block) error {
 
 	// 1. Verify miner has not been slashed and is still valid miner
 	if spc.powerTable().LookupMinerStorage(block.MinerAddress()) <= 0 {
@@ -45,12 +44,12 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block Block) error {
 	return nil
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset *Tipset) ChainWeight {
+func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset *blockchain.Tipset) base.ChainWeight {
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(string errMsg) StoragePowerConsensusError {
-	return Error(errMsg)
+func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg string) StoragePowerConsensusError {
+	return error(errMsg)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts {
@@ -60,10 +59,10 @@ func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockcha
 	}
 }
 
-func (pt *PowerTable_I) LookupMinerStorage(addr base.Address) UVarint {
+func (pt *PowerTable_I) LookupMinerStorage(addr base.Address) util.UVarint {
 	panic("")
 }
-func (pt *PowerTable_I) LookupMinerPowerFraction(addr base.Address) Float {
+func (pt *PowerTable_I) LookupMinerPowerFraction(addr base.Address) util.Float {
 	panic("")
 }
 func (pt *PowerTable_I) RemovePower(addr base.Address) {
