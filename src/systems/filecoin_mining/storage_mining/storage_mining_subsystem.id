@@ -6,6 +6,7 @@ import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
+import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 // import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 // import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 // import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -17,13 +18,13 @@ type StorageMiningSubsystem struct {
     // Component subsystems
     MinerActor      StorageMinerActor
     SectorIndex     sectoridx.SectorIndexerSubsystem
-    StorageProving  storageproving.StorageProvingSubsystem
+    StorageProving  storage_proving.StorageProvingSubsystem
 
     // Need access to SPC in order to mine a block
     Consensus       spc.StoragePowerConsensusSubsystem
 
     // Need access to the blockchain system in order to query for things in the chain
-    Blockchain      base_blockchain.BlockchainSystem
+    Blockchain      blockchain.BlockchainSubsystem
 
     // TODO: why are these here? remove?
     StartMining()
@@ -43,15 +44,15 @@ type StorageMiningSubsystem struct {
     CommitSectorError()
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    DrawElectionProof(tk blockchain.Randomness, workerKey PrivateKey) base_blockchain.ElectionProof
+    DrawElectionProof(tk blockchain.Randomness, workerKey filcrypto.PrivKey) base_blockchain.ElectionProof
 
     // call by StorageMiningSubsystem itself in BlockProduction
     // use T1 randomness when producing on a tipset
     // use T0 randomness when producing on a null block
-    GenerateNextTicket(seed blockchain.Randomness, workerKey PrivateKey) base_blockchain.Ticket
+    GenerateNextTicket(seed blockchain.Randomness, workerKey filcrypto.PrivKey) base_blockchain.Ticket
 
     // call by BlockChain when a new block is produced
-    OnNewTipset(chain base_blockchain.Chain, epoch base_blockchain.Epoch)
+    OnNewTipset(chain blockchain.Chain, epoch base_blockchain.Epoch)
 
     // call by clock during BlockProduction
     // TODO: define clock better
