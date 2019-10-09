@@ -309,7 +309,8 @@ The weight should be calculated using big integer arithmetic with order of opera
 For a given tipset `ts` in round `r+1`, we define:
 
 - `wPowerFactor[r+1]  = log2b(totalPowerAtTipset(ts))`
-  - with `log2b(X) = floor(log2(x))`, the binary length of X.
+  - with `log2b(X) = floor(log2(x))`, the binary length of X
+    - While it should never be used (given it would mean an empty power table), we define the special case: `log2b(0) = 0`.
 - wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * b / e`
   - with `b = |blocksInTipset(ts)|`
   - `e = expected number of blocks per round in the protocol`
