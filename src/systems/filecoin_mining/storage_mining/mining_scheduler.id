@@ -10,11 +10,11 @@ type SealedSectorSet [Sector]
 type ReplicaID CID
 
 type MiningScheduler struct {
-    getStagedSectors()                                   SectorSet
-    getSealedSectors()                                   SealedSectorSet
-    getFaultySectors()                                   SectorSet
-    getRepairedSectors()                                 SectorSet
-    getExpiredSectors()                                  SectorSet  // same as completedSectors/doneSectors
+    getStagedSectors()    SectorSet
+    getSealedSectors()    SealedSectorSet
+    getFaultySectors()    SectorSet
+    getRepairedSectors()  SectorSet
+    getExpiredSectors()   SectorSet  // same as completedSectors/doneSectors
 
     ProducePost(
         sectors SectorSet
