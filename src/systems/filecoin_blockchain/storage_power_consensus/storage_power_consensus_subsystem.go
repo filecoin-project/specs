@@ -2,6 +2,7 @@ package storage_power_consensus
 
 import (
 	"errors"
+
 	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
@@ -39,9 +40,10 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.BlockHead
 	}
 
 	// and value
-	minerPower := spc.powerTable().LookupMinerPowerFraction(block.MinerAddress())
-	if !block.ElectionProof().IsWinning(minerPower) {
-		return errors.New("election proof was not a winner")
+	minerPower := spc.powerTable().LookupMinerPower(block.MinerAddress())
+	totalPower := spc.powerTable().GetTotalPower()
+	if !block.ElectionProof().IsWinning(float(minerPower) / totalPower) {
+		return spc.StoragePowerConsensusError("election proof was not a winner")
 	}
 
 	return nil
