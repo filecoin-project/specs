@@ -103,6 +103,12 @@ explained in the [RFC Section
   signers into one single signature. That feature allows to drastically save
   space on the blockchain, especially when aggregating user transactions.
 
+**Aggregation Functionality**: The aggregation functionality is commutative and
+associative, enabling to perform *partial* aggregation. For example, given
+`(PK1, sig1), (PK2, sig2), (PK3, sig3)`, one can first aggregate `(PK12 = PK1 +
+PK2, sig12 = sig1 + sig2)` then aggregate with the third tuple to produce
+`(PK123 = PK12 + PK3, sig123 = sig12 + sig3)`.
+
 **Aggregation Security**: The naive BLS signature aggregation scheme is
 vulnerable to rogue-key attacks where the attacker can freely choose its public
 key. To prevent against this class of attacks there exists three different kind
@@ -117,4 +123,9 @@ Filecoin uses aggregation only for aggregating the transaction's signature of a
 block. since Filecoin uses the account model to represent the state of the
 chain, each message for a given signer is used in combination of a nonce to
 avoid replay attacks. As a direct consequence, every transaction's message is
-unique thereby the aggregation is done on distinct messages.
+unique thereby the aggregation is done on distinct messages.  Obviously, the
+**assumption** here is that the block producer **enforces that distinction** and
+the other miners will **check every transactions** to make sure they are valid.
+The validity of a transaction in Filecoin's context implies that the signature
+is correctly formed over the message with the correct nonce.
+

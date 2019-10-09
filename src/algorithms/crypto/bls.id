@@ -6,7 +6,9 @@ type BLS struct {
     // Aggregates this BLS signature and `sig` into one BLS signature that can
     // be verified against the aggregation of the two public key that signed
     // the aggregated signatures.
-    Aggregate(sig2 BLS) BLS
+    Aggregate(sig2 SignatureBytes) SignatureBytes
+
+    VerifyAggregate(messages []Message, aggPk BLSPublicKey, aggSig SignatureBytes) (valid bool, err error)
 }
 
 // BLSPublicKey is a PublicKey with an addition method to aggregate public keys
