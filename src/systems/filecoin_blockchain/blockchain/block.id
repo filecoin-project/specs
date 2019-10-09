@@ -1,5 +1,5 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
@@ -15,11 +15,13 @@ type Block struct {
     MessageReceipts  [base_blockchain.MessageReceipt]
     Timestamp        clock.Time
     BlockSig         filcrypto.Signature
+    ElectionProof    base_blockchain.ElectionProof
 
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
 
-    VerifyTickets()  bool
+    ValidateTickets(pubKey filcrypto.PubKey) bool
+    ExtractElectionSeed() base_blockchain.ElectionSeed
 }
 
 type SignedBlock struct {

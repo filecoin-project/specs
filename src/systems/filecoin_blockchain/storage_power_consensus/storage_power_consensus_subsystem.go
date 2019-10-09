@@ -3,6 +3,8 @@ package storage_power_consensus
 import (
 	base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 	blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+	util "github.com/filecoin-project/specs/util"
+	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 )
 
 const (
@@ -10,50 +12,64 @@ const (
 	SPC_LOOKBACK_TICKET     = 1   // we chain blocks together one after the other
 )
 
-func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block Block) {
+func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Block_I) error {
 
 	// 1. Verify miner has not been slashed and is still valid miner
-	if self.PowerTable.LookupMinerStorage(block.MinerAddress()) <= 0 {
-		return self.StoragePowerConsensusError("block miner not valid")
+	if spc.powerTable().LookupMinerStorage(block.MinerAddress()) <= 0 {
+		return spc.StoragePowerConsensusError("block miner not valid")
 	}
 
-	minerPK := self.StorageMiningSubsystem.GetMinerKeyByAddress(block.MinerAddress())
+	minerPK := filcrypto.PubKey{} // TODO get the key from the state tree spc.StorageMiningSubsystem.GetMinerKeyByAddress(block.MinerAddress())
 	// 2. Verify ParentWeight
-	if block.ParentWeight != self.computeTipsetWeight(block.ParentTipset()) {
-		return self.StoragePowerConsensusError("invalid parent weight")
+	if block.ParentWeight() != spc.computeTipsetWeight(block.ParentTipset()) {
+		return spc.StoragePowerConsensusError("invalid parent weight")
 	}
 
 	// 3. Verify Tickets
 	if !block.ValidateTickets(minerPK) {
-		return self.StoragePowerConsensusError("tickets were invalid")
+		return spc.StoragePowerConsensusError("tickets were invalid")
 	}
 
 	// 4. Verify ElectionProof construction
-	seed := block.ParentTipset().ExtractElectionSeed()
-	if !block.ElectionProof.Validate(seed, minerPK) {
-		return self.StoragePowerConsensusError("election proof was not a valid signature of the last ticket")
+	seed := block.ExtractElectionSeed()
+	if !block.ElectionProof().Verify(seed, minerPK) {
+		return spc.StoragePowerConsensusError("election proof was not a valid signature of the last ticket")
 	}
 
 	// and value
-	minerPower := self.PowerTable.LookupMinerPowerFraction(block.MinerAddress)
-	if !block.ElectionProof.IsWinning(minerPower) {
-		return self.StoragePowerConsensusError("election proof was not a winner")
+	minerPower := spc.powerTable().LookupMinerPowerFraction(block.MinerAddress())
+	if !block.ElectionProof().IsWinning(minerPower) {
+		return spc.StoragePowerConsensusError("election proof was not a winner")
 	}
 
 	return nil
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset *Tipset) ChainWeight {
+func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset blockchain.Tipset) base.ChainWeight {
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(string errMsg) StoragePowerConsensusError {
-	return Error(errMsg)
+func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg string) base.StoragePowerConsensusError {
+	panic("TODO")
+}
+
+func (spc *StoragePowerConsensusSubsystem_I) TicketAtEpoch(chain blockchain.Chain, epoch base.Epoch) base.Ticket {
+	panic("TODO")
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts {
-	return base.ElectionArtifacts{
-		TK: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_RANDOMNESS),
-		T1: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_TICKET),
+	return &base.ElectionArtifacts_I{
+		TK_: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_RANDOMNESS),
+		T1_: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_TICKET),
 	}
+}
+
+func (pt *PowerTable_I) LookupMinerStorage(addr base.Address) util.UVarint {
+	panic("")
+}
+func (pt *PowerTable_I) LookupMinerPowerFraction(addr base.Address) base.PowerFraction {
+	panic("")
+}
+func (pt *PowerTable_I) RemovePower(addr base.Address) {
+	panic("")
 }

@@ -1,1 +1,3 @@
-
+type PoStProof struct {}
+type SealSeed struct {}
+type PoStChallenge struct {}
