@@ -14,8 +14,7 @@ func SmallerBytes(a, b util.Bytes) util.Bytes {
 	return a
 }
 
-func ExtractElectionSeed(lookbackTipset *Tipset_I) base.ElectionSeed {
-
+func (block *Block_I) ExtractElectionSeed () base.ElectionSeed {
 	panic("TODO")
 	// var ret []byte
 

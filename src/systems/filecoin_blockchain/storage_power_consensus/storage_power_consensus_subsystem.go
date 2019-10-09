@@ -30,13 +30,13 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Bloc
 	}
 
 	// 4. Verify ElectionProof construction
-	seed := block.ParentTipset().ExtractElectionSeed()
-	if !block.ElectionProof.Validate(seed, minerPK) {
+	seed := block.ExtractElectionSeed()
+	if !block.ElectionProof().Verify(seed, minerPK) {
 		return spc.StoragePowerConsensusError("election proof was not a valid signature of the last ticket")
 	}
 
 	// and value
-	minerPower := spc.PowerTable.LookupMinerPowerFraction(block.MinerAddress)
+	minerPower := spc.powerTable().LookupMinerPowerFraction(block.MinerAddress)
 	if !block.ElectionProof.IsWinning(minerPower) {
 		return spc.StoragePowerConsensusError("election proof was not a winner")
 	}

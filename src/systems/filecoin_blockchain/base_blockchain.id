@@ -11,14 +11,15 @@ type Ticket struct {
     Validate()        bool
 }
 
+type ElectionSeed filcrypto.VDFResult
+
 type ElectionProof struct {
     vrfResult filcrypto.VRFResult
     IsWinning(minerPower PowerFraction) bool @(cached)
 
     ValidateSyntax() bool
+    Verify (seed ElectionSeed, minerPK filcrypto.PubKey) bool
 }
-
-type ElectionSeed filcrypto.VDFResult
 
 type ChainWeight UVarint
 type ChainHeight UVarint
