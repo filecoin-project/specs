@@ -21,3 +21,5 @@
 - Documentation
   - [x] codeGen Usage, -h output
   - [ ] codeGen tool Readme
+- Tests
+  - [ ] run test suite before committing codeGen changes
