@@ -1,10 +1,10 @@
 package storage_power_consensus
 
 import (
+	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 	base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 	blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
 	util "github.com/filecoin-project/specs/util"
-	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 )
 
 const (

@@ -1,3 +1,8 @@
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
+import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+
 type Seed struct {}
 type SectorCommitment struct {}
 
@@ -11,14 +16,17 @@ type StorageMinerActor struct {
     // info &MinerInfo
 
     UpdateDoneSet()
-    UpdateSectorStatus(sectorStateSets SectorStateSets, faultSets [FaultSet])
-    SubmitPoSt(postProof base.PoStProof, sectorStateSets SectorStateSets)
+    UpdateSectorStatus(sectorStateSets sector.SectorStateSets)
+    SubmitPoSt(
+        postProof        base_mining.PoStProof
+        sectorStateSets  sector.SectorStateSets
+    )
     computeProvingPeriodEndSectorState()
     CommitSector(
         seed            Seed
-        sector          SectorID
-        sealCommitment  SealCommitment
-        sealProof       SealProof
+        sector          sector.SectorID
+        sealCommitment  base_mining.SealCommitment
+        sealProof       sector.SealProof
     )
 }
 
@@ -26,16 +34,16 @@ type MinerInfo struct {
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
-    owner       Address
+    owner       address.Address
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
-    worker      Address
+    worker      address.Address
 
     // Libp2p identity that should be used when connecting to this miner.
-    peerId      PeerId
+    peerId      libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
     sectorSize  BytesAmount
@@ -60,7 +68,7 @@ type TokenAmount UVarint # What are the units? Attofil?
 
 type MinedSector {
     SectorID           UInt
-    CommR              Commitment
+    CommR              sector.Commitment
     FaultStatus(Epoch) Fault
 }
 
@@ -121,8 +129,8 @@ ype StorageMinerActor struct {
   verifyPoSt(proofs base.PoStProof, doneSet Bitfield)
 
   // Getters
-  GetOwner() Address
-  GetWorkerAddr() Address
+  GetOwner() address.Address
+  GetWorkerAddr() address.Address
   GetPower() BytesAmount
   GetPeerID() PeerID
   GetSectorSize() BytesAmount
@@ -141,7 +149,7 @@ ype StorageMinerActor struct {
   IsSlashed() (bool)
 
   UpdatePeerID(pid PeerID)
-  ChangeWorker(addr Address)
+  ChangeWorker(addr address.Address)
 
   PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
   PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)
