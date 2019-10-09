@@ -2,6 +2,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import util "github.com/filecoin-project/specs/util"
 
 type Seed struct {}
 type SectorCommitment struct {}
@@ -46,7 +47,7 @@ type MinerInfo struct {
     peerId      libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    sectorSize  BytesAmount
+    sectorSize  util.BytesAmount
 }
 
 /*
