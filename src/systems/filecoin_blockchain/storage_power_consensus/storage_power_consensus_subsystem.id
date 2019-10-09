@@ -18,7 +18,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     GetPoStChallenge(chain blockchain.Chain, epoch base.Epoch) base_mining.PoStChallenge
 
     // call by BlockchainSubsystem during block reception
-    ValidateBlock(block blockchain.Block) StoragePowerConsensusError
+    ValidateBlock(block blockchain.Block) base.StoragePowerConsensusError
 
     // call by StorageMiningSubsystem during block production
     GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts
@@ -29,7 +29,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by StorageMiningSubsystem during block production
     TryLeaderElection(electionProof base.ElectionProof) bool
 
-    StoragePowerConsensusError() StoragePowerConsensusError
+    StoragePowerConsensusError() base.StoragePowerConsensusError
 
     computeTipsetWeight(tipset blockchain.Tipset) base.ChainWeight
 }
@@ -38,7 +38,7 @@ type PowerTable struct {
     // all power here is always verified
     minerPower {base.Address: StorageMiner}
     LookupMinerStorage(addr base.Address) UVarint
-    LookupMinerPowerFraction(addr base.Address) Float
+    LookupMinerPowerFraction(addr base.Address) base.PowerFraction
     RemovePower(addr base.Address)
 }
 
@@ -49,4 +49,3 @@ type StorageMiner struct {
 }
 
 type minerStorage UVarint
-type StoragePowerConsensusError error

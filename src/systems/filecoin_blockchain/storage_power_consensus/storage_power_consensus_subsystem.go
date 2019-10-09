@@ -36,8 +36,8 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Bloc
 	}
 
 	// and value
-	minerPower := spc.powerTable().LookupMinerPowerFraction(block.MinerAddress)
-	if !block.ElectionProof.IsWinning(minerPower) {
+	minerPower := spc.powerTable().LookupMinerPowerFraction(block.MinerAddress())
+	if !block.ElectionProof().IsWinning(minerPower) {
 		return spc.StoragePowerConsensusError("election proof was not a winner")
 	}
 
@@ -48,8 +48,8 @@ func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset blockcha
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg string) StoragePowerConsensusError {
-	return error(errMsg)
+func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg string) base.StoragePowerConsensusError {
+	panic("TODO")
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts {
@@ -62,7 +62,7 @@ func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockcha
 func (pt *PowerTable_I) LookupMinerStorage(addr base.Address) util.UVarint {
 	panic("")
 }
-func (pt *PowerTable_I) LookupMinerPowerFraction(addr base.Address) util.Float {
+func (pt *PowerTable_I) LookupMinerPowerFraction(addr base.Address) base.PowerFraction {
 	panic("")
 }
 func (pt *PowerTable_I) RemovePower(addr base.Address) {
