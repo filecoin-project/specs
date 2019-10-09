@@ -12,6 +12,5 @@ type VRFKeyPair struct {
 type VRFResult struct {
     Output Bytes @(internal)
 
-    Verify(input Bytes, pk PublicKey) bool
-    ValidateSyntax() bool
+    Verify(input Bytes, pk PublicKey) struct { valid bool, err error }
 }

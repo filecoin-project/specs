@@ -21,3 +21,5 @@ the hash function. The algorithm is simple:
 ```
 VRFOutput = Blake2b-256(BLSSignature)
 ```
+
+TODO: explain security rationale
