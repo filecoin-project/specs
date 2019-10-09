@@ -1,9 +1,18 @@
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
-import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
 
 type Epoch UVarint
 type SectorID struct {}
 type Randomness struct {}
+
+type Booting struct {}
+type CatchingUp struct {}
+type Synchronized struct {}
+type SyncState union {
+    Booting
+    CatchingUp
+    Synchronized
+}
 
 type BlockchainSubsystem struct @(mutable) {
     Clock              &clock.WallClock
@@ -18,11 +27,7 @@ type BlockchainSubsystem struct @(mutable) {
     NewBestTipset()
 
     // validateBlockSemantics(Block)
-    SyncState() union {
-        Booting
-        CatchingUp
-        Synchronized
-    }
+    SyncState() SyncState
 
     // time of round cutoff time for accepting new blocks
     epochCutoffTime() clock.Time
