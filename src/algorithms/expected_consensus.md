@@ -308,7 +308,7 @@ The weight should be calculated using big integer arithmetic with order of opera
 
 For a given tipset `ts` in round `r+1`, we define:
 
-- `wPowerFactor[r+1]  = log2b(totalPowerAtTipset(ts))`
+- `wPowerFactor[r+1]  = `
   - with `log2b(X) = floor(log2(x)) = (binary length of X) - 1`
     - We define the special case: `log2b(0) = 0`. Note that it should never be used (given it would mean an empty power table.
 - wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * b / e`
@@ -316,7 +316,11 @@ For a given tipset `ts` in round `r+1`, we define:
   - `e = expected number of blocks per round in the protocol`
   - and `wRatio in ]0, 1[`
 Thus, for stability of weight across implementations, we take:
-- wBlocksFactor[r+1] =  `(wPowerFactor[r+1] * b * wRatio_num * 2^8) / (e * wRatio_den)`
+- wBlocksFactor[r+1] =  `(wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
+
+We get:
+- `w[r+1] = w[r] + log2b(totalPowerAtTipset(ts)) * 2^8 + (log2b(totalPowerAtTipset(ts)) * len(ts.blocks) * wRatio_num * 2^8) / (e * wRatio_den)`
+ Using the 2^8 here to prevent precision loss ahead of the division in the wBlocksFactor.
 
  The exact value for these parameters remain to be determined, but for testing purposes, you may use:
  - `e = 5`
