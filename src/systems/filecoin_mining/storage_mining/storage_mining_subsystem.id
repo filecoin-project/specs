@@ -1,10 +1,10 @@
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 import crypto "github.com/filecoin-project/specs/libraries/filcrypto"
+// import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+// import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
+// import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StorageMiningSubsystem struct {
     // TODO: constructor
