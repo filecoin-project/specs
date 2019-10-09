@@ -52,6 +52,10 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
+func (spc *StoragePowerConsensusSubsystem_I) TicketAtEpoch(chain blockchain.Chain, epoch base.Epoch) base.Ticket {
+	panic("TODO")
+}
+
 func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts {
 	return &base.ElectionArtifacts_I{
 		TK_: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_RANDOMNESS),
