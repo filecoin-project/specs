@@ -7,6 +7,7 @@ import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_block
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
 // import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 // import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 // import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -16,29 +17,34 @@ type StorageMiningSubsystem struct {
     // InitStorageMiningSubsystem() struct{}
 
     // Component subsystems
-    MinerActor      StorageMinerActor
-    SectorIndex     sectoridx.SectorIndexerSubsystem
-    StorageProving  storage_proving.StorageProvingSubsystem
+    StorageMinerActor  spc.StoragePowerActor
+    MinerActor         StorageMinerActor
+    SectorIndex        sectoridx.SectorIndexerSubsystem
+    StorageProving     storage_proving.StorageProvingSubsystem
 
     // Need access to SPC in order to mine a block
-    Consensus       spc.StoragePowerConsensusSubsystem
+    Consensus          spc.StoragePowerConsensusSubsystem
 
     // Need access to the blockchain system in order to query for things in the chain
-    Blockchain      blockchain.BlockchainSubsystem
+    Blockchain         blockchain.BlockchainSubsystem
 
     // TODO: why are these here? remove?
     StartMining()
     StopMining()
 
     // call by StorageMiningSubsystem itself to create miner
-    createMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, pledgeAmt actor.TokenAmount)
+    createMiner(
+        ownerPubKey   filcrypto.PubKey
+        workerPubKey  filcrypto.PubKey
+        pledgeAmt     actor.TokenAmount
+    )
 
     // get miner key by address
     GetMinerKeyByAddress(addr address.Address) filcrypto.PubKey
 
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer
-    HandleStorageDeal(deal base_markets.StorageDeal)
+    HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID)
 
     // call by StorageMinerActor when error in sealing
     CommitSectorError()
@@ -52,9 +58,13 @@ type StorageMiningSubsystem struct {
     GenerateNextTicket(seed blockchain.Randomness, workerKey filcrypto.PrivKey) base_blockchain.Ticket
 
     // call by BlockChain when a new block is produced
-    OnNewTipset(chain blockchain.Chain, epoch base_blockchain.Epoch)
+    OnNewTipset(
+        chain   blockchain.Chain
+        epoch   base_blockchain.Epoch
+        tipset  blockchain.Tipset
+    )
 
     // call by clock during BlockProduction
     // TODO: define clock better
-    OnNewRound() base_blockchain.ElectionArtifacts
+    OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts
 }
