@@ -129,7 +129,7 @@ hugo-src: $(shell find src | grep '.md') hugo/data/version.yml
 	rm -rf hugo/content/docs
 	cp -r src hugo/content/docs
 	# ox-hugo exports to src/content, so we need to copy that also.
-	cp -r src/content/ hugo/content/docs
+	cp -R src/content/ hugo/content/docs
 	mkdir -p hugo/content/ox-hugo
 	cp src/static/ox-hugo/* hugo/content/ox-hugo
 
@@ -245,7 +245,7 @@ watch-code: .PHONY
 
 DOTs=$(shell find src -name '*.dot')
 MMDs=$(shell find src -name '*.mmd')
-SVGs=$(DOTs:%=%.svg) $(MMDs:%=%.svg)
+SVGs=$(DOTs:%=%.svg) #$(MMDs:%=%.svg)
 
 diagrams: ${SVGs}
 

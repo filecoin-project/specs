@@ -1,6 +1,6 @@
 #+TITLE: PoSt Parameters
-#+HUGO_SECTION: algorithms
-#+HUGO_BASE_DIR: ../../src
+#+HUGO_SECTION: algorithms/post
+#+HUGO_BASE_DIR: ../../
 
 This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
 
@@ -13,9 +13,9 @@ This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used
 : #<PACKAGE "ORIENT.LANG">
 
 #+begin_src lisp :package orient.lang :exports none
-(defparameter *filecoin* (get-system "../orient/filecoin.orient"))
-(defparameter *input* (interface:get-json-relation-list "../orient/params.json"))
-(defparameter *multi-input* (interface:get-json-relation-list "../orient/multi-params.json"))
+(defparameter *filecoin* (get-system "../../orient/filecoin.orient"))
+(defparameter *input* (interface:get-json-relation-list "../../orient/params.json"))
+(defparameter *multi-input* (interface:get-json-relation-list "../../orient/multi-params.json"))
 #+end_src
 
 #+RESULTS:
