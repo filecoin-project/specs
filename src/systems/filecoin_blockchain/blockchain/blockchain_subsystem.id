@@ -27,10 +27,10 @@ type BlockchainSubsystem struct @(mutable) {
     NewBestTipset()
 
     // validateBlockSemantics(Block)
-    SyncState() SyncState
+    SyncState()        SyncState
 
     // time of round cutoff time for accepting new blocks
-    epochCutoffTime() clock.Time
+    epochCutoffTime()  clock.Time
 
     // call by StorageClient in StorageDealMake
     VerifySectorExists(sectorId SectorID) bool

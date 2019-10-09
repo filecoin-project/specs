@@ -18,7 +18,7 @@ type ElectionProof struct {
     IsWinning(minerPower PowerFraction) bool @(cached)
 
     ValidateSyntax() bool
-    Verify (seed ElectionSeed, minerPK filcrypto.PubKey) bool
+    Verify(seed ElectionSeed, minerPK filcrypto.PubKey) bool
 }
 
 type ChainWeight UVarint

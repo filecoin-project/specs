@@ -21,7 +21,7 @@ type Block struct {
     //	ComputeUnsignedFingerprint() []
 
     ValidateTickets(pubKey filcrypto.PubKey) bool
-    ExtractElectionSeed () base_blockchain.ElectionSeed
+    ExtractElectionSeed() base_blockchain.ElectionSeed
 }
 
 type SignedBlock struct {
