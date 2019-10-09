@@ -12,10 +12,10 @@ const (
 	SPC_LOOKBACK_TICKET     = 1   // we chain blocks together one after the other
 )
 
-func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block Block) {
+func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block Block) error {
 
 	// 1. Verify miner has not been slashed and is still valid miner
-	if spc.powerTable.LookupMinerStorage(block.MinerAddress()) <= 0 {
+	if spc.powerTable().LookupMinerStorage(block.MinerAddress()) <= 0 {
 		return spc.StoragePowerConsensusError("block miner not valid")
 	}
 
