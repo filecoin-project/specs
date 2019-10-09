@@ -53,9 +53,9 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts {
-	return base.ElectionArtifacts{
-		TK: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_RANDOMNESS),
-		T1: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_TICKET),
+	return &base.ElectionArtifacts_I{
+		TK_: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_RANDOMNESS),
+		T1_: spc.TicketAtEpoch(chain, epoch-SPC_LOOKBACK_TICKET),
 	}
 }
 
