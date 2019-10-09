@@ -8,29 +8,20 @@ import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 // import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
-func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, pledgeAmt actor.TokenAmount) StorageMinerActor {
+func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, pledgeAmt actor.TokenAmount) address.Address {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)
 	return sms.StoragePowerActor().RegisterMiner(ownerAddr, workerPubKey)
 }
 
-type StorageDealStagedNotification = struct {
-	Deal     base_markets.StorageDeal
-	PieceRef ipld.CID
-	// Pip      PieceInclusionProof
-	SectorID sector.SectorID
-}
-
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {
-	AddDealToSectorResponse := sms.SectorIndex().AddDealToSector(deal)
-	storageProvider.NotifyStorageDealStaged(StorageDealStagedNotification{
+	AddDealToSectorResponse := sms.SectorIndex().AddNewDeal(deal)
+	sms.StorageProvider().NotifyStorageDealStaged(StorageDealStagedNotification{
 		Deal:     deal,
 		PieceRef: pieceRef,
-		Pip:      AddDealToSectorResponse.pip,
 		SectorID: AddDealToSectorResponse.sectorID,
 	})
 }
@@ -74,5 +65,9 @@ func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk base_blockchain.Ticket
 }
 
 func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 base_blockchain.Ticket, workerKey filcrypto.PrivKey) base_blockchain.Ticket {
+	panic("TODO")
+}
+
+func (sp *StorageProvider) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
 	panic("TODO")
 }
