@@ -304,32 +304,26 @@ Delta weight is a term composed of a few elements:
 
 The weight should be calculated using big integer arithmetic with order of operations defined above. We use brackets instead of parentheses below for legibility. We have:
 
-`w[r+1] = w[r] + (wForkFactor[r+1](wPowerFactor[r+1] + wBlocksFactor[r+1]))`
+`w[r+1] = w[r] + wPowerFactor[r+1] + wBlocksFactor[r+1]`
 
 For a given tipset `ts` in round `r+1`, we define:
 
-- wPowerFactor[r+1]  = log2b(totalPowerAtTipset(ts))
-- wBlocksFactor[r+1] = v * |blocksInTipset(ts)| = v * k
-  - with v = vt * log2b(totalPowerAtTipset(ts) * vs)/vs
+- `wPowerFactor[r+1]  = log2b(totalPowerAtTipset(ts))`
+  - with `log2b(X) = floor(log2(x))`, the binary length of X.
+- wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * b / e`
+  - with `b = |blocksInTipset(ts)|`
+  - `e = expected number of blocks per round in the protocol`
+  - and `wRatio in ]0, 1[`
+Thus, for stability of weight across implementations, we take:
+- wBlocksFactor[r+1] =  `(wPowerFactor[r+1] * b * wRatio_num * 2^8) / (e * wRatio_den)`
 
-
-Take X -> Bin(eNumberOfBlocksPerRound * numberOfMinersInPowerTable, 1/numberOfMinersInPowerTable), for simplicity, we take:
-X -> Bin(eNumberOfBlocksPerRound * 10,000, 1/10,000). We have:
-- wForkFactor[r+1]   = 1 if |blocksInTipset(ts)| > E[X] - 2*stdDev[X], CDF(X, |blocksInTipset(ts)) otherwise.
-
-with:
-    - log2b(X) = floor(log2(x)), the binary length of X.
-    - stdDev[X] = sqrt(eNumberOfBlocksPerRound * (1 - 1/10,000))
-    - CDF(X, |blocksInTipset(ts)) = Sum_i=0^k ((10,000* choose i) (1/10,000)^i (9,999/10,000)n- i
-
+ The exact value for these parameters remain to be determined, but for testing purposes, you may use:
+ - `e = 5`
+ - `wRatio = .5, or wRatio_num = 1, wRatio_den = 2`
 
 ```sh
 Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
 ```
-
- The exact value for these parameters remain to be determined, but for testing purposes, you may use:
- - `vt = 350`
- - `vs = E-5`
 
 `ParentWeight` is the aggregate chain weight of a given block's parent set. It is calculated as
 the `ParentWeight` of any of its parent blocks (all blocks in a given Tipset should have
