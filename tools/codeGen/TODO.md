@@ -5,6 +5,8 @@
   - [x] type def not generated if one of the dependency types is not found in same file
     - sectorset test.
     - update: this seems to be fixed?
+  - [ ] cannot have `struct{ cid CID }` because there's an implicit `cid` field.
+  - [ ] cannot have `interface{}` parameters or returns
 - Parsing rules
   - [ ] looks like a function invocation can be split across lines. doing so removes the commas (at least in the fmt output)
     - we should keep commas, not doing so is error prone IMO.

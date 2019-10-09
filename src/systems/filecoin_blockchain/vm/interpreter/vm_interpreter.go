@@ -12,7 +12,7 @@ type Bytes struct{}
 
 type InvocationInput struct {
 	InTree    st.StateTree
-	VMContext runtime.VMContext
+	Runtime   runtime.Runtime
 	FromActor actor.Actor
 	ToActor   actor.Actor
 	Method    actor.MethodNum
@@ -78,7 +78,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, msg msg.Message, m
 	// (ie, include account creation, gas accounting itself)
 	out := invocationMethodDispatch(InvocationInput{
 		InTree:    compTree,
-		VMContext: makeVMContext(compTree, msg),
+		Runtime:   makeRuntime(compTree, msg),
 		FromActor: fromActor,
 		ToActor:   toActor,
 		Method:    msg.Method,

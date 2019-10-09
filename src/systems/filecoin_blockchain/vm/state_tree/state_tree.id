@@ -1,6 +1,11 @@
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
 
+// Epoch is an epoch in time in the StateTree.
+// It corresponds to rounds in the blockchain, but it
+// is defined here as actors need a notion of time.
+type Epoch UVarint
+
 // TODO: move this into a directory w/ all the actors + states
 type ActorName enum {
     StoragePowerActor
