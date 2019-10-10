@@ -1,29 +1,37 @@
-type TokenAmount UVarint
+import util "github.com/filecoin-project/specs/util"
+import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+
 type TxSeqNo UVarint
 type NumRequired UVarint
 type EpochDuration UVarint
 type Epoch UVarint
 
 type MultisigActor struct {
-    signers         [Address]
+    signers         [address.Address]
     required        NumRequired
     nextTxId        TxSeqNo
-    initialBalance  TokenAmount
+    initialBalance  actor.TokenAmount
     startingBlock   Epoch
     unlockDuration  EpochDuration
-    transactions    {TxSeqNo: Transaction}
+    // transactions    {TxSeqNo: Transaction} // TODO Transaction type does not exist
 
     Construct(
-        signers         [Address]
+        signers         [address.Address]
         required        NumRequired
         unlockDuration  EpochDuration
     )
-    Propose(to Address, value TokenAmount, method String, params Bytes) TxSeqNo
+    Propose(
+        to      address.Address
+        value   actor.TokenAmount
+        method  util.String
+        params  Bytes
+    ) TxSeqNo
     Approve(txid TxSeqNo)
     Cancel(txid TxSeqNo)
     ClearCompleted()
-    AddSigner(signer Address, increaseReq bool)
-    RemoveSigner(signer Address, decreaseReq bool)
-    SwapSigner(old Address, new Address)
+    AddSigner(signer address.Address, increaseReq bool)
+    RemoveSigner(signer address.Address, decreaseReq bool)
+    SwapSigner(old address.Address, new address.Address)
     ChangeRequirement(req NumRequired)
 }

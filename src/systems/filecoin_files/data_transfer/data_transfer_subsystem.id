@@ -51,6 +51,10 @@ type DataTransferType union {
     Recipient
 }
 
+type Ongoing struct {}
+type Completed struct {}
+type Failed struct {}
+type ChannelNotFoundError struct {}
 type DataTransferStatus union {
     Ongoing
     Completed
