@@ -54,7 +54,7 @@ func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) bas
 	if sms.Consensus().TryLeaderElection(EP) {
 		// TODO: move this into SPC or Blockchain
 		// SMS should probably not have ability to call BlockProducer directly.
-		BlockProducer.GenerateBlock(EP, ea.T0(), sms.CurrentTipset, workerKey)
+		sms.BlockProducer().GenerateBlock(EP, ea.T0(), sms.CurrentTipset(), workerKey)
 	} else {
 		// TODO when not elected
 	}
