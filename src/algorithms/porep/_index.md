@@ -1,8 +1,9 @@
 ---
 title: Proof-of-Replication
 entries:
-- zigzag
+- stacked_drg
 - porep_commitments
+- stacked_drg_circuit
 ---
 
 See [Filecoin Paper](https://filecoin.io/filecoin.pdf)
