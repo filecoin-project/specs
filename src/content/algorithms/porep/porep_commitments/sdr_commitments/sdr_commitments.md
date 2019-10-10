@@ -127,7 +127,7 @@ where \\(l\\) indexes layers, and \\(i\\) indexes labels or columns.
 
     Concatenate and hash rows of column \\(i\\) to construct \\(O\_i\\).
 
-    Column hash \\(C\_i = H(e\_i^{(1)} || e\_i^{(2)} || … || e\_i^{(L-1)})\\).
+    Column hash \\(C\_i = H(e\_i^{(1)} || e\_i^{(2)} || … || e\_i^{(L)})\\).
 
 -    Vector Commitment
 

@@ -255,7 +255,7 @@ $^{*}$ Indicates labels which must be hashed for column commitments but need not
 
 Concatenate and hash rows of column $i$ to construct $O_i$.
 
-Column hash $C_i = H(e_i^{(1)} || e_i^{(2)} || … || e_i^{(L-1)})$.
+Column hash $C_i = H(e_i^{(1)} || e_i^{(2)} || … || e_i^{(L)})$.
 
 *** Vector Commitment
 
