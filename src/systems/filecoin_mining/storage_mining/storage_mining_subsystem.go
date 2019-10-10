@@ -70,6 +70,7 @@ func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 base_blockchain.Ticke
 	panic("TODO")
 }
 
+// TODO this should be moved into storage market
 func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
 	panic("TODO")
 }

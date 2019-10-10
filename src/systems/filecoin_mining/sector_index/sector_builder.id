@@ -8,7 +8,7 @@ import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 // will return a sector.
 
 type StageDealResponse struct {
-  SectorID sector.SectorID
+    SectorID sector.SectorID
 }
 
 type SectorBuilder struct {

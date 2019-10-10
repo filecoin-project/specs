@@ -19,6 +19,7 @@ type StorageDealStagedNotification struct {
     SectorID  sector.SectorID
 }
 
+// TODO this should be moved into storage market
 type StorageProvider struct {
     NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification)
 }
@@ -33,7 +34,7 @@ type StorageMiningSubsystem struct {
     MinerActor         StorageMinerActor
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
-    BlockProducer blockchain.BlockProducer
+    BlockProducer      blockchain.BlockProducer
 
     // Need access to SPC in order to mine a block
     Consensus          spc.StoragePowerConsensusSubsystem
