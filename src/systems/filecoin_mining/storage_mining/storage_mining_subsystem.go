@@ -41,8 +41,8 @@ func (sms *StorageMiningSubsystem_I) OnNewTipset(chain blockchain.Chain, epoch b
 }
 
 func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts {
-	ea := base_blockchain.ElectionArtifacts(sms.CurrentChain, sms.CurrentEpoch)
-	EP := sms.DrawElectionProof(ea.TK, sms.workerPrivateKey)
+	ea := sms.Consensus().GetElectionArtifacts(sms.CurrentChain, sms.CurrentEpoch)
+	EP := sms.DrawElectionProof(ea.TK(), sms.workerPrivateKey)
 
 	panic("TODO: fix this below")
 	// if newTipset {
@@ -54,7 +54,7 @@ func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) bas
 	if sms.Consensus().TryLeaderElection(EP) {
 		// TODO: move this into SPC or Blockchain
 		// SMS should probably not have ability to call BlockProducer directly.
-		BlockProducer.GenerateBlock(EP, T0, sms.CurrentTipset, workerKey)
+		BlockProducer.GenerateBlock(EP, ea.T0(), sms.CurrentTipset, workerKey)
 	} else {
 		// TODO when not elected
 	}
