@@ -1,55 +1,82 @@
-import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import crypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+// import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+// import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
+// import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+type StorageDealStagedNotification struct {
+    Deal      base_markets.StorageDeal
+    PieceRef  ipld.CID
+    SectorID  sector.SectorID
+}
+
+type StorageProvider struct {
+    NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification)
+}
 
 type StorageMiningSubsystem struct {
     // TODO: constructor
     // InitStorageMiningSubsystem() struct{}
 
     // Component subsystems
-    MinerActor      StorageMinerActor
-    SectorIndex     sectoridx.SectorIndexerSubsystem
-    StorageProving  storageproving.StorageProvingSubsystem
+    StorageProvider
+    StoragePowerActor  spc.StoragePowerActor
+    MinerActor         StorageMinerActor
+    SectorIndex        sectoridx.SectorIndexerSubsystem
+    StorageProving     storage_proving.StorageProvingSubsystem
 
     // Need access to SPC in order to mine a block
-    Consensus       spc.StoragePowerConsensusSubsystem
+    Consensus          spc.StoragePowerConsensusSubsystem
 
     // Need access to the blockchain system in order to query for things in the chain
-    Blockchain      blockchain.BlockchainSystem
+    Blockchain         blockchain.BlockchainSubsystem
 
     // TODO: why are these here? remove?
     StartMining()
     StopMining()
 
     // call by StorageMiningSubsystem itself to create miner
-    createMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount)
+    createMiner(
+        ownerPubKey   filcrypto.PubKey
+        workerPubKey  filcrypto.PubKey
+        pledgeAmt     actor.TokenAmount
+    )
 
     // get miner key by address
-    GetMinerKeyByAddress(addr Address) crypto.PubKey
+    GetMinerKeyByAddress(addr address.Address) filcrypto.PubKey
 
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer
-    HandleStorageDeal(deal StorageDeal)
+    HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID)
 
     // call by StorageMinerActor when error in sealing
     CommitSectorError()
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    DrawElectionProof(tk Randomness, workerKey PrivateKey) ElectionProof
+    DrawElectionProof(tk blockchain.Randomness, workerKey filcrypto.PrivKey) base_blockchain.ElectionProof
 
     // call by StorageMiningSubsystem itself in BlockProduction
     // use T1 randomness when producing on a tipset
     // use T0 randomness when producing on a null block
-    GenerateNextTicket(seed Randomness, workerKey PrivateKey) Ticket
+    GenerateNextTicket(seed blockchain.Randomness, workerKey filcrypto.PrivKey) base_blockchain.Ticket
 
     // call by BlockChain when a new block is produced
-    OnNewTipset(chain Chain, epoch Epoch)
+    OnNewTipset(
+        chain   blockchain.Chain
+        epoch   base_blockchain.Epoch
+        tipset  blockchain.Tipset
+    )
 
     // call by clock during BlockProduction
     // TODO: define clock better
-    OnNewRound() ElectionArtifacts
+    OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts
 }

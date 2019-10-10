@@ -3,6 +3,7 @@ type VRFSecretKey Bytes
 type SigPublicKey Bytes
 type SigSecretKey Bytes
 type PubKey Bytes
+type PrivKey Bytes  // TODO merge it into SigSecretKey
 
 type VRFKeyPair struct {
     PublicKey              VRFPublicKey
