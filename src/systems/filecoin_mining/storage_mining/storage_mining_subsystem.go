@@ -18,11 +18,11 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, w
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {
-	AddDealToSectorResponse := sms.SectorIndex().AddNewDeal(deal)
-	sms.StorageProvider().NotifyStorageDealStaged(StorageDealStagedNotification{
-		Deal:     deal,
-		PieceRef: pieceRef,
-		SectorID: AddDealToSectorResponse.sectorID,
+	stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
+	sms.StorageProvider().NotifyStorageDealStaged(&StorageDealStagedNotification_I{
+		Deal_:     deal,
+		PieceRef_: pieceRef,
+		SectorID_: stagedDealResponse.SectorID(),
 	})
 }
 

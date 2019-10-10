@@ -7,7 +7,7 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
-func (sis *SectorIndexerSubsystem_I) AddNewDeal(deal mkt.StorageDeal) error {
+func (sis *SectorIndexerSubsystem_I) AddNewDeal(deal mkt.StorageDeal) StageDealResponse {
 	return sis.Builder().StageDeal(deal)
 }
 

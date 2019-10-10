@@ -20,7 +20,7 @@ type SectorIndexerSubsystem struct {
     // AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
     // has made a deal. AddNewDeal returns an error when:
     // - there is no capacity to store more deals and their pieces
-    AddNewDeal(deal mkt.StorageDeal) error
+    AddNewDeal(deal mkt.StorageDeal) StageDealResponse
 
     // bring back if needed.
     // OnNewTipset(chain Chain, epoch blockchain.Epoch) struct {}
