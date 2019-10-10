@@ -30,19 +30,19 @@ func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) CommitSectorError() StorageDeal {
+func (sms *StorageMiningSubsystem_I) CommitSectorError() base_markets.StorageDeal {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewTipset(chain blockchain.Chain, epoch blockchain.Epoch, tipset blockchain.Tipset) struct{} {
+func (sms *StorageMiningSubsystem_I) OnNewTipset(chain blockchain.Chain, epoch blockchain.Epoch, tipset blockchain.Tipset) {
 	sms.CurrentChain = chain
 	sms.CurrentEpoch = epoch
 	sms.CurrentTipset = tipset
 }
 
 func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts {
-	ea := storagePowerConsensus.ElectionArtifacts(sms.CurrentChain, sms.CurrentEpoch)
-	EP := DrawElectionProof(ea.TK, sms.workerPrivateKey)
+	ea := base_blockchain.ElectionArtifacts(sms.CurrentChain, sms.CurrentEpoch)
+	EP := sms.DrawElectionProof(ea.TK, sms.workerPrivateKey)
 
 	panic("TODO: fix this below")
 	// if newTipset {
@@ -51,7 +51,7 @@ func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) bas
 	// 	T1 := GenerateNextTicket(T0, workerPrivateKey)
 	// }
 
-	if storagePowerConsensus.TryLeaderElection(EP) {
+	if sms.Consensus().TryLeaderElection(EP) {
 		// TODO: move this into SPC or Blockchain
 		// SMS should probably not have ability to call BlockProducer directly.
 		BlockProducer.GenerateBlock(EP, T0, sms.CurrentTipset, workerKey)
