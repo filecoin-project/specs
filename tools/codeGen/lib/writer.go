@@ -701,3 +701,16 @@ func WriteDSLType(dst io.Writer, type_ Type, ctx WriteDSLContext) {
 		panic("TODO")
 	}
 }
+
+func WriteDSLTypeStr(x Type) string {
+	ctx := WriteDSLContext {
+		indent: 0,
+		useNewlines: false,
+		useFieldAlignment: false,
+		alignment: WriteDSLAlignmentNone(),
+		isEnum: false,
+	}
+	buf := bytes.NewBuffer([]byte{})
+	WriteDSLType(buf, x, ctx)
+	return buf.String()
+}

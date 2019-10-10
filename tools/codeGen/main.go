@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	codeGen "github.com/filecoin-project/specs/codeGen/lib"
@@ -22,13 +23,22 @@ func replaceExt(filePath string, srcExt string, dstExt string) string {
 	return filePath[:n-len(srcExt)] + dstExt
 }
 
+func usageAssert(cond bool, msg string) {
+	if !cond {
+		fmt.Fprintf(os.Stderr, "Usage error: %v\n\n", msg)
+		fmt.Fprintf(os.Stderr, USAGE, os.Args[0])
+		os.Exit(1)
+	}
+}
+
 const USAGE = `SYNOPSIS
 	%[1]s <command> src.id [out.go]
 
 COMMANDS
-	gen <idsrc> <goout>     parse contents of <idsrc>, compile, and output to <goout>
-	fmt <idsrc> [<idsrc2>]  parse <idsrc>, and write formatted output to <idsrc2> (or <idsrc>)
-	sym <idsrc>             parse contents of <idsrc>, and write symbol table to STDOUT
+	gen <idsrc> <goout>          parse <idsrc>, compile it, and output the generated Go code to <goout>
+	fmt <idsrc>                  parse <idsrc>, and overwrite the file in-place with formatted output
+	sym <idsrc> SYM1 <SYM2 ...>  parse <idsrc>, and write to stdout the contents of the given symbols
+	methods-json <idsrc>         parse <idsrc>, and write to stdout a JSON listing of its method prototypes
 
 EXAMPLES
 	# compile file.id to file.gen.go
@@ -42,6 +52,9 @@ EXAMPLES
 
 	# output symbol table of file.id
 	%[1]s sym a/b/file.id
+
+	# output a JSON listing of the struct/union methods defined in file.id
+	%[1]s methods-json a/b/file.id
 `
 
 func main() {
@@ -49,6 +62,7 @@ func main() {
 		fmt.Printf(USAGE, os.Args[0])
 		os.Exit(0)
 	}
+
 
 	flag.Parse()
 	argsOrig := flag.Args()
@@ -61,7 +75,7 @@ func main() {
 	var err error
 
 	// first argument
-	if cmd == "gen" || cmd == "fmt" || cmd == "sym" {
+	if cmd == "gen" || cmd == "fmt" || cmd == "sym" || cmd == "methods-json" {
 		inputFilePath = args[0]
 	}
 
@@ -71,36 +85,23 @@ func main() {
 		outputFilePath = args[1]
 	} else if cmd == "fmt" {
 		outputFilePath = args[0] // replace file
-		if len(args) == 2 {
-			outputFilePath = args[1]
-		}
+	} else if cmd == "methods-json" {
+		usageAssert(len(args) == 1, "methods-json command requires exactly one argument")
 	}
+
 	// defer opening files until they're needed
 	// so that fmt can output to the input filename,
 	// and so that it can handle codeGen fmt ./...
 
 	switch cmd {
 	case "gen":
-		inputFile, err = os.Open(inputFilePath)
-		CheckErr(err)
-		inputFilePathTokens := strings.Split(inputFilePath, "/")
-		Assert(len(inputFilePathTokens) >= 2)
-		packageName := inputFilePathTokens[len(inputFilePathTokens)-2]
-		goMod := codeGen.GenGoModFromFile(inputFile, packageName)
+		goMod := codeGen.GenGoModFromFilePath(inputFilePath)
 		outputFile, err = os.Create(outputFilePath)
 		CheckErr(err)
 		codeGen.WriteGoMod(goMod, outputFile)
 
 	case "fmt":
-		if strings.HasSuffix(inputFilePath, "/...") {
-			files := findFiles(filepath.Dir(inputFilePath), func(path string) bool {
-				return filepath.Ext(path) == ".id"
-			})
-			fmtFiles(files)
-		} else {
-			err := fmtFile(inputFilePath, outputFilePath)
-			CheckErr(err)
-		}
+		fmtFiles(extractIdFiles(inputFilePath))
 
 	case "sym":
 		inputFile, err = os.Open(inputFilePath)
@@ -125,14 +126,45 @@ func main() {
 		}
 		codeGen.WriteDSLBlockEntries(os.Stdout, declsPrint, codeGen.WriteDSLContextInit())
 
+	case "methods-json":
+		entriesJson := []map[string]interface{}{}
+		for _, idPath := range extractIdFiles(inputFilePath) {
+			idFile, err := os.Open(idPath)
+			CheckErr(err)
+			mod := codeGen.ParseDSLModuleFromFile(idFile)
+			packageName := codeGen.ExtractPackageName(idPath)
+			for _, entry := range mod.ExtractMethodPrototypesToplevel([]string{packageName}) {
+				entryJson := map[string]interface{}{}
+				entryJson["name"] = entry.Name
+				entryJson["argTypes"] = entry.ArgTypes
+				entryJson["retType"] = entry.RetType
+				entriesJson = append(entriesJson, entryJson)
+			}
+		}
+		ret, err := json.MarshalIndent(entriesJson, "", "  ")
+		CheckErr(err)
+		fmt.Printf("%v\n", string(ret))
+
 	default:
 		Assert(false)
 	}
 }
 
-func findFiles(dirpath string, filter func(path string) bool) []string {
+func extractIdFiles(inputPath string) []string {
+	if strings.HasSuffix(inputPath, "/...") {
+		return findFiles(filepath.Dir(inputPath), func(path string) bool {
+			return filepath.Ext(path) == ".id"
+		})
+	} else if strings.HasSuffix(inputPath, ".id") {
+		return []string{inputPath}
+	} else {
+		usageAssert(false, fmt.Sprintf("Unsupported input path spec: \"%v\"", inputPath)); panic("")
+	}
+}
+
+func findFiles(inputPath string, filter func(path string) bool) []string {
 	var files []string
-	filepath.Walk(dirpath, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			if strings.HasPrefix(info.Name(), ".") && len(info.Name()) > 1 {
 				return filepath.SkipDir // skip hidden directories

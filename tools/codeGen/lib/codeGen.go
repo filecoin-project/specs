@@ -640,3 +640,69 @@ func GenGoModFromFile(file *os.File, packageName string) GoMod {
 	goMod := GenGoMod(goDecls, packageName)
 	return goMod
 }
+
+func ExtractPackageName(path string) string {
+	pathTokens := strings.Split(path, "/")
+	Assert(len(pathTokens) >= 2)
+	packageName := pathTokens[len(pathTokens)-2]
+	return packageName
+}
+
+func GenGoModFromFilePath(inputPath string) GoMod {
+	inputFile, err := os.Open(inputPath)
+	CheckErr(err)
+	defer inputFile.Close()
+	return GenGoModFromFile(inputFile, ExtractPackageName(inputPath))
+}
+
+type MethodPrototypeStr struct {
+	Name string
+	ArgTypes []string
+	RetType string
+}
+
+func MethodPrototypeStr_Make(currNamespace []string, method Method) MethodPrototypeStr {
+	name := ""
+	for _, s := range currNamespace {
+		name += s + "."
+	}
+	name += method.methodName
+	argTypesStr := []string{}
+	for _, arg := range method.methodArgs {
+		switch arg.case_ {
+		case Entry_Case_Field:
+			argTypesStr = append(argTypesStr, WriteDSLTypeStr(arg.value.(Field).fieldType))
+		case Entry_Case_Comment:
+			// pass
+		case Entry_Case_Empty:
+			// pass
+		default:
+			Assert(false)
+		}
+	}
+	retTypeStr := WriteDSLTypeStr(method.methodRetType)
+	return MethodPrototypeStr {
+		Name: name,
+		ArgTypes: argTypesStr,
+		RetType: retTypeStr,
+	}
+}
+
+func (m Module) ExtractMethodPrototypesToplevel(baseNamespace []string) []MethodPrototypeStr {
+	var ret []MethodPrototypeStr
+	for _, decl := range m.Decls() {
+		currNamespace := append(baseNamespace, decl.Name())
+		switch decl.Case() {
+		case Decl_Case_Type:
+			xr := decl.(*TypeDecl)
+			switch xr.type_.Case() {
+			case Type_Case_AlgType:
+				tr := xr.type_.(*AlgType)
+				for _, method := range tr.Methods() {
+					ret = append(ret, MethodPrototypeStr_Make(currNamespace, method))
+				}
+			}
+		}
+	}
+	return ret
+}
