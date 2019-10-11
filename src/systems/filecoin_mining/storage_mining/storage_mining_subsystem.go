@@ -36,7 +36,6 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 	panic("TODO")
 }
 
-
 // triggered by new block reception and tipset assembly
 func (sms *StorageMiningSubsystem_I) OnNewBestChain() {
 	// new election, reset nonce
