@@ -40,6 +40,29 @@ This will write out an HTTP address to check out with your browser. Most likely:
 make website
 ```
 
+### Diagrams
+
+Install dependencies for digram making
+```
+make deps-diag
+```
+
+Render diagrams
+```
+make diagrams
+```
+Make sure to check in your rendered output (`*.dot.svg` and `*.mmd.svg`) so that others dont need to install diagram building deps.
+
+### Orient and Org mode
+
+Install dependencies for org mode and orient
+
+```
+make deps-orient
+```
+
+Without these, you won't be able to compile `.org` files, and they may be missing from the document output.
+
 ## Overviews
 
 ### Build System Overview
