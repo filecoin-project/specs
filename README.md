@@ -1,5 +1,7 @@
 # Filecoin Specification
 
+[![CircleCI](https://circleci.com/gh/filecoin-project/specs/tree/master.svg?style=svg)](https://circleci.com/gh/filecoin-project/specs/tree/master)
+
 This is the [Filecoin Specification](https://github.com/filecoin-project/specs), a repository that contains documents, code, models, and diagrams that constitute the specification of the [Filecoin Protocol](https://filecoin.io). This repository is the singular source of truth for the Filecoin Protocol. All implementations of the Filecoin Protocol should match and comply with the descriptions, interfaces, code, and models defined in this specification.
 
 ## View Website
