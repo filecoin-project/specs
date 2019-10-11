@@ -1,14 +1,14 @@
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 
 type StorageDeal base_markets.StorageDeal
 type StorageDealID base_markets.StorageDealID
-type Address base_markets.Address
-type Epoch base_markets.Epoch
-type TokenAmount base_markets.TokenAmount
 
 type StorageParticipantBalance struct {
-    Locked     TokenAmount
-    Available  TokenAmount
+    Locked     actor.TokenAmount
+    Available  actor.TokenAmount
 }
 
 type PublishStorageDealSuccess struct {
@@ -32,13 +32,13 @@ type StorageMarketActor struct {
     // - NetworkSubsystem
     //   - needs access to MessagePubsub
 
-    ParticipantBalances  {Address: StorageParticipantBalance}
+    ParticipantBalances  {addr.Address: StorageParticipantBalance}
     StorageDeals         {StorageDealID: StorageDeal}
 
-    RegisterParticipant(lockedBalance TokenAmount) bool
-    WithdrawBalance(balance TokenAmount)
-    AddBalance(balance TokenAmount)
-    CheckLockedBalance(participantAddr Address) TokenAmount
+    RegisterParticipant(lockedBalance actor.TokenAmount) bool
+    WithdrawBalance(balance actor.TokenAmount)
+    AddBalance(balance actor.TokenAmount)
+    CheckLockedBalance(participantAddr addr.Address) actor.TokenAmount
 
     // TODO: There should be some punishment for publishing a deal too late
     // call by CommitSector in StorageMiningSubsystem
@@ -59,7 +59,7 @@ type StorageMarketActor struct {
     CloseExpiredStorageDeal(targetStorageDeal StorageDeal)
 
     // call by StorageMinerActor on successful PoSt Submission
-    HandleStorageDealPayment(storageDeal StorageDeal, currEpoch Epoch)
+    HandleStorageDealPayment(storageDeal StorageDeal, currEpoch block.ChainEpoch)
 
     // call by StorageMinerActor or CronActor to slash deal collateral
     SlashStorageDealCollateral(targetStorageDeal StorageDeal)

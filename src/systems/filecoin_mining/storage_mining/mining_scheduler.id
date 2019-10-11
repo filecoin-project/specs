@@ -1,6 +1,6 @@
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 // import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
 

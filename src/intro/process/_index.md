@@ -27,7 +27,7 @@ For anything that is not part of the currently speced systems (like 'repair', fo
   - Work out all the details required to make this proposal work.
 - **(2) Write a draft with all the details.**
   - When you feel like a solution is near, write up a draft document that contains all the details, and includes what changes would need to happen to the spec
-  - E.g. "Add a System called X with ...", or "Add a library called Y, ...", or "Modify blockchain/vm/state_tree to include ..."
+  - E.g. "Add a System called X with ...", or "Add a library called Y, ...", or "Modify vm/state_tree to include ..."
   - Place this document inside the `src/drafts/` directory.
   - Anybody is welcome to contribute well-reasoned and detailed drafts.
   - (Note: these drafts will give way to FIPs in the future)

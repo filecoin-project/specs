@@ -1,7 +1,7 @@
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
-type Address base_blockchain.Address
-type Epoch base_blockchain.Epoch
 type Path struct {}
 type Signature struct {}
 type StorageDealID CID
@@ -9,14 +9,14 @@ type TokenAmount struct {}
 
 // Storage Market
 type StorageDealProposal struct {
-    PieceRef             CID
-    PieceSize            UInt
-    Client               Address
-    Provider             Address
-    ProposalExpiryEpoch  Epoch
-    DealExpiryEpoch      Epoch
-    StoragePrice         TokenAmount
-    StorageCollateral    TokenAmount
+    PieceRef             CID  // TODO use piece.PieceInfo
+    PieceSize            UInt  // TODO use piece.PieceInfo
+    Client               addr.Address
+    Provider             addr.Address
+    ProposalExpiryEpoch  block.ChainEpoch
+    DealExpiryEpoch      block.ChainEpoch
+    StoragePrice         actor.TokenAmount
+    StorageCollateral    actor.TokenAmount
 
     ProposerSignature    Signature
 }

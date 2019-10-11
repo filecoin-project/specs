@@ -1,10 +1,12 @@
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
-import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
@@ -34,7 +36,7 @@ type StorageMiningSubsystem struct {
     MinerActor         StorageMinerActor
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
-    BlockProducer      blockchain.BlockProducer
+    BlockProducer      blockproducer.BlockProducer
 
     // Need access to SPC in order to mine a block
     Consensus          spc.StoragePowerConsensusSubsystem
@@ -64,21 +66,21 @@ type StorageMiningSubsystem struct {
     CommitSectorError()
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    DrawElectionProof(tk blockchain.Randomness, workerKey filcrypto.PrivKey) base_blockchain.ElectionProof
+    DrawElectionProof(tk chain.Randomness, workerKey filcrypto.PrivKey) block.ElectionProof
 
     // call by StorageMiningSubsystem itself in BlockProduction
     // use T1 randomness when producing on a tipset
     // use T0 randomness when producing on a null block
-    GenerateNextTicket(seed blockchain.Randomness, workerKey filcrypto.PrivKey) base_blockchain.Ticket
+    GenerateNextTicket(seed chain.Randomness, workerKey filcrypto.PrivKey) block.Ticket
 
     // call by BlockChain when a new block is produced
     OnNewTipset(
-        chain   blockchain.Chain
-        epoch   base_blockchain.Epoch
-        tipset  blockchain.Tipset
+        chain   chain.Chain
+        epoch   block.ChainEpoch
+        tipset  block.Tipset
     )
 
     // call by clock during BlockProduction
     // TODO: define clock better
-    OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts
+    OnNewRound(newTipset block.Tipset) block.ElectionArtifacts
 }

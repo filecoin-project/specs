@@ -3,10 +3,10 @@ package storage_mining
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 // import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
-import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 
 // import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
@@ -34,11 +34,11 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() base_markets.StorageDea
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewTipset(chain blockchain.Chain, epoch blockchain.Epoch, tipset blockchain.Tipset) {
+func (sms *StorageMiningSubsystem_I) OnNewTipset(chain chain.Chain, epoch block.ChainEpoch, tipset block.Tipset) {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts {
+func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset block.Tipset) block.ElectionArtifacts {
 	panic("TODO: fix this below")
 
 	// TODO this below has been commented due to incomplete implementation
@@ -61,12 +61,12 @@ func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) bas
 	// return ea
 }
 
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk base_blockchain.Ticket, workerKey filcrypto.PrivKey) base_blockchain.ElectionProof {
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk block.Ticket, workerKey filcrypto.PrivKey) block.ElectionProof {
 	// return generateElectionProof(tk, workerKey)
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 base_blockchain.Ticket, workerKey filcrypto.PrivKey) base_blockchain.Ticket {
+func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 block.Ticket, workerKey filcrypto.PrivKey) block.Ticket {
 	panic("TODO")
 }
 
