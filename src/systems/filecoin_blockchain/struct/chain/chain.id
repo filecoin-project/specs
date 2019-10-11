@@ -1,0 +1,11 @@
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+type Randomness struct {}
+
+type Chain struct {
+    HeadEpoch()         block.ChainEpoch
+    FinalizedEpoch()    block.ChainEpoch
+    LatestCheckpoint()  block.ChainEpoch
+
+    TipsetAtEpoch(epoch block.ChainEpoch) block.Tipset
+}

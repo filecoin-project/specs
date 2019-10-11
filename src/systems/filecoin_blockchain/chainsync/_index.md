@@ -9,7 +9,7 @@ Validation is split into two stages, syntactic and semantic.
 The syntactic stage may be validated without reference to additional data, the semantic stage requires access to the chain which the block extends.
 
 For clarity, we separate these stages into separate components:
-syntactic validation is performed by the {{<sref block_syncer>}},
+syntactic validation is performed by the {{<sref chainsync>}},
 and once collected and validated, the blocks are forwarded
 to the {{<sref chain_manager>}} which performs semantic validation and adds the blocks to the node's current view of the blockchain state.
 
@@ -19,8 +19,8 @@ goFile block_syncer
 
 # Block reception and Syntactic Validation
 
-- Called by: libp2p {{<sref block_sync>}}
-- Calls on: {{<sref chain_manager>}} 
+- Called by: libp2p {{<sref chainsync>}}
+- Calls on: {{<sref chain_manager>}}
 
 On reception of a new block over the appropriate libp2p channel (see gossib_sub), the _Block Syncer_'s _OnNewBlock_ method is invoked. Thereafter, the syncer must perform syntactic validation on the block to discard invalid blocks and forward the others for further validation by the {{<sref chain_manager>}}. At a high level, a syntactically valid block:
 
@@ -45,7 +45,7 @@ In practice, appropriate parameters will not impact nodes regardless of their ne
 # Block Propagation
 
 - Called by: {{<sref block_producer>}}
-- Calls on: libp2p {{<sref block_sync>}}
+- Calls on: libp2p {{<sref chainsync>}}
 
 Blocks are propagated over the libp2p pubsub channel `/fil/blocks`. The following structure is filled out with the appropriate information, serialized (with IPLD), and sent over the wire:
 

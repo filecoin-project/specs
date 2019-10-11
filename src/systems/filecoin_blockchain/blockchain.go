@@ -1,7 +1,9 @@
-package blockchain
+package filecoin_blockchain
+
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 // The semantic stage requires access to the chain which the block extends.
-func (self *BlockchainSubsystem_I) validateBlockSemantics(block Block) {
+func (self *BlockchainSubsystem_I) validateBlockSemantics(block block.Block) {
 	panic("TODO")
 	// // 1. Verify Signature
 	// pubk := self.StateTree().GetMinerKey(block.MinerAddress())
@@ -59,11 +61,11 @@ func (self *BlockchainSubsystem_I) epochCutoffTime() {
 	panic("TODO")
 }
 
-func (self *BlockchainSubsystem_R) HandleBlock(block Block) bool {
+func (self *BlockchainSubsystem_R) HandleBlock(block block.Block) bool {
 	panic("TODO")
 }
 
-func HandleBlock(block Block) bool {
+func HandleBlock(block block.Block) bool {
 	panic("TODO")
 }
 

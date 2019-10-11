@@ -1,0 +1,16 @@
+import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+
+type Tipset struct {
+    BlockCIDs          [BlockCID]
+    Blocks             [BlockHeader]
+
+    Has(block Block)   bool           @(cached)
+    Parents            Tipset         @(cached)
+    StateTree          st.StateTree   @(cached)
+    Weight             ChainWeight    @(cached)
+    Epoch              ChainEpoch     @(cached)
+
+    ValidateSyntax()   bool           @(cached)
+    LatestTimestamp()  clock.Time     @(cached)
+}

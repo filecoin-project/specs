@@ -1,4 +1,4 @@
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/address"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 // Epoch is an epoch in time in the StateTree.

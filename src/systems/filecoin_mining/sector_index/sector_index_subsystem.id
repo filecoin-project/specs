@@ -1,4 +1,4 @@
-import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
@@ -27,7 +27,7 @@ type SectorIndexerSubsystem struct {
 
     // SectorsExpiredAtEpoch returns the set of sectors that expire
     // at a particular epoch.
-    SectorsExpiredAtEpoch(epoch blockchain.Epoch) [sector.SectorID]
+    SectorsExpiredAtEpoch(epoch block.ChainEpoch) [sector.SectorID]
 
     // removeSectors removes the given sectorIDs from storage.
     removeSectors(sectorIDs [sector.SectorID])

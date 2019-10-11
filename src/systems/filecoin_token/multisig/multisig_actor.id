@@ -1,4 +1,4 @@
-import address "github.com/filecoin-project/specs/systems/filecoin_vm/address"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 type TxSeqNo UVarint

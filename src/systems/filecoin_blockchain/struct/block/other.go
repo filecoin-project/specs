@@ -1,4 +1,4 @@
-package filecoin_blockchain
+package block
 
 import (
 	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"

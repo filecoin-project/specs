@@ -2,7 +2,7 @@ package interpreter
 
 import "errors"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/address"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"

@@ -1,6 +1,8 @@
-package blockchain
+package chainsync
 
-func (self *BlockSyncer_I) OnNewBlock(block Block) error {
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+func (self *BlockSyncer_I) OnNewBlock(block block.Block) error {
 	panic("TODO")
 	// err := self.validateBlockSyntax(block)
 	// if err {
@@ -12,7 +14,7 @@ func (self *BlockSyncer_I) OnNewBlock(block Block) error {
 }
 
 // The syntactic stage may be validated without reference to additional data (see block)
-func (bs *BlockSyncer_I) validateBlockSyntax(block Block) error {
+func (bs *BlockSyncer_I) validateBlockSyntax(block block.Block) error {
 	panic("TODO")
 	// if !block.MinerAddress().VerifySyntax(StorageMinerActor.Address.Protocol()) {
 	// 	return ErrInvalidBlockSyntax("bad miner address syntax")
@@ -64,17 +66,17 @@ func (bs *BlockSyncer_I) validateBlockSyntax(block Block) error {
 
 }
 
-func (g *AncestryGraph_I) AddBlock(block Block) {
+func (g *AncestryGraph_I) AddBlock(block block.Block) {
 	panic("TODO")
 }
 
-func (g *BlockValidationGraph_I) ConsiderBlock(block Block) {
+func (g *BlockValidationGraph_I) ConsiderBlock(block block.Block) {
 	panic("TODO")
 	// g.UnconnectedBlocks.AddBlock(block)
 	// g.tryConnectBlockToFringe(block)
 }
 
-func (g *BlockValidationGraph_I) tryConnectBlockToFringe(block Block) {
+func (g *BlockValidationGraph_I) tryConnectBlockToFringe(block block.Block) {
 	panic("TODO")
 
 	// try to connect the block, and then try connecting its descendents.
@@ -97,7 +99,7 @@ func (g *BlockValidationGraph_I) tryConnectBlockToFringe(block Block) {
 	// }
 }
 
-func (b *BlockPropagator_I) PropagateBlock(block SignedBlock) {
+func (b *BlockPropagator_I) PropagateBlock(block block.SignedBlock) {
 	panic("TODO")
 	// NetworkBroadcast(BlockPubSub, block)
 }

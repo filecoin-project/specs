@@ -9,7 +9,9 @@ sys_vm: [systems, filecoin_vm]
 vm: [systems, filecoin_vm]
 
 ### blockchain
-block_producer: [systems, filecoin_blockchain, blockchain]
+block_producer: [systems, filecoin_blockchain, struct]
+chainsync: [systems, filecoin_blockchain, chainsync]
+
 ### SPC
 storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
 power_table: [systems, filecoin_blockchain, storage_power_consensus]

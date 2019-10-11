@@ -1,18 +1,17 @@
-import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import address "github.com/filecoin-project/specs/systems/filecoin_vm/address"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type BytesAmount UVarint
 
 type StoragePowerActor struct {
     // call by StorageMiningSubsytem on miner creation
-    RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) address.Address
+    RegisterMiner(ownerAddr addr.Address, workerPubKey filcrypto.PubKey) addr.Address
 
     // call by StorageMinerActor on successful seal
     // TODO: workerKey of type StorageMiner.WorkerPubKey
-    IncrementPower(minerAddress base.Address)
-    UpdatePower(address base.Address, newPower minerStorage)
-    SuspendMiner(address base.Address)
+    IncrementPower(minerAddress addr.Address)
+    UpdatePower(address addr.Address, newPower minerStorage)
+    SuspendMiner(address addr.Address)
 
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
 

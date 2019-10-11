@@ -1,0 +1,56 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+
+import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+
+type ChainWeight UVarint
+type ChainEpoch UVarint
+
+type BlockCID ipld.CID
+type MessageRoot ipld.CID
+type ReceiptRoot ipld.CID
+
+type BlockHeader struct {
+    // Chain linking
+    Parents          Tipset
+    Weight           ChainWeight
+    Epoch            ChainEpoch
+
+    // Miner Info
+    MinerAddress     addr.Address
+
+    // State
+    StateTree        st.StateTree
+    Messages         MessageRoot
+    MessageReceipts  ReceiptRoot
+
+    // Consensus things
+    Timestamp        clock.Time
+    Tickets          [Ticket]
+    ElectionProof
+
+    // Signatures
+    BlockSig         filcrypto.Signature
+    BLSAggregateSig  filcrypto.Signature
+
+    //	SerializeSigned()            []byte
+    //	ComputeUnsignedFingerprint() []
+
+    ValidateTickets(pubKey filcrypto.PubKey) bool
+    ExtractElectionSeed() ElectionSeed
+}
+
+// TODO: remove this. header is signed
+type SignedBlock struct {
+    block  &Block
+    sig    filcrypto.Signature
+}
+
+type Block struct {
+    Header    BlockHeader
+    Messages  [msg.Message]
+    Receipts  [msg.MessageReceipt]
+}

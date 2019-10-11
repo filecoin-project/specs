@@ -1,31 +1,4 @@
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-
-type BlockProducer struct {
-    // call by StorageMiningSubsystem when elected as a leader
-    // a procedural call that calls GetMostProfitableMessages(minerAddr Address)
-    // and then get back the messages and call AssembleBlock
-    // TODO minerAddr is of type StorageMiner.Address
-    GenerateBlock(
-        electionProof  base_blockchain.ElectionProof
-        T0             base_blockchain.Ticket
-        tipset         Tipset
-        minerAddr      base_blockchain.Address
-    )
-
-    // call by BlockProducer itself after getting back messages
-    AssembleBlock(
-        electionProof  base_blockchain.ElectionProof
-        T0             base_blockchain.Ticket
-        tipset         Tipset
-        minerAddr      base_blockchain.Address
-        messages       [base_blockchain.Message]
-    ) Block
-}
-
-type BlockStore struct {
-    GetBlock(cid CID) Block
-    PutBlock(block Block) error
-}
+package block_producer
 
 /*
 func (miner *BlockProducer_I) MineBlock(messages []Message) Block {

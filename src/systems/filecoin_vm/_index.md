@@ -1,6 +1,6 @@
 ---
 menuIcon: 💻
-menuTitle: Virtual Machine
+menuTitle: "**Virtual Machine**"
 title: VM - Virtual Machine
 entries:
 - actor
@@ -10,5 +10,7 @@ entries:
 - sysactors
 - interpreter
 ---
+
+{{< incTocMap "/docs/systems/filecoin_vm" 3 >}}
 
 {{< readfile file="vm.id" code="true" lang="go" >}}

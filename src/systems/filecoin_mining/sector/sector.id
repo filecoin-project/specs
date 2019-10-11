@@ -1,9 +1,9 @@
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Bytes32 Bytes
-type MinerID base_blockchain.Address
+type MinerID addr.Address
 type Commitment Bytes32  // TODO
 
 type Deal struct {}  // TODO: remove
