@@ -9,11 +9,7 @@ import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 import storage_provider "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-// import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-// import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StorageMiningSubsystem struct {
     // TODO: constructor

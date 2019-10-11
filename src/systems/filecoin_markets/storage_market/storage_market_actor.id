@@ -12,7 +12,7 @@ type StorageParticipantBalance struct {
 }
 
 type PublishStorageDealSuccess struct {
-    DealCID deal.DealCID
+    DealID deal.DealID
 }
 type PublishStorageDealError struct {}
 type PublishStorageDealResponse struct {
@@ -40,27 +40,30 @@ type StorageMarketActor struct {
     AddBalance(balance actor.TokenAmount)
     CheckLockedBalance(participantAddr addr.Address) actor.TokenAmount
 
-    // TODO: There should be some punishment for publishing a deal too late
     // call by CommitSector in StorageMiningSubsystem
-    // a StorageDeal is only published on chain when it passes VerifyStorageDeal
-    PublishStorageDeal(newStorageDeal deal.StorageDeal) PublishStorageDealResponse
+    // a StorageDeal is only published on chain when it passes verifyStorageDeal
+    // a DealID will be assigned and stored in the mapping of DealID to StorageDeal
+    PublishStorageDeal(newStorageDeals [deal.StorageDeal]) [PublishStorageDealResponse]
 
     // check if StorageDeal is still valid
     // check if StorageDeal has the right signature
     // check if provider and client have sufficient balances
-    VerifyStorageDeal(newStorageDeal deal.StorageDeal) bool
+    verifyStorageDeal(newStorageDeal deal.StorageDeal) bool
+
+    // generate storage deal id
+    generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID
 
     // TODO: StorageDeals should be renewable
-    UpdateStorageDeal(newStorageDeal deal.StorageDeal)
+    // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
 
-    // call by StorageMarketActor on ExpiredSet
+    // call by CronActor on ExpiredSet
     // remove StorageDeal from StorageMarketActor
     // return StorageCollateral to miners
-    CloseExpiredStorageDeal(targetStorageDeal deal.StorageDeal)
+    closeExpiredStorageDeal(storageDealIDs [deal.DealID])
 
     // call by StorageMinerActor on successful PoSt Submission
     HandleStorageDealPayment(storageDeal StorageDeal, currEpoch block.ChainEpoch)
 
-    // call by StorageMinerActor or CronActor to slash deal collateral
-    SlashStorageDealCollateral(targetStorageDeal deal.StorageDeal)
+    // call by CronActor to slash deal collateral
+    slashStorageDealCollateral(storageDealIDs [deal.DealID])
 }

@@ -1,7 +1,7 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
+type DealID UVarint
 type DealCID ipld.CID
 type Signature struct {}  // TODO
 type TokenAmount UVarint  // TODO
@@ -23,19 +23,13 @@ type StorageDeal struct {
     CounterSignature  Signature
 }
 
-type StorageDealStagedNotification struct {
-    Deal      StorageDeal
-    PieceRef  ipld.CID
-    SectorID  sector.SectorID
-}
-
-type StorageDealUnfound struct {}  // TODO
+type StorageDealNotFound struct {}  // TODO
 type StorageDealProposed struct {}  // TODO
 type StorageDealStaged struct {}  // TODO
 type StorageDealActive struct {}  // TODO
 
 type StorageDealStatus struct {
-    StorageDealUnfound
+    StorageDealNotFound
     StorageDealProposed
     StorageDealStaged
     StorageDealActive

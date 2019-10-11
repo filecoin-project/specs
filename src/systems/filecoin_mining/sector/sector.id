@@ -1,13 +1,11 @@
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Bytes32 Bytes
 type MinerID addr.Address
 type Commitment Bytes32  // TODO
-
-type Deal struct {}  // TODO: remove
-
 type UnsealedSectorCID ipld.CID
 type SealedSectorCID ipld.CID
 
@@ -47,7 +45,7 @@ type SectorInDetail struct {
 
     Unsealed struct {
         CID     UnsealedSectorCID
-        Deals   [Deal]
+        Deals   [deal.StorageDeal]
         Pieces  [piece.Piece]
         // Pieces Tree<Piece> // some tree for proofs
         Bytes

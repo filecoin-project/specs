@@ -21,11 +21,10 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, w
 	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
 }
 
-func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal, pieceRef ipld.CID) {
+func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
-	sms.StorageProvider().NotifyStorageDealStaged(&StorageDealStagedNotification_I{
+	sms.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{
 		Deal_:     deal,
-		PieceRef_: pieceRef,
 		SectorID_: stagedDealResponse.SectorID(),
 	})
 }
@@ -71,10 +70,5 @@ func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk block.Ticket, workerKe
 }
 
 func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 block.Ticket, workerKey filcrypto.PrivKey) block.Ticket {
-	panic("TODO")
-}
-
-// TODO this should be moved into storage market
-func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
 	panic("TODO")
 }

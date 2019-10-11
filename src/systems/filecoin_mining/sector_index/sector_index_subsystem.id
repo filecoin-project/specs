@@ -9,7 +9,7 @@ type SectorIndex struct {
     ByUnsealedCID  {sector.UnsealedSectorCID: sector.SectorInfo}
     BySealedCID    {sector.SealedSectorCID: sector.SectorInfo}
     ByPieceID      {piece.PieceID: sector.SectorInfo}
-    ByDealID       {deal.StorageDealID: sector.SectorInfo}
+    ByDealID       {deal.DealID: sector.SectorInfo}
 }
 
 type SectorIndexerSubsystem struct {
