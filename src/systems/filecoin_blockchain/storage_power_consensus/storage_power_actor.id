@@ -1,6 +1,6 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import filcrypto "github.com/filecoin-project/specs/libraries/libp2p"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 
 type BytesAmount UVarint
 
