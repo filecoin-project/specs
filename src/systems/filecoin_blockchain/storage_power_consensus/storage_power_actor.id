@@ -1,6 +1,6 @@
 import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/address"
 
 type BytesAmount UVarint
 

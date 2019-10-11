@@ -2,7 +2,6 @@
 menuIcon: 📦
 title: "**Blockchain**"
 entries:
-- vm
 - message_pool
 - blockchain
 - storage_power_consensus

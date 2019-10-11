@@ -5,7 +5,9 @@ ds_address: [data_structures, address]
 app_address: [appendix, address]
 
 # blockchain
-sys_vm: [systems, filecoin_blockchain, vm]
+sys_vm: [systems, filecoin_vm]
+vm: [systems, filecoin_vm]
+
 ### blockchain
 block_producer: [systems, filecoin_blockchain, blockchain]
 ### SPC
