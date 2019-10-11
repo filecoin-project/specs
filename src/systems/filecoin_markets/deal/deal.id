@@ -1,20 +1,21 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type DealID UVarint
 type DealCID ipld.CID
 type Signature struct {}  // TODO
-type TokenAmount UVarint  // TODO
 
 type StorageDealProposal struct {
     PieceRef             DealCID
     PieceSize            UInt
-    Client               base_blockchain.Address
-    Provider             base_blockchain.Address
-    ProposalExpiryEpoch  base_blockchain.Epoch
-    DealExpiryEpoch      base_blockchain.Epoch
-    StoragePrice         TokenAmount
-    StorageCollateral    TokenAmount
+    Client               addr.Address
+    Provider             addr.Address
+    ProposalExpiryEpoch  block.ChainEpoch
+    DealExpiryEpoch      block.ChainEpoch
+    StoragePrice         actor.TokenAmount
+    StorageCollateral    actor.TokenAmount
     ProposerSignature    Signature
 }
 
@@ -33,6 +34,16 @@ type StorageDealStatus enum {
     StorageDealProposed
     StorageDealStaged
     StorageDealActive
+}
+
+type PublishStorageDealSuccess struct {
+    DealID
+    DealCID
+}
+type PublishStorageDealError struct {}
+type PublishStorageDealResponse union {
+    Success  PublishStorageDealSuccess
+    Error    PublishStorageDealError
 }
 
 type RetrievalDealProposal struct {}  // TODO

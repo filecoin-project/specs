@@ -21,12 +21,12 @@ type SealVerifyInfo struct {
 
 // OnChainSealVerifyInfo is the structure of information that must go on chain.
 type OnChainSealVerifyInfo struct {
-    UnsealedCID  UnsealedSectorCID  // CommD
-    SealedCID    SealedSectorCID  // CommR
-    RandomSeed   SealRandomSeed
-    Proof        SealProof
-    DealIDs      [deal.DealID]
-    SectorNumber SectorNumber
+    UnsealedCID   UnsealedSectorCID  // CommD
+    SealedCID     SealedSectorCID  // CommR
+    RandomSeed    SealRandomSeed
+    Proof         SealProof
+    DealIDs       [deal.DealID]
+    SectorNumber
 }
 
 // ProofAux is meta data required to generate certain proofs

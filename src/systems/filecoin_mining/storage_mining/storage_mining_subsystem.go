@@ -20,7 +20,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, w
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
-	panic("TODO")
+	sms.SectorIndex().AddNewDeal(deal)
 	// stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
 	// TODO: way within a node to notify different components
 	// sms.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{

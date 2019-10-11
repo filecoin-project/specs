@@ -16,7 +16,7 @@ type StorageMiningSubsystem struct {
     // InitStorageMiningSubsystem() struct{}
 
     // Component subsystems
-    StorageProvider    storage_provider.StorageProvider
+    // StorageProvider    storage_provider.StorageProvider
     StoragePowerActor  spc.StoragePowerActor
     MinerActor         StorageMinerActor
     SectorIndex        sectoridx.SectorIndexerSubsystem

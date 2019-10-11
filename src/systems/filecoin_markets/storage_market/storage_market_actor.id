@@ -1,24 +1,10 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-
-type StorageDeal base_markets.StorageDeal
-type StorageDealID base_markets.StorageDealID
 
 type StorageParticipantBalance struct {
     Locked     actor.TokenAmount
     Available  actor.TokenAmount
-}
-
-type PublishStorageDealSuccess struct {
-    DealID   deal.DealID
-    DealCID  deal.DealCID
-}
-type PublishStorageDealError struct {}
-type PublishStorageDealResponse struct {
-    Success  PublishStorageDealSuccess
-    Error    PublishStorageDealError
 }
 
 type StorageMarketActor struct {
@@ -33,12 +19,12 @@ type StorageMarketActor struct {
     // - NetworkSubsystem
     //   - needs access to MessagePubsub
 
-    Balances  {base_blockchain.Address: StorageParticipantBalance}
+    Balances  {addr.Address: StorageParticipantBalance}
     Deals     {deal.DealID: deal.StorageDeal}
 
-    WithdrawBalance(balance deal.TokenAmount)
-    AddBalance(balance deal.TokenAmount)
-    CheckLockedBalance(participantAddr base_blockchain.Address) deal.TokenAmount
+    WithdrawBalance(balance actor.TokenAmount)
+    AddBalance(balance actor.TokenAmount)
+    CheckLockedBalance(participantAddr addr.Address) actor.TokenAmount
 
     // call by CommitSector in StorageMiningSubsystem
     // a StorageDeal is only published on chain when it passes verifyStorageDeal
@@ -49,6 +35,7 @@ type StorageMarketActor struct {
 
     // check if StorageDeal is signed before expiry
     // check if StorageDeal has the right signatures
+    // check if minimum StoragePrice and StorageCollateral are met
     // check if provider and client have sufficient balances
     verifyStorageDeal(newStorageDeal deal.StorageDeal) bool
 
@@ -58,23 +45,23 @@ type StorageMarketActor struct {
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
 
-    // call by CronActor on PoSt submission
+    // call by CronActor when no PoSt is submitted within a ProvingPeriod
     // trigger subsequent calls on different SectorSet
     // pull SectorSet from the run time
     HandleCronAction()
 
-    // call by CronActor on ExpiredSet
+    // call by CronActor / onPoStSubmission on ExpiredSet
     // remove StorageDeal from StorageMarketActor
     // if no more active deals contain in the sector
     // adjust miner power for this sector
     // return StorageCollateral to miners
     closeExpiredStorageDeal(storageDealIDs [deal.DealID])
 
-    // call by CronActor on ActiveSet to process deal payment
+    // call by CronActor / onPoStSubmission on ActiveSet to process deal payment
     // go through StorageDealIDs, if IDs are active in MarketActor
     // payment will be processed
-    handleStorageDealPayment(storageDealIDs [deal.DealID], currEpoch base_blockchain.Epoch)
+    handleStorageDealPayment(storageDealIDs [deal.DealID])
 
-    // call by CronActor on FaultSet to slash deal collateral
+    // call by CronActor / onPoStSubmission on FaultSet to slash deal collateral
     slashStorageDealCollateral(storageDealIDs [deal.DealID])
 }

@@ -17,4 +17,7 @@ type Address struct {
     }
 
     VerifySyntax(addrType Address_Type) bool
+    String() AddressString
 }
+
+type AddressString string

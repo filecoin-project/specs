@@ -9,6 +9,6 @@ func (sma *StorageMinerActor_I) SubmitPoSt(postProof base_mining.PoStProof, sect
 }
 
 func (sma *StorageMinerActor_I) CommitSector(onChainInfo sealing.OnChainSealVerifyInfo) {
-	// TODO how to access StorageMarketActor
-	panic("TODO")
+	sma.Sectors()[onChainInfo.SectorNumber()] = onChainInfo
+	// TODO broadcast message on chain
 }
