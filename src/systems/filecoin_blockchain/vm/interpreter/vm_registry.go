@@ -14,7 +14,7 @@ var staticActorCodeRegistry = actorCodeRegistry{}
 // this is an idiomatic way to do this. Implementations should approach this
 // howevery they wish. The point is to initialize a static registry with
 // built in pure types that have the code for each actor. Once we have
-// a way to load code from the StateTree inst
+// a way to load code from the StateTree, use that instead.
 func init() {
 	staticRegisterBuiltinActors()
 }
