@@ -51,16 +51,16 @@ type StorageMarketActor struct {
     VerifyStorageDeal(newStorageDeal deal.StorageDeal) bool
 
     // TODO: StorageDeals should be renewable
-    UpdateStorageDeal(newStorageDeal deal.StorageDeal) struct {}
+    UpdateStorageDeal(newStorageDeal deal.StorageDeal)
 
     // call by StorageMarketActor on ExpiredSet
     // remove StorageDeal from StorageMarketActor
     // return StorageCollateral to miners
-    CloseExpiredStorageDeal(targetStorageDeal deal.StorageDeal) struct {}
+    CloseExpiredStorageDeal(targetStorageDeal deal.StorageDeal)
 
     // call by StorageMinerActor on successful PoSt Submission
     HandleStorageDealPayment(storageDeal StorageDeal, currEpoch block.ChainEpoch)
 
     // call by StorageMinerActor or CronActor to slash deal collateral
-    SlashStorageDealCollateral(targetStorageDeal deal.StorageDeal) struct {}
+    SlashStorageDealCollateral(targetStorageDeal deal.StorageDeal)
 }

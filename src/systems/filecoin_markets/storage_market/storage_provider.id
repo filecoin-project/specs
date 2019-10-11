@@ -1,16 +1,14 @@
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type StorageProvider struct {
+    StorageDeals {deal.DealCID: deal.StorageDeal}
 
-	StorageDeals {deal.DealCID: deal.StorageDeal}
+    // Client calls this to submit new StorageDealProposal
+    HandleNewStorageDealProposal(proposal deal.StorageDealProposal)
 
-	// Client calls this to submit new StorageDealProposal
-	HandleNewStorageDealProposal(proposal deal.StorageDealProposal)
+    // Call by StorageProvider to sign a StorageDealProposal
+    SignStorageDealProposal(proposal deal.StorageDealProposal) deal.StorageDeal
 
-	// Call by StorageProvider to sign a StorageDealProposal
-	SignStorageDealProposal(proposal deal.StorageDealProposal) deal.StorageDeal
-
-	// call by StorageClient
-	HandleStorageDealQuery(dealCID deal.DealCID) deal.StorageDealStatus
-
+    // call by StorageClient
+    HandleStorageDealQuery(dealCID deal.DealCID) deal.StorageDealStatus
 }
