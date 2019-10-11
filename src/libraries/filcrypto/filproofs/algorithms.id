@@ -14,7 +14,7 @@ type ExpanderGraphDegree struct {}
 type ExpanderGraphSeed struct {}
 type DRGNodeSize struct {}
 
-type SealAlgorithmArtifacts struct {// ZigZagPoRep
+type SealAlgorithmArtifacts struct {
 
     AlgorithmWideSetupArtifacts struct {
         // trusted setup output parameters go here

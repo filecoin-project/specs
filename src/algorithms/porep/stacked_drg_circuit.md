@@ -10,7 +10,7 @@ Stacked DRG PoRep is based on layering DRG graphs `LAYERS` times. The data repre
 - `CommRLast` is the Merkle tree root hash of the replica.
 - `CommR` is the on-chain commitment to the replica, dervied as the hash of the concatenation of `CommC` and `CommRLast`.
 
-The (offline) proof size in the ZigZag is too large for blockchain usage (~3MB). We use SNARKs to generate a proof of knowledge of a correct SDR proof. In other words, we implement the ZigZag proof verification algorithm in an arithmetic circuit and use SNARKs to prove that it was evaluated correctly.
+The (offline) proof size in SDR is too large for blockchain usage (~3MB). We use SNARKs to generate a proof of knowledge of a correct SDR proof. In other words, we implement the SDR proof verification algorithm in an arithmetic circuit and use SNARKs to prove that it was evaluated correctly.
 
 This circuit proves that given a Merkle root `CommD`, `CommRLast`, and `commRStar`, that the prover knew the correct replicated data at each layer.
 
