@@ -8,7 +8,7 @@ type StorageDealStagedNotification struct {
 }
 
 type StorageProvider struct {
-    StorageDeals {deal.DealCID: deal.StorageDealStatus}
+    DealCIDToStatus {deal.DealCID: deal.StorageDealStatus}
 
     // Client calls this to submit new StorageDealProposal
     HandleNewStorageDealProposal(proposal deal.StorageDealProposal)

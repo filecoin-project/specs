@@ -13,7 +13,8 @@ type StorageParticipantBalance struct {
 }
 
 type PublishStorageDealSuccess struct {
-    DealID deal.DealID
+    DealID  deal.DealID
+    DealCID deal.DealCID
 }
 type PublishStorageDealError struct {}
 type PublishStorageDealResponse struct {
@@ -34,8 +35,8 @@ type StorageMarketActor struct {
     //   - needs access to MessagePubsub
 
     ParticipantBalances  {base_blockchain.Address: StorageParticipantBalance}
-    StorageDeals         {deal.DealID: deal.StorageDeal}
-    SectorToDealIDs      {sector.SectorID: [deal.DealID]}
+    SectorIDToDealIDs    {sector.SectorID: [deal.DealID]}
+    DealIDToStorageDeal  {deal.DealID: deal.StorageDeal}
 
     RegisterParticipant(lockedBalance actor.TokenAmount) bool
     WithdrawBalance(balance actor.TokenAmount)
@@ -58,14 +59,20 @@ type StorageMarketActor struct {
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
 
+    // call by CronActor on PoSt submission
+    // trigger subsequent calls on different SectorSet
+    HandleCronAction(sectorStateSets sector.SectorStateSets) struct {}
+
     // call by CronActor on ExpiredSet
     // remove StorageDeal from StorageMarketActor
+    // if no more active deals contain in the sector
+    // adjust miner power for this sector
     // return StorageCollateral to miners
     closeExpiredStorageDeal(storageDealIDs [deal.DealID])
 
-    // call by StorageMinerActor on successful PoSt Submission
-    HandleStorageDealPayment(storageDeal StorageDeal, currEpoch block.ChainEpoch)
+    // call by CronActor on ActiveSet to process deal payment
+    handleStorageDealPayment(storageDealIDs [deal.DealID], currEpoch base_blockchain.Epoch)
 
-    // call by CronActor to slash deal collateral
+    // call by CronActor on FaultSet to slash deal collateral
     slashStorageDealCollateral(storageDealIDs [deal.DealID])
 }

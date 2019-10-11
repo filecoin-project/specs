@@ -13,7 +13,15 @@ type SealedSectorCID ipld.CID
 // relative to a Miner.
 type SectorNumber UInt
 
-type SectorStateSets struct {}
+type ExpiredSet [SectorID]
+type FaultSet   [SectorID]
+type ActiveSet  [SectorID]
+
+type SectorStateSets struct {
+    ExpiredSet
+    FaultSet
+    ActiveSet
+}
 
 // SectorSize indicates one of a set of possible sizes in the network.
 type SectorSize UInt
