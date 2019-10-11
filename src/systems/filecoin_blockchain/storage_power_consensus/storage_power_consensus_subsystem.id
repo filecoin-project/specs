@@ -32,16 +32,18 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // Randomness methods
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionSeed(chain blockchain.Chain) base.Ticket
+    GetTicketProductionSeed(chain blockchain.Chain, epoch Epoch) base.Ticket
 
     // call by StorageMiningSubsystem during block production
-    GetElectionProofSeed(chain blockchain.Chain) base.Ticket
+    GetElectionProofSeed(chain blockchain.Chain, epoch Epoch) base.Ticket
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(chain chain.Chain) base_mining.SealSeed
+    GetSealSeed(chain chain.Chain, epoch Epoch) base_mining.SealSeed
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(chain chain.Chain) base_mining.PoStChallenge
+    GetPoStChallenge(chain chain.Chain, epoch Epoch) base_mining.PoStChallenge
+
+    GetFinality()   Epoch
 }
 
 type ExpectedConsensus struct {
@@ -51,6 +53,7 @@ type ExpectedConsensus struct {
 
 type PowerTable struct {
     // all power here is always verified
+    RegisterMiner(addr base.Address)
     miners {base.Address: StorageMiner}
     GetMinerPower(addr base.Address) base.StoragePower
     GetTotalPower() base.StoragePower

@@ -63,6 +63,10 @@ However this introduces a tradeoff:
 decreasing the cost of running a targeted attack (given they have local predictability).
 - It means electionProofs are stored separately from new tickets on a block, taking up
 more space on-chain.
+
+How is K selected?
+- On the one end, there is no advantage to picking K larger than finality (by definition a fully-global lottery).
+- On the other, making K smaller reduces adversarial power to grind.
 ```
 
 ### Ticket generation

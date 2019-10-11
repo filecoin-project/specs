@@ -51,8 +51,8 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 }
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
-	T1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain)
-	TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain)
+	T1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
+	TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 
 	for _, worker := range sms.workers {
 		newTicket := PrepareNewTicket(worker.VRFKeyPair, T1)

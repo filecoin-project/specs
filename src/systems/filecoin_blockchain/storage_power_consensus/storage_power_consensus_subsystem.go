@@ -12,11 +12,13 @@ import (
 	clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 )
 
+const FINALITY = 500
+
 const (
 	SPC_LOOKBACK_RANDOMNESS = 300 // this is EC.K maybe move it there. TODO
 	SPC_LOOKBACK_TICKET     = 1   // we chain blocks together one after the other
-	SPC_LOOKBACK_POST       = -1  // TODO complete
-	SPC_LOOKBACK_SEAL       = -1  // TODO complete
+	SPC_LOOKBACK_POST       = 1   // cheap to generate, should be set as close to current TS as possible
+	SPC_LOOKBACK_SEAL       = FINALITY  // should be set to finality
 )
 
 const VRFPersonalization {
@@ -59,7 +61,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block blockchain.Bloc
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket base.Ticket, pk filcrypto.PublicKey) bool {
-	T1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain)
+	T1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 	input := VRFPersonalization.Ticket
 	input.append(T1.Output)
 	return ticket.Verify(input, pk)
@@ -73,25 +75,25 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain blockchain.Chain) base_mining.SealSeed {
+func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain blockchain.Chain, epoch Epoch) base_mining.SealSeed {
 	return &base_mining.SealSeed_I {
 		chain.TicketAtEpoch(epoch-SPC_LOOKBACK_TICKET)
 	}
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain blockchain.Chain) base_mining.SealSeed {
+func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain blockchain.Chain, epoch Epoch) base_mining.SealSeed {
 	return &base_mining.SealSeed_I {
 		chain.TicketAtEpoch(epoch-SPC_LOOKBACK_RANDOMNESS),
 	}
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain blockchain.Chain) base_mining.SealSeed {
+func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain blockchain.Chain, epoch Epoch) base_mining.SealSeed {
 	return &base_mining.SealSeed_I {
 		chain.TicketAtEpoch(epoch-SPC_LOOKBACK_SEAL)
 	}
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain blockchain.Chain) base_mining.PoStChallenge {
+func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain blockchain.Chain, epoch Epoch) base_mining.PoStChallenge {
 	return &base_mining.PoStChallenge_I {
 		chain.TicketAtEpoch(epoch-SPC_LOOKBACK_POST)
 	}
@@ -106,7 +108,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height BlockH
 	// 2. Determine that ticket was validly scratched
 	minerPK := spc.PowerTable.GetMinerPublicKey(workerAddr)
 	input := VRFPersonalization.ElectionProof
-	TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain)
+	TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 	input.append(TK.Output)
 	input.appent(electionProof.ElectionNonce)
 
@@ -122,6 +124,10 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningElectionProof(electionProo
 	// by dividing by 2^HashLen (64 Bytes using Sha256) and comparing that to the miner's
 	// power (portion of network storage).
 	return (minerPower * 2^(len(electionProof.Output)*8) < electionProof.Output * totalPower)
+}
+
+func (spc *StoragePowerConsensusSubsystem_I) GetFinality() Epoch {
+	return FINALITY
 }
 
 // Power Table
