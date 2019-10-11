@@ -53,7 +53,7 @@ type CallSeqNum UVarint
 type Code Bytes
 
 // CodeCID represents a CID for a Code object.
-type CodeCID CID
+type CodeCID ipld.CID
 
 // Actor is a base computation object in the Filecoin VM. Similar
 // to Actors in the Actor Model (programming), or Objects in Object-

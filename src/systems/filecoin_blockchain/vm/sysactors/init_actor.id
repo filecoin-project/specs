@@ -9,12 +9,9 @@ type InitActorState struct {
     NextID      actor.ActorID
 }
 
-type InitActor struct {
-    actorState  actor.ActorState
-    initState   InitActorState
-
+type InitActorCode struct {
     // 0
-    InitConstructor(r vmr.Runtime)
+    Constructor(r vmr.Runtime)
 
     // 1
     Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address

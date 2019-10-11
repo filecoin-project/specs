@@ -8,11 +8,11 @@ import exitcode "github.com/filecoin-project/specs/systems/filecoin_blockchain/v
 // import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
 // import util "github.com/filecoin-project/specs/util"
 
-func (a *InitActor_I) Constructor() {
-
+func (a *InitActorCode_I) Constructor(rt vmr.Runtime) {
+	panic("TODO")
 }
 
-func (a *InitActor_I) Exec(rt vmr.Runtime, state InitActorState, codeCID actor.CodeCID, method actor.MethodNum, params actor.MethodParams) addr.Address {
+func (a *InitActorCode_I) Exec(rt vmr.Runtime, state InitActorState, codeCID actor.CodeCID, method actor.MethodNum, params actor.MethodParams) addr.Address {
 	// Make sure that only the actors defined in the spec can be launched.
 	if !a._isBuiltinActor(codeCID) {
 		rt.Fatal("cannot launch actor instance that is not a builtin actor")
@@ -63,19 +63,19 @@ func (a *InitActor_I) Exec(rt vmr.Runtime, state InitActorState, codeCID actor.C
 	return addr
 }
 
-func (_ *InitActor_I) _assignNextID(state InitActorState) actor.ActorID {
+func (_ *InitActorCode_I) _assignNextID(state InitActorState) actor.ActorID {
 	stateI := state.Impl() // TODO: unwrapping like this is ugly.
 	actorID := stateI.NextID_
 	stateI.NextID_++
 	return actorID
 }
 
-func (_ *InitActor_I) GetActorIDForAddress(state InitActorState, address addr.Address) actor.ActorID {
+func (_ *InitActorCode_I) GetActorIDForAddress(state InitActorState, address addr.Address) actor.ActorID {
 	return state.AddressMap()[address]
 }
 
 // TODO: derive this OR from a union type
-func (_ *InitActor_I) _isSingletonActor(codeCID actor.CodeCID) bool {
+func (_ *InitActorCode_I) _isSingletonActor(codeCID actor.CodeCID) bool {
 	return true
 	// TODO: uncomment this
 	// return codeCID == StorageMarketActor ||
@@ -85,7 +85,7 @@ func (_ *InitActor_I) _isSingletonActor(codeCID actor.CodeCID) bool {
 }
 
 // TODO: derive this OR from a union type
-func (_ *InitActor_I) _isBuiltinActor(codeCID actor.CodeCID) bool {
+func (_ *InitActorCode_I) _isBuiltinActor(codeCID actor.CodeCID) bool {
 	return true
 	// TODO: uncomment this
 	// return codeCID == StorageMarketActor ||
@@ -97,7 +97,7 @@ func (_ *InitActor_I) _isBuiltinActor(codeCID actor.CodeCID) bool {
 }
 
 // TODO
-func (a *InitActor_I) InvokeMethod(input vmr.InvocInput, method actor.MethodNum, params actor.MethodParams) vmr.InvocOutput {
+func (a *InitActorCode_I) InvokeMethod(input vmr.InvocInput, method actor.MethodNum, params actor.MethodParams) vmr.InvocOutput {
 	// TODO: load state
 	// var state InitActorState
 	// storage := input.Runtime().State().Storage()
