@@ -15,7 +15,6 @@ type ExpanderGraphSeed struct {}
 type DRGNodeSize struct {}
 
 type SealAlgorithmArtifacts struct {
-
     AlgorithmWideSetupArtifacts struct {
         // trusted setup output parameters go here
         // updates to public parameters go here
