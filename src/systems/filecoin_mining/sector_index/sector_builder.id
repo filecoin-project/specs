@@ -6,6 +6,11 @@ import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
 // sector configuration requirements and the piece sizes.
 // Once there is a sector ready to be sealed, NextSector
 // will return a sector.
+
+type StageDealResponse struct {
+    SectorID sector.SectorID
+}
+
 type SectorBuilder struct {
     // DealsToSeal keeps a set of StorageDeal objects.
     // These include the info for the relevant pieces.
@@ -14,7 +19,7 @@ type SectorBuilder struct {
     DealsToSeal [mkt.StorageDeal]
 
     // StageDeal adds a deal to be packed into a sector.
-    StageDeal(d mkt.StorageDeal) error
+    StageDeal(d mkt.StorageDeal) StageDealResponse
 
     // NextSector returns an UnsealedSectorInfo, which includes the (ordered) set of
     // pieces, and the SealCfg. An error may be returned if SectorBuilder is not

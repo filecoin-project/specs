@@ -10,21 +10,21 @@ type SealedSectorSet [Sector]
 type ReplicaID CID
 
 type MiningScheduler struct {
-    getStagedSectors()                              SectorSet
-    getSealedSectors()                              SealedSectorSet
-    getFaultySectors()                              SectorSet
-    getRepairedSectors()                            SectorSet
+    getStagedSectors()              SectorSet
+    getSealedSectors()              SealedSectorSet
+    getFaultySectors()              SectorSet
+    getRepairedSectors()            SectorSet
     // same as completedSectors/doneSectors
-    getExpiredSectors()                             SectorSet
+    getExpiredSectors()             SectorSet
 
-    ProducePost(sectors SectorSet)                  poster.PoStSubmission
-    VerifyPost(sectors SectorSet)                   poster.PoStSubmission
+    ProducePost(sectors SectorSet)  poster.PoStSubmission
+    VerifyPost(sectors SectorSet)   poster.PoStSubmission
 
     ReportFaults(
         actor &StorageMinerActor
     ) bool
 
-    RemoveSectors(remove SectorSet)                 bool
+    RemoveSectors(remove SectorSet) bool
 
     DePledge(
         amount actor.TokenAmount
