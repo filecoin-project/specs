@@ -1,5 +1,3 @@
-type ChainWeight UVarint
-
 type ExpectedConsensus struct {
     // ComputeWeight(Chain)							ChainWeight
     // TryElection(StorageMiner, TipSet)				ElectionProof

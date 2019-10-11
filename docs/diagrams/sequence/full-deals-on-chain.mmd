@@ -108,7 +108,7 @@ sequenceDiagram
         BlockchainSubsystem ->> FilecoinProofsSubsystem: ValidateBlock(block)
         BlockchainSubsystem ->>- BlockchainSubsystem: StateTree ← TryGenerateStateTree(block)
 
-        alt Round Cutoff
+        opt Round Cutoff
             WallClock -->> BlockchainSubsystem: AssembleTipsets()
             BlockchainSubsystem ->> BlockchainSubsystem: [Tipset] ← AssembleTipsets()
             BlockchainSubsystem ->> BlockchainSubsystem: Tipset ← ChooseTipset([Tipset])
@@ -150,7 +150,7 @@ sequenceDiagram
                     alt 1 - success
                         StorageMinerActor ->> StorageMinerActor:  UpdateDoneSet()
                         StorageMinerActor ->> StorageMarketActor: HandleStorageDealPayment()
-                        StorageMarketActor ->> StorageMarketActor: CloseExpiredStorageDeal() 
+                        StorageMarketActor ->> StorageMarketActor: CloseExpiredStorageDeal()
                     else 0 - failure
                         StorageMinerActor -->> StorageMiningSubsystem: PoStError
                         StorageMarketActor -->> StorageMarketActor: SlashStorageCollateral()
@@ -194,7 +194,7 @@ sequenceDiagram
             alt 1 - success
                 StorageMinerActor ->> StorageMinerActor:  UpdateDoneSet()
                 StorageMinerActor ->> StorageMarketActor: HandleStorageDealPayment()
-                StorageMarketActor ->> StorageMarketActor: CloseExpiredStorageDeal() 
+                StorageMarketActor ->> StorageMarketActor: CloseExpiredStorageDeal()
             else 0 - failure
                 StorageMinerActor -->> StorageMiningSubsystem: PoStError
                 StorageMarketActor -->> StorageMarketActor: SlashStorageCollateral()
@@ -212,7 +212,7 @@ sequenceDiagram
 
         loop EveryBlock
             loop forEach StorageMinerActor in StoragePowerActor.Miners
-                alt if miner ProvingPeriod ends
+                opt if miner ProvingPeriod ends
                     StoragePowerActor ->> StorageMinerActor: ProvingPeriodUpdate()
                     StorageMinerActor ->> StorageMinerActor: computeProvingPeriodEndSectorState()
                     Note Right of StorageMinerActor: FaultSet is all sectors if no post submitted
@@ -229,10 +229,9 @@ sequenceDiagram
         StorageMinerActor -->> StoragePowerActor: DeclareConsensusFault(ConsensusFaultProof)
         StoragePowerActor -->+ StoragePowerConsensusSubsystem: ValidateFault(ConsensusFaultProof)
 
-        alt Valid Fault
+        opt Valid Fault
             StoragePowerConsensusSubsystem -->> StoragePowerActor: TerminateMiner(Address)
             StoragePowerConsensusSubsystem -->> StoragePowerActor: SlashPledgeCollateral(Address)
             StoragePowerConsensusSubsystem -->- StorageMinerActor: UpdateBalance(Reward)
-
         end
     end

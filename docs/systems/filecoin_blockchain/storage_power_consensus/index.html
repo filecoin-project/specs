@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -16,8 +16,9 @@
 
 
 <link rel="alternate" type="application/rss+xml" href="../../../../docs/systems/filecoin_blockchain/storage_power_consensus/index.xml" title="Filecoin Spec" />
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -65,7 +66,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1676,6 +1677,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4329,8 +4396,8 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
 <span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain&#34;</span>
-<span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree&#34;</span>
-<span class="kn">import</span> <span class="nx">minBase</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
+<span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree&#34;</span>
+<span class="kn">import</span> <span class="nx">base_mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
 </span><span class="c1"></span>    <span class="nx">powerTable</span>           <span class="nx">PowerTable</span>
@@ -4340,13 +4407,13 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="nf">ChooseTipsetToMine</span><span class="p">(</span><span class="nx">tipsets</span> <span class="p">[</span><span class="nx">blockchain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">])</span> <span class="p">[</span><span class="nx">blockchain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">]</span>
 
     <span class="c1">// call by StorageMiningSubsystem in sealing sector
-</span><span class="c1"></span>    <span class="nf">GetSealSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Epoch</span><span class="p">)</span> <span class="nx">minBase</span><span class="p">.</span><span class="nx">SealSeed</span>
+</span><span class="c1"></span>    <span class="nf">GetSealSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Epoch</span><span class="p">)</span> <span class="nx">base_mining</span><span class="p">.</span><span class="nx">SealSeed</span>
 
     <span class="c1">// call by StorageMiningSubsystem after sealing
-</span><span class="c1"></span>    <span class="nf">GetPoStChallenge</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Epoch</span><span class="p">)</span> <span class="nx">minBase</span><span class="p">.</span><span class="nx">PoStChallenge</span>
+</span><span class="c1"></span>    <span class="nf">GetPoStChallenge</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Epoch</span><span class="p">)</span> <span class="nx">base_mining</span><span class="p">.</span><span class="nx">PoStChallenge</span>
 
     <span class="c1">// call by BlockchainSubsystem during block reception
-</span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="nx">StoragePowerConsensusError</span>
+</span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="nx">base</span><span class="p">.</span><span class="nx">StoragePowerConsensusError</span>
 
     <span class="c1">// call by StorageMiningSubsystem during block production
 </span><span class="c1"></span>    <span class="nf">GetElectionArtifacts</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Epoch</span><span class="p">)</span> <span class="nx">base</span><span class="p">.</span><span class="nx">ElectionArtifacts</span>
@@ -4357,7 +4424,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="c1">// call by StorageMiningSubsystem during block production
 </span><span class="c1"></span>    <span class="nf">TryLeaderElection</span><span class="p">(</span><span class="nx">electionProof</span> <span class="nx">base</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">StoragePowerConsensusError</span><span class="p">()</span> <span class="nx">StoragePowerConsensusError</span>
+    <span class="nf">StoragePowerConsensusError</span><span class="p">()</span> <span class="nx">base</span><span class="p">.</span><span class="nx">StoragePowerConsensusError</span>
 
     <span class="nf">computeTipsetWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">base</span><span class="p">.</span><span class="nx">ChainWeight</span>
 <span class="p">}</span>
@@ -4366,7 +4433,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="c1">// all power here is always verified
 </span><span class="c1"></span>    <span class="nx">minerPower</span> <span class="p">{</span><span class="nx">base</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StorageMiner</span><span class="p">}</span>
     <span class="nf">LookupMinerStorage</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">UVarint</span>
-    <span class="nf">LookupMinerPowerFraction</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">Float</span>
+    <span class="nf">LookupMinerPowerFraction</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">base</span><span class="p">.</span><span class="nx">PowerFraction</span>
     <span class="nf">RemovePower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">base</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4377,7 +4444,6 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">minerStorage</span> <span class="nx">UVarint</span>
-<span class="kd">type</span> <span class="nx">StoragePowerConsensusError</span> <span class="kt">error</span>
 </code></pre></div>
 
 

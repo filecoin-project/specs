@@ -1,4 +1,13 @@
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+
+type CronActorState struct {
+    // Cron has no internal state
+}
+
 type CronActor struct {
+    actorState  actor.ActorState
+    cronState   CronActorState
+
     // Tick executes built-in periodic actions.
     Tick()
 }

@@ -8,15 +8,16 @@
 
 
 
-<link rel="stylesheet" href="../../../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
 <link rel="icon" href="../../../../../../favicon.png" type="image/x-icon">
 
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -64,7 +65,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1675,6 +1676,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4315,21 +4382,24 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime&#34;</span>
 
-<span class="kd">type</span> <span class="nx">InitActor</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="kd">type</span> <span class="nx">InitActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// responsible for create new actors
-</span><span class="c1"></span>    <span class="nx">AddressMap</span>         <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
-    <span class="nx">IDMap</span>              <span class="p">{</span><span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
-    <span class="nx">NextID</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span>
+</span><span class="c1"></span>    <span class="nx">AddressMap</span>  <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
+    <span class="nx">IDMap</span>       <span class="p">{</span><span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
+    <span class="nx">NextID</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span>
+<span class="p">}</span>
 
+<span class="kd">type</span> <span class="nx">InitActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// 0
-</span><span class="c1"></span>    <span class="nf">InitConstructor</span><span class="p">()</span>
+</span><span class="c1"></span>    <span class="nf">Constructor</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="c1">// 1
-</span><span class="c1"></span>    <span class="nf">Exec</span><span class="p">(</span><span class="nx">code</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorMethod</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nf">Exec</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">code</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// 2
-</span><span class="c1"></span>    <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span>
+</span><span class="c1"></span>    <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4359,86 +4429,119 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">sysactors</span>
 
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime&#34;</span>
+<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime/exitcode&#34;</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">InitConstructor</span><span class="p">()</span> <span class="p">{</span>
-
+<span class="c1">// import st &#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree&#34;
+</span><span class="c1">// import util &#34;github.com/filecoin-project/specs/util&#34;
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">state</span> <span class="nx">InitActorState</span><span class="p">,</span> <span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
     <span class="c1">// Make sure that only the actors defined in the spec can be launched.
-</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">self</span><span class="p">.</span><span class="nf">_isBuiltinActor</span><span class="p">(</span><span class="nx">code</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">self</span><span class="p">.</span><span class="nx">VM</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot launch actor instance that is not a builtin actor&#34;</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">_isBuiltinActor</span><span class="p">(</span><span class="nx">codeCID</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot launch actor instance that is not a builtin actor&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">// Get the actor ID for this actor.
-</span><span class="c1"></span>    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nf">_assignNextID</span><span class="p">()</span>
+</span><span class="c1"></span>    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_assignNextID</span><span class="p">(</span><span class="nx">state</span><span class="p">)</span>
 
     <span class="c1">// Ensure that singeltons can only be launched once.
 </span><span class="c1"></span>    <span class="c1">// TODO: do we want to enforce this? If so how should actors be marked as such?
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">self</span><span class="p">.</span><span class="nf">_isSingletonActor</span><span class="p">(</span><span class="nx">codeCID</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot launch another actor of this type&#34;</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_isSingletonActor</span><span class="p">(</span><span class="nx">codeCID</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot launch another actor of this type&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="c1">// This generates a unique address for this actor that is stable across message
 </span><span class="c1"></span>    <span class="c1">// reordering
 </span><span class="c1"></span>    <span class="c1">// TODO: where do `creator` and `nonce` come from?
-</span><span class="c1"></span>    <span class="nx">addr</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">VM</span><span class="p">.</span><span class="nf">ComputeActorAddress</span><span class="p">(</span><span class="nx">creator</span><span class="p">,</span> <span class="nx">nonce</span><span class="p">)</span>
-
+</span><span class="c1"></span>    <span class="c1">// TODO: CallSeqNum is not related to From -- it&#39;s related to Origin
+</span><span class="c1"></span>    <span class="c1">// addr := rt.ComputeActorAddress(rt.Invocation().FromActor(), rt.Invocation().CallSeqNum())
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="c1">// TODO
+</span><span class="c1"></span>
     <span class="c1">// Set up the actor itself
-</span><span class="c1"></span>    <span class="nx">actor</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span><span class="p">{</span>
-        <span class="nx">CodeCid</span><span class="p">:</span> <span class="nx">codeCID</span><span class="p">,</span>
-        <span class="nx">Balance</span><span class="p">:</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span>
-        <span class="nx">State</span><span class="p">:</span>   <span class="kc">nil</span><span class="p">,</span>
-        <span class="nx">Nonce</span><span class="p">:</span>   <span class="mi">0</span><span class="p">,</span>
+</span><span class="c1"></span>    <span class="nx">actorState</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState_I</span><span class="p">{</span>
+        <span class="nx">CodeCID_</span><span class="p">:</span> <span class="nx">codeCID</span><span class="p">,</span>
+        <span class="c1">// State_:   nil, // TODO: do we need to init the state? probably not
+</span><span class="c1"></span>        <span class="nx">Balance_</span><span class="p">:</span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">Invocation</span><span class="p">().</span><span class="nx">Value</span><span class="p">,</span>
+        <span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1">// The call to the actors constructor will set up the initial state
 </span><span class="c1"></span>    <span class="c1">// from the given parameters, setting `actor.Head` to a new value when successfull.
 </span><span class="c1"></span>    <span class="c1">// TODO: can constructors fail?
-</span><span class="c1"></span>    <span class="nx">actor</span><span class="p">.</span><span class="nf">Constructor</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span>
-
+</span><span class="c1"></span>    <span class="c1">// TODO: this needs to be written such that the specific type Constructor is called.
+</span><span class="c1"></span>    <span class="c1">//       right now actor.Constructor(p) calls the Actor type, not the concrete type.
+</span><span class="c1"></span>    <span class="c1">// a.Constructor(params) // TODO: uncomment this.
+</span><span class="c1"></span>
     <span class="c1">// TODO: where is this VM.GlobalState?
 </span><span class="c1"></span>    <span class="c1">// TODO: do we need this?
-</span><span class="c1"></span>    <span class="c1">// self.VM.GlobalState.Set(actorID, actor)
+</span><span class="c1"></span>    <span class="c1">// runtime.State().Storage().Set(actorID, actor)
 </span><span class="c1"></span>
     <span class="c1">// Store the mappings of address to actor ID.
-</span><span class="c1"></span>    <span class="nx">self</span><span class="p">.</span><span class="nx">AddressMap</span><span class="p">[</span><span class="nx">addr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">IDMap</span><span class="p">[</span><span class="nx">actorID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span>
+</span><span class="c1"></span>    <span class="nx">state</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">addr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
+    <span class="nx">state</span><span class="p">.</span><span class="nf">IDMap</span><span class="p">()[</span><span class="nx">actorID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span>
 
+    <span class="c1">// TODO: adjust this to be proper state setting.
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">StateTree</span><span class="p">().</span><span class="nf">ActorStates</span><span class="p">()[</span><span class="nx">addr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorState</span> <span class="c1">// atm it&#39;s nil
+</span><span class="c1"></span>
     <span class="k">return</span> <span class="nx">addr</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">_assignNextID</span><span class="p">()</span> <span class="nx">ActorID</span> <span class="p">{</span>
-    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">self</span><span class="p">.</span><span class="nx">State</span><span class="p">.</span><span class="nx">NextID</span>
-    <span class="nx">self</span><span class="p">.</span><span class="nx">State</span><span class="p">.</span><span class="nx">NextID</span><span class="o">++</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">_assignNextID</span><span class="p">(</span><span class="nx">state</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span> <span class="p">{</span>
+    <span class="nx">stateI</span> <span class="o">:=</span> <span class="nx">state</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()</span> <span class="c1">// TODO: unwrapping like this is ugly.
+</span><span class="c1"></span>    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">stateI</span><span class="p">.</span><span class="nx">NextID_</span>
+    <span class="nx">stateI</span><span class="p">.</span><span class="nx">NextID_</span><span class="o">++</span>
     <span class="k">return</span> <span class="nx">actorID</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">address</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">ActorID</span> <span class="p">{</span>
-    <span class="c1">// go code
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="c1">// TODO: derive this OR from a union type
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">_isSingletonActor</span><span class="p">(</span><span class="nx">code</span> <span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">code</span> <span class="o">==</span> <span class="nx">StorageMarketActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">StoragePowerActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">CronActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">InitActor</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">state</span> <span class="nx">InitActorState</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">state</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="c1">// TODO: derive this OR from a union type
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActor</span><span class="p">)</span> <span class="nf">_isBuiltinActor</span><span class="p">(</span><span class="nx">code</span> <span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">code</span> <span class="o">==</span> <span class="nx">StorageMarketActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">StoragePowerActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">CronActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">InitActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">StorageMinerActor</span> <span class="o">||</span>
-        <span class="nx">code</span> <span class="o">==</span> <span class="nx">PaymentChannelActor</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">_isSingletonActor</span><span class="p">(</span><span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">true</span>
+    <span class="c1">// TODO: uncomment this
+</span><span class="c1"></span>    <span class="c1">// return codeCID == StorageMarketActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == StoragePowerActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == CronActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == InitActor
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">// TODO: derive this OR from a union type
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">_isBuiltinActor</span><span class="p">(</span><span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">true</span>
+    <span class="c1">// TODO: uncomment this
+</span><span class="c1"></span>    <span class="c1">// return codeCID == StorageMarketActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == StoragePowerActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == CronActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == InitActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == StorageMinerActor ||
+</span><span class="c1"></span>    <span class="c1">//     codeCID == PaymentChannelActor
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">// TODO
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="c1">// TODO: load state
+</span><span class="c1"></span>    <span class="c1">// var state InitActorState
+</span><span class="c1"></span>    <span class="c1">// storage := input.Runtime().State().Storage()
+</span><span class="c1"></span>    <span class="c1">// err := loadActorState(storage, input.ToActor().State(), &amp;state)
+</span><span class="c1"></span>
+    <span class="k">switch</span> <span class="nx">method</span> <span class="p">{</span>
+    <span class="c1">// case 0:
+</span><span class="c1"></span>    <span class="c1">//     return a.InitConstructor(input, state)
+</span><span class="c1"></span>    <span class="c1">// case 1:
+</span><span class="c1"></span>    <span class="c1">//     return a.Exec(input, state, params[0], params[1])
+</span><span class="c1"></span>    <span class="c1">// case 2:
+</span><span class="c1"></span>    <span class="c1">//     return a.GetActorIDForAddress(input, state, params[0])
+</span><span class="c1"></span>    <span class="k">default</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">ErrorInvocOutput</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">InTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidMethod</span><span class="p">)</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 

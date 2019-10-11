@@ -8,15 +8,16 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
 <link rel="icon" href="../../../../../favicon.png" type="image/x-icon">
 
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -64,7 +65,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1675,6 +1676,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4313,33 +4380,40 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">TokenAmount</span> <span class="nx">UVarint</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
+
 <span class="kd">type</span> <span class="nx">TxSeqNo</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">NumRequired</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">EpochDuration</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">Epoch</span> <span class="nx">UVarint</span>
 
 <span class="kd">type</span> <span class="nx">MultisigActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">signers</span>         <span class="p">[</span><span class="nx">Address</span><span class="p">]</span>
+    <span class="nx">signers</span>         <span class="p">[</span><span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
     <span class="nx">required</span>        <span class="nx">NumRequired</span>
     <span class="nx">nextTxId</span>        <span class="nx">TxSeqNo</span>
-    <span class="nx">initialBalance</span>  <span class="nx">TokenAmount</span>
+    <span class="nx">initialBalance</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nx">startingBlock</span>   <span class="nx">Epoch</span>
     <span class="nx">unlockDuration</span>  <span class="nx">EpochDuration</span>
-    <span class="nx">transactions</span>    <span class="p">{</span><span class="nx">TxSeqNo</span><span class="p">:</span> <span class="nx">Transaction</span><span class="p">}</span>
-
+    <span class="c1">// transactions    {TxSeqNo: Transaction} // TODO Transaction type does not exist
+</span><span class="c1"></span>
     <span class="nf">Construct</span><span class="p">(</span>
-        <span class="nx">signers</span>         <span class="p">[</span><span class="nx">Address</span><span class="p">]</span>
+        <span class="nx">signers</span>         <span class="p">[</span><span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
         <span class="nx">required</span>        <span class="nx">NumRequired</span>
         <span class="nx">unlockDuration</span>  <span class="nx">EpochDuration</span>
     <span class="p">)</span>
-    <span class="nf">Propose</span><span class="p">(</span><span class="nx">to</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">String</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">TxSeqNo</span>
+    <span class="nf">Propose</span><span class="p">(</span>
+        <span class="nx">to</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">method</span>  <span class="kt">string</span>
+        <span class="nx">params</span>  <span class="nx">Bytes</span>
+    <span class="p">)</span> <span class="nx">TxSeqNo</span>
     <span class="nf">Approve</span><span class="p">(</span><span class="nx">txid</span> <span class="nx">TxSeqNo</span><span class="p">)</span>
     <span class="nf">Cancel</span><span class="p">(</span><span class="nx">txid</span> <span class="nx">TxSeqNo</span><span class="p">)</span>
     <span class="nf">ClearCompleted</span><span class="p">()</span>
-    <span class="nf">AddSigner</span><span class="p">(</span><span class="nx">signer</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">increaseReq</span> <span class="kt">bool</span><span class="p">)</span>
-    <span class="nf">RemoveSigner</span><span class="p">(</span><span class="nx">signer</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">decreaseReq</span> <span class="kt">bool</span><span class="p">)</span>
-    <span class="nf">SwapSigner</span><span class="p">(</span><span class="nx">old</span> <span class="nx">Address</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">AddSigner</span><span class="p">(</span><span class="nx">signer</span> <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">increaseReq</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">RemoveSigner</span><span class="p">(</span><span class="nx">signer</span> <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">decreaseReq</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">SwapSigner</span><span class="p">(</span><span class="nx">old</span> <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
     <span class="nf">ChangeRequirement</span><span class="p">(</span><span class="nx">req</span> <span class="nx">NumRequired</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>

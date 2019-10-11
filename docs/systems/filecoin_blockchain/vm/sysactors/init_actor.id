@@ -1,18 +1,21 @@
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime"
 
-type InitActor struct {
+type InitActorState struct {
     // responsible for create new actors
-    AddressMap         {addr.Address: actor.ActorID}
-    IDMap              {actor.ActorID: addr.Address}
-    NextID             actor.ActorID
+    AddressMap  {addr.Address: actor.ActorID}
+    IDMap       {actor.ActorID: addr.Address}
+    NextID      actor.ActorID
+}
 
+type InitActorCode struct {
     // 0
-    InitConstructor()
+    Constructor(r vmr.Runtime)
 
     // 1
-    Exec(code actor.CodeCID, params actor.ActorMethod) addr.Address
+    Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address
 
     // 2
-    GetActorIDForAddress(address addr.Address) actor.ActorID
+    GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID
 }

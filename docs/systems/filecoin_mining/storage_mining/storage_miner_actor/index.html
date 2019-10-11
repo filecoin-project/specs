@@ -8,15 +8,16 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
 <link rel="icon" href="../../../../../favicon.png" type="image/x-icon">
 
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -64,7 +65,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1675,6 +1676,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4313,7 +4380,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Seed</span> <span class="kd">struct</span> <span class="p">{}</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">base_mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
+<span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
+<span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+<span class="kd">type</span> <span class="nx">Seed</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">SectorCommitment</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActor</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4326,14 +4399,17 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// info &amp;MinerInfo
 </span><span class="c1"></span>
     <span class="nf">UpdateDoneSet</span><span class="p">()</span>
-    <span class="nf">UpdateSectorStatus</span><span class="p">(</span><span class="nx">sectorStateSets</span> <span class="nx">SectorStateSets</span><span class="p">,</span> <span class="nx">faultSets</span> <span class="p">[</span><span class="nx">FaultSet</span><span class="p">])</span>
-    <span class="nf">SubmitPoSt</span><span class="p">(</span><span class="nx">postProof</span> <span class="nx">base</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">,</span> <span class="nx">sectorStateSets</span> <span class="nx">SectorStateSets</span><span class="p">)</span>
+    <span class="nf">UpdateSectorStatus</span><span class="p">(</span><span class="nx">sectorStateSets</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorStateSets</span><span class="p">)</span>
+    <span class="nf">SubmitPoSt</span><span class="p">(</span>
+        <span class="nx">postProof</span>        <span class="nx">base_mining</span><span class="p">.</span><span class="nx">PoStProof</span>
+        <span class="nx">sectorStateSets</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorStateSets</span>
+    <span class="p">)</span>
     <span class="nf">computeProvingPeriodEndSectorState</span><span class="p">()</span>
     <span class="nf">CommitSector</span><span class="p">(</span>
         <span class="nx">seed</span>            <span class="nx">Seed</span>
-        <span class="nx">sector</span>          <span class="nx">SectorID</span>
-        <span class="nx">sealCommitment</span>  <span class="nx">SealCommitment</span>
-        <span class="nx">sealProof</span>       <span class="nx">SealProof</span>
+        <span class="nx">sector</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+        <span class="nx">sealCommitment</span>  <span class="nx">base_mining</span><span class="p">.</span><span class="nx">SealCommitment</span>
+        <span class="nx">sealProof</span>       <span class="nx">sector</span><span class="p">.</span><span class="nx">SealProof</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -4341,19 +4417,19 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">owner</span>       <span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">owner</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">worker</span>      <span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">worker</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">peerId</span>      <span class="nx">PeerId</span>
+</span><span class="c1"></span>    <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">sectorSize</span>  <span class="nx">BytesAmount</span>
+</span><span class="c1"></span>    <span class="nx">sectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
 <span class="p">}</span>
 
 <span class="cm">/*
@@ -4375,7 +4451,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="cm">
 </span><span class="cm">type MinedSector {
 </span><span class="cm">    SectorID           UInt
-</span><span class="cm">    CommR              Commitment
+</span><span class="cm">    CommR              sector.Commitment
 </span><span class="cm">    FaultStatus(Epoch) Fault
 </span><span class="cm">}
 </span><span class="cm">
@@ -4436,8 +4512,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="cm">  verifyPoSt(proofs base.PoStProof, doneSet Bitfield)
 </span><span class="cm">
 </span><span class="cm">  // Getters
-</span><span class="cm">  GetOwner() Address
-</span><span class="cm">  GetWorkerAddr() Address
+</span><span class="cm">  GetOwner() address.Address
+</span><span class="cm">  GetWorkerAddr() address.Address
 </span><span class="cm">  GetPower() BytesAmount
 </span><span class="cm">  GetPeerID() PeerID
 </span><span class="cm">  GetSectorSize() BytesAmount
@@ -4456,7 +4532,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="cm">  IsSlashed() (bool)
 </span><span class="cm">
 </span><span class="cm">  UpdatePeerID(pid PeerID)
-</span><span class="cm">  ChangeWorker(addr Address)
+</span><span class="cm">  ChangeWorker(addr address.Address)
 </span><span class="cm">
 </span><span class="cm">  PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
 </span><span class="cm">  PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)

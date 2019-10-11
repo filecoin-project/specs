@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -16,8 +16,9 @@
 
 
 <link rel="alternate" type="application/rss+xml" href="../../../../docs/systems/filecoin_mining/storage_mining/index.xml" title="Filecoin Spec" />
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -65,7 +66,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1676,6 +1677,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4321,59 +4388,89 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-<span class="kn">import</span> <span class="nx">sectoridx</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
-<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-<span class="kn">import</span> <span class="nx">mkt</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sectoridx</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
+<span class="kn">import</span> <span class="nx">base_blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
+<span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain&#34;</span>
+<span class="kn">import</span> <span class="nx">base_markets</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
+<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="c1">// import piece &#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;
+</span><span class="c1">// import mkt &#34;github.com/filecoin-project/specs/systems/filecoin_markets&#34;
+</span><span class="c1">// import sector &#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;
+</span><span class="c1"></span>
+<span class="kd">type</span> <span class="nx">StorageDealStagedNotification</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Deal</span>      <span class="nx">base_markets</span><span class="p">.</span><span class="nx">StorageDeal</span>
+    <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+    <span class="nx">SectorID</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+<span class="p">}</span>
+
+<span class="c1">// TODO this should be moved into storage market
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageProvider</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">NotifyStorageDealStaged</span><span class="p">(</span><span class="nx">storageDealNotification</span> <span class="nx">StorageDealStagedNotification</span><span class="p">)</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// TODO: constructor
 </span><span class="c1"></span>    <span class="c1">// InitStorageMiningSubsystem() struct{}
 </span><span class="c1"></span>
     <span class="c1">// Component subsystems
-</span><span class="c1"></span>    <span class="nx">MinerActor</span>      <span class="nx">StorageMinerActor</span>
-    <span class="nx">SectorIndex</span>     <span class="nx">sectoridx</span><span class="p">.</span><span class="nx">SectorIndexerSubsystem</span>
-    <span class="nx">StorageProving</span>  <span class="nx">storageproving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">StorageProvider</span>
+    <span class="nx">StoragePowerActor</span>  <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActor</span>
+    <span class="nx">MinerActor</span>         <span class="nx">StorageMinerActor</span>
+    <span class="nx">SectorIndex</span>        <span class="nx">sectoridx</span><span class="p">.</span><span class="nx">SectorIndexerSubsystem</span>
+    <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
+    <span class="nx">BlockProducer</span>      <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockProducer</span>
 
     <span class="c1">// Need access to SPC in order to mine a block
-</span><span class="c1"></span>    <span class="nx">Consensus</span>       <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">Consensus</span>          <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
 
     <span class="c1">// Need access to the blockchain system in order to query for things in the chain
-</span><span class="c1"></span>    <span class="nx">Blockchain</span>      <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSystem</span>
+</span><span class="c1"></span>    <span class="nx">Blockchain</span>         <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
 
     <span class="c1">// TODO: why are these here? remove?
 </span><span class="c1"></span>    <span class="nf">StartMining</span><span class="p">()</span>
     <span class="nf">StopMining</span><span class="p">()</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself to create miner
-</span><span class="c1"></span>    <span class="nf">createMiner</span><span class="p">(</span><span class="nx">ownerPubKey</span> <span class="nx">PubKey</span><span class="p">,</span> <span class="nx">workerPubKey</span> <span class="nx">PubKey</span><span class="p">,</span> <span class="nx">pledgeAmt</span> <span class="nx">TokenAmount</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">createMiner</span><span class="p">(</span>
+        <span class="nx">ownerPubKey</span>   <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
+        <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
+        <span class="nx">pledgeAmt</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="p">)</span>
 
     <span class="c1">// get miner key by address
-</span><span class="c1"></span>    <span class="nf">GetMinerKeyByAddress</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">Address</span><span class="p">)</span> <span class="nx">PubKey</span>
+</span><span class="c1"></span>    <span class="nf">GetMinerKeyByAddress</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
 
     <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
 </span><span class="c1"></span>    <span class="c1">// Triggers AddNewDeal on SectorIndexer
-</span><span class="c1"></span>    <span class="nf">HandleStorageDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">StorageDeal</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">HandleStorageDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">base_markets</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">,</span> <span class="nx">pieceRef</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span>
 
     <span class="c1">// call by StorageMinerActor when error in sealing
 </span><span class="c1"></span>    <span class="nf">CommitSectorError</span><span class="p">()</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
-</span><span class="c1"></span>    <span class="nf">DrawElectionProof</span><span class="p">(</span><span class="nx">tk</span> <span class="nx">Randomness</span><span class="p">,</span> <span class="nx">workerKey</span> <span class="nx">PrivateKey</span><span class="p">)</span> <span class="nx">ElectionProof</span>
+</span><span class="c1"></span>    <span class="nf">DrawElectionProof</span><span class="p">(</span><span class="nx">tk</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">workerKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PrivKey</span><span class="p">)</span> <span class="nx">base_blockchain</span><span class="p">.</span><span class="nx">ElectionProof</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
 </span><span class="c1"></span>    <span class="c1">// use T1 randomness when producing on a tipset
 </span><span class="c1"></span>    <span class="c1">// use T0 randomness when producing on a null block
-</span><span class="c1"></span>    <span class="nf">GenerateNextTicket</span><span class="p">(</span><span class="nx">seed</span> <span class="nx">Randomness</span><span class="p">,</span> <span class="nx">workerKey</span> <span class="nx">PrivateKey</span><span class="p">)</span> <span class="nx">Ticket</span>
+</span><span class="c1"></span>    <span class="nf">GenerateNextTicket</span><span class="p">(</span><span class="nx">seed</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">workerKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PrivKey</span><span class="p">)</span> <span class="nx">base_blockchain</span><span class="p">.</span><span class="nx">Ticket</span>
 
     <span class="c1">// call by BlockChain when a new block is produced
-</span><span class="c1"></span>    <span class="nf">OnNewTipset</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">Epoch</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">OnNewTipset</span><span class="p">(</span>
+        <span class="nx">chain</span>   <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Chain</span>
+        <span class="nx">epoch</span>   <span class="nx">base_blockchain</span><span class="p">.</span><span class="nx">Epoch</span>
+        <span class="nx">tipset</span>  <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Tipset</span>
+    <span class="p">)</span>
 
     <span class="c1">// call by clock during BlockProduction
 </span><span class="c1"></span>    <span class="c1">// TODO: define clock better
-</span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span> <span class="nx">ElectionArtifacts</span>
+</span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">(</span><span class="nx">newTipset</span> <span class="nx">blockchain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">base_blockchain</span><span class="p">.</span><span class="nx">ElectionArtifacts</span>
 <span class="p">}</span>
 </code></pre></div>
 

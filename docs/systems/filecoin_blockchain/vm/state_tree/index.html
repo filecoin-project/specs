@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -16,8 +16,9 @@
 
 
 <link rel="alternate" type="application/rss+xml" href="../../../../../docs/systems/filecoin_blockchain/vm/state_tree/index.xml" title="Filecoin Spec" />
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -65,7 +66,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1676,6 +1677,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4316,6 +4383,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
 
+<span class="c1">// Epoch is an epoch in time in the StateTree.
+</span><span class="c1">// It corresponds to rounds in the blockchain, but it
+</span><span class="c1">// is defined here as actors need a notion of time.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Epoch</span> <span class="nx">UVarint</span>
+
 <span class="c1">// TODO: move this into a directory w/ all the actors + states
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorName</span> <span class="nx">enum</span> <span class="p">{</span>
     <span class="nx">StoragePowerActor</span>
@@ -4328,31 +4400,14 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SystemActors</span>  <span class="p">{</span><span class="nx">ActorName</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
-    <span class="nx">ActorStates</span>   <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>
+    <span class="nx">SystemActors</span>              <span class="p">{</span><span class="nx">ActorName</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
+    <span class="nx">ActorStates</span>               <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>
 
     <span class="c1">// TODO: API ConvenienceAPI
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="c1">// Things we may add:
-</span><span class="c1">//
-</span><span class="c1">// number of sectors
-</span><span class="c1">// number of miners
-</span><span class="c1">// number of deals?
-</span><span class="c1">// number of actors
-</span><span class="c1">//
-</span><span class="c1">// number of addresses
-</span><span class="c1">// token stats
-</span><span class="c1">// storage power stats
-</span><span class="c1">//
-</span><span class="c1">// $head/state/sectors/count
-</span><span class="c1">// $head/state/sectors/&lt;num&gt; (cid)
-</span><span class="c1">// $head/state/sectors/&lt;num&gt;/size
-</span><span class="c1">// $head/state/sectors/&lt;num&gt;/pieces/count
-</span><span class="c1">// $head/state/sectors/&lt;num&gt;/pieces/&lt;num&gt; (cid)
-</span><span class="c1">// $head/state/pieces/count
-</span><span class="c1">// $head/state/pieces/&lt;num&gt; (cid)
-</span></code></pre></div>
+</span><span class="c1"></span>
+    <span class="nf">GetActor</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 

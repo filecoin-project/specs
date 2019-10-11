@@ -1,65 +1,76 @@
 package storage_mining
 
-func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount) StorageMinerActor {
+// import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+// import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
+
+// import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+
+func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, pledgeAmt actor.TokenAmount) address.Address {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)
-	return spa.RegisterMiner(ownerAddr, workerPubKey)
+	return sms.StoragePowerActor().RegisterMiner(ownerAddr, workerPubKey)
 }
 
-type StorageDealStagedNotification = struct {
-	Deal     StorageDeal
-	PieceRef CID
-	Pip      PieceInclusionProof
-	SectorID SectorID
-}
-
-func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal StorageDeal, pieceRef CID) {
-	AddDealToSectorResponse := sms.sectorIndexer.AddDealToSector(deal)
-	storageProvider.NotifyStorageDealStaged(StorageDealStagedNotification{
-		Deal:     deal,
-		PieceRef: pieceRef,
-		Pip:      AddDealToSectorResponse.pip,
-		SectorID: AddDealToSectorResponse.sectorID,
+func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {
+	stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
+	sms.StorageProvider().NotifyStorageDealStaged(&StorageDealStagedNotification_I{
+		Deal_:     deal,
+		PieceRef_: pieceRef,
+		SectorID_: stagedDealResponse.SectorID(),
 	})
 }
 
-func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey PubKey) Addr {
+func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) address.Address {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) CommitSectorError() StorageDeal {
+func (sms *StorageMiningSubsystem_I) CommitSectorError() base_markets.StorageDeal {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewTipset(chain Chain, epoch Epoch, tipset Tipset) struct{} {
-	sms.CurrentChain = chain
-	sms.CurrentEpoch = epoch
-	sms.CurrentTipset = tipset
+func (sms *StorageMiningSubsystem_I) OnNewTipset(chain blockchain.Chain, epoch blockchain.Epoch, tipset blockchain.Tipset) {
+	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset Tipset) ElectionArtifacts {
-	ea := storagePowerConsensus.ElectionArtifacts(sms.CurrentChain, sms.CurrentEpoch)
-	EP := DrawElectionProof(ea.TK, sms.workerPrivateKey)
-
+func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts {
 	panic("TODO: fix this below")
+
+	// TODO this below has been commented due to incomplete implementation
+	// ea := sms.Consensus().GetElectionArtifacts(sms.CurrentChain, sms.CurrentEpoch)
+	// EP := sms.DrawElectionProof(ea.TK(), sms.workerPrivateKey)
 	// if newTipset {
 	// 	T0 := GenerateNextTicket(ea.T1, workerPrivateKey)
 	// } else {
 	// 	T1 := GenerateNextTicket(T0, workerPrivateKey)
 	// }
 
-	if storagePowerConsensus.TryLeaderElection(EP) {
-		// TODO: move this into SPC or Blockchain
-		// SMS should probably not have ability to call BlockProducer directly.
-		BlockProducer.GenerateBlock(EP, T0, sms.CurrentTipset, workerKey)
-	} else {
-		// TODO when not elected
-	}
+	// if sms.Consensus().TryLeaderElection(EP) {
+	// 	// TODO: move this into SPC or Blockchain
+	// 	// SMS should probably not have ability to call BlockProducer directly.
+	// 	sms.BlockProducer().GenerateBlock(EP, ea.T1(), sms.CurrentTipset(), workerKey)
+	// } else {
+	// 	// TODO when not elected
+	// }
+
+	// return ea
 }
 
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk Ticket, workerKey PrivateKey) ElectionProof {
-	return generateElectionProof(tk, workerKey)
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk base_blockchain.Ticket, workerKey filcrypto.PrivKey) base_blockchain.ElectionProof {
+	// return generateElectionProof(tk, workerKey)
+	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 Ticket, workerKey PrivateKey) Ticket {
+func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 base_blockchain.Ticket, workerKey filcrypto.PrivKey) base_blockchain.Ticket {
+	panic("TODO")
+}
+
+// TODO this should be moved into storage market
+func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
 	panic("TODO")
 }

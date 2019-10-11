@@ -39,7 +39,7 @@ type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId 
       
       <guid>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor/</guid>
       <description>(You can see the old AccountActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address }  </description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address } type AccountActor struct { actorState actor.ActorState accountState AccountActorState }  </description>
     </item>
     
     <item>
@@ -48,7 +48,7 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockcha
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/vm/sysactors/cron_actor/</guid>
-      <description> type CronActor struct { // Tick executes built-in periodic actions.  Tick() }  </description>
+      <description> import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type CronActorState struct { // Cron has no internal state } type CronActor struct { actorState actor.ActorState cronState CronActorState // Tick executes built-in periodic actions.  Tick() }  </description>
     </item>
     
     <item>
@@ -58,7 +58,7 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockcha
       
       <guid>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor/</guid>
       <description>(You can see the old InitActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type InitActor struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID // 0  InitConstructor() // 1  Exec(code actor.CodeCID, params actor.ActorMethod) addr.Address // 2  GetActorIDForAddress(address addr.Address) actor.ActorID }  package sysactors import msg &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; func (self *InitActor) InitConstructor() { } func (self *InitActor) Exec(codeCID actor.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID } type InitActorCode struct { // 0  Constructor(r vmr.Runtime) // 1  Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address // 2  GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.</description>
     </item>
     
   </channel>

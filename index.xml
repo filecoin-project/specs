@@ -97,7 +97,7 @@ type PaymentChannel struct { from Address to Address toSend TokenAmount closingA
       
       <guid>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor/</guid>
       <description>(You can see the old AccountActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address }  </description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address } type AccountActor struct { actorState actor.ActorState accountState AccountActorState }  </description>
     </item>
     
     <item>
@@ -230,7 +230,7 @@ In so doing, the chain manager is the central subsystem that handles bookkeeping
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/vm/sysactors/cron_actor/</guid>
-      <description> type CronActor struct { // Tick executes built-in periodic actions.  Tick() }  </description>
+      <description> import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type CronActorState struct { // Cron has no internal state } type CronActor struct { actorState actor.ActorState cronState CronActorState // Tick executes built-in periodic actions.  Tick() }  </description>
     </item>
     
     <item>
@@ -279,7 +279,7 @@ This section should contain:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</guid>
-      <description> type ChainWeight UVarint type ExpectedConsensus struct { // ComputeWeight(Chain)	ChainWeight  // TryElection(StorageMiner, TipSet)	ElectionProof  // VerifyElection(StorageMiner, ElectionProof)	bool  // IsConsensusFault([Block])	bool }  </description>
+      <description> type ExpectedConsensus struct { // ComputeWeight(Chain)	ChainWeight  // TryElection(StorageMiner, TipSet)	ElectionProof  // VerifyElection(StorageMiner, ElectionProof)	bool  // IsConsensusFault([Block])	bool }  </description>
     </item>
     
     <item>
@@ -431,7 +431,7 @@ All Systems, as defined in this document, require the following:
       
       <guid>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor/</guid>
       <description>(You can see the old InitActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type InitActor struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID // 0  InitConstructor() // 1  Exec(code actor.CodeCID, params actor.ActorMethod) addr.Address // 2  GetActorIDForAddress(address addr.Address) actor.ActorID }  package sysactors import msg &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; func (self *InitActor) InitConstructor() { } func (self *InitActor) Exec(codeCID actor.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID } type InitActorCode struct { // 0  Constructor(r vmr.Runtime) // 1  Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address // 2  GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.</description>
     </item>
     
     <item>
@@ -491,7 +491,7 @@ Upon receiving the message, its validity must be checked: the signature must be 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/storage_mining/mining_scheduler/</guid>
-      <description> import poster &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs/poster&amp;#34; // import storage_indexer &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&amp;#34;  type SectorSet [Sector] type SealedSectorSet [Sector] type ReplicaID CID type MiningScheduler struct { getStagedSectors() SectorSet getSealedSectors() SealedSectorSet getFaultySectors() SectorSet getRepairedSectors() SectorSet getExpiredSectors() SectorSet // same as completedSectors/doneSectors  ProducePost(sectors SectorSet) poster.PoStSubmission VerifyPost(sectors SectorSet) poster.PoStSubmission ReportFaults(actor &amp;amp;StorageMinerActor) bool RemoveSectors(sectorsToRemove SectorSet) bool DePledge(amount TokenAmount) bool SealedSector(sealedSector SealedSector) bool // receives from sector storage subsystem  AddSector( pledge TokenAmount sectorID &amp;amp;SectorID comm &amp;amp;SealCommitment proof SealProof ) SectorID // generateReplicaID(CommD Commitment, block Block) } type SealCommitment struct { CommD Commitment CommR Commitment }  </description>
+      <description>import poster &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; import mining &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining&amp;#34; // import storage_indexer &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&amp;#34;  type Sector struct {} type SectorSet [Sector] type SealedSectorSet [Sector] type ReplicaID CID type MiningScheduler struct { getStagedSectors() SectorSet getSealedSectors() SealedSectorSet getFaultySectors() SectorSet getRepairedSectors() SectorSet // same as completedSectors/doneSectors  getExpiredSectors() SectorSet ProducePost(sectors SectorSet) poster.PoStSubmission VerifyPost(sectors SectorSet) poster.PoStSubmission ReportFaults( actor &amp;amp;StorageMinerActor ) bool RemoveSectors(remove SectorSet) bool DePledge( amount actor.TokenAmount ) bool // receives from sector storage subsystem  SealedSector( sealedSector mining.</description>
     </item>
     
     <item>
@@ -501,7 +501,7 @@ Upon receiving the message, its validity must be checked: the signature must be 
       
       <guid>/docs/systems/filecoin_token/multisig/multisig_actor/</guid>
       <description>(You can see the old Multisig Actor here )
-type TokenAmount UVarint type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [Address] required NumRequired nextTxId TxSeqNo initialBalance TokenAmount startingBlock Epoch unlockDuration EpochDuration transactions {TxSeqNo: Transaction} Construct( signers [Address] required NumRequired unlockDuration EpochDuration ) Propose(to Address, value TokenAmount, method String, params Bytes) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer Address, increaseReq bool) RemoveSigner(signer Address, decreaseReq bool) SwapSigner(old Address, new Address) ChangeRequirement(req NumRequired) }  </description>
+import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [address.Address] required NumRequired nextTxId TxSeqNo initialBalance actor.TokenAmount startingBlock Epoch unlockDuration EpochDuration // transactions {TxSeqNo: Transaction} // TODO Transaction type does not exist  Construct( signers [address.Address] required NumRequired unlockDuration EpochDuration ) Propose( to address.Address value actor.TokenAmount method string params Bytes ) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer address.</description>
     </item>
     
     <item>
@@ -661,7 +661,7 @@ High Level API Fault Detection Fault detection happens over the course of the li
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector_index/sector_builder/</guid>
-      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import mkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector. type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.  // This builder just accumulates deals, keeping track of their  // sector configuration requirements, and the piece sizes.</description>
+      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import mkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID sector.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
     </item>
     
     <item>
@@ -757,7 +757,7 @@ import base_markets &amp;#34;github.com/filecoin-project/specs/systems/filecoin_
       
       <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
       <description>(You can see the old Storage Miner Actor here )
-type Seed struct {} type SectorCommitment struct {} type StorageMinerActor struct { // CollateralVault CollateralVault  // Sectors {UInt:MinedSector} // sectors and faults, proving period ends  // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)  // ProvingPeriodEnd Epoch  // // contains mostly static info about this miner  // info &amp;amp;MinerInfo  UpdateDoneSet() UpdateSectorStatus(sectorStateSets SectorStateSets, faultSets [FaultSet]) SubmitPoSt(postProof base.</description>
+import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import base_mining &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; type Seed struct {} type SectorCommitment struct {} type StorageMinerActor struct { // CollateralVault CollateralVault  // Sectors {UInt:MinedSector} // sectors and faults, proving period ends  // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)  // ProvingPeriodEnd Epoch  // // contains mostly static info about this miner  // info &amp;amp;MinerInfo  UpdateDoneSet() UpdateSectorStatus(sectorStateSets sector.</description>
     </item>
     
     <item>
@@ -785,7 +785,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; type BytesAmount UVarint type StoragePowerActor struct { // call by StorageMiningSubsytem on miner creation  RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) // call by StorageMinerActor on successful seal  // TODO: workerKey of type StorageMiner.WorkerPubKey  IncrementPower(minerAddress base.Address) UpdatePower(address base.Address, newPower minerStorage) SuspendMiner(address base.Address) // UpdateStoragePowerSubsystem(Tipset, StateTree)  // VerifyElectionProof(base.Address, base.ElectionProof)	bool  TotalStorage() BytesAmount // // What does graceful removal look like?  // NotifyConsensusFault(base.</description>
+      <description>import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; type BytesAmount UVarint type StoragePowerActor struct { // call by StorageMiningSubsytem on miner creation  RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) address.Address // call by StorageMinerActor on successful seal  // TODO: workerKey of type StorageMiner.WorkerPubKey  IncrementPower(minerAddress base.Address) UpdatePower(address base.Address, newPower minerStorage) SuspendMiner(address base.Address) // UpdateStoragePowerSubsystem(Tipset, StateTree)  // VerifyElectionProof(base.Address, base.ElectionProof)	bool  TotalStorage() BytesAmount // // What does graceful removal look like?</description>
     </item>
     
     <item>

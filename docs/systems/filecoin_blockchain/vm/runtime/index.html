@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -16,8 +16,9 @@
 
 
 <link rel="alternate" type="application/rss+xml" href="../../../../../docs/systems/filecoin_blockchain/vm/runtime/index.xml" title="Filecoin Spec" />
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -65,7 +66,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1676,6 +1677,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4311,111 +4378,197 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">interpreter</span>
-
-<span class="kn">import</span> <span class="nx">base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
-<span class="kd">type</span> <span class="nx">Storage</span> <span class="kd">struct</span><span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">AttoFIL</span> <span class="kd">struct</span><span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">CID</span> <span class="kd">struct</span><span class="p">{}</span>
+<span class="c1">// Randomness is a string of random bytes
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Randomness</span> <span class="nx">Bytes</span>
 
-<span class="kd">type</span> <span class="nx">VMMessage</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">To</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-	<span class="nx">Method</span> <span class="kt">string</span>
-	<span class="nx">Value</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nx">Params</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}</span>
+<span class="c1">// Runtime is the VM&#39;s internal runtime object.
+</span><span class="c1">// this is everything that is accessible to actors, beyond parameters.
+</span><span class="c1">// FKA as vm.Context
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Runtime</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Invocation is the inputs for the current invocation
+</span><span class="c1"></span>    <span class="nx">Invocation</span>     <span class="nx">InvocInput</span>
+    <span class="nx">State</span>          <span class="nx">VMState</span>
+
+    <span class="c1">// Fatal is a fatal error, and halts VM execution.
+</span><span class="c1"></span>    <span class="c1">// This is the normal error condition of actor execution.
+</span><span class="c1"></span>    <span class="c1">// On Fatal errors, the VM simply does not apply the state transition.
+</span><span class="c1"></span>    <span class="c1">// This is atomic across the entire contract execution.
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// TODO: @why wants to get rid of this.
+</span><span class="c1"></span>    <span class="nf">Fatal</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span>
+
+    <span class="c1">// Send allows the current execution context to invoke methods on other actors in the system
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// TODO: this should change to async -- put the message on the queue.
+</span><span class="c1"></span>    <span class="c1">//       do definied callback methods, with maybe a glue closure to align params or carry intermediate state.
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// TODO: what are the return values here?
+</span><span class="c1"></span>    <span class="nf">Send</span><span class="p">(</span>
+        <span class="nx">to</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">method</span>  <span class="kt">string</span>
+        <span class="nx">value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">params</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
+    <span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">VMMessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="c1">// VMState is Chain state accessible to all contracts via the VM interface
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">VMState</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// StateTree returns the current state tree
+</span><span class="c1"></span>    <span class="nx">StateTree</span>  <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+
+    <span class="c1">// Storage provides access to the VM storage layer
+</span><span class="c1"></span>    <span class="nx">Storage</span>    <span class="nx">VMStorage</span>
+
+    <span class="c1">// BlockHeight returns the height of the block this message was added to the chain in
+</span><span class="c1"></span>    <span class="nf">Epoch</span><span class="p">()</span>    <span class="nx">st</span><span class="p">.</span><span class="nx">Epoch</span>
+
+    <span class="c1">// Balance returns the balance of a given actor
+</span><span class="c1"></span>    <span class="nf">Balance</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="c1">// Randomness returns the randomness (ticket) for a particular epoch, and offset.
+</span><span class="c1"></span>    <span class="nf">Randomness</span><span class="p">(</span><span class="nx">e</span> <span class="nx">st</span><span class="p">.</span><span class="nx">Epoch</span><span class="p">,</span> <span class="nx">offset</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">Randomness</span>
+
+    <span class="c1">// ComputeActorAddress computes the address of the contract,
+</span><span class="c1"></span>    <span class="c1">// based on the creator (invoking address) and nonce given.
+</span><span class="c1"></span>    <span class="c1">// TODO: why is this needed? -- InitActor
+</span><span class="c1"></span>    <span class="c1">// TODO: this has to be the origin call. and it&#39;s broken: could yield the same address
+</span><span class="c1"></span>    <span class="c1">//       need a truly unique way to assign an address.
+</span><span class="c1"></span>    <span class="nf">ComputeActorAddress</span><span class="p">(</span><span class="nx">creator</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">nonce</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">MessageNumber</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">VMStorage</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// Put writes the given object to the storage staging area and returns its CID
+</span><span class="c1"></span>    <span class="nf">Put</span><span class="p">(</span><span class="nx">o</span> <span class="nx">IpldObject</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">c</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
-<span class="c1">// VMSyscalls is the interface of functions callable from within an actor.
-</span><span class="c1">// This defines all the functions an actor may call on the VM.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">VMSyscalls</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// Fatal is a fatal error, and halts VM execution.
-</span><span class="c1"></span>	<span class="c1">// This is the normal error condition of actor execution.
-</span><span class="c1"></span>	<span class="c1">// On Fatal errors, the VM simply does not apply the state transition.
-</span><span class="c1"></span>	<span class="c1">// This is atomic across the entire contract execution.
-</span><span class="c1"></span>	<span class="nf">Fatal</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span>
+    <span class="c1">// Get fetches the given object from storage (either staging, or local) and returns
+</span><span class="c1"></span>    <span class="c1">// the serialized data.
+</span><span class="c1"></span>    <span class="nf">Get</span><span class="p">(</span><span class="nx">c</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">o</span> <span class="nx">IpldObject</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
-	<span class="c1">// ComputeActorAddress computes the address of the contract,
-</span><span class="c1"></span>	<span class="c1">// based on the creator (invoking address) and nonce given.
-</span><span class="c1"></span>	<span class="nf">ComputeActorAddress</span><span class="p">(</span><span class="nx">creator</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">nonce</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="c1">// Commit updates the actual stored state for the actor. This is a compare and swap
+</span><span class="c1"></span>    <span class="c1">// operation, and will fail if &#39;old&#39; is not equal to the current return value of `Head`.
+</span><span class="c1"></span>    <span class="c1">// This functionality is used to prevent issues with re-entrancy
+</span><span class="c1"></span>    <span class="c1">//
+</span><span class="c1"></span>    <span class="c1">// TODO: YIKES i dont think we need commit to prevent re-entrancy. if we do, the model
+</span><span class="c1"></span>    <span class="c1">// is wrong.
+</span><span class="c1"></span>    <span class="nf">Commit</span><span class="p">(</span><span class="nx">old</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">error</span>
 
-	<span class="c1">// Storage provides access to the VM storage layer
-</span><span class="c1"></span>	<span class="nf">Storage</span><span class="p">()</span> <span class="nx">VMStorage</span>
-
-	<span class="c1">// ChainState is statetree accessible to all the actors
-</span><span class="c1"></span>	<span class="nf">ChainState</span><span class="p">()</span> <span class="nx">VMChainState</span>
-
-	<span class="c1">// Send allows the current execution context to invoke methods on other actors in the system
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="c1">// TODO: this should change to async -- put the message on the queue.
-</span><span class="c1"></span>	<span class="c1">//       do definied callback methods, with maybe a glue closure to align params or carry intermediate state.
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="c1">// TODO: what are the return values here?
-</span><span class="c1"></span>	<span class="nf">SendMsg</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">params</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">uint8</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="c1">// Head returns the CID of the current actor state
+</span><span class="c1"></span>    <span class="nf">Head</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="p">}</span>
 
-<span class="c1">// VMContext is the old syscalls version. not sure we need it.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">VMContext</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// Message is the message that kicked off the current invocation
-</span><span class="c1"></span>	<span class="nf">Message</span><span class="p">()</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span>
+<span class="kd">type</span> <span class="nx">IpldObject</span> <span class="kd">struct</span> <span class="p">{}</span>
+</code></pre></div>
 
-	<span class="c1">// Origin is the address of the account that initiated the top level invocation
-</span><span class="c1"></span>	<span class="nf">Origin</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-	<span class="c1">// Storage provides access to the VM storage layer
-</span><span class="c1"></span>	<span class="nf">Storage</span><span class="p">()</span> <span class="nx">Storage</span>
 
-	<span class="c1">// Send allows the current execution context to invoke methods on other actors in the system
-</span><span class="c1"></span>	<span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">AttoFIL</span><span class="p">,</span> <span class="nx">params</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">uint8</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 
-	<span class="c1">// BlockHeight returns the height of the block this message was added to the chain in
-</span><span class="c1"></span>	<span class="nf">BlockHeight</span><span class="p">()</span> <span class="nx">base</span><span class="p">.</span><span class="nx">BlockHeight</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">runtime</span>
+
+<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree&#34;</span>
+<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime/gascost&#34;</span>
+<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime/exitcode&#34;</span>
+
+<span class="c1">// InvocInput represents inputs to a particular actor invocation.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">InvocInput</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">Runtime</span>     <span class="nx">Runtime</span>
+	<span class="nx">InTree</span>      <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+	<span class="nx">OriginActor</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
+	<span class="nx">CallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
+	<span class="nx">FromActor</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
+	<span class="nx">ToActor</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
+	<span class="nx">Method</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
+	<span class="nx">Params</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
+	<span class="nx">Value</span>       <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nx">GasLimit</span>    <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
+	<span class="nx">GasUsed</span>     <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
+	<span class="c1">// GasPrice    GasPrice
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">OutTree</span>     <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+	<span class="nx">ExitCode</span>    <span class="nx">msg</span><span class="p">.</span><span class="nx">ExitCode</span>
+	<span class="nx">ReturnValue</span> <span class="p">[]</span><span class="kt">byte</span>
+	<span class="nx">GasUsed</span>     <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">VMStorage</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// Put writes the given object to the storage staging area and returns its CID
-</span><span class="c1"></span>	<span class="nf">Put</span><span class="p">(</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="nx">CID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-
-	<span class="c1">// Get fetches the given object from storage (either staging, or local) and returns
-</span><span class="c1"></span>	<span class="c1">// the serialized data.
-</span><span class="c1"></span>	<span class="nf">Get</span><span class="p">(</span><span class="nx">CID</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-
-	<span class="c1">// Commit updates the actual stored state for the actor. This is a compare and swap
-</span><span class="c1"></span>	<span class="c1">// operation, and will fail if &#39;old&#39; is not equal to the current return value of `Head`.
-</span><span class="c1"></span>	<span class="c1">// This functionality is used to prevent issues with re-entrancy
-</span><span class="c1"></span>	<span class="c1">//
-</span><span class="c1"></span>	<span class="c1">// TODO: YIKES i dont think we need commit to prevent re-entrancy. if we do, the model
-</span><span class="c1"></span>	<span class="c1">// is wrong.
-</span><span class="c1"></span>	<span class="nf">Commit</span><span class="p">(</span><span class="nx">old</span> <span class="nx">CID</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">CID</span><span class="p">)</span> <span class="kt">error</span>
-
-	<span class="c1">// Head returns the CID of the current actor state
-</span><span class="c1"></span>	<span class="nf">Head</span><span class="p">()</span> <span class="nx">CID</span>
+<span class="kd">func</span> <span class="nf">ErrorInvocOutput</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ec</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">InvocOutput</span><span class="p">{</span>
+		<span class="nx">OutTree</span><span class="p">:</span>     <span class="nx">tree</span><span class="p">,</span>
+		<span class="nx">GasUsed</span><span class="p">:</span>     <span class="nx">gascost</span><span class="p">.</span><span class="nx">CodeLookupFail</span><span class="p">,</span>
+		<span class="nx">ExitCode</span><span class="p">:</span>    <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidMethod</span><span class="p">,</span>
+		<span class="nx">ReturnValue</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
+	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="c1">// VMChainState is Chain state accessible to all contracts via the VM interface
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">VMChainState</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="c1">// BlockHeight returns the height of the block this message was added to the chain in
-</span><span class="c1"></span>	<span class="nf">BlockHeight</span><span class="p">()</span> <span class="nx">base</span><span class="p">.</span><span class="nx">BlockHeight</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Runtime_I</span><span class="p">)</span> <span class="nf">Fatal</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span> <span class="nx">Runtime_Fatal_FunRet</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
 
-	<span class="c1">// RoundMessageNumber returns the number this message is in this round.
-</span><span class="c1"></span>	<span class="c1">// (BlockHeight, RoundMessageNumber) is a unique tuple per message invocation
-</span><span class="c1"></span>	<span class="nf">RoundMessageNumber</span><span class="p">()</span> <span class="nx">MessageNumber</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Runtime_I</span><span class="p">)</span> <span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
 
-	<span class="c1">// ChainMessageNumber returns the number of messages in the chain so far.
-</span><span class="c1"></span>	<span class="c1">// TODO: this probably should be in a bunch of state accessible to the contracts.
-</span><span class="c1"></span>	<span class="nf">ChainMessageNumber</span><span class="p">()</span> <span class="nx">MessageNumber</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMState_I</span><span class="p">)</span> <span class="nf">Epoch</span><span class="p">()</span> <span class="nx">st</span><span class="p">.</span><span class="nx">Epoch</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
 
-	<span class="c1">// MinerAddress who should earn this message txn id
-</span><span class="c1"></span>	<span class="nf">MinerAddress</span><span class="p">()</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMState_I</span><span class="p">)</span> <span class="nf">Balance</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMState_I</span><span class="p">)</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">e</span> <span class="nx">st</span><span class="p">.</span><span class="nx">Epoch</span><span class="p">,</span> <span class="nx">offset</span> <span class="kt">uint64</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMState_I</span><span class="p">)</span> <span class="nf">ComputeActorAddress</span><span class="p">(</span><span class="nx">creator</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">nonce</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMStorage_I</span><span class="p">)</span> <span class="nf">Put</span><span class="p">(</span><span class="nx">o</span> <span class="nx">IpldObject</span><span class="p">)</span> <span class="nx">VMStorage_Put_FunRet</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMStorage_I</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">c</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">VMStorage_Get_FunRet</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMStorage_I</span><span class="p">)</span> <span class="nf">Commit</span><span class="p">(</span><span class="nx">old</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">,</span> <span class="nx">new</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">VMStorage_I</span><span class="p">)</span> <span class="nf">Head</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</guid>
-      <description> type ChainWeight UVarint type ExpectedConsensus struct { // ComputeWeight(Chain)	ChainWeight  // TryElection(StorageMiner, TipSet)	ElectionProof  // VerifyElection(StorageMiner, ElectionProof)	bool  // IsConsensusFault([Block])	bool }  </description>
+      <description> type ExpectedConsensus struct { // ComputeWeight(Chain)	ChainWeight  // TryElection(StorageMiner, TipSet)	ElectionProof  // VerifyElection(StorageMiner, ElectionProof)	bool  // IsConsensusFault([Block])	bool }  </description>
     </item>
     
     <item>
@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; type BytesAmount UVarint type StoragePowerActor struct { // call by StorageMiningSubsytem on miner creation  RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) // call by StorageMinerActor on successful seal  // TODO: workerKey of type StorageMiner.WorkerPubKey  IncrementPower(minerAddress base.Address) UpdatePower(address base.Address, newPower minerStorage) SuspendMiner(address base.Address) // UpdateStoragePowerSubsystem(Tipset, StateTree)  // VerifyElectionProof(base.Address, base.ElectionProof)	bool  TotalStorage() BytesAmount // // What does graceful removal look like?  // NotifyConsensusFault(base.</description>
+      <description>import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; type BytesAmount UVarint type StoragePowerActor struct { // call by StorageMiningSubsytem on miner creation  RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) address.Address // call by StorageMinerActor on successful seal  // TODO: workerKey of type StorageMiner.WorkerPubKey  IncrementPower(minerAddress base.Address) UpdatePower(address base.Address, newPower minerStorage) SuspendMiner(address base.Address) // UpdateStoragePowerSubsystem(Tipset, StateTree)  // VerifyElectionProof(base.Address, base.ElectionProof)	bool  TotalStorage() BytesAmount // // What does graceful removal look like?</description>
     </item>
     
   </channel>

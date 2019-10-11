@@ -1,8 +1,8 @@
 import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
-import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/state_tree"
-import minBase "github.com/filecoin-project/specs/systems/filecoin_mining"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
+import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
     powerTable           PowerTable
@@ -12,13 +12,13 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     ChooseTipsetToMine(tipsets [blockchain.Tipset]) [blockchain.Tipset]
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(chain blockchain.Chain, epoch base.Epoch) minBase.SealSeed
+    GetSealSeed(chain blockchain.Chain, epoch base.Epoch) base_mining.SealSeed
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(chain blockchain.Chain, epoch base.Epoch) minBase.PoStChallenge
+    GetPoStChallenge(chain blockchain.Chain, epoch base.Epoch) base_mining.PoStChallenge
 
     // call by BlockchainSubsystem during block reception
-    ValidateBlock(block blockchain.Block) StoragePowerConsensusError
+    ValidateBlock(block blockchain.Block) base.StoragePowerConsensusError
 
     // call by StorageMiningSubsystem during block production
     GetElectionArtifacts(chain blockchain.Chain, epoch base.Epoch) base.ElectionArtifacts
@@ -29,7 +29,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by StorageMiningSubsystem during block production
     TryLeaderElection(electionProof base.ElectionProof) bool
 
-    StoragePowerConsensusError() StoragePowerConsensusError
+    StoragePowerConsensusError() base.StoragePowerConsensusError
 
     computeTipsetWeight(tipset blockchain.Tipset) base.ChainWeight
 }
@@ -38,7 +38,7 @@ type PowerTable struct {
     // all power here is always verified
     minerPower {base.Address: StorageMiner}
     LookupMinerStorage(addr base.Address) UVarint
-    LookupMinerPowerFraction(addr base.Address) Float
+    LookupMinerPowerFraction(addr base.Address) base.PowerFraction
     RemovePower(addr base.Address)
 }
 
@@ -49,4 +49,3 @@ type StorageMiner struct {
 }
 
 type minerStorage UVarint
-type StoragePowerConsensusError error

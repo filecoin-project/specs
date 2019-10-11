@@ -8,15 +8,16 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.8ad7369f48c202f33a561c4392159cab5b8b2dbd7ccdab4f731410d11b10c7a9.css">
+<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
 <link rel="icon" href="../../../../../favicon.png" type="image/x-icon">
 
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+
+<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
 Made with Book Theme
@@ -64,7 +65,7 @@ https://github.com/alex-shpak/hugo-book
   </style>
 
 
-  <div>
+  <div id="menu-toc">
 
   <div>
     
@@ -1675,6 +1676,72 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-4">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-5">
+
+</ul>
+
+
+    
+    </li>
 
 </ul>
 
@@ -4311,41 +4378,52 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proofs/poster&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
 <span class="c1">// import storage_indexer &#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&#34;
 </span><span class="c1"></span>
+<span class="kd">type</span> <span class="nx">Sector</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">SectorSet</span> <span class="p">[</span><span class="nx">Sector</span><span class="p">]</span>
 <span class="kd">type</span> <span class="nx">SealedSectorSet</span> <span class="p">[</span><span class="nx">Sector</span><span class="p">]</span>
 <span class="kd">type</span> <span class="nx">ReplicaID</span> <span class="nx">CID</span>
 
 <span class="kd">type</span> <span class="nx">MiningScheduler</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">getStagedSectors</span><span class="p">()</span>                        <span class="nx">SectorSet</span>
-    <span class="nf">getSealedSectors</span><span class="p">()</span>                        <span class="nx">SealedSectorSet</span>
-    <span class="nf">getFaultySectors</span><span class="p">()</span>                        <span class="nx">SectorSet</span>
-    <span class="nf">getRepairedSectors</span><span class="p">()</span>                      <span class="nx">SectorSet</span>
-    <span class="nf">getExpiredSectors</span><span class="p">()</span>                       <span class="nx">SectorSet</span>  <span class="c1">// same as completedSectors/doneSectors
-</span><span class="c1"></span>
-    <span class="nf">ProducePost</span><span class="p">(</span><span class="nx">sectors</span> <span class="nx">SectorSet</span><span class="p">)</span>            <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span>
-    <span class="nf">VerifyPost</span><span class="p">(</span><span class="nx">sectors</span> <span class="nx">SectorSet</span><span class="p">)</span>             <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span>
+    <span class="nf">getStagedSectors</span><span class="p">()</span>              <span class="nx">SectorSet</span>
+    <span class="nf">getSealedSectors</span><span class="p">()</span>              <span class="nx">SealedSectorSet</span>
+    <span class="nf">getFaultySectors</span><span class="p">()</span>              <span class="nx">SectorSet</span>
+    <span class="nf">getRepairedSectors</span><span class="p">()</span>            <span class="nx">SectorSet</span>
+    <span class="c1">// same as completedSectors/doneSectors
+</span><span class="c1"></span>    <span class="nf">getExpiredSectors</span><span class="p">()</span>             <span class="nx">SectorSet</span>
 
-    <span class="nf">ReportFaults</span><span class="p">(</span><span class="nx">actor</span> <span class="o">&amp;</span><span class="nx">StorageMinerActor</span><span class="p">)</span>    <span class="kt">bool</span>
-    <span class="nf">RemoveSectors</span><span class="p">(</span><span class="nx">sectorsToRemove</span> <span class="nx">SectorSet</span><span class="p">)</span>  <span class="kt">bool</span>
-    <span class="nf">DePledge</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">TokenAmount</span><span class="p">)</span>              <span class="kt">bool</span>
-    <span class="nf">SealedSector</span><span class="p">(</span><span class="nx">sealedSector</span> <span class="nx">SealedSector</span><span class="p">)</span>   <span class="kt">bool</span>  <span class="c1">// receives from sector storage subsystem
-</span><span class="c1"></span>    <span class="nf">AddSector</span><span class="p">(</span>
-        <span class="nx">pledge</span>    <span class="nx">TokenAmount</span>
-        <span class="nx">sectorID</span>  <span class="o">&amp;</span><span class="nx">SectorID</span>
-        <span class="nx">comm</span>      <span class="o">&amp;</span><span class="nx">SealCommitment</span>
-        <span class="nx">proof</span>     <span class="nx">SealProof</span>
-    <span class="p">)</span> <span class="nx">SectorID</span>
+    <span class="nf">ProducePost</span><span class="p">(</span><span class="nx">sectors</span> <span class="nx">SectorSet</span><span class="p">)</span>  <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span>
+    <span class="nf">VerifyPost</span><span class="p">(</span><span class="nx">sectors</span> <span class="nx">SectorSet</span><span class="p">)</span>   <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span>
+
+    <span class="nf">ReportFaults</span><span class="p">(</span>
+        <span class="nx">actor</span> <span class="o">&amp;</span><span class="nx">StorageMinerActor</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="nf">RemoveSectors</span><span class="p">(</span><span class="nx">remove</span> <span class="nx">SectorSet</span><span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="nf">DePledge</span><span class="p">(</span>
+        <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="c1">// receives from sector storage subsystem
+</span><span class="c1"></span>    <span class="nf">SealedSector</span><span class="p">(</span>
+        <span class="nx">sealedSector</span> <span class="nx">mining</span><span class="p">.</span><span class="nx">SealedSector</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="nf">AddSector</span><span class="p">(</span>
+        <span class="nx">pledge</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">sectorID</span>  <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+        <span class="nx">comm</span>      <span class="o">&amp;</span><span class="nx">mining</span><span class="p">.</span><span class="nx">SealCommitment</span>
+        <span class="nx">proof</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">SealProof</span>
+    <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
 
     <span class="c1">// generateReplicaID(CommD Commitment, block Block)
 </span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">CommD</span>  <span class="nx">Commitment</span>
-    <span class="nx">CommR</span>  <span class="nx">Commitment</span>
-<span class="p">}</span>
 </code></pre></div>
 
 

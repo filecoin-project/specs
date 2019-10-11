@@ -590,6 +590,14 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/runtime/exitcode/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/vm/runtime/gascost/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_blockchain/vm/interpreter/vm_interpreter_old/</loc>
   </url>
   
