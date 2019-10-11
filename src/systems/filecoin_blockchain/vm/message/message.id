@@ -14,24 +14,24 @@ type Message union {
 }  // representation keyed
 
 type UnsignedMessage struct {
-    to        addr.Address
-    from      addr.Address
+    From        addr.Address
+    To          addr.Address
+
+    Method      actor.MethodNum
+    Params      actor.MethodParams  // Serialized parameters to the method.
 
     // When receiving a message from a user account the nonce in the message must match
     // the expected nonce in the "from" actor. This prevents replay attacks.
-    nonce     actor.CallSeqNum
-    value     actor.TokenAmount
+    CallSeqNum  actor.CallSeqNum
+    Value       actor.TokenAmount
 
-    gasPrice  actor.TokenAmount
-    gasLimit  actor.TokenAmount
-
-    method    actor.MethodNum
-    params    actor.MethodParams  // Serialized parameters to the method.
+    GasPrice
+    GasLimit    GasAmount
 }  // representation tuple
 
 type SignedMessage struct {
-    message    UnsignedMessage
-    signature  filcrypto.Signature
+    Message    UnsignedMessage
+    Signature  filcrypto.Signature
 }  // representation tuple
 
 type ExitCode UVarint
@@ -39,5 +39,5 @@ type ExitCode UVarint
 type MessageReceipt struct {
     ExitCode
     ReturnValue  Bytes
-    GasUsed      actor.TokenAmount
+    GasUsed      GasAmount
 }  // representation tuple

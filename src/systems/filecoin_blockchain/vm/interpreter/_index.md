@@ -12,3 +12,7 @@ entries:
 {{< readfile file="vm_interpreter.id" code="true" lang="go" >}}
 
 {{< readfile file="vm_interpreter.go" code="true" lang="go" >}}
+
+{{< readfile file="vm_codeload.go" code="true" lang="go" >}}
+
+{{< readfile file="vm_registry.go" code="true" lang="go" >}}

@@ -1,0 +1,85 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
+import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
+import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+
+// Randomness is a string of random bytes
+type Randomness Bytes
+
+// Runtime is the VM's internal runtime object.
+// this is everything that is accessible to actors, beyond parameters.
+// FKA as vm.Context
+type Runtime struct {
+    // Invocation is the inputs for the current invocation
+    Invocation     InvocInput
+    State          VMState
+
+    // Fatal is a fatal error, and halts VM execution.
+    // This is the normal error condition of actor execution.
+    // On Fatal errors, the VM simply does not apply the state transition.
+    // This is atomic across the entire contract execution.
+    //
+    // TODO: @why wants to get rid of this.
+    Fatal(string)
+
+    // Send allows the current execution context to invoke methods on other actors in the system
+    //
+    // TODO: this should change to async -- put the message on the queue.
+    //       do definied callback methods, with maybe a glue closure to align params or carry intermediate state.
+    //
+    // TODO: what are the return values here?
+    Send(
+        to      addr.Address
+        method  string
+        value   actor.TokenAmount
+        params  actor.MethodParams
+    ) msg.MessageReceipt
+}
+
+// VMState is Chain state accessible to all contracts via the VM interface
+type VMState struct {
+    // StateTree returns the current state tree
+    StateTree  st.StateTree
+
+    // Storage provides access to the VM storage layer
+    Storage    VMStorage
+
+    // BlockHeight returns the height of the block this message was added to the chain in
+    Epoch()    st.Epoch
+
+    // Balance returns the balance of a given actor
+    Balance(id actor.ActorID) actor.TokenAmount
+
+    // Randomness returns the randomness (ticket) for a particular epoch, and offset.
+    Randomness(e st.Epoch, offset UInt) Randomness
+
+    // ComputeActorAddress computes the address of the contract,
+    // based on the creator (invoking address) and nonce given.
+    // TODO: why is this needed? -- InitActor
+    // TODO: this has to be the origin call. and it's broken: could yield the same address
+    //       need a truly unique way to assign an address.
+    ComputeActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Address
+}
+
+type VMStorage struct {
+    // Put writes the given object to the storage staging area and returns its CID
+    Put(o IpldObject) struct {c ipld.CID, err error}
+
+    // Get fetches the given object from storage (either staging, or local) and returns
+    // the serialized data.
+    Get(c ipld.CID) struct {o IpldObject, err error}
+
+    // Commit updates the actual stored state for the actor. This is a compare and swap
+    // operation, and will fail if 'old' is not equal to the current return value of `Head`.
+    // This functionality is used to prevent issues with re-entrancy
+    //
+    // TODO: YIKES i dont think we need commit to prevent re-entrancy. if we do, the model
+    // is wrong.
+    Commit(old ipld.CID, new ipld.CID) error
+
+    // Head returns the CID of the current actor state
+    Head() ipld.CID
+}
+
+type IpldObject struct {}

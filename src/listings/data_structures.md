@@ -40,7 +40,7 @@ A block header contains information relevant to a particular point in time over 
 
 For more on Tipsets, see {{<sref expected_consensus "the Expected Consensus spec">}}. Implementations may choose not to create a Tipset data structure, instead representing its operations in terms of the underlying blocks.
 
-{{<goFile Tipset>}}
+{{<goFile TipSet>}}
 
 
 # VRF Personalization

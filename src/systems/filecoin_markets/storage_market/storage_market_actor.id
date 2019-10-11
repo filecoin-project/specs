@@ -4,7 +4,6 @@ type StorageDeal base_markets.StorageDeal
 type StorageDealID base_markets.StorageDealID
 type Address base_markets.Address
 type Epoch base_markets.Epoch
-type PoStProof base_markets.PoStProof
 type TokenAmount base_markets.TokenAmount
 
 type StorageParticipantBalance struct {

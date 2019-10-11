@@ -9,12 +9,12 @@ type Address struct {
         Mainnet
     }
 
-    Protocol enum {
+    Type enum {
         ID
         Secp256k1
         Actor
         BLS
     }
 
-    VerifySyntax(addrType Address_Protocol) bool
+    VerifySyntax(addrType Address_Type) bool
 }
