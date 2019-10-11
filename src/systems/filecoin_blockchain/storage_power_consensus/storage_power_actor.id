@@ -1,16 +1,26 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import filcrypto "github.com/filecoin-project/specs/libraries/libp2p"
 
 type BytesAmount UVarint
 
 type StoragePowerActor struct {
+    Miners [address.Address] // TODO this should have a different type to account for power
+
     // call by StorageMiningSubsytem on miner creation
-    RegisterMiner(ownerAddr addr.Address, workerPubKey filcrypto.PubKey) addr.Address
+    CreateStorageMiner(ownerAddr addr.Address, workerPubKey filcrypto.PubKey, sectorSize UInt, peerId libp2p.PeerID) addr.Address
+
+    // TODO add NotifyConsensusFault(address.Address, [Block]) TODO maybe rename to Arbitrate
+    UpdatePower(address addr.Address, newPower minerStorage)
+
+    TotalStorage() BytesAmount
+
+    PowerLookup(minerAddr address.Address) BytesAmount
 
     // call by StorageMinerActor on successful seal
     // TODO: workerKey of type StorageMiner.WorkerPubKey
     IncrementPower(minerAddress addr.Address)
-    UpdatePower(address addr.Address, newPower minerStorage)
+
     SuspendMiner(address addr.Address)
 
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
@@ -18,9 +28,10 @@ type StoragePowerActor struct {
     // VerifyElectionProof(base.Address, base.ElectionProof)	bool
     TotalStorage() BytesAmount
 
-    // // What does graceful removal look like?
-    // NotifyConsensusFault(base.Address, [Block])
-    // NotifyStorageFault(base.Address)
+    // TODO: old methods, should be removed
+    // UpdateStoragePowerSubsystem(Tipset, StateTree)
+    // VerifyElectionProof(address.Address, base.ElectionProof)	bool
+    // NotifyStorageFault(address.Address)
     // TryPublishBlock(StateTree)					Block
 
     // RegisterStorageMiner(SealProof)				Address

@@ -12,9 +12,11 @@ import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 // import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
-func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, pledgeAmt actor.TokenAmount) address.Address {
+func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, sectorSize UInt, peerId libp2p.PeerID) address.Address {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)
-	return sms.StoragePowerActor().RegisterMiner(ownerAddr, workerPubKey)
+	var pledgeAmt actor.TokenAmount
+	// TODO compute PledgeCollateral for 0 bytes
+	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {
