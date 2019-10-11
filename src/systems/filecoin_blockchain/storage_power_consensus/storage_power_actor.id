@@ -41,6 +41,12 @@ type StoragePowerActor struct {
 
     // VerifyElectionProof(addr.Address, ElectionProof)	bool
 
+    Surprise(ticket base_blockchain.Ticket) [address.Address]
+
+    CheckFaults()
+
+    // // What does graceful removal look like?
+
     // TODO: old methods, should be removed
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
     // VerifyElectionProof(addr.Address, ElectionProof)	bool
