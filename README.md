@@ -51,7 +51,7 @@ For every subsystem in the Filecoin spec, it must always have a markdown file th
  <!--
  An architectural diagram of the build system can be found below.
   This is outdated. fix it and bring back.
-<img src="src/diagrams/buildsys/buildsys.svg" width="50%">
+<img src="src/diagrams/buildsys/buildsys.dot.svg" width="50%">
 -->
 
 ### System Overview
