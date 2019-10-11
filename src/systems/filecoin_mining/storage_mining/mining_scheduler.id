@@ -1,30 +1,28 @@
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import sectorset "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
 import mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 // import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
 
-type Sector struct {}
-type SectorSet [Sector]
-type SealedSectorSet [Sector]
 type ReplicaID CID
 
 type MiningScheduler struct {
-    getStagedSectors()              SectorSet
-    getSealedSectors()              SealedSectorSet
-    getFaultySectors()              SectorSet
-    getRepairedSectors()            SectorSet
+    getStagedSectors()    sectorset.SectorSet
+    getSealedSectors()    sectorset.SealedSectorSet
+    getFaultySectors()    sectorset.SectorSet
+    getRepairedSectors()  sectorset.SectorSet
     // same as completedSectors/doneSectors
-    getExpiredSectors()             SectorSet
+    getExpiredSectors()   sectorset.SectorSet
 
-    ProducePost(sectors SectorSet)  poster.PoStSubmission
-    VerifyPost(sectors SectorSet)   poster.PoStSubmission
+    ProducePost(sectors sectorset.SectorSet) poster.PoStSubmission
+    VerifyPost(sectors sectorset.SectorSet) poster.PoStSubmission
 
     ReportFaults(
         actor &StorageMinerActor
     ) bool
 
-    RemoveSectors(remove SectorSet) bool
+    RemoveSectors(remove sectorset.SectorSet) bool
 
     DePledge(
         amount actor.TokenAmount

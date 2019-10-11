@@ -15,9 +15,8 @@ type SealCfg struct {
 // SealVerifyInfo is the structure of all thte information a verifier
 // needs to verify a Seal.
 type SealVerifyInfo struct {
-    SectorID
-    MinerID   addr.Address
-    OnChain   OnChainSealVerifyInfo
+    MinerID  base_blockchain.Address
+    OnChain  OnChainSealVerifyInfo
 }
 
 // OnChainSealVerifyInfo is the structure of information that must go on chain.

@@ -8,7 +8,7 @@ type StorageDealStagedNotification struct {
 }
 
 type StorageProvider struct {
-    StorageDeals {deal.DealCID: deal.StorageDeal}
+    StorageDeals {deal.DealCID: deal.StorageDealStatus}
 
     // Client calls this to submit new StorageDealProposal
     HandleNewStorageDealProposal(proposal deal.StorageDealProposal)
@@ -16,10 +16,12 @@ type StorageProvider struct {
     // Call by StorageProvider to sign a StorageDealProposal
     signStorageDealProposal(proposal deal.StorageDealProposal) deal.StorageDeal
 
+    // Check client balance and signature
     verifyStorageClient(address base_blockchain.Address, signature deal.Signature) bool
 
+    // Call by StorageMiningSubsystem
     NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification)
 
-    // call by StorageClient
+    // Call by StorageClient
     HandleStorageDealQuery(dealCID deal.DealCID) deal.StorageDealStatus
 }
