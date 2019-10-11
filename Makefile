@@ -247,7 +247,7 @@ watch-code: .PHONY
 
 DOTs=$(shell find src -name '*.dot')
 MMDs=$(shell find src -name '*.mmd')
-SVGs=$(DOTs:%=%.svg) #$(MMDs:%=%.svg)
+SVGs=$(DOTs:%=%.svg) $(MMDs:%=%.svg)
 
 diagrams: ${SVGs}
 
