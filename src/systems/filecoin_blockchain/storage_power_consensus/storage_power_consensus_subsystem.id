@@ -14,39 +14,52 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     GenerateElectionProof(tipset block.Tipset) block.ElectionProof
     ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]
 
-    // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(chain chain.Chain, epoch block.ChainEpoch) base_mining.SealSeed
-
-    // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(chain chain.Chain, epoch block.ChainEpoch) base_mining.PoStChallenge
+    ec                   ExpectedConsensus
 
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
 
-    // call by StorageMiningSubsystem during block production
-    GetElectionArtifacts(chain chain.Chain, epoch block.ChainEpoch) block.ElectionArtifacts
+    validateElectionProof(base.ElectionProof, base.Address)
 
-    // call by StoragePowerConsensusSubsystem itself during block production
-    TicketAtEpoch(chain chain.Chain, epoch block.ChainEpoch) block.Ticket
-
-    // call by StorageMiningSubsystem during block production
-    TryLeaderElection(electionProof block.ElectionProof) bool
+    validateTicket(base.Ticket, base.Address)
 
     computeTipsetWeight(tipset block.Tipset) block.ChainWeight
+
+    IsWinningElectionProof(electionProof base.ElectionProof, workerAddr base.Address) bool
+
+    StoragePowerConsensusError() base.StoragePowerConsensusError
+
+    // Randomness methods
+
+    // call by StorageMiningSubsystem during block production
+    GetTicketProductionSeed(chain blockchain.Chain) base.Ticket
+
+    // call by StorageMiningSubsystem during block production
+    GetElectionProofSeed(chain blockchain.Chain) base.Ticket
+
+    // call by StorageMiningSubsystem in sealing sector
+    GetSealSeed(chain chain.Chain) base_mining.SealSeed
+
+    // call by StorageMiningSubsystem after sealing
+    GetPoStChallenge(chain chain.Chain) base_mining.PoStChallenge
+}
+
+type ExpectedConsensus struct {
+    // ComputeWeight(Chain)							        ChainWeight
+    // IsConsensusFault([Block])						    bool
 }
 
 type PowerTable struct {
     // all power here is always verified
-    minerPower {base.Address: StorageMiner}
-    LookupMinerPower(addr base.Address) UVarint
-    GetTotalPower() UVarint
+    miners {base.Address: StorageMiner}
+    GetMinerPower(addr base.Address) base.StoragePower
+    GetTotalPower() base.StoragePower
+    GetMinerPublicKey(addr base.Address) filcrypto.PublicKey
     RemovePower(addr base.Address)
 }
 
 type StorageMiner struct {
-    minerAddress  addr.Address
-    minerStorage
-    VRFKeyPair    filcrypto.VRFKeyPair
+    minerAddress       base.Address
+    minerStoragePower  base.StoragePower
+    minerPK            filcrypto.PublicKey
 }
-
-type minerStorage UVarint

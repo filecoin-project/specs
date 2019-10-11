@@ -14,6 +14,7 @@ chainsync: [systems, filecoin_blockchain, chainsync]
 
 ### SPC
 storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
+ticket_chain: [systems, filecoin_blockchain, storage_power_consensus, ticket_chain]
 power_table: [systems, filecoin_blockchain, storage_power_consensus]
 expected_consensus: [algorithms, expected_consensus]
 tickets: [algorithms, expected_consenus, tickets]

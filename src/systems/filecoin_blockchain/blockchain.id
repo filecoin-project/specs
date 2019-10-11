@@ -54,5 +54,5 @@ type BlockchainSubsystem struct @(mutable) {
     ChooseTipset(tipsets [block.Tipset]) block.Tipset
 
     // call by StorageMining
-    GetPostRandomness() chain.Randomness
+    // GetPostRandomness() chain.Randomness
 }

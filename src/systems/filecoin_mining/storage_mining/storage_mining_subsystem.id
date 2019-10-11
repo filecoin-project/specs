@@ -20,7 +20,12 @@ type StorageMiningSubsystem struct {
     MinerActor         StorageMinerActor
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
+<<<<<<< HEAD
     BlockProducer      blockproducer.BlockProducer
+=======
+    BlockProducer      blockproducer.BlockProducer
+    electionNonce      ElectionNonce
+>>>>>>> lots of progress on all functions related to ticket creation/validation, and EP creation/validation as well as randomness sampling
 
     // Need access to SPC in order to mine a block
     Consensus          spc.StoragePowerConsensusSubsystem
@@ -51,21 +56,17 @@ type StorageMiningSubsystem struct {
     CommitSectorError()
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    DrawElectionProof(tk chain.Randomness, workerKey filcrypto.PrivKey) block.ElectionProof
+    DrawElectionProof(lookbackTicket Ticket, nonce ElectionNonce, vrfKP libcrypto.VRFKeyPair) ElectionProof {
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    // use T1 randomness when producing on a tipset
-    // use T0 randomness when producing on a null block
-    GenerateNextTicket(seed chain.Randomness, workerKey filcrypto.PrivKey) block.Ticket
+    PrepareNewTicket(priorTicket Ticket, workerKeyPair libcrypto.VRFKeyPair) Ticket
 
     // call by BlockChain when a new block is produced
-    OnNewTipset(
-        chain   chain.Chain
-        epoch   block.ChainEpoch
-        tipset  block.Tipset
-    )
+    OnNewBestChain()
 
     // call by clock during BlockProduction
     // TODO: define clock better
-    OnNewRound(newTipset block.Tipset) block.ElectionArtifacts
+    OnNewRound()
+
+    tryLeaderElection()
 }

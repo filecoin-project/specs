@@ -46,4 +46,52 @@ Put another way, power accounting in the SPC is delayed between storage being pr
 
 ## Repeated leader election attempts
 
-In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid `ElectionProof`
+In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid `ElectionProof` and trying again.
+
+{{<label ticket_chain>}}
+### The Ticket chain and randomness on-chain
+
+While each Filecoin block header contains a ticket field (see {{<sref tickets>}}), it is useful to provide nodes with a ticket chain abstraction.
+
+Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
+- The {{<sref sector_sealer>}} uses tickets as SealSeeds to bind sector commitments to a given subchain.
+- The {{<sref post_generator>}} likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
+- They are drawn by the Storage Power subsystem as randomness in {{<leader_election>}} to determine their eligibility to mine a block
+- They are drawn by the Storage Power subsystem in order to generate new tickets for future use.
+
+Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin's Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.
+
+This ticket chain will track one-to-one with a block at each height in a given subchain, but omits certain details including other blocks mined at that height.
+
+It is composed inductively as follows. For a given chain:
+
+- At height 0, take the genesis block, return its ticket
+- At height n+1, take the heaviest tipset in our chain at height n.
+    - select the block in that tipset with the smallest final ticket, return its ticket
+
+Because a Tipset can contain multiple blocks, the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.
+
+```
+   ┌──────────────────────┐
+   │                      │
+   │                      │
+   │┌────┐                │
+   ││ TA │              A │
+   └┴────┴────────────────┘
+
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                          │
+   │
+    ┌────┐                │       TA < TB < TC
+   ││ TB │              B
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘
+
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                          │
+   │
+    ┌────┐                │
+   ││ TC │              C
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘
+```
+
+In the above diagram, a miner will use block A's Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.

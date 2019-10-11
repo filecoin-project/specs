@@ -59,3 +59,7 @@ func (self *BlockHeader_I) ValidateTickets(pubKey filcrypto.PubKey) bool {
 
 	return true
 }
+
+func (chain *Chain_I) TicketAtEpoch(epoch base.Epoch) base.Ticket_I {
+	return chain.ticketChain.TicketAtEpoch(epoch)
+}

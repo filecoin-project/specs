@@ -36,38 +36,64 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewTipset(chain chain.Chain, epoch block.ChainEpoch, tipset block.Tipset) {
-	panic("TODO")
+
+// triggered by new block reception and tipset assembly
+func (sms *StorageMiningSubsystem_I) OnNewBestChain() {
+	// new election, reset nonce
+	sms.ElectionNonce = 0
+	sms.tryLeaderElection()
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset block.Tipset) block.ElectionArtifacts {
-	panic("TODO: fix this below")
-
-	// TODO this below has been commented due to incomplete implementation
-	// ea := sms.Consensus().GetElectionArtifacts(sms.CurrentChain, sms.CurrentEpoch)
-	// EP := sms.DrawElectionProof(ea.TK(), sms.workerPrivateKey)
-	// if newTipset {
-	// 	T0 := GenerateNextTicket(ea.T1, workerPrivateKey)
-	// } else {
-	// 	T1 := GenerateNextTicket(T0, workerPrivateKey)
-	// }
-
-	// if sms.Consensus().TryLeaderElection(EP) {
-	// 	// TODO: move this into SPC or Blockchain
-	// 	// SMS should probably not have ability to call BlockProducer directly.
-	// 	sms.BlockProducer().GenerateBlock(EP, ea.T1(), sms.CurrentTipset(), workerKey)
-	// } else {
-	// 	// TODO when not elected
-	// }
-
-	// return ea
+// triggered by wall clock
+func (sms *StorageMiningSubsystem_I) OnNewRound() {
+	// repeat on prior tipset, increment nonce
+	sms.ElectionNonce += 1
+	sms.tryLeaderElection()
 }
 
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk block.Ticket, workerKey filcrypto.PrivKey) block.ElectionProof {
-	// return generateElectionProof(tk, workerKey)
-	panic("TODO")
+func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
+	T1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain)
+	TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain)
+
+	for _, worker := range sms.workers {
+		newTicket := PrepareNewTicket(worker.VRFKeyPair, T1)
+		newEP := DrawElectionProof(TK, sms.electionNonce, worker.VRFKeyPair)
+
+		if storagePowerConsensus.IsWinningLeaderElection(newEP, worker.address) {
+			BlockProducer.GenerateBlockHeader(newEP, newTicket, sms.CurrentTipset, worker.workerAddress)
+		}
+	}
 }
 
-func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 block.Ticket, workerKey filcrypto.PrivKey) block.Ticket {
+// TODO this should be moved into storage market
+func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
 	panic("TODO")
+}
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket Ticket, vrfKP libcrypto.VRFKeyPair) Ticket {
+	// 0. prepare new ticket
+	var newTicket Ticket
+
+	// 1. run it through the VRF and get deterministic output
+	// 1.i. take the VRFResult of that ticket as input, specifying the personalization (see data structures)
+	input := VRFPersonalization.Ticket
+	input.append(priorTicket.Output)
+	// 2.ii. run through VRF
+	newTicket.VRFResult := vrfKP.Generate(input)
+
+	return newTicket
+}
+
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket Ticket, nonce ElectionNonce, vrfKP libcrypto.VRFKeyPair) ElectionProof {
+	// 0. Prepare new election proof
+	var newEP ElectionProof
+
+	// 1. Run it through VRF and get determinstic output
+    // 1.i. # take the VRFOutput of that ticket as input, specified for the appropriate operation type
+	input := VRFPersonalization.ElectionProof
+	input.append(lookbackTicket.Output)
+	input.append(nonce)
+    // ii. # run it through the VRF and store the VRFProof in the new ticket
+	newEP.VRFResult := vrfKP.Generate
+	newEP.ElectionNonce := nonce
+	return newEP
 }

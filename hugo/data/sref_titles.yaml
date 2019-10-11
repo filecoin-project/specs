@@ -10,6 +10,7 @@ sys_vm: "VM"
 block_producer: "Block Producer"
 ### SPC
 storage_power_consensus: "Storage Power Consensus"
+ticket_chain: "Ticket Chain"
 power_table: "Power Table"
 expected_consensus: "Expected Consensus"
 tickets: "Tickets"
