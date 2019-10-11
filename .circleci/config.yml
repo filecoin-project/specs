@@ -1,0 +1,19 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - run:
+          command: |
+            make test
+            make fmt-code
+            git diff --exit-code
+
+workflows:
+  version: 2.1
+  test_all:
+    jobs:
+      - test
