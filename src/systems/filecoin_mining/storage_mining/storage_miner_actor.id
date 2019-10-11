@@ -52,6 +52,7 @@ type StorageMinerActor struct {
     UpdateSectorStatus(sectorStateSets sector.SectorStateSets)  // TODO: @magik says SectorStateSets might be more expensive than more methods
 
     computeProvingPeriodEndSectorState()  // TODO
+
 }
 
 type MinerInfo struct {

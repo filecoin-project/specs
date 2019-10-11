@@ -28,7 +28,7 @@ type StorageDealProposed struct {}  // TODO
 type StorageDealStaged struct {}  // TODO
 type StorageDealActive struct {}  // TODO
 
-type StorageDealStatus struct {
+type StorageDealStatus enum {
     StorageDealNotFound
     StorageDealProposed
     StorageDealStaged

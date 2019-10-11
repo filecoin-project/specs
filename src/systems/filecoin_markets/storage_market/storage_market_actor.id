@@ -2,7 +2,6 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StorageDeal base_markets.StorageDeal
 type StorageDealID base_markets.StorageDealID
@@ -13,8 +12,8 @@ type StorageParticipantBalance struct {
 }
 
 type PublishStorageDealSuccess struct {
-    DealID  deal.DealID
-    DealCID deal.DealCID
+    DealID   deal.DealID
+    DealCID  deal.DealCID
 }
 type PublishStorageDealError struct {}
 type PublishStorageDealResponse struct {
@@ -34,22 +33,22 @@ type StorageMarketActor struct {
     // - NetworkSubsystem
     //   - needs access to MessagePubsub
 
-    ParticipantBalances  {base_blockchain.Address: StorageParticipantBalance}
-    SectorIDToDealIDs    {sector.SectorID: [deal.DealID]}
-    DealIDToStorageDeal  {deal.DealID: deal.StorageDeal}
+    Balances  {base_blockchain.Address: StorageParticipantBalance}
+    Deals     {deal.DealID: deal.StorageDeal}
 
-    RegisterParticipant(lockedBalance actor.TokenAmount) bool
-    WithdrawBalance(balance actor.TokenAmount)
-    AddBalance(balance actor.TokenAmount)
-    CheckLockedBalance(participantAddr addr.Address) actor.TokenAmount
+    WithdrawBalance(balance deal.TokenAmount)
+    AddBalance(balance deal.TokenAmount)
+    CheckLockedBalance(participantAddr base_blockchain.Address) deal.TokenAmount
 
     // call by CommitSector in StorageMiningSubsystem
     // a StorageDeal is only published on chain when it passes verifyStorageDeal
     // a DealID will be assigned and stored in the mapping of DealID to StorageDeal
+    // PublishStorageDeal should be called before SecotrCommits
+    // an unregistered StorageDeal will not be processed
     PublishStorageDeal(newStorageDeals [deal.StorageDeal]) [PublishStorageDealResponse]
 
-    // check if StorageDeal is still valid
-    // check if StorageDeal has the right signature
+    // check if StorageDeal is signed before expiry
+    // check if StorageDeal has the right signatures
     // check if provider and client have sufficient balances
     verifyStorageDeal(newStorageDeal deal.StorageDeal) bool
 
@@ -61,7 +60,8 @@ type StorageMarketActor struct {
 
     // call by CronActor on PoSt submission
     // trigger subsequent calls on different SectorSet
-    HandleCronAction(sectorStateSets sector.SectorStateSets) struct {}
+    // pull SectorSet from the run time
+    HandleCronAction()
 
     // call by CronActor on ExpiredSet
     // remove StorageDeal from StorageMarketActor
@@ -71,6 +71,8 @@ type StorageMarketActor struct {
     closeExpiredStorageDeal(storageDealIDs [deal.DealID])
 
     // call by CronActor on ActiveSet to process deal payment
+    // go through StorageDealIDs, if IDs are active in MarketActor
+    // payment will be processed
     handleStorageDealPayment(storageDealIDs [deal.DealID], currEpoch base_blockchain.Epoch)
 
     // call by CronActor on FaultSet to slash deal collateral

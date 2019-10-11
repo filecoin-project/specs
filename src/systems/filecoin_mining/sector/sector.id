@@ -14,8 +14,8 @@ type SealedSectorCID ipld.CID
 type SectorNumber UInt
 
 type ExpiredSet [SectorID]
-type FaultSet   [SectorID]
-type ActiveSet  [SectorID]
+type FaultSet [SectorID]
+type ActiveSet [SectorID]
 
 type SectorStateSets struct {
     ExpiredSet
