@@ -51,8 +51,8 @@ type DataTransferType union {
     Recipient
 }
 
-type Sender struct{} // TODO: remove this
-type Recipient struct{}  // TODO: remove this
+type Sender struct {}  // TODO: remove this
+type Recipient struct {}  // TODO: remove this
 
 type Ongoing struct {}
 type Completed struct {}
