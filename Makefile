@@ -179,6 +179,7 @@ bin/watcher:
 
 test-codeGen: bin/codeGen
 	cd tools/codeGen && go build && go test ./...
+	# cd tools/codeGen/test_cases && make test # this is broken
 
 # other
 
@@ -225,7 +226,7 @@ build/code/go.mod: src/build_go.mod
 	cp $< $@
 
 build-code: gen-code
-	@cd build/code && go build -gcflags="-e" ./...
+	cd build/code && go build -gcflags="-e" ./...
 
 test-code: build-code
 	cd build/code && go test ./...
