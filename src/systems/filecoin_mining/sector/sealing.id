@@ -1,5 +1,4 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Path struct {}  // TODO
 
@@ -14,8 +13,7 @@ type SealCfg struct {
 // SealVerifyInfo is the structure of all thte information a verifier
 // needs to verify a Seal.
 type SealVerifyInfo struct {
-    SectorID
-    MinerID   addr.Address
+    SectorID  SectorID
     OnChain   OnChainSealVerifyInfo
 }
 
