@@ -1,6 +1,6 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 // import smkt "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 // SectorBuilder accumulates deals, keeping track of their
 // sector configuration requirements and the piece sizes.
@@ -16,10 +16,10 @@ type SectorBuilder struct {
     // These include the info for the relevant pieces.
     // This builder just accumulates deals, keeping track of their
     // sector configuration requirements, and the piece sizes.
-    DealsToSeal [mkt.StorageDeal]
+    DealsToSeal [deal.StorageDeal]
 
     // StageDeal adds a deal to be packed into a sector.
-    StageDeal(d mkt.StorageDeal) StageDealResponse
+    StageDeal(d deal.StorageDeal) StageDealResponse
 
     // NextSector returns an UnsealedSectorInfo, which includes the (ordered) set of
     // pieces, and the SealCfg. An error may be returned if SectorBuilder is not

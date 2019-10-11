@@ -8,8 +8,8 @@ import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 import util "github.com/filecoin-project/specs/util"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 
 // import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
@@ -21,7 +21,7 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, w
 	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
 }
 
-func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {
+func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal, pieceRef ipld.CID) {
 	stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
 	sms.StorageProvider().NotifyStorageDealStaged(&StorageDealStagedNotification_I{
 		Deal_:     deal,
@@ -34,7 +34,7 @@ func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) CommitSectorError() base_markets.StorageDeal {
+func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 	panic("TODO")
 }
 

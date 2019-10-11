@@ -3,11 +3,11 @@ package sector_index
 import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	// piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-	mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
-func (sis *SectorIndexerSubsystem_I) AddNewDeal(deal mkt.StorageDeal) StageDealResponse {
+func (sis *SectorIndexerSubsystem_I) AddNewDeal(deal deal.StorageDeal) StageDealResponse {
 	return sis.Builder().StageDeal(deal)
 }
 

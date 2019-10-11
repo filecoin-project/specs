@@ -1,5 +1,6 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type DealCID ipld.CID
 type Signature struct {}  // TODO
@@ -20,6 +21,12 @@ type StorageDealProposal struct {
 type StorageDeal struct {
     Proposal          StorageDealProposal
     CounterSignature  Signature
+}
+
+type StorageDealStagedNotification struct {
+    Deal      StorageDeal
+    PieceRef  ipld.CID
+    SectorID  sector.SectorID
 }
 
 type StorageDealUnfound struct {}  // TODO

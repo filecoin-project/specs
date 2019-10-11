@@ -1,7 +1,7 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 // TODO import this from StorageMarket
 type SectorIndex struct {
@@ -9,7 +9,7 @@ type SectorIndex struct {
     ByUnsealedCID  {sector.UnsealedSectorCID: sector.SectorInfo}
     BySealedCID    {sector.SealedSectorCID: sector.SectorInfo}
     ByPieceID      {piece.PieceID: sector.SectorInfo}
-    ByDealID       {mkt.StorageDealID: sector.SectorInfo}
+    ByDealID       {deal.StorageDealID: sector.SectorInfo}
 }
 
 type SectorIndexerSubsystem struct {
@@ -20,7 +20,7 @@ type SectorIndexerSubsystem struct {
     // AddNewDeal is called by StorageMiningSubsystem after the StorageMarket
     // has made a deal. AddNewDeal returns an error when:
     // - there is no capacity to store more deals and their pieces
-    AddNewDeal(deal mkt.StorageDeal) StageDealResponse
+    AddNewDeal(deal deal.StorageDeal) StageDealResponse
 
     // bring back if needed.
     // OnNewTipset(chain Chain, epoch blockchain.Epoch) struct {}

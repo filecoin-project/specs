@@ -4,10 +4,12 @@ type StorageProvider struct {
     StorageDeals {deal.DealCID: deal.StorageDeal}
 
     // Client calls this to submit new StorageDealProposal
-    HandleNewStorageDealProposal(proposal deal.StorageDealProposal)
+    HandleNewStorageDealProposal(proposal deal.StorageDealProposal) struct {}
 
     // Call by StorageProvider to sign a StorageDealProposal
     SignStorageDealProposal(proposal deal.StorageDealProposal) deal.StorageDeal
+
+    NotifyStorageDealStaged(storageDealNotification deal.StorageDealStagedNotification) struct {}
 
     // call by StorageClient
     HandleStorageDealQuery(dealCID deal.DealCID) deal.StorageDealStatus
