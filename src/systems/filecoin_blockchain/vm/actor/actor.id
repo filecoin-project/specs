@@ -1,7 +1,7 @@
 // This contains actor things that are _outside_ of VM exection.
 // The VM uses this to execute actors.
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 // TokenAmount is an amount of Filecoin tokens. This type is used within
 // the VM in message execution, to account movement of tokens, payment
@@ -62,18 +62,32 @@ type CodeCID CID
 // Questions for id language:
 // - we should not do inheritance, we should do composition.
 //   but we should make including actor state nicer.
+//
+// TODO: do we need this type? what is the difference between this and
+// ActorState
 type Actor struct {
+    State ActorState
+}
+
+// ActorState represents the on-chain storage actors keep.
+type ActorState struct {
     // common fields for all actors
+
     CodeCID
-    State    ActorState
-    Balance  TokenAmount
-    SeqNum   CallSeqNum  // FKA Nonce
+    // use a CID here, load it in interpreter.
+    // Alternative is to use ActorState here but tricky w/ the type system
+    State       ActorSubstateCID
+
+    Balance     TokenAmount
+    CallSeqNum  // FKA Nonce
 }
 
 // ActorID is a sequential number assigned to actors in a Filecoin Chain.
 // ActorIDs are assigned by the InitActor, when an Actor is introduced into
 // the Runtime.
 type ActorID UVarint
+
+type ActorSubstateCID ipld.CID
 
 // ActorState represents the on-chain storage actors keep. This type is a
 // union of concrete types, for each of the Actors:
@@ -88,9 +102,9 @@ type ActorID UVarint
 // TODO: move this into a directory inside the VM that patches in all
 // the actors from across the system. this will be where we declare/mount
 // all actors in the VM.
-type ActorState union {
-    Init struct {
-        AddressMap  {addr.Address: ActorID}
-        NextID      ActorID
-    }
-}
+// type ActorState union {
+//     Init struct {
+//         AddressMap  {addr.Address: ActorID}
+//         NextID      ActorID
+//     }
+// }

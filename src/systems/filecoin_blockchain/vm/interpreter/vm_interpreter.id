@@ -3,7 +3,7 @@ import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/stat
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 
 type MessageRef struct {
-    Message  msg.Message
+    Message  msg.UnsignedMessage
     Miner    addr.Address
 }
 

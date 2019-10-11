@@ -1,22 +1,27 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import st "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/state_tree"
 import msg "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/message"
 import addr "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
 
+// Randomness is a string of random bytes
+type Randomness Bytes
+
 // Runtime is the VM's internal runtime object.
 // this is everything that is accessible to actors, beyond parameters.
 // FKA as vm.Context
 type Runtime struct {
-    // Message is the message that kicked off the current invocation
-    Message()  msg.UnsignedMessage
+    // Invocation is the inputs for the current invocation
+    Invocation     InvocInput
+    State          VMState
 
-    // Origin is the address of the account that initiated the top level invocation
-    // TODO: why is this needed?
-    // TODO: can definitely be grabbed from Message().From
-    // Origin() addr.Address
-
-    // State is statetree accessible to all the actors
-    State()    VMState
+    // Fatal is a fatal error, and halts VM execution.
+    // This is the normal error condition of actor execution.
+    // On Fatal errors, the VM simply does not apply the state transition.
+    // This is atomic across the entire contract execution.
+    //
+    // TODO: @why wants to get rid of this.
+    Fatal(string)
 
     // Send allows the current execution context to invoke methods on other actors in the system
     //
@@ -30,49 +35,40 @@ type Runtime struct {
         value   actor.TokenAmount
         params  actor.MethodParams
     ) msg.MessageReceipt
-
-    // Fatal is a fatal error, and halts VM execution.
-    // This is the normal error condition of actor execution.
-    // On Fatal errors, the VM simply does not apply the state transition.
-    // This is atomic across the entire contract execution.
-    Fatal(string)
-
-    // ComputeActorAddress computes the address of the contract,
-    // based on the creator (invoking address) and nonce given.
-    // TODO: why is this needed?
-    ComputeActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Address
 }
 
 // VMState is Chain state accessible to all contracts via the VM interface
 type VMState struct {
-    // BlockHeight returns the height of the block this message was added to the chain in
-    Epoch()      st.Epoch
-
     // StateTree returns the current state tree
-    StateTree()  st.StateTree
+    StateTree  st.StateTree
 
     // Storage provides access to the VM storage layer
-    Storage()    VMStorage
+    Storage    VMStorage
 
-    // // RoundMessageNumber returns the number this message is in this round.
-    // // (BlockHeight, RoundMessageNumber) is a unique tuple per message invocation
-    // RoundMessageNumber() MessageNumber
+    // BlockHeight returns the height of the block this message was added to the chain in
+    Epoch()    st.Epoch
 
-    // // ChainMessageNumber returns the number of messages in the chain so far.
-    // // TODO: this probably should be in a bunch of state accessible to the contracts.
-    // ChainMessageNumber() MessageNumber
+    // Balance returns the balance of a given actor
+    Balance(id actor.ActorID) actor.TokenAmount
 
-    // // MinerAddress who should earn this message txn id
-    // MinerAddress()
+    // Randomness returns the randomness (ticket) for a particular epoch, and offset.
+    Randomness(e st.Epoch, offset UInt) Randomness
+
+    // ComputeActorAddress computes the address of the contract,
+    // based on the creator (invoking address) and nonce given.
+    // TODO: why is this needed? -- InitActor
+    // TODO: this has to be the origin call. and it's broken: could yield the same address
+    //       need a truly unique way to assign an address.
+    ComputeActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Address
 }
 
 type VMStorage struct {
     // Put writes the given object to the storage staging area and returns its CID
-    Put(o IpldObject) struct {c CID, err error}
+    Put(o IpldObject) struct {c ipld.CID, err error}
 
     // Get fetches the given object from storage (either staging, or local) and returns
     // the serialized data.
-    Get(c CID) struct {o IpldObject, err error}
+    Get(c ipld.CID) struct {o IpldObject, err error}
 
     // Commit updates the actual stored state for the actor. This is a compare and swap
     // operation, and will fail if 'old' is not equal to the current return value of `Head`.
@@ -80,10 +76,10 @@ type VMStorage struct {
     //
     // TODO: YIKES i dont think we need commit to prevent re-entrancy. if we do, the model
     // is wrong.
-    Commit(old CID, new CID) error
+    Commit(old ipld.CID, new ipld.CID) error
 
     // Head returns the CID of the current actor state
-    Head() CID
+    Head() ipld.CID
 }
 
 type IpldObject struct {}

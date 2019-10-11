@@ -18,8 +18,10 @@ type ActorName enum {
 }
 
 type StateTree struct {
-    SystemActors  {ActorName: addr.Address}
-    ActorStates   {addr.Address: actor.ActorState}
+    SystemActors              {ActorName: addr.Address}
+    ActorStates               {addr.Address: actor.ActorState}
 
     // TODO: API ConvenienceAPI
+
+    GetActor(a addr.Address)  actor.Actor
 }
