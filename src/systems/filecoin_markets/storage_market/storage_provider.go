@@ -15,9 +15,9 @@ func (provider *StorageProvider_I) verifyStorageClient(address base_blockchain.A
 	panic("TODO")
 }
 
-func (provider *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
-	panic("TODO")
-}
+// TODO: func (provider *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
+// 	panic("TODO")
+// }
 
 func (provider *StorageProvider_I) HandleStorageDealQuery(dealCID deal.DealCID) deal.StorageDealStatus {
 	panic("TODO")

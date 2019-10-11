@@ -26,6 +26,7 @@ type OnChainSealVerifyInfo struct {
     RandomSeed   SealRandomSeed
     Proof        SealProof
     DealIDs      [deal.DealID]
+    SectorNumber SectorNumber
 }
 
 // ProofAux is meta data required to generate certain proofs

@@ -10,8 +10,6 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import util "github.com/filecoin-project/specs/util"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-
-// import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, sectorSize util.UInt, peerId libp2p.PeerID) address.Address {
@@ -22,11 +20,13 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, w
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
-	stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
-	sms.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{
-		Deal_:     deal,
-		SectorID_: stagedDealResponse.SectorID(),
-	})
+	panic("TODO")
+	// stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
+	// TODO: way within a node to notify different components
+	// sms.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{
+	// 	Deal_:     deal,
+	// 	SectorID_: stagedDealResponse.SectorID(),
+	// })
 }
 
 func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) address.Address {
