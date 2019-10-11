@@ -6,7 +6,11 @@ jobs:
       - image: circleci/golang:1.12
     steps:
       - checkout
-      - run: make test
+      - run:
+          command: |
+            make test
+            make fmt-code
+            git diff --exit-code
 
 workflows:
   version: 2.1
