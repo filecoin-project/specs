@@ -5,17 +5,17 @@ import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 type BytesAmount UVarint
 
 type StoragePowerActor struct {
-    Miners [address.Address] // TODO this should have a different type to account for power
+    Miners [addr.Address] // TODO this should have a different type to account for power
 
     // call by StorageMiningSubsytem on miner creation
     CreateStorageMiner(ownerAddr addr.Address, workerPubKey filcrypto.PubKey, sectorSize UInt, peerId libp2p.PeerID) addr.Address
 
-    // TODO add NotifyConsensusFault(address.Address, [Block]) TODO maybe rename to Arbitrate
+    // TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate
     UpdatePower(address addr.Address, newPower minerStorage)
 
     TotalStorage() BytesAmount
 
-    PowerLookup(minerAddr address.Address) BytesAmount
+    PowerLookup(minerAddr addr.Address) BytesAmount
 
     // call by StorageMinerActor on successful seal
     // TODO: workerKey of type StorageMiner.WorkerPubKey
@@ -30,8 +30,8 @@ type StoragePowerActor struct {
 
     // TODO: old methods, should be removed
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
-    // VerifyElectionProof(address.Address, base.ElectionProof)	bool
-    // NotifyStorageFault(address.Address)
+    // VerifyElectionProof(addr.Address, base.ElectionProof)	bool
+    // NotifyStorageFault(addr.Address)
     // TryPublishBlock(StateTree)					Block
 
     // RegisterStorageMiner(SealProof)				Address
