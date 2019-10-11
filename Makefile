@@ -241,7 +241,7 @@ fmt-code:
 	go fmt ./build/code/...
 
 watch-code: .PHONY
-	bin/watcher --cmd="make gen-code" --startcmd src 2>/dev/null
+	bin/watcher --cmd="make build-code" --startcmd src 2>/dev/null
 
 ## diagrams
 
