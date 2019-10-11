@@ -127,29 +127,26 @@ An eligible miner broadcasts the completed block to the network (via [block prop
 
 # Block Rewards
 
-Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. The reward amount remains fixed for a period of 1 week (given our 30 second block time, this  is 20,160 blocks, the `AdjustmentPeriod`) and is then adjusted. Over time, the reward will eventually become zero as the fractional amount given out at each step shrinks the network account's balance to 0.
+Over the entire lifetime of the protocol, 1,400,000,000 FIL (`TotalIssuance`) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. Over time, the reward will eventually become close zero as the fractional amount given out at each step shrinks the network account's balance to 0.
 
 The equation for the current block reward is of the form:
 
 ```
-Reward = IV * (Decay ^ (BlockHeight / 20160))
+Reward = (IV * RemainingInNetworkActor) / TotalIssuance
 ```
 
-`IV` is the initial value, and is computed by taking:
+`IV` is the initial value, and is set to:
 
 ```
-IV = TotalIssuance * (1 - Decay)
+IV = 153856861913558700202 attoFIL // 153.85 FIL
 ```
 
-`Decay` is computed by:
-
-```
-Decay = e^(ln(0.5) / (HalvingPeriodBlocks / AdjustmentPeriod))
-```
-
+IV was derived from:
 ```
 // Given one block every 30 seconds, this is how many blocks are in six years
 HalvingPeriodBlocks = 6 * 365 * 24 * 60 * 2 = 6,307,200 blocks
+λ = ln(2) / HalvingPeriodBlocks
+IV = TotalIssuance * (1-e^(-λ)) // Converted to attoFIL (10e18)
 ```
 
 Note: Due to jitter in EC, and the gregorian calendar, there may be some error in the issuance schedule over time. This is expected to be small enough that it's not worth correcting for. Additionally, since the payout mechanism is transferring from the network account to the miner, there is no risk of minting *too much* FIL.
