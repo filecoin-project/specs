@@ -1,4 +1,5 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type Path struct {}  // TODO
 
