@@ -1,0 +1,138 @@
+// This is a compression of the IPLD Selector Spec
+// Full spec: https://github.com/ipld/specs/blob/master/selectors/selectors.md
+
+type Selector union {
+	Matcher | ExploreAll | ExploreFields | ExploreIndex | ExploreRange | ExploreRecursive | ExploreUnion | ExploreConditional | ExploreRecursiveEdge
+}
+
+// ExploreAll is similar to a `*` -- it traverses all elements of an array,
+// or all entries in a map, and applies a next selector to the reached nodes.
+type ExploreAll struct {
+	next Selector
+}
+
+// ExploreFields traverses named fields in a map (or equivalently, struct, if
+// traversing on typed/schema nodes) and applies a next selector to the
+// reached nodes.
+//
+// Note that a concept of exploring a whole path (e.g. "foo/bar/baz") can be
+// represented as a set of three nexted ExploreFields selectors, each
+// specifying one field.
+type ExploreFields struct {
+	fields {string:Selector} 
+}
+
+// ExploreIndex traverses a specific index in a list, and applies a next
+// selector to the reached node.
+type ExploreIndex struct {
+	index UInt 
+  next Selector
+}
+
+// ExploreIndex traverses a list, and for each element in the range specified,
+// will apply a next selector to those reached nodes.
+type ExploreRange struct {
+	start UInt
+	end UInt
+	next Selector
+}
+
+// ExploreRecursive traverses some structure recursively.
+// To guide this exploration, it uses a "sequence", which is another Selector
+// tree; some leaf node in this sequence should contain an ExploreRecursiveEdge
+// selector, which denotes the place recursion should occur.
+//
+// In implementation, whenever evaluation reaches an ExploreRecursiveEdge marker
+// in the recursion sequence's Selector tree, the implementation logically
+// produces another new Selector which is a copy of the original
+// ExploreRecursive selector, but with a decremented maxDepth parameter, and
+// continues evaluation thusly.
+//
+// It is not valid for an ExploreRecursive selector's sequence to contain
+// no instances of ExploreRecursiveEdge; it *is* valid for it to contain
+// more than one ExploreRecursiveEdge.
+//
+// ExploreRecursive can contain a nested ExploreRecursive!
+// This is comparable to a nested for-loop.
+// In these cases, any ExploreRecursiveEdge instance always refers to the
+// nearest parent ExploreRecursive (in other words, ExploreRecursiveEdge can
+// be thought of like the 'continue' statement, or end of a for-loop body;
+// it is *not* a 'goto' statement).
+//
+// Be careful when using ExploreRecursive with a large maxDepth parameter;
+// it can easily cause very large traversals (especially if used in combination
+// with selectors like ExploreAll inside the sequence).
+type ExploreRecursive struct {
+	sequence Selector
+	maxDepth UInt
+	stopAt Condition
+}
+
+// ExploreRecursiveEdge is a special sentinel value which is used to mark
+// the end of a sequence started by an ExploreRecursive selector: the recursion
+// goes back to the initial state of the earlier ExploreRecursive selector,
+// and proceeds again (with a decremented maxDepth value).
+//
+// An ExploreRecursive selector that doesn't contain an ExploreRecursiveEdge
+// is nonsensical.  Containing more than one ExploreRecursiveEdge is valid.
+// An ExploreRecursiveEdge without an enclosing ExploreRecursive is an error.
+type ExploreRecursiveEdge struct {}
+
+// ExploreUnion allows selection to continue with two or more distinct selectors
+// while exploring the same tree of data.
+//
+// ExploreUnion can be used to apply a Matcher on one node (causing it to
+// be considered part of a (possibly labelled) result set), while simultaneously
+// continuing to explore deeper parts of the tree with another selector,
+// for example.
+type ExploreUnion [Selector]
+
+// Note that ExploreConditional versus a Matcher with a Condition are distinct:
+// ExploreConditional progresses deeper into a tree;
+// whereas a Matcher with a Condition may look deeper to make its decision,
+// but returns a match for the node it's on rather any of the deeper values.
+type ExploreConditional struct {
+	condition Condition
+	next Selector
+}
+
+// Matcher marks a node to be included in the "result" set.
+// (All nodes traversed by a selector are in the "covered" set (which is a.k.a.
+// "the merkle proof"); the "result" set is a subset of the "covered" set.)
+//
+// In libraries using selectors, the "result" set is typically provided to
+// some user-specified callback.
+//
+// A selector tree with only "explore*"-type selectors and no Matcher selectors
+// is valid; it will just generate a "covered" set of nodes and no "result" set.
+type Matcher struct {
+	onlyIf Condition? // match is true based on position alone if this is not set.
+	label string? // labels can be used to match multiple different structures in one selection.
+}
+
+// Condition is expresses a predicate with a boolean result.
+//
+// Condition clauses are used several places:
+//   - in Matcher, to determine if a node is selected.
+//   - in ExploreRecursive, to halt exploration.
+//   - in ExploreConditional,
+//
+//
+// TODO -- Condition is very skeletal and incomplete.
+// The place where Condition appears in other structs is correct;
+// the rest of the details inside it are not final nor even completely drafted.
+type Condition union {
+	// We can come back to this and expand it later...
+	// TODO: figure out how to make this recurse correctly, so I can say "hasField{hasField{or{hasValue{1}, hasValue{2}}}}".
+	Condition_HasField | Condition_HasValue | Condition_HasKind | Condition_IsLink | Condition_GreaterThan | Condition_LessThan | Condition_And | Condition_Or 
+	// REVIEW: since we introduced "and" and "or" here, we're getting into dangertown again.  we'll need a "max conditionals limit" (a la 'gas' of some kind) near here.
+}
+
+type Condition_HasField struct {}
+type Condition_HasKind struct {}
+type Condition_HasValue struct {}
+type Condition_And struct {}
+type Condition_GreaterThan struct {}
+type Condition_IsLink struct {}
+type Condition_LessThan struct {}
+type Condition_Or struct {}
