@@ -7,10 +7,9 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	sid := si.SectorID()
 
 	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(si.UnsealedPath()).As_commD())
-	replicaID := s.ComputeReplicaID(sid, commD, si.RandomSeed()).As_replicaID()
 
 	return &SectorSealer_SealSector_FunRet_I{
-		rawValue: Seal(replicaID),
+		rawValue: Seal(sid, si.RandomSeed(), commD),
 	}
 }
 
@@ -22,7 +21,7 @@ func (s *SectorSealer_I) ComputeDataCommitment(unsealedPath file.Path) *SectorSe
 	return &SectorSealer_ComputeDataCommitment_FunRet_I{}
 }
 
-func (s *SectorSealer_I) ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID, seed sector.SealRandomSeed) *SectorSealer_ComputeReplicaID_FunRet_I {
+func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID, seed sector.SealRandomSeed) *SectorSealer_ComputeReplicaID_FunRet_I {
 
 	_, _ = sid.MinerID(), (sid.Number())
 
@@ -39,6 +38,10 @@ func (s *SectorSealer_I) ComputeReplicaID(sid sector.SectorID, commD sector.Unse
 //     OnChain OnChainSealVerifyInfo
 // }
 
-func Seal(repID []byte) *SealOutputs_I {
+func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID) *SealOutputs_I {
+	replicaID := ComputeReplicaID(sid, commD, randomSeed).As_replicaID()
+
+	_ = replicaID
+
 	return &SealOutputs_I{}
 }
