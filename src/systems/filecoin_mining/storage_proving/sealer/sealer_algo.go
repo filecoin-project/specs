@@ -9,8 +9,9 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(si.UnsealedPath()).As_commD())
 	replicaID := s.ComputeReplicaID(sid, commD, si.RandomSeed()).As_replicaID()
 
-	_ = replicaID
-	return &SectorSealer_SealSector_FunRet_I{}
+	return &SectorSealer_SealSector_FunRet_I{
+		rawValue: Seal(replicaID),
+	}
 }
 
 func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_VerifySeal_FunRet_I {
@@ -26,4 +27,8 @@ func (s *SectorSealer_I) ComputeReplicaID(sid sector.SectorID, commD sector.Unse
 	_, _ = sid.MinerID(), (sid.Number())
 
 	return &SectorSealer_ComputeReplicaID_FunRet_I{}
+}
+
+func Seal(repID []byte) *SealOutputs_I {
+	return &SealOutputs_I{}
 }
