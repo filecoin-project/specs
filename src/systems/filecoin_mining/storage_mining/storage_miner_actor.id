@@ -29,7 +29,7 @@ type StorageMinerActor struct {
     CommitSector(
         seed            Seed
         sector          sector.SectorID
-        sealCommitment  base_mining.SealCommitment  // TODO: it's more expensive to do a struct
+        sealCommitment  sector.OnChainSealVerifyInfo  // TODO: to check with magik about sizes
         sealProof       sector.SealProof
     )
 
