@@ -24,5 +24,5 @@ func (f FileReadWriter) Write(buf []byte) (n int, err error) {
 }
 
 func FromPath(path Path) *FileReadWriter {
-	return &FileReadWriter { } // TODO: Actually create file from path.
+	return &FileReadWriter{} // TODO: Actually create file from path.
 }
