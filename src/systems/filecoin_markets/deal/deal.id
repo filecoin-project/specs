@@ -24,28 +24,6 @@ type StorageDeal struct {
     CounterSignature  Signature
 }
 
-type StorageDealNotFound struct {}  // TODO
-type StorageDealProposed struct {}  // TODO
-type StorageDealStaged struct {}  // TODO
-type StorageDealActive struct {}  // TODO
-
-type StorageDealStatus enum {
-    StorageDealNotFound
-    StorageDealProposed
-    StorageDealStaged
-    StorageDealActive
-}
-
-type PublishStorageDealSuccess struct {
-    DealID
-    DealCID
-}
-type PublishStorageDealError struct {}
-type PublishStorageDealResponse union {
-    Success  PublishStorageDealSuccess
-    Error    PublishStorageDealError
-}
-
 type RetrievalDealProposal struct {}  // TODO
 type RetrievalDeal struct {
     Proposal          RetrievalDealProposal

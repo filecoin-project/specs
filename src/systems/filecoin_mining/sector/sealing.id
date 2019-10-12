@@ -1,3 +1,4 @@
+import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
@@ -15,7 +16,7 @@ type SealCfg struct {
 // SealVerifyInfo is the structure of all thte information a verifier
 // needs to verify a Seal.
 type SealVerifyInfo struct {
-    MinerID  base_blockchain.Address
+    MinerID  addr.Address
     OnChain  OnChainSealVerifyInfo
 }
 

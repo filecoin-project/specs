@@ -11,16 +11,21 @@ func (sma *StorageMarketActor_I) WithdrawBalance(balance actor.TokenAmount) {
 		panic("Error")
 	}
 
-	currentBalance, found := sma.Balances()[msgSender]
+	senderBalance, found := sma.Balances()[msgSender]
 	if !found {
 		panic("Error") // TODO replace with fatal
 	}
 
-	if currentBalance.Available < balance {
+	if senderBalance.Available() < balance {
 		panic("Error") // TODO replace with fatal
 	}
 
-	sma.Balances()[msgSender].Available -= balance
+	newAvailableBalance := senderBalance.Available() - balance
+	sma.Balances()[msgSender] = &StorageParticipantBalance_I{
+		Locked_:    senderBalance.Locked(),
+		Available_: newAvailableBalance,
+	}
+
 	// TODO send funds to msgSender
 }
 
@@ -33,7 +38,19 @@ func (sma *StorageMarketActor_I) AddBalance(balance actor.TokenAmount) {
 		panic("Error")
 	}
 
-	sma.Balances()[msgSender].Available += balance
+	senderBalance, found := sma.Balances()[msgSender]
+	if found {
+		newAvailableBalance := senderBalance.Available() + balance
+		sma.Balances()[msgSender] = &StorageParticipantBalance_I{
+			Locked_:    senderBalance.Locked(),
+			Available_: newAvailableBalance,
+		}
+	} else {
+		sma.Balances()[msgSender] = &StorageParticipantBalance_I{
+			Locked_:    0,
+			Available_: balance,
+		}
+	}
 }
 
 func (sma *StorageMarketActor_I) CheckLockedBalance(participantAddr addr.Address) actor.TokenAmount {
@@ -42,20 +59,17 @@ func (sma *StorageMarketActor_I) CheckLockedBalance(participantAddr addr.Address
 	return sma.Balances()[msgSender].Locked()
 }
 
-func (sma *StorageMarketActor_I) PublishStorageDeal(newStorageDeals []deal.StorageDeal) []deal.PublishStorageDealResponse {
+func (sma *StorageMarketActor_I) PublishStorageDeal(newStorageDeals []deal.StorageDeal) []PublishStorageDealResponse {
 	l := len(newStorageDeals)
-	var response [l]deal.PublishStorageDealResponse
+	response := make([]PublishStorageDealResponse, l)
 	for i, newDeal := range newStorageDeals {
-		var publishResponse deal.PublishStorageDealResponse
 		if sma.verifyStorageDeal(newDeal) {
 			id := sma.generateStorageDealID(newDeal)
 			sma.Deals()[id] = newDeal
-			publishResponse := deal.PublishStorageDealSuccess{id, newDeal.PieceRef()}
+			response[i] = PublishStorageDealSuccess
 		} else {
-			publishResponse := deal.PublishStorageDealError{}
+			response[i] = PublishStorageDealError
 		}
-
-		response[i] = publishResponse
 	}
 
 	return response
@@ -90,9 +104,10 @@ func (sma *StorageMarketActor_I) handleStorageDealPayment(storageDealIDs []deal.
 }
 
 func (sma *StorageMarketActor_I) slashStorageDealCollateral(storageDealIDs []deal.DealID) {
-	for i, dealID := range storageDealIDs {
-		faultStorageDeal := sma.Deals()[dealID]
-		// TODO remove locked funds and send slashed fund to TreasuryActor
-		// TODO provider lose power for the FaultSet but not PledgeCollateral is slashed
-	}
+	// for _, dealID := range storageDealIDs {
+	// 	faultStorageDeal := sma.Deals()[dealID]
+	// TODO remove locked funds and send slashed fund to TreasuryActor
+	// TODO provider lose power for the FaultSet but not PledgeCollateral
+	// }
+	panic("TODO")
 }

@@ -1,11 +1,8 @@
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
-import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import util "github.com/filecoin-project/specs/util"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Seed struct {}
 type SectorCommitment struct {}
@@ -14,7 +11,7 @@ type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
     // contains mostly static info about this miner
-    info &MinerInfo
+    info     &MinerInfo
 
     // TODO: add the DePledgeCollateral
     // TODO: add the Sectors
@@ -29,10 +26,12 @@ type StorageMinerActor struct {
     // TODO owedStorageCollateral
     // TODO ProvingPeriodEnd   Epoch
 
+    Sectors  {sector.SectorNumber: [sealing.OnChainSealVerifyInfo]}
+
     CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
 
     SubmitPoSt(
-        postProof        base_mining.PoStProof
+        postProof        PoStProof
         sectorStateSets  sector.SectorStateSets  // TODO: check with Juan and Magik
     )
 
@@ -52,7 +51,6 @@ type StorageMinerActor struct {
     UpdateSectorStatus(sectorStateSets sector.SectorStateSets)  // TODO: @magik says SectorStateSets might be more expensive than more methods
 
     computeProvingPeriodEndSectorState()  // TODO
-
 }
 
 type MinerInfo struct {

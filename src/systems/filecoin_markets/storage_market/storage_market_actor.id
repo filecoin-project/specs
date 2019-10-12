@@ -11,11 +11,6 @@ type StorageMarketActor struct {
     // need access to:
     // - DataTransferSubsystem
     //   - transfer data
-    // - BlockchainSubsystem
-    //   - needs access to StateTree
-    //     to verify storage capacity and pledge amount
-    //     and slash storage providers for storage faults
-    //    - needs access to access to MessagePool if deals on chain
     // - NetworkSubsystem
     //   - needs access to MessagePubsub
 

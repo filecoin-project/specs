@@ -9,8 +9,7 @@ import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/addr
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import util "github.com/filecoin-project/specs/util"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, sectorSize util.UInt, peerId libp2p.PeerID) address.Address {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)

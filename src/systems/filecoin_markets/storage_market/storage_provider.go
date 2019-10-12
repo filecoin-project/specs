@@ -4,9 +4,13 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
+// import deal_status "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+
 func (provider *StorageProvider_I) HandleNewStorageDealProposal(proposal deal.StorageDealProposal) {
 	if provider.verifyStorageClient(proposal.Client(), proposal.ProposerSignature(), proposal.StoragePrice()) {
-		provider.DealStatus()[proposal.PieceRef()] = deal.StorageDealProposed{}
+		// status := &deal.StorageDealStatus_StorageDealProposed_I{}
+		// s := deal.StorageDealStatus_Make_StorageDealProposed(status)
+		provider.DealStatus()[proposal.PieceRef()] = StorageDealProposed
 		// TODO notify StorageClient that a deal has been received
 		// TODO notify StorageMiningSubsystem to add deals to sector
 		provider.signStorageDealProposal(proposal)
@@ -18,6 +22,11 @@ func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.Storage
 	// TODO add signature to the proposal
 	// TODO notify StorageClient that a deal has been signed
 	panic("TODO")
+}
+
+func (provider *StorageProvider_I) rejectStorageDealProposal(proposal deal.StorageDealProposal) {
+	provider.DealStatus()[proposal.PieceRef()] = StorageDealRejected
+	// TODO send notification to client
 }
 
 func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, signature deal.Signature, price actor.TokenAmount) bool {
@@ -41,12 +50,12 @@ func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, sig
 // 	panic("TODO")
 // }
 
-func (provider *StorageProvider_I) HandleStorageDealQuery(dealCID deal.DealCID) deal.StorageDealStatus {
+func (provider *StorageProvider_I) HandleStorageDealQuery(dealCID deal.DealCID) StorageDealStatus {
 	dealStatus, found := provider.DealStatus()[dealCID]
 
 	if found {
 		return dealStatus
 	}
 
-	return deal.StorageDealNotFound{}
+	return StorageDealNotFound
 }
