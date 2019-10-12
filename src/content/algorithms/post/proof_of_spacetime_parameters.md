@@ -1,5 +1,5 @@
 +++
-title = "Proof of Spacetime Parameters"
+title = "PoSt Parameters"
 author = ["Chhi'med Kunzang"]
 draft = false
 +++
