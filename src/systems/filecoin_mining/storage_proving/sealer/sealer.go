@@ -29,6 +29,16 @@ func (s *SectorSealer_I) ComputeReplicaID(sid sector.SectorID, commD sector.Unse
 	return &SectorSealer_ComputeReplicaID_FunRet_I{}
 }
 
+// type SealOutputs struct {
+//     SealInfo  sector.SealVerifyInfo
+//     ProofAux  sector.ProofAux
+// }
+
+// type SealVerifyInfo struct {
+//     SectorID
+//     OnChain OnChainSealVerifyInfo
+// }
+
 func Seal(repID []byte) *SealOutputs_I {
 	return &SealOutputs_I{}
 }
