@@ -1,7 +1,7 @@
 //  SealVerifyArtifacts struct {}
 //  SealVerifyArtifacts union {
-//    ZigZagSealVerifyArtifacts struct {
-//      Proof ZigZagSealProof
+//    SDRSealVerifyArtifacts struct {
+//      Proof SDRSealProof
 //    }
 
 // type SealAlgorithmArtifacts struct {
@@ -36,9 +36,9 @@
 
 // SealOutputArtifacts union {
 //   SuperSectorPorepOutputArtifacts struct {
-//     Proof       ZigZagSealProof
+//     Proof       SDRSealProof
 //     ReplicaTree ReplicaTree
-//     CommRLast   ZigZagCommRLast
-//     CommC       ZigZagCommC
+//     CommRLast   SDRCommRLast
+//     CommC       SDRCommC
 //   }
 // }

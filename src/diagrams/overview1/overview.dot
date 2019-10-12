@@ -269,14 +269,14 @@ digraph Filecoin {
 
       { // components
         node [shape=box]
-        "ZigZag-Porep"
+        "Stacked-DRG-Porep"
         "Rational PoSt"
         "Piece Inclusion Proofs" [label="Piece\nInclusion\nProofs"]
         "VRFs"
         "VDFs"
       }
 
-      "ZigZag-Porep" -> "Rational PoSt" [style=invis]
+      "Stacked-DRG-Porep" -> "Rational PoSt" [style=invis]
       VRFs -> VDFs [style=invis]
     }
 
@@ -413,7 +413,7 @@ digraph Filecoin {
     "Switch" -> "KeyStore"
     "NTP" -> "Switch" [ltail=cluster_clock, lhead=cluster_libp2p]
     "Block Producer" -> "Message Storage" [lhead=cluster_messagepool]
-    "Pledge Prover" -> "ZigZag-Porep" [ltail=cluster_filproofs_subsystem, lhead=cluster_filproofs_lib]
+    "Pledge Prover" -> "Stacked-DRG-Porep" [ltail=cluster_filproofs_subsystem, lhead=cluster_filproofs_lib]
     "Wallet" -> "KeyStore"
     "Data Transfers" -> "PieceStore"
     "Sector Store" -> "PieceStore"
