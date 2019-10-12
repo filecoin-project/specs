@@ -1,34 +1,56 @@
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
-import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import util "github.com/filecoin-project/specs/util"
+import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Seed struct {}
 type SectorCommitment struct {}
-
+type PoStProof struct {}
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
-    // Sectors {UInt:MinedSector} // sectors and faults, proving period ends
-    // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)
-    // ProvingPeriodEnd   Epoch
 
-    // // contains mostly static info about this miner
-    // info &MinerInfo
+    // contains mostly static info about this miner
+    info     &MinerInfo
+
+    // TODO: add the DePledgeCollateral
+    // TODO: add the Sectors
+    // TODO sectors []SectorInfo CID to AMT
+    // TODO provingSet []SectorInfo CID to AMT
+
+    // TODO: should we keep the same structure as before or putting all of that into a struct?
+    // TODO currentFaultSet BitField
+    // TODO nextFaultSet BitField
+    // TODO nextDoneSet BitField
+    // TODO do we need a `slashedAt`?
+    // TODO owedStorageCollateral
+    // TODO ProvingPeriodEnd   Epoch
+
+    Sectors  {sector.SectorNumber: [sealing.OnChainSealVerifyInfo]}
+
+    CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
+
+    SubmitPoSt(
+        postProof        PoStProof
+        sectorStateSets  sector.SectorStateSets  // TODO: check with Juan and Magik
+    )
+
+    // TODO: should depledge be in here or in storage market actor?
+
+    // TODO: add GetOwner()
+    // TODO: add GetPeerID()
+    // TODO: add GetSectorSize()
+    // TODO: add UpdatePeerID()
+    // TODO: add UpdatePeerID()
+    // TODO: add ChangeWorker()
+
+    // TODO: do IsSlashed, IsLate belong here?
 
     UpdateDoneSet()
-    UpdateSectorStatus(sectorStateSets sector.SectorStateSets)
-    SubmitPoSt(
-        postProof        base_mining.PoStProof
-        sectorStateSets  sector.SectorStateSets
-    )
-    computeProvingPeriodEndSectorState()
-    CommitSector(
-        seed            Seed
-        sector          sector.SectorID
-        sealCommitment  base_mining.SealCommitment
-        sealProof       sector.SealProof
-    )
+
+    UpdateSectorStatus(sectorStateSets sector.SectorStateSets)  // TODO: @magik says SectorStateSets might be more expensive than more methods
+
+    computeProvingPeriodEndSectorState()  // TODO
 }
 
 type MinerInfo struct {

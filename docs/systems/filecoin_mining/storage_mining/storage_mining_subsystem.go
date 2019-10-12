@@ -2,43 +2,45 @@ package storage_mining
 
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 // import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+// import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
-import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
-import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
-import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
+import util "github.com/filecoin-project/specs/util"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
-// import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-
-func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, pledgeAmt actor.TokenAmount) address.Address {
+func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, sectorSize util.UInt, peerId libp2p.PeerID) address.Address {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)
-	return sms.StoragePowerActor().RegisterMiner(ownerAddr, workerPubKey)
+	// var pledgeAmt actor.TokenAmount TODO: unclear how to pass the amount/pay
+	// TODO compute PledgeCollateral for 0 bytes
+	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
 }
 
-func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {
-	stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
-	sms.StorageProvider().NotifyStorageDealStaged(&StorageDealStagedNotification_I{
-		Deal_:     deal,
-		PieceRef_: pieceRef,
-		SectorID_: stagedDealResponse.SectorID(),
-	})
+func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
+	sms.SectorIndex().AddNewDeal(deal)
+	// stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
+	// TODO: way within a node to notify different components
+	// sms.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{
+	// 	Deal_:     deal,
+	// 	SectorID_: stagedDealResponse.SectorID(),
+	// })
 }
 
 func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) address.Address {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) CommitSectorError() base_markets.StorageDeal {
+func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewTipset(chain blockchain.Chain, epoch blockchain.Epoch, tipset blockchain.Tipset) {
+func (sms *StorageMiningSubsystem_I) OnNewTipset(chain chain.Chain, epoch block.ChainEpoch, tipset block.Tipset) {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) base_blockchain.ElectionArtifacts {
+func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset block.Tipset) block.ElectionArtifacts {
 	panic("TODO: fix this below")
 
 	// TODO this below has been commented due to incomplete implementation
@@ -61,16 +63,11 @@ func (sms *StorageMiningSubsystem_I) OnNewRound(newTipset blockchain.Tipset) bas
 	// return ea
 }
 
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk base_blockchain.Ticket, workerKey filcrypto.PrivKey) base_blockchain.ElectionProof {
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk block.Ticket, workerKey filcrypto.PrivKey) block.ElectionProof {
 	// return generateElectionProof(tk, workerKey)
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 base_blockchain.Ticket, workerKey filcrypto.PrivKey) base_blockchain.Ticket {
-	panic("TODO")
-}
-
-// TODO this should be moved into storage market
-func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
+func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 block.Ticket, workerKey filcrypto.PrivKey) block.Ticket {
 	panic("TODO")
 }

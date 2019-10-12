@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>System Actors on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_vm/sysactors/</link>
+    <description>Recent content in System Actors on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_vm/sysactors/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>/docs/systems/filecoin_vm/sysactors/account_actor_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/account_actor_old/</guid>
+      <description>Account Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;account&amp;quot;&amp;gt;  The Account actor is the actor used for normal keypair backed accounts on the filecoin network.
+type AccountActorState struct { address Address } Methods    Name Method ID     AccountConstructor 1   GetAddress 2    type AccountConstructor struct { }  GetAddress Parameters
+type GetAddress struct { } representation tuple Algorithm
+func GetAddress() Address { return self.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/docs/systems/filecoin_vm/sysactors/init_actor_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/init_actor_old/</guid>
+      <description>Init Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;init&amp;quot;&amp;gt;  The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that NextID will initially be set to 100.
+type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId UInt } Methods    Name Method ID     Constructor 1   Exec 2   GetIdForAddress 3    Constructor Parameters</description>
+    </item>
+    
+    <item>
+      <title>AccountActor</title>
+      <link>/docs/systems/filecoin_vm/sysactors/account_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
+      <description>(You can see the old AccountActor here )
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address } type AccountActor struct { actorState actor.ActorState accountState AccountActorState }  </description>
+    </item>
+    
+    <item>
+      <title>CronActor</title>
+      <link>/docs/systems/filecoin_vm/sysactors/cron_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/cron_actor/</guid>
+      <description> import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type CronActorState struct { // Cron has no internal state } type CronActor struct { actorState actor.ActorState cronState CronActorState // Tick executes built-in periodic actions.  Tick() }  </description>
+    </item>
+    
+    <item>
+      <title>InitActor</title>
+      <link>/docs/systems/filecoin_vm/sysactors/init_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
+      <description>(You can see the old InitActor here )
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID } type InitActorCode struct { // 0  Constructor(r vmr.Runtime) // 1  Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address // 2  GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.</description>
+    </item>
+    
+  </channel>
+</rss>

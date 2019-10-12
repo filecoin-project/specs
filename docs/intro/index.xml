@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/intro/arch/</guid>
-      <description>Filecoin Systems Systems   Filecoin Nodes ⚙️   Node Types     Repository     Network Interface     Clock       Files &amp;amp; Data 📑   File     Piece     Data Transfer       Blockchain 📦   Virtual Machine     Message Pool     Blockchain Components     Storage Power Consensus       Token 📀   Wallet     Payments     Payment Channels     Multisig Wallet       Storage Mining ⛏   Storage Miner     Sector     Sector Index     Storage Proving       Market ⚖️   Orders     Deals     Storage Market     Retrieval Market          Overview Diagram TODO:</description>
+      <description>Filecoin Systems Systems   Filecoin Nodes ⚙️   Node Types     Repository     Network Interface     Clock       Files &amp;amp; Data 📑   File     Piece     Data Transfer       Virtual Machine 💻   Actor     State Tree     Message     Runtime     System Actors     Interpreter       Blockchain 📦   Blocks     Message Pool     Block Syncer     Storage Power Consensus       Token 📀   Wallet     Payments     Payment Channels     Multisig Wallet       Storage Mining ⛏   Storage Miner     Sector     Sector Index     Storage Proving       Market ⚖️   Orders     Deals     Storage Market     Retrieval Market          Overview Diagram TODO:</description>
     </item>
     
     <item>

@@ -1,30 +1,27 @@
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import actor "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 // import storage_indexer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer"
 
-type Sector struct {}
-type SectorSet [Sector]
-type SealedSectorSet [Sector]
 type ReplicaID CID
 
 type MiningScheduler struct {
-    getStagedSectors()              SectorSet
-    getSealedSectors()              SealedSectorSet
-    getFaultySectors()              SectorSet
-    getRepairedSectors()            SectorSet
+    getStagedSectors()    sector.SectorSet
+    getSealedSectors()    sector.SealedSectorSet
+    getFaultySectors()    sector.SectorSet
+    getRepairedSectors()  sector.SectorSet
     // same as completedSectors/doneSectors
-    getExpiredSectors()             SectorSet
+    getExpiredSectors()   sector.SectorSet
 
-    ProducePost(sectors SectorSet)  poster.PoStSubmission
-    VerifyPost(sectors SectorSet)   poster.PoStSubmission
+    ProducePost(sectors sector.SectorSet) poster.PoStSubmission
+    VerifyPost(sectors sector.SectorSet) poster.PoStSubmission
 
     ReportFaults(
         actor &StorageMinerActor
     ) bool
 
-    RemoveSectors(remove SectorSet) bool
+    RemoveSectors(remove sector.SectorSet) bool
 
     DePledge(
         amount actor.TokenAmount
@@ -38,8 +35,7 @@ type MiningScheduler struct {
     AddSector(
         pledge    actor.TokenAmount
         sectorID  &sector.SectorID
-        comm      &mining.SealCommitment
-        proof     sector.SealProof
+        comm      &sector.OnChainSealVerifyInfo
     ) sector.SectorID
 
     // generateReplicaID(CommD Commitment, block Block)

@@ -1,10 +1,4 @@
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
 type PoStProof struct {}
 type SealSeed struct {}
 type PoStChallenge struct {}
 type SealedSector struct {}
-type SealCommitment struct {
-    CommD  sector.Commitment
-    CommR  sector.Commitment
-}

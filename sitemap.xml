@@ -7,17 +7,7 @@
   </url>
   
   <url>
-    <loc>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor_old/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor_old/</loc>
+    <loc>/docs/algorithms/porep/stacked_drg_circuit/</loc>
     <priority>0</priority>
   </url>
   
@@ -42,6 +32,16 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_vm/sysactors/account_actor_old/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_vm/sysactors/init_actor_old/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_blockchain/</loc>
   </url>
   
@@ -58,11 +58,15 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor/</loc>
+    <loc>/docs/systems/filecoin_vm/sysactors/account_actor/</loc>
   </url>
   
   <url>
     <loc>/docs/appendix/address/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_vm/actor/address/</loc>
   </url>
   
   <url>
@@ -82,7 +86,11 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/blockchain/block_producer/</loc>
+    <loc>/docs/systems/filecoin_blockchain/struct/block/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/struct/block_producer/</loc>
   </url>
   
   <url>
@@ -90,11 +98,11 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/blockchain/block_syncer/</loc>
+    <loc>/docs/systems/filecoin_blockchain/chainsync/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/blockchain/</loc>
+    <loc>/docs/systems/filecoin_blockchain/struct/</loc>
   </url>
   
   <url>
@@ -102,7 +110,11 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/blockchain/chain_manager/</loc>
+    <loc>/docs/systems/filecoin_blockchain/struct/chain/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/struct/chain_manager/</loc>
   </url>
   
   <url>
@@ -134,7 +146,7 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/cron_actor/</loc>
+    <loc>/docs/systems/filecoin_vm/sysactors/cron_actor/</loc>
   </url>
   
   <url>
@@ -274,7 +286,7 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor/</loc>
+    <loc>/docs/systems/filecoin_vm/sysactors/init_actor/</loc>
   </url>
   
   <url>
@@ -378,6 +390,10 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_blockchain/struct/block/other/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_token/payment_channels/payment_channel_actor/</loc>
   </url>
   
@@ -414,11 +430,11 @@
   </url>
   
   <url>
-    <loc>/docs/algorithms/proof_of_spacetime_parameters/</loc>
+    <loc>/docs/algorithms/post/proof_of_spacetime_parameters/</loc>
   </url>
   
   <url>
-    <loc>/docs/content/algorithms/proof_of_spacetime_parameters/</loc>
+    <loc>/docs/content/algorithms/post/proof_of_spacetime_parameters/</loc>
   </url>
   
   <url>
@@ -514,15 +530,39 @@
   </url>
   
   <url>
+    <loc>/docs/algorithms/porep/porep_commitments/sdr_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/content/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/porep/stacked_drg/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_vm/state_tree/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_client/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_markets/storage_market/storage_market_actor/</loc>
   </url>
   
   <url>
     <loc>/docs/systems/filecoin_markets/storage_market/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</loc>
   </url>
   
   <url>
@@ -554,7 +594,15 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_markets/storage_market/storage_provider/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_mining/storage_proving/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_vm/sysactors/</loc>
   </url>
   
   <url>
@@ -570,6 +618,10 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_blockchain/struct/block/tipset/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/libraries/ipfs/unixfs/</loc>
   </url>
   
@@ -578,79 +630,39 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/</loc>
+    <loc>/docs/systems/filecoin_vm/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/actor/</loc>
+    <loc>/docs/systems/filecoin_vm/actor/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/address/</loc>
+    <loc>/docs/systems/filecoin_vm/runtime/exitcode/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/runtime/exitcode/</loc>
+    <loc>/docs/systems/filecoin_vm/runtime/gascost/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/runtime/gascost/</loc>
+    <loc>/docs/systems/filecoin_vm/interpreter/vm_interpreter_old/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/interpreter/vm_interpreter_old/</loc>
+    <loc>/docs/systems/filecoin_vm/interpreter/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/interpreter/</loc>
+    <loc>/docs/systems/filecoin_vm/message/</loc>
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/message/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/runtime/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/state_tree/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_blockchain/vm/sysactors/</loc>
+    <loc>/docs/systems/filecoin_vm/runtime/</loc>
   </url>
   
   <url>
     <loc>/docs/intro/system/why_systems/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/algorithms/porep/porep_commitments/zigzag_commitments/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/algorithms/zigzag_commitments/zigzag_commitments/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/content/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/content/algorithms/zigzag_commitments/zigzag_commitments/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/algorithms/porep/zigzag/</loc>
   </url>
   
 </urlset>

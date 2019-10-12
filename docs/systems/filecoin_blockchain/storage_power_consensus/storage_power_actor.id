@@ -1,27 +1,41 @@
-import base "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import address "github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 
 type BytesAmount UVarint
 
 type StoragePowerActor struct {
+    Miners [addr.Address]  // TODO this should have a different type to account for power
+
     // call by StorageMiningSubsytem on miner creation
-    RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) address.Address
+    CreateStorageMiner(
+        ownerAddr     addr.Address
+        workerPubKey  filcrypto.PubKey
+        sectorSize    util.UInt
+        peerId        libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
+    ) addr.Address
+
+    // TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate
+    UpdatePower(address addr.Address, newPower minerStorage)
+
+    TotalStorage() BytesAmount
+
+    PowerLookup(minerAddr addr.Address) BytesAmount
 
     // call by StorageMinerActor on successful seal
     // TODO: workerKey of type StorageMiner.WorkerPubKey
-    IncrementPower(minerAddress base.Address)
-    UpdatePower(address base.Address, newPower minerStorage)
-    SuspendMiner(address base.Address)
+    IncrementPower(minerAddress addr.Address)
+
+    SuspendMiner(address addr.Address)
 
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
 
     // VerifyElectionProof(base.Address, base.ElectionProof)	bool
-    TotalStorage() BytesAmount
 
-    // // What does graceful removal look like?
-    // NotifyConsensusFault(base.Address, [Block])
-    // NotifyStorageFault(base.Address)
+    // TODO: old methods, should be removed
+    // UpdateStoragePowerSubsystem(Tipset, StateTree)
+    // VerifyElectionProof(addr.Address, base.ElectionProof)	bool
+    // NotifyStorageFault(addr.Address)
     // TryPublishBlock(StateTree)					Block
 
     // RegisterStorageMiner(SealProof)				Address

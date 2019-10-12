@@ -17,7 +17,7 @@
 
 <link rel="alternate" type="application/rss+xml" href="../../../../docs/systems/filecoin_markets/storage_market/index.xml" title="Filecoin Spec" />
 
-<script type="text/javascript" src="./MathJax.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
 
 <!--
@@ -1319,6 +1319,431 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
+
+<a href="../../../../#systems__filecoin_vm" class="menu-item depth-2">
+    💻
+    
+        <strong>Virtual Machine</strong>
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_vm__actor" class="menu-item depth-3">
+    
+    
+        Actor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__actor__address" class="menu-item depth-4">
+    
+    
+        Address
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__state_tree" class="menu-item depth-3">
+    
+    
+        State Tree
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_vm__message" class="menu-item depth-3">
+    
+    
+        Message
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_vm__runtime" class="menu-item depth-3">
+    
+    
+        Runtime
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_vm__runtime__exitcode" class="menu-item depth-4">
+    
+    
+        Exit Codes
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_vm__runtime__gascost" class="menu-item depth-4">
+    
+    
+        Gas Costs
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__sysactors" class="menu-item depth-3">
+    
+    
+        System Actors
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__sysactors__init_actor" class="menu-item depth-4">
+    
+    
+        InitActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__sysactors__cron_actor" class="menu-item depth-4">
+    
+    
+        CronActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__sysactors__account_actor" class="menu-item depth-4">
+    
+    
+        AccountActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#systems__filecoin_vm__interpreter" class="menu-item depth-3">
+    
+    
+        Interpreter
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+    <li>
+    
+    </li>
+
+    <li>
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
 
 <a href="../../../../#systems__filecoin_blockchain" class="menu-item depth-2">
     📦
@@ -1344,13 +1769,11 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  
 
-
-<a href="../../../../#systems__filecoin_blockchain__vm" class="menu-item depth-3">
+<a href="../../../../#systems__filecoin_blockchain__struct" class="menu-item depth-3">
     
     
-        Virtual Machine
+        Blocks
     
 </a>
 
@@ -1372,138 +1795,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__vm__address" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_blockchain__struct__block" class="menu-item depth-4">
     
     
-        VM Address
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_blockchain__vm__actor" class="menu-item depth-4">
-    
-    
-        VM Actor
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_blockchain__vm__state_tree" class="menu-item depth-4">
-    
-    
-        VM State Tree
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_blockchain__vm__message" class="menu-item depth-4">
-    
-    
-        VM Message
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_blockchain__vm__sysactors" class="menu-item depth-4">
-    
-    
-        VM System Actors
+        Block
     
 </a>
 
@@ -1525,72 +1820,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__vm__sysactors__init_actor" class="menu-item depth-5">
+<a href="../../../../#systems__filecoin_blockchain__struct__block__tipset" class="menu-item depth-5">
     
     
-        InitActor
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-5">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_blockchain__vm__sysactors__cron_actor" class="menu-item depth-5">
-    
-    
-        CronActor
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-5">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_blockchain__vm__sysactors__account_actor" class="menu-item depth-5">
-    
-    
-        AccountActor
+        Tipset
     
 </a>
 
@@ -1623,13 +1856,11 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  
 
-
-<a href="../../../../#systems__filecoin_blockchain__vm__interpreter" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_blockchain__struct__chain" class="menu-item depth-4">
     
     
-        VM Interpreter
+        Chain
     
 </a>
 
@@ -1637,14 +1868,6 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-4">
 
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
 </ul>
 
 
@@ -1664,13 +1887,11 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  
 
-
-<a href="../../../../#systems__filecoin_blockchain__vm__runtime" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_blockchain__struct__chain_manager" class="menu-item depth-4">
     
     
-        VM Runtime Environment
+        Chain Manager
     
 </a>
 
@@ -1678,33 +1899,6 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-4">
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#systems__filecoin_blockchain__vm__runtime__exitcode" class="menu-item depth-5">
-    
-    
-        Exit Codes
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-5">
-
 </ul>
 
 
@@ -1724,25 +1918,17 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-  
 
-
-<a href="../../../../#systems__filecoin_blockchain__vm__runtime__gascost" class="menu-item depth-5">
+<a href="../../../../#systems__filecoin_blockchain__struct__block_producer" class="menu-item depth-4">
     
     
-        Gas Costs
+        Block Producer
     
 </a>
 
 
 
-<ul class="menu-item-section depth-5">
-
-</ul>
-
-
-    
-    </li>
+<ul class="menu-item-section depth-4">
 
 </ul>
 
@@ -1863,32 +2049,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__blockchain" class="menu-item depth-3">
-    
-    
-        Blockchain Components
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_blockchain__blockchain__block_syncer" class="menu-item depth-4">
+<a href="../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
         Block Syncer
@@ -1897,75 +2058,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_blockchain__blockchain__chain_manager" class="menu-item depth-4">
-    
-    
-        Chain Manager
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_blockchain__blockchain__block_producer" class="menu-item depth-4">
-    
-    
-        Block Producer
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
+<ul class="menu-item-section depth-3">
 
 </ul>
 
@@ -2900,6 +2993,64 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_provider" class="menu-item depth-4">
+    
+    
+        Storage Provider
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__storage_market__storage_client" class="menu-item depth-4">
+    
+    
+        Storage Client
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
     </li>
 
     <li>
@@ -3731,10 +3882,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__porep__zigzag" class="menu-item depth-3">
+<a href="../../../../#algorithms__porep__stacked_drg" class="menu-item depth-3">
     
     
-        ZigZag-PoRep
+        Stacked DRG PoRep
     
 </a>
 
@@ -3770,6 +3921,37 @@ https://github.com/alex-shpak/hugo-book
 </a>
 
 
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#algorithms__porep__stacked_drg_circuit" class="menu-item depth-3">
+    
+    
+        
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
 
 
     
@@ -4360,11 +4542,13 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown"><p><div id="systems__filecoin_markets__storage_market__storage_market_subsystem"></div>
-Storage Market subsystem is the data entry point into the network. Storage miners only earn power from data stored in a storage deal and all deals live on the Filecoin network. Specific deal negotiation process happens off chain, clients and miners enter a storage deal after an agreement has been reached and post storage deals on the Filecoin network to earn block rewards and get paid for storing the data in the storage deal. A deal is only valid when it is posted on chain with signatures from both parties and at the time of posting, there are sufficient balances for both parties in <code>StorageMarketActor</code> to honor the deal in terms of deal price and deal collateral. Both <code>StorageClient</code> and <code>StorageProvider</code> can submit deals on chain once they have signatures from the counter party. A partially signed <code>StorageDeal</code> is called a <code>StorageDealProposal</code>.</p>
+Storage Market subsystem is the data entry point into the network. Storage miners only earn power from data stored in a storage deal and all deals live on the Filecoin network. Specific deal negotiation process happens off chain, clients and miners enter a storage deal after an agreement has been reached and post storage deals on the Filecoin network to earn block rewards and get paid for storing the data in the storage deal. A deal is only valid when it is posted on chain with signatures from both parties and at the time of posting, there are sufficient balances for both parties in <code>StorageMarketActor</code> to honor the deal in terms of deal price and deal collateral.</p>
 
-<p>A <code>StorageDealProposal</code> can be propsed by any <code>StorageMarketParticipant</code> and sent to another participant who can counter sign the proposal with their public key and result in a <code>StorageDeal</code>. A <code>StorageDeal</code> is only in effect when it is submitted to and accepted by the <code>StorageMarketActor</code> on chain before the <code>ProposalExpiryEpoch</code>. Counter signer of the <code>StorageDeal</code> can either submit the deal directly onto the chain or return the deal to the proposer. In the event that a <code>StorageDeal</code> is reached but the counter signer does not submit the sign deal on chain, proposer can exit the storage deal by reducing its balance on <code>StorageMarketActor</code> before the deal is published so that the deal will be invalid. <code>StorageDeal</code> does not include a <code>StartEpoch</code> as it will come into effect at the block in which the deal gets accepted into the network. Hence, counter signer of the storage deal should publish the deal as soon as possible. Note that there are some UX challenges here that can be simplified with updatable storage on the network, where storage deals within a sector can be updated cheaply.</p>
+<p>Both <code>StorageClient</code> and <code>StorageProvider</code> need to first deposit Filecoin token into <code>StorageMarketActor</code> before participating in the storage market. <code>StorageClient</code> can then send a <code>StorageDealProposal</code> to the <code>StorageProvider</code> along with the data. A partially signed <code>StorageDeal</code> is called a <code>StorageDealProposal</code>. <code>StorageProvider</code> can then put this storage deal in their <code>Sector</code>, countersign the <code>StorageDealProposal</code> and result in a <code>StorageDeal</code>. A <code>StorageDeal</code> is only in effect when it is submitted to and accepted by the <code>StorageMarketActor</code> on chain before the <code>ProposalExpiryEpoch</code>. <code>StorageDeal</code> does not include a <code>StartEpoch</code> as it will come into effect at the block when the deal gets accepted into the network. Hence, <code>StorageProvider</code> should publish the deal as soon as possible.</p>
 
-<p>Storage Deal payments are processed at every successful PoSt submission and <code>StorageMarketActor</code> will move locked funds from <code>StorageClient</code> to <code>StorageProvider</code>. <code>SlashStorageDealCollateral</code> is also triggered on PoSt submission when a Sector containing a particular <code>StorageDeal</code> is faulty or miners fail to submit PoSt related to a <code>StorageDeal</code>. Note that <code>StorageProvider</code> does not need to be the same entity as the <code>StorageMinerActor</code> as long as the deal is stored on the Filecoin in at least one sector throughout the life time of the storage deal.</p>
+<p><code>StorageDeal</code> payments are processed at every successful PoSt submission and <code>StorageMarketActor</code> will move locked funds from <code>StorageClient</code> to <code>StorageProvider</code>. <code>SlashStorageDealCollateral</code> is also triggered on PoSt submission when a Sector containing a particular <code>StorageDeal</code> is faulty or miners fail to submit PoSt related to a <code>StorageDeal</code>. Note that <code>StorageProvider</code> does not need to be the same entity as the <code>StorageMinerActor</code> as long as the deal is stored in at least one <code>Sector</code> throughout the life time of the storage deal.</p>
+
+<p>TODO: process <code>StorageDeal</code> payments are larger interval beyond every PoSt submission</p>
 </article>
 
       

@@ -12,33 +12,12 @@
     
     <item>
       <title></title>
-      <link>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</link>
+      <link>/docs/algorithms/porep/stacked_drg_circuit/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor_old/</guid>
-      <description>Account Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;account&amp;quot;&amp;gt;  The Account actor is the actor used for normal keypair backed accounts on the filecoin network.
-type AccountActorState struct { address Address } Methods    Name Method ID     AccountConstructor 1   GetAddress 2    type AccountConstructor struct { }  GetAddress Parameters
-type GetAddress struct { } representation tuple Algorithm
-func GetAddress() Address { return self.</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor_old/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor_old/</guid>
-      <description>Init Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;init&amp;quot;&amp;gt;  The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that NextID will initially be set to 100.
-type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId UInt } Methods    Name Method ID     Constructor 1   Exec 2   GetIdForAddress 3    Constructor Parameters</description>
+      <guid>/docs/algorithms/porep/stacked_drg_circuit/</guid>
+      <description>Stacked DRG: Offline PoRep Circuit Spec Stacked DRG Overview Stacked DRG PoRep is based on layering DRG graphs LAYERS times. The data represented in each DRG layer is a labeling based on previously labeled nodes. The final labeled layer is the SDR key, and the &amp;lsquo;final layer&amp;rsquo; of replication the replica, an encoding of the original data using the generated key.
+ ReplicaId is a unique replica identifier (see the Filecoin Proofs spec for details).</description>
     </item>
     
     <item>
@@ -82,6 +61,28 @@ type PaymentChannel struct { from Address to Address toSend TokenAmount closingA
     </item>
     
     <item>
+      <title></title>
+      <link>/docs/systems/filecoin_vm/sysactors/account_actor_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/account_actor_old/</guid>
+      <description>Account Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;account&amp;quot;&amp;gt;  The Account actor is the actor used for normal keypair backed accounts on the filecoin network.
+type AccountActorState struct { address Address } Methods    Name Method ID     AccountConstructor 1   GetAddress 2    type AccountConstructor struct { }  GetAddress Parameters
+type GetAddress struct { } representation tuple Algorithm
+func GetAddress() Address { return self.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/docs/systems/filecoin_vm/sysactors/init_actor_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/init_actor_old/</guid>
+      <description>Init Actor  Code Cid: &amp;lt;codec:raw&amp;gt;&amp;lt;mhType:identity&amp;gt;&amp;lt;&amp;quot;init&amp;quot;&amp;gt;  The init actor is responsible for creating new actors on the filecoin network. This is a built-in actor and cannot be replicated. In the future, this actor will be responsible for loading new code into the system (for user programmable actors). ID allocation for user instantiated actors starts at 100. This means that NextID will initially be set to 100.
+type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId UInt } Methods    Name Method ID     Constructor 1   Exec 2   GetIdForAddress 3    Constructor Parameters</description>
+    </item>
+    
+    <item>
       <title>About this specification</title>
       <link>/docs/intro/process/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -92,12 +93,12 @@ type PaymentChannel struct { from Address to Address toSend TokenAmount closingA
     
     <item>
       <title>AccountActor</title>
-      <link>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor/</link>
+      <link>/docs/systems/filecoin_vm/sysactors/account_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/systems/filecoin_blockchain/vm/sysactors/account_actor/</guid>
+      <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
       <description>(You can see the old AccountActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address } type AccountActor struct { actorState actor.ActorState accountState AccountActorState }  </description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address } type AccountActor struct { actorState actor.ActorState accountState AccountActorState }  </description>
     </item>
     
     <item>
@@ -115,7 +116,7 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockcha
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/intro/arch/</guid>
-      <description>Filecoin Systems Systems   Filecoin Nodes ⚙️   Node Types     Repository     Network Interface     Clock       Files &amp;amp; Data 📑   File     Piece     Data Transfer       Blockchain 📦   Virtual Machine     Message Pool     Blockchain Components     Storage Power Consensus       Token 📀   Wallet     Payments     Payment Channels     Multisig Wallet       Storage Mining ⛏   Storage Miner     Sector     Sector Index     Storage Proving       Market ⚖️   Orders     Deals     Storage Market     Retrieval Market          Overview Diagram TODO:</description>
+      <description>Filecoin Systems Systems   Filecoin Nodes ⚙️   Node Types     Repository     Network Interface     Clock       Files &amp;amp; Data 📑   File     Piece     Data Transfer       Virtual Machine 💻   Actor     State Tree     Message     Runtime     System Actors     Interpreter       Blockchain 📦   Blocks     Message Pool     Block Syncer     Storage Power Consensus       Token 📀   Wallet     Payments     Payment Channels     Multisig Wallet       Storage Mining ⛏   Storage Miner     Sector     Sector Index     Storage Proving       Market ⚖️   Orders     Deals     Storage Market     Retrieval Market          Overview Diagram TODO:</description>
     </item>
     
     <item>
@@ -125,16 +126,6 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockcha
       
       <guid>/docs/libraries/ipfs/bitswap/</guid>
       <description></description>
-    </item>
-    
-    <item>
-      <title>Block Producer</title>
-      <link>/docs/systems/filecoin_blockchain/blockchain/block_producer/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/blockchain/block_producer/</guid>
-      <description>Mining Blocks Having registered as a miner, it&amp;rsquo;s time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest Tipsets seen on the network.
-For additional details around how consensus works in Filecoin, see the expected consensus spec. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how &amp;ldquo;Tickets&amp;rdquo; should be validated during block validation.</description>
     </item>
     
     <item>
@@ -149,16 +140,6 @@ func (g *BlockValidationGraph_I) tryConnectBlockToFringe(block Block) { panic(&a
     </item>
     
     <item>
-      <title>Block Syncer</title>
-      <link>/docs/systems/filecoin_blockchain/blockchain/block_syncer/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/blockchain/block_syncer/</guid>
-      <description>In order to ensure they are always on the correct latest state of the blockchain, a Filecoin node must continuously monitor and propagate blocks on the network.
-When a node receives blocks, it must also validate them. Validation is split into two stages, syntactic and semantic. The syntactic stage may be validated without reference to additional data, the semantic stage requires access to the chain which the block extends.</description>
-    </item>
-    
-    <item>
       <title>BlockSync</title>
       <link>/docs/algorithms/block_sync/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -167,16 +148,6 @@ When a node receives blocks, it must also validate them. Validation is split int
       <description>Name: Block Sync Protocol ID: /fil/sync/blk/0.0.1  The blocksync protocol is a small protocol that allows Filecoin nodes to request ranges of blocks from each other. It is a simple request/response protocol.
 The request requests a chain of a given length by the hash of its highest block. The Options allow the requester to specify whether or not blocks and messages to be included.
 The response contains the requested chain in reverse iteration order.</description>
-    </item>
-    
-    <item>
-      <title>Chain Manager</title>
-      <link>/docs/systems/filecoin_blockchain/blockchain/chain_manager/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/blockchain/chain_manager/</guid>
-      <description>The Chain Manager is a central component in the blockchain system. It tracks and updates competing subchains received by a given node in order to select the appropriate blockchain head: the latest block of the heaviest subchain it is aware of in the system.
-In so doing, the chain manager is the central subsystem that handles bookkeeping for numerous other systems in a Filecoin node and exposes convenience methods for use by those systems, enabling systems to sample randomness from the chain for instance, or to see which block has been finalized most recently.</description>
     </item>
     
     <item>
@@ -226,11 +197,11 @@ In so doing, the chain manager is the central subsystem that handles bookkeeping
     
     <item>
       <title>CronActor</title>
-      <link>/docs/systems/filecoin_blockchain/vm/sysactors/cron_actor/</link>
+      <link>/docs/systems/filecoin_vm/sysactors/cron_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/systems/filecoin_blockchain/vm/sysactors/cron_actor/</guid>
-      <description> import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type CronActorState struct { // Cron has no internal state } type CronActor struct { actorState actor.ActorState cronState CronActorState // Tick executes built-in periodic actions.  Tick() }  </description>
+      <guid>/docs/systems/filecoin_vm/sysactors/cron_actor/</guid>
+      <description> import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type CronActorState struct { // Cron has no internal state } type CronActor struct { actorState actor.ActorState cronState CronActorState // Tick executes built-in periodic actions.  Tick() }  </description>
     </item>
     
     <item>
@@ -426,12 +397,12 @@ All Systems, as defined in this document, require the following:
     
     <item>
       <title>InitActor</title>
-      <link>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor/</link>
+      <link>/docs/systems/filecoin_vm/sysactors/init_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/systems/filecoin_blockchain/vm/sysactors/init_actor/</guid>
+      <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
       <description>(You can see the old InitActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID } type InitActorCode struct { // 0  Constructor(r vmr.Runtime) // 1  Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address // 2  GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID } type InitActorCode struct { // 0  Constructor(r vmr.Runtime) // 1  Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address // 2  GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.</description>
     </item>
     
     <item>
@@ -491,7 +462,7 @@ Upon receiving the message, its validity must be checked: the signature must be 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/storage_mining/mining_scheduler/</guid>
-      <description>import poster &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; import mining &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining&amp;#34; // import storage_indexer &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&amp;#34;  type Sector struct {} type SectorSet [Sector] type SealedSectorSet [Sector] type ReplicaID CID type MiningScheduler struct { getStagedSectors() SectorSet getSealedSectors() SealedSectorSet getFaultySectors() SectorSet getRepairedSectors() SectorSet // same as completedSectors/doneSectors  getExpiredSectors() SectorSet ProducePost(sectors SectorSet) poster.PoStSubmission VerifyPost(sectors SectorSet) poster.PoStSubmission ReportFaults( actor &amp;amp;StorageMinerActor ) bool RemoveSectors(remove SectorSet) bool DePledge( amount actor.TokenAmount ) bool // receives from sector storage subsystem  SealedSector( sealedSector mining.</description>
+      <description>import poster &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import mining &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining&amp;#34; // import storage_indexer &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&amp;#34;  type ReplicaID CID type MiningScheduler struct { getStagedSectors() sector.SectorSet getSealedSectors() sector.SealedSectorSet getFaultySectors() sector.SectorSet getRepairedSectors() sector.SectorSet // same as completedSectors/doneSectors  getExpiredSectors() sector.SectorSet ProducePost(sectors sector.SectorSet) poster.PoStSubmission VerifyPost(sectors sector.SectorSet) poster.PoStSubmission ReportFaults( actor &amp;amp;StorageMinerActor ) bool RemoveSectors(remove sector.SectorSet) bool DePledge( amount actor.TokenAmount ) bool // receives from sector storage subsystem  SealedSector( sealedSector mining.SealedSector ) bool AddSector( pledge actor.</description>
     </item>
     
     <item>
@@ -501,7 +472,7 @@ Upon receiving the message, its validity must be checked: the signature must be 
       
       <guid>/docs/systems/filecoin_token/multisig/multisig_actor/</guid>
       <description>(You can see the old Multisig Actor here )
-import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/actor&amp;#34; type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [address.Address] required NumRequired nextTxId TxSeqNo initialBalance actor.TokenAmount startingBlock Epoch unlockDuration EpochDuration // transactions {TxSeqNo: Transaction} // TODO Transaction type does not exist  Construct( signers [address.Address] required NumRequired unlockDuration EpochDuration ) Propose( to address.Address value actor.TokenAmount method string params Bytes ) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer address.</description>
+import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type TxSeqNo UVarint type NumRequired UVarint type EpochDuration UVarint type Epoch UVarint type MultisigActor struct { signers [address.Address] required NumRequired nextTxId TxSeqNo initialBalance actor.TokenAmount startingBlock Epoch unlockDuration EpochDuration // transactions {TxSeqNo: Transaction} // TODO Transaction type does not exist  Construct( signers [address.Address] required NumRequired unlockDuration EpochDuration ) Propose( to address.Address value actor.TokenAmount method string params Bytes ) TxSeqNo Approve(txid TxSeqNo) Cancel(txid TxSeqNo) ClearCompleted() AddSigner(signer address.</description>
     </item>
     
     <item>
@@ -520,6 +491,16 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_block
       
       <guid>/docs/systems/filecoin_nodes/node_types/node/</guid>
       <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.WallClock }  </description>
+    </item>
+    
+    <item>
+      <title>Other Artifacts in Blocks</title>
+      <link>/docs/systems/filecoin_blockchain/struct/block/other/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_blockchain/struct/block/other/</guid>
+      <description>TODO: - move this stuff elsewhere
+import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { vrfResult filcrypto.VRFResult vdfResult filcrypto.VDFResult // Generate(k VRFKeyPair, seed ElectionSeed) Ticket  ValidateSyntax() bool Validate() bool } type StoragePower UVarint type PowerFraction Float type ElectionSeed filcrypto.VDFResult type ElectionArtifacts struct { TK Ticket T1 Ticket } type ElectionProof struct { vrfResult filcrypto.VRFResult IsWinning(minerPower PowerFraction) bool @(cached) ValidateSyntax() bool Verify(seed ElectionSeed, minerPK filcrypto.</description>
     </item>
     
     <item>
@@ -577,25 +558,25 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/algorithms/post/proof_of_spacetime_parameters/</guid>
-      <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin. (asdf:load-system :orient) (in-package orient.lang)  #&amp;lt;PACKAGE &amp;#34;ORIENT.LANG&amp;#34;&amp;gt;  (defparameter *filecoin* (get-system &amp;#34;../orient/filecoin.orient&amp;#34;)) (defparameter *input* (interface:get-json-relation-list &amp;#34;../orient/params.json&amp;#34;)) (defparameter *multi-input* (interface:get-json-relation-list &amp;#34;../orient/multi-params.json&amp;#34;))  *MULTI-INPUT*  (let ((result-tuple (extract (ask *filecoin* &amp;#39;(post-challenge-blocks post-challenge-hours post-proving-period) *input*)))) (org-present-tuple result-tuple *filecoin*))     Parameter Type Value Description   POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started.</description>
-    </item>
-    
-    <item>
-      <title>Proof of Spacetime Parameters</title>
-      <link>/docs/algorithms/proof_of_spacetime_parameters/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/algorithms/proof_of_spacetime_parameters/</guid>
       <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
    Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    TODO: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.</description>
     </item>
     
     <item>
-      <title>Proof of Spacetime Parameters</title>
-      <link>/docs/content/algorithms/proof_of_spacetime_parameters/</link>
+      <title>PoSt Parameters</title>
+      <link>/docs/algorithms/post/proof_of_spacetime_parameters/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/content/algorithms/proof_of_spacetime_parameters/</guid>
+      <guid>/docs/algorithms/post/proof_of_spacetime_parameters/</guid>
+      <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin. (asdf:load-system :orient) (in-package orient.lang)  #&amp;lt;PACKAGE &amp;#34;ORIENT.LANG&amp;#34;&amp;gt;  (defparameter *filecoin* (get-system &amp;#34;../../orient/filecoin.orient&amp;#34;)) (defparameter *input* (interface:get-json-relation-list &amp;#34;../../orient/params.json&amp;#34;)) (defparameter *multi-input* (interface:get-json-relation-list &amp;#34;../../orient/multi-params.json&amp;#34;))  *MULTI-INPUT*  (let ((result-tuple (extract (ask *filecoin* &amp;#39;(post-challenge-blocks post-challenge-hours post-proving-period) *input*)))) (org-present-tuple result-tuple *filecoin*))     Parameter Type Value Description   POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started.</description>
+    </item>
+    
+    <item>
+      <title>PoSt Parameters</title>
+      <link>/docs/content/algorithms/post/proof_of_spacetime_parameters/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/content/algorithms/post/proof_of_spacetime_parameters/</guid>
       <description>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
    Parameter Type Value Description     POST-CHALLENGE-BLOCKS BLOCKS 480 The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.   POST-CHALLENGE-HOURS HOURS 2 PoSt challenge time (see POST_CHALLENGE_BLOCKS).   POST-PROVING-PERIOD BLOCKS 5760 The time interval in which a PoSt has to be submitted    TODO: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.</description>
     </item>
@@ -634,7 +615,7 @@ High Level API Fault Detection Fault detection happens over the course of the li
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_client/</guid>
-      <description> import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; type TokenAmount base.TokenAmount type Address base.Address type RetrievalClient struct { CreatePaymentChannel(provider Address, payment TokenAmount) PaymentChannel }  </description>
+      <description> import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type RetrievalClient struct { CreatePaymentChannel(provider addr.Address, payment actor.TokenAmount) PaymentChannel }  </description>
     </item>
     
     <item>
@@ -652,7 +633,7 @@ High Level API Fault Detection Fault detection happens over the course of the li
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/retrieval_market/retrieval_provider/</guid>
-      <description> type PaymentChannel struct {} type CID struct {} // File Retrieval Query type FileRetrievalAvailable struct { MinPrice TokenAmount Miner Address } type FileRetrievalUnavailable struct {} type RetrievalQueryResponse union { FileRetrievalAvailable FileRetrievalUnavailable } type RetrievalQuery struct { File CID } // File Retrieval Deal Proposal and Deal type RetrievalDealProposalError struct {} type RetrievalDealProposalRejected struct {} type RetrievalDealProposalAccepted struct { CounterParty Address Payment PaymentChannel } type RetrievalDealProposalResponse union { RetrievalDealProposalAccepted RetrievalDealProposalRejected RetrievalDealProposalError } type RetrievalDealProposal struct { File CID Payment PaymentChannel MinPrice TokenAmount } type RetrievalProvider struct { NewRetrievalQuery(query RetrievalQuery) RetrievalQueryResponse // NewRetrievalDealProposal is called to propose a retrieval  NewRetrievalDealProposal(proposal RetrievalDealProposal) RetrievalDealProposalResponse // AcceptRetrievalDeal is called to accept a retrieval deal  AcceptRetrievalDealProposal(deal RetrievalDealProposal) RetrievalDealProposalResponse }  </description>
+      <description>import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type PaymentChannel struct {} type CID struct {} // File Retrieval Query type FileRetrievalAvailable struct { MinPrice actor.TokenAmount Miner addr.Address } type FileRetrievalUnavailable struct {} type RetrievalQueryResponse union { FileRetrievalAvailable FileRetrievalUnavailable } type RetrievalQuery struct { File CID } // File Retrieval Deal Proposal and Deal type RetrievalDealProposalError struct {} type RetrievalDealProposalRejected struct {} type RetrievalDealProposalAccepted struct { CounterParty addr.Address Payment PaymentChannel } type RetrievalDealProposalResponse union { RetrievalDealProposalAccepted RetrievalDealProposalRejected RetrievalDealProposalError } type RetrievalDealProposal struct { File CID Payment PaymentChannel MinPrice actor.</description>
     </item>
     
     <item>
@@ -661,7 +642,7 @@ High Level API Fault Detection Fault detection happens over the course of the li
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector_index/sector_builder/</guid>
-      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import mkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID sector.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
+      <description>import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; // import smkt &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; // SectorBuilder accumulates deals, keeping track of their // sector configuration requirements and the piece sizes. // Once there is a sector ready to be sealed, NextSector // will return a sector.  type StageDealResponse struct { SectorID sector.SectorID } type SectorBuilder struct { // DealsToSeal keeps a set of StorageDeal objects.  // These include the info for the relevant pieces.</description>
     </item>
     
     <item>
@@ -680,7 +661,7 @@ Something&#39;s not right. The sector_sealer.id file was not found.</description
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/sealing/</guid>
-      <description>import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import base_blockchain &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&amp;#34; type Path struct {} // TODO  type SealRandomSeed Bytes type SealCfg struct { SectorSize SubsectorCount UInt Partitions UInt } // SealVerifyInfo is the structure of all thte information a verifier // needs to verify a Seal. type SealVerifyInfo struct { SectorID MinerID base_blockchain.Address OnChain OnChainSealVerifyInfo } // OnChainSealVerifyInfo is the structure of information that must go on chain. type OnChainSealVerifyInfo struct { UnsealedCID UnsealedSectorCID // CommD  SealedCID SealedSectorCID // CommR  RandomSeed SealRandomSeed Proof SealProof } // ProofAux is meta data required to generate certain proofs // for a sector, for example PoSt.</description>
+      <description>import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; type Path struct {} // TODO  type SealRandomSeed Bytes type SealCfg struct { SectorSize SubsectorCount UInt Partitions UInt } // SealVerifyInfo is the structure of all thte information a verifier // needs to verify a Seal. type SealVerifyInfo struct { MinerID addr.Address OnChain OnChainSealVerifyInfo } // OnChainSealVerifyInfo is the structure of information that must go on chain. type OnChainSealVerifyInfo struct { UnsealedCID UnsealedSectorCID // CommD  SealedCID SealedSectorCID // CommR  RandomSeed SealRandomSeed Proof SealProof DealIDs [deal.</description>
     </item>
     
     <item>
@@ -732,6 +713,55 @@ We use signatures in filecoin to verify something was done by someone.</descript
     </item>
     
     <item>
+      <title>Stacked DRG Commitments</title>
+      <link>/docs/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</guid>
+      <description>This section summarizes the Stacked DRG (SDR) Column Commitments algorithm described in Tight PoS - ZigZag.
+Graph In the following graphs, DRG and expander parents are both generated by a pseudorandom permutation and are provided only to illustrate the nature of the SDR commitment scheme. They accurately represent how parent-child relationships function between layers, and are accurate for expander parents. However, this is not representative of the DRG parent selection algorithm.</description>
+    </item>
+    
+    <item>
+      <title>Stacked DRG Commitments</title>
+      <link>/docs/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</guid>
+      <description>(ql:quickload :orient)     :ORIENT     This section summarizes the Stacked DRG (SDR) Column Commitments algorithm described in Tight PoS - ZigZag. Graph  (defparameter *layers* 4) (defparameter *nodes* 8) (defparameter *regenerate-sdr-graph* nil) (defparameter *dumped-sdr-graph* &amp;#39;(:NODES 8 :CHALLENGED-NODE 7 :LAYERS 4 :RENUMBERED-PERMUTATION (:PERM-LIST (7 4 3 6 1 8 2 5) :TYPE PERM) :REVERSED-PERMUTATION (:PERM-LIST (3 7 8 6 5 1 4 2) :TYPE PERM) :TYPE SDR-GRAPH)) (defparameter *sdr-graph* (if *regenerate-sdr-graph* (make-sdr-graph *nodes* *layers*) (load-from-plist *dumped-sdr-graph*))) (let ((lg (first (sdr-graph-layer-graphs *sdr-graph*)))) (defparameter *comm-d-graph* (make-comm-d-layer-graph (layer-graph-nodes lg) (layer-graph-challenged-node lg) :parent *sdr-graph*)) (defparameter *replica-graph* (make-replica-layer-graph (layer-graph-nodes lg) (layer-graph-challenged-node lg) :parent *sdr-graph* :layers *layers*))) (dump *sdr-graph*)  (:NODES 8 :CHALLENGED-NODE 7 :LAYERS 4 :RENUMBERED-PERMUTATION (:PERM-LIST (7 4 3 6 1 8 2 5) :TYPE PERM) :REVERSED-PERMUTATION (:PERM-LIST (3 7 8 6 5 1 4 2) :TYPE PERM) :TYPE SDR-GRAPH)  (emit-legend nil)   In the following graphs, DRG and expander parents are both generated by a pseudorandom permutation and are provided only to illustrate the nature of the SDR commitment scheme.</description>
+    </item>
+    
+    <item>
+      <title>Stacked DRG Commitments</title>
+      <link>/docs/content/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/content/algorithms/porep/porep_commitments/sdr_commitments/sdr_commitments/</guid>
+      <description>This section summarizes the Stacked DRG (SDR) Column Commitments algorithm described in Tight PoS - ZigZag.
+Graph In the following graphs, DRG and expander parents are both generated by a pseudorandom permutation and are provided only to illustrate the nature of the SDR commitment scheme. They accurately represent how parent-child relationships function between layers, and are accurate for expander parents. However, this is not representative of the DRG parent selection algorithm.</description>
+    </item>
+    
+    <item>
+      <title>Stacked DRG PoRep</title>
+      <link>/docs/algorithms/porep/stacked_drg/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/porep/stacked_drg/</guid>
+      <description>This section describes Stacked DRG PoRep (SDR), the specific Proof-of-Replication (PoRep) used in Filecoin. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
+SDR has been presented by Ben Fisch at EUROCRYPT19.
+Introduction Background on Proof-of-Replication Proof-of-Replication enables a prover P to convince a verifier V that P is storing a replica R, a physically independent copy of some data D, unique to P.</description>
+    </item>
+    
+    <item>
+      <title>Storage Client</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_client/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_client/</guid>
+      <description>Both StorageProvider and StorageClient are StorageMarketParticipant. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. StorageClient will initiate the storage deal protocol by submitting a StorageDealProposal to the StorageProvider who will then add the deal data to a Sector and commit the sector onto the blockchain.</description>
+    </item>
+    
+    <item>
       <title>Storage Market Actor</title>
       <link>/docs/systems/filecoin_markets/storage_market/storage_market_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -741,23 +771,13 @@ We use signatures in filecoin to verify something was done by someone.</descript
     </item>
     
     <item>
-      <title>Storage Market Participant</title>
-      <link>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</guid>
-      <description>Both StorageProvider and StorageClient are StorageMarketParticipant and the protocol does not explicitly differentiate the two roles. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain.
-import base_markets &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; type StorageDealProposal base_markets.StorageDealProposal type StorageDealProposalQuery struct {} type StorageDealProposalQueryResponse struct {} type StorageDealQuery struct {} type StorageDealQueryResponse struct {} type StorageMarketParticipant struct { // Participants call each other to submit StorageDealProposal  NewStorageDealProposal(storageDealProposal StorageDealProposal) // When both parties sign on a StorageDealProposal  // counter signer call this function to return the signed deal  NewStorageDeal(storageDeal StorageDeal) // call by StorageMarketPariticipant itself to sign a StorageDealProposal  SignStorageDealProposal(storageDealProposal StorageDealProposal) StorageDeal // call by proposer  QueryStorageDealProposalStatus(storageDealProposalQuery StorageDealProposalQuery) StorageDealProposalQueryResponse // call by countersigner  QueryStorageDealStatus(storageDeal StorageDeal) StorageDealQueryResponse }  </description>
-    </item>
-    
-    <item>
       <title>Storage Miner Actor</title>
       <link>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
       <description>(You can see the old Storage Miner Actor here )
-import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import base_mining &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; type Seed struct {} type SectorCommitment struct {} type StorageMinerActor struct { // CollateralVault CollateralVault  // Sectors {UInt:MinedSector} // sectors and faults, proving period ends  // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)  // ProvingPeriodEnd Epoch  // // contains mostly static info about this miner  // info &amp;amp;MinerInfo  UpdateDoneSet() UpdateSectorStatus(sectorStateSets sector.</description>
+import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; type Seed struct {} type SectorCommitment struct {} type PoStProof struct {} type StorageMinerActor struct { // CollateralVault CollateralVault  // contains mostly static info about this miner  info &amp;amp;MinerInfo // TODO: add the DePledgeCollateral  // TODO: add the Sectors  // TODO sectors []SectorInfo CID to AMT  // TODO provingSet []SectorInfo CID to AMT  // TODO: should we keep the same structure as before or putting all of that into a struct?</description>
     </item>
     
     <item>
@@ -785,7 +805,16 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>import base &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/vm/address&amp;#34; type BytesAmount UVarint type StoragePowerActor struct { // call by StorageMiningSubsytem on miner creation  RegisterMiner(ownerAddr base.Address, workerPubKey filcrypto.PubKey) address.Address // call by StorageMinerActor on successful seal  // TODO: workerKey of type StorageMiner.WorkerPubKey  IncrementPower(minerAddress base.Address) UpdatePower(address base.Address, newPower minerStorage) SuspendMiner(address base.Address) // UpdateStoragePowerSubsystem(Tipset, StateTree)  // VerifyElectionProof(base.Address, base.ElectionProof)	bool  TotalStorage() BytesAmount // // What does graceful removal look like?</description>
+      <description>import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type BytesAmount UVarint type StoragePowerActor struct { Miners [addr.Address] // TODO this should have a different type to account for power  // call by StorageMiningSubsytem on miner creation  CreateStorageMiner( ownerAddr addr.Address workerPubKey filcrypto.PubKey sectorSize util.UInt peerId libp2p.PeerID // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)  ) addr.Address // TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate  UpdatePower(address addr.</description>
+    </item>
+    
+    <item>
+      <title>Storage Provider</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_provider/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_provider/</guid>
+      <description>Both StorageProvider and StorageClient are StorageMarketParticipant. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. StorageClient will initiate the storage deal protocol by submitting a StorageDealProposal to the StorageProvider who will then add the deal data to a Sector and commit the sector onto the blockchain.</description>
     </item>
     
     <item>
@@ -795,6 +824,16 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       
       <guid>/docs/intro/process/related_resources/testing/</guid>
       <description>TODO</description>
+    </item>
+    
+    <item>
+      <title>Tipset</title>
+      <link>/docs/systems/filecoin_blockchain/struct/block/tipset/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_blockchain/struct/block/tipset/</guid>
+      <description>The Tipset is a group of blocks in the same exact round, that all share the exact same parents.
+import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) }  package block import ( clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) ValidateSyntax() bool { if len(ts.</description>
     </item>
     
     <item>
@@ -817,10 +856,10 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
     
     <item>
       <title>VM Interpreter</title>
-      <link>/docs/systems/filecoin_blockchain/vm/interpreter/vm_interpreter_old/</link>
+      <link>/docs/systems/filecoin_vm/interpreter/vm_interpreter_old/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/systems/filecoin_blockchain/vm/interpreter/vm_interpreter_old/</guid>
+      <guid>/docs/systems/filecoin_vm/interpreter/vm_interpreter_old/</guid>
       <description>VM Interpreter Sending Funds As all messages carry a method ID, the method ID &amp;lsquo;0&amp;rsquo; is reserved for simple transfers of funds. Funds specified by the value field are always transferred, but specifying a method ID of &amp;lsquo;0&amp;rsquo; ensures that no other side effects occur.
 State Representation The global state is modeled as a map of actor IDs to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the &amp;lsquo;key&amp;rsquo; being the serialized ID address (every actor has an ID address that can be looked up via the InitActor), and the value is an Actor object with the actors information.</description>
     </item>
@@ -833,70 +872,6 @@ State Representation The global state is modeled as a map of actor IDs to actor 
       <guid>/docs/intro/system/why_systems/</guid>
       <description>Filecoin decouples and modularizes functionality into loosely-joined systems. Each system adds significant functionality, usually to achieve a set of important and tightly related goals.
 For example, the Blockchain System provides structures like Block, Tipset, and Chain, and provides functionality like Block Sync, Block Propagation, Block Validation, Chain Selection, and Chain Access. This is separated from the Files, Pieces, Piece Preparation, and Data Transfer. Both of these systems are separated from the Markets, which provide Orders, Deals, Market Visibility, and Deal Settlement.</description>
-    </item>
-    
-    <item>
-      <title>ZigZag Commitments</title>
-      <link>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/algorithms/porep/porep_commitments/zigzag_commitments/zigzag_commitments/</guid>
-      <description>(ql:quickload :orient)     :ORIENT     This section summarizes the ZigZag Commitments algorithm described in Tight PoS - ZigZag. Graph  (defparameter *layers* 6) (defparameter *nodes* 8) (defparameter *regenerate-zigzag-graph* nil) (defparameter *dumped-zigzag-graph* &amp;#39;(:NODES 8 :CHALLENGED-NODE 7 :LAYERS 6 :RENUMBERED-PERMUTATION (:PERM-LIST (8 6 1 5 4 7 3 2) :TYPE PERM) :REVERSED-PERMUTATION (:PERM-LIST (6 1 8 3 7 5 4 2) :TYPE PERM) :TYPE ZIGZAG-GRAPH)) (defparameter *zigzag-graph* (if *regenerate-zigzag-graph* (make-zigzag-graph *nodes* *layers*) (load-from-plist *dumped-zigzag-graph*))) (let ((lg (first (zigzag-graph-layer-graphs *zigzag-graph*)))) (defparameter *comm-d-graph* (make-comm-d-layer-graph (layer-graph-nodes lg) (layer-graph-challenged-node lg)))) (dump *zigzag-graph*)  (:NODES 8 :CHALLENGED-NODE 7 :LAYERS 6 :RENUMBERED-PERMUTATION (:PERM-LIST (8 6 1 5 4 7 3 2) :TYPE PERM) :REVERSED-PERMUTATION (:PERM-LIST (6 1 8 3 7 5 4 2) :TYPE PERM) :TYPE ZIGZAG-GRAPH)  (emit-legend :odd)  (emit-legend :even)   Both renumbered (DRG) and reversed (expander) parents are generated by a pseudorandom permutation and are provided only to illustrate the nature of the zigzag commitment scheme.</description>
-    </item>
-    
-    <item>
-      <title>ZigZag Commitments</title>
-      <link>/docs/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</guid>
-      <description>This section summarizes the ZigZag Commitments algorithm described in Tight PoS - ZigZag.
-Graph Both renumbered (DRG) and reversed (expander) parents are generated by a pseudorandom permutation and are provided only to illustrate the nature of the zigzag commitment scheme. They accurately represent how parent-child relationships change between layers, and are accurate for expander parents. However, this is not representative of the DRG parent selection algorithm.
-The following graphs illustrate how the position of challenges, DRG parents, and expander parents change between layers.</description>
-    </item>
-    
-    <item>
-      <title>ZigZag Commitments</title>
-      <link>/docs/algorithms/zigzag_commitments/zigzag_commitments/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/algorithms/zigzag_commitments/zigzag_commitments/</guid>
-      <description>Introduction This document provides a simplified visual explanation of the ZigZag Commitment algorithm described in Tight PoS - ZigZag.
-It is intended to confer intuition about the algorithm, and to serve as a reference for implementers. The author of this document and those of the linked paper believe the two are consistent; and converging on this consistent design was a third design goal of this document&amp;rsquo;s construction.
-Graph Both renumbered (DRG) and reversed (expander) parents are generated by a pseudorandom permutation and are provided only to illustrate the nature of the zigzag commitment scheme.</description>
-    </item>
-    
-    <item>
-      <title>ZigZag Commitments</title>
-      <link>/docs/content/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/content/algorithms/porep_commitments/zigzag_commitments/zigzag_commitments/</guid>
-      <description>This section summarizes the ZigZag Commitments algorithm described in Tight PoS - ZigZag.
-Graph Both renumbered (DRG) and reversed (expander) parents are generated by a pseudorandom permutation and are provided only to illustrate the nature of the zigzag commitment scheme. They accurately represent how parent-child relationships change between layers, and are accurate for expander parents. However, this is not representative of the DRG parent selection algorithm.
-The following graphs illustrate how the position of challenges, DRG parents, and expander parents change between layers.</description>
-    </item>
-    
-    <item>
-      <title>ZigZag Commitments</title>
-      <link>/docs/content/algorithms/zigzag_commitments/zigzag_commitments/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/content/algorithms/zigzag_commitments/zigzag_commitments/</guid>
-      <description>Introduction This document provides a simplified visual explanation of the ZigZag Commitment algorithm described in Tight PoS - ZigZag.
-It is intended to confer intuition about the algorithm, and to serve as a reference for implementers. The author of this document and those of the linked paper believe the two are consistent; and converging on this consistent design was a third design goal of this document&amp;rsquo;s construction.
-Graph Both renumbered (DRG) and reversed (expander) parents are generated by a pseudorandom permutation and are provided only to illustrate the nature of the zigzag commitment scheme.</description>
-    </item>
-    
-    <item>
-      <title>ZigZag-PoRep</title>
-      <link>/docs/algorithms/porep/zigzag/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/algorithms/porep/zigzag/</guid>
-      <description>This section describes the specific Proof-of-Replication (PoRep) used in Filecoin called ZigZag. In this construction, the prover encodes the original data into a replica and commits to it. An offline PoRep proves that the commitment to the replica is a valid commitment of the encoded original data.
-ZigZag has been presented by Ben Fisch at EUROCRYPT19.
-Introduction Background on Proof-of-Replication Proof-of-Replication enables a prover P to convince a verifier V that P is storing a replica R, a physically independent copy of some data D, unique to P.</description>
     </item>
     
   </channel>

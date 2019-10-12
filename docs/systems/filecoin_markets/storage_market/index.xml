@@ -32,6 +32,15 @@ Any misbehavior may result in more than one fault and can lead to slashing on bo
     </item>
     
     <item>
+      <title>Storage Client</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_client/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_client/</guid>
+      <description>Both StorageProvider and StorageClient are StorageMarketParticipant. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. StorageClient will initiate the storage deal protocol by submitting a StorageDealProposal to the StorageProvider who will then add the deal data to a Sector and commit the sector onto the blockchain.</description>
+    </item>
+    
+    <item>
       <title>Storage Market Actor</title>
       <link>/docs/systems/filecoin_markets/storage_market/storage_market_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -41,13 +50,12 @@ Any misbehavior may result in more than one fault and can lead to slashing on bo
     </item>
     
     <item>
-      <title>Storage Market Participant</title>
-      <link>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</link>
+      <title>Storage Provider</title>
+      <link>/docs/systems/filecoin_markets/storage_market/storage_provider/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/docs/systems/filecoin_markets/storage_market/storage_market_participant/</guid>
-      <description>Both StorageProvider and StorageClient are StorageMarketParticipant and the protocol does not explicitly differentiate the two roles. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain.
-import base_markets &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets&amp;#34; type StorageDealProposal base_markets.StorageDealProposal type StorageDealProposalQuery struct {} type StorageDealProposalQueryResponse struct {} type StorageDealQuery struct {} type StorageDealQueryResponse struct {} type StorageMarketParticipant struct { // Participants call each other to submit StorageDealProposal  NewStorageDealProposal(storageDealProposal StorageDealProposal) // When both parties sign on a StorageDealProposal  // counter signer call this function to return the signed deal  NewStorageDeal(storageDeal StorageDeal) // call by StorageMarketPariticipant itself to sign a StorageDealProposal  SignStorageDealProposal(storageDealProposal StorageDealProposal) StorageDeal // call by proposer  QueryStorageDealProposalStatus(storageDealProposalQuery StorageDealProposalQuery) StorageDealProposalQueryResponse // call by countersigner  QueryStorageDealStatus(storageDeal StorageDeal) StorageDealQueryResponse }  </description>
+      <guid>/docs/systems/filecoin_markets/storage_market/storage_provider/</guid>
+      <description>Both StorageProvider and StorageClient are StorageMarketParticipant. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. StorageClient will initiate the storage deal protocol by submitting a StorageDealProposal to the StorageProvider who will then add the deal data to a Sector and commit the sector onto the blockchain.</description>
     </item>
     
   </channel>

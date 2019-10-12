@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>VM Interpreter - Message Invocation (Outside VM) on Filecoin Spec</title>
+    <link>/docs/systems/filecoin_vm/interpreter/</link>
+    <description>Recent content in VM Interpreter - Message Invocation (Outside VM) on Filecoin Spec</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="/docs/systems/filecoin_vm/interpreter/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>VM Interpreter</title>
+      <link>/docs/systems/filecoin_vm/interpreter/vm_interpreter_old/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/interpreter/vm_interpreter_old/</guid>
+      <description>VM Interpreter Sending Funds As all messages carry a method ID, the method ID &amp;lsquo;0&amp;rsquo; is reserved for simple transfers of funds. Funds specified by the value field are always transferred, but specifying a method ID of &amp;lsquo;0&amp;rsquo; ensures that no other side effects occur.
+State Representation The global state is modeled as a map of actor IDs to actor structs. This map is implemented by an ipld HAMT (TODO: link to spec for our HAMT) with the &amp;lsquo;key&amp;rsquo; being the serialized ID address (every actor has an ID address that can be looked up via the InitActor), and the value is an Actor object with the actors information.</description>
+    </item>
+    
+  </channel>
+</rss>

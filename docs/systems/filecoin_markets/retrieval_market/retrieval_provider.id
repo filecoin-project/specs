@@ -1,10 +1,13 @@
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
 type PaymentChannel struct {}
 type CID struct {}
 
 // File Retrieval Query
 type FileRetrievalAvailable struct {
-    MinPrice  TokenAmount
-    Miner     Address
+    MinPrice  actor.TokenAmount
+    Miner     addr.Address
 }
 type FileRetrievalUnavailable struct {}
 type RetrievalQueryResponse union {
@@ -20,7 +23,7 @@ type RetrievalQuery struct {
 type RetrievalDealProposalError struct {}
 type RetrievalDealProposalRejected struct {}
 type RetrievalDealProposalAccepted struct {
-    CounterParty  Address
+    CounterParty  addr.Address
     Payment       PaymentChannel
 }
 type RetrievalDealProposalResponse union {
@@ -31,7 +34,7 @@ type RetrievalDealProposalResponse union {
 type RetrievalDealProposal struct {
     File      CID
     Payment   PaymentChannel
-    MinPrice  TokenAmount
+    MinPrice  actor.TokenAmount
 }
 
 type RetrievalProvider struct {

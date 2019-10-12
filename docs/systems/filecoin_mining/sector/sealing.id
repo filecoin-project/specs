@@ -1,5 +1,6 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-import base_blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type Path struct {}  // TODO
 
@@ -14,17 +15,18 @@ type SealCfg struct {
 // SealVerifyInfo is the structure of all thte information a verifier
 // needs to verify a Seal.
 type SealVerifyInfo struct {
-    SectorID
-    MinerID   base_blockchain.Address
-    OnChain   OnChainSealVerifyInfo
+    MinerID  addr.Address
+    OnChain  OnChainSealVerifyInfo
 }
 
 // OnChainSealVerifyInfo is the structure of information that must go on chain.
 type OnChainSealVerifyInfo struct {
-    UnsealedCID  UnsealedSectorCID  // CommD
-    SealedCID    SealedSectorCID  // CommR
-    RandomSeed   SealRandomSeed
-    Proof        SealProof
+    UnsealedCID   UnsealedSectorCID  // CommD
+    SealedCID     SealedSectorCID  // CommR
+    RandomSeed    SealRandomSeed
+    Proof         SealProof
+    DealIDs       [deal.DealID]
+    SectorNumber
 }
 
 // ProofAux is meta data required to generate certain proofs
