@@ -129,24 +129,3 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningElectionProof(electionProo
 func (spc *StoragePowerConsensusSubsystem_I) GetFinality() Epoch {
 	return FINALITY
 }
-
-// Power Table
-
-func (pt *PowerTable_I) GetMinerPower(addr base.Address) base.StoragePower {
-	return pt.miners[addr].minerStoragePower
-}
-func (pt *PowerTable_I) GetTotalPower() base.StoragePower {
-	totalPower := 0
-	for _, miner := range pt.miners {
-		totalPower += miner.minerStoragePower
-	}
-	return totalPower
-}
-
-func (pt *PowerTable_I) GetMinerPublicKey() filcrypto.PublicKey {
-	return pt.miners[addr].minerPK
-}
-
-func (pt *PowerTable_I) RemovePower(addr base.Address) {
-	panic("")
-}

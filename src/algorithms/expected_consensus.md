@@ -146,9 +146,7 @@ The weight should be calculated using big integer arithmetic with order of opera
 
 For a given tipset `ts` in round `r+1`, we define:
 
-- `wPowerFactor[r+1]  = `
-  - with `log2b(X) = floor(log2(x)) = (binary length of X) - 1`
-    - We define the special case: `log2b(0) = 0`. Note that it should never be used (given it would mean an empty power table.
+- `wPowerFactor[r+1]  = wFunction(totalPowerAtTipset(ts))`
 - wBlocksFactor[r+1] =  `wPowerFactor[r+1] * wRatio * b / e`
   - with `b = |blocksInTipset(ts)|`
   - `e = expected number of blocks per round in the protocol`
@@ -157,12 +155,14 @@ Thus, for stability of weight across implementations, we take:
 - wBlocksFactor[r+1] =  `(wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)`
 
 We get:
-- `w[r+1] = w[r] + log2b(totalPowerAtTipset(ts)) * 2^8 + (log2b(totalPowerAtTipset(ts)) * len(ts.blocks) * wRatio_num * 2^8) / (e * wRatio_den)`
+- `w[r+1] = w[r] + wFunction(totalPowerAtTipset(ts)) * 2^8 + (wFunction(totalPowerAtTipset(ts)) * len(ts.blocks) * wRatio_num * 2^8) / (e * wRatio_den)`
  Using the 2^8 here to prevent precision loss ahead of the division in the wBlocksFactor.
 
  The exact value for these parameters remain to be determined, but for testing purposes, you may use:
  - `e = 5`
  - `wRatio = .5, or wRatio_num = 1, wRatio_den = 2`
+- `wFunction = log2b` with
+  - `log2b(X) = floor(log2(x)) = (binary length of X) - 1` and `log2b(0) = 0`. Note that that special case should never be used (given it would mean an empty power table.
 
 ```sh
 Note that if your implementation does not allow for rounding to the fourth decimal, miners should apply the [tie-breaker below](#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.
@@ -190,17 +190,20 @@ The probability that two Tipsets with different blocks would have all the same t
 ## Finality in EC
 EC enforces a version of soft finality whereby all miners at round N will reject all blocks that fork off prior to round N-F. For illustrative purposes, we can take F to be 500. While strictly speaking EC is a probabilistically final protocol, choosing such an F simplifies miner implementations and enforces a macroeconomically-enforced finality at no cost to liveness in the chain.
 
-## Slashing in EC
+{{<label consensus_faults>}}
+## Consensus Faults
 
-Due to the existence of potential forks, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
+Due to the existence of potential forks in EC, a miner can try to unduly influence protocol fairness. This means they may choose to disregard the protocol in order to gain an advantage over the power they should normally get from their storage on the network. A miner should be slashed if they are provably deviating from the honest protocol.
 
-This is detectable when a miner submits two blocks that satisfy any of the following "slashing conditions":
+This is detectable when a given miner submits two blocks that satisfy any of the following "consensus faults":
 
-(1) two blocks contains the same electionProof nonce, mined at the same height.
-(2) one block's parent is a Tipset that could have validly included the other block according to Tipset validity rules, however the parent of the first block does not include the other block.
+- (1) `double-fork mining fault`: two blocks contains the same electionProof nonce, mined at the same height.
+- (2) `parent grinding fault`: one block's parent is a Tipset that could have validly included the other block according to Tipset validity rules, however the parent of the first block does not include the other block.
 
   - While it cannot be proven that a miner omits known blocks from a Tipset in general (i.e. network latency could simply mean the miner did not receive a particular block) in this case it can be proven because a miner must be aware of a block they mined in a previous round.
 
-Any node that detects this occurring should take both block headers, and call [`storagemarket.SlashConsensusFault`](actors.md#slashconsensusfault). The network will then take all of that node's collateral.
+Any node that detects either of the above events should submit both block headers to the `StoragePowerActor`'s `ReportConsensusFault` method. The "slasher" will receive a portion (TODO: define how much) of the offending miner's {{<sref pledge_collateral>}} as a reward for notifying the network of the fault.
+(TODO: FIP of submitting commitments to block headers to prevent miners censoring slashers in order to gain rewards).
 
-Note that a miner will likewise be slashed on failing to submit their Proof-of-Spacetime in time, given the undue power over consensus it gives them.
+It is important to note that there exists a third type of consensus fault directly reported by the `CronActor` on `StorageDeal` failures via the `ReportUncommittedPowerFault` method:
+- (3) `uncommitted power fault` which occurs when a miner fails to submit their `PostProof` and is thus participating in leader election with undue power (see {{<sref storage_faults>}}).

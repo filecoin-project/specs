@@ -7,3 +7,13 @@ title: Storage Market Actor
 (You can see the _old_ Storage Market Actor [here](docs/systems/filecoin_markets/storage_market/storage_market_actor_old) )
 
 {{< readfile file="storage_market_actor.id" code="true" lang="go" >}}
+
+{{<label storage_deal_collateral>}}
+## Storage Deal Collateral
+
+Storage Deals have an associated collateral amount. This `StorageDealCollateral` is held in the `StorageMarketActor`.
+Its value is agreed upon by the storage provider and client off-chain, but must be greater than a protocol-defined minimum in any deal. Storage providers will choose to offer greater collateral to signal high-quality storage to clients.
+
+On `SectorFailureTimeout` (see {{<sref faults>}}), the `StorageDealCollateral` will be burned. In the future, the Filecoin protocol may be amended to send up to half of the collateral to storage clients as damages in such cases.
+
+Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in {{<sref finality>}}) before being able to withdraw their `StorageDealCollateral` from the `StorageMarketActor`.

@@ -13,7 +13,7 @@ Succinctly, the SPC subsystem offers the following services:
 - Access to {{<sref expected_consensus>}} for individual storage miners, enabling:
     - Access to verifiable randomness {{<sref tickets>}} as needed in the rest of the protocol.
     - Running  {{<sref leader_election>}} to produce new blocks.
-    - Running {{<sref chain_selection>}} across subchains using EC's weighting function. 
+    - Running {{<sref chain_selection>}} across subchains using EC's weighting function.
     - Identification of {{<sref finality "the most recently finalized tipset">}}, for use by all protocol participants.
 
 Much of the Storage Power Consensus' subsystem functionality is detailed in the code below but we touch upon some of its behaviors in more detail.
@@ -22,27 +22,13 @@ Much of the Storage Power Consensus' subsystem functionality is detailed in the 
 
 ## Distinguishing between storage miners and block miners
 
-There are two ways to earn Filecoin tokens in the Filecoin network: 
+There are two ways to earn Filecoin tokens in the Filecoin network:
 - By participating in the {{<sref storage_market>}} as a storage provider and being paid by clients for file storage deals.
 - By mining new blocks on the network, helping modify system state and secure the Filecoin consensus mechanism.
 
 We must distinguish between both types of "miners" (storage and block miners). {{<sref leader_election>}} in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
-
-{{<label power_table>}}
-## The Power Table
-
-The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their `Power Fraction` over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.
-
-SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), when PoSts fail to be put on-chain (decrementing miner power) or for other storage and consensus faults.
-
-An invariant of the storage power consensus subsystem is that all storage in the power table must be verified. That is, miners can only derive power from storage they have already proven to the network. 
-
-In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector.
-Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.
-
-Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
 
 ## Repeated leader election attempts
 
@@ -117,31 +103,31 @@ We expect Filecoin will be able to produce estimates for sector commitment time 
 `(estimate, variance) <--- SEALTime(sectors)`
 G and T will be selected using these.
 
-###### Picking a Ticket to Seal
+#### Picking a Ticket to Seal
 
 When starting to prepare a SEAL in round X, the miner should draw a ticket from X-F with which to compute the SEAL.
 
-###### Verifying a Seal's ticket
+#### Verifying a Seal's ticket
 
 When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds [Z-T-F-G, Z-T-F+G].
 
-###### In Detail
+#### In Detail
 
 ```
-                                           Prover
-                       ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-                      │
+                               Prover
+           ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+          │
 
-                      ▼
-                     X-F ◀───────F────────▶ X ◀──────────T─────────▶ Z
-                 -G   .  +G                 .                        .
-              ───(┌───────┐)───────────────( )──────────────────────( )────────▶
-                  └───────┘                 '                        '        time
-             [Z-T-F-G, Z-T-F+G]
-                      ▲
+          ▼
+         X-F ◀───────F────────▶ X ◀──────────T─────────▶ Z
+     -G   .  +G                 .                        .
+  ───(┌───────┐)───────────────( )──────────────────────( )────────▶
+      └───────┘                 '                        '        time
+ [Z-T-F-G, Z-T-F+G]
+          ▲
 
-                      └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-                                          Verifier
+          └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                              Verifier
 ```
 
 Note that the prover here is submitting a message on chain (i.e. the SEAL). Using an older ticket than necessary to generate the SEAL is something the miner may do to gain more confidence about finality (since we are in a probabilistically final system). However it has a cost in terms of securing the chain in the face of long-range attacks (specifically, by mixing in chain randomness here, we ensure that an attacker going back a month in time to try and create their own chain would have to completely regenerate any and all sectors drawing randomness since to use for their fork's power).

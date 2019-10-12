@@ -6,8 +6,6 @@ import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
-    // TODO: this is incorrect, it does not belong
-    powerTable           PowerTable
     actor                StoragePowerActor
     associatedStateTree  &st.StateTree  // TODO: remove this. should not store this here.
 
@@ -47,22 +45,11 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 }
 
 type ExpectedConsensus struct {
-    // ComputeWeight(Chain)							        ChainWeight
-    // IsConsensusFault([Block])						    bool
-}
+    ComputeWeight(Chain)                                ChainWeight
+    IsValidConsensusFault(ConsensusFaultType, [Block])	bool
 
-type PowerTable struct {
-    // all power here is always verified
-    RegisterMiner(addr base.Address)
-    miners {base.Address: StorageMiner}
-    GetMinerPower(addr base.Address) base.StoragePower
-    GetTotalPower() base.StoragePower
-    GetMinerPublicKey(addr base.Address) filcrypto.PublicKey
-    RemovePower(addr base.Address)
-}
-
-type StorageMiner struct {
-    minerAddress       base.Address
-    minerStoragePower  base.StoragePower
-    minerPK            filcrypto.PublicKey
+    ConsensusFaultType union {
+        DoubleForkMiningFault,
+        ParentGrindingFault
+    }
 }

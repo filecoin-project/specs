@@ -10,7 +10,8 @@ type Ticket struct {
     Verify(input Bytes, pk VRFPublicKey) bool
 }
 
-type StoragePower UVarint
+type BytesAmount UVarint
+type StoragePower BytesAmount
 
 type ElectionSeed filcrypto.VDFResult
 

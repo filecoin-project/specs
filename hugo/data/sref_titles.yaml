@@ -17,6 +17,8 @@ tickets: "Tickets"
 leader_election: "Secret Leader Election"
 chain_selection: "Chain Selection"
 finality: "EC Finality"
+consensus_faults: "Consensus Faults"
+
 ### Message Pool
 message_pool: "Message Pool"
 message_syncer: "Message Syncer"
@@ -27,6 +29,8 @@ message_storage: "Message Storage"
 # markets
 retrieval_market: "Retrieval Market"
 storage_market: "Storage Market"
+storage_deal_collateral: "Storage Deal Collateral"
+storage_faults: "Storage Faults"
 
 # mining
 
