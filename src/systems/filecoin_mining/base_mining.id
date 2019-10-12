@@ -1,12 +1,4 @@
-type Bytes32 Bytes
-type Commitment Bytes32  // TODO
-
 type PoStProof struct {}
 type SealSeed struct {}
 type PoStChallenge struct {}
 type SealedSector struct {}
-
-type SealCommitment struct {
-    CommD  Commitment
-    CommR  Commitment
-}

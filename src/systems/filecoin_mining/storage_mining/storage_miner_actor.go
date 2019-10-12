@@ -9,12 +9,12 @@ func (sma *StorageMinerActor_I) SubmitPoSt(postProof base_mining.PoStProof, sect
 }
 
 func (sma *StorageMinerActor_I) CommitSector(onChainInfo sealing.OnChainSealVerifyInfo) {
-	currentSectorContent, found := sma.Sectors()[onChainInfo.SectorNumber()]
-	if found {
-		newSectorContent := append(currentSectorContent, onChainInfo)
-		sma.Sectors()[onChainInfo.SectorNumber()] = newSectorContent
-	} else {
+	currSector, found := sma.Sectors()[onChainInfo.SectorNumber()]
+	if !found {
 		sma.Sectors()[onChainInfo.SectorNumber()] = []sealing.OnChainSealVerifyInfo{onChainInfo}
+	} else {
+		newSector := append(currSector, onChainInfo)
+		sma.Sectors()[onChainInfo.SectorNumber()] = newSector
 	}
 
 	// TODO broadcast message on chain

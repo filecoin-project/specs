@@ -10,6 +10,7 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 type StorageProvider struct {
     DealStatus {deal.DealCID: StorageDealStatus}
 
+    // calls between StorageClient and StorageProvider happen over libp2p
     // Client calls this to submit new StorageDealProposal
     HandleNewStorageDealProposal(proposal deal.StorageDealProposal)
 

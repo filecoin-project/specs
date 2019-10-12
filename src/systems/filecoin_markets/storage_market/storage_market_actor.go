@@ -5,7 +5,7 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 func (sma *StorageMarketActor_I) WithdrawBalance(balance actor.TokenAmount) {
-	var msgSender addr.Address // TODO replace this
+	var msgSender addr.Address // TODO replace this from VM runtime
 
 	if balance < 0 {
 		panic("Error")
@@ -20,13 +20,10 @@ func (sma *StorageMarketActor_I) WithdrawBalance(balance actor.TokenAmount) {
 		panic("Error") // TODO replace with fatal
 	}
 
-	newAvailableBalance := senderBalance.Available() - balance
-	sma.Balances()[msgSender] = &StorageParticipantBalance_I{
-		Locked_:    senderBalance.Locked(),
-		Available_: newAvailableBalance,
-	}
+	senderBalance.Impl().Available_ = senderBalance.Available() - balance
+	sma.Balances()[msgSender] = senderBalance
 
-	// TODO send funds to msgSender
+	// TODO send funds to msgSender with `send` in VM runtime
 }
 
 func (sma *StorageMarketActor_I) AddBalance(balance actor.TokenAmount) {
@@ -40,11 +37,8 @@ func (sma *StorageMarketActor_I) AddBalance(balance actor.TokenAmount) {
 
 	senderBalance, found := sma.Balances()[msgSender]
 	if found {
-		newAvailableBalance := senderBalance.Available() + balance
-		sma.Balances()[msgSender] = &StorageParticipantBalance_I{
-			Locked_:    senderBalance.Locked(),
-			Available_: newAvailableBalance,
-		}
+		senderBalance.Impl().Available_ = senderBalance.Available() + balance
+		sma.Balances()[msgSender] = senderBalance
 	} else {
 		sma.Balances()[msgSender] = &StorageParticipantBalance_I{
 			Locked_:    0,
@@ -75,15 +69,18 @@ func (sma *StorageMarketActor_I) PublishStorageDeal(newStorageDeals []deal.Stora
 	return response
 }
 
-func (sma *StorageMarketActor_I) verifyStorageDeal(newStorageDeal deal.StorageDeal) bool {
+func (sma *StorageMarketActor_I) verifyStorageDeal(d deal.StorageDeal) bool {
 	// TODO verify proposal or deal has not expired
 	// TODO verify client and provider signature
 	// TODO verfiy minimum StoragePrice and StorageCollateral
-	if sma.Balances()[newStorageDeal.Proposal().Client()].Available() < newStorageDeal.Proposal().StoragePrice() ||
-		sma.Balances()[newStorageDeal.Proposal().Provider()].Available() < newStorageDeal.Proposal().StorageCollateral() {
+	p := d.Proposal()
+	clientBalanceA := sma.Balances()[p.Client()].Available()
+	providerBalanceA := sma.Balances()[p.Provider()].Available()
+
+	if clientBalanceA < p.StoragePrice() ||
+		providerBalanceA < p.StorageCollateral() {
 		return false
 	}
-
 	return true
 }
 
