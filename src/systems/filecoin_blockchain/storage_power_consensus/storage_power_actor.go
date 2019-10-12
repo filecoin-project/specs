@@ -41,35 +41,35 @@ func (spa *StoragePowerActor_I) DecommitPledgeCollateral(deals []deal.StorageDea
 }
 
 // TODO: add Surprise to the chron actor
-func (spa *StoragePowerActor_I) Surprise(ticket base_blockchain.Ticket) []address.Address {
-  surprisedMiners := []address.Address{}
+func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
+	surprisedMiners := []addr.Address{}
 
-  // The number of blocks that a challenged miner has to respond
-  // TODO: this should be set in.. spa?
-  provingPeriod := 42
-  // The number of blocks that a challenged miner has to respond
-  // TODO: this should be set in.. spa?
-  // postChallengeTime := util.UInt(42)
-  // The current currBlockHeight
-  // TODO: should be found in vm context
-  // currBlockHeight := util.UInt(42)
+	// The number of blocks that a challenged miner has to respond
+	// TODO: this should be set in.. spa?
+	provingPeriod := 42
+	// The number of blocks that a challenged miner has to respond
+	// TODO: this should be set in.. spa?
+	// postChallengeTime := util.UInt(42)
+	// The current currBlockHeight
+	// TODO: should be found in vm context
+	// currBlockHeight := util.UInt(42)
 
-  // The number of miners that are challenged at this block
-   numSurprised := len(spa.Miners()) / provingPeriod
+	// The number of miners that are challenged at this block
+	numSurprised := len(spa.Miners()) / provingPeriod
 
-  for i := 0;  i <  numSurprised; i++ {
-    // TODO: randomNumber := hash(ticket, i)
-    minerIndex := 42 % len(spa.Miners())
-    minerAddress := spa.Miners()[minerIndex]
-    surprisedMiners = append(surprisedMiners, minerAddress)
-    // TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
+	for i := 0; i < numSurprised; i++ {
+		// TODO: randomNumber := hash(ticket, i)
+		minerIndex := 42 % len(spa.Miners())
+		minerAddress := spa.Miners()[minerIndex]
+		surprisedMiners = append(surprisedMiners, minerAddress)
+		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
 
-    // TODO: the following creates a cycle
-    // minerActor := storage_mining.StorageMinerActor{}
-    // minerActor.ProvingPeriodEnd_ = currBlockHeight + postChallengeTime
-  }
+		// TODO: the following creates a cycle
+		// minerActor := storage_mining.StorageMinerActor{}
+		// minerActor.ProvingPeriodEnd_ = currBlockHeight + postChallengeTime
+	}
 
-  return surprisedMiners
+	return surprisedMiners
 }
 
 // Power Table
