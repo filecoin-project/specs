@@ -7,31 +7,15 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
-import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-// import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-// import mkt "github.com/filecoin-project/specs/systems/filecoin_markets"
-// import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
-type StorageDealStagedNotification struct {
-    Deal      base_markets.StorageDeal
-    PieceRef  ipld.CID
-    SectorID  sector.SectorID
-}
-
-// TODO this should be moved into storage market
-type StorageProvider struct {
-    NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification)
-}
 
 type StorageMiningSubsystem struct {
     // TODO: constructor
     // InitStorageMiningSubsystem() struct{}
 
     // Component subsystems
-    StorageProvider
+    // StorageProvider    storage_provider.StorageProvider
     StoragePowerActor  spc.StoragePowerActor
     MinerActor         StorageMinerActor
     SectorIndex        sectoridx.SectorIndexerSubsystem
@@ -60,7 +44,8 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer
-    HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID)
+    // StorageDeal contains DealCID
+    HandleStorageDeal(deal deal.StorageDeal)
 
     // call by StorageMinerActor when error in sealing
     CommitSectorError()

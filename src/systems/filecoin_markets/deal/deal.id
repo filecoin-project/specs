@@ -1,15 +1,31 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
+type DealID UVarint
 type DealCID ipld.CID
+type Signature struct {}  // TODO
 
-type Deal struct {
-
+type StorageDealProposal struct {
+    PieceRef             DealCID
+    PieceSize            UInt
+    Client               addr.Address
+    Provider             addr.Address
+    ProposalExpiryEpoch  block.ChainEpoch
+    DealExpiryEpoch      block.ChainEpoch
+    StoragePrice         actor.TokenAmount
+    StorageCollateral    actor.TokenAmount
+    ProposerSignature    Signature
 }
 
 type StorageDeal struct {
-
+    Proposal          StorageDealProposal
+    CounterSignature  Signature
 }
 
+type RetrievalDealProposal struct {}  // TODO
 type RetrievalDeal struct {
-
+    Proposal          RetrievalDealProposal
+    CounterSignature  Signature
 }

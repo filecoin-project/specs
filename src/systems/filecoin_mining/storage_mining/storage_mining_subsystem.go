@@ -8,11 +8,8 @@ import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
-import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
 import util "github.com/filecoin-project/specs/util"
-
-// import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, sectorSize util.UInt, peerId libp2p.PeerID) address.Address {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)
@@ -21,20 +18,21 @@ func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, w
 	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
 }
 
-func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {
-	stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
-	sms.StorageProvider().NotifyStorageDealStaged(&StorageDealStagedNotification_I{
-		Deal_:     deal,
-		PieceRef_: pieceRef,
-		SectorID_: stagedDealResponse.SectorID(),
-	})
+func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
+	sms.SectorIndex().AddNewDeal(deal)
+	// stagedDealResponse := sms.SectorIndex().AddNewDeal(deal)
+	// TODO: way within a node to notify different components
+	// sms.StorageProvider().NotifyStorageDealStaged(&storage_provider.StorageDealStagedNotification_I{
+	// 	Deal_:     deal,
+	// 	SectorID_: stagedDealResponse.SectorID(),
+	// })
 }
 
 func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) address.Address {
 	panic("TODO")
 }
 
-func (sms *StorageMiningSubsystem_I) CommitSectorError() base_markets.StorageDeal {
+func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 	panic("TODO")
 }
 
@@ -71,10 +69,5 @@ func (sms *StorageMiningSubsystem_I) DrawElectionProof(tk block.Ticket, workerKe
 }
 
 func (sms *StorageMiningSubsystem_I) GenerateNextTicket(t1 block.Ticket, workerKey filcrypto.PrivKey) block.Ticket {
-	panic("TODO")
-}
-
-// TODO this should be moved into storage market
-func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
 	panic("TODO")
 }
