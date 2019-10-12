@@ -2,19 +2,23 @@ package storage_mining
 
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 // import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+// import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import base_markets "github.com/filecoin-project/specs/systems/filecoin_markets"
+import util "github.com/filecoin-project/specs/util"
 
 // import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
-func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, pledgeAmt actor.TokenAmount) address.Address {
+func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, sectorSize util.UInt, peerId libp2p.PeerID) address.Address {
 	ownerAddr := sms.generateOwnerAddress(workerPubKey)
-	return sms.StoragePowerActor().RegisterMiner(ownerAddr, workerPubKey)
+	// var pledgeAmt actor.TokenAmount TODO: unclear how to pass the amount/pay
+	// TODO compute PledgeCollateral for 0 bytes
+	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal base_markets.StorageDeal, pieceRef ipld.CID) {

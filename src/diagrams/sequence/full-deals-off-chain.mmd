@@ -42,7 +42,7 @@ sequenceDiagram
 
     opt RegisterStorageMiner
         StorageMiningSubsystem ->> StorageMiningSubsystem: CreateMiner(ownerPubKey PubKey, workerPubKey PubKey, pledgeAmt TokenAmount)
-        StorageMiningSubsystem ->>+ StoragePowerActor: RegisterMiner(OwnerAddr, WorkerPubKey)
+        StorageMiningSubsystem ->>+ StoragePowerActor: CreateStorageMiner(OwnerAddr, WorkerPubKey)
         StoragePowerActor -->>- StorageMiningSubsystem: StorageMinerActor
     end
 

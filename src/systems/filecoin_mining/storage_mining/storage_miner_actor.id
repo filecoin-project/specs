@@ -9,26 +9,51 @@ type SectorCommitment struct {}
 
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
-    // Sectors {UInt:MinedSector} // sectors and faults, proving period ends
-    // CommitSector(CommD Commitment, CommR Commitment, proof SealProof, SectorSize UVarint)
-    // ProvingPeriodEnd   Epoch
 
-    // // contains mostly static info about this miner
-    // info &MinerInfo
+    // contains mostly static info about this miner
+    info &MinerInfo
 
-    UpdateDoneSet()
-    UpdateSectorStatus(sectorStateSets sector.SectorStateSets)
-    SubmitPoSt(
-        postProof        base_mining.PoStProof
-        sectorStateSets  sector.SectorStateSets
-    )
-    computeProvingPeriodEndSectorState()
+    // TODO: add the DePledgeCollateral
+    // TODO: add the Sectors
+    // TODO sectors []SectorInfo CID to AMT
+    // TODO provingSet []SectorInfo CID to AMT
+
+    // TODO: should we keep the same structure as before or putting all of that into a struct?
+    // TODO currentFaultSet BitField
+    // TODO nextFaultSet BitField
+    // TODO nextDoneSet BitField
+    // TODO do we need a `slashedAt`?
+    // TODO owedStorageCollateral
+    // TODO ProvingPeriodEnd   Epoch
+
     CommitSector(
         seed            Seed
         sector          sector.SectorID
-        sealCommitment  base_mining.SealCommitment
+        sealCommitment  sector.OnChainSealVerifyInfo  // TODO: to check with magik about sizes
         sealProof       sector.SealProof
     )
+
+    SubmitPoSt(
+        postProof        base_mining.PoStProof
+        sectorStateSets  sector.SectorStateSets  // TODO: check with Juan and Magik
+    )
+
+    // TODO: should depledge be in here or in storage market actor?
+
+    // TODO: add GetOwner()
+    // TODO: add GetPeerID()
+    // TODO: add GetSectorSize()
+    // TODO: add UpdatePeerID()
+    // TODO: add UpdatePeerID()
+    // TODO: add ChangeWorker()
+
+    // TODO: do IsSlashed, IsLate belong here?
+
+    UpdateDoneSet()
+
+    UpdateSectorStatus(sectorStateSets sector.SectorStateSets)  // TODO: @magik says SectorStateSets might be more expensive than more methods
+
+    computeProvingPeriodEndSectorState()  // TODO
 }
 
 type MinerInfo struct {
