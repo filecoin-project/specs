@@ -1,49 +1,13 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+
 type CID ipld.CID
+type StorageDeal struct {}
+type RetrievalDeal struct {}
 
-type Address struct {}
-type PieceStore struct {}
-type StorageDealID struct {}
-type RetrievalDealID struct {}
-type Function struct {}
-type Piece struct {}
-type ChannelID UInt
-type LibP2PHost struct {}
-
-type DataTransferSubsystem struct @(mutable) {
-	dataTransfers {ChannelID: DataTransferChannel}
-	pushValidator PushValidator
-	pullValidator PullValidator
-	pieceStore    PieceStore
-
-  // open a data transfer that will send data to the recipient address
-	OpenPushDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
-	Selector IPLDSelector) ChannelID
-
-  // open a data transfer that will request data from the sending address
-	OpenPullDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
-	Selector IPLDSelector) ChannelID
-
-	// close an open channel
-	CloseDataTransferChannel(x ChannelID)         struct{}
-
-	// get status of a transfer
-	TransferChannelStatus(x ChannelID)            DataTransferStatus
-
-	// get notified when certain types of events happen
-	RegisterDataTransferListener(listener DataTransferListener)
-
-  // respond to a pull data transfer request from the network
-	onReceivedPullDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
-	Selector IPLDSelector) ChannelID
-
-  // respond to a push data transfer request from the network
-	onReceivedPushDataTransfer(address Address, voucher DataTransferVoucher, PieceRef CID
-	Selector IPLDSelector) ChannelID
-
-}
-
-// A DataTransferVoucher is a ticket that is used to validate
+// A DataTransferVoucher is used to validate
 // a data transfer request against the underlying storage or retrieval deal
 // that precipitated it
 type DataTransferVoucher union {
@@ -52,37 +16,63 @@ type DataTransferVoucher union {
 }
 
 type StorageDealVoucher struct {
-	id StorageDealID
+	deal StorageDeal
 }
 
 type RetrievalDealVoucher struct {
-	id RetrievalDealID
+	deal RetrievalDeal
 }
 
-// A PushValidator validates an incoming push request from the network
-type PushValidator struct {
-	ValidatePush(
-		sender address.Address,
-		voucher DataTransferVoucher,
-		PieceRef CID,
-		Selector IPLDSelector)
+type Ongoing struct {}
+type Completed struct {}
+type Failed struct {}
+type ChannelNotFoundError struct {}
+
+type DataTransferStatus union {
+	Ongoing
+	Completed
+	Failed
+	ChannelNotFoundError
 }
 
-// A PullValidator validates an incoming pull request from the network
-type PullValidator struct {
-	ValidatePull(
-		receiver address.Address,
-		voucher DataTransferVoucher,
-		PieceRef CID,
-		Selector IPLDSelector)
+type TransferID UInt
+
+type ChannelID struct {
+	to libp2p.PeerID
+	id TransferID
 }
 
-// a data transfer listener specifies a callback that happens
-// when certain types of events occur
-type DataTransferListener struct {
-	eventType DataTransferEvent
-	Callback(dataTransfer DataTransferChannel, metadata EventMetadata)
+// All immutable data for a channel
+type DataTransferChannel struct {
+	// an identifier for this channel shared by request and responder, set by requestor through protocol
+	transferID     TransferID
+	// base CID for the piece being transferred
+	PieceRef      CID
+	// portion of Piece to return, specified by an IPLD selector
+	Selector      ipld.Selector
+	// used to verify this channel
+	voucher       DataTransferVoucher
+	// the party that is sending the data (not who initiated the request)
+	sender        libp2p.PeerID
+	// the party that is receiving the data (not who initiated the request)
+	recipient     libp2p.PeerID
+	// expected amount of data to be transferred
+	totalSize     UVarint
 }
+
+// DataTransferState is immutable channel data plus mutable state
+type DataTransferState struct @(mutable) {
+	DataTransferChannel
+	// total bytes sent from this node (0 if receiver)
+	sent          UVarint
+	// total bytes received by this node (0 if sender)
+	received      UVarint
+}
+
+type Open struct {}
+type Progress struct {}
+type Error struct {}
+type Complete struct {}
 
 type DataTransferEvent union {
 	Open
@@ -91,45 +81,55 @@ type DataTransferEvent union {
 	Complete
 }
 
-type EventMetadata struct {}
-
-// A Scheduler manages actually scheduling data transfer requests on the network
-// Assumes access to error-checked, ordered, reliable transmission protocol
-type Scheduler struct {
-	ScheduleTransfer(x ChannelID)        struct{}
-	requestData(x DataTransferChannel)       union { Ret Bytes, Err error }
-	sendData(x DataTransferChannel, y Bytes) error?
+type DataTransferSubscriber struct {
+	OnEvent(event DataTransferEvent, channelState DataTransferState) struct {}
 }
 
-// Data tracked for a data transfer
-// TODO: Needs work
-type DataTransferChannel struct {
-	channelID     ChannelID
-	PieceRef      CID
-	voucher       DataTransferVoucher
-	offset			  UVarint
-	sender        Address
-	recipient     Address
-	totalSize     UVarint
-	sent          UVarint
-	received      UVarint
-
-	channelType() DataTransferType  @(cached)
-	transferNum() Float             @(cached)
+// RequestValidator is an interface implemented by the client of the data transfer module to validate requests
+type RequestValidator struct {
+	ValidatePush(
+		sender libp2p.PeerID,
+		voucher DataTransferVoucher,
+		PieceRef CID,
+		Selector ipld.Selector) struct {}
+	ValidatePull(
+		receiver libp2p.PeerID,
+		voucher DataTransferVoucher,
+		PieceRef CID,
+		Selector ipld.Selector) struct {}
 }
 
-type DataTransferType union {
-    Sender
-    Recipient
-}
+type DataTransferSubsystem struct @(mutable) {
+	host					libp2p.Node
+	dataTransfers {ChannelID: DataTransferState}
+	requestValidator RequestValidator
+	pieceStore    piece.PieceStore
 
-type Ongoing struct {}
-type Completed struct {}
-type Failed struct {}
-type ChannelNotFoundError struct {}
-type DataTransferStatus union {
-    Ongoing
-    Completed
-    Failed
-    ChannelNotFoundError
+	// open a data transfer that will send data to the recipient peer and
+	// transfer the whole piece
+	OpenPushDataChannel(to libp2p.PeerID, voucher DataTransferVoucher, PieceRef CID) ChannelID
+
+	// open a data transfer that will send data to the recipient peer and
+	// transfer parts of the piece that match the selector
+	OpenPartialPushDataChannel(to libp2p.PeerID, voucher DataTransferVoucher, PieceRef CID, Selector ipld.Selector) ChannelID
+
+	// open a data transfer that will request data from the sending peer
+	// and transfer the whole piece
+	OpenPullDataChannel(to libp2p.PeerID, voucher DataTransferVoucher, PieceRef CID) ChannelID
+
+	// open a data transfer that will request data from the sending peer and
+	// transfer parts of the piece that match the selector
+	OpenPartialPullDataChannel(to libp2p.PeerID, voucher DataTransferVoucher, PieceRef CID, Selector ipld.Selector) ChannelID
+
+	// close an open channel (effectively a cancel)
+	CloseDataTransferChannel(x ChannelID)         struct{}
+
+	// get status of a transfer
+	TransferChannelStatus(x ChannelID)            DataTransferStatus
+
+	// get notified when certain types of events happen
+	SubscribeToEvents(subscriber DataTransferSubscriber) struct {}
+
+	// get all in progress transfers
+	InProgressChannels() {ChannelID:DataTransferState}
 }
