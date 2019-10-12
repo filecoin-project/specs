@@ -41,8 +41,13 @@ func (spa *StoragePowerActor_I) DecommitPledgeCollateral(deals []deal.StorageDea
 }
 
 // TODO: add Surprise to the chron actor
+<<<<<<< HEAD
 func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	surprisedMiners := []addr.Address{}
+=======
+func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []address.Address {
+	surprisedMiners := []address.Address{}
+>>>>>>> updated to latest change
 
 	// The number of blocks that a challenged miner has to respond
 	// TODO: this should be set in.. spa?
