@@ -2,14 +2,25 @@ package sealer
 
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import util "github.com/filecoin-project/specs/util"
 
 func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
 	sid := si.SectorID()
 
 	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(si.UnsealedPath()).As_commD())
 
+	buf := make(util.Bytes, si.SealCfg().SectorSize())
+	f := file.FromPath(si.SealedPath())
+	length, _ := f.Read(buf) 
+
+	// TODO: How do we meant to handle errors in implementation methods? This could get tedious fast.
+	
+	if util.UInt(length) != util.UInt(si.SealCfg().SectorSize()) {
+		panic("Sector file is wrong size.")
+	}
+	
 	return &SectorSealer_SealSector_FunRet_I{
-		rawValue: Seal(sid, si.RandomSeed(), commD),
+		rawValue: Seal(sid, si.RandomSeed(), commD, buf),
 	}
 }
 
@@ -38,9 +49,8 @@ func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID, seed 
 //     OnChain OnChainSealVerifyInfo
 // }
 
-func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID) *SealOutputs_I {
+func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID, data util.Bytes) *SealOutputs_I {
 	replicaID := ComputeReplicaID(sid, commD, randomSeed).As_replicaID()
-
 	_ = replicaID
 
 	return &SealOutputs_I{}
