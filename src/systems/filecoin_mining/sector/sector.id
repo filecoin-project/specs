@@ -31,7 +31,7 @@ type SectorSize UInt
 
 // TODO make sure this is globally unique
 type SectorID struct {
-    MinerID MinerID
+    MinerID
     Number SectorNumber
 }
 
