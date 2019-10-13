@@ -4,15 +4,29 @@ import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/poster"
 
+// If a Post is missed (either due to faults being not declared on time or
+// because the miner run out of time, every sector is reported as faulty
+// for the current proving period.
+func (sm *StorageMinerActor_I) OnFaultBeingSpotted() {
+	var allFaultBitField FaultSet
+	// TODO: ideally, both DeclareFault and OnFaultBeingSpotted call a method "ApplyFaultConsequences"
+	DeclareFaults(allFaultBitField)
+	// slash pledge collateral
+}
+
 // TODO(enhancement): decision is to currently account for power based on sector
 // an alternative proposal is to account for power based on active deals
 // postSubmission: is the post for this proving period
 // faultSet: the miner announces all of their current faults
+// TODO(enhancement): decide whether declared faults sectors should be
+// penalized in the same way as undeclared sectors
 // Workflow:
 // - New Committed Sectors (add power)
-// - Faulty Sectors (penalize faults, recover sectors)
+// - Faulty Sectors (penalize faults, recover sectors, delete faulty sectors)
 // - Active Sectors (pay)
-// - Expired Sectors
+// - Expired Sectors (settle deals..)
+// TODO: remove nextFaultSet from here, instead, inherith faults from previous
+// proving period
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, nextFaultSet sector.FaultSet) {
 	// Verify Proof
 	// TODO
@@ -64,6 +78,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 
 		// Clean up data structures
 		// delete(sm.Sectors(), expiredSectorNumber)
+		// delete(sm.Faults(), expiredSectorNumber)
 		// TODO: maybe nextFaultSet[expiredSectorNumber] = 0
 		// TODO: SPA must return the pledge collateral to the miner
 	}
@@ -95,11 +110,12 @@ func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
 	//       delete(sm.Sectors(), expiredSectorNumber)
 	//     } else {
 	//       dealIDs := sm.Sectors()[sectorNumber].DealIDs()
-	//       SendMessage(sma.SlashStorageDealCollateral(dealIDs)
 	//     }
 	//   }
 	// }
 
+	// TODO: delete power for faulty sectors
+	// TODO: check if we want to penalize some collateral for losing some files
 	// sm.nextFaultSet.applyDiff(newFaultSet)
 
 	panic("TODO")
