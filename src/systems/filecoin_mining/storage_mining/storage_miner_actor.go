@@ -10,19 +10,31 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	// challenges := GenerateChallengesForPoSt(r, sm.sectorStateSets().ActiveSet())
 	// verifyPoSt(challenges, TODO)
 
+	// var expiredSectorsNumber [SectorNumber]
+	// go through sm.SectorExpirationQueue() and get the expiredSectorsNumber
 
-	// sectorStateSets = sm.GetExpired()
-	UpdateSectorState(sectorStateSets)
+	for expiredSectorNumber := range expiredSectorsNumber {
+		// Settle deals
+		// TODO: SendMessage(SMA.SettleExpiredDeals(sm.Sectors()[expiredSectorNumber].DealIDs()))
+		// Note: in order to verify if something was stored in the past, one must
+		// scan the chain. SectorNumbers can be re-used.
 
-	// TODO: decision is to currently account for power based on sector
+		// TODO: check if there is any fault that we should handle here
+
+		// Clean up data structures
+		// delete(sm.Sectors(), expiredSectorNumber)
+		// FaultSet[expiredSectorNumber] = 0
+	}
+
+	// newPower := power - len(expiredSectorsNumber) * sm.info.sectorSize()
+	// SendMessage(SPA.UpdatePower(newPower))
+
+	// TODO(enhancement): decision is to currently account for power based on sector
 	// an alternative proposal is to account for power based on active deals
-
-
-
 	panic("TODO")
 }
 
-func (sm *StorageMinerActor_I) UpdateSectorState(sectorStateSets sector.SectorStateSets) {
+func (sm *StorageMinerActor_I) DeclareFault(faultSet sector.FaultSet) {
 	panic("TODO")
 }
 
@@ -41,6 +53,11 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 
 	// TODO: this is the latest expiry date of all deals.
 	var latestDealExpiry ChainEpoch
+	// for deal := range onChainInfo.DealIDs() {
+	//   if deal.Expiry > latestDealExpiry {
+	//     latestDealExpiry = deal.Expiry
+  //   }
+	// }
 
 	sealCommitment := &sector.SealCommitment_I{
 		UnsealedCID_: onChainInfo.UnsealedCID(),
@@ -48,6 +65,11 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 		DealIDs_:     onChainInfo.DealIDs(),
 		Expiration_:  latestDealExpiry,
 	}
+
+	sm.SectorExpirationQueue.Add(&SectorExpirationQueuItem_I{
+		SectorNumber_: onChainInfo.SectorNumber(),
+		Expiration_: latestDealExpiry,
+	})
 
 	_, found := sm.Sectors()[onChainInfo.SectorNumber()]
 

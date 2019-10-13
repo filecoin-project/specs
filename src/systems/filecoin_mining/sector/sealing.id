@@ -45,6 +45,7 @@ type SealCommitment struct {
     UnsealedCID  UnsealedSectorCID  // CommD
     SealedCID    SealedSectorCID  // CommR
     DealIDs      [deal.DealID]
+    Expiration   block.ChainEpoch
 }
 
 // ProofAux is meta data required to generate certain proofs
