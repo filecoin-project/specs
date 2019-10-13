@@ -22,7 +22,7 @@ type SectorExpirationQueue struct {
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
-    FaultSet               sector.FaultSet
+    NextFaultSet           sector.FaultSet
 
     Faults                 {sector.SectorNumber: uint}
 

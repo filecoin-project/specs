@@ -8,17 +8,46 @@ import poster "github.com/filecoin-project/specs/systems/filecoin_mining/poster"
 // an alternative proposal is to account for power based on active deals
 // postSubmission: is the post for this proving period
 // faultSet: the miner announces all of their current faults
-func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, faultSet sector.FaultSet) {
+// Workflow:
+// - New Committed Sectors (add power)
+// - Faulty Sectors (penalize faults, recover sectors)
+// - Active Sectors (pay)
+// - Expired Sectors
+func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, nextFaultSet sector.FaultSet) {
 	// Verify Proof
 	// TODO
 	// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
 	// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
 	// verifyPoSt(challenges, TODO)
 
+	// TODO: Enter newly introduced sector
+
+	// Handle faulty sectors
+	// sm.NextFaultSet_ = all zeros
+	// sm.DeclareFault(nextFaultSet)
+
+	// Handle Recovered faults:
+	// If a sector is not in sm.NextFaultSet at this point, it means that it
+	// was just proven in this proving period.
+	// However, if this had a counter in sm.Faults, then it means that it was
+	// faulty in the previous proving period and then recovered.
+	// In that case, reset the counter and resume power.
+
+	// resumedSectorsCount := 0
+	// for previouslyFaulty := range keys(sm.Faults) {
+	//   if (previouslyFaulty not in sm.NextFaultSet()) {
+	//     delete(sm.Faults, previouslyFaulty)
+	//     resumedSectorsCount = resumedSectorsCount + 1
+	//   }
+	// }
+	// SendMessage(SPA.UpdatePower(rt.SenderAddress, resumedSectorsCount * sm.info.sectorSize()))
+
 	// Pay miner
 	// TODO: batch into a single message
 	// for _, sealCommitment := range sm.Sectors {
-	//   SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
+	//   if sector is not in sm.Faults {
+	//     SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
+	//   }
 	// }
 
 	// Handle expired sectors
@@ -35,33 +64,12 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 
 		// Clean up data structures
 		// delete(sm.Sectors(), expiredSectorNumber)
-		// TODO: maybe FaultSet[expiredSectorNumber] = 0
+		// TODO: maybe nextFaultSet[expiredSectorNumber] = 0
 		// TODO: SPA must return the pledge collateral to the miner
 	}
 	// newPower := - len(expiredSectorsNumber) * sm.info.sectorSize()
 	// SendMessage(SPA.UpdatePower(rt.SenderAddress, newPower))
 
-	// Handle faulty sectors
-	// sm.FaultSet_ = all zeros
-	// sm.DeclareFault(faultSet)
-
-	// Handle Recovered faults:
-	// If a sector is not in sm.FaultSet at this point, it means that it
-	// was just proven in this proving period.
-	// However, if this had a counter in sm.Faults, then it means that it was
-	// faulty in the previous proving period and then recovered.
-	// In that case, reset the counter and resume power.
-
-	// resumedSectorsCount := 0
-	// for previouslyFaulty := range keys(sm.Faults) {
-	//   if (previouslyFaulty not in sm.FaultSet()) {
-	//     delete(sm.Faults, previouslyFaulty)
-	//     resumedSectorsCount = resumedSectorsCount + 1
-	//   }
-	// }
-	// SendMessage(SPA.UpdatePower(rt.SenderAddress, resumedSectorsCount * sm.info.sectorSize()))
-
-	// TODO: Enter newly introduced sector
 	panic("TODO")
 }
 
@@ -74,9 +82,9 @@ func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
 	// Update Fault Set
 
 	// TODO: batch into a single message
-	// for sectorNumber := range faultSet {
+	// for sectorNumber := range newFaultSet {
 	//   // Avoid penalizing the miner multiple times in the same proving period
-	//   if !(sector is in sm.FaultSet) {
+	//   if !(sector is in sm.NextFaultSet()) {
 	//     if (sectorNumber not in sm.Faults) sm.Faults[sectorNumber] = 0
 	//     sm.Faults[sectorNumber] = sm.Faults[sectorNumber] + 1
 
@@ -92,7 +100,7 @@ func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
 	//   }
 	// }
 
-	// sm.FaultSet.applyDiff(faultSet)
+	// sm.nextFaultSet.applyDiff(newFaultSet)
 
 	panic("TODO")
 }
