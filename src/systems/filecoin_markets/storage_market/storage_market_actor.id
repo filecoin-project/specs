@@ -26,7 +26,7 @@ type StorageMarketActor struct {
     // a DealID will be assigned and stored in the mapping of DealID to StorageDeal
     // PublishStorageDeal should be called before SecotrCommits
     // an unregistered StorageDeal will not be processed
-    PublishStorageDeal(newStorageDeals [deal.StorageDeal]) [PublishStorageDealResponse]
+    PublishStorageDeals(newStorageDeals [deal.StorageDeal]) [PublishStorageDealResponse]
 
     // check if StorageDeal is signed before expiry
     // check if StorageDeal has the right signatures
