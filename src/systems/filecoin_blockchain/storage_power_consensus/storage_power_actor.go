@@ -2,17 +2,17 @@ package storage_power_consensus
 
 import (
 	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-  sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-  block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-  deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-	blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain/blockchain"
+	util "github.com/filecoin-project/specs/util"
 )
 
 const PLEDGE_COLLATERAL_PER_GB = -1 // TODO define
 
 // Actor
-func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ec.ConsensusFaultType, proof [Block]) {
+func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
 	panic("TODO")
 
 	// Use EC's IsValidConsensusFault method to validate the proof
@@ -20,76 +20,84 @@ func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, f
 	// reward slasher
 }
 
-func (spa *StoragePowerActor_I) ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint) {
+func (spa *StoragePowerActor_I) ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors util.UVarint) {
 	panic("TODO")
 	// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
 
 	// slash cheater pledge collateral accordingly based on num sectors faulted
 }
 
-func (spa *StoragePowerActor_I) CommitPledgeCollateral(deals [deal.StorageDeal]) {
+func (spa *StoragePowerActor_I) CommitPledgeCollateral(deals []deal.StorageDeal) {
 
 	panic("TODO")
 	// check that based on deals (ie sector sizes and num sectors) miner has enough associated balance in the storage miner wallet
 	// pledge and associate
 }
 
-func (spa *StoragePowerActor_I) DecommitPledgeCollateral(deals [deal.StorageDeal]) {
+func (spa *StoragePowerActor_I) DecommitPledgeCollateral(deals []deal.StorageDeal) {
 	panic("TODO")
 	// must check more than finality post deal expiration
 	// return appropriate amount to storage market based on deals
 }
 
-
-
 // Power Table
 
-func (pt *PowerTable_I) RegisterMiner(addr addr.Address, pk filcrypto.PublicKey, sectorSize sector.SectorSize) {
-	pt.miners[addr] := StorageMiner{
-		minerAddress: addr,
-		minerStoragePower: 0,
-		minerSuspendedPower: 0,
-		minerPK: pk,
-		minerSectorSize: sectorSize
-	}
+func (pt *PowerTable_I) RegisterMiner(addr addr.Address, pk filcrypto.PubKey, sectorSize sector.SectorSize) {
+	panic("")
+	// newMiner := &StorageMiner_I{
+	// 	MinerAddress_:        addr,
+	// 	MinerStoragePower_:   0,
+	// 	MinerSuspendedPower_: 0,
+	// 	MinerPK_:             pk,
+	// 	MinerSectorSize_:     sectorSize,
+	// }
+	// pt.miners[&addr] = *newMiner
 }
 
 func (pt *PowerTable_I) GetMinerPower(addr addr.Address) block.StoragePower {
-	return pt.miners[addr].minerStoragePower
+	panic("")
+	// return pt.miners[addr].MinerStoragePower
 }
 
 func (pt *PowerTable_I) GetTotalPower() block.StoragePower {
-	totalPower := 0
-	for _, miner := range pt.miners {
-		totalPower += miner.minerStoragePower
-	}
-	return totalPower
+	panic("")
+	// totalPower := 0
+	// for _, miner := range pt.miners {
+	// 	totalPower += miner.MinerStoragePower
+	// }
+	// return totalPower
 }
 
-func (pt *PowerTable_I) GetMinerPublicKey() filcrypto.PublicKey {
-	return pt.miners[addr].minerPK
+func (pt *PowerTable_I) GetMinerPublicKey(addr addr.Address) filcrypto.PubKey {
+	panic("")
+	// return pt.miners[addr].MinerPK
 }
 
-func (pt *PowerTable_I) IncrementPower(addr addr.Address, numSectors UVarint) {
-	pt.miners.[addr].minerStoragePower += numSectors * pt.miners.[addr].minerSectorSize
-}
-
-// must be atomic
-func (pt *PowerTable_I) SuspendPower(addr addr.Address, numSectors UVarint) {
-	pt.miners.[addr].minerStoragePower -= numSectors * pt.miners.[addr].minerSectorSize
-	pt.miners.[addr].minerSuspendedPower += numSectors * pt.miners.[addr].minerSectorSize
+func (pt *PowerTable_I) IncrementPower(addr addr.Address, numSectors util.UVarint) {
+	panic("")
+	// pt.miners[addr].MinerStoragePower += numSectors * pt.miners[addr].minerSectorSize
 }
 
 // must be atomic
-func (pt *PowerTable_I) UnsuspendPower(addr addr.Address, numSectors UVarint) {
-	pt.miners.[addr].minerSuspendedPower -= numSectors * pt.miners.[addr].minerSectorSize
-	pt.miners.[addr].minerStoragePower += numSectors * pt.miners.[addr].minerSectorSize
+func (pt *PowerTable_I) SuspendPower(addr addr.Address, numSectors util.UVarint) {
+	panic("")
+	// pt.miners[addr].MinerStoragePower -= numSectors * pt.miners[addr].minerSectorSize
+	// pt.miners[addr].MinerSuspendedPower += numSectors * pt.miners[addr].minerSectorSize
 }
 
-func (pt *PowerTable_I) RemovePower(addr addr.Address, numSectors UVarint) {
-	pt.miners.[addr].minerSuspendedPower -= numSectors * pt.miners.[addr].minerSectorSize
+// must be atomic
+func (pt *PowerTable_I) UnsuspendPower(addr addr.Address, numSectors util.UVarint) {
+	panic("")
+	// pt.miners[addr].MinerSuspendedPower -= numSectors * pt.miners[addr].minerSectorSize
+	// pt.miners[addr].MinerStoragePower += numSectors * pt.miners[addr].minerSectorSize
 }
 
-func (pt *PowerTable_I) RemoveAllPower(addr addr.Address, numSectors UVarint) {
-	pt.miners.[addr].minerStoragePower = 0
+func (pt *PowerTable_I) RemovePower(addr addr.Address, numSectors util.UVarint) {
+	panic("")
+	// pt.miners[addr].MinerSuspendedPower -= numSectors * pt.miners[addr].minerSectorSize
+}
+
+func (pt *PowerTable_I) RemoveAllPower(addr addr.Address, numSectors util.UVarint) {
+	panic("")
+	// pt.miners[addr].MinerStoragePower = 0
 }

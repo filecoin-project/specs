@@ -13,4 +13,5 @@ type Tipset struct {
 
     ValidateSyntax()   bool           @(cached)
     LatestTimestamp()  clock.Time     @(cached)
+    MinTicket()        Ticket         @(cached)
 }

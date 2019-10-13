@@ -9,11 +9,3 @@ func (self *VRFResult_I) Verify(input util.Bytes, pk VRFPublicKey) bool {
 func (self *VRFResult_I) ValidateSyntax() bool {
 	panic("TODO")
 }
-
-func (self *VDFResult_I) Verify(input util.Bytes) bool {
-	panic("TODO")
-}
-
-func (self *VDFResult_I) ValidateSyntax() bool {
-	panic("TODO")
-}

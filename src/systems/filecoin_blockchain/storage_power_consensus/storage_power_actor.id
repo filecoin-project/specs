@@ -1,10 +1,9 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus/storage_power_consensus_subsystem"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type StoragePowerActor struct {
     // TODO: bytesamount might be inefficient
@@ -18,7 +17,7 @@ type StoragePowerActor struct {
         peerId        libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
     ) addr.Address
 
-    // TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate
+    // TODO add NotifyConsensusFault(addr.Address, [block.Block]) TODO maybe rename to Arbitrate
     UpdatePower(address addr.Address, newPower block.StoragePower)
 
     TotalStorage() block.StoragePower
@@ -31,18 +30,22 @@ type StoragePowerActor struct {
 
     SuspendMiner(address addr.Address)
 
-    ec              spc.ExpectedConsensus
-    ReportConsensusFault(slasherAddr addr.Address, faultType ec.ConsensusFaultType, proof [Block]) struct {}
+    expectedConsensus ExpectedConsensus
+    ReportConsensusFault(
+        slasherAddr  addr.Address
+        faultType    ConsensusFaultType
+        proof        [block.Block]
+    )
     ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
-    PowerTable      PowerTable
+    PowerTable
 
-    // VerifyElectionProof(addr.Address, base.ElectionProof)	bool
+    // VerifyElectionProof(addr.Address, ElectionProof)	bool
 
     // TODO: old methods, should be removed
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
-    // VerifyElectionProof(addr.Address, base.ElectionProof)	bool
+    // VerifyElectionProof(addr.Address, ElectionProof)	bool
     // NotifyStorageFault(addr.Address)
-    // TryPublishBlock(StateTree)					Block
+    // TryPublishBlock(StateTree)					block.Block
     CommitPledgeCollateral(deals [deal.StorageDeal])
     DecommitPledgeCollateral(deals [deal.StorageDeal])
 
@@ -51,11 +54,15 @@ type StoragePowerActor struct {
 
 type PowerTable struct {
     // all power here is always verified
-    RegisterMiner(addr addr.Address, pk filcrypto.PublicKey, sectorSize sector.SectorSize)
+    RegisterMiner(
+        addr        addr.Address
+        pk          filcrypto.PubKey
+        sectorSize  sector.SectorSize
+    )
     miners {addr.Address: StorageMiner}
     GetMinerPower(addr addr.Address) block.StoragePower
     GetTotalPower() block.StoragePower
-    GetMinerPublicKey(addr addr.Address) filcrypto.PublicKey
+    GetMinerPublicKey(addr addr.Address) filcrypto.PubKey
     IncrementPower(addr addr.Address, numSectors UVarint)
     SuspendPower(addr addr.Address, numSectors UVarint)
     UnsuspendPower(addr addr.Address, numSectors UVarint)
@@ -64,9 +71,9 @@ type PowerTable struct {
 }
 
 type StorageMiner struct {
-    minerAddress        addr.Address
-    minerStoragePower   block.StoragePower
-    minerSuspendedPower block.StoragePower
-    minerPK             filcrypto.PublicKey
-    minerSectorSize     sector.SectorSize
+    MinerAddress         addr.Address
+    MinerStoragePower    block.StoragePower
+    MinerSuspendedPower  block.StoragePower
+    MinerPK              filcrypto.PubKey
+    MinerSectorSize      sector.SectorSize
 }
