@@ -4,7 +4,12 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type Path struct {}  // TODO
 
-type SealRandomSeed Bytes
+type SealRandomness Bytes
+
+// SealSeed is unique to each Sector
+// SealSeed is:
+//    SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID)
+type SealSeed Bytes
 
 type SealCfg struct {
     SectorSize
@@ -23,7 +28,7 @@ type SealVerifyInfo struct {
 type OnChainSealVerifyInfo struct {
     UnsealedCID   UnsealedSectorCID  // CommD
     SealedCID     SealedSectorCID  // CommR
-    RandomSeed    SealRandomSeed
+    RandomSeed    SealRandomness
     Proof         SealProof
     DealIDs       [deal.DealID]
     SectorNumber

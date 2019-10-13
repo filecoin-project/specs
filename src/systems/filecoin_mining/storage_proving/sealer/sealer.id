@@ -6,7 +6,7 @@ type SealInputs struct {
     SectorID      sector.SectorID
     SealCfg       sector.SealCfg
     MinerID       addr.Address
-    RandomSeed    sector.SealRandomSeed
+    RandomSeed    sector.SealRandomness
     UnsealedPath  file.Path
     SealedPath    file.Path
 }
