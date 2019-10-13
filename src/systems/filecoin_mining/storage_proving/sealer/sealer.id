@@ -5,6 +5,8 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 type SealInputs struct {
     SectorID      sector.SectorID
     SealCfg       sector.SealCfg
+    MinerID       addr.Address
+    RandomSeed    sector.SealRandomness
     UnsealedPath  file.Path
     SealedPath    file.Path
     DealIDs       [deal.DealID]
