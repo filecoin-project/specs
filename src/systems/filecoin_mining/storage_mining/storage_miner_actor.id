@@ -6,9 +6,10 @@ import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/addr
 
 type Seed struct {}
 type SectorCommitment struct {}
-type PoStProof struct {}
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
+
+    sectorStateSets  sector.SectorStateSets
 
     // contains mostly static info about this miner
     info     &MinerInfo
@@ -19,9 +20,6 @@ type StorageMinerActor struct {
     // TODO provingSet []SectorInfo CID to AMT
 
     // TODO: should we keep the same structure as before or putting all of that into a struct?
-    // TODO currentFaultSet BitField
-    // TODO nextFaultSet BitField
-    // TODO nextDoneSet BitField
     // TODO do we need a `slashedAt`?
     // TODO owedStorageCollateral
     // TODO ProvingPeriodEnd   Epoch
@@ -30,10 +28,7 @@ type StorageMinerActor struct {
 
     CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
 
-    SubmitPoSt(
-        postProof        PoStProof
-        sectorStateSets  sector.SectorStateSets  // TODO: check with Juan and Magik
-    )
+    SubmitPoSt(postProof PoStProof)
 
     // TODO: should depledge be in here or in storage market actor?
 
@@ -46,9 +41,7 @@ type StorageMinerActor struct {
 
     // TODO: do IsSlashed, IsLate belong here?
 
-    UpdateDoneSet()
-
-    UpdateSectorStatus(sectorStateSets sector.SectorStateSets)  // TODO: @magik says SectorStateSets might be more expensive than more methods
+    UpdateSectorState(sectorStateSets sector.SectorStateSets)
 
     computeProvingPeriodEndSectorState()  // TODO
 }

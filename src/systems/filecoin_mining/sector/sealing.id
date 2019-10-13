@@ -6,6 +6,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 type Path struct {}  // TODO
 
 type SealRandomness Bytes
+type PoStRandomness Bytes
 
 // SealSeed is unique to each Sector
 // SealSeed is:

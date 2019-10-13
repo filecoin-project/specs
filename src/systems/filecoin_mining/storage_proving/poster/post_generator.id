@@ -10,7 +10,7 @@ type PoStProof struct {}  // TODO
 // - "blockchain/builtins" or something like that - a component in the blockchain that handles storage verification
 type PoStSubmission struct {
     PostProof  PoStProof
-    SectorSet  sector.CompactSectorSet
+    Epoch
 }
 
 type PostGenerator struct {
