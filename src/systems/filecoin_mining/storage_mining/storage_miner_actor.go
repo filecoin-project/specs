@@ -5,9 +5,11 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/poster"
 
 
-	// TODO(enhancement): decision is to currently account for power based on sector
-	// an alternative proposal is to account for power based on active deals
-func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) {
+// TODO(enhancement): decision is to currently account for power based on sector
+// an alternative proposal is to account for power based on active deals
+// postSubmission: is the post for this proving period
+// faultSet: the miner announces all of their current faults
+func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, faultSet sector.FaultSet) {
 	// Verify Proof
 	// TODO
 	// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
@@ -15,6 +17,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	// verifyPoSt(challenges, TODO)
 
 	// Pay miner
+	// TODO: batch into a single message
 	// for _, sealCommitment := range sm.Sectors {
 	//   SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
 	// }
@@ -33,19 +36,66 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 
 		// Clean up data structures
 		// delete(sm.Sectors(), expiredSectorNumber)
-		// FaultSet[expiredSectorNumber] = 0
+		// TODO: maybe FaultSet[expiredSectorNumber] = 0
+		// TODO: SPA must return the pledge collateral to the miner
 	}
+	// newPower := - len(expiredSectorsNumber) * sm.info.sectorSize()
+	// SendMessage(SPA.UpdatePower(rt.SenderAddress, newPower))
 
-	// Update Power and Handle Faults
+	// Handle faulty sectors
+	// sm.FaultSet_ = all zeros
+	// sm.DeclareFault(faultSet)
 
-	// newPower := power - len(expiredSectorsNumber) * sm.info.sectorSize()
-	// SendMessage(SPA.UpdatePower(newPower))
-	// TODO: either SM or SPA must return the pledge collateral to the miner
+	// Handle Recovered faults:
+	// If a sector is not in sm.FaultSet at this point, it means that it
+	// was just proven in this proving period.
+	// However, if this had a counter in sm.Faults, then it means that it was
+	// faulty in the previous proving period and then recovered.
+	// In that case, reset the counter and resume power.
+
+	// resumedSectorsCount := 0
+	// for previouslyFaulty := range keys(sm.Faults) {
+	//   if (previouslyFaulty not in sm.FaultSet()) {
+	//     delete(sm.Faults, previouslyFaulty)
+	//     resumedSectorsCount = resumedSectorsCount + 1
+	//   }
+  // }
+	// SendMessage(SPA.UpdatePower(rt.SenderAddress, resumedSectorsCount * sm.info.sectorSize()))
+
+	// TODO: Enter newly introduced sector
 	panic("TODO")
 }
 
-func (sm *StorageMinerActor_I) DeclareFault(faultSet sector.FaultSet) {
+
+func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
 	// Handle Fault
+
+	// TODO: the faults that are declared after post challenge,
+	// are faults for the next proving period
+
+	// Update Fault Set
+
+	// TODO: batch into a single message
+	// for sectorNumber := range faultSet {
+	//   // Avoid penalizing the miner multiple times in the same proving period
+	//   if !(sector is in sm.FaultSet) {
+	//     if (sectorNumber not in sm.Faults) sm.Faults[sectorNumber] = 0
+	//     sm.Faults[sectorNumber] = sm.Faults[sectorNumber] + 1
+
+	//     if (sm.Faults[sectorNumber] > MAX_CONSECUTIVE_FAULTS_ALLOWED) {
+	//       Sector is lost, delete it, slash storage deal collateral and all pledge
+	//       SendMessage(sma.SlashAllStorageDealCollateral(dealIDs)
+	//       SendMessage(spa.SlashAllPledgeCollateral(sectorNumber)
+	//       delete(sm.Sectors(), expiredSectorNumber)
+	//     } else {
+	//       dealIDs := sm.Sectors()[sectorNumber].DealIDs()
+	//       SendMessage(sma.SlashStorageDealCollateral(dealIDs)
+	//     }
+	//   }
+	// }
+
+	// sm.FaultSet.applyDiff(faultSet)
+
 	panic("TODO")
 }
 

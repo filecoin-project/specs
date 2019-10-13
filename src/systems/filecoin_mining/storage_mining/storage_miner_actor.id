@@ -23,6 +23,8 @@ type StorageMinerActor struct {
 
     FaultSet  sector.FaultSet
 
+    Faults {sector.SectorNumber: uint}
+
     Sectors  {sector.SectorNumber: sector.SealCommitment}
 
     SectorExpirationQueue

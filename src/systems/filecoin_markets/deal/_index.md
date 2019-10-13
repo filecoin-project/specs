@@ -3,7 +3,7 @@ menuTitle: Deals
 title: Market Deals
 ---
 
-There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with `CommitSector` to gain storage power on chain. Hence, there is a `StorageDealProposal` and a `RetrievalDealProposal` that are half sign contracts submitted by clients to be counter-signed and posted on-chain by the miners. 
+There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with `CommitSector` to gain storage power on chain. Hence, there is a `StorageDealProposal` and a `RetrievalDealProposal` that are half sign contracts submitted by clients to be counter-signed and posted on-chain by the miners.
 
 Filecoin Storage Market Deal Flow
 
@@ -16,5 +16,9 @@ a. `StorageProvider` calls `HandleStorageDeal` in `StorageMiningSubsystem` which
 b. `StorageProvider` calls `PublishStorageDeals` in `StorageMarketActor` which will generate a `DealID` for each `StorageDeal` and store a mapping from `DealID` to `StorageDeal`.
 4. `StorageMiningSubsystem` calls `CommitSector`
 5. Payment, Expiration, and Faults
+6. Declared Faults: Storage Miner calls sm.DeclareFaults, which triggers a `sma.SlashStorageDealCollateral` and loses the power for the faulty sectors. If the same sector is reported faulty X times, then the sector is dropped.
+7. At the next PoStSubmission:
+  - if the fault has been recovered, report the recovered sector in the FaultSet as you submit the post. Power is restored at the end of the next proving period.
+
 
 {{< readfile file="deal.id" code="true" lang="go" >}}

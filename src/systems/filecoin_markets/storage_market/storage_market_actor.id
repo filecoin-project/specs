@@ -56,6 +56,7 @@ type StorageMarketActor struct {
     // payment will be processed
     ProcessStorageDealsPayment(storageDealIDs [deal.DealID])
 
-    // call by CronActor / onPoStSubmission on FaultSet to slash deal collateral
-    slashStorageDealCollateral(storageDealIDs [deal.DealID])
+    // call by CronActor / on DeclareFault on FaultSet to slash deal collateral
+    // Deals should be slashed for a single proving period
+    SlashStorageDealCollateral(storageDealIDs [deal.DealID])
 }
