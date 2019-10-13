@@ -1,6 +1,7 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type Path struct {}  // TODO
 
@@ -24,14 +25,25 @@ type SealVerifyInfo struct {
     OnChain  OnChainSealVerifyInfo
 }
 
-// OnChainSealVerifyInfo is the structure of information that must go on chain.
+// OnChainSealVerifyInfo is the structure of information that must be sent with
+// a message to commit a sector. Most of this information is not needed in the
+// state tree but will be verified in sm.CommitSector. See SealCommitment for
+// data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
     UnsealedCID   UnsealedSectorCID  // CommD
     SealedCID     SealedSectorCID  // CommR
-    RandomSeed    SealRandomness
+    Epoch         block.ChainEpoch
     Proof         SealProof
     DealIDs       [deal.DealID]
     SectorNumber
+}
+
+// SealCommitment is the information kept in the state tree about a sector.
+// SealCommitment is a subset of OnChainSealVerifyInfo.
+type SealCommitment struct {
+    UnsealedCID  UnsealedSectorCID  // CommD
+    SealedCID    SealedSectorCID  // CommR
+    DealIDs      [deal.DealID]
 }
 
 // ProofAux is meta data required to generate certain proofs

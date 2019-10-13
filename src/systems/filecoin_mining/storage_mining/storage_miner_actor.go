@@ -12,18 +12,28 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postProof base_mining.PoStProof, secto
 // as an optimization, in the future CommitSector could contain a list of
 // deals that are not published yet.
 func (sm *StorageMinerActor_I) CommitSector(onChainInfo sealing.OnChainSealVerifyInfo) {
+	// TODO verify
+	// var sealRandomness sector.SealRandomness
+	// TODO: get sealRandomness from onChainInfo.Epoch
 	// TODO: sm.verifySeal(sectorID SectorID, comm sealing.OnChainSealVerifyInfo, proof SealProof)
 
 	// TODO: you don't need to store the proof and the randomseed in the state tree
 	// just verify it and drop it, just SealCommitments{CommD, CommR, DealIDs}
 	// TODO: @porcuquine verifies
-	currSector, found := sm.Sectors()[onChainInfo.SectorNumber()]
-	if !found {
-		sm.Sectors()[onChainInfo.SectorNumber()] = []sealing.OnChainSealVerifyInfo{onChainInfo}
-	} else {
-		newSector := append(currSector, onChainInfo)
-		sm.Sectors()[onChainInfo.SectorNumber()] = newSector
+	sealCommitment := &sector.SealCommitment_I{
+		UnsealedCID_: onChainInfo.UnsealedCID(),
+		SealedCID_:   onChainInfo.SealedCID(),
+		DealIDs_:     onChainInfo.DealIDs(),
 	}
+
+	_, found := sm.Sectors()[onChainInfo.SectorNumber()]
+
+	if found {
+		// TODO: throw error
+		panic("sector already in there")
+	}
+
+	sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
 
 	// TODO write state change
 }

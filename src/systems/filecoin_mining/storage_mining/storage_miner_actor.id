@@ -26,7 +26,7 @@ type StorageMinerActor struct {
     // TODO owedStorageCollateral
     // TODO ProvingPeriodEnd   Epoch
 
-    Sectors  {sector.SectorNumber: [sealing.OnChainSealVerifyInfo]}
+    Sectors  {sector.SectorNumber: sector.SealCommitment}
 
     CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
 
