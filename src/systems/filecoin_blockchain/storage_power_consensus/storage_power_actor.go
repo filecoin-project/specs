@@ -61,7 +61,8 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 
 	for i := 0; i < numSurprised; i++ {
 		// TODO: randomNumber := hash(ticket, i)
-		minerIndex := 42 % len(spa.Miners())
+		var randomNumber uint
+		minerIndex := randomNumber % len(spa.Miners())
 		minerAddress := spa.Miners()[minerIndex]
 		surprisedMiners = append(surprisedMiners, minerAddress)
 		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
