@@ -47,7 +47,7 @@ type StoragePowerActor struct {
 
     // VerifyElectionProof(addr.Address, ElectionProof)	bool
 
-    Surprise(ticket base_blockchain.Ticket) [address.Address]
+    Surprise(ticket block.Ticket) [addr.Address]
 
     CheckFaults()
 
