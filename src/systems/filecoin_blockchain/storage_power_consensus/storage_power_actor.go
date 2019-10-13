@@ -48,7 +48,7 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 
 	// The number of blocks that a challenged miner has to respond
 	// TODO: this should be set in.. spa?
-	provingPeriod := 42
+	var provingPeriod uint
 	// The number of blocks that a challenged miner has to respond
 	// TODO: this should be set in.. spa?
 	var postChallengeTime util.UInt
