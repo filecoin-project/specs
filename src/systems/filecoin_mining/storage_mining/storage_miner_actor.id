@@ -3,15 +3,35 @@ import util "github.com/filecoin-project/specs/util"
 import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type Seed struct {}
 type SectorCommitment struct {}
-type PoStProof struct {}
+
+type SectorExpirationQueuItem struct {
+    SectorNumber  sector.SectorNumber
+    Expiration    block.ChainEpoch
+}
+
+type SectorExpirationQueue struct {
+    Add(sectorExpiration SectorExpirationQueuItem)
+    Pop() SectorExpirationQueuItem
+    Peek() SectorExpirationQueuItem
+}
+
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
+    NextFaultSet           sector.FaultSet
+
+    Faults                 {sector.SectorNumber: uint}
+
+    Sectors                {sector.SectorNumber: sector.SealCommitment}
+
+    SectorExpirationQueue
+
     // contains mostly static info about this miner
-    info     &MinerInfo
+    info                   &MinerInfo
 
     // TODO: add the DePledgeCollateral
     // TODO: add the Sectors
@@ -19,21 +39,13 @@ type StorageMinerActor struct {
     // TODO provingSet []SectorInfo CID to AMT
 
     // TODO: should we keep the same structure as before or putting all of that into a struct?
-    // TODO currentFaultSet BitField
-    // TODO nextFaultSet BitField
-    // TODO nextDoneSet BitField
     // TODO do we need a `slashedAt`?
     // TODO owedStorageCollateral
     // TODO ProvingPeriodEnd   Epoch
 
-    Sectors  {sector.SectorNumber: [sealing.OnChainSealVerifyInfo]}
-
     CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
 
-    SubmitPoSt(
-        postProof        PoStProof
-        sectorStateSets  sector.SectorStateSets  // TODO: check with Juan and Magik
-    )
+    SubmitPoSt(postProof PoStProof)
 
     // TODO: should depledge be in here or in storage market actor?
 
@@ -46,9 +58,7 @@ type StorageMinerActor struct {
 
     // TODO: do IsSlashed, IsLate belong here?
 
-    UpdateDoneSet()
-
-    UpdateSectorStatus(sectorStateSets sector.SectorStateSets)  // TODO: @magik says SectorStateSets might be more expensive than more methods
+    DeclareFault(faultSet sector.FaultSet)
 
     computeProvingPeriodEndSectorState()  // TODO
 }

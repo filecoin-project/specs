@@ -2,7 +2,6 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sealer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer"
 
-// type poster.PoStProof struct {}
 // type seal.SealOutput struct {}
 // type seal.SectorSealer struct {}
 // type seal.Seed struct {}

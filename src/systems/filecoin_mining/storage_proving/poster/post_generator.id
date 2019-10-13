@@ -9,8 +9,8 @@ type PoStProof struct {}  // TODO
 // - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
 // - "blockchain/builtins" or something like that - a component in the blockchain that handles storage verification
 type PoStSubmission struct {
-    PostProof  PoStProof
-    SectorSet  sector.CompactSectorSet
+    PostProof PoStProof
+    Epoch
 }
 
 type PostGenerator struct {

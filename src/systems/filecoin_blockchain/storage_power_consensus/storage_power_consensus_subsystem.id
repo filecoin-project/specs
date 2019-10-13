@@ -6,6 +6,7 @@ import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
+    // TODO: this is incorrect, it does not belong
     powerTable           PowerTable
     actor                StoragePowerActor
     associatedStateTree  &st.StateTree  // TODO: remove this. should not store this here.
