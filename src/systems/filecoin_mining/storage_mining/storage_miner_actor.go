@@ -4,7 +4,6 @@ import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/poster"
 
-
 // TODO(enhancement): decision is to currently account for power based on sector
 // an alternative proposal is to account for power based on active deals
 // postSubmission: is the post for this proving period
@@ -59,13 +58,12 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	//     delete(sm.Faults, previouslyFaulty)
 	//     resumedSectorsCount = resumedSectorsCount + 1
 	//   }
-  // }
+	// }
 	// SendMessage(SPA.UpdatePower(rt.SenderAddress, resumedSectorsCount * sm.info.sectorSize()))
 
 	// TODO: Enter newly introduced sector
 	panic("TODO")
 }
-
 
 func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
 	// Handle Fault
@@ -117,7 +115,7 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	// for deal := range onChainInfo.DealIDs() {
 	//   if deal.Expiry > latestDealExpiry {
 	//     latestDealExpiry = deal.Expiry
-  //   }
+	//   }
 	// }
 
 	sealCommitment := &sector.SealCommitment_I{
@@ -129,7 +127,7 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 
 	sm.SectorExpirationQueue.Add(&SectorExpirationQueuItem_I{
 		SectorNumber_: onChainInfo.SectorNumber(),
-		Expiration_: latestDealExpiry,
+		Expiration_:   latestDealExpiry,
 	})
 
 	_, found := sm.Sectors()[onChainInfo.SectorNumber()]

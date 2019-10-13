@@ -5,7 +5,6 @@ import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 type BytesAmount UVarint
 
 type StoragePowerActor struct {
-
     // TODO: bytesamount might be inefficient
     Miners {addr.Address: BytesAmount}
 

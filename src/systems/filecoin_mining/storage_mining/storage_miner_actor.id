@@ -8,29 +8,30 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 type Seed struct {}
 type SectorCommitment struct {}
 
-type SectorExpirationQueuItem {
-  SectorNumber sector.SectorNumber
-  Expiration block.ChainEpoch
+type SectorExpirationQueuItem struct {
+    SectorNumber  sector.SectorNumber
+    Expiration    block.ChainEpoch
 }
+
 type SectorExpirationQueue struct {
-  Add(sectorExpiration SectorExpirationQueuItem)
-  Pop() SectorExpirationQueuItem
-  Peek() SectorExpirationQueuItem
+    Add(sectorExpiration SectorExpirationQueuItem)
+    Pop() SectorExpirationQueuItem
+    Peek() SectorExpirationQueuItem
 }
 
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
-    FaultSet  sector.FaultSet
+    FaultSet               sector.FaultSet
 
-    Faults {sector.SectorNumber: uint}
+    Faults                 {sector.SectorNumber: uint}
 
-    Sectors  {sector.SectorNumber: sector.SealCommitment}
+    Sectors                {sector.SectorNumber: sector.SealCommitment}
 
     SectorExpirationQueue
 
     // contains mostly static info about this miner
-    info     &MinerInfo
+    info                   &MinerInfo
 
     // TODO: add the DePledgeCollateral
     // TODO: add the Sectors
