@@ -48,14 +48,13 @@ type StorageMarketActor struct {
     // call by CronActor / onPoStSubmission on ExpiredSet
     // remove StorageDeal from StorageMarketActor
     // if no more active deals contain in the sector
-    // adjust miner power for this sector
     // return StorageCollateral to miners
-    closeExpiredStorageDeal(storageDealIDs [deal.DealID])
+    SettleExpiredDeals(storageDealIDs [deal.DealID])
 
     // call by CronActor / onPoStSubmission on ActiveSet to process deal payment
     // go through StorageDealIDs, if IDs are active in MarketActor
     // payment will be processed
-    handleStorageDealPayment(storageDealIDs [deal.DealID])
+    ProcessStorageDealsPayment(storageDealIDs [deal.DealID])
 
     // call by CronActor / onPoStSubmission on FaultSet to slash deal collateral
     slashStorageDealCollateral(storageDealIDs [deal.DealID])

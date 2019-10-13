@@ -4,12 +4,22 @@ import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/poster"
 
+
+	// TODO(enhancement): decision is to currently account for power based on sector
+	// an alternative proposal is to account for power based on active deals
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) {
+	// Verify Proof
 	// TODO
 	// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
-	// challenges := GenerateChallengesForPoSt(r, sm.sectorStateSets().ActiveSet())
+	// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
 	// verifyPoSt(challenges, TODO)
 
+	// Pay miner
+	// for _, sealCommitment := range sm.Sectors {
+	//   SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
+	// }
+
+	// Handle expired sectors
 	// var expiredSectorsNumber [SectorNumber]
 	// go through sm.SectorExpirationQueue() and get the expiredSectorsNumber
 
@@ -26,15 +36,16 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 		// FaultSet[expiredSectorNumber] = 0
 	}
 
+	// Update Power and Handle Faults
+
 	// newPower := power - len(expiredSectorsNumber) * sm.info.sectorSize()
 	// SendMessage(SPA.UpdatePower(newPower))
-
-	// TODO(enhancement): decision is to currently account for power based on sector
-	// an alternative proposal is to account for power based on active deals
+	// TODO: either SM or SPA must return the pledge collateral to the miner
 	panic("TODO")
 }
 
 func (sm *StorageMinerActor_I) DeclareFault(faultSet sector.FaultSet) {
+	// Handle Fault
 	panic("TODO")
 }
 
