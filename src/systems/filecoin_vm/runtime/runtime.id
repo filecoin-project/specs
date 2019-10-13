@@ -31,9 +31,9 @@ type Runtime struct {
     // TODO: what are the return values here?
     Send(
         to      addr.Address
-        method  string
-        value   actor.TokenAmount
+        method  actor.MethodNum
         params  actor.MethodParams
+        value   actor.TokenAmount
     ) msg.MessageReceipt
 }
 
