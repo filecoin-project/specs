@@ -7,6 +7,8 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
+	storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
+
 )
 
 const PLEDGE_COLLATERAL_PER_GB = -1 // TODO define
@@ -41,23 +43,18 @@ func (spa *StoragePowerActor_I) DecommitPledgeCollateral(deals []deal.StorageDea
 }
 
 // TODO: add Surprise to the chron actor
-<<<<<<< HEAD
 func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	surprisedMiners := []addr.Address{}
-=======
-func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []address.Address {
-	surprisedMiners := []address.Address{}
->>>>>>> updated to latest change
 
 	// The number of blocks that a challenged miner has to respond
 	// TODO: this should be set in.. spa?
 	provingPeriod := 42
 	// The number of blocks that a challenged miner has to respond
 	// TODO: this should be set in.. spa?
-	// postChallengeTime := util.UInt(42)
+	var postChallengeTime util.UInt
 	// The current currBlockHeight
 	// TODO: should be found in vm context
-	// currBlockHeight := util.UInt(42)
+	var currBlockHeight util.UInt
 
 	// The number of miners that are challenged at this block
 	numSurprised := len(spa.Miners()) / provingPeriod
@@ -70,8 +67,8 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []address.Address 
 		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
 
 		// TODO: the following creates a cycle
-		// minerActor := storage_mining.StorageMinerActor{}
-		// minerActor.ProvingPeriodEnd_ = currBlockHeight + postChallengeTime
+		var minerActor storage_mining.StorageMinerActor
+		minerActor.ProvingPeriodEnd_ = currBlockHeight + postChallengeTime
 	}
 
 	return surprisedMiners
