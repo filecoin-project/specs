@@ -57,7 +57,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 		sm.CommittedSectors = []
 	}
 
-	// State change: Active -> Faulty
+	// 1. State change: Active -> Faulty
 	// Note: this must happend after Committed->Active, in order to account for
 	// sectors that have been committed in this proving period which also happen
 	// to be faulty.
@@ -67,7 +67,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 		// sm.DeclareFault(nextFaultSet)
 	}
 
-	// State change: Faulty -> Active
+	// 2. State change: Faulty -> Active
 	{
 	// Handle Recovered faults:
 	// If a sector is not in sm.NextFaultSet at this point, it means that it
@@ -87,6 +87,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	}
 
 	// Pay all the Active sectors
+	// Note: this must happen before marking sectors as expired.
 	{
 	// Pay miner
 	// TODO: batch into a single message
@@ -97,7 +98,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	// }
 	}
 
-	// State change: Active -> Expired
+	// 3. State change: Active -> Expired
 	// Note: this must happen as last state transition check to ensure that
 	// payments and faults have been accounted for correctly.
 	{
