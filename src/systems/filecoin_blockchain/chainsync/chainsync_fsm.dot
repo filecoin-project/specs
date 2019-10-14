@@ -1,0 +1,22 @@
+digraph sector {
+  compound=true;
+  node [shape=Mrecord]
+  edge [style=solid]
+  // splines=ortho;
+
+  INIT
+  BOOTSTRAP
+  SYNC_CHECKPOINT
+  CHAIN_CATCHUP
+  CHAIN_FOLLOW [style=filled, color=seagreen3]
+
+  INIT -> BOOTSTRAP [label="prepare and verify\nall internal state"]
+  BOOTSTRAP -> SYNC_CHECKPOINT [label="done bootstrapping.\ndo not have\nLastTrustedCheckpoint\nstate",  labelangle=90.0, labeldistance=20]
+  BOOTSTRAP -> CHAIN_CATCHUP [label="done bootstrapping. have\nLastTrustedCheckpoint state"]
+  SYNC_CHECKPOINT -> CHAIN_CATCHUP [label="done getting\nLastTrustedCheckpoint\nstate"]
+  CHAIN_CATCHUP -> CHAIN_FOLLOW [label="done validating\nup to BestTargetHead"]
+
+  // drop backs
+  CHAIN_FOLLOW -> CHAIN_CATCHUP [label="unvalidated gap\nformed between\nValidG and\nBestTargetHead", constraint=false, color=red, fontcolor=red]
+  CHAIN_FOLLOW -> INIT [label="on shut down node", constraint=false, color=red, fontcolor=red]
+}

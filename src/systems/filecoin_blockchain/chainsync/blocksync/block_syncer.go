@@ -1,4 +1,4 @@
-package chainsync
+package blocksync
 
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
