@@ -1,0 +1,150 @@
+digraph sector {
+  compound=true;
+  ranksep=0.2;
+  splines=ortho;
+  edge [style=solid]
+
+  subgraph cluster_local {
+    style=bold
+    color=gray
+    label="Sector States in Storage Miner\n(off chain)"
+
+    Empty
+    Packing
+    Unsealed
+    Sealed
+    NotProving [label="Not Proving"]
+    Deleted
+
+
+    Empty -> Packing -> Unsealed -> Sealed -> NotProving -> Deleted [style=invis] // structure
+
+    subgraph cluster_power {
+      label=""
+      style=filled
+      color=seagreen3
+      Proving
+    }
+
+    Empty -> Packing [label="Add Deal"]
+    Packing -> Unsealed [label="Sector is full"]
+    Unsealed -> Sealed [label="Seal"]
+    Sealed -> Proving [label="Commit\n(sm.CommitSector)"]
+    Proving -> NotProving [label="Lost data\nor\nStopped Proving"]
+    NotProving -> Deleted [label="Give up on recovery\nor\nExpiry"]
+  }
+
+  subgraph cluster_chain {
+    label="Sector States in StorageMinerActor\n(on chain)"
+    style=bold
+    color=gray
+
+    subgraph cluster_postproving {
+      label="must be proved in post"
+      style=filled
+      color=azure2
+
+      subgraph cluster_nopowerC1 {
+        label="Does not count for power"
+        style=filled
+        color=lightgray
+        CommittedC [label="Unproven"]
+      }
+
+      subgraph cluster_powerC {
+        label="Counts for power"
+        style=filled
+        color=seagreen3
+        ActiveC [label="Active"]
+      }
+
+      { // messages
+        edge [color=blue, fontcolor=blue]
+        node [color=blue, fontcolor=blue, shape=none]
+        FirstPost [label="1st PoSt\n(sm.SubmitPost \n->sm.ActivateSector)", color="invis"]
+      }
+    }
+
+    subgraph cluster_nopowerC2 {
+      label="Does not count for power"
+      style=filled
+      color=lightgray
+
+      FaultedC [label="Faulted"]
+      ExpiredC [label="Deleted"]
+      // DeletedC [label="Deleted"]
+
+      { // cron
+        edge [color=magenta, fontcolor=magenta]
+        // ExpiredC -> DeletedC [label="Sector Cleanup\n(sma.CronTick \n-> sm.SectorCleanup)"]
+        FaultedC -> ExpiredC [label="Expiry epoch reached\n(sma.CronTick \n-> sm.ExpireSectors)"]
+        FaultedC -> ExpiredC [label="Faulted 3+ times\n(sma.CronTick \n-> sm.SectorCleanup)", constraint=false]
+      }
+    }
+
+    { // messages
+      edge [color=blue, fontcolor=blue]
+      node [color=blue, fontcolor=blue, shape=box]
+      FirstPost -> ActiveC
+      FaultsDeclared [label="Fault Declared\n(sm.DeclareFaults)"]
+    }
+
+    { // cron
+      edge [color=magenta, fontcolor=magenta]
+      node [color=magenta, fontcolor=magenta, shape=box]
+      FaultSpotted [label="Fault Spotted\n(sma.CronTick \n-> sm.PostFailed)"]
+
+      // CommittedC -> ExpiredC [label="Expiry epoch reached\n(sma.CronTick \n-> sm.ExpireSectors)"]
+      CommittedC -> FaultSpotted [arrowhead=none]
+      ActiveC -> FaultSpotted [arrowhead=none]
+      FaultSpotted -> FaultedC
+      // ActiveC -> ExpiredC [label="Expiry epoch reached\n(sma.CronTick \n-> sm.ExpireSectors)"]
+    }
+
+    CommittedC -> FirstPost -> ActiveC -> FaultsDeclared -> FaultedC -> ExpiredC [style=invis] // structure
+    CommittedC -> FirstPost -> ActiveC -> FaultSpotted -> FaultedC -> ExpiredC [style=invis] // structure
+  }
+
+  {
+    Packing -> Packing [label="Add Deal"]
+    // ExpiredC -> Deleted [label="Expired"]
+  }
+  { // messages
+    edge [color=blue, fontcolor=blue]
+    node [color=blue, fontcolor=blue, shape=none]
+    Proving -> Proving [label="Produce Post\n(sm.SubmitPost)"]
+    NotProving -> Proving [label="Recover\n(sm.SubmitPost)", constraint=false]
+    Sealed -> CommittedC [label="Commit Sector\n(sm.CommitSector)", style=dashed, constraint=false]
+    CommittedC -> FirstPost [arrowhead=none]
+    Proving -> FirstPost [arrowhead=none, style=dashed]
+
+    CommittedC -> Proving [label="Commit Sector\n(wait for commit)", style=dashed]
+    ActiveC -> ExpiredC [label="Expiry epoch reached\n(sm.SubmitPost \n-> sm.ExpireSectors)"]
+    FaultedC -> CommittedC [label="Recover\n(sm.SubmitPost)", constraint=false]
+
+    NotProving -> FaultsDeclared [arrowhead=none, style=dashed]
+    CommittedC -> FaultsDeclared [arrowhead=none]
+    ActiveC -> FaultsDeclared [arrowhead=none]
+    FaultsDeclared -> FaultedC
+  }
+  { // cron
+    edge [color=magenta, fontcolor=magenta]
+    NotProving -> FaultSpotted [arrowhead=none, style=dashed]
+  }
+
+
+  { // split sides structure
+    node [color=red, style=dotted]
+    edge [color=red, style=dotted]
+    node [style=invis]
+    edge [style=invis]
+
+    // Sealed -> split_________________1 -> CommittedC
+    // CommittedC -> split_________________2 -> Sealed
+
+    Proving -> split_________________2 -> ActiveC
+    NotProving -> split_________________3 -> FaultedC
+    FaultedC -> split_________________4 -> Deleted
+
+  }
+}
