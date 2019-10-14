@@ -135,7 +135,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	}
 }
 
-func (sm *StorageMinerActor_I) DecoverFaults(newFaults sector.FaultSet) {
+func (sm *StorageMinerActor_I) RecoverFaults(newFaults sector.FaultSet) {
 	// add them to the UnprovenSectors_
 	// update FaultSet
 }
