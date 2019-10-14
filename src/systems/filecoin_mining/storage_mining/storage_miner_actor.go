@@ -87,50 +87,69 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	if numUnprovenSector > 0 {
 		// activate unproven sectors will also empty sm.UnprovenSectors_
 		sm.activateUnprovenSectors(sm.UnprovenSectors())
-		powerUpdate = powerUpdate + numUnprovenSector * sm.Info().SectorSize()
+		powerUpdate = powerUpdate + numUnprovenSector*sm.Info().SectorSize()
 	}
 
 	// Pay all the Active sectors
 	// Note: this must happen before marking sectors as expired.
 	// TODO: Pay miner in a single batch message
 	// for _, sc := range sm.ActiveSectors() {
-	  // SendMessage(sma.ProcessStorageDealsPayment(sc.DealIDs()))
+	// SendMessage(sma.ProcessStorageDealsPayment(sc.DealIDs()))
 	// }
 
-
-	// 3. State change: Active -> Deleted (because they are expired)
+	// State change: Active -> Deleted (because they are expired)
 	// Note: this must happen as last state transition check to ensure that
 	// payments and faults have been accounted for correctly.
-	{
-		// Handle expired sectors
-		// var expiredSectorsNumber [SectorNumber]
-		// go through sm.SectorExpirationQueue() and get the expiredSectorsNumber
+	// Handle expired sectors
+	var numExpiredSectors = uint64(0)
+	var currEpoch block.ChainEpoch // TODO: replace this with rt.State().Epoch()
+	// go through sm.SectorExpirationQueue() and get the expiredSectorNumbers
 
-		// for expiredSectorNumber := range expiredSectorsNumber {
-		// Settle deals
-		// TODO: SendMessage(SMA.SettleExpiredDeals(sm.Sectors()[expiredSectorNumber].DealIDs()))
-		// Note: in order to verify if something was stored in the past, one must
-		// scan the chain. SectorNumbers can be re-used.
+	// TODO verify this
+	expirationPeek := sm.SectorExpirationQueue().Peek().Expiration()
+	for expirationPeek <= currEpoch {
+		expiredSectorNo := sm.SectorExpirationQueue().Pop().SectorNumber()
 
-		// TODO: check if there is any fault that we should handle here
+		_, isUnproven := sm.UnprovenSectors()[expiredSectorNo]
+		_, isFaulty := sm.FaultySectors()[expiredSectorNo]
+		_, isActive := sm.ActiveSectors()[expiredSectorNo]
 
-		// Clean up data structures
-		// delete(sm.Sectors(), expiredSectorNumber)
-		// delete(sm.Faults(), expiredSectorNumber)
-		// TODO: maybe nextFaultSet[expiredSectorNumber] = 0
-		// TODO: SPA must return the pledge collateral to the miner
-		// }
-		// powerUpdate = powerUpdate - len(expiredSectorsNumber) * sm.info.sectorSize()
+		// Note: this should never happen
+		if isUnproven {
+			panic("Expired sector is unproven")
+		}
+
+		if isFaulty {
+			// TODO: check if there is any fault that we should handle here
+			// Slash everything?
+			panic("TODO")
+			// delete(sm.Faults(), expiredSectorNumber)
+		}
+
+		if isActive {
+			// Note: in order to verify if something was stored in the past, one must
+			// scan the chain. SectorNumbers can be re-used.
+
+			// Settle deals
+			// expiredDealIDs := sm.ActiveSectors()[expiredSectorNo].DealIDs()
+			delete(sm.ActiveSectors_, expiredSectorNo)
+			numExpiredSectors = numExpiredSectors + 1
+			// TODO: SendMessage(sma.SettleExpiredDeals(expiredDealIDs))
+
+		}
+
+		expirationPeek = sm.SectorExpirationQueue().Peek().Expiration()
+
 	}
 
 	// Reset Proving Period and report power updates
-	{
-		panic("TODO")
-		// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
-		// SendMessage(sma.UpdatePower(powerUpdate))
-	}
-}
+	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
+	// powerUpdate = powerUpdate - numExpiredSectors * sm.Info().SectorSize()
+	// SendMessage(sma.UpdatePower(powerUpdate))
 
+	// Return PledgeCollateral
+	// TODO: SendMessage(spa.Depledge)
+}
 
 // RecoverFaults checks if miners have sufficent collateral
 // move SectorNumber and SealCommitment
@@ -173,7 +192,6 @@ func (sm *StorageMinerActor_I) DeclareFaults(newFaults sector.FaultSet) {
 		// Handle faulty sectors
 		// sm.DeclareFault(sm.nextFaultSet)
 	}
-
 
 	// Handle Fault
 
