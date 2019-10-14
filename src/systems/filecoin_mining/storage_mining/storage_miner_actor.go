@@ -28,11 +28,18 @@ func (sm *StorageMinerActor_I) OnFaultBeingSpotted() {
 // TODO: remove nextFaultSet from here, instead, inherith faults from previous
 // proving period
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, nextFaultSet sector.FaultSet) {
+	// Check proof timing
+	// if rt.ChainEpoch < sm.ProvingPeriodEnd - challengeTime {
+  //   panic("too early")
+	// }
+
 	// Verify Proof
+	{
 	// TODO
 	// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
 	// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
 	// verifyPoSt(challenges, TODO)
+	}
 
 	// TODO: Enter newly introduced sector
 
@@ -86,6 +93,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	// SendMessage(SPA.UpdatePower(rt.SenderAddress, newPower))
 
 	panic("TODO")
+	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
 }
 
 func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
