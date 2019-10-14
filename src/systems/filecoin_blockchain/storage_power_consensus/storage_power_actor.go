@@ -1,5 +1,8 @@
 package storage_power_consensus
 
-func (spa *StoragePowerActor) UpdatePower(address addr.Address, newPower BytesAmount) {
-	spa.Miners()[addr.Address] = spa.Miners()[addr.Address] + newPower
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+func (spa *StoragePowerActor_I) UpdatePower(address addr.Address, newPower BytesAmount) {
+	panic("TODO")
+	// spa.Miners()[addr.Address] = spa.Miners()[addr.Address] + newPower
 }
