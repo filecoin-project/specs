@@ -1,22 +1,58 @@
 digraph sector {
   compound=true;
-  node [shape=Mrecord]
+  // splines=curved;
   edge [style=solid]
-  // splines=ortho;
 
-  INIT
-  BOOTSTRAP
-  SYNC_CHECKPOINT
-  CHAIN_CATCHUP
-  CHAIN_FOLLOW [style=filled, color=seagreen3]
+  { // states
+    node [shape=box, fontname="monospace", style=filled, color=gray84]
+    INIT
+    BOOTSTRAP
+    SYNC_CHECKPOINT
+    CHAIN_CATCHUP
+    CHAIN_FOLLOW [color=seagreen3]
+  }
 
-  INIT -> BOOTSTRAP [label="prepare and verify\nall internal state"]
-  BOOTSTRAP -> SYNC_CHECKPOINT [label="done bootstrapping.\ndo not have\nLastTrustedCheckpoint\nstate",  labelangle=90.0, labeldistance=20]
-  BOOTSTRAP -> CHAIN_CATCHUP [label="done bootstrapping. have\nLastTrustedCheckpoint state"]
-  SYNC_CHECKPOINT -> CHAIN_CATCHUP [label="done getting\nLastTrustedCheckpoint\nstate"]
-  CHAIN_CATCHUP -> CHAIN_FOLLOW [label="done validating\nup to BestTargetHead"]
+  { // transitions
+    node [shape=none]
+    init2boot [label=< <i>prepare and verify<br/>all internal state</i> >]
+    boot2check [label=< <i>done bootstrapping.<br/><b>DO NOT</b>   have state for<br/><u>LastTrustedCheckpoint</u></i> >]
+    boot2catch [label=< <i>done bootstrapping.<br/><b>DO</b>   have state for<br/><u>LastTrustedCheckpoint</u></i> >]
+    check2catch [label=< <i>done getting state for<br/><u>LastTrustedCheckpoint</u></i> >]
+    catch2follow [label=< <i>done validating<br/>up to <u>BestTargetHead</u></i> >]
+    {
+      follow2catch [label=< <i>new unvalidated gap between<br/><u>ValidG</u>   and <u>BestTargetHead</u></i> >, constraint=false, color=red, fontcolor=red]
+      follow2init [label=< <i>on shut down node</i> >, constraint=false, color=red, fontcolor=red, pos="6,3!"]
+    }
+  }
 
-  // drop backs
-  CHAIN_FOLLOW -> CHAIN_CATCHUP [label="unvalidated gap\nformed between\nValidG and\nBestTargetHead", constraint=false, color=red, fontcolor=red]
-  CHAIN_FOLLOW -> INIT [label="on shut down node", constraint=false, color=red, fontcolor=red]
+  { // transition 1
+    edge [arrowhead=none]
+    INIT            -> init2boot
+    BOOTSTRAP       -> boot2check
+    BOOTSTRAP       -> boot2catch
+    SYNC_CHECKPOINT -> check2catch
+    CHAIN_CATCHUP   -> catch2follow
+  }
+
+  { // transition 2
+    init2boot       -> BOOTSTRAP
+    boot2check      -> SYNC_CHECKPOINT
+    boot2catch      -> CHAIN_CATCHUP
+    check2catch     -> CHAIN_CATCHUP
+    catch2follow    -> CHAIN_FOLLOW
+  }
+
+  { // transition backs (reversed)
+    {
+      edge [dir=back]
+      CHAIN_CATCHUP   -> follow2catch    [color=red]
+      INIT            -> follow2init     [color=red]
+    }
+
+    {
+      edge [dir=none]
+      follow2catch    -> CHAIN_FOLLOW    [constraint=false, color=red]
+      // follow2init     -> CHAIN_FOLLOW    [color=red]
+    }
+  }
 }
