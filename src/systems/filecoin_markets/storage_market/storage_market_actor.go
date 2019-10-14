@@ -1,6 +1,7 @@
 package storage_market
 
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
@@ -53,7 +54,7 @@ func (sma *StorageMarketActor_I) CheckLockedBalance(participantAddr addr.Address
 	return sma.Balances()[msgSender].Locked()
 }
 
-func (sma *StorageMarketActor_I) PublishStorageDeal(newStorageDeals []deal.StorageDeal) []PublishStorageDealResponse {
+func (sma *StorageMarketActor_I) PublishStorageDeals(newStorageDeals []deal.StorageDeal) []PublishStorageDealResponse {
 	l := len(newStorageDeals)
 	response := make([]PublishStorageDealResponse, l)
 	for i, newDeal := range newStorageDeals {
@@ -70,7 +71,7 @@ func (sma *StorageMarketActor_I) PublishStorageDeal(newStorageDeals []deal.Stora
 }
 
 func (sma *StorageMarketActor_I) verifyStorageDeal(d deal.StorageDeal) bool {
-	// TODO verify proposal or deal has not expired
+	// TODO verify proposal or deal has not expired and proposal expires earlier than deal
 	// TODO verify client and provider signature
 	// TODO verfiy minimum StoragePrice and StorageCollateral
 	p := d.Proposal()
@@ -114,15 +115,42 @@ func (sma *StorageMarketActor_I) SettleExpiredDeals(storageDealIDs []deal.DealID
 	panic("TODO")
 }
 
-func (sma *StorageMarketActor_I) handleStorageDealPayment(storageDealIDs []deal.DealID) {
+func (sma *StorageMarketActor_I) handleStorageDealPayment(dealIDs []deal.DealID) {
 	panic("TODO")
 }
 
-func (sma *StorageMarketActor_I) slashStorageDealCollateral(storageDealIDs []deal.DealID) {
+func (sma *StorageMarketActor_I) slashStorageDealCollateral(dealIDs []deal.DealID) {
 	// for _, dealID := range storageDealIDs {
 	// 	faultStorageDeal := sma.Deals()[dealID]
 	// TODO remove locked funds and send slashed fund to TreasuryActor
 	// TODO provider lose power for the FaultSet but not PledgeCollateral
 	// }
 	panic("TODO")
+}
+
+// Call by StorageMinerActor at CommitSector
+func (sma *StorageMarketActor_I) GetLastDealExpirationFromDealIDs(dealIDs []deal.DealID) block.ChainEpoch {
+	var lastDealExpiration block.ChainEpoch
+	for _, dealID := range dealIDs {
+		deal, found := sma.Deals()[dealID]
+		if !found {
+			// TODO: proper failure
+			panic("Unregistered Deal")
+		}
+
+		// this function is also called at sma.PublishStorageDeals()
+		// TODO: decide if we want to refactor this
+		// check balances, deal and proposal expiration, signatures
+		isDealValid := sma.verifyStorageDeal(deal)
+		if !isDealValid {
+			// TODO: proper failure
+			panic("Invalid Deal")
+		}
+		currExpiration := deal.Proposal().DealExpiration()
+		if currExpiration > lastDealExpiration {
+			lastDealExpiration = currExpiration
+		}
+	}
+
+	return lastDealExpiration
 }

@@ -1,6 +1,7 @@
 package storage_mining
 
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 
 // If a Post is missed (either due to faults being not declared on time or
@@ -191,6 +192,11 @@ func (sm *StorageMinerActor_I) DeclareFaults(newFaults sector.FaultSet) {
 	panic("TODO")
 }
 
+func (sm *StorageMinerActor_I) verifySeal(onChainInfo sector.OnChainSealVerifyInfo) bool {
+	panic("TODO")
+	return true
+}
+
 // Currently deals must be posted on chain via sma.PublishStorageDeals before CommitSector
 // TODO: as an optimization, in the future CommitSector could contain a list of
 // deals that are not published yet.
@@ -199,43 +205,46 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	// var sealRandomness sector.SealRandomness
 	// TODO: get sealRandomness from onChainInfo.Epoch
 	// TODO: sm.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
+	isSealVerified := sm.verifySeal(onChainInfo)
+	if !isSealVerified {
+		// TODO: proper failure
+		panic("Seal is not verified")
+	}
 
-	// TODO: you don't need to store the proof and the randomseed in the state tree
-	// just verify it and drop it, just SealCommitments{CommD, CommR, DealIDs}
+	// determine lastDealExpiration from sma
+	// TODO: proper onchain transaction
+	// TODO: check if this makes sense as an onchain transaction
+	// lastDealExpiration := SendMessage(sma, GetLastDealExpirationFromDealIDs(onChainInfo.DealIDs()))
+	var lastDealExpiration block.ChainEpoch
+
+	// no need to store the proof and randomseed in the state tree
+	// just verify and drop it, only SealCommitments{CommD, CommR, DealIDs} on chain
 	// TODO: @porcuquine verifies
+	sealCommitment := &sector.SealCommitment_I{
+		UnsealedCID_: onChainInfo.UnsealedCID(),
+		SealedCID_:   onChainInfo.SealedCID(),
+		DealIDs_:     onChainInfo.DealIDs(),
+		Expiration_:  lastDealExpiration,
+	}
 
-	// TODO: this is the latest expiry date of all deals.
-	// var latestDealExpiry ChainEpoch
-	// for deal := range onChainInfo.DealIDs() {
-	//   if deal.Expiry > latestDealExpiry {
-	//     latestDealExpiry = deal.Expiry
-	//   }
-	// }
+	sm.SectorExpirationQueue().Add(&SectorExpirationQueuItem_I{
+		SectorNumber_: onChainInfo.SectorNumber(),
+		Expiration_:   lastDealExpiration,
+	})
 
-	// sealCommitment := &sector.SealCommitment_I{
-	// 	UnsealedCID_: onChainInfo.UnsealedCID(),
-	// 	SealedCID_:   onChainInfo.SealedCID(),
-	// 	DealIDs_:     onChainInfo.DealIDs(),
-	// 	Expiration_:  latestDealExpiry,
-	// }
+	_, found := sm.Sectors()[onChainInfo.SectorNumber()]
 
-	// sm.SectorExpirationQueue.Add(&SectorExpirationQueuItem_I{
-	// 	SectorNumber_: onChainInfo.SectorNumber(),
-	// 	Expiration_:   latestDealExpiry,
-	// })
+	if found {
+		//TODO: proper failure
+		panic("Sector already exists")
+	}
 
-	// _, found := sm.Sectors()[onChainInfo.SectorNumber()]
+	// add SectorNumber and SealCommitment to Sectors
+	sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
 
-	// if found {
-	// TODO: throw error
-	// 	panic("sector already in there")
-	// }
+	// add SectorNumber to UnprovenSectors
+	// it will become Active at the next proving period
+	sm.UnprovenSectors_ = append(sm.UnprovenSectors(), onChainInfo.SectorNumber())
 
-	// sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
-
-	// Mark sector as Committed, it will become active at the next proving period
-	// append(sm.CommittedSectors, sectorNumber)
-
-	// TODO write state change
-	panic("TODO")
+	// TODO: write state change
 }
