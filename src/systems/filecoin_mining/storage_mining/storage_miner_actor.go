@@ -52,8 +52,8 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 
 	// State change: Committed -> Active
 	{
-		// TODO: Enter newly introduced sector
 		powerUpdate = powerUpdate + len(sm.CommittedSectors()) * sm.info().sectorSize()
+		sm.CommittedSectors = []
 	}
 
 	// State change: Active -> Faulty
