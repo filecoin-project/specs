@@ -28,25 +28,43 @@ func (sm *StorageMinerActor_I) OnFaultBeingSpotted() {
 // TODO: remove nextFaultSet from here, instead, inherith faults from previous
 // proving period
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, nextFaultSet sector.FaultSet) {
-	// Check proof timing
-	// if rt.ChainEpoch < sm.ProvingPeriodEnd - challengeTime {
-  //   panic("too early")
-	// }
-
-	// Verify Proof
+	// Verify correct PoSt Submission:
+	// 1. A proof must be submitted after the postRandomness for this proving
+	// period is on chain
 	{
-	// TODO
-	// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
-	// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
-	// verifyPoSt(challenges, TODO)
+		// if rt.ChainEpoch < sm.ProvingPeriodEnd - challengeTime {
+	  //   panic("too early")
+		// }
 	}
 
-	// TODO: Enter newly introduced sector
+	// 2. A proof must be a valid snark proof with the correct public inputs
+	{
+		// 2.1 Get randomness from the chain at the right epoch
+		// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
+		// 2.2 Generate the set of challenges
+		// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
+		// 2.3 Verify the PoSt Proof
+		// verifyPoSt(challenges, TODO)
+	}
 
-	// Handle faulty sectors
-	// sm.NextFaultSet_ = all zeros
-	// sm.DeclareFault(nextFaultSet)
+	// The proof is verified, proceed to sector state transitions:
+	var powerUpdate uint
 
+	// State change: Committed -> Active
+	{
+		// TODO: Enter newly introduced sector
+		powerUpdate = powerUpdate + len(sm.CommittedSectors()) * sm.info().sectorSize()
+	}
+
+	// State change: Active -> Faulty
+	{
+		// Handle faulty sectors
+		// sm.NextFaultSet_ = all zeros
+		// sm.DeclareFault(nextFaultSet)
+	}
+
+	// State change: Faulty -> Active
+	{
 	// Handle Recovered faults:
 	// If a sector is not in sm.NextFaultSet at this point, it means that it
 	// was just proven in this proving period.
@@ -61,8 +79,11 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	//     resumedSectorsCount = resumedSectorsCount + 1
 	//   }
 	// }
-	// SendMessage(SPA.UpdatePower(rt.SenderAddress, resumedSectorsCount * sm.info.sectorSize()))
+	// powerUpdate = powerUpdate + resumedSectorsCount * sm.info().sectorSize()
+	}
 
+	// Pay all the Active sectors
+	{
 	// Pay miner
 	// TODO: batch into a single message
 	// for _, sealCommitment := range sm.Sectors {
@@ -70,30 +91,35 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	//     SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
 	//   }
 	// }
-
-	// Handle expired sectors
-	// var expiredSectorsNumber [SectorNumber]
-	// go through sm.SectorExpirationQueue() and get the expiredSectorsNumber
-
-	for expiredSectorNumber := range expiredSectorsNumber {
-		// Settle deals
-		// TODO: SendMessage(SMA.SettleExpiredDeals(sm.Sectors()[expiredSectorNumber].DealIDs()))
-		// Note: in order to verify if something was stored in the past, one must
-		// scan the chain. SectorNumbers can be re-used.
-
-		// TODO: check if there is any fault that we should handle here
-
-		// Clean up data structures
-		// delete(sm.Sectors(), expiredSectorNumber)
-		// delete(sm.Faults(), expiredSectorNumber)
-		// TODO: maybe nextFaultSet[expiredSectorNumber] = 0
-		// TODO: SPA must return the pledge collateral to the miner
 	}
-	// newPower := - len(expiredSectorsNumber) * sm.info.sectorSize()
-	// SendMessage(SPA.UpdatePower(rt.SenderAddress, newPower))
 
+	// State change: Active -> Expired
+	{
+		// Handle expired sectors
+		// var expiredSectorsNumber [SectorNumber]
+		// go through sm.SectorExpirationQueue() and get the expiredSectorsNumber
+
+		for expiredSectorNumber := range expiredSectorsNumber {
+			// Settle deals
+			// TODO: SendMessage(SMA.SettleExpiredDeals(sm.Sectors()[expiredSectorNumber].DealIDs()))
+			// Note: in order to verify if something was stored in the past, one must
+			// scan the chain. SectorNumbers can be re-used.
+
+			// TODO: check if there is any fault that we should handle here
+
+			// Clean up data structures
+			// delete(sm.Sectors(), expiredSectorNumber)
+			// delete(sm.Faults(), expiredSectorNumber)
+			// TODO: maybe nextFaultSet[expiredSectorNumber] = 0
+			// TODO: SPA must return the pledge collateral to the miner
+		}
+		// powerUpdate = powerUpdate - len(expiredSectorsNumber) * sm.info.sectorSize()
+	}
+
+	// Reset Proving Period and report power updates
 	panic("TODO")
 	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
+	// SendMessage(sma.UpdatePower(powerUpdate))
 }
 
 func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
@@ -170,6 +196,9 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	}
 
 	sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
+
+	// Mark sector as Committed, it will become active at the next proving period
+	append(sm.CommittedSectors, sectorNumber)
 
 	// TODO write state change
 }

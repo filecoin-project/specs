@@ -24,6 +24,8 @@ type StorageMinerActor struct {
 
     NextFaultSet           sector.FaultSet
 
+    CommittedSectors                 [sector.SectorNumber]
+
     Faults                 {sector.SectorNumber: uint}
 
     Sectors                {sector.SectorNumber: sector.SealCommitment}
