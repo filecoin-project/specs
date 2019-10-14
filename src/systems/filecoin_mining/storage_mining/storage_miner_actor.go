@@ -4,6 +4,8 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 
+var CONSECUTIVE_FAULT_COUNT_LIMIT uint64
+
 // If a Post is missed (either due to faults being not declared on time or
 // because the miner run out of time, every sector is reported as faulty
 // for the current proving period.
@@ -90,6 +92,20 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 		powerUpdate = powerUpdate + numUnprovenSector*sm.Info().SectorSize()
 	}
 
+	// Process FaultySectors
+	// Increment ConsecutiveFaultCounts
+	for sectorNo, _ := range sm.FaultySectors() {
+		prevFaultCount := sm.ConsecutiveFaultCounts()[sectorNo]
+		newFaultCount := prevFaultCount + 1
+		if newFaultCount >= CONSECUTIVE_FAULT_COUNT_LIMIT {
+			// TODO heavy penalization
+			// slash pledge collateral and delete sector?
+			panic("TODO")
+		} else {
+			sm.ConsecutiveFaultCounts()[sectorNo] = newFaultCount
+		}
+	}
+
 	// Pay all the Active sectors
 	// Note: this must happen before marking sectors as expired.
 	// TODO: Pay miner in a single batch message
@@ -152,35 +168,36 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 }
 
 // RecoverFaults checks if miners have sufficent collateral
-// move SectorNumber and SealCommitment
-// from sm.FaultySectors to UnprovenSectors
-func (sm *StorageMinerActor_I) RecoverFaults(newFaults sector.FaultSet) {
-	// 2. State change: Faulty -> Active
-	{
-		// Handle Recovered faults:
-		// If a sector is not in sm.NextFaultSet at this point, it means that it
-		// was just proven in this proving period.
-		// However, if this had a counter in sm.Faults, then it means that it was
-		// faulty in the previous proving period and then recovered.
-		// In that case, reset the counter and resume power.
+// move SectorNumber and SealCommitment from sm.FaultySectors to UnprovenSectors
+// clear ConsecutiveFaultCounts
+// no power is updated
+func (sm *StorageMinerActor_I) RecoverFaults(recoveredSectorNo []sector.SectorNumber) {
+	// State change: Faulty -> Unproven
+	for _, sectorNo := range recoveredSectorNo {
+		sc, isFaulty := sm.FaultySectors()[sectorNo]
+		if !isFaulty {
+			// TODO proper failure
+			panic("Sector was not at fault")
+		}
 
-		// resumedSectorsCount := 0
-		// for previouslyFaulty := range keys(sm.Faults) {
-		//   if (previouslyFaulty not in sm.NextFaultSet() and previouslyFaulty in sm.UnprovenSectors_) {
-		//     delete(sm.Faults, previouslyFaulty)
-		//     resumedSectorsCount = resumedSectorsCount + 1
-		//   }
-		// }
-		// powerUpdate = powerUpdate + resumedSectorsCount * sm.info().sectorSize()
+		// Check if miners have sufficient balances in sma
+		// SendMessage(sma.PublishStorageDeals) or sma.ResumeStorageDeals?
+		// TODO need to remove storage deals from sma at fault?
+		// throw if miner cannot cover StorageDealCollateral
+
+		// update Sectors
+		delete(sm.FaultySectors(), sectorNo)
+		delete(sm.ConsecutiveFaultCounts(), sectorNo)
+		sm.UnprovenSectors()[sectorNo] = sc
 	}
 }
 
 // DeclareFaults penalizes miners (slashStorageDealCollateral and suspendPower)
 // and moves SectorNumber and SealCommitment
 // from sm.ActiveSectors to sm.FaultySectors
-func (sm *StorageMinerActor_I) DeclareFaults(newFaults sector.FaultSet) {
+func (sm *StorageMinerActor_I) DeclareFaults(faultySectorNo []sector.SectorNumber) {
 
-	// 1. State change: Active -> Faulty
+	// State change: Active -> Faulty
 	// Note: this must happen after Unproven->Active, in order to account for
 	// sectors that have been committed in this proving period which also happen
 	// to be faulty.
@@ -188,48 +205,46 @@ func (sm *StorageMinerActor_I) DeclareFaults(newFaults sector.FaultSet) {
 	// TODO: @nicola verify this
 	// Note: if the miner has not recovered the faults, they are re-declared
 	// automatically.
-	{
-		// Handle faulty sectors
-		// sm.DeclareFault(sm.nextFaultSet)
+
+	for _, sectorNo := range faultySectorNo {
+		_, isUnproven := sm.UnprovenSectors()[sectorNo]
+		if isUnproven {
+			// TODO proper failure
+			panic("Cannot declare faults for unproven sectors")
+		}
+
+		_, isFaulty := sm.FaultySectors()[sectorNo]
+		if isFaulty {
+			// TODO proper failure
+			panic("Cannot declare faults for faulty sectors")
+		}
+
+		sc, isActive := sm.ActiveSectors()[sectorNo]
+		if !isActive {
+			// TODO proper failure
+			panic("SectorNumber not found in ActiveSectors")
+		}
+
+		_, found := sm.ConsecutiveFaultCounts()[sectorNo]
+		if found {
+			// TODO proper failure
+			panic("Sector already at fault")
+		}
+
+		// slash storage collateral
+		// TODO: decide how much storage collateral to slash
+		// SendMessage(sma.slashStorageDealCollateral(sc.DealIDs()))
+
+		// Update mapping
+		delete(sm.ActiveSectors(), sectorNo)
+		sm.FaultySectors()[sectorNo] = sc
+		sm.ConsecutiveFaultCounts()[sectorNo] = 1
+
 	}
 
-	// Handle Fault
-
-	// TODO: the faults that are declared after post challenge,
-	// are faults for the next proving period
-
-	// TODO: below is a bit complicated, it should be simplified.
-
-	// Update Fault Set
-
-	// var lostPower uint
-	// for sectorNumber := range newFaultSet {
-	//   // Avoid penalizing the miner multiple times in the same proving period
-	//   if !(sector is in sm.NextFaultSet()) {
-	//     // it is a new fault:
-	//     lostPower = lostPower + sm.info().sectorSize()
-	//     if (sectorNumber not in sm.Faults) sm.Faults[sectorNumber] = 0
-	//     sm.Faults[sectorNumber] = sm.Faults[sectorNumber] + 1
-	//     if (sm.Faults[sectorNumber] > MAX_CONSECUTIVE_FAULTS_ALLOWED) {
-	//       Sector is lost, delete it, slash storage deal collateral and all pledge
-	//       SendMessage(sma.SlashAllStorageDealCollateral(dealIDs)
-	//       SendMessage(spa.SlashAllPledgeCollateral(sectorNumber)
-	//       delete(sm.Sectors(), expiredSectorNumber)
-	//     } else {
-	//       append(sm.UnprovenSectors_, sectorNumber)
-	//     }
-	//   }
-	// }
-
-	// Delete Power
-	// SendMessage(sma.UpdatePower(- lostPower))
-
-	// Store updated fault set
-	// sm.nextFaultSet.applyDiff(newFaultSet)
-
-	// TODO: check if we want to penalize some collateral for losing some files
-
-	panic("TODO")
+	// suspend power
+	// powerDiff := uint64(len(faultySectorNo) * sm.Info().SectorSize())
+	// SendMessage(spa.UpdatePower(-powerDiff))
 }
 
 func (sm *StorageMinerActor_I) verifySeal(onChainInfo sector.OnChainSealVerifyInfo) bool {

@@ -30,7 +30,7 @@ type StorageMinerActor struct {
     ActiveSectors           {sector.SectorNumber: sector.SealCommitment}
     FaultySectors           {sector.SectorNumber: sector.SealCommitment}
 
-    ConsecutiveFaultCounts  {sector.SectorNumber: uint}
+    ConsecutiveFaultCounts  {sector.SectorNumber: uint64}
 
     SectorExpirationQueue
 
