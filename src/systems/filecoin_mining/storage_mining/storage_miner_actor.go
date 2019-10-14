@@ -51,12 +51,16 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	var powerUpdate uint
 
 	// State change: Committed -> Active
+	// Note: this must be the first state transition check.
 	{
 		powerUpdate = powerUpdate + len(sm.CommittedSectors()) * sm.info().sectorSize()
 		sm.CommittedSectors = []
 	}
 
 	// State change: Active -> Faulty
+	// Note: this must happend after Committed->Active, in order to account for
+	// sectors that have been committed in this proving period which also happen
+	// to be faulty.
 	{
 		// Handle faulty sectors
 		// sm.NextFaultSet_ = all zeros
@@ -94,6 +98,8 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	}
 
 	// State change: Active -> Expired
+	// Note: this must happen as last state transition check to ensure that
+	// payments and faults have been accounted for correctly.
 	{
 		// Handle expired sectors
 		// var expiredSectorsNumber [SectorNumber]
@@ -117,9 +123,11 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 	}
 
 	// Reset Proving Period and report power updates
-	panic("TODO")
-	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
-	// SendMessage(sma.UpdatePower(powerUpdate))
+	{
+		panic("TODO")
+		// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
+		// SendMessage(sma.UpdatePower(powerUpdate))
+	}
 }
 
 func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
