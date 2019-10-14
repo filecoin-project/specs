@@ -22,19 +22,20 @@ type SectorExpirationQueue struct {
 
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
+    // NextFaultSet           sector.FaultSet
 
-    NextFaultSet           sector.FaultSet
+    // Every Sector can only by in one of these three states
+    // at any point in time
+    UnprovenSectors        {sector.SectorNumber: sector.SealCommitment}
+    ActiveSectors          {sector.SectorNumber: sector.SealCommitment}
+    FaultySectors          {sector.SectorNumber: sector.SealCommitment}
 
-    UnprovenSectors        [sector.SectorNumber]
+    ConsecutiveFaultCounts {sector.SectorNumber: uint}
 
-    Faults                 {sector.SectorNumber: uint}
-
-    Sectors                {sector.SectorNumber: sector.SealCommitment}
-
-    SectorExpirationQueue
+    SectorExpirationQueue  SectorExpirationQueue
 
     // contains mostly static info about this miner
-    info                   &MinerInfo
+    Info                   &MinerInfo
 
     // TODO: add the DePledgeCollateral
     // TODO: add the Sectors
@@ -72,19 +73,19 @@ type MinerInfo struct {
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
-    owner       address.Address
+    Owner       address.Address
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
-    worker      address.Address
+    Worker      address.Address
 
     // Libp2p identity that should be used when connecting to this miner.
-    peerId      libp2p.PeerID
+    PeerId      libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    sectorSize  util.BytesAmount
+    SectorSize  util.BytesAmount
 }
 
 /*

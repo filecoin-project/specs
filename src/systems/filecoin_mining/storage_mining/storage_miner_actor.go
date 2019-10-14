@@ -37,6 +37,21 @@ func (sm *StorageMinerActor_I) verifyPoStSubmission(postSubmission poster.PoStSu
 	return true
 }
 
+func extendSectors(toSectors map[sector.SectorNumber]sector.SealCommitment, fromSectors map[sector.SectorNumber]sector.SealCommitment) map[sector.SectorNumber]sector.SealCommitment {
+
+	for sectorNo, sc := range toSectors {
+		fromSectors[sectorNo] = sc
+	}
+
+	return fromSectors
+}
+
+func (sm *StorageMinerActor_I) activateUnprovenSectors(unprovenSectors map[sector.SectorNumber]sector.SealCommitment) {
+	sm.ActiveSectors_ = extendSectors(sm.ActiveSectors(), sm.UnprovenSectors())
+	sm.UnprovenSectors_ = map[sector.SectorNumber]sector.SealCommitment{}
+	// TDOD check what committing state change here looks like
+}
+
 // decision is to currently account for power based on sector
 // with at least one active deals and deals cannot be updated
 // an alternative proposal is to account for power based on active deals
@@ -47,72 +62,41 @@ func (sm *StorageMinerActor_I) verifyPoStSubmission(postSubmission poster.PoStSu
 // penalized in the same way as undeclared sectors
 // Workflow:
 // - Verify PoSt Submission
-// - Process Unproven Sectors (add power)
+// - Process Unproven Sectors (move Sectors from Unproven to Active)
 // - Process Faulty Sectors (penalize faults, recover sectors, delete faulty sectors)
-// - Process Active Sectors (pay)
+// - Process Active Sectors (pay miners)
 // - Process Expired Sectors (settle deals..)
 // TODO: if something is faulty, move it to committed instead
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) {
 	// Verify correct PoSt Submission:
 	isPoStVerified := sm.verifyPoStSubmission(postSubmission)
 	if !isPoStVerified {
-		// TODO mark all sectors as faulty
+		// TODO: mark all sectors as faulty
+		// TODO: proper failture
 		panic("TODO")
 	}
 
 	// The proof is verified, proceed to sector state transitions:
-	// var powerUpdate uint
+	var powerUpdate uint64
 
 	// State change: Unproven -> Active
 	// Note: this must be the first state transition check.
-	{
-		// check if there are any sectors in UnprovenSectors_
-		// if so, their PoSt has been verified, credit power for these sectors
-		// powerUpdate = powerUpdate + len(sm.UnprovenSectors_()) * sm.info().sectorSize()
-		// sm.UnprovenSectors_ = []
-	}
-
-	// 1. State change: Active -> Faulty
-	// Note: this must happend after Unproven->Active, in order to account for
-	// sectors that have been committed in this proving period which also happen
-	// to be faulty.
-	// Note: if the miner has not recovered the faults, they are re-declared
-	// automatically.
-	{
-		// Handle faulty sectors
-		// sm.DeclareFault(sm.nextFaultSet)
-	}
-
-	// 2. State change: Faulty -> Active
-	{
-		// Handle Recovered faults:
-		// If a sector is not in sm.NextFaultSet at this point, it means that it
-		// was just proven in this proving period.
-		// However, if this had a counter in sm.Faults, then it means that it was
-		// faulty in the previous proving period and then recovered.
-		// In that case, reset the counter and resume power.
-
-		// resumedSectorsCount := 0
-		// for previouslyFaulty := range keys(sm.Faults) {
-		//   if (previouslyFaulty not in sm.NextFaultSet() and previouslyFaulty in sm.UnprovenSectors_) {
-		//     delete(sm.Faults, previouslyFaulty)
-		//     resumedSectorsCount = resumedSectorsCount + 1
-		//   }
-		// }
-		// powerUpdate = powerUpdate + resumedSectorsCount * sm.info().sectorSize()
+	// check if there are any sectors in UnprovenSectors_
+	// if so, their PoSt has been verified, credit power for these sectors
+	numUnprovenSector := uint64(len(sm.UnprovenSectors()))
+	if numUnprovenSector > 0 {
+		// activate unproven sectors will also empty sm.UnprovenSectors_
+		sm.activateUnprovenSectors(sm.UnprovenSectors())
+		powerUpdate = powerUpdate + numUnprovenSector * sm.Info().SectorSize()
 	}
 
 	// Pay all the Active sectors
 	// Note: this must happen before marking sectors as expired.
-	{
-		// Pay miner
-		// TODO: batch into a single message
-		// for _, sealCommitment := range sm.Sectors {
-		//   if sector is not in sm.Faults {
-		//     SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
-		//   }
-		// }
-	}
+	// TODO: Pay miner in a single batch message
+	// for _, sc := range sm.ActiveSectors() {
+	  // SendMessage(sma.ProcessStorageDealsPayment(sc.DealIDs()))
+	// }
+
 
 	// 3. State change: Active -> Deleted (because they are expired)
 	// Note: this must happen as last state transition check to ensure that
@@ -147,12 +131,50 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	}
 }
 
+
+// RecoverFaults checks if miners have sufficent collateral
+// move SectorNumber and SealCommitment
+// from sm.FaultySectors to UnprovenSectors
 func (sm *StorageMinerActor_I) RecoverFaults(newFaults sector.FaultSet) {
-	// add them to the UnprovenSectors_
-	// update FaultSet
+	// 2. State change: Faulty -> Active
+	{
+		// Handle Recovered faults:
+		// If a sector is not in sm.NextFaultSet at this point, it means that it
+		// was just proven in this proving period.
+		// However, if this had a counter in sm.Faults, then it means that it was
+		// faulty in the previous proving period and then recovered.
+		// In that case, reset the counter and resume power.
+
+		// resumedSectorsCount := 0
+		// for previouslyFaulty := range keys(sm.Faults) {
+		//   if (previouslyFaulty not in sm.NextFaultSet() and previouslyFaulty in sm.UnprovenSectors_) {
+		//     delete(sm.Faults, previouslyFaulty)
+		//     resumedSectorsCount = resumedSectorsCount + 1
+		//   }
+		// }
+		// powerUpdate = powerUpdate + resumedSectorsCount * sm.info().sectorSize()
+	}
 }
 
+// DeclareFaults penalizes miners (slashStorageDealCollateral and suspendPower)
+// and moves SectorNumber and SealCommitment
+// from sm.ActiveSectors to sm.FaultySectors
 func (sm *StorageMinerActor_I) DeclareFaults(newFaults sector.FaultSet) {
+
+	// 1. State change: Active -> Faulty
+	// Note: this must happen after Unproven->Active, in order to account for
+	// sectors that have been committed in this proving period which also happen
+	// to be faulty.
+	// Note: if a Sector is faulty when it's in Unproven state, it wont pass verifyPoSt
+	// TODO: @nicola verify this
+	// Note: if the miner has not recovered the faults, they are re-declared
+	// automatically.
+	{
+		// Handle faulty sectors
+		// sm.DeclareFault(sm.nextFaultSet)
+	}
+
+
 	// Handle Fault
 
 	// TODO: the faults that are declared after post challenge,
@@ -197,6 +219,16 @@ func (sm *StorageMinerActor_I) verifySeal(onChainInfo sector.OnChainSealVerifyIn
 	return true
 }
 
+func (sm *StorageMinerActor_I) checkIfSectorExists(sectorNo sector.SectorNumber) bool {
+	_, isUnproven := sm.UnprovenSectors()[sectorNo]
+	_, isActive := sm.ActiveSectors()[sectorNo]
+	_, isFaulty := sm.FaultySectors()[sectorNo]
+	if isUnproven || isActive || isFaulty {
+		return true
+	}
+	return false
+}
+
 // Currently deals must be posted on chain via sma.PublishStorageDeals before CommitSector
 // TODO: as an optimization, in the future CommitSector could contain a list of
 // deals that are not published yet.
@@ -227,24 +259,22 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 		Expiration_:  lastDealExpiration,
 	}
 
+	// add sector expiration to SectorExpirationQueue
 	sm.SectorExpirationQueue().Add(&SectorExpirationQueuItem_I{
 		SectorNumber_: onChainInfo.SectorNumber(),
 		Expiration_:   lastDealExpiration,
 	})
 
-	_, found := sm.Sectors()[onChainInfo.SectorNumber()]
-
-	if found {
+	sectorExists := sm.checkIfSectorExists(onChainInfo.SectorNumber())
+	if sectorExists {
 		//TODO: proper failure
 		panic("Sector already exists")
 	}
 
-	// add SectorNumber and SealCommitment to Sectors
-	sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
-
-	// add SectorNumber to UnprovenSectors
+	// add SectorNumber and SealCommitment to UnprovenSectors
+	// Note that SectorNumber is not in ActiveSectors yet
 	// it will become Active at the next proving period
-	sm.UnprovenSectors_ = append(sm.UnprovenSectors(), onChainInfo.SectorNumber())
+	sm.UnprovenSectors()[onChainInfo.SectorNumber()] = sealCommitment
 
 	// TODO: write state change
 }
