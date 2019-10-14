@@ -11,7 +11,7 @@ func (a *CronActorCode_I) Constructor(rt vmr.Runtime) {
 	// Nothing. intentionally left blank.
 }
 
-func (a *CronActorCode_I) Tick(rt vmr.Runtime) {
+func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) {
 	// Hook period actions in here.
 
 	// a.actors is basically a static registry for now, loaded
@@ -24,7 +24,7 @@ func (a *CronActorCode_I) Tick(rt vmr.Runtime) {
 func (a *CronActorCode_I) InvokeMethod(input vmr.InvocInput, method actor.MethodNum, params actor.MethodParams) vmr.InvocOutput {
 	switch method {
 	case 1:
-		a.Tick(input.Runtime)
+		a.EpochTick(input.Runtime)
 		return vmr.InvocOutput{} // todo: grab the updated state tree + return success
 	default:
 		return vmr.ErrorInvocOutput(input.InTree, exitcode.InvalidMethod)

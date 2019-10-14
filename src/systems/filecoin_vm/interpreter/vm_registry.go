@@ -18,6 +18,7 @@ var (
 	CronActorCodeCID           = actor.CodeCID("filecoin/1.0/CronActor")
 	AccountActorCodeCID        = actor.CodeCID("filecoin/1.0/AccountActor")
 	StoragePowerActorCodeCID   = actor.CodeCID("filecoin/1.0/StoragePowerActor")
+	StorageMinerActorCodeCID   = actor.CodeCID("filecoin/1.0/StorageMinerActor")
 	StorageMarketActorCodeCID  = actor.CodeCID("filecoin/1.0/StorageMarketActor")
 	PaymentChannelActorCodeCID = actor.CodeCID("filecoin/1.0/PaymentChannelActor")
 )
