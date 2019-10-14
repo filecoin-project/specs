@@ -13,7 +13,7 @@ type SealedSectorCID ipld.CID
 // relative to a Miner.
 type SectorNumber UInt
 
-type FaultSet sector.CompactSectorSet
+type FaultSet CompactSectorSet
 
 // SectorSize indicates one of a set of possible sizes in the network.
 type SectorSize UInt

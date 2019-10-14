@@ -4,6 +4,7 @@ import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 
 type Seed struct {}
 type SectorCommitment struct {}
@@ -23,6 +24,8 @@ type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
     NextFaultSet           sector.FaultSet
+
+    UnprovenSectors        [sector.SectorNumber]
 
     Faults                 {sector.SectorNumber: uint}
 
@@ -45,7 +48,7 @@ type StorageMinerActor struct {
 
     CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
 
-    SubmitPoSt(postProof PoStProof)
+    SubmitPoSt(postSubmission poster.PoStSubmission)
 
     // TODO: should depledge be in here or in storage market actor?
 
@@ -61,6 +64,8 @@ type StorageMinerActor struct {
     DeclareFault(faultSet sector.FaultSet)
 
     computeProvingPeriodEndSectorState()  // TODO
+
+    verifyPoStSubmission(postSubmission poster.PoStSubmission) bool
 }
 
 type MinerInfo struct {

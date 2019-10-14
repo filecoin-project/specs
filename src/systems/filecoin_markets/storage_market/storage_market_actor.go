@@ -93,24 +93,25 @@ func (sma *StorageMarketActor_I) HandleCronAction() {
 }
 
 func (sma *StorageMarketActor_I) SettleExpiredDeals(storageDealIDs []deal.DealID) {
-	for dealID := range storageDealIDs {
-		// Return the storage collateral
-		storageDeal := sma.Deals()[dealID]
-		storageCollateral := storageDeal.StorageCollateral()
-		provider := storageDeal.Provider()
-		assert(sma.Balances()[provider].Locked() >= storageCollateral)
+	// for dealID := range storageDealIDs {
+	// Return the storage collateral
+	// storageDeal := sma.Deals()[dealID]
+	// storageCollateral := storageDeal.StorageCollateral()
+	// provider := storageDeal.Provider()
+	// assert(sma.Balances()[provider].Locked() >= storageCollateral)
 
-		// Move storageCollateral from locked to available
-		balance := sma.Balances()[provider]
+	// // Move storageCollateral from locked to available
+	// balance := sma.Balances()[provider]
 
-		sma.Balances()[provider] = &StorageParticipantBalance_I{
-			Locked_:    balance.Locked() - storageCollateral,
-			Available_: balance.Available() + storageCollateral,
-		}
+	// sma.Balances()[provider] = &StorageParticipantBalance_I{
+	// 	Locked_:    balance.Locked() - storageCollateral,
+	// 	Available_: balance.Available() + storageCollateral,
+	// }
 
-		// Delete reference to the deal
-		delete(sma.Deals_, dealID)
-	}
+	// // Delete reference to the deal
+	// delete(sma.Deals_, dealID)
+	// }
+	panic("TODO")
 }
 
 func (sma *StorageMarketActor_I) handleStorageDealPayment(storageDealIDs []deal.DealID) {

@@ -1,74 +1,127 @@
 package storage_mining
 
-import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import poster "github.com/filecoin-project/specs/systems/filecoin_mining/poster"
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 
 // If a Post is missed (either due to faults being not declared on time or
 // because the miner run out of time, every sector is reported as faulty
 // for the current proving period.
 func (sm *StorageMinerActor_I) OnFaultBeingSpotted() {
-	var allFaultBitField FaultSet
+	// var allFaultBitField FaultSet
 	// TODO: ideally, both DeclareFault and OnFaultBeingSpotted call a method "ApplyFaultConsequences"
-	DeclareFaults(allFaultBitField)
+	// DeclareFaults(allFaultBitField)
 	// slash pledge collateral
+	panic("TODO")
 }
 
-// TODO(enhancement): decision is to currently account for power based on sector
+func (sm *StorageMinerActor_I) verifyPoStSubmission(postSubmission poster.PoStSubmission) bool {
+	panic("TODO")
+	// 1. A proof must be submitted after the postRandomness for this proving
+	// period is on chain
+	{
+		// if rt.ChainEpoch < sm.ProvingPeriodEnd - challengeTime {
+		//   panic("too early")
+		// }
+	}
+
+	// 2. A proof must be a valid snark proof with the correct public inputs
+	{
+		// 2.1 Get randomness from the chain at the right epoch
+		// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
+		// 2.2 Generate the set of challenges
+		// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
+		// 2.3 Verify the PoSt Proof
+		// verifyPoSt(challenges, TODO)
+	}
+	return true
+}
+
+// decision is to currently account for power based on sector
+// with at least one active deals and deals cannot be updated
 // an alternative proposal is to account for power based on active deals
+// an improvement proposal is to allow storage deal update in a sector
 // postSubmission: is the post for this proving period
 // faultSet: the miner announces all of their current faults
 // TODO(enhancement): decide whether declared faults sectors should be
 // penalized in the same way as undeclared sectors
 // Workflow:
-// - New Committed Sectors (add power)
-// - Faulty Sectors (penalize faults, recover sectors, delete faulty sectors)
-// - Active Sectors (pay)
-// - Expired Sectors (settle deals..)
-// TODO: remove nextFaultSet from here, instead, inherith faults from previous
-// proving period
-func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, nextFaultSet sector.FaultSet) {
-	// Verify Proof
-	// TODO
-	// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
-	// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
-	// verifyPoSt(challenges, TODO)
+// - Verify PoSt Submission
+// - Process Unproven Sectors (add power)
+// - Process Faulty Sectors (penalize faults, recover sectors, delete faulty sectors)
+// - Process Active Sectors (pay)
+// - Process Expired Sectors (settle deals..)
+// TODO: if something is faulty, move it to committed instead
+func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) {
+	// Verify correct PoSt Submission:
+	isPoStVerified := sm.verifyPoStSubmission(postSubmission)
+	if !isPoStVerified {
+		// TODO mark all sectors as faulty
+		panic("TODO")
+	}
 
-	// TODO: Enter newly introduced sector
+	// The proof is verified, proceed to sector state transitions:
+	// var powerUpdate uint
 
-	// Handle faulty sectors
-	// sm.NextFaultSet_ = all zeros
-	// sm.DeclareFault(nextFaultSet)
+	// State change: Unproven -> Active
+	// Note: this must be the first state transition check.
+	{
+		// check if there are any sectors in UnprovenSectors_
+		// if so, their PoSt has been verified, credit power for these sectors
+		// powerUpdate = powerUpdate + len(sm.UnprovenSectors_()) * sm.info().sectorSize()
+		// sm.UnprovenSectors_ = []
+	}
 
-	// Handle Recovered faults:
-	// If a sector is not in sm.NextFaultSet at this point, it means that it
-	// was just proven in this proving period.
-	// However, if this had a counter in sm.Faults, then it means that it was
-	// faulty in the previous proving period and then recovered.
-	// In that case, reset the counter and resume power.
+	// 1. State change: Active -> Faulty
+	// Note: this must happend after Unproven->Active, in order to account for
+	// sectors that have been committed in this proving period which also happen
+	// to be faulty.
+	// Note: if the miner has not recovered the faults, they are re-declared
+	// automatically.
+	{
+		// Handle faulty sectors
+		// sm.DeclareFault(sm.nextFaultSet)
+	}
 
-	// resumedSectorsCount := 0
-	// for previouslyFaulty := range keys(sm.Faults) {
-	//   if (previouslyFaulty not in sm.NextFaultSet()) {
-	//     delete(sm.Faults, previouslyFaulty)
-	//     resumedSectorsCount = resumedSectorsCount + 1
-	//   }
-	// }
-	// SendMessage(SPA.UpdatePower(rt.SenderAddress, resumedSectorsCount * sm.info.sectorSize()))
+	// 2. State change: Faulty -> Active
+	{
+		// Handle Recovered faults:
+		// If a sector is not in sm.NextFaultSet at this point, it means that it
+		// was just proven in this proving period.
+		// However, if this had a counter in sm.Faults, then it means that it was
+		// faulty in the previous proving period and then recovered.
+		// In that case, reset the counter and resume power.
 
-	// Pay miner
-	// TODO: batch into a single message
-	// for _, sealCommitment := range sm.Sectors {
-	//   if sector is not in sm.Faults {
-	//     SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
-	//   }
-	// }
+		// resumedSectorsCount := 0
+		// for previouslyFaulty := range keys(sm.Faults) {
+		//   if (previouslyFaulty not in sm.NextFaultSet() and previouslyFaulty in sm.UnprovenSectors_) {
+		//     delete(sm.Faults, previouslyFaulty)
+		//     resumedSectorsCount = resumedSectorsCount + 1
+		//   }
+		// }
+		// powerUpdate = powerUpdate + resumedSectorsCount * sm.info().sectorSize()
+	}
 
-	// Handle expired sectors
-	// var expiredSectorsNumber [SectorNumber]
-	// go through sm.SectorExpirationQueue() and get the expiredSectorsNumber
+	// Pay all the Active sectors
+	// Note: this must happen before marking sectors as expired.
+	{
+		// Pay miner
+		// TODO: batch into a single message
+		// for _, sealCommitment := range sm.Sectors {
+		//   if sector is not in sm.Faults {
+		//     SendMessage(sma.ProcessStorageDealsPayment(sealCommitment.DealIDs))
+		//   }
+		// }
+	}
 
-	for expiredSectorNumber := range expiredSectorsNumber {
+	// 3. State change: Active -> Deleted (because they are expired)
+	// Note: this must happen as last state transition check to ensure that
+	// payments and faults have been accounted for correctly.
+	{
+		// Handle expired sectors
+		// var expiredSectorsNumber [SectorNumber]
+		// go through sm.SectorExpirationQueue() and get the expiredSectorsNumber
+
+		// for expiredSectorNumber := range expiredSectorsNumber {
 		// Settle deals
 		// TODO: SendMessage(SMA.SettleExpiredDeals(sm.Sectors()[expiredSectorNumber].DealIDs()))
 		// Note: in order to verify if something was stored in the past, one must
@@ -81,51 +134,68 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission, 
 		// delete(sm.Faults(), expiredSectorNumber)
 		// TODO: maybe nextFaultSet[expiredSectorNumber] = 0
 		// TODO: SPA must return the pledge collateral to the miner
+		// }
+		// powerUpdate = powerUpdate - len(expiredSectorsNumber) * sm.info.sectorSize()
 	}
-	// newPower := - len(expiredSectorsNumber) * sm.info.sectorSize()
-	// SendMessage(SPA.UpdatePower(rt.SenderAddress, newPower))
 
-	panic("TODO")
+	// Reset Proving Period and report power updates
+	{
+		panic("TODO")
+		// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
+		// SendMessage(sma.UpdatePower(powerUpdate))
+	}
 }
 
-func (sm *StorageMinerActor_I) DeclareFault(newFaults sector.FaultSet) {
+func (sm *StorageMinerActor_I) RecoverFaults(newFaults sector.FaultSet) {
+	// add them to the UnprovenSectors_
+	// update FaultSet
+}
+
+func (sm *StorageMinerActor_I) DeclareFaults(newFaults sector.FaultSet) {
 	// Handle Fault
 
 	// TODO: the faults that are declared after post challenge,
 	// are faults for the next proving period
 
+	// TODO: below is a bit complicated, it should be simplified.
+
 	// Update Fault Set
 
-	// TODO: batch into a single message
+	// var lostPower uint
 	// for sectorNumber := range newFaultSet {
 	//   // Avoid penalizing the miner multiple times in the same proving period
 	//   if !(sector is in sm.NextFaultSet()) {
+	//     // it is a new fault:
+	//     lostPower = lostPower + sm.info().sectorSize()
 	//     if (sectorNumber not in sm.Faults) sm.Faults[sectorNumber] = 0
 	//     sm.Faults[sectorNumber] = sm.Faults[sectorNumber] + 1
-
 	//     if (sm.Faults[sectorNumber] > MAX_CONSECUTIVE_FAULTS_ALLOWED) {
 	//       Sector is lost, delete it, slash storage deal collateral and all pledge
 	//       SendMessage(sma.SlashAllStorageDealCollateral(dealIDs)
 	//       SendMessage(spa.SlashAllPledgeCollateral(sectorNumber)
 	//       delete(sm.Sectors(), expiredSectorNumber)
 	//     } else {
-	//       dealIDs := sm.Sectors()[sectorNumber].DealIDs()
+	//       append(sm.UnprovenSectors_, sectorNumber)
 	//     }
 	//   }
 	// }
 
-	// TODO: delete power for faulty sectors
-	// TODO: check if we want to penalize some collateral for losing some files
+	// Delete Power
+	// SendMessage(sma.UpdatePower(- lostPower))
+
+	// Store updated fault set
 	// sm.nextFaultSet.applyDiff(newFaultSet)
+
+	// TODO: check if we want to penalize some collateral for losing some files
 
 	panic("TODO")
 }
 
-// TODO: currently deals must be posted on chain via sma.PublishStorageDeals
-// as an optimization, in the future CommitSector could contain a list of
+// Currently deals must be posted on chain via sma.PublishStorageDeals before CommitSector
+// TODO: as an optimization, in the future CommitSector could contain a list of
 // deals that are not published yet.
 func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerifyInfo) {
-	// TODO verify
+	// TODO verify seal @nicola
 	// var sealRandomness sector.SealRandomness
 	// TODO: get sealRandomness from onChainInfo.Epoch
 	// TODO: sm.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
@@ -135,33 +205,37 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	// TODO: @porcuquine verifies
 
 	// TODO: this is the latest expiry date of all deals.
-	var latestDealExpiry ChainEpoch
+	// var latestDealExpiry ChainEpoch
 	// for deal := range onChainInfo.DealIDs() {
 	//   if deal.Expiry > latestDealExpiry {
 	//     latestDealExpiry = deal.Expiry
 	//   }
 	// }
 
-	sealCommitment := &sector.SealCommitment_I{
-		UnsealedCID_: onChainInfo.UnsealedCID(),
-		SealedCID_:   onChainInfo.SealedCID(),
-		DealIDs_:     onChainInfo.DealIDs(),
-		Expiration_:  latestDealExpiry,
-	}
+	// sealCommitment := &sector.SealCommitment_I{
+	// 	UnsealedCID_: onChainInfo.UnsealedCID(),
+	// 	SealedCID_:   onChainInfo.SealedCID(),
+	// 	DealIDs_:     onChainInfo.DealIDs(),
+	// 	Expiration_:  latestDealExpiry,
+	// }
 
-	sm.SectorExpirationQueue.Add(&SectorExpirationQueuItem_I{
-		SectorNumber_: onChainInfo.SectorNumber(),
-		Expiration_:   latestDealExpiry,
-	})
+	// sm.SectorExpirationQueue.Add(&SectorExpirationQueuItem_I{
+	// 	SectorNumber_: onChainInfo.SectorNumber(),
+	// 	Expiration_:   latestDealExpiry,
+	// })
 
-	_, found := sm.Sectors()[onChainInfo.SectorNumber()]
+	// _, found := sm.Sectors()[onChainInfo.SectorNumber()]
 
-	if found {
-		// TODO: throw error
-		panic("sector already in there")
-	}
+	// if found {
+	// TODO: throw error
+	// 	panic("sector already in there")
+	// }
 
-	sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
+	// sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
+
+	// Mark sector as Committed, it will become active at the next proving period
+	// append(sm.CommittedSectors, sectorNumber)
 
 	// TODO write state change
+	panic("TODO")
 }

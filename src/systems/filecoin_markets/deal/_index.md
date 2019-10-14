@@ -3,22 +3,39 @@ menuTitle: Deals
 title: Market Deals
 ---
 
-There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with `CommitSector` to gain storage power on chain. Hence, there is a `StorageDealProposal` and a `RetrievalDealProposal` that are half sign contracts submitted by clients to be counter-signed and posted on-chain by the miners.
+There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with `CommitSector` to gain storage power on chain. Hence, there is a `StorageDealProposal` and a `RetrievalDealProposal` that are half-signed contracts submitted by clients to be counter-signed and posted on-chain by the miners.
 
 Filecoin Storage Market Deal Flow
 
-1.`StorageClient` and `StorageProvider` deposit funds to `StorageMarketActor`
+====== Add Storage Deal and Power ======
+
+1.`StorageClient` and `StorageProvider` call `StorageMarketActor.AddBalance` to deposit funds into Storage Market. There are two fund states in the Storage Market, `Locked` and `Available`.
 a. `StorageClient` and `StorageProvider` can call `WithdrawBalance` before any deal is made. (move to state X)
 2. `StorageClient` and `StorageProvider` negotiate a deal off chain. `StorageClient` sends a `StorageDealProposal` to a `StorageProvider`.
 a. `StorageProvider` verifies the `StorageDeal` by checking address and signature of `StorageClient`, checking the proposal has not expired, checking `StorageClient` did not call withdraw in the last X Epoch, checking both `StorageProvider` and `StorageClient` have sufficient available balances in `StorageMarketActor`.
 3. `StorageProvider` signs the `StorageDealProposal` and gets a `StorageDeal`.
 a. `StorageProvider` calls `HandleStorageDeal` in `StorageMiningSubsystem` which will then add the `StorageDeal` into a `Sector`.
-b. `StorageProvider` calls `PublishStorageDeals` in `StorageMarketActor` which will generate a `DealID` for each `StorageDeal` and store a mapping from `DealID` to `StorageDeal`.
-4. `StorageMiningSubsystem` calls `CommitSector`
-5. Payment, Expiration, and Faults
-6. Declared Faults: Storage Miner calls sm.DeclareFaults, which triggers a `sma.SlashStorageDealCollateral` and loses the power for the faulty sectors. If the same sector is reported faulty X times, then the sector is dropped.
-7. At the next PoStSubmission:
-  - if the fault has been recovered, report the recovered sector in the FaultSet as you submit the post. Power is restored at the end of the next proving period.
+b. `StorageProvider` calls `PublishStorageDeals` in `StorageMarketActor` which will generate a `DealID` for each `StorageDeal` and store a mapping from `DealID` to `StorageDeal`. However, the deals are not active at this point.
+4. Once the miner finishes packing a Sector, it generates a Sealed Sector and calls `StorageMiningSubsystem.CommitSector` to verify the seal, store sector expiration, and record the mapping from `SectorNumber` to `SealCommitment`. It will also place this newly added Sector in the list of `CommittedSectors` in `StorageMinerActor`. `StorageMiner` does not earn any power for this newly added sector until its first PoSt has been submitted.
 
+====== Declare and Recover Faults ======
+
+5. Declared faults are penalized to a smaller degree than spotted faults by `CronActor`. Miners declare faulty sectors by invoking `StorageMinerActor.DeclareFaults` and X of the `StorageDealCollateral` will be slashed and power corresponding to these sectors will be tempororily lost.
+6. Miners can then recover faults by invoking `StorageMinerActor.RecoverFaults` and have sufficient `StorageDealCollateral` in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission.
+7. Sectors that are declared faulty for X consecutive ChainEpoch will result in `StoragePowerActor.SlashPledgeCollateral`.
+
+====== Submit PoSt ======
+
+On every PoSt Submission, the following steps happen.
+8. `StorageMinerActor` first verifies the PoSt Submission. All Sectors will be considered in `SpottedFaults` if PoSt submission has failed (move to State 14).
+9. If `CommittedSectors` are proven in `PoStSubmission.SectorSet`, Storage Miner gains power for these newly committed sectors.
+10. If there are `DeclaredFaultySectors` , `Sector` in that set will not be challenged.
+11. For all other sectors, payment will be processed by invoking `StorageMarketActor.ProcessStorageDealsPayment` and miner available balances will be updated.
+12. Decide which Sectors have expired by looking at the `SectorExpirationQueue`. Sectors expire when all deals in that Sector have expired. `StorageDealCollateral` for both miners and users will only be returned when all deals in the Sector have expired. This is done by calling `StorageMarketActor.SettleExpiredDeals` and the Sector will be deleted from `StorageMinerActor.Sectors`.
+
+====== Spotted Faults ======
+
+13. If no PoSt is submitted within a ProvingPeriod, `CronActor` will spot the missing PoSt and set all sectors to `SpottedFaults`.
+14. When there are sectors in `SpottedFaults`, `StorageDealCollateral` and `PledgeCollateral` are slashed, power is lost, and sectors are removed from `StorageMinerActor`.
 
 {{< readfile file="deal.id" code="true" lang="go" >}}
