@@ -77,64 +77,45 @@ func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.Un
 
 func generateSDRKeyLayers(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus UInt) []Bytes {
 	keyLayers := make([]Bytes, layers)
+	var prevLayer Bytes
 
-	prevLayer := labelFirstLayer(drg, replicaID, nodes, nodeSize, modulus)
-	for i := 0; i < layers; i++ {
-		layer := make([]byte, nodes*nodeSize)
-		keyLayers[i] = labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer, layer)
+	for i := 0; i <= layers; i++ {
+		keyLayers[i] = labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer)
 	}
 	return keyLayers
 }
 
-// TODO: Make this a special case of labelLayer.
-func labelFirstLayer(drg *filproofs.DRG_I, replicaID Bytes, nodes int, nodeSize int, modulus UInt) Bytes {
+func labelLayer(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodeSize int, nodes int, prevLayer Bytes) Bytes {
 	size := nodes * nodeSize
-	labeled := make([]byte, size)
+	labels := make(Bytes, size)
 
 	for i := 0; i < nodes; i++ {
-		dependencies := make(Bytes, size)
+		var dependencies Bytes
 
-		copy(dependencies, replicaID)
-
-		// FIXME: label first node
-		for parent := range drg.Parents(labeled, UInt(i)) {
-			dependencies = append(dependencies, labeled[parent])
+		// The first node of every layer has no DRG Parents.
+		if i > 0 {
+			for parent := range drg.Parents(labels, UInt(i)) {
+				start := parent * nodeSize
+				dependencies = append(dependencies, labels[start:start+nodeSize]...)
+			}
 		}
 
-		labeled = append(labeled, generateLabel(dependencies)...)
+		// The first layer has no expander parents.
+		if prevLayer != nil {
+			for parent := range expander.Parents(labels, UInt(i)) {
+				start := parent * nodeSize
+				dependencies = append(dependencies, labels[start:start+nodeSize]...)
+			}
+		}
+
+		label := generateLabel(replicaID, i, dependencies)
+		labels = append(labels, label...)
 	}
 
-	return labeled
+	return labels
 }
 
-func labelLayer(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodeSize int, nodes int, prevLayer Bytes, layer Bytes) Bytes {
-	return layer // FIXME: Do something.
-
-	size := nodes * nodeSize
-	labeled := make([]byte, size)
-
-	for i := 0; i < nodes; i++ {
-		dependencies := make(Bytes, size)
-
-		copy(dependencies, replicaID)
-
-		// FIXME: label first node
-		for parent := range drg.Parents(labeled, UInt(i)) {
-			dependencies = append(dependencies, labeled[parent])
-		}
-
-		for parent := range drg.Parents(labeled, UInt(i)) {
-			dependencies = append(dependencies, labeled[parent])
-		}
-
-		labeled = append(labeled, generateLabel(dependencies)...)
-	}
-
-	return labeled
-
-}
-
-func generateLabel(preimage Bytes) Bytes {
+func generateLabel(replicaID Bytes, node int, preimage Bytes) Bytes {
 	// TODO: Get KDF fn from the StackedDRG
 	return KDF(preimage)
 }
