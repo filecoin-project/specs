@@ -40,6 +40,16 @@ type ProofAux struct {
     CachedMerkleTreePath  file.Path
 }
 
+type ProofAuxTmp struct {
+    CommRLast             Commitment
+    CommC                 Commitment
+
+    // TODO: This may be a partially-cached tree.
+    // this may be empty
+    CachedMerkleTreePath  file.Path
+    Layers                util.BytesArray
+}
+
 type SealArguments struct {
     Algorithm        SealAlgorithm
     OutputArtifacts  SealOutputArtifacts

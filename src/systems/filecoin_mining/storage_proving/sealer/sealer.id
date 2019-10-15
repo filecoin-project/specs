@@ -2,7 +2,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
-type Seal1Inputs struct {
+type SealInputs struct {
     SectorID      sector.SectorID
     SealCfg       sector.SealCfg
     UnsealedPath  file.Path
@@ -10,27 +10,27 @@ type Seal1Inputs struct {
     DealIDs       [deal.DealID]
 }
 
-type Seal2Inputs struct {
-    SectorID      sector.SectorID
-    SealCfg       sector.SealCfg
-    RandomSeed    sector.SealRandomSeed
-    SealedPath    file.Path
-    Seal1Outputs
+type CreateSealProofInputs struct {
+    SectorID     sector.SectorID
+    SealCfg      sector.SealCfg
+    RandomSeed   sector.SealRandomSeed
+    SealedPath   file.Path
+    SealOutputs
 }
 
-type Seal1Outputs struct {
-    SealInfo  sector.SealVerifyInfo
-    ProofAux  sector.ProofAux
+type SealOutputs struct {
+    SealInfo     sector.SealVerifyInfo
+    ProofAuxTmp  sector.ProofAuxTmp
 }
 
-type Seal2Outputs struct {
+type CreateSealProofOutputs struct {
     SealInfo  sector.SealVerifyInfo
     ProofAux  sector.ProofAux
 }
 
 type SectorSealer struct {
-    Seal1Sector() union {so Seal1Outputs, err error}
-    Seal2Sector(si Seal2Inputs) union {so Seal2Outputs, err error}
+    SealSector() union {so SealOutputs, err error}
+    CreateSealProof(si CreateSealProofInputs) union {so CreateSealProofOutputs, err error}
     VerifySeal(sv sector.SealVerifyInfo) union {ok bool, err error}
 
     ComputeDataCommitment(unsealedPath file.Path) union {commD sector.UnsealedSectorCID, err error}

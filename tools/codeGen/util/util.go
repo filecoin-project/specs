@@ -25,6 +25,7 @@ type UInt = uint64
 type UInts = []uint64
 type Float = float64
 type Bytes = []byte
+type BytesArray = []Bytes
 type BytesKey = string // to use Bytes in map keys.
 type BytesAmount = UVarint
 type String = string

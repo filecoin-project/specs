@@ -8,7 +8,7 @@ import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproof
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-func (s *SectorSealer_I) Seal1Sector(si Seal1Inputs) *SectorSealer_Seal1Sector_FunRet_I {
+func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
 	sid := si.SectorID()
 	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(si.UnsealedPath()).As_commD())
 
@@ -22,27 +22,18 @@ func (s *SectorSealer_I) Seal1Sector(si Seal1Inputs) *SectorSealer_Seal1Sector_F
 		panic("Sector file is wrong size.")
 	}
 
-	return &SectorSealer_Seal1Sector_FunRet_I{
-		rawValue: Seal1(sid, commD, buf),
+	return &SectorSealer_SealSector_FunRet_I{
+		rawValue: Seal(sid, commD, buf),
 	}
 }
 
-func (s *SectorSealer_I) Seal2Sector(si Seal2Inputs) *SectorSealer_Seal2Sector_FunRet_I {
+func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer_CreateSealProof_FunRet_I {
 	sid := si.SectorID()
-	commD := si.Seal1Outputs().SealInfo().OnChain().UnsealedCID()
+	commD := si.SealOutputs().SealInfo().OnChain().UnsealedCID()
+	layers := si.SealOutputs().ProofAuxTmp().Layers()
 
-	buf := make(Bytes, si.SealCfg().SectorSize())
-	f := file.FromPath(si.SealedPath())
-	length, _ := f.Read(buf)
-
-	// TODO: How do we meant to handle errors in implementation methods? This could get tedious fast.
-
-	if UInt(length) != UInt(si.SealCfg().SectorSize()) {
-		panic("Sector file is wrong size.")
-	}
-
-	return &SectorSealer_Seal2Sector_FunRet_I{
-		rawValue: Seal2(sid, si.RandomSeed(), commD, buf),
+	return &SectorSealer_CreateSealProof_FunRet_I{
+		rawValue: CreateSealProof(sid, si.RandomSeed(), commD, layers[len(layers)-1]),
 	}
 }
 
@@ -75,7 +66,7 @@ func SDRParams() *filproofs.StackedDRG_I {
 	return &filproofs.StackedDRG_I{}
 }
 
-func Seal1(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) *Seal1Outputs_I {
+func Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) *SealOutputs_I {
 	replicaID := ComputeReplicaID(sid, commD).As_replicaID()
 
 	params := SDRParams()
@@ -97,7 +88,7 @@ func Seal1(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) *Sea
 
 	var proof sector.SealProof
 
-	return &Seal1Outputs_I{
+	return &SealOutputs_I{
 		SealInfo_: &sector.SealVerifyInfo_I{
 			SectorID_: sid,
 			OnChain_: &sector.OnChainSealVerifyInfo_I{
@@ -106,7 +97,7 @@ func Seal1(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) *Sea
 				Proof_:       proof,
 			},
 		},
-		ProofAux_: &sector.ProofAux_I{
+		ProofAuxTmp_: &sector.ProofAuxTmp_I{
 			CommRLast_:            sector.Commitment{},
 			CommC_:                sector.Commitment{},
 			CachedMerkleTreePath_: cachedMerkleTreePath,
@@ -114,21 +105,15 @@ func Seal1(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) *Sea
 	}
 }
 
-func Seal2(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID, data Bytes) *Seal2Outputs_I {
-	replicaID := ComputeReplicaID(sid, commD).As_replicaID()
+func CreateSealProof(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID, replica Bytes) *CreateSealProofOutputs_I {
+	//replicaID := ComputeReplicaID(sid, commD).As_replicaID()
 
-	params := SDRParams()
+	//params := SDRParams()
 
-	drg := filproofs.DRG_I{}                // FIXME: Derive from params
-	expander := filproofs.ExpanderGraph_I{} // FIXME: Derive from params
-	nodeSize := int(params.NodeSize().Size())
-	nodes := len(data) / nodeSize
-	curveModulus := params.Curve().FieldModulus()
-	layers := int(params.Layers().Layers())
-	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
-	key := keyLayers[len(keyLayers)-1]
-
-	replica := encodeData(data, key, nodeSize, curveModulus)
+	//	drg := filproofs.DRG_I{}                // FIXME: Derive from params
+	//expander := filproofs.ExpanderGraph_I{} // FIXME: Derive from params
+	//nodeSize := int(params.NodeSize().Size())
+	//	nodes := len(replica) / nodeSize
 
 	var cachedMerkleTreePath file.Path // FIXME: get this
 
@@ -136,7 +121,7 @@ func Seal2(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.U
 
 	var proof sector.SealProof
 
-	return &Seal2Outputs_I{
+	return &CreateSealProofOutputs_I{
 		SealInfo_: &sector.SealVerifyInfo_I{
 			SectorID_: sid,
 			OnChain_: &sector.OnChainSealVerifyInfo_I{

@@ -17,8 +17,8 @@ type StorageProvingSubsystem struct {
     SectorSealer   sealer.SectorSealer
     PostGenerator  poster.PostGenerator
 
-    Seal2Sector(si sealer.Seal2Inputs) union {so sealer.Seal2Outputs, err error}
-    Seal1Sector(si sealer.Seal1Inputs) union {so sealer.Seal1Outputs, err error}
+    SealSector(si sealer.SealInputs) union {so sealer.SealOutputs, err error}
+    CreateSealProof(si sealer.CreateSealProofInputs) union {so sealer.CreateSealProofOutputs, err error}
     VerifySeal(sv sector.SealVerifyInfo) union {ok bool, err error}
 
     ValidateBlock(block Block)
