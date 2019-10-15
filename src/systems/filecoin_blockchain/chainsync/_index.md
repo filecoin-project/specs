@@ -1,8 +1,6 @@
 ---
 menuTitle: ChainSync
 title: ChainSync - synchronizing the Blockchain
-entries:
-- blocksync
 ---
 
 # What is blockchain synchronization?
