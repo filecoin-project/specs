@@ -22,15 +22,10 @@ type SectorExpirationQueue struct {
 
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
-    // NextFaultSet           sector.FaultSet
 
-    // Every Sector can only by in one of these three states
-    // at any point in time
-    UnprovenSectors         {sector.SectorNumber: sector.SealCommitment}
-    ActiveSectors           {sector.SectorNumber: sector.SealCommitment}
-    FaultySectors           {sector.SectorNumber: sector.SealCommitment}
-
-    ConsecutiveFaultCounts  {sector.SectorNumber: uint64}
+    Sectors      {sector.SectorNumber: sector.SealCommitment}
+    SectorStates {sector.SectorNumber: SectorState}
+    ProvingSet   sector.CompactSectorSet
 
     SectorExpirationQueue
 
