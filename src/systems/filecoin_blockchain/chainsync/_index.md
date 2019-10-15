@@ -166,7 +166,8 @@ implementation must include the full `ChainSync` protocol as described here.
 ## Previous BlockSync protocol
 
 Prior versions of this spec recommended a `BlockSync` protocol. This protocol definition is
-[available here](./blocksync1). Filecoin nodes are libp2p nodes, and therefore may run a variety
+[available here](https://github.com/filecoin-project/specs/blob/prevspec/network-protocols.md#blocksync).
+Filecoin nodes are libp2p nodes, and therefore may run a variety
 of other protocols, including this `BlockSync` protocol. As with anything else in Filecoin, nodes
 MAY opt to use additional protocols to achieve the results.
 That said, Nodes MUST implement the version of `ChainSync` as described in this spec in order to
