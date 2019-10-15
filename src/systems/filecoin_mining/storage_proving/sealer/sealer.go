@@ -169,19 +169,24 @@ func reverse(bytes []byte) {
 }
 
 func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
-	// FIXME: Check correct endianness.
-	sum := new(big.Int)
-	reverse(data) // Reverse for little-endian
-	reverse(key)  // Reverse for little-endian
 
-	d := new(big.Int).SetBytes(data) // Big-endian
-	k := new(big.Int).SetBytes(key)  // Big-endian
+	d := bigIntFromLittleEndianBytes(data)
+	k := bigIntFromLittleEndianBytes(key)
 
-	sum = sum.Add(d, k)
+	sum := new(big.Int).Add(d, k)
+	result := new(big.Int).Mod(sum, modulus)
 
-	result := new(big.Int)
-	resultBytes := result.Mod(sum, modulus).Bytes()[0:nodeSize] // Big-endian
-	reverse(resultBytes)                                        // Reverse for little-endian
+	return littleEndianBytesFromBigInt(result, nodeSize)
+}
 
-	return resultBytes
+func bigIntFromLittleEndianBytes(bytes Bytes) *big.Int {
+	reverse(bytes)
+	return new(big.Int).SetBytes(bytes)
+}
+
+func littleEndianBytesFromBigInt(z *big.Int, size int) Bytes {
+	bytes := z.Bytes()[0:size]
+	reverse(bytes)
+
+	return bytes
 }
