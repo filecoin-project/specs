@@ -1,0 +1,82 @@
+digraph sector {
+  compound=true;
+  ranksep=0.2;
+  splines=ortho;
+  edge [style=solid]
+
+  subgraph cluster_chain {
+    label="Sector States in StorageMinerActor\n(on chain)"
+    style=bold
+    color=gray
+
+    subgraph cluster_postproving {
+      label="must be proved in post"
+      style=filled
+      color=azure2
+
+      subgraph cluster_nopowerC1 {
+        label="Does not count for power"
+        style=filled
+        color=lightgray
+        CommittedC [label="Unproven"]
+      }
+
+      subgraph cluster_powerC {
+        label="Counts for power"
+        style=filled
+        color=seagreen3
+        ActiveC [label="Active"]
+      }
+
+    }
+
+    subgraph cluster_nopowerC2 {
+      label="Does not count for power"
+      style=filled
+      color=lightgray
+
+      FaultedC [label="Faulted"]
+      ExpiredC [label="Deleted"]
+      // DeletedC [label="Deleted"]
+
+      { // cron
+        edge [color=magenta, fontcolor=magenta]
+        // ExpiredC -> DeletedC [label="Sector Cleanup\n(sma.CronTick \n-> sm.SectorCleanup)"]
+        FaultedC -> ExpiredC [label="Expiry epoch reached\n(sma.CronTick \n-> sm.ExpireSectors)"]
+        FaultedC -> ExpiredC [label="Faulted 3+ times\n(sma.CronTick \n-> sm.SectorCleanup)", constraint=false]
+      }
+    }
+
+    { // messages
+      edge [color=blue, fontcolor=blue]
+      node [color=blue, fontcolor=blue, shape=box]
+
+      FaultsDeclared [label="Fault Declared\n(sm.DeclareFaults)"]
+
+      CommittedC -> ActiveC [label="1st PoSt\n(sm.SubmitPost \n->sm.ActivateSector)"]
+
+      CommittedC -> FaultsDeclared [arrowhead=none]
+      ActiveC -> FaultsDeclared [arrowhead=none]
+      FaultsDeclared -> FaultedC
+
+      FaultedC -> CommittedC [label="Recover\n(sm.SubmitPost)", constraint=false]
+      ActiveC -> ExpiredC [label="Expiry epoch reached\n(sm.SubmitPost \n-> sm.ExpireSectors)"]
+    }
+
+    { // cron
+      edge [color=magenta, fontcolor=magenta]
+      node [color=magenta, fontcolor=magenta, shape=box]
+      FaultSpotted [label="Fault Spotted\n(sma.CronTick \n-> sm.PostFailed)"]
+
+      // CommittedC -> ExpiredC [label="Expiry epoch reached\n(sma.CronTick \n-> sm.ExpireSectors)"]
+      CommittedC -> FaultSpotted [arrowhead=none]
+      ActiveC -> FaultSpotted [arrowhead=none]
+      FaultSpotted -> FaultedC
+
+      // ActiveC -> ExpiredC [label="Expiry epoch reached\n(sma.CronTick \n-> sm.ExpireSectors)"]
+    }
+
+    CommittedC -> ActiveC -> FaultsDeclared -> FaultedC -> ExpiredC [style=invis] // structure
+    CommittedC -> ActiveC -> FaultSpotted -> FaultedC -> ExpiredC [style=invis] // structure
+  }
+}
