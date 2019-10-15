@@ -52,7 +52,7 @@ type ZigZagPoRep StackedDRG
 type SDRPoSpace StackedDRG
 
 type EllipticCurve struct {
-    Modulus UInt
+    FieldModulus UInt
 }
 
 type StackedDRGAlgorithm struct {}

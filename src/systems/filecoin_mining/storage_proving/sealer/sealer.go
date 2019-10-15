@@ -8,9 +8,8 @@ import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproof
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
+func (s *SectorSealer_I) Seal1Sector(si Seal1Inputs) *SectorSealer_Seal1Sector_FunRet_I {
 	sid := si.SectorID()
-
 	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(si.UnsealedPath()).As_commD())
 
 	buf := make(Bytes, si.SealCfg().SectorSize())
@@ -23,8 +22,27 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 		panic("Sector file is wrong size.")
 	}
 
-	return &SectorSealer_SealSector_FunRet_I{
-		rawValue: Seal(sid, si.RandomSeed(), commD, buf),
+	return &SectorSealer_Seal1Sector_FunRet_I{
+		rawValue: Seal1(sid, commD, buf),
+	}
+}
+
+func (s *SectorSealer_I) Seal2Sector(si Seal2Inputs) *SectorSealer_Seal2Sector_FunRet_I {
+	sid := si.SectorID()
+	commD := si.Seal1Outputs().SealInfo().OnChain().UnsealedCID()
+
+	buf := make(Bytes, si.SealCfg().SectorSize())
+	f := file.FromPath(si.SealedPath())
+	length, _ := f.Read(buf)
+
+	// TODO: How do we meant to handle errors in implementation methods? This could get tedious fast.
+
+	if UInt(length) != UInt(si.SealCfg().SectorSize()) {
+		panic("Sector file is wrong size.")
+	}
+
+	return &SectorSealer_Seal2Sector_FunRet_I{
+		rawValue: Seal2(sid, si.RandomSeed(), commD, buf),
 	}
 }
 
@@ -33,42 +51,32 @@ func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_Veri
 }
 
 func (s *SectorSealer_I) ComputeDataCommitment(unsealedPath file.Path) *SectorSealer_ComputeDataCommitment_FunRet_I {
+	// TODO: Generate merkle tree using appropriate hash.
 	return &SectorSealer_ComputeDataCommitment_FunRet_I{}
 }
 
-func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID, seed sector.SealRandomSeed) *SectorSealer_ComputeReplicaID_FunRet_I {
+func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) *SectorSealer_ComputeReplicaID_FunRet_I {
 
 	_, _ = sid.MinerID(), (sid.Number())
 
+	// FIXME: Implement
 	return &SectorSealer_ComputeReplicaID_FunRet_I{}
 }
 
-// type SealOutputs struct {
-//     SealInfo  sector.SealVerifyInfo
-//     ProofAux  sector.ProofAux
-// }
+func UnsealedSectorCID(h filproofs.Blake2sHash) sector.UnsealedSectorCID {
+	panic("not implemented -- re-arrange bits")
+}
 
-// type SealVerifyInfo struct {
-//     SectorID
-//     OnChain OnChainSealVerifyInfo
-// }
-
-// type OnChainSealVerifyInfo struct {
-//     UnsealedCID   UnsealedSectorCID  // CommD
-//     SealedCID     SealedSectorCID  // CommR
-//     RandomSeed    SealRandomSeed
-//     Proof         SealProof
-//     DealIDs       [deal.DealID]
-//     SectorNumber
-
-// }
+func SealedSectorCID(h filproofs.PedersenHash) sector.SealedSectorCID {
+	panic("not implemented -- re-arrange bits")
+}
 
 func SDRParams() *filproofs.StackedDRG_I {
 	return &filproofs.StackedDRG_I{}
 }
 
-func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID, data Bytes) *SealOutputs_I {
-	replicaID := ComputeReplicaID(sid, commD, randomSeed).As_replicaID()
+func Seal1(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) *Seal1Outputs_I {
+	replicaID := ComputeReplicaID(sid, commD).As_replicaID()
 
 	params := SDRParams()
 
@@ -76,15 +84,78 @@ func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.Un
 	expander := filproofs.ExpanderGraph_I{} // FIXME: Derive from params
 	nodeSize := int(params.NodeSize().Size())
 	nodes := len(data) / nodeSize
-	curveModulus := params.Curve().Modulus()
+	curveModulus := params.Curve().FieldModulus()
 	layers := int(params.Layers().Layers())
 	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
 	key := keyLayers[len(keyLayers)-1]
 
 	replica := encodeData(data, key, nodeSize, curveModulus)
 
-	_ = replica
-	return &SealOutputs_I{}
+	var cachedMerkleTreePath file.Path // FIXME: get this
+
+	commR, cachedMerkleTreePath := repHash(replica)
+
+	var proof sector.SealProof
+
+	return &Seal1Outputs_I{
+		SealInfo_: &sector.SealVerifyInfo_I{
+			SectorID_: sid,
+			OnChain_: &sector.OnChainSealVerifyInfo_I{
+				SealedCID_:   SealedSectorCID(commR),
+				UnsealedCID_: commD,
+				Proof_:       proof,
+			},
+		},
+		ProofAux_: &sector.ProofAux_I{
+			CommRLast_:            sector.Commitment{},
+			CommC_:                sector.Commitment{},
+			CachedMerkleTreePath_: cachedMerkleTreePath,
+		},
+	}
+}
+
+func Seal2(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID, data Bytes) *Seal2Outputs_I {
+	replicaID := ComputeReplicaID(sid, commD).As_replicaID()
+
+	params := SDRParams()
+
+	drg := filproofs.DRG_I{}                // FIXME: Derive from params
+	expander := filproofs.ExpanderGraph_I{} // FIXME: Derive from params
+	nodeSize := int(params.NodeSize().Size())
+	nodes := len(data) / nodeSize
+	curveModulus := params.Curve().FieldModulus()
+	layers := int(params.Layers().Layers())
+	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
+	key := keyLayers[len(keyLayers)-1]
+
+	replica := encodeData(data, key, nodeSize, curveModulus)
+
+	var cachedMerkleTreePath file.Path // FIXME: get this
+
+	commR, cachedMerkleTreePath := repHash(replica)
+
+	var proof sector.SealProof
+
+	return &Seal2Outputs_I{
+		SealInfo_: &sector.SealVerifyInfo_I{
+			SectorID_: sid,
+			OnChain_: &sector.OnChainSealVerifyInfo_I{
+				SealedCID_:   SealedSectorCID(commR),
+				UnsealedCID_: commD,
+				RandomSeed_:  randomSeed,
+				Proof_:       proof,
+			},
+		},
+		ProofAux_: &sector.ProofAux_I{
+			CommRLast_:            sector.Commitment{},
+			CommC_:                sector.Commitment{},
+			CachedMerkleTreePath_: cachedMerkleTreePath,
+		},
+	}
+}
+
+func repHash(data Bytes) (filproofs.PedersenHash, file.Path) {
+	return Bytes{}, file.Path("") // FIXME
 }
 
 func generateSDRKeyLayers(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus UInt) []Bytes {
@@ -162,12 +233,6 @@ func encodeNode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 	return addEncode(data, key, modulus, nodeSize)
 }
 
-func reverse(bytes []byte) {
-	for i, j := 0, len(bytes)-1; i < j; i, j = i+1, j-1 {
-		bytes[i], bytes[j] = bytes[j], bytes[i]
-	}
-}
-
 func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 
 	d := bigIntFromLittleEndianBytes(data)
@@ -177,6 +242,14 @@ func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 	result := new(big.Int).Mod(sum, modulus)
 
 	return littleEndianBytesFromBigInt(result, nodeSize)
+}
+
+// Utilities
+
+func reverse(bytes []byte) {
+	for i, j := 0, len(bytes)-1; i < j; i, j = i+1, j-1 {
+		bytes[i], bytes[j] = bytes[j], bytes[i]
+	}
 }
 
 func bigIntFromLittleEndianBytes(bytes Bytes) *big.Int {

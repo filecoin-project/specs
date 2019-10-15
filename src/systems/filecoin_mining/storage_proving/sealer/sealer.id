@@ -1,21 +1,36 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
-type SealInputs struct {
+type Seal1Inputs struct {
+    SectorID      sector.SectorID
+    SealCfg       sector.SealCfg
+    UnsealedPath  file.Path
+    SealedPath    file.Path
+    DealIDs       [deal.DealID]
+}
+
+type Seal2Inputs struct {
     SectorID      sector.SectorID
     SealCfg       sector.SealCfg
     RandomSeed    sector.SealRandomSeed
-    UnsealedPath  file.Path
     SealedPath    file.Path
+    Seal1Outputs
 }
 
-type SealOutputs struct {
+type Seal1Outputs struct {
+    SealInfo  sector.SealVerifyInfo
+    ProofAux  sector.ProofAux
+}
+
+type Seal2Outputs struct {
     SealInfo  sector.SealVerifyInfo
     ProofAux  sector.ProofAux
 }
 
 type SectorSealer struct {
-    SealSector(si SealInputs) union {so SealOutputs, err error}
+    Seal1Sector() union {so Seal1Outputs, err error}
+    Seal2Sector(si Seal2Inputs) union {so Seal2Outputs, err error}
     VerifySeal(sv sector.SealVerifyInfo) union {ok bool, err error}
 
     ComputeDataCommitment(unsealedPath file.Path) union {commD sector.UnsealedSectorCID, err error}
