@@ -111,3 +111,8 @@ type ExpanderGraphCfg struct {
     Seed      ExpanderGraphSeed
     NodeSize  DRGNodeSize
 }
+
+type ExpanderGraph struct {
+     Config DRGCfg
+     Parents(Bytes, UInt) util.UInts
+}

@@ -61,12 +61,12 @@ func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.Un
 	params := SDRParams();
 
 	drg := filproofs.DRG_I{}; // FIXME: Derive from params
-	
+	expander := filproofs.ExpanderGraph_I{}; // FIXME: Derive from params
 	nodeSize := int(params.NodeSize().Size());
 	nodes := len(data) / nodeSize;
 	curveModulus := params.Curve().Modulus();
 	layers := int(params.Layers().Layers());
-	keyLayers := generateSDRKeyLayers(drg, replicaID, nodes, layers, nodeSize, curveModulus);
+	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus);
 	key := keyLayers[len(keyLayers)-1];
 	
 	replica := encodeData(data, key, nodeSize, curveModulus);
@@ -75,18 +75,19 @@ func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.Un
 	return &SealOutputs_I{}
 }
 
-func generateSDRKeyLayers(drg filproofs.DRG_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus UInt) []Bytes {
+func generateSDRKeyLayers(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus UInt) []Bytes {
 	keyLayers := make([]Bytes, layers);
 
 	prevLayer := labelFirstLayer(drg, replicaID, nodes, nodeSize, modulus);
 	for i := 0; i < layers; i++ {
 		layer := make([]byte, nodes*nodeSize);
-		keyLayers[i] = labelLayer(drg, replicaID, prevLayer, layer);
+		keyLayers[i] = labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer, layer);
 	}
 	return keyLayers;
 }
 
-func labelFirstLayer(drg filproofs.DRG_I, replicaID Bytes, nodes int, nodeSize int, modulus UInt) Bytes {
+// TODO: Make this a special case of labelLayer.
+func labelFirstLayer(drg *filproofs.DRG_I, replicaID Bytes, nodes int, nodeSize int, modulus UInt) Bytes {
 	size := nodes * nodeSize;
 	labeled := make([]byte, size);
 	
@@ -106,6 +107,36 @@ func labelFirstLayer(drg filproofs.DRG_I, replicaID Bytes, nodes int, nodeSize i
 	return labeled;
 }
 
+
+func labelLayer(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodeSize int, nodes int, prevLayer Bytes, layer Bytes) Bytes {
+	return layer; // FIXME: Do something.
+
+	size := nodes * nodeSize;
+	labeled := make([]byte, size);
+	
+	for i := 0; i < nodes; i++ {
+		dependencies := make(Bytes, size);
+		
+		copy(dependencies, replicaID);
+
+		// FIXME: label first node
+		for parent := range drg.Parents(labeled, UInt(i)) {
+			dependencies = append(dependencies, labeled[parent])
+		}
+
+		for parent := range drg.Parents(labeled, UInt(i)) {
+			dependencies = append(dependencies, labeled[parent])
+		}
+
+		
+		labeled = append(labeled, generateLabel(dependencies)...);
+	}
+
+	return labeled;
+
+}
+
+
 func generateLabel(preimage Bytes) Bytes {
 	// TODO: Get KDF fn from the StackedDRG	
 	return KDF(preimage)
@@ -113,11 +144,6 @@ func generateLabel(preimage Bytes) Bytes {
 
 func KDF(elements Bytes) Bytes {
 	return elements; // FIXME: Do something.
-}
-
-func labelLayer(drg filproofs.DRG_I, replicaID, prevLayer Bytes, layer Bytes) Bytes {
-	return layer; // FIXME: Do something.
-	
 }
 
 func encodeData(data Bytes, key Bytes, nodeSize int, modulus UInt) Bytes {
