@@ -10,3 +10,5 @@ hugo/content/codeGen/main
 .DS_Store
 *.gen.go
 hugo/data/version.yml
+bin/
+pkg/

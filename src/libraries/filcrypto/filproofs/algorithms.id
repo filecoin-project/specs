@@ -77,10 +77,19 @@ type DRGCfg struct {
         ParentsAlgorithm enum {
             DRSample
         }
+
+        RNGAlgorith enum {
+            ChaCha20
+        }
     }
     Degree DRGDegree
     Seed DRGSeed
     Nodes DRGNodeCount
+}
+
+type DRG struct {
+     Config DRGCfg
+     Parents(Bytes, UInt) util.UInts
 }
 
 type ExpanderGraphCfg struct {

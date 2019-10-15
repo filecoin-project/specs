@@ -60,11 +60,14 @@ func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.Un
 
 	params := SDRParams();
 
+	drg := filproofs.DRG_I{}; // FIXME: Derive from params
+	
 	nodeSize := int(params.NodeSize().Size());
 	nodes := len(data) / nodeSize;
 	curveModulus := params.Curve().Modulus();
 	layers := int(params.Layers().Layers());
-	key := generateSDRKey(replicaID, nodes, layers, curveModulus);
+	keyLayers := generateSDRKeyLayers(drg, replicaID, nodes, layers, nodeSize, curveModulus);
+	key := keyLayers[len(keyLayers)-1];
 	
 	replica := encodeData(data, key, nodeSize, curveModulus);
 	
@@ -72,8 +75,49 @@ func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.Un
 	return &SealOutputs_I{}
 }
 
-func generateSDRKey(replicaID Bytes, nodes int, layers int, modulus UInt) Bytes {
-	return []byte{}
+func generateSDRKeyLayers(drg filproofs.DRG_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus UInt) []Bytes {
+	keyLayers := make([]Bytes, layers);
+
+	prevLayer := labelFirstLayer(drg, replicaID, nodes, nodeSize, modulus);
+	for i := 0; i < layers; i++ {
+		layer := make([]byte, nodes*nodeSize);
+		keyLayers[i] = labelLayer(drg, replicaID, prevLayer, layer);
+	}
+	return keyLayers;
+}
+
+func labelFirstLayer(drg filproofs.DRG_I, replicaID Bytes, nodes int, nodeSize int, modulus UInt) Bytes {
+	size := nodes * nodeSize;
+	labeled := make([]byte, size);
+	
+	for i := 0; i < nodes; i++ {
+		dependencies := make(Bytes, size);
+		
+		copy(dependencies, replicaID);
+
+		// FIXME: label first node
+		for parent := range drg.Parents(labeled, UInt(i)) {
+			dependencies = append(dependencies, labeled[parent])
+		}
+
+		labeled = append(labeled, generateLabel(dependencies)...);
+	}
+
+	return labeled;
+}
+
+func generateLabel(preimage Bytes) Bytes {
+	// TODO: Get KDF fn from the StackedDRG	
+	return KDF(preimage)
+}
+
+func KDF(elements Bytes) Bytes {
+	return elements; // FIXME: Do something.
+}
+
+func labelLayer(drg filproofs.DRG_I, replicaID, prevLayer Bytes, layer Bytes) Bytes {
+	return layer; // FIXME: Do something.
+	
 }
 
 func encodeData(data Bytes, key Bytes, nodeSize int, modulus UInt) Bytes {
@@ -92,11 +136,9 @@ func encodeData(data Bytes, key Bytes, nodeSize int, modulus UInt) Bytes {
 }
 
 func encodeNode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
-
 	// TODO: Allow this to vary by algorithm variant.
 	return addEncode(data, key, modulus, nodeSize);
 }
-
 
 func reverse(bytes []byte) {
 	for i, j := 0, len(bytes)-1; i < j; i, j = i+1, j-1 {
