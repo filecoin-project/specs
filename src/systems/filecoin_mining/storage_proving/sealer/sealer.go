@@ -1,10 +1,12 @@
 package sealer
 
+import "math/big"
+import "encoding/binary"
+import . "github.com/filecoin-project/specs/util"
+
 import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import . "github.com/filecoin-project/specs/util"
-import "math/big"
 
 func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
 	sid := si.SectorID()
@@ -49,6 +51,16 @@ func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID, seed 
 // type SealVerifyInfo struct {
 //     SectorID
 //     OnChain OnChainSealVerifyInfo
+// }
+
+// type OnChainSealVerifyInfo struct {
+//     UnsealedCID   UnsealedSectorCID  // CommD
+//     SealedCID     SealedSectorCID  // CommR
+//     RandomSeed    SealRandomSeed
+//     Proof         SealProof
+//     DealIDs       [deal.DealID]
+//     SectorNumber
+
 // }
 
 func SDRParams() *filproofs.StackedDRG_I {
@@ -115,11 +127,17 @@ func labelLayer(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, repli
 	return labels
 }
 
-func generateLabel(replicaID Bytes, node int, preimage Bytes) Bytes {
-	// TODO: Get KDF fn from the StackedDRG
+func generateLabel(replicaID Bytes, node int, dependencies Bytes) Bytes {
+	nodeBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(nodeBytes, uint64(node))
+
+	preimage := append(replicaID, nodeBytes...)
+	preimage = append(preimage, dependencies...)
+
 	return KDF(preimage)
 }
 
+// KDF is a key-derivation functions. In SDR, the derived key is used to generate labels directly, without encoding any data.
 func KDF(elements Bytes) Bytes {
 	return elements // FIXME: Do something.
 }
