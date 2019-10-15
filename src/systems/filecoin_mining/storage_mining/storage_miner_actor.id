@@ -23,14 +23,14 @@ type SectorExpirationQueue struct {
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
-    Sectors      {sector.SectorNumber: sector.SealCommitment}
-    SectorStates {sector.SectorNumber: SectorState}
-    ProvingSet   sector.CompactSectorSet
+    Sectors                {sector.SectorNumber: sector.SealCommitment}
+    SectorStates           {sector.SectorNumber: SectorState}
+    ProvingSet             sector.CompactSectorSet
 
     SectorExpirationQueue
 
     // contains mostly static info about this miner
-    Info                    &MinerInfo
+    Info                   &MinerInfo
 
     // TODO: add the DePledgeCollateral
     // TODO: add the Sectors

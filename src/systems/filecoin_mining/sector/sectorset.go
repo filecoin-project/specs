@@ -1,6 +1,11 @@
 package sector
 
-func (css *CompactSectorSet) Get() []SectorNumber {
+func (css *CompactSectorSet) GetOnes() []SectorNumber {
+	var sectorNo []SectorNumber
+	return sectorNo
+}
+
+func (css *CompactSectorSet) GetZeros() []SectorNumber {
 	var sectorNo []SectorNumber
 	return sectorNo
 }
