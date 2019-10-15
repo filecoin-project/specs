@@ -1,10 +1,10 @@
 type StackedDRGLayers struct {
-     Layers UInt
+    Layers UInt
 }
 type StackedDRGNodeSize struct {
-     Size UInt
+    Size UInt
 }
-          
+
 type DRGDepth struct {}
 type DRGFraction struct {}
 type DRGDegree struct {}
@@ -52,21 +52,19 @@ type ZigZagPoRep StackedDRG
 type SDRPoSpace StackedDRG
 
 type EllipticCurve struct {
-     Modulus UInt
+    Modulus UInt
 }
 
-type StackedDRGAlgorithm struct {
-}
+type StackedDRGAlgorithm struct {}
 
 type StackedDRG struct {
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
     Algorithm         struct {}
     DRGCfg
-    ExpanderGraphCfg    
+    ExpanderGraphCfg
     // invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
     Curve             EllipticCurve
-
 }
 
 type DRGCfg struct {
@@ -88,8 +86,8 @@ type DRGCfg struct {
 }
 
 type DRG struct {
-     Config DRGCfg
-     Parents(Bytes, UInt) util.UInts
+    Config DRGCfg
+    Parents(Bytes, UInt) util.UInts
 }
 
 type ExpanderGraphCfg struct {
@@ -113,6 +111,6 @@ type ExpanderGraphCfg struct {
 }
 
 type ExpanderGraph struct {
-     Config DRGCfg
-     Parents(Bytes, UInt) util.UInts
+    Config DRGCfg
+    Parents(Bytes, UInt) util.UInts
 }

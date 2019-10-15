@@ -51,73 +51,72 @@ func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID, seed 
 //     OnChain OnChainSealVerifyInfo
 // }
 
-func SDRParams() *filproofs.StackedDRG_I  {
-	return &filproofs.StackedDRG_I { }
+func SDRParams() *filproofs.StackedDRG_I {
+	return &filproofs.StackedDRG_I{}
 }
 
 func Seal(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID, data Bytes) *SealOutputs_I {
 	replicaID := ComputeReplicaID(sid, commD, randomSeed).As_replicaID()
 
-	params := SDRParams();
+	params := SDRParams()
 
-	drg := filproofs.DRG_I{}; // FIXME: Derive from params
-	expander := filproofs.ExpanderGraph_I{}; // FIXME: Derive from params
-	nodeSize := int(params.NodeSize().Size());
-	nodes := len(data) / nodeSize;
-	curveModulus := params.Curve().Modulus();
-	layers := int(params.Layers().Layers());
-	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus);
-	key := keyLayers[len(keyLayers)-1];
-	
-	replica := encodeData(data, key, nodeSize, curveModulus);
-	
+	drg := filproofs.DRG_I{}                // FIXME: Derive from params
+	expander := filproofs.ExpanderGraph_I{} // FIXME: Derive from params
+	nodeSize := int(params.NodeSize().Size())
+	nodes := len(data) / nodeSize
+	curveModulus := params.Curve().Modulus()
+	layers := int(params.Layers().Layers())
+	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
+	key := keyLayers[len(keyLayers)-1]
+
+	replica := encodeData(data, key, nodeSize, curveModulus)
+
 	_ = replica
 	return &SealOutputs_I{}
 }
 
 func generateSDRKeyLayers(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus UInt) []Bytes {
-	keyLayers := make([]Bytes, layers);
+	keyLayers := make([]Bytes, layers)
 
-	prevLayer := labelFirstLayer(drg, replicaID, nodes, nodeSize, modulus);
+	prevLayer := labelFirstLayer(drg, replicaID, nodes, nodeSize, modulus)
 	for i := 0; i < layers; i++ {
-		layer := make([]byte, nodes*nodeSize);
-		keyLayers[i] = labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer, layer);
+		layer := make([]byte, nodes*nodeSize)
+		keyLayers[i] = labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer, layer)
 	}
-	return keyLayers;
+	return keyLayers
 }
 
 // TODO: Make this a special case of labelLayer.
 func labelFirstLayer(drg *filproofs.DRG_I, replicaID Bytes, nodes int, nodeSize int, modulus UInt) Bytes {
-	size := nodes * nodeSize;
-	labeled := make([]byte, size);
-	
+	size := nodes * nodeSize
+	labeled := make([]byte, size)
+
 	for i := 0; i < nodes; i++ {
-		dependencies := make(Bytes, size);
-		
-		copy(dependencies, replicaID);
+		dependencies := make(Bytes, size)
+
+		copy(dependencies, replicaID)
 
 		// FIXME: label first node
 		for parent := range drg.Parents(labeled, UInt(i)) {
 			dependencies = append(dependencies, labeled[parent])
 		}
 
-		labeled = append(labeled, generateLabel(dependencies)...);
+		labeled = append(labeled, generateLabel(dependencies)...)
 	}
 
-	return labeled;
+	return labeled
 }
-
 
 func labelLayer(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, replicaID Bytes, nodeSize int, nodes int, prevLayer Bytes, layer Bytes) Bytes {
-	return layer; // FIXME: Do something.
+	return layer // FIXME: Do something.
 
-	size := nodes * nodeSize;
-	labeled := make([]byte, size);
-	
+	size := nodes * nodeSize
+	labeled := make([]byte, size)
+
 	for i := 0; i < nodes; i++ {
-		dependencies := make(Bytes, size);
-		
-		copy(dependencies, replicaID);
+		dependencies := make(Bytes, size)
+
+		copy(dependencies, replicaID)
 
 		// FIXME: label first node
 		for parent := range drg.Parents(labeled, UInt(i)) {
@@ -128,42 +127,40 @@ func labelLayer(drg *filproofs.DRG_I, expander *filproofs.ExpanderGraph_I, repli
 			dependencies = append(dependencies, labeled[parent])
 		}
 
-		
-		labeled = append(labeled, generateLabel(dependencies)...);
+		labeled = append(labeled, generateLabel(dependencies)...)
 	}
 
-	return labeled;
+	return labeled
 
 }
 
-
 func generateLabel(preimage Bytes) Bytes {
-	// TODO: Get KDF fn from the StackedDRG	
+	// TODO: Get KDF fn from the StackedDRG
 	return KDF(preimage)
 }
 
 func KDF(elements Bytes) Bytes {
-	return elements; // FIXME: Do something.
+	return elements // FIXME: Do something.
 }
 
 func encodeData(data Bytes, key Bytes, nodeSize int, modulus UInt) Bytes {
-	bigMod := big.NewInt(int64(modulus));
-	
+	bigMod := big.NewInt(int64(modulus))
+
 	if len(data) != len(key) {
 		panic("Key and data must be same length.")
 	}
 
 	encoded := make(Bytes, len(data))
 	for i := 0; i < len(data); i += nodeSize {
-		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], bigMod, nodeSize));
+		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], bigMod, nodeSize))
 	}
-	
+
 	return encoded
 }
 
 func encodeNode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 	// TODO: Allow this to vary by algorithm variant.
-	return addEncode(data, key, modulus, nodeSize);
+	return addEncode(data, key, modulus, nodeSize)
 }
 
 func reverse(bytes []byte) {
@@ -174,18 +171,18 @@ func reverse(bytes []byte) {
 
 func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 	// FIXME: Check correct endianness.
-	sum := new(big.Int);
-	reverse(data); // Reverse for little-endian 
-	reverse(key);  // Reverse for little-endian 
+	sum := new(big.Int)
+	reverse(data) // Reverse for little-endian
+	reverse(key)  // Reverse for little-endian
 
-	d := new(big.Int).SetBytes(data); // Big-endian
-	k := new(big.Int).SetBytes(key);  // Big-endian
-	
-	sum = sum.Add(d, k);
-	
-	result := new(big.Int);
-	resultBytes := result.Mod(sum, modulus).Bytes()[0:nodeSize]; // Big-endian
-	reverse(resultBytes); // Reverse for little-endian 
+	d := new(big.Int).SetBytes(data) // Big-endian
+	k := new(big.Int).SetBytes(key)  // Big-endian
 
-	return resultBytes; 
+	sum = sum.Add(d, k)
+
+	result := new(big.Int)
+	resultBytes := result.Mod(sum, modulus).Bytes()[0:nodeSize] // Big-endian
+	reverse(resultBytes)                                        // Reverse for little-endian
+
+	return resultBytes
 }
