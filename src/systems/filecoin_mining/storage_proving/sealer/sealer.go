@@ -28,12 +28,12 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 		rawValue: &SealOutputs_I{
 			ProofAuxTmp_: &sector.ProofAuxTmp_I{
 				PersistentAux_: &sector.ProofAux_I{
-					CommC_:                sealOutputs.CommC,
-					CommRLast_:            sealOutputs.CommRLast,
-					CachedMerkleTreePath_: sealOutputs.TreePath,
+					CommC_:                sealOutputs.CommC(),
+					CommRLast_:            sealOutputs.CommRLast(),
+					CachedMerkleTreePath_: sealOutputs.TreePath(),
 				},
 				CommD_: commD,
-				CommR_: sealOutputs.CommR,
+				CommR_: sealOutputs.CommR(),
 			},
 		},
 		which: SectorSealer_SealSector_FunRet_Case_so,

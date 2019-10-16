@@ -1,3 +1,6 @@
+import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
 type StackedDRGLayers struct {
     Layers UInt
 }
@@ -25,9 +28,7 @@ type SealAlgorithmArtifacts struct {
         // updates to public parameters go here
     }
 
-    SealSetupArtifacts struct {
-        // per-sector setup artifacts go here
-    }
+    SealSetupArtifacts
 
     // ProveArtifacts or
     ChallengeArtifacts struct {
@@ -37,6 +38,14 @@ type SealAlgorithmArtifacts struct {
     VerifyArtifacts struct {
         // inputs into verify() go here
     }
+}
+
+// per-sector setup artifacts go here   
+type SealSetupArtifacts struct {
+    CommR      sector.SealedSectorCID
+    CommC      sector.Commitment
+    CommRLast  sector.Commitment
+    TreePath   file.Path
 }
 
 type PoRep union {

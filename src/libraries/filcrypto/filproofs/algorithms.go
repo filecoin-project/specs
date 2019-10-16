@@ -18,14 +18,7 @@ func (exp *ExpanderGraph_I) Parents(layer Bytes, node UInt) []UInt {
 	return []UInt{} // FIXME
 }
 
-type SealOutputs struct {
-	CommR     sector.SealedSectorCID
-	CommC     sector.Commitment
-	CommRLast sector.Commitment
-	TreePath  file.Path
-}
-
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) SealOutputs {
+func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) SealSetupArtifacts {
 	replicaID := ComputeReplicaID(sid, commD)
 
 	// FIXME: Derive these from sdr.
@@ -45,23 +38,14 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 
 	commR, cachedMerkleTreePath := repHash(replica)
 
-	result := SealOutputs{
-		CommR:     SealedSectorCID(commR),
-		CommC:     sector.Commitment{},
-		CommRLast: sector.Commitment{},
-		TreePath:  cachedMerkleTreePath,
+	result := SealSetupArtifacts_I{
+		CommR_:     SealedSectorCID(commR),
+		CommC_:     sector.Commitment{},
+		CommRLast_: sector.Commitment{},
+		TreePath_:  cachedMerkleTreePath,
 	}
-	return result
+	return &result
 }
-
-// func (sdr *StackedDRG_I) CreateSealProof(layers BytesArray) (sector.SealedSectorCID, file.Path) {
-// 	commRLast, merkleTreeCache := repHash(layers[len(layers)-1])
-
-// 	//	commR = repCompress(commC, commRLast)
-// 	commR := commRLast // FIXME: This is wrong. Implement repCompress and uncomment above.
-
-// 	return SealedSectorCID(commR), merkleTreeCache
-// }
 
 func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomSeed, aux sector.ProofAuxTmp) sector.SealProof {
 	panic("TODO")
