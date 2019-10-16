@@ -22,22 +22,24 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	}
 
 	sdr := filproofs.SDRParams()
-	commR, commC, commRLast, proof, cachedTreePath := sdr.Seal(sid, commD, data)
+	sealOutputs := sdr.Seal(sid, commD, data)
 
 	return &SectorSealer_SealSector_FunRet_I{
 		rawValue: &SealOutputs_I{
 			SealInfo_: &sector.SealVerifyInfo_I{
 				SectorID_: sid,
 				OnChain_: &sector.OnChainSealVerifyInfo_I{
-					SealedCID_:   commR,
-					UnsealedCID_: commD,
-					Proof_:       proof,
+					SealedCID_: sealOutputs.CommR,
+					Proof_:     sealOutputs.Proof,
 				},
 			},
 			ProofAuxTmp_: &sector.ProofAuxTmp_I{
-				CommC_:                commC,
-				CommRLast_:            commRLast,
-				CachedMerkleTreePath_: cachedTreePath,
+				PersistentAux_: &sector.ProofAux_I{
+					CommC_:                sealOutputs.CommC,
+					CommRLast_:            sealOutputs.CommRLast,
+					CachedMerkleTreePath_: sealOutputs.TreePath,
+				},
+				CommD_: commD,
 			},
 		},
 		which: SectorSealer_SealSector_FunRet_Case_so,
@@ -46,7 +48,6 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 
 func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer_CreateSealProof_FunRet_I {
 	sid := si.SectorID()
-	commD := si.SealOutputs().SealInfo().OnChain().UnsealedCID()
 	randomSeed := si.SealOutputs().SealInfo().OnChain().RandomSeed()
 	layers := si.SealOutputs().ProofAuxTmp().Layers()
 
@@ -60,10 +61,9 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 			SealInfo_: &sector.SealVerifyInfo_I{
 				SectorID_: sid,
 				OnChain_: &sector.OnChainSealVerifyInfo_I{
-					SealedCID_:   sealedCID,
-					UnsealedCID_: commD,
-					RandomSeed_:  randomSeed,
-					Proof_:       proof,
+					SealedCID_:  sealedCID,
+					RandomSeed_: randomSeed,
+					Proof_:      proof,
 				},
 			},
 			ProofAux_: &sector.ProofAux_I{

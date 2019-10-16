@@ -20,7 +20,6 @@ type SealVerifyInfo struct {
 
 // OnChainSealVerifyInfo is the structure of information that must go on chain.
 type OnChainSealVerifyInfo struct {
-    UnsealedCID   UnsealedSectorCID  // CommD
     SealedCID     SealedSectorCID  // CommR
     RandomSeed    SealRandomSeed
     Proof         SealProof
@@ -41,11 +40,11 @@ type ProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    CommRLast             Commitment
-    CommC                 Commitment
+    PersistentAux         ProofAux
 
     // TODO: This may be a partially-cached tree.
     // this may be empty
+    CommD                 UnsealedSectorCID
     CachedMerkleTreePath  file.Path
     Layers                BytesArray
 }

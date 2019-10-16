@@ -18,7 +18,15 @@ func (exp *ExpanderGraph_I) Parents(layer Bytes, node UInt) []UInt {
 	return []UInt{} // FIXME
 }
 
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) (sector.SealedSectorCID, sector.Commitment, sector.Commitment, sector.SealProof, file.Path) {
+type SealOutputs struct {
+	CommR     sector.SealedSectorCID
+	CommC     sector.Commitment
+	CommRLast sector.Commitment
+	Proof     sector.SealProof
+	TreePath  file.Path
+}
+
+func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) SealOutputs {
 	replicaID := ComputeReplicaID(sid, commD)
 
 	// FIXME: Derive these from sdr.
@@ -40,7 +48,14 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 
 	var proof sector.SealProof
 
-	return SealedSectorCID(commR), sector.Commitment{}, sector.Commitment{}, proof, cachedMerkleTreePath
+	result := SealOutputs{
+		CommR:     SealedSectorCID(commR),
+		CommC:     sector.Commitment{},
+		CommRLast: sector.Commitment{},
+		Proof:     proof,
+		TreePath:  cachedMerkleTreePath,
+	}
+	return result
 }
 
 func (sdr *StackedDRG_I) CreateSealProof(layers BytesArray) (sector.SealedSectorCID, file.Path) {
