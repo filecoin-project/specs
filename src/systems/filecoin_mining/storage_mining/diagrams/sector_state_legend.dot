@@ -1,0 +1,40 @@
+digraph {
+  rankdir=LR
+  node [shape=plaintext]
+  subgraph cluster_01 {
+    // black: sm.CommitSector
+    // green: sm.SubmitPoSt - ActivateSectors
+    // blue: sm.DeclareFaults
+    // cyan: sm.RecoverFaults
+    // red: ca.CronTick -> sm.SpottedFaults
+    // gold: sm.SubmitPoSt/ca.CronTick - ExpireSectors
+    // magenta: -> sm.SubmitPoSt/ca.CronTick - MaxFaultCount
+    label = "Legend";
+    key [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+      <tr><td align="right" port="i1">sm.CommitSector</td></tr>
+      <tr><td align="right" port="i2">sm.SubmitPoSt - ActivateSectors</td></tr>
+      <tr><td align="right" port="i3">sm.DeclareFaults</td></tr>
+      <tr><td align="right" port="i4">sm.RecoverFaults</td></tr>
+      <tr><td align="right" port="i5">ca.CronTick - sm.SpottedFaults</td></tr>
+      <tr><td align="right" port="i6">sm.SubmitPoSt/ca.CronTick - ExpireSectors</td></tr>
+      <tr><td align="right" port="i7">sm.SubmitPoSt/ca.CronTick - MaxFaultCount</td></tr>
+
+      </table>>]
+    key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+      <tr><td port="i1">&nbsp;</td></tr>
+      <tr><td port="i2">&nbsp;</td></tr>
+      <tr><td port="i3">&nbsp;</td></tr>
+      <tr><td port="i4">&nbsp;</td></tr>
+      <tr><td port="i5">&nbsp;</td></tr>
+      <tr><td port="i6">&nbsp;</td></tr>
+      <tr><td port="i7">&nbsp;</td></tr>
+      </table>>]
+    key:i1:e -> key2:i1:w [color=black]
+    key:i2:e -> key2:i2:w [color=green]
+    key:i3:e -> key2:i3:w [color=blue]
+    key:i4:e -> key2:i4:w [color=cyan]
+    key:i5:e -> key2:i5:w [color=red]
+    key:i6:e -> key2:i6:w [color=gold]
+    key:i7:e -> key2:i7:w [color=magenta]
+  }
+}

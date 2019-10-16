@@ -1,0 +1,45 @@
+digraph sectoRecovering {
+  Compound=true
+  splines=ortho
+  ranksep=0.2
+  nodesep=2
+  node [shape=circle width=1.2 fixedsize=true]
+  edge [penwidth=2]
+  Cleared
+  subgraph cluster_0 {
+      label="Proving Set"
+      style=filled
+      color=grey60
+     Committed
+     Active
+     Recovering
+
+     subgraph cluster_1 {
+         label="Not Counted for Power"
+         style=filled
+         color=grey80
+         Committed
+         Recovering
+     }
+  }
+
+  // black: sm.CommitSector
+  // green: sm.SubmitPoSt - ActivateSectors
+  // blue: sm.DeclareFaults
+  // red: ca.CronTick -> sm.SpottedFaults
+  // gold: sm.SubmitPoSt/ca.CronTick - ExpireSectors
+  // magenta: sm.SubmitPoSt/ca.CronTick - MaxFaultCount
+  // cyan: sm.RecoverFaults
+  Cleared -> Committed [color="black"]
+  Committed -> Active [color="green"]
+  Active -> Failing [color="blue:red"]
+  Recovering -> Cleared [constraint=false color="magenta:gold"]
+  Failing -> Recovering [constraint=false color="cyan"]
+  Failing -> Cleared [constraint=false color="magenta:gold"]
+  Recovering -> Active [color="green"]
+  Committed -> Cleared [constraint=false color="gold"]
+  Committed -> Failing [color="blue:red"]
+  Active -> Cleared [constraint=false color="gold"]
+  Recovering -> Failing [color="blue:red"]
+
+}
