@@ -22,11 +22,11 @@ type _UnusedCompileAssert2 = [8 - unsafe.Sizeof(int(0))]byte
 type UVarint = uint64
 type Varint = int64
 type UInt = uint64
-type UInts = []uint64
+type UInts = []uint64 // Subject to change when array support comes.
 type Float = float64
 type Bytes = []byte
-type BytesArray = []Bytes
-type BytesKey = string // to use Bytes in map keys.
+type BytesArray = []Bytes // Subject to change when array support comes.
+type BytesKey = string    // to use Bytes in map keys.
 type BytesAmount = UVarint
 type String = string
 

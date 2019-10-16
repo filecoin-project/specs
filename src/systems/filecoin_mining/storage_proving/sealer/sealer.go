@@ -26,13 +26,6 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 
 	return &SectorSealer_SealSector_FunRet_I{
 		rawValue: &SealOutputs_I{
-			SealInfo_: &sector.SealVerifyInfo_I{
-				SectorID_: sid,
-				OnChain_: &sector.OnChainSealVerifyInfo_I{
-					SealedCID_: sealOutputs.CommR,
-					Proof_:     sealOutputs.Proof,
-				},
-			},
 			ProofAuxTmp_: &sector.ProofAuxTmp_I{
 				PersistentAux_: &sector.ProofAux_I{
 					CommC_:                sealOutputs.CommC,
@@ -40,6 +33,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CachedMerkleTreePath_: sealOutputs.TreePath,
 				},
 				CommD_: commD,
+				CommR_: sealOutputs.CommR,
 			},
 		},
 		which: SectorSealer_SealSector_FunRet_Case_so,
@@ -48,29 +42,26 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 
 func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer_CreateSealProof_FunRet_I {
 	sid := si.SectorID()
-	randomSeed := si.SealOutputs().SealInfo().OnChain().RandomSeed()
-	layers := si.SealOutputs().ProofAuxTmp().Layers()
+	randomSeed := si.RandomSeed()
+	auxTmp := si.SealOutputs().ProofAuxTmp()
+	aux := auxTmp.PersistentAux()
 
 	sdr := filproofs.SDRParams()
-	sealedCID, cachedMerkleTreePath := sdr.CreateSealProof(layers)
+	proof := sdr.CreateSealProof(randomSeed, auxTmp)
 
-	var proof sector.SealProof
+	onChain := sector.OnChainSealVerifyInfo_I{
+		SealedCID_:  auxTmp.CommR(),
+		RandomSeed_: si.RandomSeed(),
+		Proof_:      proof,
+	}
 
 	return &SectorSealer_CreateSealProof_FunRet_I{
 		rawValue: &CreateSealProofOutputs_I{
 			SealInfo_: &sector.SealVerifyInfo_I{
 				SectorID_: sid,
-				OnChain_: &sector.OnChainSealVerifyInfo_I{
-					SealedCID_:  sealedCID,
-					RandomSeed_: randomSeed,
-					Proof_:      proof,
-				},
+				OnChain_:  &onChain,
 			},
-			ProofAux_: &sector.ProofAux_I{
-				CommRLast_:            sector.Commitment{},
-				CommC_:                sector.Commitment{},
-				CachedMerkleTreePath_: cachedMerkleTreePath,
-			},
+			ProofAux_: aux,
 		},
 	}
 }

@@ -42,9 +42,8 @@ type ProofAux struct {
 type ProofAuxTmp struct {
     PersistentAux  ProofAux
 
-    // TODO: This may be a partially-cached tree.
-    // this may be empty
     CommD          UnsealedSectorCID
+    CommR          SealedSectorCID
     Layers         BytesArray
 }
 

@@ -19,8 +19,7 @@ type CreateSealProofInputs struct {
 }
 
 type SealOutputs struct {
-    SealInfo     sector.SealVerifyInfo
-    ProofAuxTmp  sector.ProofAuxTmp
+    ProofAuxTmp sector.ProofAuxTmp
 }
 
 type CreateSealProofOutputs struct {
