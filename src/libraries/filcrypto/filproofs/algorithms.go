@@ -172,6 +172,7 @@ func RepCompress_Blake2sHash(left Bytes, right Bytes) Blake2sHash {
 /// Binary Merkle-tree generation
 // RepHash<T>
 func RepHash_T(data Bytes) (T, file.Path) {
+	// Plan: define this in terms of RepCompress_T, then copy-paste changes into T-specific specializations, for now.
 	return T{}, file.Path("") // FIXME
 }
 

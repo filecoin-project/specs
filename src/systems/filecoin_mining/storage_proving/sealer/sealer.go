@@ -10,11 +10,11 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	sdr := filproofs.SDRParams()
 	sid := si.SectorID()
 
-	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(si.UnsealedPath()).As_commD())
-
 	data := make(Bytes, si.SealCfg().SectorSize())
 	f := file.FromPath(si.SealedPath())
 	length, _ := f.Read(data)
+
+	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(data).As_commD())
 
 	if UInt(length) != UInt(si.SealCfg().SectorSize()) {
 		return &SectorSealer_SealSector_FunRet_I{
@@ -71,7 +71,11 @@ func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_Veri
 	return &SectorSealer_VerifySeal_FunRet_I{}
 }
 
-func (s *SectorSealer_I) ComputeDataCommitment(unsealedPath file.Path) *SectorSealer_ComputeDataCommitment_FunRet_I {
-	// TODO: Generate merkle tree using appropriate hash.
-	return &SectorSealer_ComputeDataCommitment_FunRet_I{}
+func (s *SectorSealer_I) ComputeDataCommitment(data Bytes) *SectorSealer_ComputeDataCommitment_FunRet_I {
+	hash, _ := filproofs.RepHash_Blake2sHash(data)
+
+	return &SectorSealer_ComputeDataCommitment_FunRet_I{
+		rawValue: filproofs.UnsealedSectorCID(hash),
+		which:    SectorSealer_ComputeDataCommitment_FunRet_Case_commD,
+	}
 }
