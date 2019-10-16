@@ -40,13 +40,12 @@ type ProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    PersistentAux         ProofAux
+    PersistentAux  ProofAux
 
     // TODO: This may be a partially-cached tree.
     // this may be empty
-    CommD                 UnsealedSectorCID
-    CachedMerkleTreePath  file.Path
-    Layers                BytesArray
+    CommD          UnsealedSectorCID
+    Layers         BytesArray
 }
 
 type SealArguments struct {
