@@ -76,7 +76,7 @@ type DRGCfg struct {
             DRSample
         }
 
-        RNGAlgorith enum {
+        RNGAlgorithm enum {
             ChaCha20
         }
     }

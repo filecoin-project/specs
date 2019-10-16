@@ -16,14 +16,16 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	f := file.FromPath(si.SealedPath())
 	length, _ := f.Read(buf)
 
-	// TODO: How do we meant to handle errors in implementation methods? This could get tedious fast.
-
 	if UInt(length) != UInt(si.SealCfg().SectorSize()) {
-		panic("Sector file is wrong size.")
+		return &SectorSealer_SealSector_FunRet_I{
+			rawValue: "Sector file is wrong size",
+			which:    SectorSealer_SealSector_FunRet_Case_err,
+		}
 	}
 
 	return &SectorSealer_SealSector_FunRet_I{
 		rawValue: Seal(sid, commD, buf),
+		which:    SectorSealer_SealSector_FunRet_Case_so,
 	}
 }
 
