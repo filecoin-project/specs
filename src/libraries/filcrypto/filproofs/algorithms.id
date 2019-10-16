@@ -87,7 +87,7 @@ type DRGCfg struct {
 
 type DRG struct {
     Config DRGCfg
-    Parents(Bytes, UInt) util.UInts
+    Parents(Bytes, UInt) UInts
 }
 
 type ExpanderGraphCfg struct {
@@ -112,5 +112,5 @@ type ExpanderGraphCfg struct {
 
 type ExpanderGraph struct {
     Config DRGCfg
-    Parents(Bytes, UInt) util.UInts
+    Parents(Bytes, UInt) UInts
 }

@@ -47,7 +47,7 @@ type ProofAuxTmp struct {
     // TODO: This may be a partially-cached tree.
     // this may be empty
     CachedMerkleTreePath  file.Path
-    Layers                util.BytesArray
+    Layers                BytesArray
 }
 
 type SealArguments struct {
