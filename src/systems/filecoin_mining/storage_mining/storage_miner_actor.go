@@ -4,18 +4,47 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 
-var CONSECUTIVE_FAULT_COUNT_LIMIT uint8
-
 // If a Post is missed (either due to faults being not declared on time or
-// because the miner run out of time, every sector is reported as faulty
+// because the miner run out of time, every sector is reported as failing
 // for the current proving period.
-func (sm *StorageMinerActor_I) OnFaultBeingSpotted() {
-	// var allFaultBitField FaultSet
-	// TODO: ideally, both DeclareFault and OnFaultBeingSpotted call a method "ApplyFaultConsequences"
-	// DeclareFaults(allFaultBitField)
-	// slash pledge collateral
+func (sm *StorageMinerActor_I) CronAction() {
+	// TODO: detemine how much pledge collateral to slash
+	// TODO: SendMessage(spa.SlashPledgeCollateral)
+	var powerUpdate uint64 = 0
 
-	panic("TODO")
+	for sectorNo, _ := range sm.Sectors() {
+		state := sm.SectorStates()[sectorNo]
+		switch state.StateNumber {
+		case SectorCommittedStateNo:
+			// SlashStorageDealCollateral
+			// SendMessage(sma.slashStorageDealCollateral(sc.DealIDs()))
+			sm.failSector(sectorNo)
+		case SectorRecoveringStateNo:
+			// SlashStorageDealCollateral
+			// SendMessage(sma.slashStorageDealCollateral(sc.DealIDs()))
+			sm.failSector(sectorNo)
+			newFaultCount := sm.SectorStates()[sectorNo].FaultCount
+			if newFaultCount > MAX_CONSECUTIVE_FAULT_COUNT {
+				// TODO: heavy penalization: slash pledge collateral and delete sector
+				// TODO: SendMessage(SPA.SlashPledgeCollateral)
+				sm.clearSector(sectorNo)
+			}
+		case SectorActiveStateNo:
+			// SlashStorageDealCollateral
+			// SendMessage(sma.slashStorageDealCollateral(sc.DealIDs()))
+			sm.failSector(sectorNo)
+			powerUpdate = powerUpdate - sm.Info().SectorSize()
+		case SectorFailingStateNo:
+			sm.checkMFC(sectorNo)
+		default:
+			// TODO: proper failure
+			panic("Invalid sector state in CronAction")
+		}
+	}
+
+	// Reset Proving Period and report power updates
+	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
+	// SendMessage(sma.UpdatePower(powerUpdate))
 }
 
 func (sm *StorageMinerActor_I) verifyPoStSubmission(postSubmission poster.PoStSubmission) bool {
@@ -37,10 +66,42 @@ func (sm *StorageMinerActor_I) verifyPoStSubmission(postSubmission poster.PoStSu
 	return true
 }
 
-func (sm *StorageMinerActor_I) purgeSectorNumber(sectorNo sector.SectorNumber) {
+// move Sector from Active/Committed/Recovering/Failing
+// into Cleared State which means deleting the Sector from state
+// remove SectorNumber from all states on chain
+func (sm *StorageMinerActor_I) clearSector(sectorNo sector.SectorNumber) {
 	delete(sm.Sectors(), sectorNo)
 	delete(sm.SectorStates(), sectorNo)
 	sm.ProvingSet_.Remove(sectorNo)
+}
+
+// move Sector from Committed/Recovering into Active State
+// reset FaultCount to zero
+func (sm *StorageMinerActor_I) activateSector(sectorNo sector.SectorNumber) {
+	sm.SectorStates()[sectorNo] = SectorActive()
+}
+
+// move Sector from Active/Committed/Recovering into Failing State
+// and increment FaultCount
+func (sm *StorageMinerActor_I) failSector(sectorNo sector.SectorNumber) {
+	newFaultCount := sm.SectorStates()[sectorNo].FaultCount + 1
+	sm.ProvingSet_.Remove(sectorNo)
+	sm.SectorStates()[sectorNo] = SectorFailing(newFaultCount)
+}
+
+// increment FaultCount and check if greater than MaxFaultCount
+// move from Failing to Cleared State if so
+func (sm *StorageMinerActor_I) checkMFC(sectorNo sector.SectorNumber) {
+	newFaultCount := sm.SectorStates()[sectorNo].FaultCount + 1
+	if newFaultCount > MAX_CONSECUTIVE_FAULT_COUNT {
+		// TODO: heavy penalization: slash pledge collateral and delete sector
+		// TODO: SendMessage(SPA.SlashPledgeCollateral)
+		sm.clearSector(sectorNo)
+	} else {
+		// increment FaultCount
+		// TODO: SendMessage(sma.SlashStorageDealCollateral)
+		sm.SectorStates()[sectorNo] = SectorFailing(newFaultCount)
+	}
 }
 
 // Decision is to currently account for power based on sector
@@ -60,10 +121,10 @@ func (sm *StorageMinerActor_I) purgeSectorNumber(sectorNo sector.SectorNumber) {
 //   - Process Active Sectors (pay miners)
 // - Process ProvingSet.GetZeros()
 //	   - increment FaultCount
-//     - clear Sector and slash pledge collateral if count >= CONSECUTIVE_FAULT_COUNT_LIMIT
+//     - clear Sector and slash pledge collateral if count > MAX_CONSECUTIVE_FAULT_COUNT
 // - Process Expired Sectors (settle deals and return storage collateral to miners)
 //     - State Transition
-//       - Faulted / Recovering / Active / Committed -> Cleared
+//       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, SectorStates, ProvingSet
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) {
 	// Verify correct PoSt Submission
@@ -83,11 +144,11 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 		state := sm.SectorStates()[sectorNo]
 		switch state.StateNumber {
 		case SectorCommittedStateNo:
-			sm.SectorStates()[sectorNo] = SectorActive()
+			sm.activateSector(sectorNo)
 			powerUpdate = powerUpdate + sm.Info().SectorSize()
 		case SectorRecoveringStateNo:
 			// Note: SectorState.FaultCount is also reset to zero here
-			sm.SectorStates()[sectorNo] = SectorActive()
+			sm.activateSector(sectorNo)
 			powerUpdate = powerUpdate + sm.Info().SectorSize()
 		case SectorActiveStateNo:
 			// Process payment in all active deals
@@ -101,24 +162,15 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	}
 
 	// Process ProvingSet.GetZeros()
-	// ProvingSet.GetZeros() contains SectorFaulted
+	// ProvingSet.GetZeros() contains SectorFailing
 	// SectorRecovering is Proving and hence will not be in GetZeros()
-	// heavy penalty if faulted for more than or equal to CONSECUTIVE_FAULT_COUNT_LIMIT
+	// heavy penalty if Failing for more than or equal to MAX_CONSECUTIVE_FAULT_COUNT
 	// otherwise increment FaultCount in SectorStates()
 	for _, sectorNo := range sm.ProvingSet_.GetZeros() {
 		state := sm.SectorStates()[sectorNo]
-		newFaultCount := state.FaultCount + 1
 		switch state.StateNumber {
-		case SectorFaultedStateNo:
-			if newFaultCount >= CONSECUTIVE_FAULT_COUNT_LIMIT {
-				// TODO: heavy penalization: slash pledge collateral and delete sector
-				// TODO: SendMessage(SPA.SlashPledgeCollateral)
-				sm.purgeSectorNumber(sectorNo)
-			} else {
-				// increment FaultCount
-				// TODO: SendMessage(sma.SlashStorageDealCollateral)
-				sm.SectorStates()[sectorNo] = SectorFaulted(newFaultCount)
-			}
+		case SectorFailingStateNo:
+			sm.checkMFC(sectorNo)
 		default:
 			// TODO: proper failure
 			panic("Invalid sector state in ProvingSet.GetZeros")
@@ -126,8 +178,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	}
 
 	// Process Expiration
-	// State change: Active / Committed / Recovering / Faulted -> Cleared
-	var numExpiredActiveSectors = uint64(0)
+	// State change: Active / Committed / Recovering / Failing -> Cleared
 	var currEpoch block.ChainEpoch // TODO: replace this with rt.State().Epoch()
 
 	expirationPeek := sm.SectorExpirationQueue().Peek().Expiration()
@@ -137,28 +188,28 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 		state := sm.SectorStates()[expiredSectorNo]
 		// sc := sm.Sectors()[expiredSectorNo]
 		switch state.StateNumber {
-		case SectorCommittedStateNo:
-			// return storage deal collateral
-			// delete SectorNumber from Sectors, SectorStates, ProvingSet
-			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
-			sm.purgeSectorNumber(expiredSectorNo)
-		case SectorRecoveringStateNo:
-			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
-			sm.purgeSectorNumber(expiredSectorNo)
+		// case SectorCommittedStateNo:
+		// return storage deal collateral
+		// delete SectorNumber from Sectors, SectorStates, ProvingSet
+		// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
+		// sm.clearSector(expiredSectorNo)
+		// case SectorRecoveringStateNo:
+		// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
+		// sm.clearSector(expiredSectorNo)
 		case SectorActiveStateNo:
 			// Note: in order to verify if something was stored in the past, one must
-			// scan the chain. SectorNumbers can be re-used.
+			// scan the chain. SectorNumber can be re-used.
 
 			// Settle deals
 			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
-			sm.purgeSectorNumber(expiredSectorNo)
+			sm.clearSector(expiredSectorNo)
+			powerUpdate = powerUpdate - sm.Info().SectorSize()
 
-			numExpiredActiveSectors = numExpiredActiveSectors + 1
-		case SectorFaultedStateNo:
+		case SectorFailingStateNo:
 			// TODO: check if there is any fault that we should handle here
-			// If a SectorFaulted Expires, return remaining StorageDealCollateral and remove sector
+			// If a SectorFailing Expires, return remaining StorageDealCollateral and remove sector
 			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
-			sm.purgeSectorNumber(expiredSectorNo)
+			sm.clearSector(expiredSectorNo)
 		default:
 			// TODO: proper failure
 			panic("Invalid sector state in SectorExpirationQueue")
@@ -170,7 +221,6 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 
 	// Reset Proving Period and report power updates
 	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
-	// powerUpdate = powerUpdate - numExpiredSectors * sm.Info().SectorSize()
 	// SendMessage(sma.UpdatePower(powerUpdate))
 
 	// Return PledgeCollateral
@@ -178,9 +228,9 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 }
 
 // RecoverFaults checks if miners have sufficent collateral
-// and adds SectorFaulted into SectorRecovering
+// and adds SectorFailing into SectorRecovering
 // - State Transition
-//   - Faulted -> Recovering with the same FaultCount
+//   - Failing -> Recovering with the same FaultCount
 // - Add SectorNumber to ProvingSet
 // Note that power is not updated until it is active
 func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorSet) {
@@ -188,7 +238,7 @@ func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorS
 	for _, sectorNo := range recoveringSet.GetOnes() {
 		state := sm.SectorStates()[sectorNo]
 		switch state.StateNumber {
-		case SectorFaultedStateNo:
+		case SectorFailingStateNo:
 			// Check if miners have sufficient balances in sma
 			// SendMessage(sma.PublishStorageDeals) or sma.ResumeStorageDeals?
 			// throw if miner cannot cover StorageDealCollateral
@@ -206,36 +256,32 @@ func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorS
 // DeclareFaults penalizes miners (slashStorageDealCollateral and suspendPower)
 // TODO: decide how much storage collateral to slash
 // - State Transition
-//   - Active / Commited / Recovering -> Faulted
+//   - Active / Commited / Recovering -> Failing
 // - Update SectorStates
 // - Remove Active / Commited / Recovering from ProvingSet
 func (sm *StorageMinerActor_I) DeclareFaults(faultSet sector.CompactSectorSet) {
 
 	var powerUpdate uint64 = 0
 
-	// get all SectorNumber marked as faulted by faultSet
+	// get all SectorNumber marked as Failing by faultSet
 	for _, sectorNo := range faultSet.GetOnes() {
 		state := sm.SectorStates()[sectorNo]
-		newFaultCount := state.FaultCount + 1
 		// sc := sm.Sectors()[sectorNo]
 
 		switch state.StateNumber {
 		case SectorActiveStateNo:
 			// SlashStorageDealCollateral
 			// SendMessage(sma.slashStorageDealCollateral(sc.DealIDs()))
-			sm.ProvingSet_.Remove(sectorNo)
-			sm.SectorStates()[sectorNo] = SectorFaulted(newFaultCount)
+			sm.failSector(sectorNo)
 			powerUpdate = powerUpdate - sm.Info().SectorSize()
 		case SectorCommittedStateNo:
 			// SlashStorageDealCollateral
 			// SendMessage(sma.slashStorageDealCollateral(sc.DealIDs()))
-			sm.ProvingSet_.Remove(sectorNo)
-			sm.SectorStates()[sectorNo] = SectorFaulted(newFaultCount)
+			sm.failSector(sectorNo)
 		case SectorRecoveringStateNo:
 			// SlashStorageDealCollateral
 			// SendMessage(sma.slashStorageDealCollateral(sc.DealIDs()))
-			sm.ProvingSet_.Remove(sectorNo)
-			sm.SectorStates()[sectorNo] = SectorFaulted(newFaultCount)
+			sm.failSector(sectorNo)
 		default:
 			// TODO: proper failure
 			panic("Invalid sector state in DeclareFaults")

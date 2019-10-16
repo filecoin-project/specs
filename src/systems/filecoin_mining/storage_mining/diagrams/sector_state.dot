@@ -25,21 +25,35 @@ digraph sectoRecovering {
 
   // black: sm.CommitSector
   // green: sm.SubmitPoSt - ActivateSectors
-  // blue: sm.DeclareFaults
-  // red: ca.CronTick -> sm.SpottedFaults
-  // gold: sm.SubmitPoSt/ca.CronTick - ExpireSectors
-  // magenta: sm.SubmitPoSt/ca.CronTick - MaxFaultCount
+  // orange: sm.DeclareFaults - sm.FailSector
+  // red: sm.CronAction - sm.FailSector
   // cyan: sm.RecoverFaults
+  // blue: sm.SubmitPoSt - Expiration - ClearSector
+  // magenta: sm.SubmitPoSt - MaxFCount - ClearSector
+  // purple: sm.CronAction - MaxFCount - ClearSector
+
   Cleared -> Committed [color="black"]
   Committed -> Active [color="green"]
-  Active -> Failing [color="blue:red"]
-  Recovering -> Cleared [constraint=false color="magenta:gold"]
-  Failing -> Recovering [constraint=false color="cyan"]
-  Failing -> Cleared [constraint=false color="magenta:gold"]
   Recovering -> Active [color="green"]
-  Committed -> Cleared [constraint=false color="gold"]
-  Committed -> Failing [color="blue:red"]
-  Active -> Cleared [constraint=false color="gold"]
-  Recovering -> Failing [color="blue:red"]
+
+  // either declare Fault or miss PoSt
+  Active -> Failing [color="red:orange"]
+
+  // only miss PoSt, otherwise PoSt will move Recovering to Active
+  // Recovering -> Cleared [constraint=false color="magenta"]
+  // only miss PoSt, otherwise PoSt will move Committed to Active
+  // Committed -> Cleared [constraint=false color="magenta"]
+
+  Failing -> Recovering [constraint=false color="cyan"]
+
+  // only submit PoSt and expire, otherwise will move to Failing
+  Active -> Cleared [constraint=false color="blue"]
+
+  // either miss PoSt (MFC) or submit PoSt (still in FaultSet) expire/MFC
+  Failing -> Cleared [constraint=false color="magenta:purple:blue"]
+
+  // either declare fault or miss PoSt
+  Committed -> Failing [color="red:orange"]
+  Recovering -> Failing [color="red:orange"]
 
 }
