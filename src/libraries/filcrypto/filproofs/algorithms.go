@@ -40,7 +40,16 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 
 	var proof sector.SealProof
 
-	return sector.SealedSectorCID(commR), sector.Commitment{}, sector.Commitment{}, proof, cachedMerkleTreePath
+	return SealedSectorCID(commR), sector.Commitment{}, sector.Commitment{}, proof, cachedMerkleTreePath
+}
+
+func (sdr *StackedDRG_I) CreateSealProof(layers BytesArray) (sector.SealedSectorCID, file.Path) {
+	commRLast, merkleTreeCache := repHash(layers[len(layers)-1])
+
+	//	commR = repCompress(commC, commRLast)
+	commR := commRLast // FIXME: This is wrong. Implement repCompress and uncomment above.
+
+	return SealedSectorCID(commR), merkleTreeCache
 }
 
 func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes {
@@ -77,10 +86,6 @@ func encodeData(data Bytes, key Bytes, nodeSize int, modulus UInt) Bytes {
 	}
 
 	return encoded
-}
-
-func repHash(data Bytes) (PedersenHash, file.Path) {
-	return Bytes{}, file.Path("") // FIXME
 }
 
 func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes, nodeSize int, nodes int, prevLayer Bytes) Bytes {
@@ -143,6 +148,20 @@ func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 
 	return littleEndianBytesFromBigInt(result, nodeSize)
 }
+
+func repHash(data Bytes) (PedersenHash, file.Path) {
+	return Bytes{}, file.Path("") // FIXME
+}
+
+func UnsealedSectorCID(h Blake2sHash) sector.UnsealedSectorCID {
+	panic("not implemented -- re-arrange bits")
+}
+
+func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
+	panic("not implemented -- re-arrange bits")
+}
+
+// Utilities
 
 func reverse(bytes []byte) {
 	for i, j := 0, len(bytes)-1; i < j; i, j = i+1, j-1 {

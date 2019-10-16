@@ -47,10 +47,31 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer_CreateSealProof_FunRet_I {
 	sid := si.SectorID()
 	commD := si.SealOutputs().SealInfo().OnChain().UnsealedCID()
+	randomSeed := si.SealOutputs().SealInfo().OnChain().RandomSeed()
 	layers := si.SealOutputs().ProofAuxTmp().Layers()
 
+	sdr := filproofs.SDRParams()
+	sealedCID, cachedMerkleTreePath := sdr.CreateSealProof(layers)
+
+	var proof sector.SealProof
+
 	return &SectorSealer_CreateSealProof_FunRet_I{
-		rawValue: CreateSealProof(sid, si.RandomSeed(), commD, layers[len(layers)-1]),
+		rawValue: &CreateSealProofOutputs_I{
+			SealInfo_: &sector.SealVerifyInfo_I{
+				SectorID_: sid,
+				OnChain_: &sector.OnChainSealVerifyInfo_I{
+					SealedCID_:   sealedCID,
+					UnsealedCID_: commD,
+					RandomSeed_:  randomSeed,
+					Proof_:       proof,
+				},
+			},
+			ProofAux_: &sector.ProofAux_I{
+				CommRLast_:            sector.Commitment{},
+				CommC_:                sector.Commitment{},
+				CachedMerkleTreePath_: cachedMerkleTreePath,
+			},
+		},
 	}
 }
 
@@ -61,52 +82,4 @@ func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_Veri
 func (s *SectorSealer_I) ComputeDataCommitment(unsealedPath file.Path) *SectorSealer_ComputeDataCommitment_FunRet_I {
 	// TODO: Generate merkle tree using appropriate hash.
 	return &SectorSealer_ComputeDataCommitment_FunRet_I{}
-}
-
-func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) *SectorSealer_ComputeReplicaID_FunRet_I {
-	_, _ = sid.MinerID(), (sid.Number())
-
-	// FIXME: Implement
-	return &SectorSealer_ComputeReplicaID_FunRet_I{}
-}
-
-func UnsealedSectorCID(h filproofs.Blake2sHash) sector.UnsealedSectorCID {
-	panic("not implemented -- re-arrange bits")
-}
-
-func SealedSectorCID(h filproofs.PedersenHash) sector.SealedSectorCID {
-	panic("not implemented -- re-arrange bits")
-}
-
-func SDRParams() *filproofs.StackedDRG_I {
-	return &filproofs.StackedDRG_I{}
-}
-
-func CreateSealProof(sid sector.SectorID, randomSeed sector.SealRandomSeed, commD sector.UnsealedSectorCID, replica Bytes) *CreateSealProofOutputs_I {
-	var cachedMerkleTreePath file.Path // FIXME: get this
-
-	commR, cachedMerkleTreePath := repHash(replica)
-
-	var proof sector.SealProof
-
-	return &CreateSealProofOutputs_I{
-		SealInfo_: &sector.SealVerifyInfo_I{
-			SectorID_: sid,
-			OnChain_: &sector.OnChainSealVerifyInfo_I{
-				SealedCID_:   SealedSectorCID(commR),
-				UnsealedCID_: commD,
-				RandomSeed_:  randomSeed,
-				Proof_:       proof,
-			},
-		},
-		ProofAux_: &sector.ProofAux_I{
-			CommRLast_:            sector.Commitment{},
-			CommC_:                sector.Commitment{},
-			CachedMerkleTreePath_: cachedMerkleTreePath,
-		},
-	}
-}
-
-func repHash(data Bytes) (filproofs.PedersenHash, file.Path) {
-	return Bytes{}, file.Path("") // FIXME
 }
