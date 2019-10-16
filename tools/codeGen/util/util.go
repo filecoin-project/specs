@@ -29,6 +29,7 @@ type BytesArray = []Bytes // Subject to change when array support comes.
 type BytesKey = string    // to use Bytes in map keys.
 type BytesAmount = UVarint
 type String = string
+type T = struct{} // For use in generic definitions.
 
 func Assert(b bool) {
 	if !b {

@@ -36,7 +36,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 
 	var cachedMerkleTreePath file.Path // FIXME: get this
 
-	commR, cachedMerkleTreePath := repHash(replica)
+	commR, cachedMerkleTreePath := RepHash_PedersenHash(replica)
 
 	result := SealSetupArtifacts_I{
 		CommR_:     SealedSectorCID(commR),
@@ -148,9 +148,44 @@ func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 	return littleEndianBytesFromBigInt(result, nodeSize)
 }
 
-func repHash(data Bytes) (PedersenHash, file.Path) {
+////////////////////////////////////////////////////////////////////////////////
+/// Generic Hashing and Merkle Tree generation
+
+/// Binary hash compression.
+// RepCompress<T>
+func RepCompress_T(left Bytes, right Bytes) T {
+	return T{}
+}
+
+// RepCompress<PedersenHash>
+func RepCompress_PedersenHash(left Bytes, right Bytes) PedersenHash {
+	return PedersenHash{}
+}
+
+// RepCompress<Blake2sHash>
+func RepCompress_Blake2sHash(left Bytes, right Bytes) Blake2sHash {
+	return Blake2sHash{}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/// Binary Merkle-tree generation
+// RepHash<T>
+func RepHash_T(data Bytes) (T, file.Path) {
+	return T{}, file.Path("") // FIXME
+}
+
+// RepHash<PedersenHash>
+func RepHash_PedersenHash(data Bytes) (PedersenHash, file.Path) {
+	return PedersenHash{}, file.Path("") // FIXME
+}
+
+//  RepHash<Blake2sHash>
+func RepHash_Blake2sHash(data Bytes) (Blake2sHash, file.Path) {
 	return Bytes{}, file.Path("") // FIXME
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 func UnsealedSectorCID(h Blake2sHash) sector.UnsealedSectorCID {
 	panic("not implemented -- re-arrange bits")

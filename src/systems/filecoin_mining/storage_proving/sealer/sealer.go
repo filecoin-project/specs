@@ -7,7 +7,9 @@ import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
+	sdr := filproofs.SDRParams()
 	sid := si.SectorID()
+
 	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(si.UnsealedPath()).As_commD())
 
 	data := make(Bytes, si.SealCfg().SectorSize())
@@ -21,7 +23,6 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 		}
 	}
 
-	sdr := filproofs.SDRParams()
 	sealOutputs := sdr.Seal(sid, commD, data)
 
 	return &SectorSealer_SealSector_FunRet_I{
