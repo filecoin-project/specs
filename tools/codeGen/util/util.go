@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"log"
+	big "math/big"
 	"unsafe"
 )
 
@@ -12,8 +13,8 @@ type CID struct {
 }
 
 // TODO: finish
-type BigInt struct {
-}
+// type BigInt struct {
+// }
 
 // Check that sizeof(int) == 8 (we only support 64-bit builds for now)
 type _UnusedCompileAssert1 = [unsafe.Sizeof(int(0)) - 8]byte
@@ -24,6 +25,7 @@ type Varint = int64
 type UInt = uint64
 type UInts = []uint64 // Subject to change when array support comes.
 type Float = float64
+type BigInt = big.Int
 type Bytes = []byte
 type BytesArray = []Bytes // Subject to change when array support comes.
 type BytesKey = string    // to use Bytes in map keys.

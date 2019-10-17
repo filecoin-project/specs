@@ -64,10 +64,10 @@ type ZigZagPoRep StackedDRG
 type SDRPoSpace StackedDRG
 
 type EllipticCurve struct {
-    FieldModulus UInt
+    FieldModulus &BigInt
 }
 
-type StackedDRGAlgorithm struct {}
+//type StackedDRG_Algorithm struct {}
 
 type StackedDRG struct {
     Layers            StackedDRGLayers

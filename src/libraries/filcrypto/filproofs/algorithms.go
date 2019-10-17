@@ -1,6 +1,6 @@
 package filproofs
 
-import "math/big"
+import big "math/big"
 import "encoding/binary"
 import . "github.com/filecoin-project/specs/util"
 
@@ -10,6 +10,35 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 type Blake2sHash Bytes32
 type PedersenHash Bytes32
 type Bytes32 Bytes
+
+func SDRParams() *StackedDRG_I {
+	fieldModulus := new(big.Int)
+	// TODO: Bridge constants with orient model.
+	// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
+	fieldModulus.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
+
+	return &StackedDRG_I{
+		Layers_: &StackedDRGLayers_I{
+			// TODO: Get correct values. Interpolate from orient?
+			Layers_: 10,
+		},
+		NodeSize_: &StackedDRGNodeSize_I{
+			Size_: 32,
+		},
+		Algorithm_: &StackedDRG_Algorithm_I{},
+		DRGCfg_: &DRGCfg_I{
+			Algorithm_: &DRGCfg_Algorithm_I{
+				ParentsAlgorithm_: &DRGCfg_Algorithm_ParentsAlgorithm_I{
+					rawValue: DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{},
+					which:    DRGCfg_Algorithm_ParentsAlgorithm_Case_DRSample,
+				},
+			},
+		},
+		Curve_: &EllipticCurve_I{
+			FieldModulus_: *fieldModulus,
+		},
+	}
+}
 
 func (drg *DRG_I) Parents(layer Bytes, node UInt) []UInt {
 	return []UInt{} // FIXME
@@ -32,7 +61,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
 	key := keyLayers[len(keyLayers)-1]
 
-	replica := encodeData(data, key, nodeSize, curveModulus)
+	replica := encodeData(data, key, nodeSize, &curveModulus)
 	commRLast, commRLastTreePath := RepHash_PedersenHash(replica)
 	commC, commCTreePath := computeCommC(keyLayers, nodeSize)
 	commR := RepCompress_PedersenHash(commC, commRLast)
@@ -90,11 +119,7 @@ func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes
 	return Bytes32{}
 }
 
-func SDRParams() *StackedDRG_I {
-	return &StackedDRG_I{}
-}
-
-func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus UInt) []Bytes {
+func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus BigInt) []Bytes {
 	keyLayers := make([]Bytes, layers)
 	var prevLayer Bytes
 
@@ -104,16 +129,14 @@ func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes
 	return keyLayers
 }
 
-func encodeData(data Bytes, key Bytes, nodeSize int, modulus UInt) Bytes {
-	bigMod := big.NewInt(int64(modulus))
-
+func encodeData(data Bytes, key Bytes, nodeSize int, modulus *BigInt) Bytes {
 	if len(data) != len(key) {
 		panic("Key and data must be same length.")
 	}
 
 	encoded := make(Bytes, len(data))
 	for i := 0; i < len(data); i += nodeSize {
-		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], bigMod, nodeSize))
+		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], modulus, nodeSize))
 	}
 
 	return encoded
