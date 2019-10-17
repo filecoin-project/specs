@@ -105,7 +105,7 @@ func hashColumn(column Bytes) PedersenHash {
 	return WideRepCompress_PedersenHash(column)
 }
 
-func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomSeed, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
 	//numChallenges := 12345 // FIXME
 	//challenges := GeneratePoRepChallenges(randomSeed, numChallenges, )
 

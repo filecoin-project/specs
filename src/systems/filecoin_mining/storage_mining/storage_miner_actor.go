@@ -335,9 +335,9 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	// verify and drop, only SealCommitments{CommD, CommR, DealIDs} on chain
 	// TODO: @porcuquine verifies
 	sealCommitment := &sector.SealCommitment_I{
-		UnsealedCID_: onChainInfo.UnsealedCID(),
-		SealedCID_:   onChainInfo.SealedCID(),
-		DealIDs_:     onChainInfo.DealIDs(),
+		// UnsealedCID_: onChainInfo.UnsealedCID(), // no longer need this? remove from SealCommitment?
+		SealedCID_: onChainInfo.SealedCID(),
+		DealIDs_:   onChainInfo.DealIDs(),
 		// Expiration_:  lastDealExpiration,
 	}
 
