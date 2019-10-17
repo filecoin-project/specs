@@ -36,7 +36,7 @@ At a high level, `ChainSync` does the following:
   - Step 3. Graphsync the `StateTree`
 - **Part 4: Catch up to the chain  (`CHAIN_CATCHUP`)**
   - Step 1. Maintain a set of `TargetHeads`, and select the `BestTargetHead` from it
-  - Step 2. Synchronize to the latest heads observed, validating blocks towards them
+  - Step 2. Synchronize to the latest heads observed, validating blocks towards them (requesting intermediate points)
   - Step 3. As validation progresses, `TargetHeads` and `BestTargetHead` will likely change
   - Step 4. Finish when node has "caught up" with `BestTargetHead` (retrieved all the state, linked to local chain, validated all the blocks, etc).
 - **Part 5: Stay in sync, and participate in block propagation (`CHAIN_FOLLOW`)**
@@ -182,84 +182,6 @@ State Machine:
 
 {{< diagram src="chainsync_fsm.dot.svg" title="ChainSync State Machine" >}}
 
-## Details for all states:
-
-### Block Fetching and Validation
-
-- `ChainSync` selects and maintains a set of the most likely heads to be correct from among those received
-  via `BlockPubsub`. As more blocks are received, the set of `BestHeads` is reevaluated.
-- `ChainSync` fetches `Blocks`, `Messages`, and `StateTree` through the `Graphsync` protocol.
-- `ChainSync` maintains sets of `Blocks/Tipsets` in `Graphs` (see `ChainSync.id`)
-- `ChainSync` gathers a list of `LatestTipsets` from `BlockPubsub`, sorted by likelihood of being the best chain (see below).
-- `ChainSync` makes requests for chains of `BlockHeaders` to close gaps between  `LatestTipsets`
-- `ChainSync` forms partial unvalidated chains of `BlockHeaders`, from those received via `BlockPubsub`, and those requested via `Graphsync`.
-- `ChainSync` attempts to form fully connected chains of `BlockHeaders`, parting from `StateTree`, toward observed `Heads`
-- `ChainSync` minimizes resource expenditures to fetch and validate blocks, to protect against DOS attack vectors.
-  `ChainSync` employs **Progressive Block Validation**, validating different facets at different stages of syncing.
-- `ChainSync` delays syncing `Messages` until they are needed. Much of the structure of the partial chains can
-  be checked and used to make syncing decisions without fetching the `Messages`.
-
-### Progressive Block Validation
-
-- Blocks can be validated in progressive stages, in order to minimize resource expenditure.
-- Validation computation is considerable, and a serious DOS attack vector.
-- Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.
-- **Progressive Stages of Block Validation**
-  - _(TODO: move this to blockchain/Block section)_
-  - **BV0 - Syntactic Validation**: Validate data structure packing and ensure correct typing.
-  - **BV1 - Light Consensus State Checks**: Validate `b.ChainWeight`, `b.ChainEpoch`, `b.MinerAddress`, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at `b.ChainEpoch - consensus.LookbackParameter`. Eg Weight and Epoch have well defined valid ranges, and `b.MinerAddress`
-  must exist in the lookback state).
-  - **BV2 - Signature Validation**: Verify `b.BlockSig` is correct.
-  - **BV3 - Verify ElectionProof**: Verify `b.ElectionProof` is correct.
-  - **BV4 - Verify Ancestry links to chain**: Verify ancestry links back to trusted blocks. If the ancestry forks off before finality, or does not connect at all, it is a bad block.
-  - **BV4 - Verify MessageSigs**: Verify the signatures on messages
-  - **BV5 - Verify StateTree**: Verify the application of `b.Parents.Messages()` correctly produces `b.StateTree` and `b.MessageReceipts`
-- These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.
-
-### Progressive Block Propagation
-
-- In order to make Block propagation more efficient, we trade off network round trips for bandwidth usage.
-- **Motivating observations:**
-  - `Block` propagation is one of the most security critical points of the whole protocol.
-  - Bandwidth usage during `Block` propagation is the biggest rate limiter for network scalability.
-  - The time it takes for a `Block` to propagate to the whole network is a critical factor in determining a secure `BlockTime`
-  - Blocks propagating through the network should take as few _sequential_ roundtrips as possible, as these roundtrips impose serious block time delays. However, interleaved roundtrips may be fine. Meaning that `block.CIDs` may be propagated on their own, without the header, then the header without the messages, then the messages.
-  - `Blocks` will propagate over a `libp2p.PubSub`. `libp2p.PubSub.Messages` will most likely arrive multiple times at a node. Therefore, using only the `block.CID` here could make this very cheap in bandwidth (more expensive in round trips)
-  - `Blocks` in a single epoch may include the same `Messages`, and duplicate transfers can be avoided
-  - `Messages` propagate through their own `MessagePubsub`, and nodes have a significant probability of already having a large fraction of the messages in a block. Since messages are the _bulk_ of the size of a `Block`, this can present great bandwidth savings.
-- **Progressive Steps of Block Propagation**
-  - **IMPORTANT NOTES**:
-      - these can be effectively pipelined. The `receiver` is in control of what to pull, and when. It is up them to decide when to trade-off RTTs for Bandwidth.
-      - If the `sender` is propagating the block at all to `receiver`, it is in their interest to provide the full content to `receiver` when asked. Otherwise the block may not get included at all.
-      - Lots of security assumptions here -- this needs to be hyper verified, in both spec and code.
-  - **Step 1. (sender) `Send SignedBlock`**:
-      - Block propagation begins with the `sender` propagating the `block.SignedBlock` - `Gossipsub.Send(b block.SignedBlock)`
-      - This is a very light object (~200 bytes), which fits into one network packet.
-      - This has the BlockCID, the MinerAddress and the Signature. This enables parties to (a) learn that a block from a particular miner is propagating, (b) validate the `MinerAddress` and `Signature`, and decide whether to invest more resources pulling the `BlockHeader`, or the `Messages`.
-      - Note that this can propagate to ther rest of the network before the next steps complete.
-  - **Step 2. (receiver) `Pull BlockHeader`**:
-      - if `receiver` **DOES NOT** already have the `BlockHeader` for `b.BlockCID`, then:
-        - `receiver` requests `BlockHeader` from `sender`:
-            - `bh := Graphsync.Pull(sender, SelectCID(b.BlockCID))`
-        - This is a light-ish object (<4KB).
-        - This has many fields that can be validated before pulling the messages. (See **Progressive Block Validation**).
-  - **Step 3. (receiver) `Pull MessageHints` (TODO: validate/decide on this)**:
-      - if `receiver` **DOES NOT** already have the full block for `b.BlockCID`, then:
-        - `receiver` requests `MessagePoolHints` from `sender`: ...
-        - `MessagePoolHints` are TBD -- this is a compressed representation of messages that can expedite message propagation by leveraging prior `MessagePool` syncing.
-        - (This is an extension and not required. can just do Step 4.)
-  - **Step 4. (receiver) `Pull Messages`**:
-      - if `receiver` **DOES NOT** already have the full block for `b.BlockCID`, then:
-        - if `receiver` has _some_ of the messages:
-          - `receiver` requests missing `Messages` and `MessageReceipts` from `sender`:
-              - `Graphsync.Pull(sender, Select(m3, m10, m50, ...))`
-        - if `receiver` does not have any of the messages (default safe but expensive thing to do):
-          - `receiver` requests all `Messages` and `MessageReceipts` from `sender`:
-              - `Graphsync.Pull(sender, SelectAll(bh.Messages), SelectAll(bh.MessageReceipts))`
-        - (This is the largest amount of stuff)
-  - **Step 5. (receiver) `Validate Block`**:
-      - the only remaining thing to do is to complete Block Validation.
-
 
 ## ChainSync FSM: `INIT`
 
@@ -386,3 +308,82 @@ State Machine:
   - if a temporary network partition is detected: move to `CHAIN_CATCHUP`
   - if gaps of >2 epochs form between the Validated set and `ChainSync.BestTargetHead`: move to `CHAIN_CATCHUP`
   - if node is shut down: move to `INIT`
+
+# Block Fetching, Validation, and Propagation
+
+## General notes on fetching Blocks
+
+- `ChainSync` selects and maintains a set of the most likely heads to be correct from among those received
+  via `BlockPubsub`. As more blocks are received, the set of `BestHeads` is reevaluated.
+- `ChainSync` fetches `Blocks`, `Messages`, and `StateTree` through the `Graphsync` protocol.
+- `ChainSync` maintains sets of `Blocks/Tipsets` in `Graphs` (see `ChainSync.id`)
+- `ChainSync` gathers a list of `LatestTipsets` from `BlockPubsub`, sorted by likelihood of being the best chain (see below).
+- `ChainSync` makes requests for chains of `BlockHeaders` to close gaps between  `LatestTipsets`
+- `ChainSync` forms partial unvalidated chains of `BlockHeaders`, from those received via `BlockPubsub`, and those requested via `Graphsync`.
+- `ChainSync` attempts to form fully connected chains of `BlockHeaders`, parting from `StateTree`, toward observed `Heads`
+- `ChainSync` minimizes resource expenditures to fetch and validate blocks, to protect against DOS attack vectors.
+  `ChainSync` employs **Progressive Block Validation**, validating different facets at different stages of syncing.
+- `ChainSync` delays syncing `Messages` until they are needed. Much of the structure of the partial chains can
+  be checked and used to make syncing decisions without fetching the `Messages`.
+
+## Progressive Block Validation
+
+- Blocks can be validated in progressive stages, in order to minimize resource expenditure.
+- Validation computation is considerable, and a serious DOS attack vector.
+- Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.
+- **Progressive Stages of Block Validation**
+  - _(TODO: move this to blockchain/Block section)_
+  - **BV0 - Syntactic Validation**: Validate data structure packing and ensure correct typing.
+  - **BV1 - Light Consensus State Checks**: Validate `b.ChainWeight`, `b.ChainEpoch`, `b.MinerAddress`, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at `b.ChainEpoch - consensus.LookbackParameter`. Eg Weight and Epoch have well defined valid ranges, and `b.MinerAddress`
+  must exist in the lookback state).
+  - **BV2 - Signature Validation**: Verify `b.BlockSig` is correct.
+  - **BV3 - Verify ElectionProof**: Verify `b.ElectionProof` is correct.
+  - **BV4 - Verify Ancestry links to chain**: Verify ancestry links back to trusted blocks. If the ancestry forks off before finality, or does not connect at all, it is a bad block.
+  - **BV4 - Verify MessageSigs**: Verify the signatures on messages
+  - **BV5 - Verify StateTree**: Verify the application of `b.Parents.Messages()` correctly produces `b.StateTree` and `b.MessageReceipts`
+- These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.
+
+## Progressive Block Propagation (or BlockSend)
+
+- In order to make Block propagation more efficient, we trade off network round trips for bandwidth usage.
+- **Motivating observations:**
+  - `Block` propagation is one of the most security critical points of the whole protocol.
+  - Bandwidth usage during `Block` propagation is the biggest rate limiter for network scalability.
+  - The time it takes for a `Block` to propagate to the whole network is a critical factor in determining a secure `BlockTime`
+  - Blocks propagating through the network should take as few _sequential_ roundtrips as possible, as these roundtrips impose serious block time delays. However, interleaved roundtrips may be fine. Meaning that `block.CIDs` may be propagated on their own, without the header, then the header without the messages, then the messages.
+  - `Blocks` will propagate over a `libp2p.PubSub`. `libp2p.PubSub.Messages` will most likely arrive multiple times at a node. Therefore, using only the `block.CID` here could make this very cheap in bandwidth (more expensive in round trips)
+  - `Blocks` in a single epoch may include the same `Messages`, and duplicate transfers can be avoided
+  - `Messages` propagate through their own `MessagePubsub`, and nodes have a significant probability of already having a large fraction of the messages in a block. Since messages are the _bulk_ of the size of a `Block`, this can present great bandwidth savings.
+- **Progressive Steps of Block Propagation**
+  - **IMPORTANT NOTES**:
+      - these can be effectively pipelined. The `receiver` is in control of what to pull, and when. It is up them to decide when to trade-off RTTs for Bandwidth.
+      - If the `sender` is propagating the block at all to `receiver`, it is in their interest to provide the full content to `receiver` when asked. Otherwise the block may not get included at all.
+      - Lots of security assumptions here -- this needs to be hyper verified, in both spec and code.
+  - **Step 1. (sender) `Send SignedBlock`**:
+      - Block propagation begins with the `sender` propagating the `block.SignedBlock`
+          - `Gossipsub.Send(b block.SignedBlock)`
+      - This is a very light object (~200 bytes), which fits into one network packet.
+      - This has the BlockCID, the MinerAddress and the Signature. This enables parties to (a) learn that a block from a particular miner is propagating, (b) validate the `MinerAddress` and `Signature`, and decide whether to invest more resources pulling the `BlockHeader`, or the `Messages`.
+      - Note that this can propagate to ther rest of the network before the next steps complete.
+  - **Step 2. (receiver) `Pull BlockHeader`**:
+      - if `receiver` **DOES NOT** already have the `BlockHeader` for `b.BlockCID`, then:
+          - `receiver` requests `BlockHeader` from `sender`:
+              - `bh := Graphsync.Pull(sender, SelectCID(b.BlockCID))`
+          - This is a light-ish object (<4KB).
+          - This has many fields that can be validated before pulling the messages. (See **Progressive Block Validation**).
+  - **Step 3. (receiver) `Pull MessageHints` (TODO: validate/decide on this)**:
+      - if `receiver` **DOES NOT** already have the full block for `b.BlockCID`, then:
+          - `receiver` requests `MessagePoolHints` from `sender`: ...
+          - `MessagePoolHints` are TBD -- this is a compressed representation of messages that can expedite message propagation by leveraging prior `MessagePool` syncing.
+          - (This is an extension and not required. can just do Step 4.)
+  - **Step 4. (receiver) `Pull Messages`**:
+      - if `receiver` **DOES NOT** already have the full block for `b.BlockCID`, then:
+          - if `receiver` has _some_ of the messages:
+              - `receiver` requests missing `Messages` and `MessageReceipts` from `sender`:
+                  - `Graphsync.Pull(sender, Select(m3, m10, m50, ...))`
+          - if `receiver` does not have any of the messages (default safe but expensive thing to do):
+              - `receiver` requests all `Messages` and `MessageReceipts` from `sender`:
+                  - `Graphsync.Pull(sender, SelectAll(bh.Messages), SelectAll(bh.MessageReceipts))`
+          - (This is the largest amount of stuff)
+  - **Step 5. (receiver) `Validate Block`**:
+      - the only remaining thing to do is to complete Block Validation.
