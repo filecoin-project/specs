@@ -78,7 +78,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 	return &result
 }
 
-func computeCommC(keyLayers util.BytesArray, nodeSize int) (PedersenHash, file.Path) {
+func computeCommC(keyLayers []util.Bytes, nodeSize int) (PedersenHash, file.Path) {
 	leaves := make(util.Bytes, len(keyLayers[0]))
 
 	// For each node in the graph,

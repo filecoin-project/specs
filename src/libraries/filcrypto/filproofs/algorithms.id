@@ -47,7 +47,7 @@ type SealSetupArtifacts struct {
     CommRLast          sector.Commitment
     CommCTreePath      file.Path
     CommRLastTreePath  file.Path
-    KeyLayers          BytesArray
+    KeyLayers          [Bytes]
     Replica            Bytes
 }
 
@@ -99,7 +99,7 @@ type DRGCfg struct {
 
 type DRG struct {
     Config DRGCfg
-    Parents(Bytes, UInt) UInts
+    Parents(Bytes, UInt) [UInt]
 }
 
 type ExpanderGraphCfg struct {
@@ -124,5 +124,5 @@ type ExpanderGraphCfg struct {
 
 type ExpanderGraph struct {
     Config DRGCfg
-    Parents(Bytes, UInt) UInts
+    Parents(Bytes, UInt) [UInt]
 }
