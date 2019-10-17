@@ -54,9 +54,9 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 	proof := sdr.CreateSealProof(randomSeed, auxTmp)
 
 	onChain := sector.OnChainSealVerifyInfo_I{
-		SealedCID_:  auxTmp.CommR(),
-		RandomSeed_: si.RandomSeed(),
-		Proof_:      proof,
+		SealedCID_: auxTmp.CommR(),
+		// Epoch_:  ? // TODO
+		Proof_: proof,
 	}
 
 	return &SectorSealer_CreateSealProof_FunRet_I{

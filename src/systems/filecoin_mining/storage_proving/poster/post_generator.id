@@ -1,4 +1,5 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type UInt64 UInt
 type Challenge UInt64
@@ -9,8 +10,8 @@ type PoStProof struct {}  // TODO
 // - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
 // - "blockchain/builtins" or something like that - a component in the blockchain that handles storage verification
 type PoStSubmission struct {
-    PostProof  PoStProof
-    SectorSet  sector.CompactSectorSet
+    PostProof   PoStProof
+    ChainEpoch  block.ChainEpoch
 }
 
 type PostGenerator struct {

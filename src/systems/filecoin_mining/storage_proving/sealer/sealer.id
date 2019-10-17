@@ -1,10 +1,13 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type SealInputs struct {
     SectorID      sector.SectorID
     SealCfg       sector.SealCfg
+    MinerID       addr.Address
+    RandomSeed    sector.SealRandomness
     UnsealedPath  file.Path
     SealedPath    file.Path
     DealIDs       [deal.DealID]
@@ -13,7 +16,7 @@ type SealInputs struct {
 type CreateSealProofInputs struct {
     SectorID     sector.SectorID
     SealCfg      sector.SealCfg
-    RandomSeed   sector.SealRandomSeed
+    RandomSeed   sector.SealRandomness
     SealedPath   file.Path
     SealOutputs
 }
@@ -36,7 +39,7 @@ type SectorSealer struct {
     ComputeReplicaID(
         sid    sector.SectorID
         commD  sector.UnsealedSectorCID
-        seed   sector.SealRandomSeed
+        seed   sector.SealRandomness
     ) union {replicaID Bytes, err error}
 
     MaxUnsealedBytesPerSector(SectorSize UInt) UInt

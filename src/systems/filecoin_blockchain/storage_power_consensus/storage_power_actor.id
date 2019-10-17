@@ -3,9 +3,11 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 
 type BytesAmount UVarint
+type StoragePower UVarint
 
 type StoragePowerActor struct {
-    Miners [addr.Address]  // TODO this should have a different type to account for power
+    // TODO: bytesamount might be inefficient
+    Miners {addr.Address: StoragePower}
 
     // call by StorageMiningSubsytem on miner creation
     CreateStorageMiner(
@@ -16,11 +18,11 @@ type StoragePowerActor struct {
     ) addr.Address
 
     // TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate
-    UpdatePower(address addr.Address, newPower minerStorage)
+    UpdatePower(address addr.Address, newPower StoragePower)
 
-    TotalStorage() BytesAmount
+    TotalStorage() StoragePower
 
-    PowerLookup(minerAddr addr.Address) BytesAmount
+    PowerLookup(minerAddr addr.Address) StoragePower
 
     // call by StorageMinerActor on successful seal
     // TODO: workerKey of type StorageMiner.WorkerPubKey
