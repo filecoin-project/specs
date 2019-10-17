@@ -9,11 +9,30 @@ jobs:
       - run:
           command: |
             make test
+
+  format:
+    docker:
+      - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - run:
+          command: |
             make fmt-code
             git diff --exit-code
+
+  build:
+    docker:
+      - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - run:
+          command: |
+            make build
 
 workflows:
   version: 2.1
   test_all:
     jobs:
       - test
+      - format
+      - build
