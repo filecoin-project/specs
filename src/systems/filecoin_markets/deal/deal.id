@@ -14,7 +14,7 @@ type StorageDealProposal struct {
     PieceRef                DealCID
     // The data hashed in a form that is compatible with the proofs system.
     // Reference for actual storage in a sector.
-    CommP                   ipld.CID  // 32 bytes
+    CommP                   ipld.CID  // 35 bytes
     PieceSize               UInt
     Client                  addr.Address
     Provider                addr.Address
