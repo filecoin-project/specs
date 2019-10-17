@@ -7,8 +7,9 @@ import . "github.com/filecoin-project/specs/util"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-type Blake2sHash Bytes
-type PedersenHash Bytes
+type Blake2sHash Bytes32
+type PedersenHash Bytes32
+type Bytes32 Bytes
 
 func (drg *DRG_I) Parents(layer Bytes, node UInt) []UInt {
 	return []UInt{} // FIXME
@@ -21,7 +22,6 @@ func (exp *ExpanderGraph_I) Parents(layer Bytes, node UInt) []UInt {
 func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) SealSetupArtifacts {
 	replicaID := ComputeReplicaID(sid, commD)
 
-	// FIXME: Derive these from sdr.
 	drg := DRG_I{}
 	expander := ExpanderGraph_I{}
 
@@ -33,29 +33,55 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 	key := keyLayers[len(keyLayers)-1]
 
 	replica := encodeData(data, key, nodeSize, curveModulus)
-
-	var cachedMerkleTreePath file.Path // FIXME: get this
-
-	commR, cachedMerkleTreePath := RepHash_PedersenHash(replica)
+	commRLast, commRLastTreePath := RepHash_PedersenHash(replica)
+	commC, commCTreePath := computeCommC(keyLayers, nodeSize)
+	commR := RepCompress_PedersenHash(commC, commRLast)
 
 	result := SealSetupArtifacts_I{
-		CommR_:     SealedSectorCID(commR),
-		CommC_:     sector.Commitment{},
-		CommRLast_: sector.Commitment{},
-		TreePath_:  cachedMerkleTreePath,
+		CommR_:             SealedSectorCID(commR),
+		CommC_:             sector.Commitment(commC),
+		CommRLast_:         sector.Commitment(commRLast),
+		CommRLastTreePath_: commRLastTreePath,
+		CommCTreePath_:     commCTreePath,
+		KeyLayers_:         keyLayers,
+		Replica_:           replica,
 	}
 	return &result
 }
 
-func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomSeed, aux sector.ProofAuxTmp) sector.SealProof {
+func computeCommC(keyLayers BytesArray, nodeSize int) (PedersenHash, file.Path) {
+	leaves := make(Bytes, len(keyLayers[0]))
+
+	for start := 0; start < len(leaves); start += nodeSize {
+		end := start + nodeSize
+
+		var column Bytes
+		for i := 0; i < len(keyLayers); i++ {
+			row := keyLayers[i][start:end]
+			column = append(column, row...)
+		}
+
+		copy(leaves[start:end], hashColumn(column)[:])
+	}
+	return RepHash_PedersenHash(leaves)
+}
+
+func hashColumn(column Bytes) PedersenHash {
 	panic("TODO")
 }
 
-func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes {
+func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomSeed, aux sector.ProofAuxTmp) sector.SealProof {
+	//numChallenges := 12345 // FIXME
+	//challenges := GeneratePoRepChallenges(randomSeed, numChallenges, )
+
+	panic("TODO")
+}
+
+func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes32 {
 	_, _ = sid.MinerID(), (sid.Number())
 
 	// FIXME: Implement
-	return Bytes{}
+	return Bytes32{}
 }
 
 func SDRParams() *StackedDRG_I {
@@ -194,6 +220,13 @@ func UnsealedSectorCID(h Blake2sHash) sector.UnsealedSectorCID {
 
 func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
 	panic("not implemented -- re-arrange bits")
+}
+
+// Compute CommP or CommD.
+func ComputeUnsealedSectorCID(data Bytes) sector.UnsealedSectorCID {
+	// TODO: check that len(data) > minimum piece size and is a power of 2.
+	hash, _ := RepHash_Blake2sHash(data)
+	return UnsealedSectorCID(hash)
 }
 
 // Utilities

@@ -44,7 +44,10 @@ type ProofAuxTmp struct {
 
     CommD          UnsealedSectorCID
     CommR          SealedSectorCID
-    Layers         BytesArray
+
+    Data           Bytes
+    Replica        Bytes
+    KeyLayers      BytesArray
 }
 
 type SealArguments struct {

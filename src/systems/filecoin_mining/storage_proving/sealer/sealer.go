@@ -23,18 +23,21 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 		}
 	}
 
-	sealOutputs := sdr.Seal(sid, commD, data)
+	sealArtifacts := sdr.Seal(sid, commD, data)
 
 	return &SectorSealer_SealSector_FunRet_I{
 		rawValue: &SealOutputs_I{
 			ProofAuxTmp_: &sector.ProofAuxTmp_I{
 				PersistentAux_: &sector.ProofAux_I{
-					CommC_:                sealOutputs.CommC(),
-					CommRLast_:            sealOutputs.CommRLast(),
-					CachedMerkleTreePath_: sealOutputs.TreePath(),
+					CommC_:                sealArtifacts.CommC(),
+					CommRLast_:            sealArtifacts.CommRLast(),
+					CachedMerkleTreePath_: sealArtifacts.CommRLastTreePath(),
 				},
-				CommD_: commD,
-				CommR_: sealOutputs.CommR(),
+				CommD_:     commD,
+				CommR_:     sealArtifacts.CommR(),
+				Data_:      data,
+				KeyLayers_: sealArtifacts.KeyLayers(),
+				Replica_:   sealArtifacts.Replica(),
 			},
 		},
 		which: SectorSealer_SealSector_FunRet_Case_so,
@@ -72,10 +75,8 @@ func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_Veri
 }
 
 func (s *SectorSealer_I) ComputeDataCommitment(data Bytes) *SectorSealer_ComputeDataCommitment_FunRet_I {
-	hash, _ := filproofs.RepHash_Blake2sHash(data)
-
 	return &SectorSealer_ComputeDataCommitment_FunRet_I{
-		rawValue: filproofs.UnsealedSectorCID(hash),
+		rawValue: filproofs.ComputeUnsealedSectorCID(data),
 		which:    SectorSealer_ComputeDataCommitment_FunRet_Case_commD,
 	}
 }

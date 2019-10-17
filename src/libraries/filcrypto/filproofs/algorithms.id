@@ -42,10 +42,13 @@ type SealAlgorithmArtifacts struct {
 
 // per-sector setup artifacts go here   
 type SealSetupArtifacts struct {
-    CommR      sector.SealedSectorCID
-    CommC      sector.Commitment
-    CommRLast  sector.Commitment
-    TreePath   file.Path
+    CommR              sector.SealedSectorCID
+    CommC              sector.Commitment
+    CommRLast          sector.Commitment
+    CommCTreePath      file.Path
+    CommRLastTreePath  file.Path
+    KeyLayers          BytesArray
+    Replica            Bytes
 }
 
 type PoRep union {
