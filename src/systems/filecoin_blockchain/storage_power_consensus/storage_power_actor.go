@@ -7,8 +7,6 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
-	storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
-
 )
 
 const PLEDGE_COLLATERAL_PER_GB = -1 // TODO define
@@ -67,9 +65,11 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 		surprisedMiners = append(surprisedMiners, minerAddress)
 		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
 
-		// TODO: the following creates a cycle
-		var minerActor storage_mining.StorageMinerActor
-		minerActor.ProvingPeriodEnd_ = currBlockHeight + postChallengeTime
+		// TODO: send message to StorageMinerActor to update ProvingPeriod
+		// TODO: should this update be done after surprisedMiners respond with a successful PoSt?
+		// var minerActor storage_mining.StorageMinerActor
+		// minerActor.ProvingPeriodEnd_ = currBlockHeight + postChallengeTime
+		// SendMessage(sm.ExtendProvingPeriod)
 	}
 
 	return surprisedMiners
