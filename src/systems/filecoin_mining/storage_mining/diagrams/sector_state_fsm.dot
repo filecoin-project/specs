@@ -5,7 +5,9 @@ digraph sectoRecovering {
   nodesep=2
   node [shape=circle width=1.2 fixedsize=true]
   edge [penwidth=2]
-  Cleared
+
+  Cleared [shape=doublecircle] // doublecircle because it is the init state
+
   subgraph cluster_0 {
       label="Proving Set"
       style=filled
