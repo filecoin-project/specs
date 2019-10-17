@@ -2,14 +2,14 @@ package filproofs
 
 import big "math/big"
 import "encoding/binary"
-import . "github.com/filecoin-project/specs/util"
+import util "github.com/filecoin-project/specs/util"
 
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type Blake2sHash Bytes32
 type PedersenHash Bytes32
-type Bytes32 Bytes
+type Bytes32 util.Bytes
 
 func SDRParams() *StackedDRG_I {
 	fieldModulus := new(big.Int)
@@ -40,15 +40,15 @@ func SDRParams() *StackedDRG_I {
 	}
 }
 
-func (drg *DRG_I) Parents(layer Bytes, node UInt) []UInt {
-	return []UInt{} // FIXME
+func (drg *DRG_I) Parents(layer util.Bytes, node util.UInt) []util.UInt {
+	return []util.UInt{} // FIXME
 }
 
-func (exp *ExpanderGraph_I) Parents(layer Bytes, node UInt) []UInt {
-	return []UInt{} // FIXME
+func (exp *ExpanderGraph_I) Parents(layer util.Bytes, node util.UInt) []util.UInt {
+	return []util.UInt{} // FIXME
 }
 
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data Bytes) SealSetupArtifacts {
+func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data util.Bytes) SealSetupArtifacts {
 	replicaID := ComputeReplicaID(sid, commD)
 
 	drg := DRG_I{}
@@ -78,14 +78,14 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 	return &result
 }
 
-func computeCommC(keyLayers BytesArray, nodeSize int) (PedersenHash, file.Path) {
-	leaves := make(Bytes, len(keyLayers[0]))
+func computeCommC(keyLayers util.BytesArray, nodeSize int) (PedersenHash, file.Path) {
+	leaves := make(util.Bytes, len(keyLayers[0]))
 
 	// For each node in the graph,
 	for start := 0; start < len(leaves); start += nodeSize {
 		end := start + nodeSize
 
-		var column Bytes
+		var column util.Bytes
 		// Concatenate that node's label at each layer, in order, into a column.
 		for i := 0; i < len(keyLayers); i++ {
 			label := keyLayers[i][start:end]
@@ -101,7 +101,7 @@ func computeCommC(keyLayers BytesArray, nodeSize int) (PedersenHash, file.Path) 
 	return RepHash_PedersenHash(leaves)
 }
 
-func hashColumn(column Bytes) PedersenHash {
+func hashColumn(column util.Bytes) PedersenHash {
 	return WideRepCompress_PedersenHash(column)
 }
 
@@ -119,9 +119,9 @@ func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes
 	return Bytes32{}
 }
 
-func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes, nodes int, layers int, nodeSize int, modulus BigInt) []Bytes {
-	keyLayers := make([]Bytes, layers)
-	var prevLayer Bytes
+func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID util.Bytes, nodes int, layers int, nodeSize int, modulus util.BigInt) []util.Bytes {
+	keyLayers := make([]util.Bytes, layers)
+	var prevLayer util.Bytes
 
 	for i := 0; i <= layers; i++ {
 		keyLayers[i] = labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer)
@@ -129,12 +129,12 @@ func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes
 	return keyLayers
 }
 
-func encodeData(data Bytes, key Bytes, nodeSize int, modulus *BigInt) Bytes {
+func encodeData(data util.Bytes, key util.Bytes, nodeSize int, modulus *util.BigInt) util.Bytes {
 	if len(data) != len(key) {
 		panic("Key and data must be same length.")
 	}
 
-	encoded := make(Bytes, len(data))
+	encoded := make(util.Bytes, len(data))
 	for i := 0; i < len(data); i += nodeSize {
 		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], modulus, nodeSize))
 	}
@@ -142,16 +142,16 @@ func encodeData(data Bytes, key Bytes, nodeSize int, modulus *BigInt) Bytes {
 	return encoded
 }
 
-func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes, nodeSize int, nodes int, prevLayer Bytes) Bytes {
+func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID util.Bytes, nodeSize int, nodes int, prevLayer util.Bytes) util.Bytes {
 	size := nodes * nodeSize
-	labels := make(Bytes, size)
+	labels := make(util.Bytes, size)
 
 	for i := 0; i < nodes; i++ {
-		var dependencies Bytes
+		var dependencies util.Bytes
 
 		// The first node of every layer has no DRG Parents.
 		if i > 0 {
-			for parent := range drg.Parents(labels, UInt(i)) {
+			for parent := range drg.Parents(labels, util.UInt(i)) {
 				start := parent * nodeSize
 				dependencies = append(dependencies, labels[start:start+nodeSize]...)
 			}
@@ -159,7 +159,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes, nodeSize
 
 		// The first layer has no expander parents.
 		if prevLayer != nil {
-			for parent := range expander.Parents(labels, UInt(i)) {
+			for parent := range expander.Parents(labels, util.UInt(i)) {
 				start := parent * nodeSize
 				dependencies = append(dependencies, labels[start:start+nodeSize]...)
 			}
@@ -172,7 +172,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID Bytes, nodeSize
 	return labels
 }
 
-func generateLabel(replicaID Bytes, node int, dependencies Bytes) Bytes {
+func generateLabel(replicaID util.Bytes, node int, dependencies util.Bytes) util.Bytes {
 	nodeBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(nodeBytes, uint64(node))
 
@@ -182,16 +182,16 @@ func generateLabel(replicaID Bytes, node int, dependencies Bytes) Bytes {
 	return deriveLabel(preimage)
 }
 
-func deriveLabel(elements Bytes) Bytes {
+func deriveLabel(elements util.Bytes) util.Bytes {
 	return WideRepCompress_Blake2sHash(elements)
 }
 
-func encodeNode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
+func encodeNode(data util.Bytes, key util.Bytes, modulus *big.Int, nodeSize int) util.Bytes {
 	// TODO: Allow this to vary by algorithm variant.
 	return addEncode(data, key, modulus, nodeSize)
 }
 
-func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
+func addEncode(data util.Bytes, key util.Bytes, modulus *big.Int, nodeSize int) util.Bytes {
 
 	d := bigIntFromLittleEndianBytes(data)
 	k := bigIntFromLittleEndianBytes(key)
@@ -207,17 +207,17 @@ func addEncode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
 
 /// Binary hash compression.
 // RepCompress<T>
-func RepCompress_T(left Bytes, right Bytes) T {
-	return T{}
+func RepCompress_T(left util.Bytes, right util.Bytes) util.T {
+	return util.T{}
 }
 
 // RepCompress<PedersenHash>
-func RepCompress_PedersenHash(left Bytes, right Bytes) PedersenHash {
+func RepCompress_PedersenHash(left util.Bytes, right util.Bytes) PedersenHash {
 	return PedersenHash{}
 }
 
 // RepCompress<Blake2sHash>
-func RepCompress_Blake2sHash(left Bytes, right Bytes) Blake2sHash {
+func RepCompress_Blake2sHash(left util.Bytes, right util.Bytes) Blake2sHash {
 	return Blake2sHash{}
 }
 
@@ -225,17 +225,17 @@ func RepCompress_Blake2sHash(left Bytes, right Bytes) Blake2sHash {
 
 /// Digest
 // WideRepCompress<T>
-func WideRepCompress_T(data Bytes) T {
-	return T{}
+func WideRepCompress_T(data util.Bytes) util.T {
+	return util.T{}
 }
 
 // RepCompress<PedersenHash>
-func WideRepCompress_PedersenHash(data Bytes) PedersenHash {
+func WideRepCompress_PedersenHash(data util.Bytes) PedersenHash {
 	return PedersenHash{}
 }
 
 // RepCompress<Blake2sHash>
-func WideRepCompress_Blake2sHash(data Bytes) Blake2sHash {
+func WideRepCompress_Blake2sHash(data util.Bytes) Blake2sHash {
 	return Blake2sHash{}
 }
 
@@ -243,19 +243,19 @@ func WideRepCompress_Blake2sHash(data Bytes) Blake2sHash {
 
 /// Binary Merkle-tree generation
 // RepHash<T>
-func RepHash_T(data Bytes) (T, file.Path) {
+func RepHash_T(data util.Bytes) (util.T, file.Path) {
 	// Plan: define this in terms of RepCompress_T, then copy-paste changes into T-specific specializations, for now.
-	return T{}, file.Path("") // FIXME
+	return util.T{}, file.Path("") // FIXME
 }
 
 // RepHash<PedersenHash>
-func RepHash_PedersenHash(data Bytes) (PedersenHash, file.Path) {
+func RepHash_PedersenHash(data util.Bytes) (PedersenHash, file.Path) {
 	return PedersenHash{}, file.Path("") // FIXME
 }
 
 //  RepHash<Blake2sHash>
-func RepHash_Blake2sHash(data Bytes) (Blake2sHash, file.Path) {
-	return Bytes{}, file.Path("") // FIXME
+func RepHash_Blake2sHash(data util.Bytes) (Blake2sHash, file.Path) {
+	return util.Bytes{}, file.Path("") // FIXME
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -269,7 +269,7 @@ func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
 }
 
 // Compute CommP or CommD.
-func ComputeUnsealedSectorCID(data Bytes) sector.UnsealedSectorCID {
+func ComputeUnsealedSectorCID(data util.Bytes) sector.UnsealedSectorCID {
 	// TODO: check that len(data) > minimum piece size and is a power of 2.
 	hash, _ := RepHash_Blake2sHash(data)
 	return UnsealedSectorCID(hash)
@@ -283,12 +283,12 @@ func reverse(bytes []byte) {
 	}
 }
 
-func bigIntFromLittleEndianBytes(bytes Bytes) *big.Int {
+func bigIntFromLittleEndianBytes(bytes util.Bytes) *big.Int {
 	reverse(bytes)
 	return new(big.Int).SetBytes(bytes)
 }
 
-func littleEndianBytesFromBigInt(z *big.Int, size int) Bytes {
+func littleEndianBytesFromBigInt(z *big.Int, size int) util.Bytes {
 	bytes := z.Bytes()[0:size]
 	reverse(bytes)
 

@@ -1,6 +1,6 @@
 package sealer
 
-import . "github.com/filecoin-project/specs/util"
+import util "github.com/filecoin-project/specs/util"
 
 import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
@@ -10,13 +10,13 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	sdr := filproofs.SDRParams()
 	sid := si.SectorID()
 
-	data := make(Bytes, si.SealCfg().SectorSize())
+	data := make(util.Bytes, si.SealCfg().SectorSize())
 	f := file.FromPath(si.SealedPath())
 	length, _ := f.Read(data)
 
 	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(data).As_commD())
 
-	if UInt(length) != UInt(si.SealCfg().SectorSize()) {
+	if util.UInt(length) != util.UInt(si.SealCfg().SectorSize()) {
 		return &SectorSealer_SealSector_FunRet_I{
 			rawValue: "Sector file is wrong size",
 			which:    SectorSealer_SealSector_FunRet_Case_err,
@@ -74,7 +74,7 @@ func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_Veri
 	return &SectorSealer_VerifySeal_FunRet_I{}
 }
 
-func (s *SectorSealer_I) ComputeDataCommitment(data Bytes) *SectorSealer_ComputeDataCommitment_FunRet_I {
+func (s *SectorSealer_I) ComputeDataCommitment(data util.Bytes) *SectorSealer_ComputeDataCommitment_FunRet_I {
 	return &SectorSealer_ComputeDataCommitment_FunRet_I{
 		rawValue: filproofs.ComputeUnsealedSectorCID(data),
 		which:    SectorSealer_ComputeDataCommitment_FunRet_Case_commD,
