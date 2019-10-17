@@ -49,19 +49,29 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	var provingPeriod uint
 	// The number of blocks that a challenged miner has to respond
 	// TODO: this should be set in.. spa?
-	var postChallengeTime util.UInt
+	// var postChallengeTime util.UInt
+
 	// The current currBlockHeight
 	// TODO: should be found in vm context
-	var currBlockHeight util.UInt
+	// var currBlockHeight util.UInt
 
 	// The number of miners that are challenged at this block
-	numSurprised := len(spa.Miners()) / provingPeriod
+	numSurprised := uint(len(spa.Miners())) / provingPeriod
 
-	for i := 0; i < numSurprised; i++ {
+	// TODO: seem inefficient but spa.Miners() is now a map from address to power
+	minerAddresses := make([]addr.Address, len(spa.Miners()))
+
+	index := 0
+	for address := range spa.Miners() {
+		minerAddresses[index] = address
+		index++
+	}
+
+	for i := uint(0); i < numSurprised; i++ {
 		// TODO: randomNumber := hash(ticket, i)
 		var randomNumber uint
-		minerIndex := randomNumber % len(spa.Miners())
-		minerAddress := spa.Miners()[minerIndex]
+		minerIndex := randomNumber % uint(len(spa.Miners()))
+		minerAddress := minerAddresses[minerIndex]
 		surprisedMiners = append(surprisedMiners, minerAddress)
 		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
 

@@ -1,18 +1,13 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-<<<<<<< HEAD
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-=======
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-
-type BytesAmount UVarint
->>>>>>> updated to latest change
 
 type StoragePowerActor struct {
     // TODO: bytesamount might be inefficient
+    // Miners [addr.Address]
     Miners {addr.Address: block.StoragePower}
 
     // call by StorageMiningSubsytem on miner creation
@@ -55,7 +50,6 @@ type StoragePowerActor struct {
 
     // TODO: old methods, should be removed
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
-<<<<<<< HEAD
     // VerifyElectionProof(addr.Address, ElectionProof)	bool
     // NotifyStorageFault(addr.Address)
     // TryPublishBlock(StateTree)					block.Block
@@ -89,12 +83,4 @@ type StorageMiner struct {
     MinerSuspendedPower  block.StoragePower
     MinerPK              filcrypto.PubKey
     MinerSectorSize      sector.SectorSize
-=======
-    // VerifyElectionProof(address.Address, base.ElectionProof)	bool
-    // NotifyConsensusFault(address.Address, [Block])
-    // NotifyStorageFault(address.Address)
-    // TryPublishBlock(StateTree)					Block
-    // RegisterStorageMiner(SealProof)				address.Address
-    // TryUpdateStorage(addr.Address, newPower)			error
->>>>>>> updated to latest change
 }
