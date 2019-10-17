@@ -52,22 +52,28 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 func computeCommC(keyLayers BytesArray, nodeSize int) (PedersenHash, file.Path) {
 	leaves := make(Bytes, len(keyLayers[0]))
 
+	// For each node in the graph,
 	for start := 0; start < len(leaves); start += nodeSize {
 		end := start + nodeSize
 
 		var column Bytes
+		// Concatenate that node's label at each layer, in order, into a column.
 		for i := 0; i < len(keyLayers); i++ {
-			row := keyLayers[i][start:end]
-			column = append(column, row...)
+			label := keyLayers[i][start:end]
+			column = append(column, label...)
 		}
 
-		copy(leaves[start:end], hashColumn(column)[:])
+		// And hash that column to create the leaf of a new tree.
+		hashed := hashColumn(column)
+		copy(leaves[start:end], hashed[:])
 	}
+
+	// Return the root of and path to the column tree.
 	return RepHash_PedersenHash(leaves)
 }
 
 func hashColumn(column Bytes) PedersenHash {
-	panic("TODO")
+	return WideRepCompress_PedersenHash(column)
 }
 
 func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomSeed, aux sector.ProofAuxTmp) sector.SealProof {
@@ -150,12 +156,11 @@ func generateLabel(replicaID Bytes, node int, dependencies Bytes) Bytes {
 	preimage := append(replicaID, nodeBytes...)
 	preimage = append(preimage, dependencies...)
 
-	return KDF(preimage)
+	return deriveLabel(preimage)
 }
 
-// KDF is a key-derivation functions. In SDR, the derived key is used to generate labels directly, without encoding any data.
-func KDF(elements Bytes) Bytes {
-	return elements // FIXME: Do something.
+func deriveLabel(elements Bytes) Bytes {
+	return WideRepCompress_Blake2sHash(elements)
 }
 
 func encodeNode(data Bytes, key Bytes, modulus *big.Int, nodeSize int) Bytes {
@@ -190,6 +195,24 @@ func RepCompress_PedersenHash(left Bytes, right Bytes) PedersenHash {
 
 // RepCompress<Blake2sHash>
 func RepCompress_Blake2sHash(left Bytes, right Bytes) Blake2sHash {
+	return Blake2sHash{}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/// Digest
+// WideRepCompress<T>
+func WideRepCompress_T(data Bytes) T {
+	return T{}
+}
+
+// RepCompress<PedersenHash>
+func WideRepCompress_PedersenHash(data Bytes) PedersenHash {
+	return PedersenHash{}
+}
+
+// RepCompress<Blake2sHash>
+func WideRepCompress_Blake2sHash(data Bytes) Blake2sHash {
 	return Blake2sHash{}
 }
 
