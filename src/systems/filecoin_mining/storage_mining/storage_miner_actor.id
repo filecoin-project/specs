@@ -9,23 +9,27 @@ import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage
 type Seed struct {}
 type SectorCommitment struct {}
 
-type SectorExpirationQueuItem struct {
+type SectorExpirationQueueItem struct {
     SectorNumber  sector.SectorNumber
     Expiration    block.ChainEpoch
 }
 
 type SectorExpirationQueue struct {
-    Add(sectorExpiration SectorExpirationQueuItem)
-    Pop() SectorExpirationQueuItem
-    Peek() SectorExpirationQueuItem
+    Add(i SectorExpirationQueueItem)
+    Pop() SectorExpirationQueueItem
+    Peek() SectorExpirationQueueItem
+    Remove(n sector.SectorNumber)
 }
 
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
-    Sectors                {sector.SectorNumber: sector.SealCommitment}
+    // TODO: consider merging SectorState into sector.SealCommitment to keep
+    // only one map, instead of two.
+    Sectors                {sector.SectorNumber: sector.SealCommitment}  // this should be an AMT
     SectorStates           {sector.SectorNumber: SectorState}
     ProvingSet             sector.CompactSectorSet
+    LastChallengePoSt      block.ChainEpoch
 
     SectorExpirationQueue
 

@@ -9,54 +9,54 @@ package storage_mining
 // in a row will result in Sectors getting cleared and miners penalized.
 // The enum is written in this awkward way because of golang limitation.
 
-const MAX_CONSECUTIVE_FAULT_COUNT uint8 = 3
+type FaultCount uint8
+
+const MAX_CONSECUTIVE_FAULTS = FaultCount(3)
 
 const (
-	SectorCommittedStateNo  uint8 = 0
-	SectorRecoveringStateNo uint8 = 1
-	SectorActiveStateNo     uint8 = 2
-	SectorFailingStateNo    uint8 = 3
-	// SectorClearedStateNo    uint8 = 4 // deleted from sm
+	SectorClearedSN    uint8 = 0
+	SectorCommittedSN  uint8 = 1
+	SectorActiveSN     uint8 = 2
+	SectorRecoveringSN uint8 = 3
+	SectorFailingSN    uint8 = 4
 )
 
 type SectorState struct {
 	StateNumber uint8
-	FaultCount  uint8
+	FaultCount  FaultCount
 }
 
 func SectorCommitted() SectorState {
 	return SectorState{
-		StateNumber: SectorCommittedStateNo,
-		FaultCount:  0,
+		StateNumber: SectorCommittedSN,
+		FaultCount:  0, // always zero for SectorCommitted
 	}
 }
 
-func SectorRecovering(count uint8) SectorState {
+func SectorRecovering(count FaultCount) SectorState {
 	return SectorState{
-		StateNumber: SectorRecoveringStateNo,
+		StateNumber: SectorRecoveringSN,
 		FaultCount:  count,
 	}
 }
 
 func SectorActive() SectorState {
 	return SectorState{
-		StateNumber: SectorActiveStateNo,
-		FaultCount:  0,
+		StateNumber: SectorActiveSN,
+		FaultCount:  0, // always zero for SectorActive
 	}
 }
 
-func SectorFailing(count uint8) SectorState {
+func SectorFailing(count FaultCount) SectorState {
 	return SectorState{
-		StateNumber: SectorFailingStateNo,
+		StateNumber: SectorFailingSN,
 		FaultCount:  count,
 	}
 }
 
-// SectorCleared is not directly represented in the spec
-// when a Sector is cleared, it is deleted from sm
-// func SectorCleared() SectorState {
-// 	return SectorState{
-// 		StateNumber: SectorClearedStateNo,
-// 		FaultCount:  0,
-// 	}
-// }
+func SectorCleared() SectorState {
+	return SectorState{
+		StateNumber: SectorClearedSN,
+		FaultCount:  0,
+	}
+}
