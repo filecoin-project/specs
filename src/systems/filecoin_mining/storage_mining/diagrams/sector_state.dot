@@ -9,9 +9,9 @@ digraph sectoRecovering {
   subgraph cluster_0 {
       label="Proving Set"
       style=filled
-      color=grey60
+      color=grey90
      Committed
-     Active
+     Active [label="Active\n(Counted\nfor Power)"]
      Recovering
 
      subgraph cluster_1 {
@@ -37,7 +37,7 @@ digraph sectoRecovering {
   Recovering -> Active [color="green"]
 
   // either declare Fault or miss PoSt
-  Active -> Failing [color="red:orange"]
+  Active -> Failing [color="red:gray90:orange"]
 
   // only miss PoSt, otherwise PoSt will move Recovering to Active
   // Recovering -> Cleared [constraint=false color="magenta"]
@@ -50,10 +50,11 @@ digraph sectoRecovering {
   Active -> Cleared [constraint=false color="blue"]
 
   // either miss PoSt (MFC) or submit PoSt (still in FaultSet) expire/MFC
-  Failing -> Cleared [constraint=false color="magenta:purple:blue"]
+  Failing -> Cleared [constraint=false color="magenta:white:purple:white:blue"]
 
   // either declare fault or miss PoSt
-  Committed -> Failing [color="red:orange"]
-  Recovering -> Failing [color="red:orange"]
+  Committed -> Failing [color="red:gray90:orange"]
+  Recovering -> Failing [color="red:gray90:orange"]
+
 
 }

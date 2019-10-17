@@ -11,7 +11,7 @@
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-448 370,-448 370,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_0</title>
-<polygon fill="#999999" stroke="#999999" points="8,-94 8,-350 356,-350 356,-94 8,-94"/>
+<polygon fill="#e5e5e5" stroke="#e5e5e5" points="8,-94 8,-350 356,-350 356,-94 8,-94"/>
 <text text-anchor="middle" x="182" y="-334.8" font-family="Times,serif" font-size="14.00" fill="#000000">Proving Set</text>
 </g>
 <g id="clust2" class="cluster">
@@ -41,7 +41,9 @@
 <g id="node3" class="node">
 <title>Active</title>
 <ellipse fill="none" stroke="#000000" cx="63" cy="-145" rx="43" ry="43"/>
-<text text-anchor="middle" x="63" y="-140.8" font-family="Times,serif" font-size="14.00" fill="#000000">Active</text>
+<text text-anchor="middle" x="63" y="-154.8" font-family="Times,serif" font-size="14.00" fill="#000000">Active</text>
+<text text-anchor="middle" x="63" y="-140.8" font-family="Times,serif" font-size="14.00" fill="#000000">(Counted</text>
+<text text-anchor="middle" x="63" y="-126.8" font-family="Times,serif" font-size="14.00" fill="#000000">for Power)</text>
 </g>
 <!-- Committed&#45;&gt;Active -->
 <g id="edge2" class="edge">
@@ -58,8 +60,9 @@
 <!-- Committed&#45;&gt;Failing -->
 <g id="edge8" class="edge">
 <title>Committed&#45;&gt;Failing</title>
-<path fill="none" stroke="#ff0000" stroke-width="2" d="M77.6667,-205.3542C77.6667,-199.8132 77.6667,-196 78.6667,-196 78.6667,-195 304,-195 304,-196 303,-196 303,-91.6084 304,-91.6084"/>
-<path fill="none" stroke="#ffa500" stroke-width="2" d="M79.6667,-205.3542C79.6667,-199.8132 79.6667,-196 78.6667,-196 78.6667,-197 304,-197 304,-196 305,-196 305,-91.6084 304,-91.6084"/>
+<path fill="none" stroke="#ff0000" stroke-width="2" d="M76.6667,-205.3542C76.6667,-199.8132 76.6667,-196 78.6667,-196 78.6667,-194 304,-194 304,-196 302,-196 302,-91.6084 304,-91.6084"/>
+<path fill="none" stroke="#e5e5e5" stroke-width="2" d="M78.6667,-205.3542C78.6667,-199.8132 78.6667,-196 78.6667,-196 78.6667,-196 304,-196 304,-196 304,-196 304,-91.6084 304,-91.6084"/>
+<path fill="none" stroke="#ffa500" stroke-width="2" d="M80.6667,-205.3542C80.6667,-199.8132 80.6667,-196 78.6667,-196 78.6667,-198 304,-198 304,-196 306,-196 306,-91.6084 304,-91.6084"/>
 <polygon fill="#ff0000" stroke="#ff0000" stroke-width="2" points="307.5001,-91.6083 304,-81.6084 300.5001,-91.6084 307.5001,-91.6083"/>
 </g>
 <!-- Active&#45;&gt;Cleared -->
@@ -71,8 +74,9 @@
 <!-- Active&#45;&gt;Failing -->
 <g id="edge4" class="edge">
 <title>Active&#45;&gt;Failing</title>
-<path fill="none" stroke="#ff0000" stroke-width="2" d="M103.4135,-129C169.1548,-129 292,-129 292,-130 291,-130 291,-82.9405 292,-82.9405"/>
-<path fill="none" stroke="#ffa500" stroke-width="2" d="M103.4135,-131C169.1548,-131 292,-131 292,-130 293,-130 293,-82.9405 292,-82.9405"/>
+<path fill="none" stroke="#ff0000" stroke-width="2" d="M103.4135,-128C169.1548,-128 292,-128 292,-130 290,-130 290,-82.9405 292,-82.9405"/>
+<path fill="none" stroke="#e5e5e5" stroke-width="2" d="M103.4135,-130C169.1548,-130 292,-130 292,-130 292,-130 292,-82.9405 292,-82.9405"/>
+<path fill="none" stroke="#ffa500" stroke-width="2" d="M103.4135,-132C169.1548,-132 292,-132 292,-130 294,-130 294,-82.9405 292,-82.9405"/>
 <polygon fill="#ff0000" stroke="#ff0000" stroke-width="2" points="295.5001,-82.9404 292,-72.9405 288.5001,-82.9405 295.5001,-82.9404"/>
 </g>
 <!-- Recovering -->
@@ -90,16 +94,19 @@
 <!-- Recovering&#45;&gt;Failing -->
 <g id="edge9" class="edge">
 <title>Recovering&#45;&gt;Failing</title>
-<path fill="none" stroke="#ff0000" stroke-width="2" d="M328,-216.8991C327,-216.8991 327,-96.045 328,-96.045"/>
-<path fill="none" stroke="#ffa500" stroke-width="2" d="M328,-216.8991C329,-216.8991 329,-96.045 328,-96.045"/>
+<path fill="none" stroke="#ff0000" stroke-width="2" d="M328,-216.8991C326,-216.8991 326,-96.045 328,-96.045"/>
+<path fill="none" stroke="#e5e5e5" stroke-width="2" d="M328,-216.8991C328,-216.8991 328,-96.045 328,-96.045"/>
+<path fill="none" stroke="#ffa500" stroke-width="2" d="M328,-216.8991C330,-216.8991 330,-96.045 328,-96.045"/>
 <polygon fill="#ff0000" stroke="#ff0000" stroke-width="2" points="331.5001,-96.045 328,-86.045 324.5001,-96.045 331.5001,-96.045"/>
 </g>
 <!-- Failing&#45;&gt;Cleared -->
 <g id="edge7" class="edge">
 <title>Failing&#45;&gt;Cleared</title>
-<path fill="none" stroke="#ff00ff" stroke-width="2" d="M355,-73.8327C355,-160.6705 355,-401 353,-401 353,-403 120.1267,-403 120.1267,-401"/>
+<path fill="none" stroke="#ff00ff" stroke-width="2" d="M357,-73.8327C357,-160.6705 357,-401 353,-401 353,-405 120.1267,-405 120.1267,-401"/>
+<path fill="none" stroke="#ffffff" stroke-width="2" d="M355,-73.8327C355,-160.6705 355,-401 353,-401 353,-403 120.1267,-403 120.1267,-401"/>
 <path fill="none" stroke="#a020f0" stroke-width="2" d="M353,-73.8327C353,-160.6705 353,-401 353,-401 353,-401 120.1267,-401 120.1267,-401"/>
-<path fill="none" stroke="#0000ff" stroke-width="2" d="M351,-73.8327C351,-160.6705 351,-401 353,-401 353,-399 120.1267,-399 120.1267,-401"/>
+<path fill="none" stroke="#ffffff" stroke-width="2" d="M351,-73.8327C351,-160.6705 351,-401 353,-401 353,-399 120.1267,-399 120.1267,-401"/>
+<path fill="none" stroke="#0000ff" stroke-width="2" d="M349,-73.8327C349,-160.6705 349,-401 353,-401 353,-397 120.1267,-397 120.1267,-401"/>
 <polygon fill="#ff00ff" stroke="#ff00ff" stroke-width="2" points="120.1268,-397.5001 110.1267,-401 120.1267,-404.5001 120.1268,-397.5001"/>
 </g>
 <!-- Failing&#45;&gt;Recovering -->

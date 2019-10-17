@@ -17,13 +17,11 @@ Filecoin Storage Mining Subsystem
 
 {{< readfile file="storage_mining_subsystem.id" code="true" lang="go" >}}
 
-# Sector in StorageMiner State Machine (on chain)
+# Sector in StorageMiner State Machine (new one)
 
-{{< diagram src="diagrams/sector_chain_fsm.dot.svg" title="Sector State Machine (on chain)" >}}
+{{< diagram src="diagrams/sector_state.dot.svg" title="Sector State (new one)" >}}
 
-# Sector in StorageMiner State Machine (off chain)
-
-{{< diagram src="diagrams/sector_offchain_fsm.dot.svg" title="Sector State Machine (off chain)" >}}
+{{< diagram src="diagrams/sector_state_legend.dot.svg" title="Sector State Legend (new one)" >}}
 
 # Sector in StorageMiner State Machine (both)
 
