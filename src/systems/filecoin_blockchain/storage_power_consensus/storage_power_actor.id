@@ -7,6 +7,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 
 type StoragePowerActor struct {
     // TODO: bytesamount might be inefficient
+    // Miners [addr.Address]
     Miners {addr.Address: block.StoragePower}
 
     // call by StorageMiningSubsytem on miner creation
@@ -40,6 +41,12 @@ type StoragePowerActor struct {
     PowerTable
 
     // VerifyElectionProof(addr.Address, ElectionProof)	bool
+
+    Surprise(ticket block.Ticket) [addr.Address]
+
+    CheckFaults()
+
+    // // What does graceful removal look like?
 
     // TODO: old methods, should be removed
     // UpdateStoragePowerSubsystem(Tipset, StateTree)
