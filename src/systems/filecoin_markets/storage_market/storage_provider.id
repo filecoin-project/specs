@@ -22,7 +22,8 @@ type StorageProvider struct {
     rejectStorageDealProposal(proposal deal.StorageDealProposal)
 
     // Check CommP provided by StorageClient in StorageDealProposal
-    // Provider needs to verify this to generate correct seal proof
+    // Provider needs to verify and reject deal if incorrect.
+    // If on-chain CommP does not match actual piece, Seal proof will not verify.
     verifyCommP(commP ipld.CID, dealCID deal.DealCID) bool
 
     // Check client balance and signature
