@@ -11,6 +11,11 @@ type Blake2sHash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 
+const FEISTEL_ROUNDS = 3
+
+// Would be a constant if Go allowed it.
+var FEISTEL_KEYS = [FEISTEL_ROUNDS]util.UInt{1, 2, 3}
+
 func SDRParams() *StackedDRG_I {
 	fieldModulus := new(big.Int)
 	// TODO: Bridge constants with orient model.
@@ -28,12 +33,22 @@ func SDRParams() *StackedDRG_I {
 		Algorithm_: &StackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
-				ParentsAlgorithm_: &DRGCfg_Algorithm_ParentsAlgorithm_I{
-					rawValue: DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{},
-					which:    DRGCfg_Algorithm_ParentsAlgorithm_Case_DRSample,
-				},
+				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample(&DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{}),
+				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20(&DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I{}),
 			},
 		},
+		ExpanderGraphCfg_: &ExpanderGraphCfg_I{
+			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
+				&ExpanderGraphCfg_Algorithm_ChungExpanderAlgorithm_I{
+					PermutationAlgorithm_: ExpanderGraphCfg_Algorithm_ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&ExpanderGraphCfg_Algorithm_ChungExpanderAlgorithm_PermutationAlgorithm_Feistel_I{
+						Keys_:   FEISTEL_KEYS[:],
+						Rounds_: FEISTEL_ROUNDS,
+						HashFunction_: ChungExpanderPermutationFeistelHashFunction_Make_Blake2S(
+							&ChungExpanderPermutationFeistelHashFunction_Blake2S_I{}),
+					}),
+				}),
+		},
+
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *fieldModulus,
 		},
