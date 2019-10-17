@@ -73,13 +73,13 @@ func (sma *StorageMarketActor_I) PublishStorageDeals(newStorageDeals []deal.Stor
 func (sma *StorageMarketActor_I) verifyStorageDeal(d deal.StorageDeal) bool {
 	// TODO verify proposal or deal has not expired and proposal expires earlier than deal
 	// TODO verify client and provider signature
-	// TODO verfiy minimum StoragePrice and StorageCollateral
+	// TODO verify minimum StoragePrice, ProviderDealCollateral, and ClientDealCollateral
 	p := d.Proposal()
 	clientBalanceA := sma.Balances()[p.Client()].Available()
 	providerBalanceA := sma.Balances()[p.Provider()].Available()
 
-	if clientBalanceA < p.StoragePrice() ||
-		providerBalanceA < p.StorageCollateral() {
+	if clientBalanceA < (p.StoragePrice()+p.ClientDealCollateral()) ||
+		providerBalanceA < p.ProviderDealCollateral() {
 		return false
 	}
 	return true

@@ -293,6 +293,9 @@ func (sm *StorageMinerActor_I) verifySeal(onChainInfo sector.OnChainSealVerifyIn
 	// TODO: verify seal @nicola
 	// TODO: get var sealRandomness sector.SealRandomness from onChainInfo.Epoch
 	// TODO: sm.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
+
+	// verifySeal will also generate CommD on the fly from CommP and PieceSize
+	// TODO: @nicola or @porcu define the interface and what is needed here
 	panic("TODO")
 	return true
 }
@@ -332,13 +335,12 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	})
 
 	// no need to store the proof and randomseed in the state tree
-	// verify and drop, only SealCommitments{CommD, CommR, DealIDs} on chain
+	// verify and drop, only SealCommitments{CommR, DealIDs} on chain
 	// TODO: @porcuquine verifies
 	sealCommitment := &sector.SealCommitment_I{
-		// UnsealedCID_: onChainInfo.UnsealedCID(), // no longer need this? remove from SealCommitment?
-		SealedCID_: onChainInfo.SealedCID(),
-		DealIDs_:   onChainInfo.DealIDs(),
-		// Expiration_:  lastDealExpiration,
+		SealedCID_:  onChainInfo.SealedCID(),
+		DealIDs_:    onChainInfo.DealIDs(),
+		Expiration_: lastDealExpiration, // TODO decide if we need this too
 	}
 
 	// add SectorNumber and SealCommitment to Sectors

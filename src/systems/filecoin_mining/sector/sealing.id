@@ -41,10 +41,9 @@ type OnChainSealVerifyInfo struct {
 // SealCommitment is the information kept in the state tree about a sector.
 // SealCommitment is a subset of OnChainSealVerifyInfo.
 type SealCommitment struct {
-    UnsealedCID  UnsealedSectorCID  // CommD
-    SealedCID    SealedSectorCID  // CommR
-    DealIDs      [deal.DealID]
-    Expiration   block.ChainEpoch
+    SealedCID   SealedSectorCID  // CommR
+    DealIDs     [deal.DealID]
+    Expiration  block.ChainEpoch
 }
 
 // ProofAux is meta data required to generate certain proofs

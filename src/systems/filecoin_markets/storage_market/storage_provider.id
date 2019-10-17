@@ -1,3 +1,4 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -20,10 +21,15 @@ type StorageProvider struct {
     // Call by StorageProvider to reject a StorageDealProposal
     rejectStorageDealProposal(proposal deal.StorageDealProposal)
 
+    // Check CommP provided by StorageClient in StorageDealProposal
+    // Provider needs to verify this to generate correct seal proof
+    verifyCommP(commP ipld.CID, dealCID deal.DealCID) bool
+
     // Check client balance and signature
     verifyStorageClient(address addr.Address, signature deal.Signature) bool
 
     // TODO: Call by StorageMiningSubsystem
+    // TODO: not sure if this will get called
     NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification)
 
     // Call by StorageClient

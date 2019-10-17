@@ -8,17 +8,25 @@ type DealCID ipld.CID
 type Signature struct {}  // TODO
 
 type StorageDealProposal struct {
-    PieceRef            DealCID
-    PieceSize           UInt
-    Client              addr.Address
-    Provider            addr.Address
-    ProposalExpiration  block.ChainEpoch
-    DealExpiration      block.ChainEpoch
-    StoragePrice        actor.TokenAmount
-    StorageCollateral   actor.TokenAmount
-    ProposerSignature   Signature
+    // TODO: Decide if PieceRef needs to go on chain
+    // PieceRef is the hash of the data in native structure. This will be used for
+    // certifying the data transfer. Reference for transit.
+    PieceRef                DealCID
+    // The data hashed in a form that is compatible with the proofs system.
+    // Reference for actual storage in a sector.
+    CommP                   ipld.CID  // 32 bytes
+    PieceSize               UInt
+    Client                  addr.Address
+    Provider                addr.Address
+    ProposalExpiration      block.ChainEpoch
+    DealExpiration          block.ChainEpoch
+    StoragePrice            actor.TokenAmount
+    ProviderDealCollateral  actor.TokenAmount
+    ClientDealCollateral    actor.TokenAmount
+    ProposerSignature       Signature
 }
 
+// Everything in this struct will go on chain
 type StorageDeal struct {
     Proposal          StorageDealProposal
     CounterSignature  Signature

@@ -1,10 +1,10 @@
 package storage_market
 
 import (
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 )
 
 // import deal_status "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
@@ -32,6 +32,11 @@ func (provider *StorageProvider_I) rejectStorageDealProposal(proposal deal.Stora
 	// TODO send notification to client
 }
 
+func (provider *StorageProvider_I) verifyCommP(commP ipld.CID, dealCID deal.DealCID) bool {
+	panic("TODO")
+	return true
+}
+
 func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, signature deal.Signature, price actor.TokenAmount) bool {
 	// TODO make call to StorageMarketActor
 	// balance, found := StorageMarketActor.Balances()[address]
@@ -45,6 +50,7 @@ func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, sig
 	// }
 
 	// TODO Check on Signature
+	// TODO Verify CommP
 	// return true
 	panic("TODO")
 }
