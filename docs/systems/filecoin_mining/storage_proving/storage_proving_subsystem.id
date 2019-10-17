@@ -2,7 +2,6 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sealer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer"
 
-// type poster.PoStProof struct {}
 // type seal.SealOutput struct {}
 // type seal.SectorSealer struct {}
 // type seal.Seed struct {}
@@ -18,6 +17,7 @@ type StorageProvingSubsystem struct {
     PostGenerator  poster.PostGenerator
 
     SealSector(si sealer.SealInputs) union {so sealer.SealOutputs, err error}
+    CreateSealProof(si sealer.CreateSealProofInputs) union {so sealer.CreateSealProofOutputs, err error}
     VerifySeal(sv sector.SealVerifyInfo) union {ok bool, err error}
 
     ValidateBlock(block Block)

@@ -4561,12 +4561,18 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">SealRandomSeed</span> <span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">SealRandomness</span> <span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="nx">Bytes</span>
+
+<span class="c1">// SealSeed is unique to each Sector
+</span><span class="c1">// SealSeed is:
+</span><span class="c1">//    SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID)
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSeed</span> <span class="nx">Bytes</span>
 
 <span class="kd">type</span> <span class="nx">SealCfg</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorSize</span>
@@ -4577,30 +4583,52 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// SealVerifyInfo is the structure of all thte information a verifier
 </span><span class="c1">// needs to verify a Seal.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">MinerID</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">OnChain</span>  <span class="nx">OnChainSealVerifyInfo</span>
+    <span class="nx">SectorID</span>
+    <span class="nx">OnChain</span> <span class="nx">OnChainSealVerifyInfo</span>
 <span class="p">}</span>
 
-<span class="c1">// OnChainSealVerifyInfo is the structure of information that must go on chain.
+<span class="c1">// OnChainSealVerifyInfo is the structure of information that must be sent with
+</span><span class="c1">// a message to commit a sector. Most of this information is not needed in the
+</span><span class="c1">// state tree but will be verified in sm.CommitSector. See SealCommitment for
+</span><span class="c1">// data stored on the state tree for each sector.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">OnChainSealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">UnsealedCID</span>   <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
-</span><span class="c1"></span>    <span class="nx">SealedCID</span>     <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">RandomSeed</span>    <span class="nx">SealRandomSeed</span>
+    <span class="nx">SealedCID</span>     <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">Epoch</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">Proof</span>         <span class="nx">SealProof</span>
     <span class="nx">DealIDs</span>       <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
     <span class="nx">SectorNumber</span>
+<span class="p">}</span>
+
+<span class="c1">// SealCommitment is the information kept in the state tree about a sector.
+</span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">UnsealedCID</span>  <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
+</span><span class="c1"></span>    <span class="nx">SealedCID</span>    <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">DealIDs</span>      <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nx">Expiration</span>   <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="c1">// ProofAux is meta data required to generate certain proofs
 </span><span class="c1">// for a sector, for example PoSt.
 </span><span class="c1">// These should be stored and indexed somewhere by CommR.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">CommRLast</span>             <span class="nx">SealedSectorCID</span>
+    <span class="nx">CommRLast</span>             <span class="nx">Commitment</span>
     <span class="nx">CommC</span>                 <span class="nx">Commitment</span>
 
     <span class="c1">// TODO: This may be a partially-cached tree.
 </span><span class="c1"></span>    <span class="c1">// this may be empty
 </span><span class="c1"></span>    <span class="nx">CachedMerkleTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofAuxTmp</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PersistentAux</span>  <span class="nx">ProofAux</span>
+
+    <span class="nx">CommD</span>          <span class="nx">UnsealedSectorCID</span>
+    <span class="nx">CommR</span>          <span class="nx">SealedSectorCID</span>
+
+    <span class="nx">Data</span>           <span class="nx">Bytes</span>
+    <span class="nx">Replica</span>        <span class="nx">Bytes</span>
+    <span class="nx">KeyLayers</span>      <span class="nx">BytesArray</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealArguments</span> <span class="kd">struct</span> <span class="p">{</span>

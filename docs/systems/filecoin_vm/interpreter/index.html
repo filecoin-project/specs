@@ -4865,6 +4865,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">sysactors</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/sysactors&#34;</span>
 
@@ -4874,11 +4875,25 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{}</span>
 
-<span class="kd">var</span> <span class="p">(</span>
-	<span class="nx">InitActorCodeCID</span>    <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;/filecoin/builtin/actor/init&#34;</span><span class="p">)</span>
-	<span class="nx">CronActorCodeCID</span>    <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;/filecoin/builtin/actor/cron&#34;</span><span class="p">)</span>
-	<span class="nx">AccountActorCodeCID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;/filecoin/builtin/actor/account&#34;</span><span class="p">)</span>
+<span class="c1">// CodeCIDs for system actors
+</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
+	<span class="nx">InitActorCodeCID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/InitActor&#34;</span><span class="p">)</span>
+	<span class="nx">CronActorCodeCID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/CronActor&#34;</span><span class="p">)</span>
+	<span class="nx">AccountActorCodeCID</span>        <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/AccountActor&#34;</span><span class="p">)</span>
+	<span class="nx">StoragePowerActorCodeCID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StoragePowerActor&#34;</span><span class="p">)</span>
+	<span class="nx">StorageMinerActorCodeCID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StorageMinerActor&#34;</span><span class="p">)</span>
+	<span class="nx">StorageMarketActorCodeCID</span>  <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StorageMarketActor&#34;</span><span class="p">)</span>
+	<span class="nx">PaymentChannelActorCodeCID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/PaymentChannelActor&#34;</span><span class="p">)</span>
 <span class="p">)</span>
+
+<span class="c1">// Addresses for singleton system actors
+</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
+	<span class="nx">InitActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">CronActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">StoragePowerActorAddr</span>   <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">StorageMarketActorAddr</span>  <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">PaymentChannelActorAddr</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span><span class="p">)</span>
 
 <span class="c1">// init is called in Go during initialization of a program.
 </span><span class="c1">// this is an idiomatic way to do this. Implementations should approach this
@@ -4891,7 +4906,16 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="nf">registerBuiltinActors</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+</span><span class="c1"></span>
+	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">CronActorCode_I</span><span class="p">{}</span>
+
+	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">CronActorCodeCID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
+
+	<span class="c1">// wire in CRON actions.
+</span><span class="c1"></span>	<span class="c1">// TODO: there&#39;s probably a better place to put this, but for now, do it here.
+</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">StoragePowerActorAddr</span><span class="p">)</span>
+	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">StorageMarketActorAddr</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// ActorCode is the interface that all actor code types should satisfy.

@@ -1,4 +1,5 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
@@ -26,16 +27,16 @@ type StorageMarketActor struct {
     // a DealID will be assigned and stored in the mapping of DealID to StorageDeal
     // PublishStorageDeal should be called before SecotrCommits
     // an unregistered StorageDeal will not be processed
-    PublishStorageDeal(newStorageDeals [deal.StorageDeal]) [PublishStorageDealResponse]
+    PublishStorageDeals(deals [deal.StorageDeal]) [PublishStorageDealResponse]
 
     // check if StorageDeal is signed before expiry
     // check if StorageDeal has the right signatures
     // check if minimum StoragePrice and StorageCollateral are met
     // check if provider and client have sufficient balances
-    verifyStorageDeal(newStorageDeal deal.StorageDeal) bool
+    verifyStorageDeal(deal deal.StorageDeal) bool
 
     // generate storage deal id
-    generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID
+    generateStorageDealID(deal deal.StorageDeal) deal.DealID
 
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
@@ -48,15 +49,17 @@ type StorageMarketActor struct {
     // call by CronActor / onPoStSubmission on ExpiredSet
     // remove StorageDeal from StorageMarketActor
     // if no more active deals contain in the sector
-    // adjust miner power for this sector
     // return StorageCollateral to miners
-    closeExpiredStorageDeal(storageDealIDs [deal.DealID])
+    SettleExpiredDeals(dealIDs [deal.DealID])
 
     // call by CronActor / onPoStSubmission on ActiveSet to process deal payment
     // go through StorageDealIDs, if IDs are active in MarketActor
     // payment will be processed
-    handleStorageDealPayment(storageDealIDs [deal.DealID])
+    ProcessStorageDealsPayment(dealIDs [deal.DealID])
 
-    // call by CronActor / onPoStSubmission on FaultSet to slash deal collateral
-    slashStorageDealCollateral(storageDealIDs [deal.DealID])
+    // call by CronActor / on DeclareFault on FaultSet to slash deal collateral
+    // Deals should be slashed for a single proving period
+    SlashStorageDealCollateral(dealIDs [deal.DealID])
+
+    GetLastExpirationFromDealIDs(dealIDs [deal.DealID]) block.ChainEpoch
 }

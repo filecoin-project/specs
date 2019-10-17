@@ -4715,11 +4715,13 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// err := loadActorState(storage, input.ToActor().State(), &amp;state)
 </span><span class="c1"></span>
     <span class="k">switch</span> <span class="nx">method</span> <span class="p">{</span>
-    <span class="c1">// case 0:
-</span><span class="c1"></span>    <span class="c1">//     return a.InitConstructor(input, state)
-</span><span class="c1"></span>    <span class="c1">// case 1:
-</span><span class="c1"></span>    <span class="c1">//     return a.Exec(input, state, params[0], params[1])
+    <span class="c1">// case 0: -- disable: value send
+</span><span class="c1"></span>    <span class="c1">// case 1: -- disable: cron. init has no cron action
 </span><span class="c1"></span>    <span class="c1">// case 2:
+</span><span class="c1"></span>    <span class="c1">//     return a.InitConstructor(input, state)
+</span><span class="c1"></span>    <span class="c1">// case 3:
+</span><span class="c1"></span>    <span class="c1">//     return a.Exec(input, state, params[0], params[1])
+</span><span class="c1"></span>    <span class="c1">// case 4:
 </span><span class="c1"></span>    <span class="c1">//     return a.GetActorIDForAddress(input, state, params[0])
 </span><span class="c1"></span>    <span class="k">default</span><span class="p">:</span>
         <span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">ErrorInvocOutput</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">InTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidMethod</span><span class="p">)</span>

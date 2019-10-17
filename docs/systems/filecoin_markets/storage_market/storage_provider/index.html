@@ -4541,7 +4541,9 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>Both <code>StorageProvider</code> and <code>StorageClient</code> are <code>StorageMarketParticipant</code>. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. <code>StorageClient</code> will initiate the storage deal protocol by submitting a <code>StorageDealProposal</code> to the <code>StorageProvider</code> who will then add the deal data to a <code>Sector</code> and commit the sector onto the blockchain.</p>
+  
+
+<p>Both <code>StorageProvider</code> and <code>StorageClient</code> are <code>StorageMarketParticipant</code>. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. <code>StorageClient</code> will initiate the storage deal protocol by submitting a <code>StorageDealProposal</code> to the <code>StorageProvider</code> who will then add the deal data to a <code>Sector</code> and commit the sector onto the blockchain.</p>
 
 
 
@@ -4600,6 +4602,124 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
+
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+
+<span class="c1">// import deal_status &#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleNewStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">ProposerSignature</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">StoragePrice</span><span class="p">())</span> <span class="p">{</span>
+        <span class="c1">// status := &amp;deal.StorageDealStatus_StorageDealProposed_I{}
+</span><span class="c1"></span>        <span class="c1">// s := deal.StorageDealStatus_Make_StorageDealProposed(status)
+</span><span class="c1"></span>        <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceRef</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealProposed</span>
+        <span class="c1">// TODO notify StorageClient that a deal has been received
+</span><span class="c1"></span>        <span class="c1">// TODO notify StorageMiningSubsystem to add deals to sector
+</span><span class="c1"></span>        <span class="nx">provider</span><span class="p">.</span><span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
+        <span class="c1">// DO THIS TODAY Call StorageMarketActor.publishStorageDeal()
+</span><span class="c1"></span>    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span> <span class="p">{</span>
+    <span class="c1">// TODO add signature to the proposal
+</span><span class="c1"></span>    <span class="c1">// TODO notify StorageClient that a deal has been signed
+</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceRef</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealRejected</span>
+    <span class="c1">// TODO send notification to client
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="c1">// TODO make call to StorageMarketActor
+</span><span class="c1"></span>    <span class="c1">// balance, found := StorageMarketActor.Balances()[address]
+</span><span class="c1"></span>
+    <span class="c1">// if !found {
+</span><span class="c1"></span>    <span class="c1">//     return false
+</span><span class="c1"></span>    <span class="c1">// }
+</span><span class="c1"></span>
+    <span class="c1">// if balance &lt; price {
+</span><span class="c1"></span>    <span class="c1">//     return false
+</span><span class="c1"></span>    <span class="c1">// }
+</span><span class="c1"></span>
+    <span class="c1">// TODO Check on Signature
+</span><span class="c1"></span>    <span class="c1">// return true
+</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// TODO: func (provider *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
+</span><span class="c1">//     panic(&#34;TODO&#34;)
+</span><span class="c1">// }
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span> <span class="p">{</span>
+    <span class="nx">dealStatus</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">dealStatus</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">StorageDealNotFound</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+<h1 id="storage-provider-state-machine">Storage Provider State Machine</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Storage Provider State Machine</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/storage_market/diagrams/storage_provider_fsm.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/storage_market/diagrams/storage_provider_fsm.dot.svg" />
+
+
+
+
+</div>
+
+
 </article>
 
       
@@ -4609,6 +4729,14 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#storage-provider-state-machine">Storage Provider State Machine</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

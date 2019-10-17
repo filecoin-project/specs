@@ -4565,10 +4565,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 
 <span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">UVarint</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Miners</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>  <span class="c1">// TODO this should have a different type to account for power
-</span><span class="c1"></span>
+    <span class="c1">// TODO: bytesamount might be inefficient
+</span><span class="c1"></span>    <span class="nx">Miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StoragePower</span><span class="p">}</span>
+
     <span class="c1">// call by StorageMiningSubsytem on miner creation
 </span><span class="c1"></span>    <span class="nf">CreateStorageMiner</span><span class="p">(</span>
         <span class="nx">ownerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -4578,11 +4580,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate
-</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">minerStorage</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">StoragePower</span><span class="p">)</span>
 
-    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">BytesAmount</span>
+    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">StoragePower</span>
 
-    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">BytesAmount</span>
+    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StoragePower</span>
 
     <span class="c1">// call by StorageMinerActor on successful seal
 </span><span class="c1"></span>    <span class="c1">// TODO: workerKey of type StorageMiner.WorkerPubKey

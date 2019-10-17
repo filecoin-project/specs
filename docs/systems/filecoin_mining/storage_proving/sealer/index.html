@@ -4565,33 +4565,47 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SealInputs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">SealCfg</span>       <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
     <span class="nx">MinerID</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">RandomSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomSeed</span>
+    <span class="nx">RandomSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
     <span class="nx">UnsealedPath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">SealedPath</span>    <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">DealIDs</span>       <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">CreateSealProofInputs</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorID</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+    <span class="nx">SealCfg</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
+    <span class="nx">RandomSeed</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
+    <span class="nx">SealedPath</span>   <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">SealOutputs</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealOutputs</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ProofAuxTmp</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAuxTmp</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">CreateSealProofOutputs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span>
     <span class="nx">ProofAux</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorSealer</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">SealSector</span><span class="p">(</span><span class="nx">si</span> <span class="nx">SealInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">SealOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">SealSector</span><span class="p">()</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">SealOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">CreateSealProof</span><span class="p">(</span><span class="nx">si</span> <span class="nx">CreateSealProofInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">CreateSealProofOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
     <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
-    <span class="c1">//  GeneratePieceInclusionProof(
-</span><span class="c1"></span>    <span class="c1">//    Tree          MerkleTree, //MerkleTree&lt;Rephash&gt;,
-</span><span class="c1"></span>    <span class="c1">//    PieceStart    UInt,
-</span><span class="c1"></span>    <span class="c1">//    PieceLength   UInt,
-</span><span class="c1"></span>    <span class="c1">//  ) union { error, PieceInclusionProofs }
-</span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">//  VerifyPieceInclusionProof() struct {}
-</span><span class="c1"></span>
+    <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">unsealedPath</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">ComputeReplicaID</span><span class="p">(</span>
+        <span class="nx">sid</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+        <span class="nx">commD</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span>
+        <span class="nx">seed</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
+    <span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">replicaID</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+
     <span class="nf">MaxUnsealedBytesPerSector</span><span class="p">(</span><span class="nx">SectorSize</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInt</span>
 <span class="p">}</span>
 </code></pre></div>

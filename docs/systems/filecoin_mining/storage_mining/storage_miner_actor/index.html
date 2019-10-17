@@ -4567,15 +4567,38 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">sealing</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Seed</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">SectorCommitment</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">SectorExpirationQueueItem</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorNumber</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span>
+    <span class="nx">Expiration</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SectorExpirationQueue</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">Add</span><span class="p">(</span><span class="nx">i</span> <span class="nx">SectorExpirationQueueItem</span><span class="p">)</span>
+    <span class="nf">Pop</span><span class="p">()</span> <span class="nx">SectorExpirationQueueItem</span>
+    <span class="nf">Peek</span><span class="p">()</span> <span class="nx">SectorExpirationQueueItem</span>
+    <span class="nf">Remove</span><span class="p">(</span><span class="nx">n</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+<span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">StorageMinerActor</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// CollateralVault CollateralVault
 </span><span class="c1"></span>
+    <span class="c1">// TODO: consider merging SectorState into sector.SealCommitment to keep
+</span><span class="c1"></span>    <span class="c1">// only one map, instead of two.
+</span><span class="c1"></span>    <span class="nx">Sectors</span>                <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span><span class="p">}</span>  <span class="c1">// this should be an AMT
+</span><span class="c1"></span>    <span class="nx">SectorStates</span>           <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorState</span><span class="p">}</span>
+    <span class="nx">ProvingSet</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+    <span class="nx">LastChallengePoSt</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+
+    <span class="nx">SectorExpirationQueue</span>
+
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">info</span>     <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                   <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
     <span class="c1">// TODO: add the DePledgeCollateral
 </span><span class="c1"></span>    <span class="c1">// TODO: add the Sectors
@@ -4583,21 +4606,13 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// TODO provingSet []SectorInfo CID to AMT
 </span><span class="c1"></span>
     <span class="c1">// TODO: should we keep the same structure as before or putting all of that into a struct?
-</span><span class="c1"></span>    <span class="c1">// TODO currentFaultSet BitField
-</span><span class="c1"></span>    <span class="c1">// TODO nextFaultSet BitField
-</span><span class="c1"></span>    <span class="c1">// TODO nextDoneSet BitField
 </span><span class="c1"></span>    <span class="c1">// TODO do we need a `slashedAt`?
 </span><span class="c1"></span>    <span class="c1">// TODO owedStorageCollateral
 </span><span class="c1"></span>    <span class="c1">// TODO ProvingPeriodEnd   Epoch
 </span><span class="c1"></span>
-    <span class="nx">Sectors</span>  <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="p">[</span><span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">]}</span>
-
     <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>
-    <span class="nf">SubmitPoSt</span><span class="p">(</span>
-        <span class="nx">postProof</span>        <span class="nx">PoStProof</span>
-        <span class="nx">sectorStateSets</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorStateSets</span>  <span class="c1">// TODO: check with Juan and Magik
-</span><span class="c1"></span>    <span class="p">)</span>
+    <span class="nf">SubmitPoSt</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
 
     <span class="c1">// TODO: should depledge be in here or in storage market actor?
 </span><span class="c1"></span>
@@ -4610,30 +4625,30 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
     <span class="c1">// TODO: do IsSlashed, IsLate belong here?
 </span><span class="c1"></span>
-    <span class="nf">UpdateDoneSet</span><span class="p">()</span>
+    <span class="nf">DeclareFault</span><span class="p">(</span><span class="nx">faultSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">)</span>
 
-    <span class="nf">UpdateSectorStatus</span><span class="p">(</span><span class="nx">sectorStateSets</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorStateSets</span><span class="p">)</span>  <span class="c1">// TODO: @magik says SectorStateSets might be more expensive than more methods
-</span><span class="c1"></span>
     <span class="nf">computeProvingPeriodEndSectorState</span><span class="p">()</span>  <span class="c1">// TODO
-</span><span class="c1"></span><span class="p">}</span>
+</span><span class="c1"></span>
+    <span class="nf">verifyPoStSubmission</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MinerInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">owner</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">worker</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">PeerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">sectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
 <span class="p">}</span>
 
 <span class="cm">/*

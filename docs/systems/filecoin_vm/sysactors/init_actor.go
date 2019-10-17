@@ -104,11 +104,13 @@ func (a *InitActorCode_I) InvokeMethod(input vmr.InvocInput, method actor.Method
 	// err := loadActorState(storage, input.ToActor().State(), &state)
 
 	switch method {
-	// case 0:
-	// 	return a.InitConstructor(input, state)
-	// case 1:
-	// 	return a.Exec(input, state, params[0], params[1])
+	// case 0: -- disable: value send
+	// case 1: -- disable: cron. init has no cron action
 	// case 2:
+	// 	return a.InitConstructor(input, state)
+	// case 3:
+	// 	return a.Exec(input, state, params[0], params[1])
+	// case 4:
 	// 	return a.GetActorIDForAddress(input, state, params[0])
 	default:
 		return vmr.ErrorInvocOutput(input.InTree, exitcode.InvalidMethod)

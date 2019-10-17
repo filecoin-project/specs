@@ -4583,6 +4583,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <span class="kn">import</span> <span class="nx">base_mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
+</span><span class="c1"></span>    <span class="c1">// TODO: this is incorrect, it does not belong
 </span><span class="c1"></span>    <span class="nx">powerTable</span>           <span class="nx">PowerTable</span>
     <span class="nx">actor</span>                <span class="nx">StoragePowerActor</span>
     <span class="nx">associatedStateTree</span>  <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>  <span class="c1">// TODO: remove this. should not store this here.

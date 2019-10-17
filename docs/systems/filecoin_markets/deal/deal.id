@@ -8,15 +8,15 @@ type DealCID ipld.CID
 type Signature struct {}  // TODO
 
 type StorageDealProposal struct {
-    PieceRef             DealCID
-    PieceSize            UInt
-    Client               addr.Address
-    Provider             addr.Address
-    ProposalExpiryEpoch  block.ChainEpoch
-    DealExpiryEpoch      block.ChainEpoch
-    StoragePrice         actor.TokenAmount
-    StorageCollateral    actor.TokenAmount
-    ProposerSignature    Signature
+    PieceRef            DealCID
+    PieceSize           UInt
+    Client              addr.Address
+    Provider            addr.Address
+    ProposalExpiration  block.ChainEpoch
+    DealExpiration      block.ChainEpoch
+    StoragePrice        actor.TokenAmount
+    StorageCollateral   actor.TokenAmount
+    ProposerSignature   Signature
 }
 
 type StorageDeal struct {

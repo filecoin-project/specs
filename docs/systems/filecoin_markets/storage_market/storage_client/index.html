@@ -4541,7 +4541,9 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>Both <code>StorageProvider</code> and <code>StorageClient</code> are <code>StorageMarketParticipant</code>. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. <code>StorageClient</code> will initiate the storage deal protocol by submitting a <code>StorageDealProposal</code> to the <code>StorageProvider</code> who will then add the deal data to a <code>Sector</code> and commit the sector onto the blockchain.</p>
+  
+
+<p>Both <code>StorageProvider</code> and <code>StorageClient</code> are <code>StorageMarketParticipant</code>. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. <code>StorageClient</code> will initiate the storage deal protocol by submitting a <code>StorageDealProposal</code> to the <code>StorageProvider</code> who will then add the deal data to a <code>Sector</code> and commit the sector onto the blockchain.</p>
 
 
 
@@ -4580,6 +4582,57 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>storage_client.go</code> file was not found.</i></b></p>
+
+
+
+<h1 id="storage-client-state-machine">Storage Client State Machine</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Storage Client State Machine</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/storage_market/diagrams/storage_client_fsm.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/storage_market/diagrams/storage_client_fsm.dot.svg" />
+
+
+
+
+</div>
+
+
 </article>
 
       
@@ -4589,6 +4642,14 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#storage-client-state-machine">Storage Client State Machine</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

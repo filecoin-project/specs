@@ -4594,8 +4594,16 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StackedDRGLayers</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">StackedDRGNodeSize</span> <span class="kd">struct</span> <span class="p">{}</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+
+<span class="kd">type</span> <span class="nx">StackedDRGLayers</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Layers</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">StackedDRGNodeSize</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Size</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">DRGDepth</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">DRGFraction</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">DRGDegree</span> <span class="kd">struct</span> <span class="p">{}</span>
@@ -4616,9 +4624,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>        <span class="c1">// updates to public parameters go here
 </span><span class="c1"></span>    <span class="p">}</span>
 
-    <span class="nx">SealSetupArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="c1">// per-sector setup artifacts go here
-</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="nx">SealSetupArtifacts</span>
 
     <span class="c1">// ProveArtifacts or
 </span><span class="c1"></span>    <span class="nx">ChallengeArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4628,6 +4634,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">VerifyArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
         <span class="c1">// inputs into verify() go here
 </span><span class="c1"></span>    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// per-sector setup artifacts go here   
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSetupArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">CommR</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span>
+    <span class="nx">CommC</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+    <span class="nx">CommRLast</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+    <span class="nx">CommCTreePath</span>      <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">CommRLastTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">KeyLayers</span>          <span class="nx">BytesArray</span>
+    <span class="nx">Replica</span>            <span class="nx">Bytes</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PoRep</span> <span class="nx">union</span> <span class="p">{</span>
@@ -4642,8 +4659,12 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">SDRPoSpace</span> <span class="nx">StackedDRG</span>
 
-<span class="kd">type</span> <span class="nx">StackedDRGAlgorithm</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">EllipticCurve</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">FieldModulus</span> <span class="o">&amp;</span><span class="nx">BigInt</span>
+<span class="p">}</span>
 
+<span class="c1">//type StackedDRG_Algorithm struct {}
+</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StackedDRG</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Layers</span>            <span class="nx">StackedDRGLayers</span>
     <span class="nx">NodeSize</span>          <span class="nx">StackedDRGNodeSize</span>
@@ -4651,7 +4672,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">DRGCfg</span>
     <span class="nx">ExpanderGraphCfg</span>
     <span class="c1">// invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
-</span><span class="c1"></span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="nx">Curve</span>             <span class="nx">EllipticCurve</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">DRGCfg</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Algorithm</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4661,10 +4683,19 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">ParentsAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
             <span class="nx">DRSample</span>
         <span class="p">}</span>
+
+        <span class="nx">RNGAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
+            <span class="nx">ChaCha20</span>
+        <span class="p">}</span>
     <span class="p">}</span>
     <span class="nx">Degree</span> <span class="nx">DRGDegree</span>
     <span class="nx">Seed</span> <span class="nx">DRGSeed</span>
     <span class="nx">Nodes</span> <span class="nx">DRGNodeCount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">DRG</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Config</span> <span class="nx">DRGCfg</span>
+    <span class="nf">Parents</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInts</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ExpanderGraphCfg</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4685,6 +4716,11 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">Degree</span>    <span class="nx">ExpanderGraphDegree</span>
     <span class="nx">Seed</span>      <span class="nx">ExpanderGraphSeed</span>
     <span class="nx">NodeSize</span>  <span class="nx">DRGNodeSize</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ExpanderGraph</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Config</span> <span class="nx">DRGCfg</span>
+    <span class="nf">Parents</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInts</span>
 <span class="p">}</span>
 </code></pre></div>
 

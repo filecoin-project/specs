@@ -4593,9 +4593,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// TODO: what are the return values here?
 </span><span class="c1"></span>    <span class="nf">Send</span><span class="p">(</span>
         <span class="nx">to</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">method</span>  <span class="kt">string</span>
-        <span class="nx">value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">method</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
         <span class="nx">params</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
+        <span class="nx">value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 <span class="p">}</span>
 
@@ -4717,7 +4717,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Runtime_I</span><span class="p">)</span> <span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Runtime_I</span><span class="p">)</span> <span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 

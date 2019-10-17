@@ -13,26 +13,18 @@ type SealedSectorCID ipld.CID
 // relative to a Miner.
 type SectorNumber UInt
 
-type ExpiredSet [SectorID]
-type FaultSet [SectorID]
-type ActiveSet [SectorID]
-
-type SectorStateSets struct {
-    ExpiredSet
-    FaultSet
-    ActiveSet
-}
+type FaultSet CompactSectorSet
 
 // SectorSize indicates one of a set of possible sizes in the network.
 type SectorSize UInt
 
 // Ideally, SectorSize would be an enum
 // type SectorSize enum {
-//   1KB = UInt 1000
-//   1MB = Uint 1000000
-//   1GB = Uint 1000000000
-//   1TB = Uint 1000000000000
-//   1PB = Uint 1000000000000000
+//   1KiB = UInt 1024
+//   1MiB = Uint 1048576
+//   1GiB = Uint 1073741824
+//   1TiB = Uint 1099511627776
+//   1PiB = Uint 1125899906842624
 // }
 
 // TODO make sure this is globally unique

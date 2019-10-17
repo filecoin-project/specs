@@ -4560,18 +4560,24 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 
 <span class="kd">type</span> <span class="nx">CronActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Cron has no internal state
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">CronActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">actorState</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
-    <span class="nx">cronState</span>   <span class="nx">CronActorState</span>
+<span class="kd">type</span> <span class="nx">CronActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// actors is a set of actors to call during EpochTick.
+</span><span class="c1"></span>    <span class="c1">// This can be done a bunch of ways. We do it this way here to make it easy to add
+</span><span class="c1"></span>    <span class="c1">// a handler to Cron elsewhere in the spec code. How to do this is implementation
+</span><span class="c1"></span>    <span class="c1">// specific.
+</span><span class="c1"></span>    <span class="nx">Actors</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
-    <span class="c1">// Tick executes built-in periodic actions.
-</span><span class="c1"></span>    <span class="nf">Tick</span><span class="p">()</span>
+    <span class="c1">// EpochTick executes built-in periodic actions, run at every Epoch.
+</span><span class="c1"></span>    <span class="c1">// EpochTick(r) is called after all other messages in the epoch have been applied.
+</span><span class="c1"></span>    <span class="c1">// This can be seen as an implicit last message.
+</span><span class="c1"></span>    <span class="nf">EpochTick</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

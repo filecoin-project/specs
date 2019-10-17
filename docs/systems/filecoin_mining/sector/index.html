@@ -4578,26 +4578,18 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1">// relative to a Miner.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorNumber</span> <span class="nx">UInt</span>
 
-<span class="kd">type</span> <span class="nx">ExpiredSet</span> <span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span>
-<span class="kd">type</span> <span class="nx">FaultSet</span> <span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span>
-<span class="kd">type</span> <span class="nx">ActiveSet</span> <span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span>
-
-<span class="kd">type</span> <span class="nx">SectorStateSets</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ExpiredSet</span>
-    <span class="nx">FaultSet</span>
-    <span class="nx">ActiveSet</span>
-<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">FaultSet</span> <span class="nx">CompactSectorSet</span>
 
 <span class="c1">// SectorSize indicates one of a set of possible sizes in the network.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorSize</span> <span class="nx">UInt</span>
 
 <span class="c1">// Ideally, SectorSize would be an enum
 </span><span class="c1">// type SectorSize enum {
-</span><span class="c1">//   1KB = UInt 1000
-</span><span class="c1">//   1MB = Uint 1000000
-</span><span class="c1">//   1GB = Uint 1000000000
-</span><span class="c1">//   1TB = Uint 1000000000000
-</span><span class="c1">//   1PB = Uint 1000000000000000
+</span><span class="c1">//   1KiB = UInt 1024
+</span><span class="c1">//   1MiB = Uint 1048576
+</span><span class="c1">//   1GiB = Uint 1073741824
+</span><span class="c1">//   1TiB = Uint 1099511627776
+</span><span class="c1">//   1PiB = Uint 1125899906842624
 </span><span class="c1">// }
 </span><span class="c1"></span>
 <span class="c1">// TODO make sure this is globally unique

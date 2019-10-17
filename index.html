@@ -4718,8 +4718,8 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.0</span>-<span id="spec-version-hash">1d33495</span>
-    <br /><span id="spec-version-date">2019-10-12_16:37:02Z</span>
+    spec doc version: <span id="spec-version-number">v1.0</span>-<span id="spec-version-hash">be80226</span>
+    <br /><span id="spec-version-date">2019-10-17_10:16:36Z</span>
   </div>
 </div>
 
@@ -6285,36 +6285,93 @@ over time, without requiring further interaction from the original parties
 </ul>
 
 
-<div class="diagram">
-<span class="diagram-title">Protocol Overview Diagram</span>
-(<a href="./docs/diagrams/overview1/overview.dot.svg" target="_blank">open in new tab</a>)
-<br />
 
-<img src="./docs/diagrams/overview1/overview.dot.svg" />
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Protocol Overview Diagram</span>
+
+
+
+
+(<a href="docs/intro/../diagrams/overview1/overview.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/intro/../diagrams/overview1/overview.dot.svg" />
+
+
+
+
 </div>
 
 
 <h3 id="protocol-flow-diagram-deals-off-chain">Protocol Flow Diagram &ndash; deals off chain</h3>
 
 
-<div class="diagram">
-<span class="diagram-title">Protocol Sequence Diagram - Deals off Chain</span>
-(<a href="./docs/diagrams/sequence/full-deals-off-chain.mmd.svg" target="_blank">open in new tab</a>)
-<br />
 
-<img src="./docs/diagrams/sequence/full-deals-off-chain.mmd.svg" />
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Protocol Sequence Diagram - Deals off Chain</span>
+
+
+
+
+(<a href="docs/intro/../diagrams/sequence/full-deals-off-chain.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/intro/../diagrams/sequence/full-deals-off-chain.mmd.svg" />
+
+
+
+
 </div>
 
 
 <h3 id="protocol-flow-diagram-deals-on-chain">Protocol Flow Diagram &ndash; deals on chain</h3>
 
 
-<div class="diagram">
-<span class="diagram-title">Protocol Sequence Diagram - Deals on Chain</span>
-(<a href="./docs/diagrams/sequence/full-deals-on-chain.mmd.svg" target="_blank">open in new tab</a>)
-<br />
 
-<img src="./docs/diagrams/sequence/full-deals-on-chain.mmd.svg" />
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Protocol Sequence Diagram - Deals on Chain</span>
+
+
+
+
+(<a href="docs/intro/../diagrams/sequence/full-deals-on-chain.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/intro/../diagrams/sequence/full-deals-on-chain.mmd.svg" />
+
+
+
+
 </div>
 
 
@@ -6323,12 +6380,31 @@ over time, without requiring further interaction from the original parties
 <p>This is a diagram of the model for parameter calculation. This is made with <a href="https://github.com/filecoin-project/orient">orient</a>, our tool for modeling and solving for constraints.</p>
 
 
-<div class="diagram">
-<span class="diagram-title">Parameter Calculation Dependency Graph</span>
-(<a href="./docs/diagrams/orient/filecoin.dot.svg" target="_blank">open in new tab</a>)
-<br />
 
-<img src="./docs/diagrams/orient/filecoin.dot.svg" />
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Parameter Calculation Dependency Graph</span>
+
+
+
+
+(<a href="docs/intro/../diagrams/orient/filecoin.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/intro/../diagrams/orient/filecoin.dot.svg" />
+
+
+
+
 </div>
 
 
@@ -11139,9 +11215,9 @@ an index of pieces.</p>
 </span><span class="c1"></span>    <span class="c1">// TODO: what are the return values here?
 </span><span class="c1"></span>    <span class="nf">Send</span><span class="p">(</span>
         <span class="nx">to</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">method</span>  <span class="kt">string</span>
-        <span class="nx">value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">method</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
         <span class="nx">params</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
+        <span class="nx">value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 <span class="p">}</span>
 
@@ -11263,7 +11339,7 @@ an index of pieces.</p>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Runtime_I</span><span class="p">)</span> <span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">Runtime_I</span><span class="p">)</span> <span class="nf">Send</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -11838,11 +11914,13 @@ an index of pieces.</p>
 </span><span class="c1"></span>	<span class="c1">// err := loadActorState(storage, input.ToActor().State(), &amp;state)
 </span><span class="c1"></span>
 	<span class="k">switch</span> <span class="nx">method</span> <span class="p">{</span>
-	<span class="c1">// case 0:
-</span><span class="c1"></span>	<span class="c1">// 	return a.InitConstructor(input, state)
-</span><span class="c1"></span>	<span class="c1">// case 1:
-</span><span class="c1"></span>	<span class="c1">// 	return a.Exec(input, state, params[0], params[1])
+	<span class="c1">// case 0: -- disable: value send
+</span><span class="c1"></span>	<span class="c1">// case 1: -- disable: cron. init has no cron action
 </span><span class="c1"></span>	<span class="c1">// case 2:
+</span><span class="c1"></span>	<span class="c1">// 	return a.InitConstructor(input, state)
+</span><span class="c1"></span>	<span class="c1">// case 3:
+</span><span class="c1"></span>	<span class="c1">// 	return a.Exec(input, state, params[0], params[1])
+</span><span class="c1"></span>	<span class="c1">// case 4:
 </span><span class="c1"></span>	<span class="c1">// 	return a.GetActorIDForAddress(input, state, params[0])
 </span><span class="c1"></span>	<span class="k">default</span><span class="p">:</span>
 		<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">ErrorInvocOutput</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">InTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidMethod</span><span class="p">)</span>
@@ -11936,18 +12014,24 @@ an index of pieces.</p>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 
 <span class="kd">type</span> <span class="nx">CronActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Cron has no internal state
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">CronActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">actorState</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
-    <span class="nx">cronState</span>   <span class="nx">CronActorState</span>
+<span class="kd">type</span> <span class="nx">CronActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// actors is a set of actors to call during EpochTick.
+</span><span class="c1"></span>    <span class="c1">// This can be done a bunch of ways. We do it this way here to make it easy to add
+</span><span class="c1"></span>    <span class="c1">// a handler to Cron elsewhere in the spec code. How to do this is implementation
+</span><span class="c1"></span>    <span class="c1">// specific.
+</span><span class="c1"></span>    <span class="nx">Actors</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
-    <span class="c1">// Tick executes built-in periodic actions.
-</span><span class="c1"></span>    <span class="nf">Tick</span><span class="p">()</span>
+    <span class="c1">// EpochTick executes built-in periodic actions, run at every Epoch.
+</span><span class="c1"></span>    <span class="c1">// EpochTick(r) is called after all other messages in the epoch have been applied.
+</span><span class="c1"></span>    <span class="c1">// This can be seen as an implicit last message.
+</span><span class="c1"></span>    <span class="nf">EpochTick</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -12449,6 +12533,7 @@ an index of pieces.</p>
 
 <span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">sysactors</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/sysactors&#34;</span>
 
@@ -12458,11 +12543,25 @@ an index of pieces.</p>
 
 <span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{}</span>
 
-<span class="kd">var</span> <span class="p">(</span>
-	<span class="nx">InitActorCodeCID</span>    <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;/filecoin/builtin/actor/init&#34;</span><span class="p">)</span>
-	<span class="nx">CronActorCodeCID</span>    <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;/filecoin/builtin/actor/cron&#34;</span><span class="p">)</span>
-	<span class="nx">AccountActorCodeCID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;/filecoin/builtin/actor/account&#34;</span><span class="p">)</span>
+<span class="c1">// CodeCIDs for system actors
+</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
+	<span class="nx">InitActorCodeCID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/InitActor&#34;</span><span class="p">)</span>
+	<span class="nx">CronActorCodeCID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/CronActor&#34;</span><span class="p">)</span>
+	<span class="nx">AccountActorCodeCID</span>        <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/AccountActor&#34;</span><span class="p">)</span>
+	<span class="nx">StoragePowerActorCodeCID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StoragePowerActor&#34;</span><span class="p">)</span>
+	<span class="nx">StorageMinerActorCodeCID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StorageMinerActor&#34;</span><span class="p">)</span>
+	<span class="nx">StorageMarketActorCodeCID</span>  <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StorageMarketActor&#34;</span><span class="p">)</span>
+	<span class="nx">PaymentChannelActorCodeCID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/PaymentChannelActor&#34;</span><span class="p">)</span>
 <span class="p">)</span>
+
+<span class="c1">// Addresses for singleton system actors
+</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
+	<span class="nx">InitActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">CronActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">StoragePowerActorAddr</span>   <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">StorageMarketActorAddr</span>  <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span>	<span class="nx">PaymentChannelActorAddr</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
+</span><span class="c1"></span><span class="p">)</span>
 
 <span class="c1">// init is called in Go during initialization of a program.
 </span><span class="c1">// this is an idiomatic way to do this. Implementations should approach this
@@ -12475,7 +12574,16 @@ an index of pieces.</p>
 
 <span class="kd">func</span> <span class="nf">registerBuiltinActors</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+</span><span class="c1"></span>
+	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">CronActorCode_I</span><span class="p">{}</span>
+
+	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">CronActorCodeCID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
+
+	<span class="c1">// wire in CRON actions.
+</span><span class="c1"></span>	<span class="c1">// TODO: there&#39;s probably a better place to put this, but for now, do it here.
+</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">StoragePowerActorAddr</span><span class="p">)</span>
+	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">StorageMarketActorAddr</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// ActorCode is the interface that all actor code types should satisfy.
@@ -14703,6 +14811,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <span class="kn">import</span> <span class="nx">base_mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
+</span><span class="c1"></span>    <span class="c1">// TODO: this is incorrect, it does not belong
 </span><span class="c1"></span>    <span class="nx">powerTable</span>           <span class="nx">PowerTable</span>
     <span class="nx">actor</span>                <span class="nx">StoragePowerActor</span>
     <span class="nx">associatedStateTree</span>  <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>  <span class="c1">// TODO: remove this. should not store this here.
@@ -14963,10 +15072,12 @@ Conversely, storage faults only lead to power loss once they are detected (up to
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 
 <span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">UVarint</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Miners</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>  <span class="c1">// TODO this should have a different type to account for power
-</span><span class="c1"></span>
+    <span class="c1">// TODO: bytesamount might be inefficient
+</span><span class="c1"></span>    <span class="nx">Miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StoragePower</span><span class="p">}</span>
+
     <span class="c1">// call by StorageMiningSubsytem on miner creation
 </span><span class="c1"></span>    <span class="nf">CreateStorageMiner</span><span class="p">(</span>
         <span class="nx">ownerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -14976,11 +15087,11 @@ Conversely, storage faults only lead to power loss once they are detected (up to
 </span><span class="c1"></span>    <span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate
-</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">minerStorage</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">StoragePower</span><span class="p">)</span>
 
-    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">BytesAmount</span>
+    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">StoragePower</span>
 
-    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">BytesAmount</span>
+    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StoragePower</span>
 
     <span class="c1">// call by StorageMinerActor on successful seal
 </span><span class="c1"></span>    <span class="c1">// TODO: workerKey of type StorageMiner.WorkerPubKey
@@ -16487,6 +16598,8 @@ satisfy those constraints, especially those relating to protocol security.</p>
 
 
 
+
+
 <div id="systems__filecoin_mining__storage_mining__storage_mining_subsystem"></div>
 
 <p>TODO:</p>
@@ -16592,6 +16705,97 @@ satisfy those constraints, especially those relating to protocol security.</p>
 
 
 
+
+
+<h4 id="sector-in-storageminer-state-machine-new-one">Sector in StorageMiner State Machine (new one)</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Sector State (new one)</span>
+
+
+
+
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state.dot.svg" />
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Sector State Legend (new one)</span>
+
+
+
+
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_legend.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_legend.dot.svg" />
+
+
+
+
+</div>
+
+
+<h4 id="sector-in-storageminer-state-machine-both">Sector in StorageMiner State Machine (both)</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Sector State Machine (both)</span>
+
+
+
+
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_fsm.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_fsm.dot.svg" />
+
+
+
+
+</div>
 
 
 
@@ -16831,15 +17035,38 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 <span class="kn">import</span> <span class="nx">sealing</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Seed</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">SectorCommitment</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">SectorExpirationQueueItem</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorNumber</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span>
+    <span class="nx">Expiration</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SectorExpirationQueue</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">Add</span><span class="p">(</span><span class="nx">i</span> <span class="nx">SectorExpirationQueueItem</span><span class="p">)</span>
+    <span class="nf">Pop</span><span class="p">()</span> <span class="nx">SectorExpirationQueueItem</span>
+    <span class="nf">Peek</span><span class="p">()</span> <span class="nx">SectorExpirationQueueItem</span>
+    <span class="nf">Remove</span><span class="p">(</span><span class="nx">n</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+<span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">StorageMinerActor</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// CollateralVault CollateralVault
 </span><span class="c1"></span>
+    <span class="c1">// TODO: consider merging SectorState into sector.SealCommitment to keep
+</span><span class="c1"></span>    <span class="c1">// only one map, instead of two.
+</span><span class="c1"></span>    <span class="nx">Sectors</span>                <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span><span class="p">}</span>  <span class="c1">// this should be an AMT
+</span><span class="c1"></span>    <span class="nx">SectorStates</span>           <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorState</span><span class="p">}</span>
+    <span class="nx">ProvingSet</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+    <span class="nx">LastChallengePoSt</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+
+    <span class="nx">SectorExpirationQueue</span>
+
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">info</span>     <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                   <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
     <span class="c1">// TODO: add the DePledgeCollateral
 </span><span class="c1"></span>    <span class="c1">// TODO: add the Sectors
@@ -16847,21 +17074,13 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>    <span class="c1">// TODO provingSet []SectorInfo CID to AMT
 </span><span class="c1"></span>
     <span class="c1">// TODO: should we keep the same structure as before or putting all of that into a struct?
-</span><span class="c1"></span>    <span class="c1">// TODO currentFaultSet BitField
-</span><span class="c1"></span>    <span class="c1">// TODO nextFaultSet BitField
-</span><span class="c1"></span>    <span class="c1">// TODO nextDoneSet BitField
 </span><span class="c1"></span>    <span class="c1">// TODO do we need a `slashedAt`?
 </span><span class="c1"></span>    <span class="c1">// TODO owedStorageCollateral
 </span><span class="c1"></span>    <span class="c1">// TODO ProvingPeriodEnd   Epoch
 </span><span class="c1"></span>
-    <span class="nx">Sectors</span>  <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="p">[</span><span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">]}</span>
-
     <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>
-    <span class="nf">SubmitPoSt</span><span class="p">(</span>
-        <span class="nx">postProof</span>        <span class="nx">PoStProof</span>
-        <span class="nx">sectorStateSets</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorStateSets</span>  <span class="c1">// TODO: check with Juan and Magik
-</span><span class="c1"></span>    <span class="p">)</span>
+    <span class="nf">SubmitPoSt</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
 
     <span class="c1">// TODO: should depledge be in here or in storage market actor?
 </span><span class="c1"></span>
@@ -16874,30 +17093,30 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>
     <span class="c1">// TODO: do IsSlashed, IsLate belong here?
 </span><span class="c1"></span>
-    <span class="nf">UpdateDoneSet</span><span class="p">()</span>
+    <span class="nf">DeclareFault</span><span class="p">(</span><span class="nx">faultSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">)</span>
 
-    <span class="nf">UpdateSectorStatus</span><span class="p">(</span><span class="nx">sectorStateSets</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorStateSets</span><span class="p">)</span>  <span class="c1">// TODO: @magik says SectorStateSets might be more expensive than more methods
-</span><span class="c1"></span>
     <span class="nf">computeProvingPeriodEndSectorState</span><span class="p">()</span>  <span class="c1">// TODO
-</span><span class="c1"></span><span class="p">}</span>
+</span><span class="c1"></span>
+    <span class="nf">verifyPoStSubmission</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MinerInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">owner</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">worker</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">PeerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">sectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
 <span class="p">}</span>
 
 <span class="cm">/*
@@ -17248,26 +17467,18 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1">// relative to a Miner.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorNumber</span> <span class="nx">UInt</span>
 
-<span class="kd">type</span> <span class="nx">ExpiredSet</span> <span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span>
-<span class="kd">type</span> <span class="nx">FaultSet</span> <span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span>
-<span class="kd">type</span> <span class="nx">ActiveSet</span> <span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span>
-
-<span class="kd">type</span> <span class="nx">SectorStateSets</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ExpiredSet</span>
-    <span class="nx">FaultSet</span>
-    <span class="nx">ActiveSet</span>
-<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">FaultSet</span> <span class="nx">CompactSectorSet</span>
 
 <span class="c1">// SectorSize indicates one of a set of possible sizes in the network.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorSize</span> <span class="nx">UInt</span>
 
 <span class="c1">// Ideally, SectorSize would be an enum
 </span><span class="c1">// type SectorSize enum {
-</span><span class="c1">//   1KB = UInt 1000
-</span><span class="c1">//   1MB = Uint 1000000
-</span><span class="c1">//   1GB = Uint 1000000000
-</span><span class="c1">//   1TB = Uint 1000000000000
-</span><span class="c1">//   1PB = Uint 1000000000000000
+</span><span class="c1">//   1KiB = UInt 1024
+</span><span class="c1">//   1MiB = Uint 1048576
+</span><span class="c1">//   1GiB = Uint 1073741824
+</span><span class="c1">//   1TiB = Uint 1099511627776
+</span><span class="c1">//   1PiB = Uint 1125899906842624
 </span><span class="c1">// }
 </span><span class="c1"></span>
 <span class="c1">// TODO make sure this is globally unique
@@ -17518,12 +17729,18 @@ and serves to make storage conform to a set of expectations.</p>
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">SealRandomSeed</span> <span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">SealRandomness</span> <span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="nx">Bytes</span>
+
+<span class="c1">// SealSeed is unique to each Sector
+</span><span class="c1">// SealSeed is:
+</span><span class="c1">//    SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID)
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSeed</span> <span class="nx">Bytes</span>
 
 <span class="kd">type</span> <span class="nx">SealCfg</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorSize</span>
@@ -17534,30 +17751,52 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="c1">// SealVerifyInfo is the structure of all thte information a verifier
 </span><span class="c1">// needs to verify a Seal.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">MinerID</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">OnChain</span>  <span class="nx">OnChainSealVerifyInfo</span>
+    <span class="nx">SectorID</span>
+    <span class="nx">OnChain</span> <span class="nx">OnChainSealVerifyInfo</span>
 <span class="p">}</span>
 
-<span class="c1">// OnChainSealVerifyInfo is the structure of information that must go on chain.
+<span class="c1">// OnChainSealVerifyInfo is the structure of information that must be sent with
+</span><span class="c1">// a message to commit a sector. Most of this information is not needed in the
+</span><span class="c1">// state tree but will be verified in sm.CommitSector. See SealCommitment for
+</span><span class="c1">// data stored on the state tree for each sector.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">OnChainSealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">UnsealedCID</span>   <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
-</span><span class="c1"></span>    <span class="nx">SealedCID</span>     <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">RandomSeed</span>    <span class="nx">SealRandomSeed</span>
+    <span class="nx">SealedCID</span>     <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">Epoch</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nx">Proof</span>         <span class="nx">SealProof</span>
     <span class="nx">DealIDs</span>       <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
     <span class="nx">SectorNumber</span>
+<span class="p">}</span>
+
+<span class="c1">// SealCommitment is the information kept in the state tree about a sector.
+</span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">UnsealedCID</span>  <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
+</span><span class="c1"></span>    <span class="nx">SealedCID</span>    <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">DealIDs</span>      <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nx">Expiration</span>   <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="c1">// ProofAux is meta data required to generate certain proofs
 </span><span class="c1">// for a sector, for example PoSt.
 </span><span class="c1">// These should be stored and indexed somewhere by CommR.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">CommRLast</span>             <span class="nx">SealedSectorCID</span>
+    <span class="nx">CommRLast</span>             <span class="nx">Commitment</span>
     <span class="nx">CommC</span>                 <span class="nx">Commitment</span>
 
     <span class="c1">// TODO: This may be a partially-cached tree.
 </span><span class="c1"></span>    <span class="c1">// this may be empty
 </span><span class="c1"></span>    <span class="nx">CachedMerkleTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ProofAuxTmp</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PersistentAux</span>  <span class="nx">ProofAux</span>
+
+    <span class="nx">CommD</span>          <span class="nx">UnsealedSectorCID</span>
+    <span class="nx">CommR</span>          <span class="nx">SealedSectorCID</span>
+
+    <span class="nx">Data</span>           <span class="nx">Bytes</span>
+    <span class="nx">Replica</span>        <span class="nx">Bytes</span>
+    <span class="nx">KeyLayers</span>      <span class="nx">BytesArray</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealArguments</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -18049,8 +18288,7 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 <span class="kn">import</span> <span class="nx">sealer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer&#34;</span>
 
-<span class="c1">// type poster.PoStProof struct {}
-</span><span class="c1">// type seal.SealOutput struct {}
+<span class="c1">// type seal.SealOutput struct {}
 </span><span class="c1">// type seal.SectorSealer struct {}
 </span><span class="c1">// type seal.Seed struct {}
 </span><span class="c1">// type sector.SectorID struct {}
@@ -18065,6 +18303,7 @@ and serves to make storage conform to a set of expectations.</p>
     <span class="nx">PostGenerator</span>  <span class="nx">poster</span><span class="p">.</span><span class="nx">PostGenerator</span>
 
     <span class="nf">SealSector</span><span class="p">(</span><span class="nx">si</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">SealInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">SealOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">CreateSealProof</span><span class="p">(</span><span class="nx">si</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">CreateSealProofInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">CreateSealProofOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
     <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
     <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span>
@@ -18160,33 +18399,47 @@ and serves to make storage conform to a set of expectations.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SealInputs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
     <span class="nx">SealCfg</span>       <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
     <span class="nx">MinerID</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">RandomSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomSeed</span>
+    <span class="nx">RandomSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
     <span class="nx">UnsealedPath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">SealedPath</span>    <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">DealIDs</span>       <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">CreateSealProofInputs</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorID</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+    <span class="nx">SealCfg</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
+    <span class="nx">RandomSeed</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
+    <span class="nx">SealedPath</span>   <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">SealOutputs</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealOutputs</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ProofAuxTmp</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAuxTmp</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">CreateSealProofOutputs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span>
     <span class="nx">ProofAux</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorSealer</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">SealSector</span><span class="p">(</span><span class="nx">si</span> <span class="nx">SealInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">SealOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">SealSector</span><span class="p">()</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">SealOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">CreateSealProof</span><span class="p">(</span><span class="nx">si</span> <span class="nx">CreateSealProofInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">CreateSealProofOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
     <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
-    <span class="c1">//  GeneratePieceInclusionProof(
-</span><span class="c1"></span>    <span class="c1">//    Tree          MerkleTree, //MerkleTree&lt;Rephash&gt;,
-</span><span class="c1"></span>    <span class="c1">//    PieceStart    UInt,
-</span><span class="c1"></span>    <span class="c1">//    PieceLength   UInt,
-</span><span class="c1"></span>    <span class="c1">//  ) union { error, PieceInclusionProofs }
-</span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">//  VerifyPieceInclusionProof() struct {}
-</span><span class="c1"></span>
+    <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">unsealedPath</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">ComputeReplicaID</span><span class="p">(</span>
+        <span class="nx">sid</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+        <span class="nx">commD</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span>
+        <span class="nx">seed</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
+    <span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">replicaID</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+
     <span class="nf">MaxUnsealedBytesPerSector</span><span class="p">(</span><span class="nx">SectorSize</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInt</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -18280,6 +18533,7 @@ and serves to make storage conform to a set of expectations.</p>
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
 <span class="kd">type</span> <span class="nx">Challenge</span> <span class="nx">UInt64</span>
@@ -18290,8 +18544,8 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1">// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
 </span><span class="c1">// - &#34;blockchain/builtins&#34; or something like that - a component in the blockchain that handles storage verification
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStSubmission</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PostProof</span>  <span class="nx">PoStProof</span>
-    <span class="nx">SectorSet</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+    <span class="nx">PostProof</span>   <span class="nx">PoStProof</span>
+    <span class="nx">ChainEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PostGenerator</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -19022,7 +19276,81 @@ and serves to make storage conform to a set of expectations.</p>
 
 
 
-<p>There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with <code>CommitSector</code> to gain storage power on chain. Hence, there is a <code>StorageDealProposal</code> and a <code>RetrievalDealProposal</code> that are half sign contracts submitted by clients to be counter-signed and posted on-chain by the miners.</p>
+
+
+<p>There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with <code>CommitSector</code> to gain storage power on chain. Hence, there is a <code>StorageDealProposal</code> and a <code>RetrievalDealProposal</code> that are half-signed contracts submitted by clients to be counter-signed and posted on-chain by the miners.</p>
+
+<p>Filecoin Storage Market Deal Flow</p>
+
+<h4 id="add-storage-deal-and-power">Add Storage Deal and Power</h4>
+
+<ul>
+<li>1. <code>StorageClient</code> and <code>StorageProvider</code> call <code>StorageMarketActor.AddBalance</code> to deposit funds into Storage Market. There are two fund states in the Storage Market, <code>Locked</code> and <code>Available</code>.
+
+<ul>
+<li><code>StorageClient</code> and <code>StorageProvider</code> can call <code>WithdrawBalance</code> before any deal is made. (move to state X)</li>
+</ul></li>
+<li>2. <code>StorageClient</code> and <code>StorageProvider</code> negotiate a deal off chain. <code>StorageClient</code> sends a <code>StorageDealProposal</code> to a <code>StorageProvider</code>.
+
+<ul>
+<li><code>StorageProvider</code> verifies the <code>StorageDeal</code> by checking address and signature of <code>StorageClient</code>, checking the proposal has not expired, checking <code>StorageClient</code> did not call withdraw in the last X Epoch, checking both <code>StorageProvider</code> and <code>StorageClient</code> have sufficient available balances in <code>StorageMarketActor</code>.</li>
+</ul></li>
+<li>3. <code>StorageProvider</code> signs the <code>StorageDealProposal</code>  gets a <code>StorageDeal</code>.
+
+<ul>
+<li>a. <code>StorageProvider</code> calls <code>PublishStorageDeals</code> in <code>StorageMarketActor</code> which will generate a <code>DealID</code> for each <code>StorageDeal</code> and store a mapping from <code>DealID</code> to <code>StorageDeal</code>. However, the deals are not active at this point.
+
+<ul>
+<li>As a backup, <code>StorageClient</code> MAY call <code>PublishStorageDeals</code> with the <code>StorageDeal</code>, to activate the deal.</li>
+<li>It is possible for either <code>StorageProvider</code> or <code>StorageClient</code> to try to enter into two deals simultaneously with funds available only for one. Only the first deal to commit in the chain would clear, the second would fail with error <code>errorcode.InsufficientFunds</code>.</li>
+</ul></li>
+<li>b. <code>StorageProvider</code> calls <code>HandleStorageDeal</code> in <code>StorageMiningSubsystem</code> which will then add the <code>StorageDeal</code> into a <code>Sector</code>.</li>
+</ul></li>
+<li>4. Once the miner finishes packing a <code>Sector</code>, it generates a Sealed Sector and calls <code>StorageMinerActor.CommitSector</code> to verify the seal, store sector expiration, and record the mapping from <code>SectorNumber</code> to <code>SealCommitment</code>. It will also place this newly added <code>Sector</code> in the list of <code>CommittedSectors</code> in <code>StorageMinerActor</code>. <code>StorageMiner</code> does not earn any power for this newly added sector until its first PoSt has been submitted.</li>
+</ul>
+
+<h4 id="declare-and-recover-faults">Declare and Recover Faults</h4>
+
+<ul>
+<li>5. Declared faults are penalized to a smaller degree than spotted faults by <code>CronActor</code>. Miners declare faulty sectors by invoking <code>StorageMinerActor.DeclareFaults</code> and X of the <code>StorageDealCollateral</code> will be slashed and power corresponding to these sectors will be tempororily lost.</li>
+<li>6. Miners can then recover faults by invoking <code>StorageMinerActor.RecoverFaults</code> and have sufficient <code>StorageDealCollateral</code> in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission.</li>
+<li>7. Sectors that are declared faulty for <code>storagemining.MaxFaults</code> consecutive ChainEpochs will result in <code>StoragePowerActor.SlashPledgeCollateral</code>.
+
+<ul>
+<li>TODO: set <code>X</code> parameter</li>
+</ul></li>
+</ul>
+
+<h4 id="submit-post">Submit PoSt</h4>
+
+<p>(TODO: move into Storage Mining)</p>
+
+<p>On every PoSt Submission, the following steps happen.</p>
+
+<ul>
+<li>8. <code>StorageMinerActor</code> first verifies the PoSt Submission. All Sectors will be considered in <code>SpottedFaults</code> if PoSt submission has failed (move to State 14).</li>
+<li>9. If <code>CommittedSectors</code> are proven in <code>PoStSubmission.SectorSet</code>, Storage Miner gains power for these newly committed sectors.</li>
+<li>10. If there are <code>DeclaredFaultySectors</code> , <code>Sector</code> in that set will not be challenged.</li>
+<li>11. For all other sectors, payment will be processed by invoking <code>StorageMarketActor.ProcessStorageDealsPayment</code> and miner available balances will be updated.</li>
+<li>12. Decide which Sectors have expired by looking at the <code>SectorExpirationQueue</code>. Sectors expire when all deals in that Sector have expired. <code>StorageDealCollateral</code> for both miners and users will only be returned when all deals in the Sector have expired. This is done by calling <code>StorageMarketActor.SettleExpiredDeals</code> and the Sector will be deleted from <code>StorageMinerActor.Sectors</code>.</li>
+</ul>
+
+<h4 id="spot-faults">Spot Faults</h4>
+
+<p>(TODO: move into Storage Mining)</p>
+
+<ul>
+<li>13. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckPoSt</code> on all the miners whose <code>ProvingPeriod</code> is up.
+
+<ul>
+<li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>StorageMinerActor</code> spots the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
+<li>TODO: reword in terms of a conditional in the mining cycle</li>
+<li>When there are sector faults are spotted, both <code>StorageDealCollateral</code> and <code>PledgeCollateral</code> are slashed, and power is lost.</li>
+<li>If the faults persist for <code>storagemining.MaxFaults</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
+</ul></li>
+</ul>
+
+<h4 id="deal-code">Deal Code</h4>
 
 
 
@@ -19053,15 +19381,15 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PieceRef</span>             <span class="nx">DealCID</span>
-    <span class="nx">PieceSize</span>            <span class="nx">UInt</span>
-    <span class="nx">Client</span>               <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Provider</span>             <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">ProposalExpiryEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">DealExpiryEpoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">StoragePrice</span>         <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">StorageCollateral</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">ProposerSignature</span>    <span class="nx">Signature</span>
+    <span class="nx">PieceRef</span>            <span class="nx">DealCID</span>
+    <span class="nx">PieceSize</span>           <span class="nx">UInt</span>
+    <span class="nx">Client</span>              <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">Provider</span>            <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">ProposalExpiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">DealExpiration</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">StoragePrice</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">StorageCollateral</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">ProposerSignature</span>   <span class="nx">Signature</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -19233,6 +19561,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 
@@ -19260,16 +19589,16 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1"></span>    <span class="c1">// a DealID will be assigned and stored in the mapping of DealID to StorageDeal
 </span><span class="c1"></span>    <span class="c1">// PublishStorageDeal should be called before SecotrCommits
 </span><span class="c1"></span>    <span class="c1">// an unregistered StorageDeal will not be processed
-</span><span class="c1"></span>    <span class="nf">PublishStorageDeal</span><span class="p">(</span><span class="nx">newStorageDeals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span> <span class="p">[</span><span class="nx">PublishStorageDealResponse</span><span class="p">]</span>
+</span><span class="c1"></span>    <span class="nf">PublishStorageDeals</span><span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span> <span class="p">[</span><span class="nx">PublishStorageDealResponse</span><span class="p">]</span>
 
     <span class="c1">// check if StorageDeal is signed before expiry
 </span><span class="c1"></span>    <span class="c1">// check if StorageDeal has the right signatures
 </span><span class="c1"></span>    <span class="c1">// check if minimum StoragePrice and StorageCollateral are met
 </span><span class="c1"></span>    <span class="c1">// check if provider and client have sufficient balances
-</span><span class="c1"></span>    <span class="nf">verifyStorageDeal</span><span class="p">(</span><span class="nx">newStorageDeal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">verifyStorageDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="kt">bool</span>
 
     <span class="c1">// generate storage deal id
-</span><span class="c1"></span>    <span class="nf">generateStorageDealID</span><span class="p">(</span><span class="nx">storageDeal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+</span><span class="c1"></span>    <span class="nf">generateStorageDealID</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
 
     <span class="c1">// TODO: StorageDeals should be renewable
 </span><span class="c1"></span>    <span class="c1">// UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
@@ -19282,17 +19611,19 @@ Storage Market subsystem is the data entry point into the network. Storage miner
     <span class="c1">// call by CronActor / onPoStSubmission on ExpiredSet
 </span><span class="c1"></span>    <span class="c1">// remove StorageDeal from StorageMarketActor
 </span><span class="c1"></span>    <span class="c1">// if no more active deals contain in the sector
-</span><span class="c1"></span>    <span class="c1">// adjust miner power for this sector
 </span><span class="c1"></span>    <span class="c1">// return StorageCollateral to miners
-</span><span class="c1"></span>    <span class="nf">closeExpiredStorageDeal</span><span class="p">(</span><span class="nx">storageDealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+</span><span class="c1"></span>    <span class="nf">SettleExpiredDeals</span><span class="p">(</span><span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 
     <span class="c1">// call by CronActor / onPoStSubmission on ActiveSet to process deal payment
 </span><span class="c1"></span>    <span class="c1">// go through StorageDealIDs, if IDs are active in MarketActor
 </span><span class="c1"></span>    <span class="c1">// payment will be processed
-</span><span class="c1"></span>    <span class="nf">handleStorageDealPayment</span><span class="p">(</span><span class="nx">storageDealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+</span><span class="c1"></span>    <span class="nf">ProcessStorageDealsPayment</span><span class="p">(</span><span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 
-    <span class="c1">// call by CronActor / onPoStSubmission on FaultSet to slash deal collateral
-</span><span class="c1"></span>    <span class="nf">slashStorageDealCollateral</span><span class="p">(</span><span class="nx">storageDealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+    <span class="c1">// call by CronActor / on DeclareFault on FaultSet to slash deal collateral
+</span><span class="c1"></span>    <span class="c1">// Deals should be slashed for a single proving period
+</span><span class="c1"></span>    <span class="nf">SlashStorageDealCollateral</span><span class="p">(</span><span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+
+    <span class="nf">GetLastExpirationFromDealIDs</span><span class="p">(</span><span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -19327,6 +19658,8 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </h4>
 
 <div class="section-content">
+
+
 
 
 
@@ -19423,6 +19756,124 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
+
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+
+<span class="c1">// import deal_status &#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleNewStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">ProposerSignature</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">StoragePrice</span><span class="p">())</span> <span class="p">{</span>
+		<span class="c1">// status := &amp;deal.StorageDealStatus_StorageDealProposed_I{}
+</span><span class="c1"></span>		<span class="c1">// s := deal.StorageDealStatus_Make_StorageDealProposed(status)
+</span><span class="c1"></span>		<span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceRef</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealProposed</span>
+		<span class="c1">// TODO notify StorageClient that a deal has been received
+</span><span class="c1"></span>		<span class="c1">// TODO notify StorageMiningSubsystem to add deals to sector
+</span><span class="c1"></span>		<span class="nx">provider</span><span class="p">.</span><span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
+		<span class="c1">// DO THIS TODAY Call StorageMarketActor.publishStorageDeal()
+</span><span class="c1"></span>	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span> <span class="p">{</span>
+	<span class="c1">// TODO add signature to the proposal
+</span><span class="c1"></span>	<span class="c1">// TODO notify StorageClient that a deal has been signed
+</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceRef</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealRejected</span>
+	<span class="c1">// TODO send notification to client
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="c1">// TODO make call to StorageMarketActor
+</span><span class="c1"></span>	<span class="c1">// balance, found := StorageMarketActor.Balances()[address]
+</span><span class="c1"></span>
+	<span class="c1">// if !found {
+</span><span class="c1"></span>	<span class="c1">// 	return false
+</span><span class="c1"></span>	<span class="c1">// }
+</span><span class="c1"></span>
+	<span class="c1">// if balance &lt; price {
+</span><span class="c1"></span>	<span class="c1">// 	return false
+</span><span class="c1"></span>	<span class="c1">// }
+</span><span class="c1"></span>
+	<span class="c1">// TODO Check on Signature
+</span><span class="c1"></span>	<span class="c1">// return true
+</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// TODO: func (provider *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
+</span><span class="c1">// 	panic(&#34;TODO&#34;)
+</span><span class="c1">// }
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span> <span class="p">{</span>
+	<span class="nx">dealStatus</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span>
+
+	<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">dealStatus</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">StorageDealNotFound</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+<h5 id="storage-provider-state-machine">Storage Provider State Machine</h5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Storage Provider State Machine</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/storage_market/diagrams/storage_provider_fsm.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/storage_market/diagrams/storage_provider_fsm.dot.svg" />
+
+
+
+
+</div>
+
+
+
 </div>
 
 
@@ -19448,6 +19899,8 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </h4>
 
 <div class="section-content">
+
+
 
 
 
@@ -19521,6 +19974,57 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>storage_client.go</code> file was not found.</i></b></p>
+
+
+
+<h5 id="storage-client-state-machine">Storage Client State Machine</h5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Storage Client State Machine</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/storage_market/diagrams/storage_client_fsm.dot.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/storage_market/diagrams/storage_client_fsm.dot.svg" />
+
+
+
+
+</div>
 
 
 
@@ -20918,8 +21422,16 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StackedDRGLayers</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">StackedDRGNodeSize</span> <span class="kd">struct</span> <span class="p">{}</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+
+<span class="kd">type</span> <span class="nx">StackedDRGLayers</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Layers</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">StackedDRGNodeSize</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Size</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">DRGDepth</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">DRGFraction</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">DRGDegree</span> <span class="kd">struct</span> <span class="p">{}</span>
@@ -20940,9 +21452,7 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 </span><span class="c1"></span>        <span class="c1">// updates to public parameters go here
 </span><span class="c1"></span>    <span class="p">}</span>
 
-    <span class="nx">SealSetupArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="c1">// per-sector setup artifacts go here
-</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="nx">SealSetupArtifacts</span>
 
     <span class="c1">// ProveArtifacts or
 </span><span class="c1"></span>    <span class="nx">ChallengeArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -20952,6 +21462,17 @@ Storage Market subsystem is the data entry point into the network. Storage miner
     <span class="nx">VerifyArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
         <span class="c1">// inputs into verify() go here
 </span><span class="c1"></span>    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// per-sector setup artifacts go here   
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSetupArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">CommR</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span>
+    <span class="nx">CommC</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+    <span class="nx">CommRLast</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+    <span class="nx">CommCTreePath</span>      <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">CommRLastTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">KeyLayers</span>          <span class="nx">BytesArray</span>
+    <span class="nx">Replica</span>            <span class="nx">Bytes</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PoRep</span> <span class="nx">union</span> <span class="p">{</span>
@@ -20966,8 +21487,12 @@ Storage Market subsystem is the data entry point into the network. Storage miner
 
 <span class="kd">type</span> <span class="nx">SDRPoSpace</span> <span class="nx">StackedDRG</span>
 
-<span class="kd">type</span> <span class="nx">StackedDRGAlgorithm</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">EllipticCurve</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">FieldModulus</span> <span class="o">&amp;</span><span class="nx">BigInt</span>
+<span class="p">}</span>
 
+<span class="c1">//type StackedDRG_Algorithm struct {}
+</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StackedDRG</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Layers</span>            <span class="nx">StackedDRGLayers</span>
     <span class="nx">NodeSize</span>          <span class="nx">StackedDRGNodeSize</span>
@@ -20975,7 +21500,8 @@ Storage Market subsystem is the data entry point into the network. Storage miner
     <span class="nx">DRGCfg</span>
     <span class="nx">ExpanderGraphCfg</span>
     <span class="c1">// invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
-</span><span class="c1"></span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="nx">Curve</span>             <span class="nx">EllipticCurve</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">DRGCfg</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Algorithm</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -20985,10 +21511,19 @@ Storage Market subsystem is the data entry point into the network. Storage miner
         <span class="nx">ParentsAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
             <span class="nx">DRSample</span>
         <span class="p">}</span>
+
+        <span class="nx">RNGAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
+            <span class="nx">ChaCha20</span>
+        <span class="p">}</span>
     <span class="p">}</span>
     <span class="nx">Degree</span> <span class="nx">DRGDegree</span>
     <span class="nx">Seed</span> <span class="nx">DRGSeed</span>
     <span class="nx">Nodes</span> <span class="nx">DRGNodeCount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">DRG</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Config</span> <span class="nx">DRGCfg</span>
+    <span class="nf">Parents</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInts</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ExpanderGraphCfg</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -21009,6 +21544,11 @@ Storage Market subsystem is the data entry point into the network. Storage miner
     <span class="nx">Degree</span>    <span class="nx">ExpanderGraphDegree</span>
     <span class="nx">Seed</span>      <span class="nx">ExpanderGraphSeed</span>
     <span class="nx">NodeSize</span>  <span class="nx">DRGNodeSize</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ExpanderGraph</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Config</span> <span class="nx">DRGCfg</span>
+    <span class="nf">Parents</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInts</span>
 <span class="p">}</span>
 </code></pre></div>
 

@@ -4,7 +4,7 @@ package address
 // 	util "github.com/filecoin-project/specs/util"
 // )
 
-func (a *Address_I) verifySyntax(addrType Address_Type) bool {
+func (a *Address_I) VerifySyntax(addrType Address_Type) bool {
 	panic("TODO")
 	// switch aType := addrType; aType {
 	// case Address_Protocol.Secp256k1():
@@ -17,4 +17,8 @@ func (a *Address_I) verifySyntax(addrType Address_Type) bool {
 	// case Address_Protocol.BLS():
 	// 	// BLS-12_381 - 48 Byte PK
 	// }
+}
+
+func (a *Address_I) String() AddressString {
+	return AddressString("") // TODo
 }

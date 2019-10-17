@@ -44,7 +44,7 @@ func (r *Runtime_I) Fatal(string) Runtime_Fatal_FunRet {
 	panic("TODO")
 }
 
-func (r *Runtime_I) Send(to addr.Address, method string, value actor.TokenAmount, params actor.MethodParams) msg.MessageReceipt {
+func (r *Runtime_I) Send(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) msg.MessageReceipt {
 	panic("TODO")
 }
 

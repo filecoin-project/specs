@@ -1,0 +1,111 @@
+digraph sector {
+  compound=true;
+  ranksep=0.2;
+  splines=ortho;
+  edge [style=solid]
+
+  subgraph cluster_chain {
+    label="Sector States in StorageMinerActor\n(on chain)"
+    style=bold
+    color=gray
+
+    subgraph cluster_postproving {
+      label="Proving Set"
+      style=filled
+      color=azure2
+
+      subgraph cluster_nopowerC1 {
+        label="Does not count for power"
+        style=filled
+        color=lightgray
+        CommittedC [label="Committed"]
+      }
+
+      subgraph cluster_nopowerC2 {
+        label="Does not count for power"
+        style=filled
+        color=lightgray
+        RecoveringC [label="Recovering"]
+      }
+
+      subgraph cluster_activate {
+        fontcolor=darkgreen
+        label=""
+        node [label="1st PoSt\n(sm.SubmitPost)\nActivateSectors"
+        fontcolor=darkgreen shape=box color=darkgreen]
+        FirstPoSt
+      }
+
+      subgraph cluster_powerC {
+        label="Counts for power"
+        style=filled
+        color=seagreen3
+        ActiveC [label="Active"]
+      }
+
+
+    }
+
+    subgraph cluster_nopowerC2 {
+      label="Does not count for power"
+      style=filled
+      color=lightgray
+
+      FaultedC [label="Faulted"]
+      ExpiredC [label="Cleared"]
+
+      subgraph cluster_expire_by_post {
+          fontcolor=orange
+          label=""
+          node [label="Expiration Reached\n(sma.CronTick \n-> sm.ExpireSectors)"
+          fontcolor=orange shape=box color=orange]
+          ExpireByPost
+      }
+
+
+      { // cron
+        edge [color=magenta, fontcolor=magenta]
+        FaultedC -> ExpiredC [label="Expiry epoch reached\n(sma.CronTick \n-> sm.ExpireSectors)"]
+        FaultedC -> ExpiredC [label="Faulted 3+ times\n(sma.CronTick \n-> sm.SectorCleanup)", constraint=false]
+      }
+    }
+
+    { // messages
+      edge [color=blue, fontcolor=blue]
+      node [color=blue, fontcolor=blue, shape=box]
+
+      FaultsDeclared [label="Fault Declared\n(sm.DeclareFaults)"]
+
+      CommittedC -> FirstPoSt [arrowhead=none color=darkgreen fontcolor=darkgreen]
+      RecoveringC -> FirstPoSt [arrowhead=none color=darkgreen fontcolor=darkgreen]
+      FirstPoSt -> ActiveC [color=darkgreen fontcolor=darkgreen]
+
+      RecoveringC -> FaultsDeclared [arrowhead=none]
+      CommittedC -> FaultsDeclared [arrowhead=none]
+      ActiveC -> FaultsDeclared [arrowhead=none]
+      FaultsDeclared -> FaultedC
+
+      FaultedC -> RecoveringC [label="sm.RecoverFaults" color=black fontcolor=black]
+
+      ActiveC -> ExpireByPost [arrowhead=none color=orange fontcolor=orange]
+      RecoveringC -> ExpireByPost [arrowhead=none color=orange fontcolor=orange]
+      CommittedC -> ExpireByPost [arrowhead=none color=orange fontcolor=orange]
+      ExpireByPost -> ExpiredC [color=orange fontcolor=orange]
+    }
+
+    { // cron
+      edge [color=magenta, fontcolor=magenta]
+      node [color=magenta, fontcolor=magenta, shape=box]
+      FaultSpotted [label="Fault Spotted\n(ca.CronTick \n-> sm.PostFailed)"]
+
+      CommittedC -> FaultSpotted [arrowhead=none]
+      ActiveC -> FaultSpotted [arrowhead=none]
+      RecoveringC -> FaultSpotted [arrowhead=none]
+      FaultSpotted -> FaultedC
+
+    }
+
+    CommittedC -> ActiveC -> FaultsDeclared -> FaultedC -> ExpiredC [style=invis] // structure
+    CommittedC -> ActiveC -> FaultSpotted -> FaultedC -> ExpiredC [style=invis] // structure
+  }
+}

@@ -1,0 +1,53 @@
+digraph sector {
+  compound=true;
+  ranksep=0.2;
+  // splines=ortho;
+  edge [style=solid]
+
+  subgraph cluster_local {
+    style=bold
+    color=gray
+    label="Sector States in Storage Miner\n(off chain)"
+
+    Empty
+    Packing
+    Unsealed
+    Sealed
+    NotProving [label="Not Proving"]
+    Deleted
+
+
+    Empty -> Packing -> Unsealed -> Sealed -> NotProving -> Deleted [style=invis] // structure
+
+    subgraph cluster_power {
+      label=""
+      style=filled
+      color=seagreen3
+      Proving
+    }
+
+    Empty -> Packing [label="Add Deal"]
+    Packing -> Unsealed [label="Sector is full"]
+    Unsealed -> Sealed [label="Seal"]
+    Proving -> NotProving [label="Lost data\nor\nStopped Proving"]
+    NotProving -> Deleted [label="Give up on recovery\nor\nExpiry"]
+  }
+
+  {
+    Packing -> Packing [label="Add Deal"]
+    // ExpiredC -> Deleted [label="Expired"]
+  }
+  { // messages
+    edge [color=blue, fontcolor=blue]
+    node [color=blue, fontcolor=blue, shape=none]
+    Proving -> Proving [label="Produce Post\n(sm.SubmitPost)"]
+    NotProving -> Proving [label="Recover\n(sm.SubmitPost)", constraint=false]
+    Sealed -> Proving [label="Commit Sector\n(sm.CommitSector)"]
+
+    NotProving -> NotProving [label="Fault Declared\n(sm.DeclareFaults)"]
+  }
+  { // cron
+    edge [color=magenta, fontcolor=magenta]
+    NotProving -> NotProving [label="Fault Spotted\n(sma.CronTick \n-> sm.PostFailed)"]
+  }
+}
