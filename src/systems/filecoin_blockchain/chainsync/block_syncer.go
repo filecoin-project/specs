@@ -16,6 +16,8 @@ func (self *BlockSyncer_I) OnNewBlock(block block.Block) error {
 // The syntactic stage may be validated without reference to additional data (see block)
 func (bs *BlockSyncer_I) validateBlockSyntax(block block.Block) error {
 	panic("TODO")
+
+	// if !block.Epoch().WithinFinality
 	// if !block.MinerAddress().VerifySyntax(StorageMinerActor.Address.Protocol()) {
 	// 	return ErrInvalidBlockSyntax("bad miner address syntax")
 	// }

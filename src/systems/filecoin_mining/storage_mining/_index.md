@@ -19,7 +19,7 @@ Filecoin Storage Mining Subsystem
 
 # Sector in StorageMiner State Machine (new one)
 
-{{< diagram src="diagrams/sector_state.dot.svg" title="Sector State (new one)" >}}
+{{< diagram src="diagrams/sector_state_fsm.dot.svg" title="Sector State (new one)" >}}
 
 {{< diagram src="diagrams/sector_state_legend.dot.svg" title="Sector State Legend (new one)" >}}
 

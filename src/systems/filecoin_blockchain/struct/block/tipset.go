@@ -4,6 +4,21 @@ import (
 	clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 )
 
+func (ts *Tipset_I) MinTicket() Ticket {
+	var ret Ticket
+
+	// for _, currBlock := range ts.Blocks() {
+	// 	tix := currBlock.Ticket()
+	// 	if ret == nil {
+	// 		ret = tix
+	// 	} else {
+	// 		ret = SmallerBytes(tix, ret)
+	// 	}
+	// }
+
+	return ret
+}
+
 func (ts *Tipset_I) ValidateSyntax() bool {
 
 	if len(ts.Blocks_) <= 0 {

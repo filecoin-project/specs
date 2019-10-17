@@ -20,21 +20,6 @@ type VRFResult struct {
     ValidateSyntax() bool
 }
 
-type VDF struct {
-    evalKey            Bytes      @(internal)
-    VerifKey           Bytes      @(internal)
-
-    Eval(input Bytes)  VDFResult  @(static)
-}
-
-type VDFResult struct {
-    Output  Bytes  @(internal)
-    Proof   Bytes  @(internal)
-
-    Verify(input Bytes) bool @(static)
-    ValidateSyntax() bool
-}
-
 type SigKeyPair struct {
     PublicKey  SigPublicKey
     SecretKey  SigSecretKey

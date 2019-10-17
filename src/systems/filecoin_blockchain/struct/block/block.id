@@ -6,12 +6,11 @@ import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
-type ChainWeight UVarint
-type ChainEpoch UVarint
-
 type BlockCID ipld.CID
 type MessageRoot ipld.CID
 type ReceiptRoot ipld.CID
+type ChainWeight UVarint
+type ChainEpoch UVarint
 
 type BlockHeader struct {
     // Chain linking
@@ -29,7 +28,7 @@ type BlockHeader struct {
 
     // Consensus things
     Timestamp        clock.Time
-    Tickets          [Ticket]
+    Ticket
     ElectionProof
 
     // Signatures
@@ -38,9 +37,6 @@ type BlockHeader struct {
 
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
-
-    ValidateTickets(pubKey filcrypto.PubKey) bool
-    ExtractElectionSeed() ElectionSeed
 }
 
 // TODO: remove this. header is signed
@@ -53,4 +49,14 @@ type Block struct {
     Header    BlockHeader
     Messages  [msg.Message]
     Receipts  [msg.MessageReceipt]
+}
+
+type Chain struct {
+    HeadEpoch()         ChainEpoch
+    HeadTipset()        Tipset
+    FinalizedEpoch()    ChainEpoch
+    LatestCheckpoint()  ChainEpoch
+
+    TipsetAtEpoch(epoch ChainEpoch) Tipset
+    TicketAtEpoch(epoch ChainEpoch) Ticket
 }
