@@ -22,3 +22,7 @@ func (f FileReadWriter) Write(buf []byte) (n int, err error) {
 	ret := f.f.Write(buf)
 	return ret.size(), ret.e()
 }
+
+func FromPath(path Path) *FileReadWriter {
+	return &FileReadWriter{} // TODO: Actually create file from path.
+}

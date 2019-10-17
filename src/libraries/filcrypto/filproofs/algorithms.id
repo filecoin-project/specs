@@ -1,5 +1,13 @@
-type StackedDRGLayers struct {}
-type StackedDRGNodeSize struct {}
+import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+type StackedDRGLayers struct {
+    Layers UInt
+}
+type StackedDRGNodeSize struct {
+    Size UInt
+}
+
 type DRGDepth struct {}
 type DRGFraction struct {}
 type DRGDegree struct {}
@@ -20,9 +28,7 @@ type SealAlgorithmArtifacts struct {
         // updates to public parameters go here
     }
 
-    SealSetupArtifacts struct {
-        // per-sector setup artifacts go here
-    }
+    SealSetupArtifacts
 
     // ProveArtifacts or
     ChallengeArtifacts struct {
@@ -32,6 +38,17 @@ type SealAlgorithmArtifacts struct {
     VerifyArtifacts struct {
         // inputs into verify() go here
     }
+}
+
+// per-sector setup artifacts go here   
+type SealSetupArtifacts struct {
+    CommR              sector.SealedSectorCID
+    CommC              sector.Commitment
+    CommRLast          sector.Commitment
+    CommCTreePath      file.Path
+    CommRLastTreePath  file.Path
+    KeyLayers          BytesArray
+    Replica            Bytes
 }
 
 type PoRep union {
@@ -46,7 +63,11 @@ type ZigZagPoRep StackedDRG
 
 type SDRPoSpace StackedDRG
 
-type StackedDRGAlgorithm struct {}
+type EllipticCurve struct {
+    FieldModulus &BigInt
+}
+
+//type StackedDRG_Algorithm struct {}
 
 type StackedDRG struct {
     Layers            StackedDRGLayers
@@ -55,6 +76,7 @@ type StackedDRG struct {
     DRGCfg
     ExpanderGraphCfg
     // invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
+    Curve             EllipticCurve
 }
 
 type DRGCfg struct {
@@ -65,10 +87,19 @@ type DRGCfg struct {
         ParentsAlgorithm enum {
             DRSample
         }
+
+        RNGAlgorithm enum {
+            ChaCha20
+        }
     }
     Degree DRGDegree
     Seed DRGSeed
     Nodes DRGNodeCount
+}
+
+type DRG struct {
+    Config DRGCfg
+    Parents(Bytes, UInt) UInts
 }
 
 type ExpanderGraphCfg struct {
@@ -89,4 +120,9 @@ type ExpanderGraphCfg struct {
     Degree    ExpanderGraphDegree
     Seed      ExpanderGraphSeed
     NodeSize  DRGNodeSize
+}
+
+type ExpanderGraph struct {
+    Config DRGCfg
+    Parents(Bytes, UInt) UInts
 }
