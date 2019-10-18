@@ -8,6 +8,4 @@ Both `StorageProvider` and `StorageClient` are `StorageMarketParticipant`. Any p
 
 {{< readfile file="storage_provider.go" code="true" lang="go" >}}
 
-# Storage Provider State Machine
-
-{{< diagram src="diagrams/storage_provider_fsm.dot.svg" title="Storage Provider State Machine" >}}
+<!-- # Storage Provider State Machine -->
