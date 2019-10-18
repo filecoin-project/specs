@@ -1,29 +1,31 @@
 package storage_power_consensus
 
 import (
+	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 
-const PLEDGE_COLLATERAL_PER_GB = -1 // TODO define
-
-// Actor
-func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
+func (spa *StoragePowerActor_I) CreateStorageMiner(
+	ownerAddr addr.Address,
+	workerPubKey filcrypto.PubKey,
+	sectorSize util.UInt,
+	peerId libp2p.PeerID,
+) addr.Address {
 	panic("TODO")
-
-	// Use EC's IsValidConsensusFault method to validate the proof
-	// slash block miner's pledge collateral
-	// reward slasher
 }
 
-func (spa *StoragePowerActor_I) ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors util.UVarint) {
-	panic("TODO")
-	// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
-
-	// slash cheater pledge collateral accordingly based on num sectors faulted
+// PowerTable Operation - consider remove
+func (spa *StoragePowerActor_I) IncrementPower(address addr.Address, numSectors util.UVarint) {}
+func (spa *StoragePowerActor_I) DecrementPower(address addr.Address, numSectors util.UVarint) {}
+func (spa *StoragePowerActor_I) GetTotalPower() block.StoragePower {
+	return block.StoragePower(0)
 }
+
+func (spa *StoragePowerActor_I) GetPledgeCollateralReq(newStorage block.StoragePower) {}
 
 func (spa *StoragePowerActor_I) CommitPledgeCollateral(deals []deal.StorageDeal) {
 
@@ -36,6 +38,19 @@ func (spa *StoragePowerActor_I) DecommitPledgeCollateral(deals []deal.StorageDea
 	panic("TODO")
 	// must check more than finality post deal expiration
 	// return appropriate amount to storage market based on deals
+}
+
+func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
+	panic("TODO")
+
+	// Use EC's IsValidConsensusFault method to validate the proof
+	// slash block miner's pledge collateral
+	// reward slasher
+
+	// include ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors util.UVarint) as case
+	// Quite a bit more straightforward since only called by the cron actor (ie publicly verified)
+	// slash cheater pledge collateral accordingly based on num sectors faulted
+
 }
 
 // TODO: add Surprise to the chron actor
