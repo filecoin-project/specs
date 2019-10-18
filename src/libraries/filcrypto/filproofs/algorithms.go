@@ -132,10 +132,14 @@ func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux s
 		challengeProofs = append(challengeProofs, sdr.CreateChallengeProof(c, aux))
 	}
 
-	panic("TODO")
+	return sdr.CreateCircuitProof(challengeProofs, aux)
 }
 
 func (sdr *StackedDRG_I) CreateChallengeProof(c int, aux sector.ProofAuxTmp) OfflineChallengeProof {
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) CreateCircuitProof(challengeProofs []OfflineChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
 	panic("TODO")
 }
 
