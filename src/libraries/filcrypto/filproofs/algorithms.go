@@ -120,10 +120,26 @@ func hashColumn(column []byte) PedersenHash {
 	return WideRepCompress_PedersenHash(column)
 }
 
-func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
-	//numChallenges := 12345 // FIXME
-	//challenges := sdr.GeneratePoRepChallenges(randomSeed, numChallenges, )
+// TODO: Maybe move this to algorithms.id.
+type OfflineChallengeProof struct {
+}
 
+func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+	challenges := sdr.GenerateOfflineChallenges(randomSeed, int(sdr.Challenges()))
+
+	var challengeProofs []OfflineChallengeProof
+	for c := range challenges {
+		challengeProofs = append(challengeProofs, sdr.CreateChallengeProof(c, aux))
+	}
+
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) CreateChallengeProof(c int, aux sector.ProofAuxTmp) OfflineChallengeProof {
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomSeed sector.SealRandomness, challenges int) []util.UInt {
 	panic("TODO")
 }
 
