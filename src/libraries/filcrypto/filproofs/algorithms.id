@@ -19,9 +19,9 @@ type ChungExpanderPermutationFeistelHashFunction enum {
 }
 type ChungExpanderAlpha struct {}
 type ChungExpanderBeta struct {}
-type ExpanderGraphDegree struct {}
+type ExpanderGraphDegree UInt
 type ExpanderGraphSeed struct {}
-type DRGNodeSize struct {}
+type DRGNodeSize UInt
 
 type SealAlgorithmArtifacts struct {
     AlgorithmWideSetupArtifacts struct {
@@ -100,31 +100,38 @@ type DRGCfg struct {
 }
 
 type DRG struct {
-    Config DRGCfg
-    Parents(Bytes, UInt) [UInt]
+    Config         DRGCfg
+    Parents(UInt)  [UInt]
 }
 
 type ExpanderGraphCfg struct {
     Algorithm union {
-        ChungExpanderAlgorithm struct {
-            Alpha  ChungExpanderAlpha
-            Beta   ChungExpanderBeta
-            PermutationAlgorithm union {
-                Feistel struct {
-                    Keys          ChungExpanderPermutationFeistelKeys
-                    Rounds        ChungExpanderPermutationFeistelRounds
-                    HashFunction  ChungExpanderPermutationFeistelHashFunction
-                }
-            }
-        }
+        ChungExpanderAlgorithm
     }
 
     Degree    ExpanderGraphDegree
     Seed      ExpanderGraphSeed
+    Nodes     UInt
     NodeSize  DRGNodeSize
 }
 
 type ExpanderGraph struct {
-    Config ExpanderGraphCfg
-    Parents(Bytes, UInt) [UInt]
+    Config         ExpanderGraphCfg
+    Parents(UInt)  [UInt]
+}
+
+type ChungExpanderAlgorithm struct {
+    Alpha  ChungExpanderAlpha
+    Beta   ChungExpanderBeta
+    PermutationAlgorithm union {
+        Feistel
+    }
+    Parents(node UInt, ExpanderGraphDegree, nodes UInt) [UInt]
+}
+
+type Feistel struct {
+    Keys          ChungExpanderPermutationFeistelKeys
+    Rounds        ChungExpanderPermutationFeistelRounds
+    HashFunction  ChungExpanderPermutationFeistelHashFunction
+    Permute(size UInt, n UInt) UInt
 }

@@ -11,7 +11,7 @@ type Blake2sHash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 
-func SDRParams() *StackedDRG_I {
+func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const NODE_SIZE = 32
@@ -21,6 +21,8 @@ func SDRParams() *StackedDRG_I {
 	var FIELD_MODULUS = new(big.Int)
 	// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
 	FIELD_MODULUS.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
+
+	nodes := util.UInt(sealCfg.SectorSize() / NODE_SIZE)
 
 	return &StackedDRG_I{
 		Layers_:     StackedDRGLayers(LAYERS),
@@ -35,14 +37,17 @@ func SDRParams() *StackedDRG_I {
 		},
 		ExpanderGraphCfg_: &ExpanderGraphCfg_I{
 			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
-				&ExpanderGraphCfg_Algorithm_ChungExpanderAlgorithm_I{
-					PermutationAlgorithm_: ExpanderGraphCfg_Algorithm_ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&ExpanderGraphCfg_Algorithm_ChungExpanderAlgorithm_PermutationAlgorithm_Feistel_I{
+				&ChungExpanderAlgorithm_I{
+					PermutationAlgorithm_: ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&Feistel_I{
 						Keys_:   FEISTEL_KEYS[:],
 						Rounds_: FEISTEL_ROUNDS,
 						HashFunction_: ChungExpanderPermutationFeistelHashFunction_Make_Blake2S(
 							&ChungExpanderPermutationFeistelHashFunction_Blake2S_I{}),
 					}),
 				}),
+			Degree_:   8,
+			Nodes_:    nodes,
+			NodeSize_: NODE_SIZE,
 		},
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
@@ -50,11 +55,32 @@ func SDRParams() *StackedDRG_I {
 	}
 }
 
-func (drg *DRG_I) Parents(layer []byte, node util.UInt) []util.UInt {
+func (drg *DRG_I) Parents(node util.UInt) []util.UInt {
 	panic("TODO")
 }
 
-func (exp *ExpanderGraph_I) Parents(layer []byte, node util.UInt) []util.UInt {
+func (exp *ExpanderGraph_I) Parents(node util.UInt) []util.UInt {
+	// TODO: How do we handle choice of algorithm generically?
+	d := exp.Config().Degree()
+	return exp.Config().Algorithm().As_ChungExpanderAlgorithm().Parents(node, d, exp.Config().Nodes())
+}
+
+func (chung *ChungExpanderAlgorithm_I) Parents(node util.UInt, d ExpanderGraphDegree, nodes util.UInt) []util.UInt {
+	var parents []util.UInt
+	for i := 0; i < int(d); i++ {
+		parent := chung.ithParent(node, i, d, nodes)
+		parents = append(parents, parent)
+	}
+	return parents
+}
+
+func (chung *ChungExpanderAlgorithm_I) ithParent(node util.UInt, i int, d ExpanderGraphDegree, nodes util.UInt) util.UInt {
+	a := node*util.UInt(d) + util.UInt(i)
+	b := chung.PermutationAlgorithm().As_Feistel().Permute(nodes, a)
+	return b / util.UInt(d)
+}
+
+func (f *Feistel_I) Permute(size util.UInt, i util.UInt) util.UInt {
 	panic("TODO")
 }
 
@@ -186,7 +212,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 
 		// The first node of every layer has no DRG Parents.
 		if i > 0 {
-			for parent := range drg.Parents(labels, util.UInt(i)) {
+			for parent := range drg.Parents(util.UInt(i)) {
 				start := parent * nodeSize
 				dependencies = append(dependencies, labels[start:start+nodeSize]...)
 			}
@@ -194,7 +220,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 
 		// The first layer has no expander parents.
 		if prevLayer != nil {
-			for parent := range expander.Parents(labels, util.UInt(i)) {
+			for parent := range expander.Parents(util.UInt(i)) {
 				start := parent * nodeSize
 				dependencies = append(dependencies, labels[start:start+nodeSize]...)
 			}
