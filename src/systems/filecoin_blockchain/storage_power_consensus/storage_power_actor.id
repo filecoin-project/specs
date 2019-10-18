@@ -5,12 +5,18 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import util "github.com/filecoin-project/specs/util"
 
+type PledgeCollateralBalance struct {
+    Pledged   actor.TokenAmount
+    Frozen    actor.TokenAmount
+    Available actor.TokenAmount
+}
+
 type StoragePowerActor struct {
     // TODO: bytesamount might be inefficient
     Miners             {addr.Address: block.StoragePower}
 
     // TODO: decide on locking pc locked in SPA or StorageMiner?
-    PledgeCollaterals  {addr.Address: actor.TokenAmount}
+    PledgeCollaterals  {addr.Address: actor.PledgeCollateralBalance}
     PowerTable
     // TODO: verify its relationship with SPA
     ExpectedConsensus

@@ -3,6 +3,13 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
+// TODO: only SPA can write to this
+// read only for all the other actors
+
+// TODO: Diagram for state transition to someones power
+// increment and decrement?
+
+// TODO: add GetActiveSectorCount()
 type PowerTable struct {
     // all power here is always verified
     // TODO: decide where sectorSize should live
@@ -19,9 +26,14 @@ type PowerTable struct {
 
     GetTotalPower()  block.StoragePower
 
-    IncrementPower(addr addr.Address, numSectors UVarint)
+    // check if it is an easy calculation
+    // TODO: batch process power updates
 
-    DecrementPower(add addr.Address, numSectors UVarint)
+    // TODO: get rid of sectorSize in SPA
+    SetActiveStoragePower(newPower block.StoragePower)
+
+    // IncrementPower(addr addr.Address, numSectors UVarint)
+    // DecrementPower(add addr.Address, numSectors UVarint)
 
     RemoveMiner(addr addr.Address)
 
