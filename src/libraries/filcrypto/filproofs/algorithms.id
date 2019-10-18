@@ -1,12 +1,11 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-type StackedDRGLayers struct {
-    Layers UInt
-}
-type StackedDRGNodeSize struct {
-    Size UInt
-}
+type StackedDRGLayers UInt
+
+type StackedDRGNodeSize UInt
+
+type StackedDRGChallenges UInt
 
 type DRGDepth struct {}
 type DRGFraction struct {}
@@ -74,6 +73,7 @@ type EllipticCurve struct {
 type StackedDRG struct {
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
+    Challenges        StackedDRGChallenges
     Algorithm         struct {}
     DRGCfg
     ExpanderGraphCfg
@@ -125,6 +125,6 @@ type ExpanderGraphCfg struct {
 }
 
 type ExpanderGraph struct {
-    Config DRGCfg
+    Config ExpanderGraphCfg
     Parents(Bytes, UInt) [UInt]
 }

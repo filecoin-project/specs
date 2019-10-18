@@ -11,26 +11,22 @@ type Blake2sHash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 
-const FEISTEL_ROUNDS = 3
-
-// Would be a constant if Go allowed it.
-var FEISTEL_KEYS = [FEISTEL_ROUNDS]util.UInt{1, 2, 3}
-
 func SDRParams() *StackedDRG_I {
-	fieldModulus := new(big.Int)
 	// TODO: Bridge constants with orient model.
+	const LAYERS = 10
+	const NODE_SIZE = 32
+	const OFFLINE_CHALLENGES = 6666
+	const FEISTEL_ROUNDS = 3
+	var FEISTEL_KEYS = [FEISTEL_ROUNDS]util.UInt{1, 2, 3}
+	var FIELD_MODULUS = new(big.Int)
 	// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
-	fieldModulus.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
+	FIELD_MODULUS.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
 
 	return &StackedDRG_I{
-		Layers_: &StackedDRGLayers_I{
-			// TODO: Get correct values. Interpolate from orient?
-			Layers_: 10,
-		},
-		NodeSize_: &StackedDRGNodeSize_I{
-			Size_: 32,
-		},
-		Algorithm_: &StackedDRG_Algorithm_I{},
+		Layers_:     StackedDRGLayers(LAYERS),
+		Challenges_: StackedDRGChallenges(OFFLINE_CHALLENGES),
+		NodeSize_:   StackedDRGNodeSize(NODE_SIZE),
+		Algorithm_:  &StackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
 				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample(&DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{}),
@@ -48,31 +44,35 @@ func SDRParams() *StackedDRG_I {
 					}),
 				}),
 		},
-
 		Curve_: &EllipticCurve_I{
-			FieldModulus_: *fieldModulus,
+			FieldModulus_: *FIELD_MODULUS,
 		},
 	}
 }
 
 func (drg *DRG_I) Parents(layer []byte, node util.UInt) []util.UInt {
-	return []util.UInt{} // FIXME
+	panic("TODO")
 }
 
 func (exp *ExpanderGraph_I) Parents(layer []byte, node util.UInt) []util.UInt {
-	return []util.UInt{} // FIXME
+	panic("TODO")
 }
 
 func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data []byte) SealSetupArtifacts {
 	replicaID := ComputeReplicaID(sid, commD)
 
-	drg := DRG_I{}
-	expander := ExpanderGraph_I{}
+	drg := DRG_I{
+		Config_: sdr.DRGCfg(),
+	}
 
-	nodeSize := int(sdr.NodeSize().Size())
+	expander := ExpanderGraph_I{
+		Config_: sdr.ExpanderGraphCfg(),
+	}
+
+	nodeSize := int(sdr.NodeSize())
 	nodes := len(data) / nodeSize
 	curveModulus := sdr.Curve().FieldModulus()
-	layers := int(sdr.Layers().Layers())
+	layers := int(sdr.Layers())
 	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
 	key := keyLayers[len(keyLayers)-1]
 
@@ -122,7 +122,7 @@ func hashColumn(column []byte) PedersenHash {
 
 func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
 	//numChallenges := 12345 // FIXME
-	//challenges := GeneratePoRepChallenges(randomSeed, numChallenges, )
+	//challenges := sdr.GeneratePoRepChallenges(randomSeed, numChallenges, )
 
 	panic("TODO")
 }
@@ -202,7 +202,7 @@ func deriveLabel(elements []byte) []byte {
 }
 
 func encodeNode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
-	// TODO: Allow this to vary by algorithm variant.
+	// TODO: Make this a method of StackedDRG.
 	return addEncode(data, key, modulus, nodeSize)
 }
 
@@ -278,7 +278,7 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 	// Nodes are always the digest size so data cannot be compressed to digest for storage.
 	nodeSize := DigestSize_T()
 
-	// TODO: Fail if len(dat) is not a power of 2 and an even multiple of the node size.
+	// TODO: Fail if len(dat) is not a power of 2 and a multiple of the node size.
 
 	rows := [][]byte{data}
 
@@ -300,11 +300,11 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 		panic("math failed us")
 	}
 
-	var file // TODO: dump tree to file.
+	var filePath file.Path // TODO: dump tree to file.
 	// NOTE: merkle tree file layout is illustrative, not prescriptive.
-	
+
 	// TODO: Check above more carefully. It's just an untested sketch for the moment.
-	return fromBytes_T(root), file 
+	return fromBytes_T(root), filePath
 }
 
 // RepHash<PedersenHash>
