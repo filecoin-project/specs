@@ -34,6 +34,7 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample(&DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{}),
 				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20(&DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I{}),
 			},
+			Nodes_: DRGNodeCount(nodes),
 		},
 		ExpanderGraphCfg_: &ExpanderGraphCfg_I{
 			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
@@ -45,9 +46,8 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 							&ChungExpanderPermutationFeistelHashFunction_Blake2S_I{}),
 					}),
 				}),
-			Degree_:   8,
-			Nodes_:    nodes,
-			NodeSize_: NODE_SIZE,
+			Degree_: 8,
+			Nodes_:  ExpanderGraphNodeCount(nodes),
 		},
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
@@ -60,24 +60,41 @@ func (drg *DRG_I) Parents(node util.UInt) []util.UInt {
 }
 
 func (exp *ExpanderGraph_I) Parents(node util.UInt) []util.UInt {
-	// TODO: How do we handle choice of algorithm generically?
 	d := exp.Config().Degree()
+
+	// TODO: How do we handle choice of algorithm generically?
 	return exp.Config().Algorithm().As_ChungExpanderAlgorithm().Parents(node, d, exp.Config().Nodes())
 }
 
-func (chung *ChungExpanderAlgorithm_I) Parents(node util.UInt, d ExpanderGraphDegree, nodes util.UInt) []util.UInt {
+func (chung *ChungExpanderAlgorithm_I) Parents(node util.UInt, d ExpanderGraphDegree, nodes ExpanderGraphNodeCount) []util.UInt {
 	var parents []util.UInt
-	for i := 0; i < int(d); i++ {
+	var i util.UInt
+	for i = 0; i < util.UInt(d); i++ {
 		parent := chung.ithParent(node, i, d, nodes)
 		parents = append(parents, parent)
 	}
 	return parents
 }
 
-func (chung *ChungExpanderAlgorithm_I) ithParent(node util.UInt, i int, d ExpanderGraphDegree, nodes util.UInt) util.UInt {
-	a := node*util.UInt(d) + util.UInt(i)
-	b := chung.PermutationAlgorithm().As_Feistel().Permute(nodes, a)
-	return b / util.UInt(d)
+func (chung *ChungExpanderAlgorithm_I) ithParent(node util.UInt, i util.UInt, degree ExpanderGraphDegree, nodes ExpanderGraphNodeCount) util.UInt {
+	// ithParent generates one of d parents of node.
+	d := util.UInt(degree)
+
+	// This is done by operating on permutations of a group with d elements per node.
+	groupSize := util.UInt(nodes) * d
+
+	// There are d ways of mapping each node into the group, and we choose the ith.
+	// Note that we can project the element back to the original node: groupElement / d == node
+	groupElement := d + i
+
+	// Permutations of the d group elements corresponding to each node yield d new group elements,
+	permuted := chung.PermutationAlgorithm().As_Feistel().Permute(groupSize, groupElement)
+
+	// Each of which can be projected back to a node.
+	projected := permuted / d
+
+	// We have selected the ith such parent of node.
+	return projected
 }
 
 func (f *Feistel_I) Permute(size util.UInt, i util.UInt) util.UInt {
