@@ -22,9 +22,12 @@ _Data Transfer_ is a system for transferring all or part of a `Piece` across the
 There are two basic phases to any data transfer:
 
 1. Negotiation - the requestor and responder agree to the transfer by validating with the data transfer voucher
-2. Transfer - The transfer is actually initiated by the party that will actually receive data. The default protocol used to do the transfer is Graphsync
+2. Transfer - Once both parties have negotiated and agreed upon, the data is actually transferred. The default protocol used to do the transfer is Graphsync
 
-# Flows
+Note that the Negotiation and Transfer stages can occur in seperate round trips,
+or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data.
+
+# Example Flows
 
 ## Push Flow
 
@@ -57,16 +60,34 @@ once it verifies the the deal is signed and on chain
 9. The requestor receives data and can produce an indication of progress
 10. The requestor completes receiving data, and notifies any listeners
 
-The push flow is ideal for retrieval deals, where the client initiates the pull when the deal is agreed upon.
+The pull flow is ideal for retrieval deals, where the client initiates the pull when the deal is agreed upon.
+
+# Alternater Pull Flow - Single Round Trip
+
+{{< diagram src="./docs/systems/filecoin_files/data_transfer/alternate-pull-flow.mmd.svg" title="Data Transfer - Single Round Trip Pull Flow" >}}
+
+1. A requestor initiates a Pull transfer when it wants to receive data from another party. 
+2. The requestor’s DTM schedules the data transfer
+3. The requestor makes a Graphsync request to the responder with a data transfer request
+4. The responder receives the graphsync request, and forwards the data transfer request to the data transfer module
+5. The requestors' data transfer module will send a pull request to the responder along with the data transfer voucher. 
+6. The responder's data transfer module validates the data transfer request via a PullValidator provided as a dependency by the responder
+7. The responder's data transfer module schedules the transfer
+8. The responder sends a graphsync response along with a data transfer accepted response piggypacked
+9. The requestor receives data and can produce an indication of progress
+10. The requestor completes receiving data, and notifies any listeners
 
 # Protocol
 
-A data transfer is negotiated over the network via the {{<sref data_transfer_protocol "Data Transfer Protocol">}}, a Libp2p protocol type
+A data transfer CAN be negotiated over the network via the {{<sref data_transfer_protocol "Data Transfer Protocol">}}, a Libp2p protocol type
 
 A Pull request expects a response. The requestor does not initiate the transfer
 until they know the request is accepted.
 
 The responder should send a response to a push request as well so the requestor can release the resources (if not accepted). However, if the Responder accepts the request they can immediately initiate the transfer
+
+Using the Data Transfer Protocol as an independent libp2p communciation mechanism is not a hard requirement -- as long as both parties have an implementation of the Data Transfer Subsystem that can talk to the other, any
+transport mechanism (including offline mechanisms) is acceptable.
 
 # Data Structures
 

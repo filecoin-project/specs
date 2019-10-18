@@ -107,11 +107,11 @@ type DataTransferSubsystem struct @(mutable) {
 	// open a data transfer that will send data to the recipient peer and
 	// open a data transfer that will send data to the recipient peer and
 	// transfer parts of the piece that match the selector
-	OpenPushDataChannel(to peer.ID, voucher DataTransferVoucher, PieceRef CID, Selector ipld.Selector) ChannelID
+	OpenPushDataChannel(to libp2p.PeerID, voucher DataTransferVoucher, PieceRef CID, Selector ipld.Selector) ChannelID
 
 	// open a data transfer that will request data from the sending peer and
 	// transfer parts of the piece that match the selector
-	OpenPullDataChannel(to peer.ID, voucher DataTransferVoucher, PieceRef CID, Selector ipld.Selector) ChannelID
+	OpenPullDataChannel(to libp2p.PeerID, voucher DataTransferVoucher, PieceRef CID, Selector ipld.Selector) ChannelID
 		
 	// close an open channel (effectively a cancel)
 	CloseDataTransferChannel(x ChannelID)         struct{}
