@@ -18,7 +18,7 @@ The {{<sref storage_power_consensus>}} subsystem uses access to EC to use the fo
 {{<label tickets>}}
 ## Tickets
 
-One may think of leader election in EC as a verifiable lottery, in which participants win in proportion to the power they have within the network.
+For leader election in EC, participants win in proportion to the power they have within the network.
 
 A ticket is drawn from the past at the beginning of each new round to perform leader election. EC also generates a new ticket in every round for future use. Tickets are chained independently of the main blockchain. A ticket only depends on the ticket before it, and not any other data in the block.
 On expectation, in Filecoin, every block header contains one ticket, though it could contain more if that block was generated over multiple rounds.
@@ -36,7 +36,7 @@ Whenever comparing tickets is evoked in Filecoin, for instance when discussing s
 
 ## Tickets in EC
 
-Within EC, a miner generates a new ticket in their block for every ticket they use (or "scratch") running leader election, thereby ensuring the ticket chain is always as long as the block chain.
+Within EC, a miner generates a new ticket in their block for every ticket they use running leader election, thereby ensuring the ticket chain is always as long as the block chain.
 
 Tickets are used to achieve the following:
 - Ensure leader secrecy -- meaning a block producer will not be known until they release their block to the network.
@@ -46,13 +46,13 @@ Tickets are used to achieve the following:
 In practice, EC defines two different fields within a block:
 
 - A `Ticket` field — this stores the new ticket generated during this block generation attempt. It is from this ticket that miners will sample randomness to run leader election in `K` rounds.
-- An `ElectionProof` — this stores a proof that a given miner scratched a winning lottery ticket using the appropriate ticket `K` rounds back along with a nonce showing how many rounds generating the EP took. It proves that the leader was elected in this round.
+- An `ElectionProof` — this stores a proof that a given miner has won a leader election using the appropriate ticket `K` rounds back along with a nonce showing how many rounds generating the EP took. It proves that the leader was elected in this round.
 
 ```
 But why the randomness lookback?
 
-The randomness lookback helps turn independent lotteries (ticket drawings from a block one round back)
-into a global lottery instead. Rather than having a distinct chance of winning or losing
+The randomness lookback helps turn independent ticket generation from a block one round back
+into a global ticket generation game instead. Rather than having a distinct chance of winning or losing
 for each potential fork in a given round, a miner will either win on all or lose on all
 forks descended from the block in which the ticket is sampled.
 
@@ -65,7 +65,7 @@ decreasing the cost of running a targeted attack (given they have local predicta
 more space on-chain.
 
 How is K selected?
-- On the one end, there is no advantage to picking K larger than finality (by definition a fully-global lottery).
+- On the one end, there is no advantage to picking K larger than finality.
 - On the other, making K smaller reduces adversarial power to grind.
 ```
 
@@ -105,7 +105,7 @@ We use the ECVRF algorithm (must yield a pseudorandom, deterministic output) fro
   - Sha256 for our hashing function
   - Secp256k1 for our curve
 
-If the miner scratches a winning ticket in this round, it can use newEP, along with a newTicket to generate and publish a new block. Otherwise, it waits to hear of another block generated in this round.
+If the miner wins the election in this round, it can use newEP, along with a newTicket to generate and publish a new block. Otherwise, it waits to hear of another block generated in this round.
 
 It is important to note that every block contains two artifacts: one, a ticket derived from last block's ticket to extend the ticket-chain, and two, an election proof derived from the ticket `K` rounds back used to run leader election.
 
