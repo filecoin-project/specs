@@ -3,6 +3,7 @@ package storage_mining
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+import sealer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer"
 
 // If a Post is missed (either due to faults being not declared on time or
 // because the miner run out of time, every sector is reported as failing
@@ -295,8 +296,15 @@ func (sm *StorageMinerActor_I) verifySeal(onChainInfo sector.OnChainSealVerifyIn
 	// TODO: sm.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
 
 	// verifySeal will also generate CommD on the fly from CommP and PieceSize
-	// TODO: @nicola or @porcu define the interface and what is needed here
-	panic("TODO")
+
+	new(sealer.SectorSealer_I).VerifySeal(&sector.SealVerifyInfo_I{
+		SectorID_: &sector.SectorID_I{
+			MinerID_: sm.Info().Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
+			Number_:  onChainInfo.SectorNumber(),
+		},
+
+		OnChain_: onChainInfo,
+	})
 	return true
 }
 
@@ -336,7 +344,6 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 
 	// no need to store the proof and randomseed in the state tree
 	// verify and drop, only SealCommitments{CommR, DealIDs} on chain
-	// TODO: @porcuquine verifies
 	sealCommitment := &sector.SealCommitment_I{
 		SealedCID_:  onChainInfo.SealedCID(),
 		DealIDs_:    onChainInfo.DealIDs(),
