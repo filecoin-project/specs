@@ -3,6 +3,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import util "github.com/filecoin-project/specs/util"
 
 type PledgeCollateralBalance struct {
@@ -26,13 +27,13 @@ type StoragePowerActor struct {
         // TODO: document differences in Addr, Key and ID accross spec
         ownerAddr     addr.Address
         workerPubKey  filcrypto.PubKey
-        sectorSize    util.UInt
         peerId        libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
     ) addr.Address
 
     // PowerTable Operation - consider remove
-    IncrementPower(address addr.Address, numSectors util.UVarint)
-    DecrementPower(address addr.Address, numSectors util.UVarint)
+    // sectorSize should be passed in from SM.Info()
+    IncrementPower(numSectors util.UVarint, sectorSize sector.SectorSize)
+    DecrementPower(numSectors util.UVarint, sectorSize sector.SectorSize)
     GetTotalPower() block.StoragePower
 
     GetPledgeCollateralReq(newStorage block.StoragePower)

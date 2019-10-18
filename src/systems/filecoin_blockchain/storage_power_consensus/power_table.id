@@ -18,7 +18,6 @@ type PowerTable struct {
     RegisterMiner(
         addr        addr.Address
         pk          filcrypto.PubKey
-        sectorSize  sector.SectorSize
     )
 
     // Miners should be public
@@ -29,11 +28,11 @@ type PowerTable struct {
     // check if it is an easy calculation
     // TODO: batch process power updates
 
-    // TODO: get rid of sectorSize in SPA
     SetActiveStoragePower(newPower block.StoragePower)
 
-    // IncrementPower(addr addr.Address, numSectors UVarint)
-    // DecrementPower(add addr.Address, numSectors UVarint)
+    // sectorSize should be passed in from SM.Info()
+    // IncrementPower(numSectors UVarint, sectorSize sector.SectorSize)
+    // DecrementPower(numSectors UVarint, sectorSize sector.SectorSize)
 
     RemoveMiner(addr addr.Address)
 
