@@ -1,0 +1,44 @@
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+type PowerTable struct {
+    // all power here is always verified
+    // TODO: decide where sectorSize should live
+    // SPA vs SM or both
+    // TODO: document the difference between addr and pk
+    RegisterMiner(
+        addr        addr.Address
+        pk          filcrypto.PubKey
+        sectorSize  sector.SectorSize
+    )
+
+    // Miners should be public
+    Miners           {addr.Address: StorageMinerInfo}
+
+    GetTotalPower()  block.StoragePower
+
+    IncrementPower(addr addr.Address, numSectors UVarint)
+
+    DecrementPower(add addr.Address, numSectors UVarint)
+
+    RemoveMiner(addr addr.Address)
+
+    verifyMiner(addr addr.Address) bool
+    // GetMinerPower(addr addr.Address) block.StoragePower
+    // GetTotalPower() block.StoragePower
+    // GetMinerPublicKey(addr addr.Address) filcrypto.PubKey
+    // IncrementPower(addr addr.Address, numSectors UVarint)
+    // SuspendPower(addr addr.Address, numSectors UVarint)
+    // UnsuspendPower(addr addr.Address, numSectors UVarint)
+    // RemovePower(addr addr.Address, numSectors UVarint)
+    // RemoveAllPower(addr addr.Address, numSectors UVarint)
+}
+
+type StorageMinerInfo struct {
+    MinerAddress       addr.Address
+    MinerStoragePower  block.StoragePower
+    MinerPK            filcrypto.PubKey
+    MinerSectorSize    sector.SectorSize
+}
