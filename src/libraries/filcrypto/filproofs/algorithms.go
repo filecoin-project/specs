@@ -1,5 +1,7 @@
 package filproofs
 
+import "math"
+import "math/rand"
 import big "math/big"
 import "encoding/binary"
 
@@ -34,7 +36,8 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample(&DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{}),
 				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20(&DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I{}),
 			},
-			Nodes_: DRGNodeCount(nodes),
+			Degree_: 6,
+			Nodes_:  DRGNodeCount(nodes),
 		},
 		ExpanderGraphCfg_: &ExpanderGraphCfg_I{
 			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
@@ -56,7 +59,32 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 }
 
 func (drg *DRG_I) Parents(node util.UInt) []util.UInt {
-	panic("TODO")
+	config := drg.Config()
+	degree := util.UInt(config.Degree())
+	return config.Algorithm().ParentsAlgorithm().As_DRSample().Impl().Parents(degree, node)
+}
+
+// TODO: Verify this. Both the port from impl and the algorithm.
+func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node util.UInt) (parents []util.UInt) {
+	m := degree - 1
+
+	var k util.UInt
+	for k = 0; k < m; k++ {
+		logi := int(math.Floor(math.Log2(float64(node * m))))
+		// FIXME: Make RNG parameterizable and specify it.
+		j := rand.Intn(logi)
+		jj := math.Min(float64(node*m+k), float64(util.UInt(1)<<uint(j+1)))
+		backDist := randInRange(int(math.Max(float64(util.UInt(jj)>>1), 2)), int(jj+1))
+		out := (node*m + k - backDist) / m
+
+		parents = append(parents, out)
+	}
+
+	return parents
+}
+
+func randInRange(lowInclusive int, highExclusive int) util.UInt {
+	return util.UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
 func (exp *ExpanderGraph_I) Parents(node util.UInt) []util.UInt {
@@ -80,15 +108,15 @@ func (chung *ChungExpanderAlgorithm_I) ithParent(node util.UInt, i util.UInt, de
 	// ithParent generates one of d parents of node.
 	d := util.UInt(degree)
 
-	// This is done by operating on permutations of a group with d elements per node.
-	groupSize := util.UInt(nodes) * d
+	// This is done by operating on permutations of a set with d elements per node.
+	setSize := util.UInt(nodes) * d
 
-	// There are d ways of mapping each node into the group, and we choose the ith.
-	// Note that we can project the element back to the original node: groupElement / d == node
-	groupElement := d + i
+	// There are d ways of mapping each node into the set, and we choose the ith.
+	// Note that we can project the element back to the original node: element / d == node.
+	element := d + i
 
-	// Permutations of the d group elements corresponding to each node yield d new group elements,
-	permuted := chung.PermutationAlgorithm().As_Feistel().Permute(groupSize, groupElement)
+	// Permutations of the d elements corresponding to each node yield d new elements.
+	permuted := chung.PermutationAlgorithm().As_Feistel().Permute(setSize, element)
 
 	// Each of which can be projected back to a node.
 	projected := permuted / d

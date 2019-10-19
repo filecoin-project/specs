@@ -6,7 +6,7 @@ type StackedDRGNodeSize UInt
 type StackedDRGChallenges UInt
 type DRGDepth struct {}
 type DRGFraction struct {}
-type DRGDegree struct {}
+type DRGDegree UInt
 type DRGSeed struct {}
 type DRGNodeCount UInt
 type ExpanderGraphNodeCount UInt
