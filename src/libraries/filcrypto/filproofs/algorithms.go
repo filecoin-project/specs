@@ -67,6 +67,9 @@ func (drg *DRG_I) Parents(node UInt) []UInt {
 
 // TODO: Verify this. Both the port from impl and the algorithm.
 func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node UInt) (parents []UInt) {
+	util.Assert(node > 0)
+	parents = append(parents, node-1)
+
 	m := degree - 1
 
 	var k UInt
