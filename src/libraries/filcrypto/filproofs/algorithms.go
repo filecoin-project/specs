@@ -12,6 +12,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 type Blake2sHash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
+type UInt = util.UInt
 
 func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
@@ -19,12 +20,12 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 	const NODE_SIZE = 32
 	const OFFLINE_CHALLENGES = 6666
 	const FEISTEL_ROUNDS = 3
-	var FEISTEL_KEYS = [FEISTEL_ROUNDS]util.UInt{1, 2, 3}
+	var FEISTEL_KEYS = [FEISTEL_ROUNDS]UInt{1, 2, 3}
 	var FIELD_MODULUS = new(big.Int)
 	// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
 	FIELD_MODULUS.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
 
-	nodes := util.UInt(sealCfg.SectorSize() / NODE_SIZE)
+	nodes := UInt(sealCfg.SectorSize() / NODE_SIZE)
 
 	return &StackedDRG_I{
 		Layers_:     StackedDRGLayers(LAYERS),
@@ -58,23 +59,23 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 	}
 }
 
-func (drg *DRG_I) Parents(node util.UInt) []util.UInt {
+func (drg *DRG_I) Parents(node UInt) []UInt {
 	config := drg.Config()
-	degree := util.UInt(config.Degree())
+	degree := UInt(config.Degree())
 	return config.Algorithm().ParentsAlgorithm().As_DRSample().Impl().Parents(degree, node)
 }
 
 // TODO: Verify this. Both the port from impl and the algorithm.
-func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node util.UInt) (parents []util.UInt) {
+func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node UInt) (parents []UInt) {
 	m := degree - 1
 
-	var k util.UInt
+	var k UInt
 	for k = 0; k < m; k++ {
 		logi := int(math.Floor(math.Log2(float64(node * m))))
 		// FIXME: Make RNG parameterizable and specify it.
 		j := rand.Intn(logi)
-		jj := math.Min(float64(node*m+k), float64(util.UInt(1)<<uint(j+1)))
-		backDist := randInRange(int(math.Max(float64(util.UInt(jj)>>1), 2)), int(jj+1))
+		jj := math.Min(float64(node*m+k), float64(UInt(1)<<uint(j+1)))
+		backDist := randInRange(int(math.Max(float64(UInt(jj)>>1), 2)), int(jj+1))
 		out := (node*m + k - backDist) / m
 
 		parents = append(parents, out)
@@ -83,33 +84,33 @@ func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node ut
 	return parents
 }
 
-func randInRange(lowInclusive int, highExclusive int) util.UInt {
-	return util.UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
+func randInRange(lowInclusive int, highExclusive int) UInt {
+	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
-func (exp *ExpanderGraph_I) Parents(node util.UInt) []util.UInt {
+func (exp *ExpanderGraph_I) Parents(node UInt) []UInt {
 	d := exp.Config().Degree()
 
 	// TODO: How do we handle choice of algorithm generically?
 	return exp.Config().Algorithm().As_ChungExpanderAlgorithm().Parents(node, d, exp.Config().Nodes())
 }
 
-func (chung *ChungExpanderAlgorithm_I) Parents(node util.UInt, d ExpanderGraphDegree, nodes ExpanderGraphNodeCount) []util.UInt {
-	var parents []util.UInt
-	var i util.UInt
-	for i = 0; i < util.UInt(d); i++ {
+func (chung *ChungExpanderAlgorithm_I) Parents(node UInt, d ExpanderGraphDegree, nodes ExpanderGraphNodeCount) []UInt {
+	var parents []UInt
+	var i UInt
+	for i = 0; i < UInt(d); i++ {
 		parent := chung.ithParent(node, i, d, nodes)
 		parents = append(parents, parent)
 	}
 	return parents
 }
 
-func (chung *ChungExpanderAlgorithm_I) ithParent(node util.UInt, i util.UInt, degree ExpanderGraphDegree, nodes ExpanderGraphNodeCount) util.UInt {
+func (chung *ChungExpanderAlgorithm_I) ithParent(node UInt, i UInt, degree ExpanderGraphDegree, nodes ExpanderGraphNodeCount) UInt {
 	// ithParent generates one of d parents of node.
-	d := util.UInt(degree)
+	d := UInt(degree)
 
 	// This is done by operating on permutations of a set with d elements per node.
-	setSize := util.UInt(nodes) * d
+	setSize := UInt(nodes) * d
 
 	// There are d ways of mapping each node into the set, and we choose the ith.
 	// Note that we can project the element back to the original node: element / d == node.
@@ -125,7 +126,7 @@ func (chung *ChungExpanderAlgorithm_I) ithParent(node util.UInt, i util.UInt, de
 	return projected
 }
 
-func (f *Feistel_I) Permute(size util.UInt, i util.UInt) util.UInt {
+func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 	panic("TODO")
 }
 
@@ -193,7 +194,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 
 		// The first node of every layer has no DRG Parents.
 		if i > 0 {
-			for parent := range drg.Parents(util.UInt(i)) {
+			for parent := range drg.Parents(UInt(i)) {
 				start := parent * nodeSize
 				dependencies = append(dependencies, labels[start:start+nodeSize]...)
 			}
@@ -201,7 +202,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 
 		// The first layer has no expander parents.
 		if prevLayer != nil {
-			for parent := range expander.Parents(util.UInt(i)) {
+			for parent := range expander.Parents(UInt(i)) {
 				start := parent * nodeSize
 				dependencies = append(dependencies, labels[start:start+nodeSize]...)
 			}
@@ -279,27 +280,27 @@ func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux s
 		Config_: sdr.ExpanderGraphCfg(),
 	}
 
-	nodeSize := util.UInt(sdr.NodeSize())
+	nodeSize := UInt(sdr.NodeSize())
 	challenges := sdr.GenerateOfflineChallenges(randomSeed, int(sdr.Challenges()))
 
 	var challengeProofs []OfflineSDRChallengeProof
 
 	for c := range challenges {
-		challengeProofs = append(challengeProofs, CreateChallengeProof(&drg, &expander, replicaID, util.UInt(c), nodeSize, aux))
+		challengeProofs = append(challengeProofs, CreateChallengeProof(&drg, &expander, replicaID, UInt(c), nodeSize, aux))
 	}
 
 	return sdr.CreateCircuitProof(challengeProofs, aux)
 }
 
-func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, challenge util.UInt, nodeSize util.UInt, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
-	var openings []util.UInt
+func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, challenge UInt, nodeSize UInt, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
+	var openings []UInt
 	openings = append(openings, challenge)
 	openings = append(openings, drg.Parents(challenge)...)
 	openings = append(openings, expander.Parents(challenge)...)
 
 	var columnProofs []SDRColumnProof
 	for c := range openings {
-		columnProof := CreateColumnProof(util.UInt(c), nodeSize, aux)
+		columnProof := CreateColumnProof(UInt(c), nodeSize, aux)
 		columnProofs = append(columnProofs, columnProof)
 	}
 
@@ -315,7 +316,7 @@ func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byt
 	return proof
 }
 
-func CreateColumnProof(c util.UInt, nodeSize util.UInt, aux sector.ProofAuxTmp) (columnProof SDRColumnProof) {
+func CreateColumnProof(c UInt, nodeSize UInt, aux sector.ProofAuxTmp) (columnProof SDRColumnProof) {
 	commC := aux.PersistentAux().CommC()
 	layers := aux.KeyLayers()
 	var column []byte
@@ -352,7 +353,7 @@ func (sdr *StackedDRG_I) CreateCircuitProof(challengeProofs []OfflineSDRChalleng
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomSeed sector.SealRandomness, challenges int) []util.UInt {
+func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomSeed sector.SealRandomness, challenges int) []UInt {
 	panic("TODO")
 }
 
