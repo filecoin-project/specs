@@ -389,6 +389,13 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Verification
+
+func (sdr *StackedDRG_I) VerifySeal(sc sector.SealCfg, sv sector.SealVerifyInfo) bool {
+	panic("todo")
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /// Generic Hashing and Merkle Tree generation
 
 /// Binary hash compression.

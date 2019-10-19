@@ -23,24 +23,22 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 
 	sealArtifacts := sdr.Seal(sid, data, si.RandomSeed())
 
-	return &SectorSealer_SealSector_FunRet_I{
-		rawValue: &SealOutputs_I{
-			ProofAuxTmp_: &sector.ProofAuxTmp_I{
-				PersistentAux_: &sector.ProofAux_I{
-					CommC_:             sealArtifacts.CommC(),
-					CommRLast_:         sealArtifacts.CommRLast(),
-					CommRLastTreePath_: sealArtifacts.CommRLastTreePath(),
-				},
-				CommD_:         sealArtifacts.CommD(),
-				CommR_:         sealArtifacts.CommR(),
-				CommDTreePath_: sealArtifacts.CommDTreePath(),
-				Data_:          data,
-				KeyLayers_:     sealArtifacts.KeyLayers(),
-				Replica_:       sealArtifacts.Replica(),
-			},
-		},
-		which: SectorSealer_SealSector_FunRet_Case_so,
-	}
+	return SectorSealer_SealSector_FunRet_Make_so(
+		SectorSealer_SealSector_FunRet_so(
+			&SealOutputs_I{
+				ProofAuxTmp_: &sector.ProofAuxTmp_I{
+					PersistentAux_: &sector.ProofAux_I{
+						CommC_:             sealArtifacts.CommC(),
+						CommRLast_:         sealArtifacts.CommRLast(),
+						CommRLastTreePath_: sealArtifacts.CommRLastTreePath(),
+					},
+					CommD_:         sealArtifacts.CommD(),
+					CommR_:         sealArtifacts.CommR(),
+					CommDTreePath_: sealArtifacts.CommDTreePath(),
+					Data_:          data,
+					KeyLayers_:     sealArtifacts.KeyLayers(),
+					Replica_:       sealArtifacts.Replica(),
+				}})).Impl()
 }
 
 func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer_CreateSealProof_FunRet_I {
@@ -58,17 +56,22 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 		Proof_: proof,
 	}
 
-	return &SectorSealer_CreateSealProof_FunRet_I{
-		rawValue: &CreateSealProofOutputs_I{
-			SealInfo_: &sector.SealVerifyInfo_I{
-				SectorID_: sid,
-				OnChain_:  &onChain,
-			},
-			ProofAux_: aux,
-		},
-	}
+	return SectorSealer_CreateSealProof_FunRet_Make_so(
+		SectorSealer_CreateSealProof_FunRet_so(
+			&CreateSealProofOutputs_I{
+				SealInfo_: &sector.SealVerifyInfo_I{
+					SectorID_: sid,
+					OnChain_:  &onChain,
+				},
+				ProofAux_: aux,
+			})).Impl()
 }
 
-func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_VerifySeal_FunRet_I {
-	return &SectorSealer_VerifySeal_FunRet_I{}
+func (s *SectorSealer_I) VerifySeal(sc sector.SealCfg, sv sector.SealVerifyInfo) *SectorSealer_VerifySeal_FunRet_I {
+
+	sdr := filproofs.SDRParams(sc)
+	result := sdr.VerifySeal(sc, sv)
+
+	return SectorSealer_VerifySeal_FunRet_Make_ok(
+		SectorSealer_VerifySeal_FunRet_ok(result)).Impl()
 }
