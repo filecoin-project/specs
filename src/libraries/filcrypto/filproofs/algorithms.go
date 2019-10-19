@@ -119,10 +119,10 @@ func (chung *ChungExpanderAlgorithm_I) ithParent(node UInt, i UInt, degree Expan
 	// Note that we can project the element back to the original node: element / d == node.
 	element := node*d + i
 
-	// Permutations of the d elements corresponding to each node yield d new elements.
+	// Permutations of the d elements corresponding to each node yield d new elements,
 	permuted := chung.PermutationAlgorithm().As_Feistel().Permute(setSize, element)
 
-	// Each of which can be projected back to a node.
+	// each of which can be projected back to a node.
 	projected := permuted / d
 
 	// We have selected the ith such parent of node.
@@ -148,10 +148,12 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 	nodes := len(data) / nodeSize
 	curveModulus := sdr.Curve().FieldModulus()
 	layers := int(sdr.Layers())
+
 	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
 	key := keyLayers[len(keyLayers)-1]
 
 	replica := encodeData(data, key, nodeSize, &curveModulus)
+
 	commRLast, commRLastTreePath := RepHash_PedersenHash(replica)
 	commC, commCTreePath := computeCommC(keyLayers, nodeSize)
 	commR := RepCompress_PedersenHash(commC, commRLast)
@@ -193,13 +195,13 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 	labels := make([]byte, size)
 
 	for i := 0; i < nodes; i++ {
-		var dependencies []byte
+		var parents []byte
 
 		// The first node of every layer has no DRG Parents.
 		if i > 0 {
 			for parent := range drg.Parents(UInt(i)) {
 				start := parent * nodeSize
-				dependencies = append(dependencies, labels[start:start+nodeSize]...)
+				parents = append(parents, labels[start:start+nodeSize]...)
 			}
 		}
 
@@ -207,11 +209,11 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 		if prevLayer != nil {
 			for parent := range expander.Parents(UInt(i)) {
 				start := parent * nodeSize
-				dependencies = append(dependencies, labels[start:start+nodeSize]...)
+				parents = append(parents, labels[start:start+nodeSize]...)
 			}
 		}
 
-		label := generateLabel(replicaID, i, dependencies)
+		label := generateLabel(replicaID, i, parents)
 		labels = append(labels, label...)
 	}
 
@@ -296,13 +298,13 @@ func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux s
 }
 
 func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, challenge UInt, nodeSize UInt, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
-	var openings []UInt
-	openings = append(openings, challenge)
-	openings = append(openings, drg.Parents(challenge)...)
-	openings = append(openings, expander.Parents(challenge)...)
+	var columnElements []UInt
+	columnElements = append(columnElements, challenge)
+	columnElements = append(columnElements, drg.Parents(challenge)...)
+	columnElements = append(columnElements, expander.Parents(challenge)...)
 
 	var columnProofs []SDRColumnProof
-	for c := range openings {
+	for c := range columnElements {
 		columnProof := CreateColumnProof(UInt(c), nodeSize, aux)
 		columnProofs = append(columnProofs, columnProof)
 	}
