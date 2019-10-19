@@ -61,6 +61,7 @@ type ProofAux struct {
 type ProofAuxTmp struct {
     PersistentAux  ProofAux
 
+    SectorID
     CommD          UnsealedSectorCID
     CommR          SealedSectorCID
 

@@ -136,60 +136,6 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 	return &result
 }
 
-func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
-	leaves := make([]byte, len(keyLayers[0]))
-
-	// For each node in the graph,
-	for start := 0; start < len(leaves); start += nodeSize {
-		end := start + nodeSize
-
-		var column []byte
-		// Concatenate that node's label at each layer, in order, into a column.
-		for i := 0; i < len(keyLayers); i++ {
-			label := keyLayers[i][start:end]
-			column = append(column, label...)
-		}
-
-		// And hash that column to create the leaf of a new tree.
-		hashed := hashColumn(column)
-		copy(leaves[start:end], hashed[:])
-	}
-
-	// Return the root of and path to the column tree.
-	return RepHash_PedersenHash(leaves)
-}
-
-func hashColumn(column []byte) PedersenHash {
-	return WideRepCompress_PedersenHash(column)
-}
-
-// TODO: Maybe move this to algorithms.id.
-type OfflineChallengeProof struct {
-}
-
-func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
-	challenges := sdr.GenerateOfflineChallenges(randomSeed, int(sdr.Challenges()))
-
-	var challengeProofs []OfflineChallengeProof
-	for c := range challenges {
-		challengeProofs = append(challengeProofs, sdr.CreateChallengeProof(c, aux))
-	}
-
-	return sdr.CreateCircuitProof(challengeProofs, aux)
-}
-
-func (sdr *StackedDRG_I) CreateChallengeProof(c int, aux sector.ProofAuxTmp) OfflineChallengeProof {
-	panic("TODO")
-}
-
-func (sdr *StackedDRG_I) CreateCircuitProof(challengeProofs []OfflineChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
-	panic("TODO")
-}
-
-func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomSeed sector.SealRandomness, challenges int) []util.UInt {
-	panic("TODO")
-}
-
 func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes32 {
 	_, _ = sid.MinerID(), (sid.Number())
 
@@ -198,26 +144,16 @@ func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes
 }
 
 func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodes int, layers int, nodeSize int, modulus big.Int) [][]byte {
-	keyLayers := make([][]byte, layers)
+	var keyLayers [][]byte
 	var prevLayer []byte
 
 	for i := 0; i <= layers; i++ {
-		keyLayers[i] = labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer)
+		currentLayer := labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer)
+		keyLayers = append(keyLayers, currentLayer)
+		prevLayer = currentLayer
 	}
+
 	return keyLayers
-}
-
-func encodeData(data []byte, key []byte, nodeSize int, modulus *big.Int) []byte {
-	if len(data) != len(key) {
-		panic("Key and data must be same length.")
-	}
-
-	encoded := make([]byte, len(data))
-	for i := 0; i < len(data); i += nodeSize {
-		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], modulus, nodeSize))
-	}
-
-	return encoded
 }
 
 func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSize int, nodes int, prevLayer []byte) []byte {
@@ -250,6 +186,19 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 	return labels
 }
 
+func encodeData(data []byte, key []byte, nodeSize int, modulus *big.Int) []byte {
+	if len(data) != len(key) {
+		panic("Key and data must be same length.")
+	}
+
+	encoded := make([]byte, len(data))
+	for i := 0; i < len(data); i += nodeSize {
+		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], modulus, nodeSize))
+	}
+
+	return encoded
+}
+
 func generateLabel(replicaID []byte, node int, dependencies []byte) []byte {
 	nodeBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(nodeBytes, uint64(node))
@@ -262,6 +211,121 @@ func generateLabel(replicaID []byte, node int, dependencies []byte) []byte {
 
 func deriveLabel(elements []byte) []byte {
 	return WideRepCompress_Blake2sHash(elements)
+}
+
+func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
+	leaves := make([]byte, len(keyLayers[0]))
+
+	// For each node in the graph,
+	for start := 0; start < len(leaves); start += nodeSize {
+		end := start + nodeSize
+
+		var column []byte
+		// Concatenate that node's label at each layer, in order, into a column.
+		for i := 0; i < len(keyLayers); i++ {
+			label := keyLayers[i][start:end]
+			column = append(column, label...)
+		}
+
+		// And hash that column to create the leaf of a new tree.
+		hashed := hashColumn(column)
+		copy(leaves[start:end], hashed[:])
+	}
+
+	// Return the root of and path to the column tree.
+	return RepHash_PedersenHash(leaves)
+}
+
+func hashColumn(column []byte) PedersenHash {
+	return WideRepCompress_PedersenHash(column)
+}
+
+func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+	replicaID := ComputeReplicaID(aux.SectorID(), aux.CommD())
+
+	drg := DRG_I{
+		Config_: sdr.DRGCfg(),
+	}
+
+	expander := ExpanderGraph_I{
+		Config_: sdr.ExpanderGraphCfg(),
+	}
+
+	nodeSize := util.UInt(sdr.NodeSize())
+	challenges := sdr.GenerateOfflineChallenges(randomSeed, int(sdr.Challenges()))
+
+	var challengeProofs []OfflineSDRChallengeProof
+
+	for c := range challenges {
+		challengeProofs = append(challengeProofs, CreateChallengeProof(&drg, &expander, replicaID, util.UInt(c), nodeSize, aux))
+	}
+
+	return sdr.CreateCircuitProof(challengeProofs, aux)
+}
+
+func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, challenge util.UInt, nodeSize util.UInt, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
+	var openings []util.UInt
+	openings = append(openings, challenge)
+	openings = append(openings, drg.Parents(challenge)...)
+	openings = append(openings, expander.Parents(challenge)...)
+
+	var columnProofs []SDRColumnProof
+	for c := range openings {
+		columnProof := CreateColumnProof(util.UInt(c), nodeSize, aux)
+		columnProofs = append(columnProofs, columnProof)
+	}
+
+	dataProof := createInclusionProof(aux.Data()[challenge*nodeSize:(challenge+1)*nodeSize], aux.Data())
+	replicaProof := createInclusionProof(aux.Replica()[challenge*nodeSize:(challenge+1)*nodeSize], aux.Data())
+
+	proof = OfflineSDRChallengeProof{
+		DataProof:    dataProof,
+		ColumnProofs: columnProofs,
+		ReplicaProof: replicaProof,
+	}
+
+	return proof
+}
+
+func CreateColumnProof(c util.UInt, nodeSize util.UInt, aux sector.ProofAuxTmp) (columnProof SDRColumnProof) {
+	commC := aux.PersistentAux().CommC()
+	layers := aux.KeyLayers()
+	var column []byte
+
+	for i := 0; i < len(layers); i++ {
+		column = append(column, layers[i][c*nodeSize:(c+1)*nodeSize]...)
+	}
+
+	leaf := hashColumn(column)
+	columnProof = SDRColumnProof(createInclusionProof(leaf, commC))
+
+	return columnProof
+}
+
+func createInclusionProof(leaf []byte, root []byte) InclusionProof {
+	panic("TODO")
+}
+
+type OfflineSDRChallengeProof struct {
+	CommRLast sector.Commitment
+	CommC     sector.Commitment
+
+	// TODO: these proofs need to depend on hash function.
+	DataProof    InclusionProof // Blake2s
+	ColumnProofs []SDRColumnProof
+	ReplicaProof InclusionProof // Pedersen
+
+}
+
+type InclusionProof struct{}
+type SDRColumnProof InclusionProof
+
+func (sdr *StackedDRG_I) CreateCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomSeed sector.SealRandomness, challenges int) []util.UInt {
+	panic("TODO")
 }
 
 func encodeNode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
@@ -410,6 +474,7 @@ func bigIntFromLittleEndianBytes(bytes []byte) *big.Int {
 	return new(big.Int).SetBytes(bytes)
 }
 
+// size is number of bytes to return
 func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
 	bytes := z.Bytes()[0:size]
 	reverse(bytes)
