@@ -114,7 +114,7 @@ func (chung *ChungExpanderAlgorithm_I) ithParent(node UInt, i UInt, degree Expan
 
 	// There are d ways of mapping each node into the set, and we choose the ith.
 	// Note that we can project the element back to the original node: element / d == node.
-	element := d + i
+	element := node*d + i
 
 	// Permutations of the d elements corresponding to each node yield d new elements.
 	permuted := chung.PermutationAlgorithm().As_Feistel().Permute(setSize, element)
