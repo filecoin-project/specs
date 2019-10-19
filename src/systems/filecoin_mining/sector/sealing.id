@@ -23,6 +23,7 @@ type SealCfg struct {
 type SealVerifyInfo struct {
     SectorID
     OnChain OnChainSealVerifyInfo
+    SealCfg
 }
 
 // OnChainSealVerifyInfo is the structure of information that must be sent with

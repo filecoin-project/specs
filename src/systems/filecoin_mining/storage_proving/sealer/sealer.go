@@ -66,12 +66,3 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 				ProofAux_: aux,
 			})).Impl()
 }
-
-func (s *SectorSealer_I) VerifySeal(sc sector.SealCfg, sv sector.SealVerifyInfo) *SectorSealer_VerifySeal_FunRet_I {
-
-	sdr := filproofs.SDRParams(sc)
-	result := sdr.VerifySeal(sc, sv)
-
-	return SectorSealer_VerifySeal_FunRet_Make_ok(
-		SectorSealer_VerifySeal_FunRet_ok(result)).Impl()
-}

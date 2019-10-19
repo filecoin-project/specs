@@ -391,7 +391,7 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 ////////////////////////////////////////////////////////////////////////////////
 // Verification
 
-func (sdr *StackedDRG_I) VerifySeal(sc sector.SealCfg, sv sector.SealVerifyInfo) bool {
+func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	panic("todo")
 }
 
