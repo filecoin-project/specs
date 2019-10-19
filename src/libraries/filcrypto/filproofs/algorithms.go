@@ -331,7 +331,10 @@ func CreateColumnProof(c UInt, nodeSize UInt, aux sector.ProofAuxTmp) (columnPro
 	}
 
 	leaf := hashColumn(column)
-	columnProof = SDRColumnProof(createInclusionProof(leaf, commC))
+	columnProof = SDRColumnProof{
+		ColumnElements: column,
+		InclusionProof: createInclusionProof(leaf, commC),
+	}
 
 	return columnProof
 }
@@ -352,7 +355,11 @@ type OfflineSDRChallengeProof struct {
 }
 
 type InclusionProof struct{}
-type SDRColumnProof InclusionProof
+
+type SDRColumnProof struct {
+	ColumnElements []byte
+	InclusionProof InclusionProof
+}
 
 func (sdr *StackedDRG_I) CreateCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
 	panic("TODO")
