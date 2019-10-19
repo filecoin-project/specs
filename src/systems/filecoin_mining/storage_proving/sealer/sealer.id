@@ -35,12 +35,5 @@ type SectorSealer struct {
     CreateSealProof(si CreateSealProofInputs) union {so CreateSealProofOutputs, err error}
     VerifySeal(sv sector.SealVerifyInfo) union {ok bool, err error}
 
-    ComputeDataCommitment(unsealedPath file.Path) union {commD sector.UnsealedSectorCID, err error}
-    ComputeReplicaID(
-        sid    sector.SectorID
-        commD  sector.UnsealedSectorCID
-        seed   sector.SealRandomness
-    ) union {replicaID Bytes, err error}
-
     MaxUnsealedBytesPerSector(SectorSize UInt) UInt
 }

@@ -14,8 +14,6 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	f := file.FromPath(si.SealedPath())
 	length, _ := f.Read(data)
 
-	commD := sector.UnsealedSectorCID(s.ComputeDataCommitment(data).As_commD())
-
 	if util.UInt(length) != util.UInt(si.SealCfg().SectorSize()) {
 		return &SectorSealer_SealSector_FunRet_I{
 			rawValue: "Sector file is wrong size",
@@ -23,21 +21,22 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 		}
 	}
 
-	sealArtifacts := sdr.Seal(sid, commD, data)
+	sealArtifacts := sdr.Seal(sid, data, si.RandomSeed())
 
 	return &SectorSealer_SealSector_FunRet_I{
 		rawValue: &SealOutputs_I{
 			ProofAuxTmp_: &sector.ProofAuxTmp_I{
 				PersistentAux_: &sector.ProofAux_I{
-					CommC_:                sealArtifacts.CommC(),
-					CommRLast_:            sealArtifacts.CommRLast(),
-					CachedMerkleTreePath_: sealArtifacts.CommRLastTreePath(),
+					CommC_:             sealArtifacts.CommC(),
+					CommRLast_:         sealArtifacts.CommRLast(),
+					CommRLastTreePath_: sealArtifacts.CommRLastTreePath(),
 				},
-				CommD_:     commD,
-				CommR_:     sealArtifacts.CommR(),
-				Data_:      data,
-				KeyLayers_: sealArtifacts.KeyLayers(),
-				Replica_:   sealArtifacts.Replica(),
+				CommD_:         sealArtifacts.CommD(),
+				CommR_:         sealArtifacts.CommR(),
+				CommDTreePath_: sealArtifacts.CommDTreePath(),
+				Data_:          data,
+				KeyLayers_:     sealArtifacts.KeyLayers(),
+				Replica_:       sealArtifacts.Replica(),
 			},
 		},
 		which: SectorSealer_SealSector_FunRet_Case_so,
@@ -72,11 +71,4 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 
 func (s *SectorSealer_I) VerifySeal(sv sector.SealVerifyInfo) *SectorSealer_VerifySeal_FunRet_I {
 	return &SectorSealer_VerifySeal_FunRet_I{}
-}
-
-func (s *SectorSealer_I) ComputeDataCommitment(data util.Bytes) *SectorSealer_ComputeDataCommitment_FunRet_I {
-	return &SectorSealer_ComputeDataCommitment_FunRet_I{
-		rawValue: filproofs.ComputeUnsealedSectorCID(data),
-		which:    SectorSealer_ComputeDataCommitment_FunRet_Case_commD,
-	}
 }

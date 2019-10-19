@@ -41,9 +41,11 @@ type SealAlgorithmArtifacts struct {
 
 // per-sector setup artifacts go here   
 type SealSetupArtifacts struct {
+    CommD              sector.Commitment
     CommR              sector.SealedSectorCID
     CommC              sector.Commitment
     CommRLast          sector.Commitment
+    CommDTreePath      file.Path
     CommCTreePath      file.Path
     CommRLastTreePath  file.Path
     KeyLayers          [Bytes]

@@ -133,8 +133,9 @@ func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCID, data []byte) SealSetupArtifacts {
-	replicaID := ComputeReplicaID(sid, commD)
+func (sdr *StackedDRG_I) Seal(sid sector.SectorID, data []byte, seed sector.SealRandomness) SealSetupArtifacts {
+	commD, commDTreePath := ComputeDataCommitment(data)
+	replicaID := ComputeReplicaID(sid, commD, seed)
 
 	drg := DRG_I{
 		Config_: sdr.DRGCfg(),
@@ -159,18 +160,20 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, commD sector.UnsealedSectorCI
 	commR := RepCompress_PedersenHash(commC, commRLast)
 
 	result := SealSetupArtifacts_I{
+		CommD_:             sector.Commitment(commC),
 		CommR_:             SealedSectorCID(commR),
 		CommC_:             sector.Commitment(commC),
 		CommRLast_:         sector.Commitment(commRLast),
-		CommRLastTreePath_: commRLastTreePath,
+		CommDTreePath_:     commDTreePath,
 		CommCTreePath_:     commCTreePath,
+		CommRLastTreePath_: commRLastTreePath,
 		KeyLayers_:         keyLayers,
 		Replica_:           replica,
 	}
 	return &result
 }
 
-func ComputeReplicaID(sid sector.SectorID, commD sector.UnsealedSectorCID) Bytes32 {
+func ComputeReplicaID(sid sector.SectorID, commD sector.Commitment, seed sector.SealRandomness) Bytes32 {
 	_, _ = sid.MinerID(), (sid.Number())
 
 	// FIXME: Implement
@@ -275,7 +278,7 @@ func hashColumn(column []byte) PedersenHash {
 }
 
 func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
-	replicaID := ComputeReplicaID(aux.SectorID(), aux.CommD())
+	replicaID := ComputeReplicaID(aux.SectorID(), aux.CommD(), aux.Seed())
 
 	drg := DRG_I{
 		Config_: sdr.DRGCfg(),
@@ -495,11 +498,16 @@ func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
 	panic("not implemented -- re-arrange bits")
 }
 
+func ComputeDataCommitment(data []byte) ([]byte, file.Path) {
+	// TODO: make hash parameterizable
+	return RepHash_Blake2sHash(data)
+}
+
 // Compute CommP or CommD.
-func ComputeUnsealedSectorCID(data []byte) sector.UnsealedSectorCID {
+func ComputeUnsealedSectorCID(data []byte) (sector.UnsealedSectorCID, file.Path) {
 	// TODO: check that len(data) > minimum piece size and is a power of 2.
-	hash, _ := RepHash_Blake2sHash(data)
-	return UnsealedSectorCID(hash)
+	hash, treePath := RepHash_Blake2sHash(data)
+	return UnsealedSectorCID(hash), treePath
 }
 
 // Utilities
