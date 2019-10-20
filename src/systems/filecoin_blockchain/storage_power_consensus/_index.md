@@ -42,7 +42,7 @@ While each Filecoin block header contains a ticket field (see {{<sref tickets>}}
 Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
 - The {{<sref sector_sealer>}} uses tickets as SealSeeds to bind sector commitments to a given subchain.
 - The {{<sref post_generator>}} likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
-- They are drawn by the Storage Power subsystem as randomness in {{<leader_election>}} to determine their eligibility to mine a block
+- They are drawn by the Storage Power subsystem as randomness in {{<sref leader_election>}} to determine their eligibility to mine a block
 - They are drawn by the Storage Power subsystem in order to generate new tickets for future use.
 
 Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin's Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.
