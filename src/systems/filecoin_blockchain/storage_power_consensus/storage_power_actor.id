@@ -12,14 +12,25 @@ type PledgeCollateralBalance struct {
     Available actor.TokenAmount
 }
 
-type StoragePowerActor struct {
-    // TODO: bytesamount might be inefficient
-    Miners             {addr.Address: block.StoragePower}
+type StorageMinerInfo struct {
+    OwnerAddr          addr.Address
+    MinerStoragePower  block.StoragePower
+    MinerPK            filcrypto.PubKey
+}
 
-    // TODO: decide on locking pc locked in SPA or StorageMiner?
-    PledgeCollaterals  {addr.Address: actor.PledgeCollateralBalance}
-    PowerTable
-    // TODO: verify its relationship with SPA
+// TODO: Diagram for state transition to someones power
+// TODO: increment and decrement?
+// TODO: What does graceful removal look like?
+
+type StoragePowerActor struct {
+
+    // TODO: bytesamount might be inefficient
+    PledgeCollaterals  {addr.Address: PledgeCollateralBalance}
+
+    // TODO: only SPA can write to this
+    // read only for all the other actors
+    // MinerAddress(Worker) to StorageMinerInfo
+    PowerTable         {addr.Address: StorageMinerInfo}
     ExpectedConsensus
 
     // call by StorageMiningSubsytem on miner creation
@@ -30,15 +41,25 @@ type StoragePowerActor struct {
         peerId        libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
     ) addr.Address
 
-    // PowerTable Operation - consider remove
+    RemoveStorageMiner(addr addr.Address)
+    verifyStorageMiner(addr addr.Address) bool
+
+    // PowerTable Operations
+    GetTotalPower() block.StoragePower
+
     // sectorSize should be passed in from SM.Info()
     IncrementPower(numSectors util.UVarint, sectorSize sector.SectorSize)
     DecrementPower(numSectors util.UVarint, sectorSize sector.SectorSize)
-    GetTotalPower() block.StoragePower
+    // SectiveActivePower(newPower block.StoragePower)
 
-    GetPledgeCollateralReq(newStorage block.StoragePower)
-    CommitPledgeCollateral()
-    DecommitPledgeCollateral(amount actor.TokenAmount)
+    GetPledgeCollateralReq(newPower block.StoragePower) actor.TokenAmount
+    AddPledgeCollateral()
+    WithdrawPledgeCollateral(amount actor.TokenAmount)
+
+    freezePledgeCollateral(amount actor.TokenAmount)
+    unfreezePledgeCollateral(amount actor.TokenAmount)
+    commitPledgeCollateral(amount actor.TokenAmount)
+    decommitPledgeCollateral(amount actor.TokenAmount)
 
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
@@ -50,10 +71,3 @@ type StoragePowerActor struct {
     // this should be part of ReportConsensusFault, numSectors should be all sectors
     // ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
 }
-
-// // What does graceful removal look like?
-
-// TODO: old methods, should be removed
-// UpdateStoragePowerSubsystem(Tipset, StateTree)
-// VerifyElectionProof(addr.Address, ElectionProof) bool
-// NotifyStorageFault(addr.Address)

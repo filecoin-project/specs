@@ -4,41 +4,179 @@ import (
 	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
 func (spa *StoragePowerActor_I) CreateStorageMiner(
 	ownerAddr addr.Address,
 	workerPubKey filcrypto.PubKey,
-	sectorSize util.UInt,
 	peerId libp2p.PeerID,
 ) addr.Address {
-	panic("TODO")
+	var msgSender addr.Address // TODO replace this
+
+	// TODO: anything to check here?
+	newMiner := &StorageMinerInfo_I{
+		OwnerAddr_:         ownerAddr,
+		MinerStoragePower_: block.StoragePower(0),
+		MinerPK_:           workerPubKey,
+	}
+	spa.PowerTable()[msgSender] = newMiner
+
+	// TODO: commit state
+
+	// TODO: do we need a return here?
+	return msgSender
 }
 
 // PowerTable Operation - consider remove
-func (spa *StoragePowerActor_I) IncrementPower(address addr.Address, numSectors util.UVarint) {}
-func (spa *StoragePowerActor_I) DecrementPower(address addr.Address, numSectors util.UVarint) {}
-func (spa *StoragePowerActor_I) GetTotalPower() block.StoragePower {
-	return block.StoragePower(0)
+func (spa *StoragePowerActor_I) IncrementPower(numSectors util.UVarint, sectorSize sector.SectorSize) {
+	var msgSender addr.Address // TODO replace this
+
+	// redundant if numSectors is unsigned
+	if numSectors < 0 {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	isMinerVerified := spa.verifyMiner(msgSender)
+	if !isMinerVerified {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	powerDelta := block.StoragePower(numSectors * uint64(sectorSize))
+	spa.PowerTable()[msgSender].Impl().MinerStoragePower_ += powerDelta
+
+	// TODO: commit state
+}
+func (spa *StoragePowerActor_I) DecrementPower(numSectors util.UVarint, sectorSize sector.SectorSize) {
+	var msgSender addr.Address // TODO replace this
+
+	if numSectors < 0 {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	isMinerVerified := spa.verifyMiner(msgSender)
+	if !isMinerVerified {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	powerDelta := block.StoragePower(numSectors * uint64(sectorSize))
+	if spa.PowerTable()[msgSender].Impl().MinerStoragePower_ < powerDelta {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	spa.PowerTable()[msgSender].Impl().MinerStoragePower_ -= powerDelta
+
+	// TODO: commit state
 }
 
-func (spa *StoragePowerActor_I) GetPledgeCollateralReq(newStorage block.StoragePower) {}
+func (spa *StoragePowerActor_I) RemoveMiner(addr addr.Address) {
+	isMinerVerified := spa.verifyMiner(addr)
+	if !isMinerVerified {
+		// TODO: proper throw
+		panic("TODO")
+	}
 
-func (spa *StoragePowerActor_I) CommitPledgeCollateral(deals []deal.StorageDeal) {
+	delete(spa.PowerTable(), addr)
 
-	panic("TODO")
+	// TODO: commit state
+}
+
+func (spa *StoragePowerActor_I) verifyMiner(addr addr.Address) bool {
+	// TODO: anything else to check?
+    // TODO: check miner pledge collateral balances?
+    // TODO: decide on what should be checked here
+	_, found := spa.PowerTable()[addr]
+	if !found {
+		return false
+	}
+	return true
+}
+
+func (spa *StoragePowerActor_I) GetTotalPower() block.StoragePower {
+	totalPower := block.StoragePower(0)
+	for _, miner := range spa.PowerTable() {
+		totalPower += miner.MinerStoragePower()
+	}
+	return totalPower
+}
+
+func (spa *StoragePowerActor_I) GetPledgeCollateralReq(newPower block.StoragePower) actor.TokenAmount {
+	// TODO: Implement
+	return actor.TokenAmount(0)
+}
+
+func (spa *StoragePowerActor_I) AddPledgeCollateral(newPower block.StoragePower) {
+	var msgSender addr.Address // TODO replace this
+	var msgValue actor.TokenAmount
+
+	isMinerVerified := spa.verifyMiner(msgSender)
+	if !isMinerVerified {
+		// TODO: proper throw
+		// TODO: this might be okay, create new miner
+		panic("TODO")
+	}
+
+	if msgValue < 0 {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currBal, found := spa.PledgeCollaterals()[msgSender]
+	if found {
+		currBal.Impl().Available_ = currBal.Available() + msgValue
+		spa.PledgeCollaterals_[msgSender] = currBal
+
+		// TODO: commit state change
+	} else {
+		newBal := &PledgeCollateralBalance_I{
+			Pledged_: actor.TokenAmount(0),
+			Frozen_: actor.TokenAmount(0),
+			Available_: msgValue,
+		}
+		spa.PledgeCollaterals_[msgSender] = newBal
+
+		// TODO: commit state change
+	}
+
 	// check that based on deals (ie sector sizes and num sectors) miner has enough associated balance in the storage miner wallet
 	// pledge and associate
 }
 
-func (spa *StoragePowerActor_I) DecommitPledgeCollateral(deals []deal.StorageDeal) {
+func (spa *StoragePowerActor_I) WithdrawPledgeCollateral(amount actor.TokenAmount) {
 	panic("TODO")
 	// must check more than finality post deal expiration
 	// return appropriate amount to storage market based on deals
 }
+
+func (spa *StoragePowerActor_I) freezePledgeCollateral(amount actor.TokenAmount) {
+	// move funds from available to freeze
+	panic("TODO")
+}
+
+func (spa *StoragePowerActor_I) unfreezePledgeCollateral(amount actor.TokenAmount) {
+	// move funds from freeze to available
+	panic("TODO")
+}
+
+func (spa *StoragePowerActor_I) commitPledgeCollateral(amount actor.TokenAmount) {
+	// move funds from available to pledged
+	panic("TODO")
+}
+
+func (spa *StoragePowerActor_I) decommitPledgeCollateral(amount actor.TokenAmount) {
+	// move funds from pledged to available
+	panic("TODO")
+}
+
+
 
 func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
 	panic("TODO")
@@ -69,13 +207,13 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	// var currBlockHeight util.UInt
 
 	// The number of miners that are challenged at this block
-	numSurprised := uint(len(spa.Miners())) / provingPeriod
+	numSurprised := uint(len(spa.PowerTable())) / provingPeriod
 
-	// TODO: seem inefficient but spa.Miners() is now a map from address to power
-	minerAddresses := make([]addr.Address, len(spa.Miners()))
+	// TODO: seem inefficient but spa.PowerTable() is now a map from address to power
+	minerAddresses := make([]addr.Address, len(spa.PowerTable()))
 
 	index := 0
-	for address := range spa.Miners() {
+	for address, _ := range spa.PowerTable() {
 		minerAddresses[index] = address
 		index++
 	}
@@ -83,7 +221,7 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	for i := uint(0); i < numSurprised; i++ {
 		// TODO: randomNumber := hash(ticket, i)
 		var randomNumber uint
-		minerIndex := randomNumber % uint(len(spa.Miners()))
+		minerIndex := randomNumber % uint(len(spa.PowerTable()))
 		minerAddress := minerAddresses[minerIndex]
 		surprisedMiners = append(surprisedMiners, minerAddress)
 		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
@@ -97,3 +235,36 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 
 	return surprisedMiners
 }
+
+
+// func (pt *PowerTable_I) GetMinerPower(addr addr.Address) block.StoragePower {
+// 	return spa.PowerTable()[addr].MinerStoragePower()
+// }
+
+// func (pt *PowerTable_I) GetMinerPublicKey(addr addr.Address) filcrypto.PubKey {
+// 	return spa.PowerTable[addr].MinerPK()
+// }
+
+// must be atomic
+// func (pt *PowerTable_I) SuspendPower(addr addr.Address, numSectors util.UVarint) {
+// 	panic("")
+// 	// spa.PowerTable[addr].MinerStoragePower -= numSectors * spa.PowerTable[addr].minerSectorSize
+// 	// spa.PowerTable[addr].MinerSuspendedPower += numSectors * spa.PowerTable[addr].minerSectorSize
+// }
+
+// must be atomic
+// func (pt *PowerTable_I) UnsuspendPower(addr addr.Address, numSectors util.UVarint) {
+// 	panic("")
+// 	// spa.PowerTable[addr].MinerSuspendedPower -= numSectors * spa.PowerTable[addr].minerSectorSize
+// 	// spa.PowerTable[addr].MinerStoragePower += numSectors * spa.PowerTable[addr].minerSectorSize
+// }
+
+// func (pt *PowerTable_I) RemovePower(addr addr.Address, numSectors util.UVarint) {
+// 	panic("")
+// 	// spa.PowerTable[addr].MinerSuspendedPower -= numSectors * spa.PowerTable[addr].minerSectorSize
+// }
+
+// func (pt *PowerTable_I) RemoveAllPower(addr addr.Address, numSectors util.UVarint) {
+// 	panic("")
+// 	// spa.PowerTable[addr].MinerStoragePower = 0
+// }
