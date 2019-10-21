@@ -1,4 +1,3 @@
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -6,38 +5,44 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import util "github.com/filecoin-project/specs/util"
 
-type PledgeCollateralBalance struct {
-    Pledged    actor.TokenAmount
-    Frozen     actor.TokenAmount
-    Available  actor.TokenAmount
+type PowerTableEntry struct {
+    ActivePower             block.StoragePower
+    InactivePower           block.StoragePower
+    AvailableBalance        actor.TokenAmount
+    LockedPledgeCollateral  actor.TokenAmount
 }
 
-type StorageMinerInfo struct {
-    OwnerAddr          addr.Address
-    MinerStoragePower  block.StoragePower
-    MinerPK            filcrypto.PubKey
+type PowerReport struct {
+    ActivePower            block.StoragePower
+    InactivePower          block.StoragePower
+    SlashDeclaredFaults    util.UVarint
+    SlashDeletedFaults     util.UVarint
+    SlashTerminatedFaults  util.UVarint
 }
+
+// type PowerTableHAMT {actor.ActorID: PowerTableEntry}
+type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: covert ActorID to address
+
+// type StorageMinerInfo struct {
+//     OwnerAddr          addr.Address
+//     MinerStoragePower  block.StoragePower
+//     MinerPK            filcrypto.PubKey
+// }
 
 // TODO: Diagram for state transition to someones power
 // TODO: increment and decrement?
 // TODO: What does graceful removal look like?
 
 type StoragePowerActor struct {
-    // TODO: bytesamount might be inefficient
-    PledgeCollaterals  {addr.Address: PledgeCollateralBalance}
-
-    // TODO: only SPA can write to this
-    // read only for all the other actors
-    // MinerAddress(Worker) to StorageMinerInfo
-    PowerTable         {addr.Address: StorageMinerInfo}
-    ExpectedConsensus
+    PowerTable  PowerTableHAMT
+    EC          ExpectedConsensus
 
     // call by StorageMiningSubsytem on miner creation
     CreateStorageMiner(
         // TODO: document differences in Addr, Key and ID accross spec
-        ownerAddr     addr.Address
-        workerPubKey  filcrypto.PubKey
-        peerId        libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
+        ownerAddr   addr.Address
+        workerAddr  addr.Address
+        peerId      libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
     ) addr.Address
 
     RemoveStorageMiner(addr addr.Address)
@@ -52,13 +57,11 @@ type StoragePowerActor struct {
     // SectiveActivePower(newPower block.StoragePower)
 
     GetPledgeCollateralReq(newPower block.StoragePower) actor.TokenAmount
-    AddPledgeCollateral()
-    WithdrawPledgeCollateral(amount actor.TokenAmount)
+    AddBalance()
+    WithdrawBalance(amount actor.TokenAmount)
 
-    freezePledgeCollateral(amount actor.TokenAmount)
-    unfreezePledgeCollateral(amount actor.TokenAmount)
-    commitPledgeCollateral(amount actor.TokenAmount)
-    decommitPledgeCollateral(amount actor.TokenAmount)
+    lockPledgeCollateral(amount actor.TokenAmount)
+    unlockPledgeCollateral(amount actor.TokenAmount)
 
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
