@@ -7,9 +7,9 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import util "github.com/filecoin-project/specs/util"
 
 type PledgeCollateralBalance struct {
-    Pledged   actor.TokenAmount
-    Frozen    actor.TokenAmount
-    Available actor.TokenAmount
+    Pledged    actor.TokenAmount
+    Frozen     actor.TokenAmount
+    Available  actor.TokenAmount
 }
 
 type StorageMinerInfo struct {
@@ -23,7 +23,6 @@ type StorageMinerInfo struct {
 // TODO: What does graceful removal look like?
 
 type StoragePowerActor struct {
-
     // TODO: bytesamount might be inefficient
     PledgeCollaterals  {addr.Address: PledgeCollateralBalance}
 

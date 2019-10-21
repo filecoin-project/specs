@@ -4,10 +4,10 @@ import (
 	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
 func (spa *StoragePowerActor_I) CreateStorageMiner(
@@ -91,8 +91,8 @@ func (spa *StoragePowerActor_I) RemoveMiner(addr addr.Address) {
 
 func (spa *StoragePowerActor_I) verifyMiner(addr addr.Address) bool {
 	// TODO: anything else to check?
-    // TODO: check miner pledge collateral balances?
-    // TODO: decide on what should be checked here
+	// TODO: check miner pledge collateral balances?
+	// TODO: decide on what should be checked here
 	_, found := spa.PowerTable()[addr]
 	if !found {
 		return false
@@ -137,8 +137,8 @@ func (spa *StoragePowerActor_I) AddPledgeCollateral(newPower block.StoragePower)
 		// TODO: commit state change
 	} else {
 		newBal := &PledgeCollateralBalance_I{
-			Pledged_: actor.TokenAmount(0),
-			Frozen_: actor.TokenAmount(0),
+			Pledged_:   actor.TokenAmount(0),
+			Frozen_:    actor.TokenAmount(0),
 			Available_: msgValue,
 		}
 		spa.PledgeCollaterals_[msgSender] = newBal
@@ -175,8 +175,6 @@ func (spa *StoragePowerActor_I) decommitPledgeCollateral(amount actor.TokenAmoun
 	// move funds from pledged to available
 	panic("TODO")
 }
-
-
 
 func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
 	panic("TODO")
@@ -235,7 +233,6 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 
 	return surprisedMiners
 }
-
 
 // func (pt *PowerTable_I) GetMinerPower(addr addr.Address) block.StoragePower {
 // 	return spa.PowerTable()[addr].MinerStoragePower()
