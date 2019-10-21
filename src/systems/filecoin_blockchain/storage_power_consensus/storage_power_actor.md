@@ -40,4 +40,4 @@ Pledge Collateral will be slashed when {{<sref consensus_faults>}} are reported 
 
 Pledge Collateral is slashed for any fault affecting storage-power consensus, these include:
 - faults to expected consensus in particular (see {{<sref consensus_faults>}}) which will be reported by a slasher to the `StoragePowerActor` in exchange for a reward.
-- faults affecting consensus power more generally, specifically uncommitted power faults (i.e. {{<sref storage faults>}}) which will be reported by the `CronActor` automatically.
+- faults affecting consensus power more generally, specifically uncommitted power faults (i.e. {{<sref storage_faults>}}) which will be reported by the `CronActor` automatically.
