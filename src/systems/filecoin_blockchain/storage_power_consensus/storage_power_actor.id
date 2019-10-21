@@ -15,7 +15,7 @@ type PowerReport struct {
     ActivePower            block.StoragePower
     InactivePower          block.StoragePower
     SlashDeclaredFaults    util.UVarint
-    SlashDeletedFaults     util.UVarint
+    SlashDetectedFaults    util.UVarint
     SlashTerminatedFaults  util.UVarint
 }
 

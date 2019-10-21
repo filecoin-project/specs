@@ -283,7 +283,7 @@ func (spa *StoragePowerActor_I) getDeclaredFaultSlash(util.UVarint) actor.TokenA
 	return actor.TokenAmount(0)
 }
 
-func (spa *StoragePowerActor_I) getDeletedFaultSlash(util.UVarint) actor.TokenAmount {
+func (spa *StoragePowerActor_I) getDetectedFaultSlash(util.UVarint) actor.TokenAmount {
 	return actor.TokenAmount(0)
 }
 
@@ -300,10 +300,10 @@ func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
 	spa.PowerTable_[msgSender] = powerEntry
 
 	declaredFaultSlash := spa.getDeclaredFaultSlash(report.SlashDeclaredFaults())
-	deletedFaultSlash := spa.getDeletedFaultSlash(report.SlashDeletedFaults())
+	detectedFaultSlash := spa.getDetectedFaultSlash(report.SlashDetectedFaults())
 	terminatedFaultSlash := spa.getTerminatedFaultSlash(report.SlashTerminatedFaults())
 
-	spa.slashPledgeCollateral(msgSender, (declaredFaultSlash + deletedFaultSlash + terminatedFaultSlash))
+	spa.slashPledgeCollateral(msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
 
 	// TODO: commit state change
 }
