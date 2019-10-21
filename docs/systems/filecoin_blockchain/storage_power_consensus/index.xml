@@ -11,21 +11,12 @@
     
     
     <item>
-      <title>Expected Consensus</title>
-      <link>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</guid>
-      <description> type ExpectedConsensus struct { // ComputeWeight(Chain)	ChainWeight  // TryElection(StorageMiner, TipSet)	ElectionProof  // VerifyElection(StorageMiner, ElectionProof)	bool  // IsConsensusFault([Block])	bool }  </description>
-    </item>
-    
-    <item>
       <title>Storage Power Actor</title>
       <link>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type BytesAmount UVarint type StoragePower UVarint type StoragePowerActor struct { // TODO: bytesamount might be inefficient  Miners {addr.Address: StoragePower} // call by StorageMiningSubsytem on miner creation  CreateStorageMiner( ownerAddr addr.Address workerPubKey filcrypto.PubKey sectorSize util.UInt peerId libp2p.PeerID // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)  ) addr.Address // TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate  UpdatePower(address addr.</description>
+      <description>import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; type StoragePowerActor struct { // TODO: bytesamount might be inefficient  // Miners [addr.Address]  Miners {addr.Address: block.StoragePower} // call by StorageMiningSubsytem on miner creation  CreateStorageMiner( ownerAddr addr.Address workerPubKey filcrypto.PubKey sectorSize util.UInt peerId libp2p.PeerID // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)  ) addr.Address // TODO add NotifyConsensusFault(addr.Address, [block.Block]) TODO maybe rename to Arbitrate  UpdatePower(address addr.</description>
     </item>
     
   </channel>

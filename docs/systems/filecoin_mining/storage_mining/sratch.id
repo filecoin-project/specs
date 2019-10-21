@@ -1,7 +1,6 @@
 /*
 type PubKey struct {}
 type StorageDeal struct {}
-type ElectionArtifacts struct {
     TK Ticket,
     T1 Ticket,
 }

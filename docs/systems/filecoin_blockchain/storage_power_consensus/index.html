@@ -2105,7 +2105,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2114,7 +2114,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4549,7 +4549,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <p>Succinctly, the SPC subsystem offers the following services:
 - Access to the <em>Power Table</em> for every subchain, accounting for individual storage miner power and total power on-chain.
 - Access to <a href="../../../../#algorithms__expected_consensus">Expected Consensus</a> for individual storage miners, enabling:
-    - Access to verifiable randomness <a href="../../../../#algorithms__expected_consenus__tickets">Tickets</a>as needed in the rest of the protocol.
+    - Access to verifiable randomness <a href="../../../../#algorithms__expected_consenus__tickets">Tickets</a> as needed in the rest of the protocol.
     - Running  <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to produce new blocks.
     - Running <a href="../../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> across subchains using EC&rsquo;s weighting function.
     - Identification of <a href="../../../../#algorithms__expected_consensus__finality">the most recently finalized tipset</a>, for use by all protocol participants.</p>
@@ -4576,57 +4576,66 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">base_mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
-</span><span class="c1"></span>    <span class="c1">// TODO: this is incorrect, it does not belong
-</span><span class="c1"></span>    <span class="nx">powerTable</span>           <span class="nx">PowerTable</span>
-    <span class="nx">actor</span>                <span class="nx">StoragePowerActor</span>
+</span><span class="c1"></span>    <span class="nx">actor</span>                <span class="nx">StoragePowerActor</span>
     <span class="nx">associatedStateTree</span>  <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>  <span class="c1">// TODO: remove this. should not store this here.
 </span><span class="c1"></span>
     <span class="nf">GenerateElectionProof</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
     <span class="nf">ChooseTipsetToMine</span><span class="p">(</span><span class="nx">tipsets</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">])</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">]</span>
 
-    <span class="c1">// call by StorageMiningSubsystem in sealing sector
-</span><span class="c1"></span>    <span class="nf">GetSealSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">base_mining</span><span class="p">.</span><span class="nx">SealSeed</span>
-
-    <span class="c1">// call by StorageMiningSubsystem after sealing
-</span><span class="c1"></span>    <span class="nf">GetPoStChallenge</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">base_mining</span><span class="p">.</span><span class="nx">PoStChallenge</span>
+    <span class="nx">ec</span> <span class="nx">ExpectedConsensus</span>
 
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
-    <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">GetElectionArtifacts</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionArtifacts</span>
+    <span class="nf">validateElectionProof</span><span class="p">(</span>
+        <span class="nx">height</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">electionProof</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
+        <span class="nx">workerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="c1">// call by StoragePowerConsensusSubsystem itself during block production
-</span><span class="c1"></span>    <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
-
-    <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">TryLeaderElection</span><span class="p">(</span><span class="nx">electionProof</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">validateTicket</span><span class="p">(</span><span class="nx">tix</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">computeTipsetWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
+
+    <span class="nf">IsWinningElectionProof</span><span class="p">(</span><span class="nx">electionProof</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="nf">StoragePowerConsensusError</span><span class="p">()</span> <span class="nx">StoragePowerConsensusError</span>
+
+    <span class="c1">// Randomness methods
+</span><span class="c1"></span>
+    <span class="c1">// call by StorageMiningSubsystem during block production
+</span><span class="c1"></span>    <span class="nf">GetTicketProductionSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+
+    <span class="c1">// call by StorageMiningSubsystem during block production
+</span><span class="c1"></span>    <span class="nf">GetElectionProofSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+
+    <span class="c1">// call by StorageMiningSubsystem in sealing sector
+</span><span class="c1"></span>    <span class="nf">GetSealSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">base_mining</span><span class="p">.</span><span class="nx">SealSeed</span>
+
+    <span class="c1">// call by StorageMiningSubsystem after sealing
+</span><span class="c1"></span>    <span class="nf">GetPoStChallenge</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">base_mining</span><span class="p">.</span><span class="nx">PoStChallenge</span>
+
+    <span class="nf">GetFinality</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">PowerTable</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// all power here is always verified
-</span><span class="c1"></span>    <span class="nx">minerPower</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StorageMiner</span><span class="p">}</span>
-    <span class="nf">LookupMinerStorage</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">UVarint</span>
-    <span class="nf">LookupMinerPowerFraction</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">PowerFraction</span>
-    <span class="nf">RemovePower</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+<span class="kd">type</span> <span class="nx">ExpectedConsensus</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">ComputeWeight</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
+    <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">])</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">StorageMiner</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">minerAddress</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">minerStorage</span>
-    <span class="nx">VRFKeyPair</span>    <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
+<span class="kd">type</span> <span class="nx">ConsensusFaultType</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">DoubleForkMiningFault</span>  <span class="nx">ConsensusFault</span>
+    <span class="nx">ParentGrindingFault</span>    <span class="nx">ConsensusFault</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">minerStorage</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">ConsensusFault</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">StoragePowerConsensusError</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
 
@@ -4644,30 +4653,131 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 <p>However, given Filecoin&rsquo;s &ldquo;useful Proof-of-Work&rdquo; is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a <a href="../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">Storage Miner Actor</a> need only register with the <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor">Storage Power Actor</a> in order to participate in Expected Consensus and mine blocks.</p>
 
-<div id="systems__filecoin_blockchain__storage_power_consensus__power_table"></div>
-
-<h2 id="the-power-table">The Power Table</h2>
-
-<p>The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their <code>Power Fraction</code> over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.</p>
-
-<p>SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), when PoSts fail to be put on-chain (decrementing miner power) or for other storage and consensus faults.</p>
-
-<p>An invariant of the storage power consensus subsystem is that all storage in the power table must be verified. That is, miners can only derive power from storage they have already proven to the network.</p>
-
-<p>In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector.
-Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.</p>
-
-<p>Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.</p>
-
-<p>To illustrate this, an example:</p>
-
-<p>Miner M1 has a provingPeriod of 30. M1 submits a PoST at height 39. Their next <code>provingPeriodEnd</code> will be 69, but M1 can submit a new PoST at any height X, for X in (39, 69]. Let&rsquo;s assume X is 67.</p>
-
-<p>At height Y in (39, 67], M1 will attempt to generate an <code>ElectionProof</code> using the storage market actor from height 39 for their own power (and an actor from Y for total network power); at height 68, M1 will use the storage market actor from height 67 for their own power, and the storage market actor from height 68 for total power and so on.</p>
-
 <h2 id="repeated-leader-election-attempts">Repeated leader election attempts</h2>
 
-<p>In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election.</p>
+<p>In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid <code>ElectionProof</code> and trying again.</p>
+
+<div id="systems__filecoin_blockchain__storage_power_consensus__ticket_chain"></div>
+
+<h3 id="the-ticket-chain-and-randomness-on-chain">The Ticket chain and randomness on-chain</h3>
+
+<p>While each Filecoin block header contains a ticket field (see <a href="../../../../#algorithms__expected_consenus__tickets">Tickets</a>), it is useful to provide nodes with a ticket chain abstraction.</p>
+
+<p>Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
+- The <a href="../../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a> uses tickets as SealSeeds to bind sector commitments to a given subchain.
+- The <a href="../../../../#systems__filecoin_mining__storage_proving__post_generator">PoSt Generator</a> likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
+- They are drawn by the Storage Power subsystem as randomness in <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to determine their eligibility to mine a block
+- They are drawn by the Storage Power subsystem in order to generate new tickets for future use.</p>
+
+<p>Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.</p>
+
+<p>This ticket chain will track one-to-one with a block at each height in a given subchain, but omits certain details including other blocks mined at that height.</p>
+
+<p>It is composed inductively as follows. For a given chain:</p>
+
+<ul>
+<li>At height 0, take the genesis block, return its ticket</li>
+<li>At height n+1, take the heaviest tipset in our chain at height n.
+
+<ul>
+<li>select the block in that tipset with the smallest final ticket, return its ticket</li>
+</ul></li>
+</ul>
+
+<p>Because a Tipset can contain multiple blocks, the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.</p>
+
+<pre><code>   ┌──────────────────────┐
+   │                      │
+   │                      │
+   │┌────┐                │
+   ││ TA │              A │
+   └┴────┴────────────────┘
+
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                          │
+   │
+    ┌────┐                │       TA &lt; TB &lt; TC
+   ││ TB │              B
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘
+
+   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                          │
+   │
+    ┌────┐                │
+   ││ TC │              C
+    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘
+</code></pre>
+
+<p>In the above diagram, a miner will use block A&rsquo;s Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.</p>
+
+<h2 id="drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</h2>
+
+<p>Tickets are used as input to the SEAL above in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
+
+<p>The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.</p>
+
+<p>Verification should ensure that the ticket was drawn no farther back than necessary by the miner. We note that tickets can uniquely be associated to a given round in the protocol (lest a hash collision be found), but that the round number is explicited by the miner in <code>commitSector</code>.</p>
+
+<p>We present precisely how ticket selection and verification should work. In the below, we use the following notation:</p>
+
+<ul>
+<li><code>F</code>&ndash; Finality (number of rounds)</li>
+<li><code>X</code>&ndash; round in which SEALing starts</li>
+<li><code>Z</code>&ndash; round in which the SEAL appears (in a block)</li>
+<li><code>Y</code>&ndash; round announced in the SEAL <code>commitSector</code> (should be X, but a miner could use any Y &lt;= X), denoted by the ticket selection
+
+<ul>
+<li><code>T</code>&ndash; estimated time for SEAL, dependent on sector size</li>
+<li><code>G = T + variance</code>&ndash; necessary flexibility to account for network delay and SEAL-time variance.</li>
+</ul></li>
+</ul>
+
+<p>We expect Filecoin will be able to produce estimates for sector commitment time based on sector sizes, e.g.:
+<code>(estimate, variance) &lt;--- SEALTime(sectors)</code>
+G and T will be selected using these.</p>
+
+<h4 id="picking-a-ticket-to-seal">Picking a Ticket to Seal</h4>
+
+<p>When starting to prepare a SEAL in round X, the miner should draw a ticket from X-F with which to compute the SEAL.</p>
+
+<h4 id="verifying-a-seal-s-ticket">Verifying a Seal&rsquo;s ticket</h4>
+
+<p>When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds [Z-T-F-G, Z-T-F+G].</p>
+
+<h4 id="in-detail">In Detail</h4>
+
+<pre><code>                               Prover
+           ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+          │
+
+          ▼
+         X-F ◀───────F────────▶ X ◀──────────T─────────▶ Z
+     -G   .  +G                 .                        .
+  ───(┌───────┐)───────────────( )──────────────────────( )────────▶
+      └───────┘                 '                        '        time
+ [Z-T-F-G, Z-T-F+G]
+          ▲
+
+          └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                              Verifier
+</code></pre>
+
+<p>Note that the prover here is submitting a message on chain (i.e. the SEAL). Using an older ticket than necessary to generate the SEAL is something the miner may do to gain more confidence about finality (since we are in a probabilistically final system). However it has a cost in terms of securing the chain in the face of long-range attacks (specifically, by mixing in chain randomness here, we ensure that an attacker going back a month in time to try and create their own chain would have to completely regenerate any and all sectors drawing randomness since to use for their fork&rsquo;s power).</p>
+
+<p>We break this down as follows:</p>
+
+<ul>
+<li>The miner should draw from <code>X-F</code>.</li>
+<li>The verifier wants to find what <code>X-F</code> should have been (to ensure the miner is not drawing from farther back) even though Y (i.e. the round of the ticket actually used) is an unverifiable value.</li>
+<li>Thus, the verifier will need to make an inference about what <code>X-F</code> is likely to have been based on:
+
+<ul>
+<li>(known) round in which the message is received (Z)</li>
+<li>(known) finality value (F)</li>
+<li>(approximate) SEAL time (T)</li>
+</ul></li>
+<li>Because T is an approximate value, and to account for network delay and variance in SEAL time across miners, the verifier allows for G offset from the assumed value of <code>X-F</code>: <code>Z-T-F</code>, hence verifying that the ticket is drawn from the range <code>[Z-T-F-G, Z-T-F+G]</code>.</li>
+</ul>
 </article>
 
       
@@ -4684,8 +4794,19 @@ Conversely, storage faults only lead to power loss once they are detected (up to
 <li>
 <ul>
 <li><a href="#distinguishing-between-storage-miners-and-block-miners">Distinguishing between storage miners and block miners</a></li>
-<li><a href="#the-power-table">The Power Table</a></li>
-<li><a href="#repeated-leader-election-attempts">Repeated leader election attempts</a></li>
+<li><a href="#repeated-leader-election-attempts">Repeated leader election attempts</a>
+<ul>
+<li><a href="#the-ticket-chain-and-randomness-on-chain">The Ticket chain and randomness on-chain</a></li>
+</ul></li>
+<li><a href="#drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</a>
+<ul>
+<li>
+<ul>
+<li><a href="#picking-a-ticket-to-seal">Picking a Ticket to Seal</a></li>
+<li><a href="#verifying-a-seal-s-ticket">Verifying a Seal&rsquo;s ticket</a></li>
+<li><a href="#in-detail">In Detail</a></li>
+</ul></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>

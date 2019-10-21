@@ -2104,7 +2104,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2113,7 +2113,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4562,8 +4562,9 @@ https://github.com/alex-shpak/hugo-book
 
 <ul>
 <li>The address of the miner that mined the block</li>
-<li>An array of the tickets that led to this particular miner being selected as the leader for this round (see
-<a href="../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> for more details), as well as a signature on the winning ticket</li>
+<li>A ticket associated to this block&rsquo;s creation to be used as randomness elsewhere in the protocol (see
+<a href="../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> for more details)</li>
+<li>An electionProof showing this miner was eligible to mine, as well as a Nonce relating the number of rounds over which the block was mined (on expectation 1)</li>
 <li>The set of parent blocks and aggregate <a href="../../../#algorithms__expected_consensus__chain_selection">chain weight</a> of the parents</li>
 <li>This block&rsquo;s height</li>
 <li>Merkle root of the state tree (after applying the messages &ndash; state transitions &ndash; included in this block)</li>
@@ -4674,10 +4675,7 @@ https://github.com/alex-shpak/hugo-book
 <h1 id="ticket">Ticket</h1>
 
 <p>A ticket contains a shared random value referenced by a particular <code>Block</code> in the Filecoin blockchain.
-Every miner must produce a new <code>Ticket</code> each time they run a leader election attempt.
-In that sense, every new block produced will have one or more associated tickets
-(specifically, the block may contain more than one ticket if it corresponds to
-one or more zero-winner epochs of <a href="../../../#algorithms__expected_consensus">Expected Consensus</a>).</p>
+Every miner must produce a new <code>Ticket</code> for each ticket used in a leader election attempt.</p>
 
 <p>To produce the ticket values,
 we use an <a href="https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10">EC-VRF per Goldberg et al.</a>
@@ -4708,9 +4706,9 @@ with Secp256k1 and SHA-256 to obtain a deterministic, pseudorandom output.</p>
 <p>The ticket is represented concretely by the <code>Ticket</code> data structure.
 Whenever the Filecoin protocol refers to ticket values
 (notably in crafting <a href="../../../#algorithms__post___index">PoSTs</a> or running leader election),
-what is meant is that the bytes of the <code>VDFResult</code> field in the <code>Ticket</code> struct are used.
+what is meant is that the bytes of the <code>VRFResult</code> field in the <code>Ticket</code> struct are used.
 Specifically, tickets are compared lexicographically,
-interpreting the bytes of the <code>VDFResult</code> as an unsigned integer value (little-endian).</p>
+interpreting the bytes of the <code>VRFResult.Output</code> as an unsigned integer value (little-endian).</p>
 
 <h1 id="electionproof">ElectionProof</h1>
 
@@ -4719,7 +4717,9 @@ by a miner during the leader election process.
 Its output value determines whether the miner is elected as one of the leaders,
 and hence is eligible to produce a block for the current epoch.
 The inclusion of the <code>ElectionProof</code> in the block allows other network participants
-to verify that the block was mined by a valid leader.</p>
+to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket,
+(in cases where no blocks are found in a round) a miner increments that ElectionProof&rsquo;s associated <code>Nonce</code>, marking
+increased block height.</p>
 
 <div>
   

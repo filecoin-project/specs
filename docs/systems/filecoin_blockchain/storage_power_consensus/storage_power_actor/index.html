@@ -2104,7 +2104,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2113,7 +2113,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4560,16 +4560,19 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+
+
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-
-<span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UVarint</span>
-<span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">UVarint</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActor</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// TODO: bytesamount might be inefficient
-</span><span class="c1"></span>    <span class="nx">Miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StoragePower</span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="c1">// Miners [addr.Address]
+</span><span class="c1"></span>    <span class="nx">Miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">}</span>
 
     <span class="c1">// call by StorageMiningSubsytem on miner creation
 </span><span class="c1"></span>    <span class="nf">CreateStorageMiner</span><span class="p">(</span>
@@ -4579,12 +4582,12 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">peerId</span>        <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>  <span class="c1">// TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
 </span><span class="c1"></span>    <span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-    <span class="c1">// TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate
-</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">StoragePower</span><span class="p">)</span>
+    <span class="c1">// TODO add NotifyConsensusFault(addr.Address, [block.Block]) TODO maybe rename to Arbitrate
+</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span>
 
-    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">StoragePower</span>
+    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 
-    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StoragePower</span>
+    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 
     <span class="c1">// call by StorageMinerActor on successful seal
 </span><span class="c1"></span>    <span class="c1">// TODO: workerKey of type StorageMiner.WorkerPubKey
@@ -4592,25 +4595,104 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">SuspendMiner</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
 
-    <span class="c1">// UpdateStoragePowerSubsystem(Tipset, StateTree)
+    <span class="nx">expectedConsensus</span> <span class="nx">ExpectedConsensus</span>
+    <span class="nf">ReportConsensusFault</span><span class="p">(</span>
+        <span class="nx">slasherAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">faultType</span>    <span class="nx">ConsensusFaultType</span>
+        <span class="nx">proof</span>        <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="nf">ReportUncommittedPowerFault</span><span class="p">(</span><span class="nx">cheaterAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
+    <span class="nx">PowerTable</span>
+
+    <span class="c1">// VerifyElectionProof(addr.Address, ElectionProof)    bool
 </span><span class="c1"></span>
-    <span class="c1">// VerifyElectionProof(base.Address, base.ElectionProof)    bool
+    <span class="nf">Surprise</span><span class="p">(</span><span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
+
+    <span class="nf">CheckFaults</span><span class="p">()</span>
+
+    <span class="c1">// // What does graceful removal look like?
 </span><span class="c1"></span>
     <span class="c1">// TODO: old methods, should be removed
 </span><span class="c1"></span>    <span class="c1">// UpdateStoragePowerSubsystem(Tipset, StateTree)
-</span><span class="c1"></span>    <span class="c1">// VerifyElectionProof(addr.Address, base.ElectionProof)    bool
+</span><span class="c1"></span>    <span class="c1">// VerifyElectionProof(addr.Address, ElectionProof)    bool
 </span><span class="c1"></span>    <span class="c1">// NotifyStorageFault(addr.Address)
-</span><span class="c1"></span>    <span class="c1">// TryPublishBlock(StateTree)                    Block
-</span><span class="c1"></span>
-    <span class="c1">// RegisterStorageMiner(SealProof)                Address
-</span><span class="c1"></span>    <span class="c1">// TryUpdateStorage(base.Address, newPower)            error
-</span><span class="c1"></span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="c1">// TryPublishBlock(StateTree)                    block.Block
+</span><span class="c1"></span>    <span class="nf">CommitPledgeCollateral</span><span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span>
+    <span class="nf">DecommitPledgeCollateral</span><span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span>
+
+    <span class="nx">pledgeCollateralBalances</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">UVarint</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PowerTable</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// all power here is always verified
+</span><span class="c1"></span>    <span class="nf">RegisterMiner</span><span class="p">(</span>
+        <span class="nx">addr</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">pk</span>          <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
+        <span class="nx">sectorSize</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
+    <span class="p">)</span>
+    <span class="nx">miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StorageMiner</span><span class="p">}</span>
+    <span class="nf">GetMinerPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">GetTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">GetMinerPublicKey</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
+    <span class="nf">IncrementPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
+    <span class="nf">SuspendPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
+    <span class="nf">UnsuspendPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
+    <span class="nf">RemovePower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
+    <span class="nf">RemoveAllPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">StorageMiner</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">MinerAddress</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">MinerStoragePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">MinerSuspendedPower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">MinerPK</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
+    <span class="nx">MinerSectorSize</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
+<span class="p">}</span>
 </code></pre></div>
 
 
 
 
 
+
+<div id="systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__power_table"></div>
+
+<h2 id="the-power-table">The Power Table</h2>
+
+<p>The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their <code>Power Fraction</code> over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.</p>
+
+<p>SPC provides a power table abstraction which tracks miner power (i.e. miner storage in relation to network storage) over time. The power table is updated for new sector commitments (incrementing miner power), when PoSts fail to be put on-chain (decrementing miner power) or for other storage and consensus faults.</p>
+
+<p>An invariant of the storage power consensus subsystem is that all storage in the power table must be verified. That is, miners can only derive power from storage they have already proven to the network.</p>
+
+<p>In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector.
+Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.</p>
+
+<p>Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
+Finally, we also account for &ldquo;suspended&rdquo; power in order to make accounting simple in the presence of faults (see <a href="../../../../../#algorithms__expected_consensus__consensus_faults">Consensus Faults</a>) and subsequent recovery.</p>
+
+<p>The Miner lifecycle in the power table should be roughly as follows:
+- MinerRegistration: A new miner with an associated worker public key and address is registered on the power table by the storage mining subsystem, along with their associated sector size (there is only one per worker).
+- UpdatePower: These power increments and decrements (in multiples of the associated sector size) are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
+    - Power is incremented to account for a new SectorCommitment at the first PoSt past the first ProvingPeriod.
+    - All Power is decremented immediately after a missed PoSt.
+    - Power is decremented immediately after faults are declared, proportional to the faulty sector size.
+    - Power is incremented after a PoSt recovering from a fault.
+    - Power is definitively removed from the Power Table past the sector failure timeout (see <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Faults</a>)</p>
+
+<div id="systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral"></div>
+
+<h2 id="pledge-collateral">Pledge Collateral</h2>
+
+<p>Consensus in Filecoin is secured in part by economic incentives enforced by Pledge Collateral.</p>
+
+<p>Pledge collateral amount is committed based on power pledged to the system (i.e. proportional to number of sectors committed and sector size for a miner). It is a system-wide parameter and is committed to the <code>StoragePowerActor</code>. TODO: define parameter value. Pledge Collateral submission methods take on storage deals to determine the appropriate amount of collateral to be pledged. Pledge collateral can be posted by the <code>StorageMinerActor</code> at any time by a miner up to sector commitments. A sector commitment without the requisite posted pledge collateral will be deemed invalid.</p>
+
+<p>Pledge Collateral will be slashed when <a href="../../../../../#algorithms__expected_consensus__consensus_faults">Consensus Faults</a> are reported to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method or when the <code>CronActor</code> calls the <code>StoragePowerActor</code>&rsquo;s <code>ReportUncommittedPowerFault</code> method.</p>
+
+<p>Pledge Collateral is slashed for any fault affecting storage-power consensus, these include:
+- faults to expected consensus in particular (see <a href="../../../../../#algorithms__expected_consensus__consensus_faults">Consensus Faults</a>) which will be reported by a slasher to the <code>StoragePowerActor</code> in exchange for a reward.
+- faults affecting consensus power more generally, specifically uncommitted power faults (i.e. <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Faults</a>) which will be reported by the <code>CronActor</code> automatically.</p>
 
 </article>
 
@@ -4621,6 +4703,18 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#the-power-table">The Power Table</a></li>
+<li><a href="#pledge-collateral">Pledge Collateral</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 

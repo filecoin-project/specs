@@ -1,7 +1,6 @@
 package block
 
 import (
-	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -12,50 +11,52 @@ func SmallerBytes(a, b util.Bytes) util.Bytes {
 	return a
 }
 
-func (block *BlockHeader_I) ExtractElectionSeed() ElectionSeed {
-	panic("TODO")
-	// var ret []byte
+func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
+	panic("")
 
-	// for _, currBlock := range lookbackTipset.Blocks() {
-	// 	for _, currTicket := range currBlock.Tickets() {
-
-	// 		currSeed := Hash(
-	// 			HashRole_ElectionSeedFromVRFOutput,
-	// 			currTicket.VRFResult().bytes(),
-	// 		)
-	// 		if ret == nil {
-	// 			ret = currSeed
-	// 		} else {
-	//             ret = SmallerBytes(currSeed, ret)
-	//         }
-	// 	}
+	// dist := chain.HeadEpoch() - epoch
+	// current := chain.HeadTipset()
+	// parents := current.Parents()
+	// for i := 0; i < dist; i++ {
+	// 	current = parents
+	// 	parents = current.Parents
 	// }
 
-	// Assert(ret != nil)
-	// return ElectionSeed.FromBytesInternal(nil, ret)
+	// return current
 }
 
-// func GenerateElectionTicket(k VRFKeyPair, seed ElectionSeed) Ticket {
-// 	var vrfResult VRFResult = VRFEval(k, seed.ToBytesInternal())
+func (chain *Chain_I) TicketAtEpoch(epoch ChainEpoch) Ticket {
+	ts := chain.TipsetAtEpoch(epoch)
+	return ts.MinTicket()
+}
 
-// 	var vdfInput []byte = Hash(
-// 		HashRole_TicketVDFInputFromVRFOutput,
-// 		vrfResult.ToBytesInternal(),
-// 	)
-// 	var vdfResult VDFResult = VDFEval(vdfInput)
+func (chain *Chain_I) FinalizedEpoch() ChainEpoch {
+	panic("")
+	// ep := chain.HeadEpoch()
+	// return ep - GetFinality()
+}
 
-// 	return &TicketI{
-// 		vrfResult,
-// 		vdfResult,
-// 	}
-// }
+func (chain *Chain_I) HeadEpoch() ChainEpoch {
+	panic("")
+}
 
-func (self *BlockHeader_I) ValidateTickets(pubKey filcrypto.PubKey) bool {
-	for _, tix := range self.Tickets_ {
-		panic("TODO")
-		panic(tix)
-		// tix.Validate()
-	}
+func (chain *Chain_I) HeadTipset() Tipset {
+	panic("")
+}
 
-	return true
+func (bl *Block_I) TipsetAtEpoch(epoch ChainEpoch) Tipset_I {
+	panic("")
+	// dist := bl.Epoch - epoch - 1
+	// current := bl.ParentTipset
+	// parents := current.Parents
+	// for i := range dist {
+	// 	current = parents
+	// 	parent = current.Parents
+	// }
+	// return current
+}
+
+func (bl *Block_I) TicketAtEpoch(epoch ChainEpoch) Ticket {
+	ts := bl.TipsetAtEpoch(epoch)
+	return ts.MinTicket()
 }

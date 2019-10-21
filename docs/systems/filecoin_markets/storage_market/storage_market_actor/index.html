@@ -2104,7 +2104,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2113,7 +2113,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4541,7 +4541,9 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p><code>StorageMarketActor</code> is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of <code>StorageDealID</code> to <code>StorageDeal</code> and keeps track of locked balances of <code>StorageClient</code> and <code>StorageProvider</code>. When a deal is posted on chain through the <code>StorageMarketActor</code>, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. On every successful submission of <code>PoStProof</code>, <code>StorageMarketActor</code> will credit the <code>StorageProvider</code> a fraction of the storage fee based on how many blocks have passed since the last <code>PoStProof</code>. In the event that there are sectors included in the <code>FaultSet</code>, <code>StorageMarketActor</code> will fetch deal information from the chain and <code>SlashStorageFault</code> for faulting on those deals. Similarly, when a <code>PoStProof</code> is missed by the end of a <code>ProvingPeriod</code>, <code>SlashStorageFault</code> will also be called by the <code>CronActor</code> to penalize <code>StorageProvider</code> for dropping a <code>StorageDeal</code>.</p>
+  
+
+<p><code>StorageMarketActor</code> is responsible for processing and managing on-chain deals. This is also the entry point of all storage deals and data into the system. It maintains a mapping of <code>StorageDealID</code> to <code>StorageDeal</code> and keeps track of locked balances of <code>StorageClient</code> and <code>StorageProvider</code>. When a deal is posted on chain through the <code>StorageMarketActor</code>, it will first check if both transacting parties have sufficient balances locked up and include the deal on chain. On every successful submission of <code>PoStProof</code>, <code>StorageMarketActor</code> will credit the <code>StorageProvider</code> a fraction of the storage fee based on how many blocks have passed since the last <code>PoStProof</code>. In the event that there are sectors included in the <code>FaultSet</code>, <code>StorageMarketActor</code> will fetch deal information from the chain and <code>SlashStorageFault</code> for faulting on those deals. Similarly, when a <code>PoStProof</code> is missed by the end of a <code>ProvingPeriod</code>, <code>SlashStorageFault</code> will also be called by the <code>CronActor</code> to penalize <code>StorageProvider</code> for dropping a <code>StorageDeal</code>.</p>
 
 <p>(You can see the <em>old</em> Storage Market Actor <a href="docs/systems/filecoin_markets/storage_market/storage_market_actor_old">here</a> )</p>
 
@@ -4636,6 +4638,17 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<div id="systems__filecoin_markets__storage_market__storage_market_actor__storage_deal_collateral"></div>
+
+<h2 id="storage-deal-collateral">Storage Deal Collateral</h2>
+
+<p>Storage Deals have an associated collateral amount. This <code>StorageDealCollateral</code> is held in the <code>StorageMarketActor</code>.
+Its value is agreed upon by the storage provider and client off-chain, but must be greater than a protocol-defined minimum in any deal. Storage providers will choose to offer greater collateral to signal high-quality storage to clients.</p>
+
+<p>On <code>SectorFailureTimeout</code> (see <a href="../../../../../#systems__filecoin_markets__storage_market__faults">Faults</a>), the <code>StorageDealCollateral</code> will be burned. In the future, the Filecoin protocol may be amended to send up to half of the collateral to storage clients as damages in such cases.</p>
+
+<p>Upon graceful deal expiration, storage providers must wait for finality number of epochs (as defined in <a href="../../../../../#algorithms__expected_consensus__finality">EC Finality</a>) before being able to withdraw their <code>StorageDealCollateral</code> from the <code>StorageMarketActor</code>.</p>
+
 </article>
 
       
@@ -4645,6 +4658,17 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#storage-deal-collateral">Storage Deal Collateral</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 

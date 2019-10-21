@@ -245,23 +245,15 @@ This section should contain:
     </item>
     
     <item>
-      <title>Expected Consensus</title>
-      <link>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/expected_consensus/</guid>
-      <description> type ExpectedConsensus struct { // ComputeWeight(Chain)	ChainWeight  // TryElection(StorageMiner, TipSet)	ElectionProof  // VerifyElection(StorageMiner, ElectionProof)	bool  // IsConsensusFault([Block])	bool }  </description>
-    </item>
-    
-    <item>
       <title>Faults</title>
       <link>/docs/systems/filecoin_markets/storage_market/faults/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_markets/storage_market/faults/</guid>
       <description>There are two main categories of faults in the Filecoin network.
- ConsensusFaults StorageDealFaults  ConsensusFaults are faults that hurt network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers. PledgeCollateral is slashed for ConsensusFaults and StorageDealCollateral for StorageDealFaults.
-Any misbehavior may result in more than one fault and can lead to slashing on both collaterals. For example, missing a PoStProof will incur a penalty on both PledgeCollateral and StorageDealCollateral if there is the data is stored in a StorageDeal.</description>
+ ConsensusFaults StorageDealFaults  ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers pursuant to deal terms.
+ is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
+Any misbehavior may result in more than one fault thus lead to slashing on both collaterals. For example, missing a PoStProof will incur a penalty on both PledgeCollateral and StorageDealCollateral given it impacts both a given StorageDeal and power derived from the sector commitments in Storage Power Consensus.</description>
     </item>
     
     <item>
@@ -500,7 +492,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       
       <guid>/docs/systems/filecoin_blockchain/struct/block/other/</guid>
       <description>TODO: - move this stuff elsewhere
-import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { vrfResult filcrypto.VRFResult vdfResult filcrypto.VDFResult // Generate(k VRFKeyPair, seed ElectionSeed) Ticket  ValidateSyntax() bool Validate() bool } type StoragePower UVarint type PowerFraction Float type ElectionSeed filcrypto.VDFResult type ElectionArtifacts struct { TK Ticket T1 Ticket } type ElectionProof struct { vrfResult filcrypto.VRFResult IsWinning(minerPower PowerFraction) bool @(cached) ValidateSyntax() bool Verify(seed ElectionSeed, minerPK filcrypto.</description>
+import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { VRFResult filcrypto.VRFResult Output Bytes @(cached) ValidateSyntax() bool Verify(input Bytes, pk filcrypto.VRFPublicKey) bool } type BytesAmount UVarint type StoragePower BytesAmount type ElectionProof struct { VRFResult filcrypto.VRFResult Verify(input Bytes, pk filcrypto.VRFPublicKey) bool Nonce ElectionNonce ValidateSyntax() bool } type ElectionNonce UVarint  package block import ( filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; util &amp;#34;github.</description>
     </item>
     
     <item>
@@ -805,7 +797,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type BytesAmount UVarint type StoragePower UVarint type StoragePowerActor struct { // TODO: bytesamount might be inefficient  Miners {addr.Address: StoragePower} // call by StorageMiningSubsytem on miner creation  CreateStorageMiner( ownerAddr addr.Address workerPubKey filcrypto.PubKey sectorSize util.UInt peerId libp2p.PeerID // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)  ) addr.Address // TODO add NotifyConsensusFault(addr.Address, [Block]) TODO maybe rename to Arbitrate  UpdatePower(address addr.</description>
+      <description>import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; type StoragePowerActor struct { // TODO: bytesamount might be inefficient  // Miners [addr.Address]  Miners {addr.Address: block.StoragePower} // call by StorageMiningSubsytem on miner creation  CreateStorageMiner( ownerAddr addr.Address workerPubKey filcrypto.PubKey sectorSize util.UInt peerId libp2p.PeerID // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)  ) addr.Address // TODO add NotifyConsensusFault(addr.Address, [block.Block]) TODO maybe rename to Arbitrate  UpdatePower(address addr.</description>
     </item>
     
     <item>
@@ -833,7 +825,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       
       <guid>/docs/systems/filecoin_blockchain/struct/block/tipset/</guid>
       <description>The Tipset is a group of blocks in the same exact round, that all share the exact same parents.
-import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) }  package block import ( clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) ValidateSyntax() bool { if len(ts.</description>
+import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) MinTicket() Ticket @(cached) }  package block import ( clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) MinTicket() Ticket { var ret Ticket // for _, currBlock := range ts.</description>
     </item>
     
     <item>

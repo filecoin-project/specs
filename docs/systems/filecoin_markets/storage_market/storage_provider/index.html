@@ -2104,7 +2104,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2113,7 +2113,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4541,9 +4541,7 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
-
-<p>Both <code>StorageProvider</code> and <code>StorageClient</code> are <code>StorageMarketParticipant</code>. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. <code>StorageClient</code> will initiate the storage deal protocol by submitting a <code>StorageDealProposal</code> to the <code>StorageProvider</code> who will then add the deal data to a <code>Sector</code> and commit the sector onto the blockchain.</p>
+  <p>Both <code>StorageProvider</code> and <code>StorageClient</code> are <code>StorageMarketParticipant</code>. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. <code>StorageClient</code> will initiate the storage deal protocol by submitting a <code>StorageDealProposal</code> to the <code>StorageProvider</code> who will then add the deal data to a <code>Sector</code> and commit the sector onto the blockchain.</p>
 
 
 
@@ -4566,13 +4564,13 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="c1">// import sector &#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;
-</span><span class="c1"></span>
-<span class="c1">// type StorageDealStagedNotification struct {
-</span><span class="c1">//     Deal      deal.StorageDeal
-</span><span class="c1">//     SectorID  sector.SectorID
-</span><span class="c1">// }
-</span><span class="c1"></span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+
+<span class="kd">type</span> <span class="nx">StorageDealStagedNotification</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Deal</span>      <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span>
+    <span class="nx">SectorID</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+<span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">StorageProvider</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">DealStatus</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">:</span> <span class="nx">StorageDealStatus</span><span class="p">}</span>
 
@@ -4590,8 +4588,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span> <span class="kt">bool</span>
 
     <span class="c1">// TODO: Call by StorageMiningSubsystem
-</span><span class="c1"></span>    <span class="c1">// NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification)
-</span><span class="c1"></span>
+</span><span class="c1"></span>    <span class="nf">NotifyStorageDealStaged</span><span class="p">(</span><span class="nx">storageDealNotification</span> <span class="nx">StorageDealStagedNotification</span><span class="p">)</span>
+
     <span class="c1">// Call by StorageClient
 </span><span class="c1"></span>    <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
 <span class="p">}</span>
@@ -4623,9 +4621,12 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
 
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+
+    <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+<span class="p">)</span>
 
 <span class="c1">// import deal_status &#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;
 </span><span class="c1"></span>
@@ -4682,6 +4683,11 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="k">return</span> <span class="nx">StorageDealNotFound</span>
 <span class="p">}</span>
+
+<span class="c1">// TODO this should be moved into storage market
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">sp</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">NotifyStorageDealStaged</span><span class="p">(</span><span class="nx">storageDealNotification</span> <span class="nx">StorageDealStagedNotification</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre></div>
 
 
@@ -4689,36 +4695,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<h1 id="storage-provider-state-machine">Storage Provider State Machine</h1>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="diagram">
-
-<span class="diagram-title">Storage Provider State Machine</span>
-
-
-
-
-(<a href="docs/systems/filecoin_markets/storage_market/diagrams/storage_provider_fsm.dot.svg" target="_blank">open in new tab</a>)
-<br />
-<img src="docs/systems/filecoin_markets/storage_market/diagrams/storage_provider_fsm.dot.svg" />
-
-
-
-
-</div>
-
+<!-- # Storage Provider State Machine -->
 
 </article>
 
@@ -4729,14 +4706,6 @@ https://github.com/alex-shpak/hugo-book
 
     
   
-
-  <aside class="book-toc level-6 fixed">
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#storage-provider-state-machine">Storage Provider State Machine</a></li>
-</ul>
-</nav>
-  </aside>
 
 
 

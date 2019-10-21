@@ -2105,7 +2105,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2114,7 +2114,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4578,7 +4578,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
 <span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
 <span class="kn">import</span> <span class="nx">blockproducer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
@@ -4595,6 +4594,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">SectorIndex</span>        <span class="nx">sectoridx</span><span class="p">.</span><span class="nx">SectorIndexerSubsystem</span>
     <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
     <span class="nx">BlockProducer</span>      <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
+    <span class="nx">electionNonce</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionNonce</span>
 
     <span class="c1">// Need access to SPC in order to mine a block
 </span><span class="c1"></span>    <span class="nx">Consensus</span>          <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
@@ -4625,23 +4625,23 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">CommitSectorError</span><span class="p">()</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
-</span><span class="c1"></span>    <span class="nf">DrawElectionProof</span><span class="p">(</span><span class="nx">tk</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">workerKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PrivKey</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
+</span><span class="c1"></span>    <span class="nf">DrawElectionProof</span><span class="p">(</span>
+        <span class="nx">lookbackTicket</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+        <span class="nx">nonce</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionNonce</span>
+        <span class="nx">vrfKP</span>           <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
+    <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
-</span><span class="c1"></span>    <span class="c1">// use T1 randomness when producing on a tipset
-</span><span class="c1"></span>    <span class="c1">// use T0 randomness when producing on a null block
-</span><span class="c1"></span>    <span class="nf">GenerateNextTicket</span><span class="p">(</span><span class="nx">seed</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">workerKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PrivKey</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+</span><span class="c1"></span>    <span class="nf">PrepareNewTicket</span><span class="p">(</span><span class="nx">priorTicket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">workerKeyPair</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
 
     <span class="c1">// call by BlockChain when a new block is produced
-</span><span class="c1"></span>    <span class="nf">OnNewTipset</span><span class="p">(</span>
-        <span class="nx">chain</span>   <span class="nx">chain</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">epoch</span>   <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">tipset</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span>
-    <span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">OnNewBestChain</span><span class="p">()</span>
 
     <span class="c1">// call by clock during BlockProduction
 </span><span class="c1"></span>    <span class="c1">// TODO: define clock better
-</span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">(</span><span class="nx">newTipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionArtifacts</span>
+</span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
+
+    <span class="nf">tryLeaderElection</span><span class="p">()</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4671,9 +4671,9 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state.dot.svg" target="_blank">open in new tab</a>)
+(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_fsm.dot.svg" target="_blank">open in new tab</a>)
 <br />
-<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state.dot.svg" />
+<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_fsm.dot.svg" />
 
 
 

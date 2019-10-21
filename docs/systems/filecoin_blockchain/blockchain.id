@@ -1,7 +1,6 @@
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 
 type SectorID struct {}
 
@@ -18,8 +17,8 @@ type BlockchainSubsystem struct @(mutable) {
     Clock              &clock.WallClock
 
     LatestEpoch()      block.ChainEpoch
-    BestChain()        chain.Chain
-    CandidateChains()  [chain.Chain]
+    BestChain()        block.Chain
+    CandidateChains()  [block.Chain]
 
     // // Receiving blocks and tipset
     // should be channels or notifications
@@ -52,7 +51,4 @@ type BlockchainSubsystem struct @(mutable) {
 
     // call by BlockchainSubsystem itself in BlockReception after Round Cutoff
     ChooseTipset(tipsets [block.Tipset]) block.Tipset
-
-    // call by StorageMining
-    GetPostRandomness() chain.Randomness
 }

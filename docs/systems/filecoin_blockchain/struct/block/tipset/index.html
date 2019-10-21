@@ -2104,7 +2104,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2113,7 +2113,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4578,6 +4578,7 @@ The Tipset is a group of blocks in the same exact round, that all share the exac
 
     <span class="nf">ValidateSyntax</span><span class="p">()</span>   <span class="kt">bool</span>           <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
     <span class="nf">LatestTimestamp</span><span class="p">()</span>  <span class="nx">clock</span><span class="p">.</span><span class="nx">Time</span>     <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">MinTicket</span><span class="p">()</span>        <span class="nx">Ticket</span>         <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4610,6 +4611,21 @@ The Tipset is a group of blocks in the same exact round, that all share the exac
 <span class="kn">import</span> <span class="p">(</span>
     <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
 <span class="p">)</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">ts</span> <span class="o">*</span><span class="nx">Tipset_I</span><span class="p">)</span> <span class="nf">MinTicket</span><span class="p">()</span> <span class="nx">Ticket</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">ret</span> <span class="nx">Ticket</span>
+
+    <span class="c1">// for _, currBlock := range ts.Blocks() {
+</span><span class="c1"></span>    <span class="c1">//     tix := currBlock.Ticket()
+</span><span class="c1"></span>    <span class="c1">//     if ret == nil {
+</span><span class="c1"></span>    <span class="c1">//         ret = tix
+</span><span class="c1"></span>    <span class="c1">//     } else {
+</span><span class="c1"></span>    <span class="c1">//         ret = SmallerBytes(tix, ret)
+</span><span class="c1"></span>    <span class="c1">//     }
+</span><span class="c1"></span>    <span class="c1">// }
+</span><span class="c1"></span>
+    <span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">ts</span> <span class="o">*</span><span class="nx">Tipset_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
 

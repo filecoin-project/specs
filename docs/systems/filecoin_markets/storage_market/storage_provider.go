@@ -1,8 +1,11 @@
 package storage_market
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+)
 
 // import deal_status "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 
@@ -58,4 +61,9 @@ func (provider *StorageProvider_I) HandleStorageDealQuery(dealCID deal.DealCID) 
 	}
 
 	return StorageDealNotFound
+}
+
+// TODO this should be moved into storage market
+func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
+	panic("TODO")
 }

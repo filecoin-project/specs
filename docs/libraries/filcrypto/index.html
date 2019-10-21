@@ -2105,7 +2105,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2114,7 +2114,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4579,21 +4579,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">Proof</span>   <span class="nx">Bytes</span>  <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
 
     <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">VDF</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">evalKey</span>            <span class="nx">Bytes</span>      <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
-    <span class="nx">VerifKey</span>           <span class="nx">Bytes</span>      <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
-
-    <span class="nf">Eval</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">)</span>  <span class="nx">VDFResult</span>  <span class="err">@</span><span class="p">(</span><span class="nx">static</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">VDFResult</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Output</span>  <span class="nx">Bytes</span>  <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
-    <span class="nx">Proof</span>   <span class="nx">Bytes</span>  <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
-
-    <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="kt">bool</span> <span class="err">@</span><span class="p">(</span><span class="nx">static</span><span class="p">)</span>
     <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span>
 <span class="p">}</span>
 

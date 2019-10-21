@@ -4,7 +4,6 @@ import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
@@ -21,6 +20,7 @@ type StorageMiningSubsystem struct {
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
     BlockProducer      blockproducer.BlockProducer
+    electionNonce      block.ElectionNonce
 
     // Need access to SPC in order to mine a block
     Consensus          spc.StoragePowerConsensusSubsystem
@@ -51,21 +51,21 @@ type StorageMiningSubsystem struct {
     CommitSectorError()
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    DrawElectionProof(tk chain.Randomness, workerKey filcrypto.PrivKey) block.ElectionProof
+    DrawElectionProof(
+        lookbackTicket  block.Ticket
+        nonce           block.ElectionNonce
+        vrfKP           filcrypto.VRFKeyPair
+    ) block.ElectionProof
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    // use T1 randomness when producing on a tipset
-    // use T0 randomness when producing on a null block
-    GenerateNextTicket(seed chain.Randomness, workerKey filcrypto.PrivKey) block.Ticket
+    PrepareNewTicket(priorTicket block.Ticket, workerKeyPair filcrypto.VRFKeyPair) block.Ticket
 
     // call by BlockChain when a new block is produced
-    OnNewTipset(
-        chain   chain.Chain
-        epoch   block.ChainEpoch
-        tipset  block.Tipset
-    )
+    OnNewBestChain()
 
     // call by clock during BlockProduction
     // TODO: define clock better
-    OnNewRound(newTipset block.Tipset) block.ElectionArtifacts
+    OnNewRound()
+
+    tryLeaderElection()
 }

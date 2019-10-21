@@ -2105,7 +2105,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2114,7 +2114,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4571,12 +4571,11 @@ The Block is a unit of the Filecoin blockchain.</p>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
-<span class="kd">type</span> <span class="nx">ChainWeight</span> <span class="nx">UVarint</span>
-<span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
-
 <span class="kd">type</span> <span class="nx">BlockCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">MessageRoot</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">ReceiptRoot</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+<span class="kd">type</span> <span class="nx">ChainWeight</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
 
 <span class="kd">type</span> <span class="nx">BlockHeader</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Chain linking
@@ -4594,7 +4593,7 @@ The Block is a unit of the Filecoin blockchain.</p>
 
     <span class="c1">// Consensus things
 </span><span class="c1"></span>    <span class="nx">Timestamp</span>        <span class="nx">clock</span><span class="p">.</span><span class="nx">Time</span>
-    <span class="nx">Tickets</span>          <span class="p">[</span><span class="nx">Ticket</span><span class="p">]</span>
+    <span class="nx">Ticket</span>
     <span class="nx">ElectionProof</span>
 
     <span class="c1">// Signatures
@@ -4603,10 +4602,7 @@ The Block is a unit of the Filecoin blockchain.</p>
 
     <span class="c1">//	SerializeSigned()            []byte
 </span><span class="c1"></span>    <span class="c1">//	ComputeUnsignedFingerprint() []
-</span><span class="c1"></span>
-    <span class="nf">ValidateTickets</span><span class="p">(</span><span class="nx">pubKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">ExtractElectionSeed</span><span class="p">()</span> <span class="nx">ElectionSeed</span>
-<span class="p">}</span>
+</span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// TODO: remove this. header is signed
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SignedBlock</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4618,6 +4614,16 @@ The Block is a unit of the Filecoin blockchain.</p>
     <span class="nx">Header</span>    <span class="nx">BlockHeader</span>
     <span class="nx">Messages</span>  <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">]</span>
     <span class="nx">Receipts</span>  <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Chain</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">HeadEpoch</span><span class="p">()</span>         <span class="nx">ChainEpoch</span>
+    <span class="nf">HeadTipset</span><span class="p">()</span>        <span class="nx">Tipset</span>
+    <span class="nf">FinalizedEpoch</span><span class="p">()</span>    <span class="nx">ChainEpoch</span>
+    <span class="nf">LatestCheckpoint</span><span class="p">()</span>  <span class="nx">ChainEpoch</span>
+
+    <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span>
+    <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4648,7 +4654,6 @@ The Block is a unit of the Filecoin blockchain.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">block</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4659,52 +4664,54 @@ The Block is a unit of the Filecoin blockchain.</p>
 	<span class="k">return</span> <span class="nx">a</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">block</span> <span class="o">*</span><span class="nx">BlockHeader_I</span><span class="p">)</span> <span class="nf">ExtractElectionSeed</span><span class="p">()</span> <span class="nx">ElectionSeed</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-	<span class="c1">// var ret []byte
-</span><span class="c1"></span>
-	<span class="c1">// for _, currBlock := range lookbackTipset.Blocks() {
-</span><span class="c1"></span>	<span class="c1">// 	for _, currTicket := range currBlock.Tickets() {
-</span><span class="c1"></span>
-	<span class="c1">// 		currSeed := Hash(
-</span><span class="c1"></span>	<span class="c1">// 			HashRole_ElectionSeedFromVRFOutput,
-</span><span class="c1"></span>	<span class="c1">// 			currTicket.VRFResult().bytes(),
-</span><span class="c1"></span>	<span class="c1">// 		)
-</span><span class="c1"></span>	<span class="c1">// 		if ret == nil {
-</span><span class="c1"></span>	<span class="c1">// 			ret = currSeed
-</span><span class="c1"></span>	<span class="c1">// 		} else {
-</span><span class="c1"></span>	<span class="c1">//             ret = SmallerBytes(currSeed, ret)
-</span><span class="c1"></span>	<span class="c1">//         }
-</span><span class="c1"></span>	<span class="c1">// 	}
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+
+	<span class="c1">// dist := chain.HeadEpoch() - epoch
+</span><span class="c1"></span>	<span class="c1">// current := chain.HeadTipset()
+</span><span class="c1"></span>	<span class="c1">// parents := current.Parents()
+</span><span class="c1"></span>	<span class="c1">// for i := 0; i &lt; dist; i++ {
+</span><span class="c1"></span>	<span class="c1">// 	current = parents
+</span><span class="c1"></span>	<span class="c1">// 	parents = current.Parents
 </span><span class="c1"></span>	<span class="c1">// }
 </span><span class="c1"></span>
-	<span class="c1">// Assert(ret != nil)
-</span><span class="c1"></span>	<span class="c1">// return ElectionSeed.FromBytesInternal(nil, ret)
+	<span class="c1">// return current
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="c1">// func GenerateElectionTicket(k VRFKeyPair, seed ElectionSeed) Ticket {
-</span><span class="c1">// 	var vrfResult VRFResult = VRFEval(k, seed.ToBytesInternal())
-</span><span class="c1"></span>
-<span class="c1">// 	var vdfInput []byte = Hash(
-</span><span class="c1">// 		HashRole_TicketVDFInputFromVRFOutput,
-</span><span class="c1">// 		vrfResult.ToBytesInternal(),
-</span><span class="c1">// 	)
-</span><span class="c1">// 	var vdfResult VDFResult = VDFEval(vdfInput)
-</span><span class="c1"></span>
-<span class="c1">// 	return &amp;TicketI{
-</span><span class="c1">// 		vrfResult,
-</span><span class="c1">// 		vdfResult,
-</span><span class="c1">// 	}
-</span><span class="c1">// }
-</span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">BlockHeader_I</span><span class="p">)</span> <span class="nf">ValidateTickets</span><span class="p">(</span><span class="nx">pubKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">tix</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">self</span><span class="p">.</span><span class="nx">Tickets_</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="nx">tix</span><span class="p">)</span>
-		<span class="c1">// tix.Validate()
-</span><span class="c1"></span>	<span class="p">}</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>
+	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">()</span>
+<span class="p">}</span>
 
-	<span class="k">return</span> <span class="kc">true</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">FinalizedEpoch</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="c1">// ep := chain.HeadEpoch()
+</span><span class="c1"></span>	<span class="c1">// return ep - GetFinality()
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">HeadEpoch</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">HeadTipset</span><span class="p">()</span> <span class="nx">Tipset</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset_I</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="c1">// dist := bl.Epoch - epoch - 1
+</span><span class="c1"></span>	<span class="c1">// current := bl.ParentTipset
+</span><span class="c1"></span>	<span class="c1">// parents := current.Parents
+</span><span class="c1"></span>	<span class="c1">// for i := range dist {
+</span><span class="c1"></span>	<span class="c1">// 	current = parents
+</span><span class="c1"></span>	<span class="c1">// 	parent = current.Parents
+</span><span class="c1"></span>	<span class="c1">// }
+</span><span class="c1"></span>	<span class="c1">// return current
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>
+	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">bl</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">()</span>
 <span class="p">}</span>
 </code></pre></div>
 

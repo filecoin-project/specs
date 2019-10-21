@@ -2104,7 +2104,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2113,7 +2113,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4541,16 +4541,25 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>There are two main categories of faults in the Filecoin network.</p>
+  
+
+<p><div id="systems__filecoin_markets__storage_market__faults__storage_faults"></div>
+There are two main categories of faults in the Filecoin network.</p>
 
 <ul>
 <li>ConsensusFaults</li>
 <li>StorageDealFaults</li>
 </ul>
 
-<p>ConsensusFaults are faults that hurt network consensus and StorageDealFaults are faults where data in a <code>StorageDeal</code> is not maintained by the providers. <code>PledgeCollateral</code> is slashed for ConsensusFaults and <code>StorageDealCollateral</code> for StorageDealFaults.</p>
+<p>ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a <code>StorageDeal</code> is not maintained by the providers pursuant to deal terms.</p>
 
-<p>Any misbehavior may result in more than one fault and can lead to slashing on both collaterals. For example, missing a <code>PoStProof</code> will incur a penalty on both <code>PledgeCollateral</code> and <code>StorageDealCollateral</code> if there is the data is stored in a <code>StorageDeal</code>.</p>
+<p><a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral"></a> is slashed for ConsensusFaults and <a href="../../../../../#systems__filecoin_markets__storage_market__storage_deal_collateral">Storage Deal Collateral</a> for StorageDealFaults.</p>
+
+<p>Any misbehavior may result in more than one fault thus lead to slashing on both collaterals. For example, missing a <code>PoStProof</code> will incur a penalty on both <code>PledgeCollateral</code> and <code>StorageDealCollateral</code> given it impacts both a given <code>StorageDeal</code> and power derived from the sector commitments in <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a>.</p>
+
+<h2 id="storage-faults">Storage Faults</h2>
+
+<p>TODO: complete this.</p>
 
 </article>
 
@@ -4561,6 +4570,17 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#storage-faults">Storage Faults</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 

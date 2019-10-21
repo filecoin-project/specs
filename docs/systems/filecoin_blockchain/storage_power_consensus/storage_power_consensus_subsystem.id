@@ -1,52 +1,61 @@
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
+import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
-    // TODO: this is incorrect, it does not belong
-    powerTable           PowerTable
     actor                StoragePowerActor
     associatedStateTree  &st.StateTree  // TODO: remove this. should not store this here.
 
     GenerateElectionProof(tipset block.Tipset) block.ElectionProof
     ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]
 
-    // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(chain chain.Chain, epoch block.ChainEpoch) base_mining.SealSeed
-
-    // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(chain chain.Chain, epoch block.ChainEpoch) base_mining.PoStChallenge
+    ec ExpectedConsensus
 
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
 
-    // call by StorageMiningSubsystem during block production
-    GetElectionArtifacts(chain chain.Chain, epoch block.ChainEpoch) block.ElectionArtifacts
+    validateElectionProof(
+        height         block.ChainEpoch
+        electionProof  block.ElectionProof
+        workerAddr     addr.Address
+    ) bool
 
-    // call by StoragePowerConsensusSubsystem itself during block production
-    TicketAtEpoch(chain chain.Chain, epoch block.ChainEpoch) block.Ticket
-
-    // call by StorageMiningSubsystem during block production
-    TryLeaderElection(electionProof block.ElectionProof) bool
+    validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey) bool
 
     computeTipsetWeight(tipset block.Tipset) block.ChainWeight
+
+    IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool
+
+    StoragePowerConsensusError() StoragePowerConsensusError
+
+    // Randomness methods
+
+    // call by StorageMiningSubsystem during block production
+    GetTicketProductionSeed(chain block.Chain, epoch block.ChainEpoch) block.Ticket
+
+    // call by StorageMiningSubsystem during block production
+    GetElectionProofSeed(chain block.Chain, epoch block.ChainEpoch) block.Ticket
+
+    // call by StorageMiningSubsystem in sealing sector
+    GetSealSeed(chain block.Chain, epoch block.ChainEpoch) base_mining.SealSeed
+
+    // call by StorageMiningSubsystem after sealing
+    GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) base_mining.PoStChallenge
+
+    GetFinality() block.ChainEpoch
 }
 
-type PowerTable struct {
-    // all power here is always verified
-    minerPower {addr.Address: StorageMiner}
-    LookupMinerStorage(a addr.Address) UVarint
-    LookupMinerPowerFraction(a addr.Address) block.PowerFraction
-    RemovePower(a addr.Address)
+type ExpectedConsensus struct {
+    ComputeWeight(chain block.Chain) block.ChainWeight
+    IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
 }
 
-type StorageMiner struct {
-    minerAddress  addr.Address
-    minerStorage
-    VRFKeyPair    filcrypto.VRFKeyPair
+type ConsensusFaultType union {
+    DoubleForkMiningFault  ConsensusFault
+    ParentGrindingFault    ConsensusFault
 }
 
-type minerStorage UVarint
+type ConsensusFault struct {}
+type StoragePowerConsensusError struct {}

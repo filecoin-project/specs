@@ -2104,7 +2104,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../../#systems__filecoin_blockchain__storage_power_consensus__expected_consensus" class="menu-item depth-4">
+<a href="../../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
     
     
         Expected Consensus
@@ -2113,7 +2113,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-4">
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -4568,31 +4568,25 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// TODO: move all this stuff elsewhere. a consensus lib?
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">vrfResult</span>         <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult</span>
-    <span class="nx">vdfResult</span>         <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VDFResult</span>
+    <span class="nx">VRFResult</span>         <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult</span>
 
-    <span class="c1">// Generate(k VRFKeyPair, seed ElectionSeed) Ticket
-</span><span class="c1"></span>    <span class="nf">ValidateSyntax</span><span class="p">()</span>  <span class="kt">bool</span>
-    <span class="nf">Validate</span><span class="p">()</span>        <span class="kt">bool</span>
+    <span class="nx">Output</span>            <span class="nx">Bytes</span>                <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">ValidateSyntax</span><span class="p">()</span>  <span class="kt">bool</span>
+    <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">UVarint</span>
-<span class="kd">type</span> <span class="nx">PowerFraction</span> <span class="nx">Float</span>
-
-<span class="kd">type</span> <span class="nx">ElectionSeed</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VDFResult</span>
-
-<span class="kd">type</span> <span class="nx">ElectionArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">TK</span> <span class="nx">Ticket</span>
-    <span class="nx">T1</span> <span class="nx">Ticket</span>
-<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">BytesAmount</span>
 
 <span class="kd">type</span> <span class="nx">ElectionProof</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">vrfResult</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult</span>
-    <span class="nf">IsWinning</span><span class="p">(</span><span class="nx">minerPower</span> <span class="nx">PowerFraction</span><span class="p">)</span> <span class="kt">bool</span> <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nx">VRFResult</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult</span>
+    <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nx">Nonce</span> <span class="nx">ElectionNonce</span>
 
     <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span>
-    <span class="nf">Verify</span><span class="p">(</span><span class="nx">seed</span> <span class="nx">ElectionSeed</span><span class="p">,</span> <span class="nx">minerPK</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ElectionNonce</span> <span class="nx">UVarint</span>
 </code></pre></div>
 
 
@@ -4628,26 +4622,19 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
 
-    <span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">vrfResult_</span><span class="p">.</span><span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
-        <span class="nx">tix</span><span class="p">.</span><span class="nx">vdfResult_</span><span class="p">.</span><span class="nf">ValidateSyntax</span><span class="p">()</span>
-
+    <span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">ValidateSyntax</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">Validate</span><span class="p">(</span><span class="nx">input</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">vrfResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-        <span class="nx">tix</span><span class="p">.</span><span class="nx">vdfResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">tix</span><span class="p">.</span><span class="nx">vdfResult_</span><span class="p">.</span><span class="nf">Output</span><span class="p">())</span>
+    <span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">ep</span> <span class="o">*</span><span class="nx">ElectionProof_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">ep</span><span class="p">.</span><span class="nx">vrfResult_</span><span class="p">.</span><span class="nf">ValidateSyntax</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nx">ep</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">ValidateSyntax</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">ep</span> <span class="o">*</span><span class="nx">ElectionProof_I</span><span class="p">)</span> <span class="nf">Validate</span><span class="p">(</span><span class="nx">input</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">ep</span><span class="p">.</span><span class="nx">vrfResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">ep</span> <span class="o">*</span><span class="nx">ElectionProof_I</span><span class="p">)</span> <span class="nf">IsWinning</span><span class="p">(</span><span class="nx">power</span> <span class="nx">PowerFraction</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">ep</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
