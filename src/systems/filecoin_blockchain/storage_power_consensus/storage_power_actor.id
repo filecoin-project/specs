@@ -2,7 +2,6 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import util "github.com/filecoin-project/specs/util"
 
 type PowerTableEntry struct {
@@ -22,12 +21,6 @@ type PowerReport struct {
 
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
 type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: covert ActorID to address
-
-// type StorageMinerInfo struct {
-//     OwnerAddr          addr.Address
-//     MinerStoragePower  block.StoragePower
-//     MinerPK            filcrypto.PubKey
-// }
 
 // TODO: Diagram for state transition to someones power
 // TODO: increment and decrement?
@@ -52,16 +45,21 @@ type StoragePowerActor struct {
     GetTotalPower() block.StoragePower
 
     // sectorSize should be passed in from SM.Info()
-    IncrementPower(numSectors util.UVarint, sectorSize sector.SectorSize)
-    DecrementPower(numSectors util.UVarint, sectorSize sector.SectorSize)
+    // newPower = numSectors util.UVarint * sectorSize sector.SectorSize
+    IncrementPower(newPower block.StoragePower)
+    DecrementPower(newPower block.StoragePower)
     // SectiveActivePower(newPower block.StoragePower)
 
     GetPledgeCollateralReq(newPower block.StoragePower) actor.TokenAmount
+    IsPledgeCollateralSatisfied() bool
     AddBalance()
     WithdrawBalance(amount actor.TokenAmount)
+    slashPledgeCollateral(address addr.Address, amount actor.TokenAmount)
 
-    lockPledgeCollateral(amount actor.TokenAmount)
-    unlockPledgeCollateral(amount actor.TokenAmount)
+    lockPledgeCollateral(address addr.Address, amount actor.TokenAmount)
+    unlockPledgeCollateral(address addr.Address, amount actor.TokenAmount)
+
+    ProcessPowerReport(report PowerReport)
 
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor

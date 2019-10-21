@@ -3,7 +3,6 @@ package storage_power_consensus
 import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
@@ -36,11 +35,11 @@ func (spa *StoragePowerActor_I) CreateStorageMiner(
 }
 
 // PowerTable Operation - consider remove
-func (spa *StoragePowerActor_I) IncrementPower(numSectors util.UVarint, sectorSize sector.SectorSize) {
+func (spa *StoragePowerActor_I) IncrementPower(powerDelta block.StoragePower) {
 	var msgSender addr.Address // TODO replace this
 
-	// redundant if numSectors is unsigned
-	if numSectors < 0 {
+	// redundant if powerDelta is unsigned
+	if powerDelta < 0 {
 		// TODO: proper throw
 		panic("TODO")
 	}
@@ -51,15 +50,14 @@ func (spa *StoragePowerActor_I) IncrementPower(numSectors util.UVarint, sectorSi
 		panic("TODO")
 	}
 
-	powerDelta := block.StoragePower(numSectors * uint64(sectorSize))
 	spa.PowerTable()[msgSender].Impl().ActivePower_ += powerDelta
 
 	// TODO: commit state
 }
-func (spa *StoragePowerActor_I) DecrementPower(numSectors util.UVarint, sectorSize sector.SectorSize) {
+func (spa *StoragePowerActor_I) DecrementPower(powerDelta block.StoragePower) {
 	var msgSender addr.Address // TODO replace this
 
-	if numSectors < 0 {
+	if powerDelta < 0 {
 		// TODO: proper throw
 		panic("TODO")
 	}
@@ -70,7 +68,6 @@ func (spa *StoragePowerActor_I) DecrementPower(numSectors util.UVarint, sectorSi
 		panic("TODO")
 	}
 
-	powerDelta := block.StoragePower(numSectors * uint64(sectorSize))
 	if spa.PowerTable()[msgSender].Impl().ActivePower_ < powerDelta {
 		// TODO: proper throw
 		panic("TODO")
@@ -112,9 +109,29 @@ func (spa *StoragePowerActor_I) GetTotalPower() block.StoragePower {
 	return totalPower
 }
 
-func (spa *StoragePowerActor_I) GetPledgeCollateralReq(newPower block.StoragePower) actor.TokenAmount {
+func (spa *StoragePowerActor_I) GetPledgeCollateralReq(power block.StoragePower) actor.TokenAmount {
 	// TODO: Implement
 	return actor.TokenAmount(0)
+}
+
+func (spa *StoragePowerActor_I) IsPledgeCollateralSatisfied() bool {
+	var msgSender addr.Address // TODO replace this
+
+	powerEntry := spa.PowerTable()[msgSender]
+	pledgeCollateralRequired := spa.GetPledgeCollateralReq(powerEntry.ActivePower() + powerEntry.InactivePower())
+
+	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
+		return true
+	}
+
+	if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
+		spa.lockPledgeCollateral(msgSender, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
+
+		// TODO: commit state change
+		return true
+	}
+
+	return false
 }
 
 func (spa *StoragePowerActor_I) AddBalance() {
@@ -150,25 +167,145 @@ func (spa *StoragePowerActor_I) AddBalance() {
 
 		// TODO: commit state change
 	}
-
-	// check that based on deals (ie sector sizes and num sectors) miner has enough associated balance in the storage miner wallet
-	// pledge and associate
 }
 
 func (spa *StoragePowerActor_I) WithdrawBalance(amount actor.TokenAmount) {
-	panic("TODO")
-	// must check more than finality post deal expiration
-	// return appropriate amount to storage market based on deals
+	var msgSender addr.Address // TODO replace this
+
+	isMinerVerified := spa.verifyMiner(msgSender)
+	if !isMinerVerified {
+		// TODO: proper throw
+		// TODO: this might be okay, create new miner
+		panic("TODO")
+	}
+
+	if amount < 0 {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry, found := spa.PowerTable()[msgSender]
+	if !found {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	if currEntry.AvailableBalance() < amount {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
+	spa.PowerTable_[msgSender] = currEntry
+
+	// TODO: send funds to msgSender
+	// TODO: commit state change
+
 }
 
-func (spa *StoragePowerActor_I) lockPledgeCollateral(amount actor.TokenAmount) {
+func (spa *StoragePowerActor_I) slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) {
+	if amount < 0 {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry, found := spa.PowerTable()[address]
+	if !found {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	if currEntry.Impl().LockedPledgeCollateral() < amount {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
+	// TODO: send amount to TreasuryAccount
+	spa.PowerTable_[address] = currEntry
+
+	// TODO: commit state change
+}
+
+// TODO: batch process this if possible
+func (spa *StoragePowerActor_I) lockPledgeCollateral(address addr.Address, amount actor.TokenAmount) {
 	// AvailableBalance -> LockedPledgeCollateral
-	panic("TODO")
+	// TODO: potentially unnecessary check
+	if amount < 0 {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry, found := spa.PowerTable()[address]
+	if !found {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	if currEntry.Impl().AvailableBalance() < amount {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
+	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() + amount
+	spa.PowerTable_[address] = currEntry
+
+	// TODO: commit state change
 }
 
-func (spa *StoragePowerActor_I) unlockPledgeCollateral(amount actor.TokenAmount) {
+func (spa *StoragePowerActor_I) unlockPledgeCollateral(address addr.Address, amount actor.TokenAmount) {
 	// lockedPledgeCollateral -> AvailableBalance
-	panic("TODO")
+	if amount < 0 {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry, found := spa.PowerTable()[address]
+	if !found {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	if currEntry.Impl().LockedPledgeCollateral() < amount {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
+	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + amount
+	spa.PowerTable_[address] = currEntry
+
+	// TODO: commit state change
+}
+
+func (spa *StoragePowerActor_I) getDeclaredFaultSlash(util.UVarint) actor.TokenAmount {
+	return actor.TokenAmount(0)
+}
+
+func (spa *StoragePowerActor_I) getDeletedFaultSlash(util.UVarint) actor.TokenAmount {
+	return actor.TokenAmount(0)
+}
+
+func (spa *StoragePowerActor_I) getTerminatedFaultSlash(util.UVarint) actor.TokenAmount {
+	return actor.TokenAmount(0)
+}
+
+func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
+	var msgSender addr.Address // TODO replace this
+
+	powerEntry := spa.PowerTable()[msgSender]
+	powerEntry.Impl().ActivePower_ = report.ActivePower()
+	powerEntry.Impl().InactivePower_ = report.InactivePower()
+	spa.PowerTable_[msgSender] = powerEntry
+
+	declaredFaultSlash := spa.getDeclaredFaultSlash(report.SlashDeclaredFaults())
+	deletedFaultSlash := spa.getDeletedFaultSlash(report.SlashDeletedFaults())
+	terminatedFaultSlash := spa.getTerminatedFaultSlash(report.SlashTerminatedFaults())
+
+	spa.slashPledgeCollateral(msgSender, (declaredFaultSlash + deletedFaultSlash + terminatedFaultSlash))
+
+	// TODO: commit state change
 }
 
 func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
