@@ -92,6 +92,7 @@ func (sm *StorageMinerActor_I) failSectors(sectors []sector.SectorNumber) {
 // move from Failing to Cleared State if so
 func (sm *StorageMinerActor_I) incrementFaultCount(sectorNo sector.SectorNumber) {
 	newFaultCount := sm.SectorStates()[sectorNo].FaultCount + 1
+	sm.SectorStates()[sectorNo] = SectorFailing(newFaultCount)
 	if newFaultCount > MAX_CONSECUTIVE_FAULTS {
 		// TODO: heavy penalization: slash pledge collateral and delete sector
 		// TODO: SendMessage(SPA.SlashPledgeCollateral)
@@ -100,7 +101,6 @@ func (sm *StorageMinerActor_I) incrementFaultCount(sectorNo sector.SectorNumber)
 		// increment FaultCount
 		// TODO: SendMessage(sma.SlashStorageDealCollateral)
 		sm.ProvingSet_.Remove(sectorNo)
-		sm.SectorStates()[sectorNo] = SectorFailing(newFaultCount)
 	}
 }
 

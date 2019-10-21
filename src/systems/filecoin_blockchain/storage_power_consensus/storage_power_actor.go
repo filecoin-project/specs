@@ -27,6 +27,8 @@ func (spa *StoragePowerActor_I) CreateStorageMiner(
 
 	// TODO: commit state
 
+	// TODO call constructor of StorageMinerActor
+
 	// TODO: do we need a return here?
 	return msgSender
 }
