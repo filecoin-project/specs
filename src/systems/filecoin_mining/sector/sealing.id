@@ -23,6 +23,7 @@ type SealCfg struct {
 type SealVerifyInfo struct {
     SectorID
     OnChain OnChainSealVerifyInfo
+    SealCfg
 }
 
 // OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -50,23 +51,26 @@ type SealCommitment struct {
 // for a sector, for example PoSt.
 // These should be stored and indexed somewhere by CommR.
 type ProofAux struct {
-    CommRLast             Commitment
-    CommC                 Commitment
+    CommRLast          Commitment
+    CommC              Commitment
 
     // TODO: This may be a partially-cached tree.
     // this may be empty
-    CachedMerkleTreePath  file.Path
+    CommRLastTreePath  file.Path
 }
 
 type ProofAuxTmp struct {
     PersistentAux  ProofAux
 
-    CommD          UnsealedSectorCID
+    SectorID
+    CommD          Commitment
     CommR          SealedSectorCID
+    CommDTreePath  file.Path
 
+    Seed           SealRandomness
     Data           Bytes
     Replica        Bytes
-    KeyLayers      BytesArray
+    KeyLayers      [Bytes]
 }
 
 type SealArguments struct {
