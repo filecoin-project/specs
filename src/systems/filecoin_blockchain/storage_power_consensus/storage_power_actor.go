@@ -34,67 +34,28 @@ func (spa *StoragePowerActor_I) CreateStorageMiner(
 	return smAddress
 }
 
-// PowerTable Operation - consider remove
-func (spa *StoragePowerActor_I) IncrementPower(powerDelta block.StoragePower) {
-	var msgSender addr.Address // TODO replace this
-
-	// redundant if powerDelta is unsigned
-	if powerDelta < 0 {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	isMinerVerified := spa.verifyMiner(msgSender)
+func (spa *StoragePowerActor_I) RemoveStorageMiner(address addr.Address) {
+	isMinerVerified := spa.verifyMiner(address)
 	if !isMinerVerified {
 		// TODO: proper throw
 		panic("TODO")
 	}
 
-	spa.PowerTable()[msgSender].Impl().ActivePower_ += powerDelta
-
-	// TODO: commit state
-}
-func (spa *StoragePowerActor_I) DecrementPower(powerDelta block.StoragePower) {
-	var msgSender addr.Address // TODO replace this
-
-	if powerDelta < 0 {
+	if (spa.PowerTable()[address].ActivePower() + spa.PowerTable()[address].InactivePower()) > 0 {
 		// TODO: proper throw
 		panic("TODO")
 	}
 
-	isMinerVerified := spa.verifyMiner(msgSender)
-	if !isMinerVerified {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	if spa.PowerTable()[msgSender].Impl().ActivePower_ < powerDelta {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	spa.PowerTable()[msgSender].Impl().ActivePower_ -= powerDelta
+	delete(spa.PowerTable(), address)
 
 	// TODO: commit state
 }
 
-func (spa *StoragePowerActor_I) RemoveMiner(addr addr.Address) {
-	isMinerVerified := spa.verifyMiner(addr)
-	if !isMinerVerified {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	delete(spa.PowerTable(), addr)
-
-	// TODO: commit state
-}
-
-func (spa *StoragePowerActor_I) verifyMiner(addr addr.Address) bool {
+func (spa *StoragePowerActor_I) verifyMiner(address addr.Address) bool {
 	// TODO: anything else to check?
 	// TODO: check miner pledge collateral balances?
 	// TODO: decide on what should be checked here
-	_, found := spa.PowerTable()[addr]
+	_, found := spa.PowerTable()[address]
 	if !found {
 		return false
 	}
@@ -299,9 +260,9 @@ func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
 	spa.PowerTable_[msgSender] = powerEntry
 
-	declaredFaultSlash := spa.getDeclaredFaultSlash(report.SlashDeclaredFaults())
-	detectedFaultSlash := spa.getDetectedFaultSlash(report.SlashDetectedFaults())
-	terminatedFaultSlash := spa.getTerminatedFaultSlash(report.SlashTerminatedFaults())
+	declaredFaultSlash := spa.getDeclaredFaultSlash(report.NewDeclaredFaults())
+	detectedFaultSlash := spa.getDetectedFaultSlash(report.NewDetectedFaults())
+	terminatedFaultSlash := spa.getTerminatedFaultSlash(report.NewTerminatedFaults())
 
 	spa.slashPledgeCollateral(msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
 
@@ -365,35 +326,3 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 
 	return surprisedMiners
 }
-
-// func (pt *PowerTable_I) GetMinerPower(addr addr.Address) block.StoragePower {
-// 	return spa.PowerTable()[addr].MinerStoragePower()
-// }
-
-// func (pt *PowerTable_I) GetMinerPublicKey(addr addr.Address) filcrypto.PubKey {
-// 	return spa.PowerTable[addr].MinerPK()
-// }
-
-// must be atomic
-// func (pt *PowerTable_I) SuspendPower(addr addr.Address, numSectors util.UVarint) {
-// 	panic("")
-// 	// spa.PowerTable[addr].MinerStoragePower -= numSectors * spa.PowerTable[addr].minerSectorSize
-// 	// spa.PowerTable[addr].MinerSuspendedPower += numSectors * spa.PowerTable[addr].minerSectorSize
-// }
-
-// must be atomic
-// func (pt *PowerTable_I) UnsuspendPower(addr addr.Address, numSectors util.UVarint) {
-// 	panic("")
-// 	// spa.PowerTable[addr].MinerSuspendedPower -= numSectors * spa.PowerTable[addr].minerSectorSize
-// 	// spa.PowerTable[addr].MinerStoragePower += numSectors * spa.PowerTable[addr].minerSectorSize
-// }
-
-// func (pt *PowerTable_I) RemovePower(addr addr.Address, numSectors util.UVarint) {
-// 	panic("")
-// 	// spa.PowerTable[addr].MinerSuspendedPower -= numSectors * spa.PowerTable[addr].minerSectorSize
-// }
-
-// func (pt *PowerTable_I) RemoveAllPower(addr addr.Address, numSectors util.UVarint) {
-// 	panic("")
-// 	// spa.PowerTable[addr].MinerStoragePower = 0
-// }

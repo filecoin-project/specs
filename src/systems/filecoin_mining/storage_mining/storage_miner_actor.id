@@ -5,6 +5,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 
 type Seed struct {}
 type SectorCommitment struct {}
@@ -21,6 +22,18 @@ type SectorExpirationQueue struct {
     Remove(n sector.SectorNumber)
 }
 
+type SectorTable struct {
+    SectorSize         sector.SectorSize
+    ActiveSectors      util.UVarint
+    CommittedSectors   util.UVarint
+    RecoveringSectors  util.UVarint
+    FailingSectors     util.UVarint
+    TerminatedSectors  util.UVarint  // transient State that get reset on every constructPowerReport
+
+    ActivePower()      block.StoragePower
+    InactivePower()    block.StoragePower
+}
+
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
@@ -28,9 +41,11 @@ type StorageMinerActor struct {
     // only one map, instead of two.
     Sectors                {sector.SectorNumber: sector.SealCommitment}  // this should be an AMT
     SectorStates           {sector.SectorNumber: SectorState}
+
     ProvingSet             sector.CompactSectorSet
     LastChallengePoSt      block.ChainEpoch
 
+    SectorTable
     SectorExpirationQueue
 
     // contains mostly static info about this miner
@@ -50,6 +65,7 @@ type StorageMinerActor struct {
 
     SubmitPoSt(postSubmission poster.PoStSubmission)
 
+    CheckPoStSubmissionHappened()
     // TODO: should depledge be in here or in storage market actor?
 
     // TODO: add GetOwner()
@@ -61,11 +77,20 @@ type StorageMinerActor struct {
 
     // TODO: do IsSlashed, IsLate belong here?
 
-    DeclareFault(faultSet sector.FaultSet)
+    DeclareFaults(failingSet sector.CompactSectorSet)
+    RecoverFaults(recoveringSet sector.CompactSectorSet)
+
+    constructPowerReport() power.PowerReport
 
     computeProvingPeriodEndSectorState()  // TODO
 
     verifyPoStSubmission(postSubmission poster.PoStSubmission) bool
+
+    clearSector(sectorNo sector.SectorNumber)
+    activateSector(sectorNo sector.SectorNumber)
+    failSector(sectorNo sector.SectorNumber, incrementFaultCount bool)
+
+    expireSectors()
 }
 
 type MinerInfo struct {

@@ -12,11 +12,11 @@ type PowerTableEntry struct {
 }
 
 type PowerReport struct {
-    ActivePower            block.StoragePower
-    InactivePower          block.StoragePower
-    SlashDeclaredFaults    util.UVarint
-    SlashDetectedFaults    util.UVarint
-    SlashTerminatedFaults  util.UVarint
+    ActivePower          block.StoragePower  // set value
+    InactivePower        block.StoragePower  // set value
+    NewDeclaredFaults    util.UVarint  // diff value
+    NewDetectedFaults    util.UVarint  // diff value
+    NewTerminatedFaults  util.UVarint  // diff value
 }
 
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
@@ -44,23 +44,20 @@ type StoragePowerActor struct {
     // PowerTable Operations
     GetTotalPower() block.StoragePower
 
-    // sectorSize should be passed in from SM.Info()
-    // newPower = numSectors util.UVarint * sectorSize sector.SectorSize
-    IncrementPower(newPower block.StoragePower)
-    DecrementPower(newPower block.StoragePower)
-    // SectiveActivePower(newPower block.StoragePower)
-
     GetPledgeCollateralReq(newPower block.StoragePower) actor.TokenAmount
     IsPledgeCollateralSatisfied() bool
     AddBalance()
     WithdrawBalance(amount actor.TokenAmount)
+
+    getDeclaredFaultSlash(amount util.UVarint) actor.TokenAmount
+    getDetectedFaultSlash(amount util.UVarint) actor.TokenAmount
+    getTerminatedFaultSlash(amount util.UVarint) actor.TokenAmount
     slashPledgeCollateral(address addr.Address, amount actor.TokenAmount)
 
     lockPledgeCollateral(address addr.Address, amount actor.TokenAmount)
     unlockPledgeCollateral(address addr.Address, amount actor.TokenAmount)
 
     ProcessPowerReport(report PowerReport)
-
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
         faultType  ConsensusFaultType
