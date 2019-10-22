@@ -13,6 +13,7 @@ type Blake2sHash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 type UInt = util.UInt
+type PieceInfo = sector.PieceInfo
 
 func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
@@ -402,18 +403,100 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 
 	sealCfg := sv.SealCfg()
 	util.Assert(sealCfg.SubsectorCount() == 1) // A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
-	sectorSize := sealCfg.SectorSize
+	sectorSize := sealCfg.SectorSize()
 
-	commD := sdr.ComputeCommDFromPieceInfos(UInt(sectorSize()), pieceInfos)
+	rootPieceInfo := sdr.ComputeRootPieceInfo(pieceInfos)
+	rootSize := rootPieceInfo.Size()
+	commD := rootPieceInfo.CommP()
+
+	if rootSize != sectorSize {
+		return false
+	}
 
 	return sdr.VerifyOfflineCircuitProof(commD, commR, sealProof)
 }
 
-func (sdr *StackedDRG_I) ComputeCommDFromPieceInfos(sectorSize UInt, pieceInfos []sector.PieceInfo) sector.Commitment {
-	panic("TODO")
+func (sdr *StackedDRG_I) ComputeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
+	// Construct root PieceInfo by (shift-reduce) parsing the constituent pieceInfo array.
+	// Later pieces must always be joined with equal-sized predecessors to create a new root twice their size.
+	// So if a piece is larger than the current root (top of stack), add padding until it is not.
+	// If a piece is smaller than the root, let it be the new root (top of stack) until reduced to a new root that can be joined
+	// with the previous.
+	var stack []PieceInfo
+
+	shift := func(p PieceInfo) {
+		stack = append(stack, p)
+	}
+	peek := func() PieceInfo {
+		return stack[len(stack)-1]
+	}
+	peek2 := func() PieceInfo {
+		return stack[len(stack)-2]
+	}
+	pop := func() PieceInfo {
+		stack = stack[:len(stack)-1]
+		return stack[len(stack)-1]
+	}
+	reduce1 := func() bool {
+		if peek().Size() == peek2().Size() {
+			right := pop()
+			left := pop()
+			joined := joinPieceInfos(left, right)
+			shift(joined)
+			return true
+		}
+		return false
+	}
+	reduce := func() {
+		for reduce1() {
+		}
+	}
+	shiftReduce := func(p PieceInfo) {
+		shift(p)
+		reduce()
+	}
+
+	// Prime the pump with first pieceInfo
+	shift(pieceInfos[0])
+
+	// Consume the remainder.
+	for _, pieceInfo := range pieceInfos[1:] {
+		// TODO: Assert that pieceInfo.Size() is a power of 2.
+
+		// Add padding until top of stack is large enough to receive current pieceInfo.
+		for peek().Size() < pieceInfo.Size() {
+			shiftReduce(zeroPadding(peek().Size()))
+		}
+
+		// Add the current piece.
+		shiftReduce(pieceInfo)
+	}
+
+	// Add any necessary final padding.
+	for len(stack) > 1 {
+		shiftReduce(zeroPadding(peek().Size()))
+	}
+	util.Assert(len(stack) == 1)
+
+	return pop()
 }
 
-func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.Commitment, commR sector.Commitment, sv sector.SealProof) bool {
+func zeroPadding(size UInt) PieceInfo {
+	return &sector.PieceInfo_I{
+		Size_: size,
+		// CommP_: FIXME: Implement.
+	}
+}
+
+func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
+	util.Assert(left.Size() == right.Size())
+	return &sector.PieceInfo_I{
+		Size_:  left.Size() + right.Size(),
+		CommP_: UnsealedSectorCID(RepCompress_Blake2sHash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
+	}
+}
+
+func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.Commitment, sv sector.SealProof) bool {
 	panic("TODO")
 }
 
@@ -488,7 +571,7 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 			right := data[i+nodeSize : i+2*nodeSize]
 			hashed := RepCompress_T(left, right)
 
-			row = append(row, asBytes(hashed)...)
+			row = append(row, AsBytes_T(hashed)...)
 		}
 		rows = append(rows, row)
 	}
@@ -568,7 +651,19 @@ func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
 	return bytes
 }
 
-func asBytes(t util.T) []byte {
+func AsBytes_T(t util.T) []byte {
+	panic("Unimplemented for T")
+
+	return []byte{}
+}
+
+func AsBytes_UnsealedSectorCID(cid sector.UnsealedSectorCID) []byte {
+	panic("Unimplemented for T")
+
+	return []byte{}
+}
+
+func AsBytes_SealedSectorCID(CID sector.SealedSectorCID) []byte {
 	panic("Unimplemented for T")
 
 	return []byte{}

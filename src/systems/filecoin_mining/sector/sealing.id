@@ -13,7 +13,7 @@ type PoStRandomness Bytes
 type SealSeed Bytes
 
 type SealCfg struct {
-    SectorSize
+    SectorSize      UInt
     SubsectorCount  UInt
     Partitions      UInt
 }
@@ -97,4 +97,7 @@ type SealAlgorithm enum {
 // TODO
 type SealOutputArtifacts struct {}
 
-type PieceInfo struct {}
+type PieceInfo struct {
+    Size   UInt  // Size in nodes. For BLS12-381 (capacity 254 bits), must be >= 16. (16 * 8 = 128)
+    CommP  UnsealedSectorCID
+}
