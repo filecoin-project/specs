@@ -297,7 +297,7 @@ func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux s
 		challengeProofs = append(challengeProofs, CreateChallengeProof(&drg, &expander, replicaID, UInt(c), nodeSize, aux))
 	}
 
-	return sdr.CreateCircuitProof(challengeProofs, aux)
+	return sdr.CreateOfflineCircuitProof(challengeProofs, aux)
 }
 
 func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, challenge UInt, nodeSize UInt, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
@@ -364,7 +364,7 @@ type SDRColumnProof struct {
 	InclusionProof InclusionProof
 }
 
-func (sdr *StackedDRG_I) CreateCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *StackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
 	panic("TODO")
 }
 
@@ -392,7 +392,20 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 // Verification
 
 func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
-	panic("todo")
+	onChain := sv.OnChain()
+
+	sealProof := onChain.Proof()
+
+	var commD sector.Commitment
+	commR := Commitment_SealedSectorCID(sector.SealedSectorCID(onChain.SealedCID()))
+
+	sdr.VerifyOfflineCircuitProof(commD, commR, sealProof)
+
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.Commitment, commR sector.Commitment, sv sector.SealProof) bool {
+	panic("TODO")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -502,6 +515,14 @@ func UnsealedSectorCID(h Blake2sHash) sector.UnsealedSectorCID {
 }
 
 func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
+	panic("not implemented -- re-arrange bits")
+}
+
+func Commitment_UnsealedSectorCID(cid sector.UnsealedSectorCID) sector.Commitment {
+	panic("not implemented -- re-arrange bits")
+}
+
+func Commitment_SealedSectorCID(cid sector.SealedSectorCID) sector.Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
