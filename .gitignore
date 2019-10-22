@@ -11,3 +11,4 @@ hugo/content/codeGen/main
 *.gen.go
 hugo/data/version.yml
 pkg/
+tools/codeGen/codeGen
