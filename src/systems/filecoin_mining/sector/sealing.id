@@ -67,7 +67,7 @@ type ProofAuxTmp struct {
     CommR          SealedSectorCID
     CommDTreePath  file.Path
 
-    Seed           SealRandomness
+    Seed           SealSeed
     Data           Bytes
     Replica        Bytes
     KeyLayers      [Bytes]

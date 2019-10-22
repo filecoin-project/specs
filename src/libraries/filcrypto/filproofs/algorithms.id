@@ -48,6 +48,7 @@ type SealSetupArtifacts struct {
     CommDTreePath      file.Path
     CommCTreePath      file.Path
     CommRLastTreePath  file.Path
+    Seed               sector.SealSeed
     KeyLayers          [Bytes]
     Replica            Bytes
 }
