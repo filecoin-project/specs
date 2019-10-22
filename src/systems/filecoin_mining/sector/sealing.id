@@ -22,8 +22,9 @@ type SealCfg struct {
 // needs to verify a Seal.
 type SealVerifyInfo struct {
     SectorID
-    OnChain OnChainSealVerifyInfo
+    OnChain     OnChainSealVerifyInfo
     SealCfg
+    PieceInfos  [PieceInfo]
 }
 
 // OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -95,3 +96,5 @@ type SealAlgorithm enum {
 
 // TODO
 type SealOutputArtifacts struct {}
+
+type PieceInfo struct {}
