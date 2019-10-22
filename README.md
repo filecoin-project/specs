@@ -17,7 +17,7 @@ Please [read the spec process](https://filecoin-project.github.io/specs/#intro__
 ### Install
 
 ```
-git clone https://github.com/filecoin-project/spec filecoin-specs
+git clone https://github.com/filecoin-project/specs filecoin-specs
 cd filecoin-specs
 make deps-basic
 ```
