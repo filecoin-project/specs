@@ -396,11 +396,20 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 
 	sealProof := onChain.Proof()
 
-	var commD sector.Commitment
+	pieceInfos := sv.PieceInfos()
+
 	commR := Commitment_SealedSectorCID(sector.SealedSectorCID(onChain.SealedCID()))
 
-	sdr.VerifyOfflineCircuitProof(commD, commR, sealProof)
+	sealCfg := sv.SealCfg()
+	util.Assert(sealCfg.SubsectorCount() == 1) // A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
+	sectorSize := sealCfg.SectorSize
 
+	commD := sdr.ComputeCommDFromPieceInfos(UInt(sectorSize()), pieceInfos)
+
+	return sdr.VerifyOfflineCircuitProof(commD, commR, sealProof)
+}
+
+func (sdr *StackedDRG_I) ComputeCommDFromPieceInfos(sectorSize UInt, pieceInfos []sector.PieceInfo) sector.Commitment {
 	panic("TODO")
 }
 
