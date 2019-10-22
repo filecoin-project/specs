@@ -4560,12 +4560,14 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SectorInfo</span> <span class="kd">struct</span> <span class="p">{}</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+
+<span class="kd">type</span> <span class="nx">SectorInfo</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">SectorID</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">FilecoinProofsSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sectorID</span> <span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorInfo</span> <span class="nx">SectorInfo</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sealVerifyInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4597,26 +4599,25 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
-<span class="kd">type</span> <span class="nx">StackedDRGLayers</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Layers</span> <span class="nx">UInt</span>
-<span class="p">}</span>
-<span class="kd">type</span> <span class="nx">StackedDRGNodeSize</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Size</span> <span class="nx">UInt</span>
-<span class="p">}</span>
-
+<span class="kd">type</span> <span class="nx">StackedDRGLayers</span> <span class="nx">UInt</span>
+<span class="kd">type</span> <span class="nx">StackedDRGNodeSize</span> <span class="nx">UInt</span>
+<span class="kd">type</span> <span class="nx">StackedDRGChallenges</span> <span class="nx">UInt</span>
 <span class="kd">type</span> <span class="nx">DRGDepth</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">DRGFraction</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">DRGDegree</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">DRGDegree</span> <span class="nx">UInt</span>
 <span class="kd">type</span> <span class="nx">DRGSeed</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">DRGNodeCount</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelSeed</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelRound</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelHashFunction</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">DRGNodeCount</span> <span class="nx">UInt</span>
+<span class="kd">type</span> <span class="nx">ExpanderGraphNodeCount</span> <span class="nx">UInt</span>
+<span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelKeys</span> <span class="p">[</span><span class="nx">UInt</span><span class="p">]</span>
+<span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelRounds</span> <span class="nx">UInt</span>
+<span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelHashFunction</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">Blake2S</span>
+<span class="p">}</span>
 <span class="kd">type</span> <span class="nx">ChungExpanderAlpha</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">ChungExpanderBeta</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">ExpanderGraphDegree</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">ExpanderGraphDegree</span> <span class="nx">UInt</span>
 <span class="kd">type</span> <span class="nx">ExpanderGraphSeed</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">DRGNodeSize</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">DRGNodeSize</span> <span class="nx">UInt</span>
 
 <span class="kd">type</span> <span class="nx">SealAlgorithmArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">AlgorithmWideSetupArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4638,12 +4639,14 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// per-sector setup artifacts go here   
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSetupArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">CommD</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
     <span class="nx">CommR</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span>
     <span class="nx">CommC</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
     <span class="nx">CommRLast</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+    <span class="nx">CommDTreePath</span>      <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">CommCTreePath</span>      <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
     <span class="nx">CommRLastTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
-    <span class="nx">KeyLayers</span>          <span class="nx">BytesArray</span>
+    <span class="nx">KeyLayers</span>          <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
     <span class="nx">Replica</span>            <span class="nx">Bytes</span>
 <span class="p">}</span>
 
@@ -4668,10 +4671,11 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">StackedDRG</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Layers</span>            <span class="nx">StackedDRGLayers</span>
     <span class="nx">NodeSize</span>          <span class="nx">StackedDRGNodeSize</span>
+    <span class="nx">Challenges</span>        <span class="nx">StackedDRGChallenges</span>
     <span class="nx">Algorithm</span>         <span class="kd">struct</span> <span class="p">{}</span>
     <span class="nx">DRGCfg</span>
     <span class="nx">ExpanderGraphCfg</span>
-    <span class="c1">// invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
+    <span class="c1">// invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
 </span><span class="c1"></span>    <span class="nx">Curve</span>             <span class="nx">EllipticCurve</span>
 <span class="p">}</span>
 
@@ -4694,33 +4698,636 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">DRG</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Config</span> <span class="nx">DRGCfg</span>
-    <span class="nf">Parents</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInts</span>
+    <span class="nx">Config</span>         <span class="nx">DRGCfg</span>
+    <span class="nf">Parents</span><span class="p">(</span><span class="nx">UInt</span><span class="p">)</span>  <span class="p">[</span><span class="nx">UInt</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ExpanderGraphCfg</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Algorithm</span> <span class="nx">union</span> <span class="p">{</span>
-        <span class="nx">ChungExpanderAlgorithm</span> <span class="kd">struct</span> <span class="p">{</span>
-            <span class="nx">Alpha</span>  <span class="nx">ChungExpanderAlpha</span>
-            <span class="nx">Beta</span>   <span class="nx">ChungExpanderBeta</span>
-            <span class="nx">PermutationAlgorithm</span> <span class="nx">union</span> <span class="p">{</span>
-                <span class="nx">Feistel</span> <span class="kd">struct</span> <span class="p">{</span>
-                    <span class="nx">Seed</span>          <span class="nx">ChungExpanderPermutationFeistelSeed</span>
-                    <span class="nx">Round</span>         <span class="nx">ChungExpanderPermutationFeistelRound</span>
-                    <span class="nx">HashFunction</span>  <span class="nx">ChungExpanderPermutationFeistelHashFunction</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
+        <span class="nx">ChungExpanderAlgorithm</span>
     <span class="p">}</span>
 
-    <span class="nx">Degree</span>    <span class="nx">ExpanderGraphDegree</span>
-    <span class="nx">Seed</span>      <span class="nx">ExpanderGraphSeed</span>
-    <span class="nx">NodeSize</span>  <span class="nx">DRGNodeSize</span>
+    <span class="nx">Degree</span>  <span class="nx">ExpanderGraphDegree</span>
+    <span class="nx">Seed</span>    <span class="nx">ExpanderGraphSeed</span>
+    <span class="nx">Nodes</span>   <span class="nx">ExpanderGraphNodeCount</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ExpanderGraph</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Config</span> <span class="nx">DRGCfg</span>
-    <span class="nf">Parents</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInts</span>
+    <span class="nx">Config</span>         <span class="nx">ExpanderGraphCfg</span>
+    <span class="nf">Parents</span><span class="p">(</span><span class="nx">UInt</span><span class="p">)</span>  <span class="p">[</span><span class="nx">UInt</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ChungExpanderAlgorithm</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Alpha</span>  <span class="nx">ChungExpanderAlpha</span>
+    <span class="nx">Beta</span>   <span class="nx">ChungExpanderBeta</span>
+    <span class="nx">PermutationAlgorithm</span> <span class="nx">union</span> <span class="p">{</span>
+        <span class="nx">Feistel</span>
+    <span class="p">}</span>
+    <span class="nf">Parents</span><span class="p">(</span><span class="nx">node</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">ExpanderGraphDegree</span><span class="p">,</span> <span class="nx">nodes</span> <span class="nx">ExpanderGraphNodeCount</span><span class="p">)</span> <span class="p">[</span><span class="nx">UInt</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Feistel</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Keys</span>          <span class="nx">ChungExpanderPermutationFeistelKeys</span>
+    <span class="nx">Rounds</span>        <span class="nx">ChungExpanderPermutationFeistelRounds</span>
+    <span class="nx">HashFunction</span>  <span class="nx">ChungExpanderPermutationFeistelHashFunction</span>
+    <span class="nf">Permute</span><span class="p">(</span><span class="nx">size</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">n</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">filproofs</span>
+
+<span class="kn">import</span> <span class="s">&#34;math&#34;</span>
+<span class="kn">import</span> <span class="s">&#34;math/rand&#34;</span>
+<span class="kn">import</span> <span class="nx">big</span> <span class="s">&#34;math/big&#34;</span>
+<span class="kn">import</span> <span class="s">&#34;encoding/binary&#34;</span>
+
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+
+<span class="kd">type</span> <span class="nx">Blake2sHash</span> <span class="nx">Bytes32</span>
+<span class="kd">type</span> <span class="nx">PedersenHash</span> <span class="nx">Bytes32</span>
+<span class="kd">type</span> <span class="nx">Bytes32</span> <span class="p">[]</span><span class="kt">byte</span>
+<span class="kd">type</span> <span class="nx">UInt</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
+
+<span class="kd">func</span> <span class="nf">SDRParams</span><span class="p">(</span><span class="nx">sealCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">StackedDRG_I</span> <span class="p">{</span>
+	<span class="c1">// TODO: Bridge constants with orient model.
+</span><span class="c1"></span>	<span class="kd">const</span> <span class="nx">LAYERS</span> <span class="p">=</span> <span class="mi">10</span>
+	<span class="kd">const</span> <span class="nx">NODE_SIZE</span> <span class="p">=</span> <span class="mi">32</span>
+	<span class="kd">const</span> <span class="nx">OFFLINE_CHALLENGES</span> <span class="p">=</span> <span class="mi">6666</span>
+	<span class="kd">const</span> <span class="nx">FEISTEL_ROUNDS</span> <span class="p">=</span> <span class="mi">3</span>
+	<span class="kd">var</span> <span class="nx">FEISTEL_KEYS</span> <span class="p">=</span> <span class="p">[</span><span class="nx">FEISTEL_ROUNDS</span><span class="p">]</span><span class="nx">UInt</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
+	<span class="kd">var</span> <span class="nx">FIELD_MODULUS</span> <span class="p">=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">)</span>
+	<span class="c1">// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
+</span><span class="c1"></span>	<span class="nx">FIELD_MODULUS</span><span class="p">.</span><span class="nf">SetString</span><span class="p">(</span><span class="s">&#34;52435875175126190479447740508185965837690552500527637822603658699938581184513&#34;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+	<span class="nx">nodes</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">sealCfg</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span> <span class="o">/</span> <span class="nx">NODE_SIZE</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">StackedDRG_I</span><span class="p">{</span>
+		<span class="nx">Layers_</span><span class="p">:</span>     <span class="nf">StackedDRGLayers</span><span class="p">(</span><span class="nx">LAYERS</span><span class="p">),</span>
+		<span class="nx">Challenges_</span><span class="p">:</span> <span class="nf">StackedDRGChallenges</span><span class="p">(</span><span class="nx">OFFLINE_CHALLENGES</span><span class="p">),</span>
+		<span class="nx">NodeSize_</span><span class="p">:</span>   <span class="nf">StackedDRGNodeSize</span><span class="p">(</span><span class="nx">NODE_SIZE</span><span class="p">),</span>
+		<span class="nx">Algorithm_</span><span class="p">:</span>  <span class="o">&amp;</span><span class="nx">StackedDRG_Algorithm_I</span><span class="p">{},</span>
+		<span class="nx">DRGCfg_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">DRGCfg_I</span><span class="p">{</span>
+			<span class="nx">Algorithm_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">DRGCfg_Algorithm_I</span><span class="p">{</span>
+				<span class="nx">ParentsAlgorithm_</span><span class="p">:</span> <span class="nf">DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I</span><span class="p">{}),</span>
+				<span class="nx">RNGAlgorithm_</span><span class="p">:</span>     <span class="nf">DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I</span><span class="p">{}),</span>
+			<span class="p">},</span>
+			<span class="nx">Degree_</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+			<span class="nx">Nodes_</span><span class="p">:</span>  <span class="nf">DRGNodeCount</span><span class="p">(</span><span class="nx">nodes</span><span class="p">),</span>
+		<span class="p">},</span>
+		<span class="nx">ExpanderGraphCfg_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ExpanderGraphCfg_I</span><span class="p">{</span>
+			<span class="nx">Algorithm_</span><span class="p">:</span> <span class="nf">ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm</span><span class="p">(</span>
+				<span class="o">&amp;</span><span class="nx">ChungExpanderAlgorithm_I</span><span class="p">{</span>
+					<span class="nx">PermutationAlgorithm_</span><span class="p">:</span> <span class="nf">ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">Feistel_I</span><span class="p">{</span>
+						<span class="nx">Keys_</span><span class="p">:</span>   <span class="nx">FEISTEL_KEYS</span><span class="p">[:],</span>
+						<span class="nx">Rounds_</span><span class="p">:</span> <span class="nx">FEISTEL_ROUNDS</span><span class="p">,</span>
+						<span class="nx">HashFunction_</span><span class="p">:</span> <span class="nf">ChungExpanderPermutationFeistelHashFunction_Make_Blake2S</span><span class="p">(</span>
+							<span class="o">&amp;</span><span class="nx">ChungExpanderPermutationFeistelHashFunction_Blake2S_I</span><span class="p">{}),</span>
+					<span class="p">}),</span>
+				<span class="p">}),</span>
+			<span class="nx">Degree_</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+			<span class="nx">Nodes_</span><span class="p">:</span>  <span class="nf">ExpanderGraphNodeCount</span><span class="p">(</span><span class="nx">nodes</span><span class="p">),</span>
+		<span class="p">},</span>
+		<span class="nx">Curve_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">EllipticCurve_I</span><span class="p">{</span>
+			<span class="nx">FieldModulus_</span><span class="p">:</span> <span class="o">*</span><span class="nx">FIELD_MODULUS</span><span class="p">,</span>
+		<span class="p">},</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">drg</span> <span class="o">*</span><span class="nx">DRG_I</span><span class="p">)</span> <span class="nf">Parents</span><span class="p">(</span><span class="nx">node</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">[]</span><span class="nx">UInt</span> <span class="p">{</span>
+	<span class="nx">config</span> <span class="o">:=</span> <span class="nx">drg</span><span class="p">.</span><span class="nf">Config</span><span class="p">()</span>
+	<span class="nx">degree</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nf">Degree</span><span class="p">())</span>
+	<span class="k">return</span> <span class="nx">config</span><span class="p">.</span><span class="nf">Algorithm</span><span class="p">().</span><span class="nf">ParentsAlgorithm</span><span class="p">().</span><span class="nf">As_DRSample</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">Parents</span><span class="p">(</span><span class="nx">degree</span><span class="p">,</span> <span class="nx">node</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// TODO: Verify this. Both the port from impl and the algorithm.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">drs</span> <span class="o">*</span><span class="nx">DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I</span><span class="p">)</span> <span class="nf">Parents</span><span class="p">(</span><span class="nx">degree</span><span class="p">,</span> <span class="nx">node</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">(</span><span class="nx">parents</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">node</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">node</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+	<span class="nx">m</span> <span class="o">:=</span> <span class="nx">degree</span> <span class="o">-</span> <span class="mi">1</span>
+
+	<span class="kd">var</span> <span class="nx">k</span> <span class="nx">UInt</span>
+	<span class="k">for</span> <span class="nx">k</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">k</span> <span class="p">&lt;</span> <span class="nx">m</span><span class="p">;</span> <span class="nx">k</span><span class="o">++</span> <span class="p">{</span>
+		<span class="nx">logi</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Floor</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Log2</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">node</span> <span class="o">*</span> <span class="nx">m</span><span class="p">))))</span>
+		<span class="c1">// FIXME: Make RNG parameterizable and specify it.
+</span><span class="c1"></span>		<span class="nx">j</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">logi</span><span class="p">)</span>
+		<span class="nx">jj</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">node</span><span class="o">*</span><span class="nx">m</span><span class="o">+</span><span class="nx">k</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="nb">uint</span><span class="p">(</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+		<span class="nx">backDist</span> <span class="o">:=</span> <span class="nf">randInRange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">jj</span><span class="p">)</span><span class="o">&gt;&gt;</span><span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="nx">jj</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+		<span class="nx">out</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">node</span><span class="o">*</span><span class="nx">m</span> <span class="o">+</span> <span class="nx">k</span> <span class="o">-</span> <span class="nx">backDist</span><span class="p">)</span> <span class="o">/</span> <span class="nx">m</span>
+
+		<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">out</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">parents</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">randInRange</span><span class="p">(</span><span class="nx">lowInclusive</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">highExclusive</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">UInt</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">highExclusive</span><span class="o">-</span><span class="nx">lowInclusive</span><span class="p">)</span> <span class="o">+</span> <span class="nx">lowInclusive</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">exp</span> <span class="o">*</span><span class="nx">ExpanderGraph_I</span><span class="p">)</span> <span class="nf">Parents</span><span class="p">(</span><span class="nx">node</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">[]</span><span class="nx">UInt</span> <span class="p">{</span>
+	<span class="nx">d</span> <span class="o">:=</span> <span class="nx">exp</span><span class="p">.</span><span class="nf">Config</span><span class="p">().</span><span class="nf">Degree</span><span class="p">()</span>
+
+	<span class="c1">// TODO: How do we handle choice of algorithm generically?
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">exp</span><span class="p">.</span><span class="nf">Config</span><span class="p">().</span><span class="nf">Algorithm</span><span class="p">().</span><span class="nf">As_ChungExpanderAlgorithm</span><span class="p">().</span><span class="nf">Parents</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">d</span><span class="p">,</span> <span class="nx">exp</span><span class="p">.</span><span class="nf">Config</span><span class="p">().</span><span class="nf">Nodes</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chung</span> <span class="o">*</span><span class="nx">ChungExpanderAlgorithm_I</span><span class="p">)</span> <span class="nf">Parents</span><span class="p">(</span><span class="nx">node</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">d</span> <span class="nx">ExpanderGraphDegree</span><span class="p">,</span> <span class="nx">nodes</span> <span class="nx">ExpanderGraphNodeCount</span><span class="p">)</span> <span class="p">[]</span><span class="nx">UInt</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">parents</span> <span class="p">[]</span><span class="nx">UInt</span>
+	<span class="kd">var</span> <span class="nx">i</span> <span class="nx">UInt</span>
+	<span class="k">for</span> <span class="nx">i</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">d</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="nx">parent</span> <span class="o">:=</span> <span class="nx">chung</span><span class="p">.</span><span class="nf">ithParent</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">d</span><span class="p">,</span> <span class="nx">nodes</span><span class="p">)</span>
+		<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">parent</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">parents</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chung</span> <span class="o">*</span><span class="nx">ChungExpanderAlgorithm_I</span><span class="p">)</span> <span class="nf">ithParent</span><span class="p">(</span><span class="nx">node</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">i</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">degree</span> <span class="nx">ExpanderGraphDegree</span><span class="p">,</span> <span class="nx">nodes</span> <span class="nx">ExpanderGraphNodeCount</span><span class="p">)</span> <span class="nx">UInt</span> <span class="p">{</span>
+	<span class="c1">// ithParent generates one of d parents of node.
+</span><span class="c1"></span>	<span class="nx">d</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">degree</span><span class="p">)</span>
+
+	<span class="c1">// This is done by operating on permutations of a set with d elements per node.
+</span><span class="c1"></span>	<span class="nx">setSize</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">nodes</span><span class="p">)</span> <span class="o">*</span> <span class="nx">d</span>
+
+	<span class="c1">// There are d ways of mapping each node into the set, and we choose the ith.
+</span><span class="c1"></span>	<span class="c1">// Note that we can project the element back to the original node: element / d == node.
+</span><span class="c1"></span>	<span class="nx">element</span> <span class="o">:=</span> <span class="nx">node</span><span class="o">*</span><span class="nx">d</span> <span class="o">+</span> <span class="nx">i</span>
+
+	<span class="c1">// Permutations of the d elements corresponding to each node yield d new elements,
+</span><span class="c1"></span>	<span class="nx">permuted</span> <span class="o">:=</span> <span class="nx">chung</span><span class="p">.</span><span class="nf">PermutationAlgorithm</span><span class="p">().</span><span class="nf">As_Feistel</span><span class="p">().</span><span class="nf">Permute</span><span class="p">(</span><span class="nx">setSize</span><span class="p">,</span> <span class="nx">element</span><span class="p">)</span>
+
+	<span class="c1">// each of which can be projected back to a node.
+</span><span class="c1"></span>	<span class="nx">projected</span> <span class="o">:=</span> <span class="nx">permuted</span> <span class="o">/</span> <span class="nx">d</span>
+
+	<span class="c1">// We have selected the ith such parent of node.
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">projected</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">Feistel_I</span><span class="p">)</span> <span class="nf">Permute</span><span class="p">(</span><span class="nx">size</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">i</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInt</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">Seal</span><span class="p">(</span><span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">seed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">)</span> <span class="nx">SealSetupArtifacts</span> <span class="p">{</span>
+	<span class="nx">commD</span><span class="p">,</span> <span class="nx">commDTreePath</span> <span class="o">:=</span> <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+	<span class="nx">replicaID</span> <span class="o">:=</span> <span class="nf">ComputeReplicaID</span><span class="p">(</span><span class="nx">sid</span><span class="p">,</span> <span class="nx">commD</span><span class="p">,</span> <span class="nx">seed</span><span class="p">)</span>
+
+	<span class="nx">drg</span> <span class="o">:=</span> <span class="nx">DRG_I</span><span class="p">{</span>
+		<span class="nx">Config_</span><span class="p">:</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">DRGCfg</span><span class="p">(),</span>
+	<span class="p">}</span>
+
+	<span class="nx">expander</span> <span class="o">:=</span> <span class="nx">ExpanderGraph_I</span><span class="p">{</span>
+		<span class="nx">Config_</span><span class="p">:</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">ExpanderGraphCfg</span><span class="p">(),</span>
+	<span class="p">}</span>
+
+	<span class="nx">nodeSize</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">sdr</span><span class="p">.</span><span class="nf">NodeSize</span><span class="p">())</span>
+	<span class="nx">nodes</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">/</span> <span class="nx">nodeSize</span>
+	<span class="nx">curveModulus</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">Curve</span><span class="p">().</span><span class="nf">FieldModulus</span><span class="p">()</span>
+	<span class="nx">layers</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">sdr</span><span class="p">.</span><span class="nf">Layers</span><span class="p">())</span>
+
+	<span class="nx">keyLayers</span> <span class="o">:=</span> <span class="nf">generateSDRKeyLayers</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">drg</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">expander</span><span class="p">,</span> <span class="nx">replicaID</span><span class="p">,</span> <span class="nx">nodes</span><span class="p">,</span> <span class="nx">layers</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">,</span> <span class="nx">curveModulus</span><span class="p">)</span>
+	<span class="nx">key</span> <span class="o">:=</span> <span class="nx">keyLayers</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">keyLayers</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+	<span class="nx">replica</span> <span class="o">:=</span> <span class="nf">encodeData</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">curveModulus</span><span class="p">)</span>
+
+	<span class="nx">commRLast</span><span class="p">,</span> <span class="nx">commRLastTreePath</span> <span class="o">:=</span> <span class="nf">RepHash_PedersenHash</span><span class="p">(</span><span class="nx">replica</span><span class="p">)</span>
+	<span class="nx">commC</span><span class="p">,</span> <span class="nx">commCTreePath</span> <span class="o">:=</span> <span class="nf">computeCommC</span><span class="p">(</span><span class="nx">keyLayers</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">)</span>
+	<span class="nx">commR</span> <span class="o">:=</span> <span class="nf">RepCompress_PedersenHash</span><span class="p">(</span><span class="nx">commC</span><span class="p">,</span> <span class="nx">commRLast</span><span class="p">)</span>
+
+	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">SealSetupArtifacts_I</span><span class="p">{</span>
+		<span class="nx">CommD_</span><span class="p">:</span>             <span class="nx">sector</span><span class="p">.</span><span class="nf">Commitment</span><span class="p">(</span><span class="nx">commC</span><span class="p">),</span>
+		<span class="nx">CommR_</span><span class="p">:</span>             <span class="nf">SealedSectorCID</span><span class="p">(</span><span class="nx">commR</span><span class="p">),</span>
+		<span class="nx">CommC_</span><span class="p">:</span>             <span class="nx">sector</span><span class="p">.</span><span class="nf">Commitment</span><span class="p">(</span><span class="nx">commC</span><span class="p">),</span>
+		<span class="nx">CommRLast_</span><span class="p">:</span>         <span class="nx">sector</span><span class="p">.</span><span class="nf">Commitment</span><span class="p">(</span><span class="nx">commRLast</span><span class="p">),</span>
+		<span class="nx">CommDTreePath_</span><span class="p">:</span>     <span class="nx">commDTreePath</span><span class="p">,</span>
+		<span class="nx">CommCTreePath_</span><span class="p">:</span>     <span class="nx">commCTreePath</span><span class="p">,</span>
+		<span class="nx">CommRLastTreePath_</span><span class="p">:</span> <span class="nx">commRLastTreePath</span><span class="p">,</span>
+		<span class="nx">KeyLayers_</span><span class="p">:</span>         <span class="nx">keyLayers</span><span class="p">,</span>
+		<span class="nx">Replica_</span><span class="p">:</span>           <span class="nx">replica</span><span class="p">,</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">result</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ComputeReplicaID</span><span class="p">(</span><span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span><span class="p">,</span> <span class="nx">seed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">)</span> <span class="nx">Bytes32</span> <span class="p">{</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">_</span> <span class="p">=</span> <span class="nx">sid</span><span class="p">.</span><span class="nf">MinerID</span><span class="p">(),</span> <span class="p">(</span><span class="nx">sid</span><span class="p">.</span><span class="nf">Number</span><span class="p">())</span>
+
+	<span class="c1">// FIXME: Implement
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">Bytes32</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">generateSDRKeyLayers</span><span class="p">(</span><span class="nx">drg</span> <span class="o">*</span><span class="nx">DRG_I</span><span class="p">,</span> <span class="nx">expander</span> <span class="o">*</span><span class="nx">ExpanderGraph_I</span><span class="p">,</span> <span class="nx">replicaID</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">nodes</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">layers</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">modulus</span> <span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">)</span> <span class="p">[][]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">keyLayers</span> <span class="p">[][]</span><span class="kt">byte</span>
+	<span class="kd">var</span> <span class="nx">prevLayer</span> <span class="p">[]</span><span class="kt">byte</span>
+
+	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">layers</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="nx">currentLayer</span> <span class="o">:=</span> <span class="nf">labelLayer</span><span class="p">(</span><span class="nx">drg</span><span class="p">,</span> <span class="nx">expander</span><span class="p">,</span> <span class="nx">replicaID</span><span class="p">,</span> <span class="nx">nodes</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">,</span> <span class="nx">prevLayer</span><span class="p">)</span>
+		<span class="nx">keyLayers</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">keyLayers</span><span class="p">,</span> <span class="nx">currentLayer</span><span class="p">)</span>
+		<span class="nx">prevLayer</span> <span class="p">=</span> <span class="nx">currentLayer</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">keyLayers</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">labelLayer</span><span class="p">(</span><span class="nx">drg</span> <span class="o">*</span><span class="nx">DRG_I</span><span class="p">,</span> <span class="nx">expander</span> <span class="o">*</span><span class="nx">ExpanderGraph_I</span><span class="p">,</span> <span class="nx">replicaID</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">nodes</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">prevLayer</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nx">size</span> <span class="o">:=</span> <span class="nx">nodes</span> <span class="o">*</span> <span class="nx">nodeSize</span>
+	<span class="nx">labels</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">size</span><span class="p">)</span>
+
+	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">nodes</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="kd">var</span> <span class="nx">parents</span> <span class="p">[]</span><span class="kt">byte</span>
+
+		<span class="c1">// The first node of every layer has no DRG Parents.
+</span><span class="c1"></span>		<span class="k">if</span> <span class="nx">i</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+			<span class="k">for</span> <span class="nx">parent</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">drg</span><span class="p">.</span><span class="nf">Parents</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
+				<span class="nx">start</span> <span class="o">:=</span> <span class="nx">parent</span> <span class="o">*</span> <span class="nx">nodeSize</span>
+				<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">labels</span><span class="p">[</span><span class="nx">start</span><span class="p">:</span><span class="nx">start</span><span class="o">+</span><span class="nx">nodeSize</span><span class="p">]</span><span class="o">...</span><span class="p">)</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+
+		<span class="c1">// The first layer has no expander parents.
+</span><span class="c1"></span>		<span class="k">if</span> <span class="nx">prevLayer</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">for</span> <span class="nx">parent</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">expander</span><span class="p">.</span><span class="nf">Parents</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="p">{</span>
+				<span class="nx">start</span> <span class="o">:=</span> <span class="nx">parent</span> <span class="o">*</span> <span class="nx">nodeSize</span>
+				<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">labels</span><span class="p">[</span><span class="nx">start</span><span class="p">:</span><span class="nx">start</span><span class="o">+</span><span class="nx">nodeSize</span><span class="p">]</span><span class="o">...</span><span class="p">)</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+
+		<span class="nx">label</span> <span class="o">:=</span> <span class="nf">generateLabel</span><span class="p">(</span><span class="nx">replicaID</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">parents</span><span class="p">)</span>
+		<span class="nx">labels</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">labels</span><span class="p">,</span> <span class="nx">label</span><span class="o">...</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">labels</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">encodeData</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">key</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">modulus</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Key and data must be same length.&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">encoded</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span> <span class="nx">i</span> <span class="o">+=</span> <span class="nx">nodeSize</span> <span class="p">{</span>
+		<span class="nb">copy</span><span class="p">(</span><span class="nx">encoded</span><span class="p">[</span><span class="nx">i</span><span class="p">:</span><span class="nx">i</span><span class="o">+</span><span class="nx">nodeSize</span><span class="p">],</span> <span class="nf">encodeNode</span><span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="p">:</span><span class="nx">i</span><span class="o">+</span><span class="nx">nodeSize</span><span class="p">],</span> <span class="nx">key</span><span class="p">[</span><span class="nx">i</span><span class="p">:</span><span class="nx">i</span><span class="o">+</span><span class="nx">nodeSize</span><span class="p">],</span> <span class="nx">modulus</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">))</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">encoded</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">generateLabel</span><span class="p">(</span><span class="nx">replicaID</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">node</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">dependencies</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nx">nodeBytes</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+	<span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">.</span><span class="nf">PutUint64</span><span class="p">(</span><span class="nx">nodeBytes</span><span class="p">,</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">node</span><span class="p">))</span>
+
+	<span class="nx">preimage</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">replicaID</span><span class="p">,</span> <span class="nx">nodeBytes</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">preimage</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">preimage</span><span class="p">,</span> <span class="nx">dependencies</span><span class="o">...</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="nf">deriveLabel</span><span class="p">(</span><span class="nx">preimage</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">deriveLabel</span><span class="p">(</span><span class="nx">elements</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">WideRepCompress_Blake2sHash</span><span class="p">(</span><span class="nx">elements</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">computeCommC</span><span class="p">(</span><span class="nx">keyLayers</span> <span class="p">[][]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">PedersenHash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">leaves</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">keyLayers</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+	<span class="c1">// For each node in the graph,
+</span><span class="c1"></span>	<span class="k">for</span> <span class="nx">start</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">start</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">leaves</span><span class="p">);</span> <span class="nx">start</span> <span class="o">+=</span> <span class="nx">nodeSize</span> <span class="p">{</span>
+		<span class="nx">end</span> <span class="o">:=</span> <span class="nx">start</span> <span class="o">+</span> <span class="nx">nodeSize</span>
+
+		<span class="kd">var</span> <span class="nx">column</span> <span class="p">[]</span><span class="kt">byte</span>
+		<span class="c1">// Concatenate that node&#39;s label at each layer, in order, into a column.
+</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">keyLayers</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+			<span class="nx">label</span> <span class="o">:=</span> <span class="nx">keyLayers</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">start</span><span class="p">:</span><span class="nx">end</span><span class="p">]</span>
+			<span class="nx">column</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">column</span><span class="p">,</span> <span class="nx">label</span><span class="o">...</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="c1">// And hash that column to create the leaf of a new tree.
+</span><span class="c1"></span>		<span class="nx">hashed</span> <span class="o">:=</span> <span class="nf">hashColumn</span><span class="p">(</span><span class="nx">column</span><span class="p">)</span>
+		<span class="nb">copy</span><span class="p">(</span><span class="nx">leaves</span><span class="p">[</span><span class="nx">start</span><span class="p">:</span><span class="nx">end</span><span class="p">],</span> <span class="nx">hashed</span><span class="p">[:])</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Return the root of and path to the column tree.
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">RepHash_PedersenHash</span><span class="p">(</span><span class="nx">leaves</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">hashColumn</span><span class="p">(</span><span class="nx">column</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">PedersenHash</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">WideRepCompress_PedersenHash</span><span class="p">(</span><span class="nx">column</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">CreateSealProof</span><span class="p">(</span><span class="nx">randomSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">,</span> <span class="nx">aux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAuxTmp</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealProof</span> <span class="p">{</span>
+	<span class="nx">replicaID</span> <span class="o">:=</span> <span class="nf">ComputeReplicaID</span><span class="p">(</span><span class="nx">aux</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">(),</span> <span class="nx">aux</span><span class="p">.</span><span class="nf">CommD</span><span class="p">(),</span> <span class="nx">aux</span><span class="p">.</span><span class="nf">Seed</span><span class="p">())</span>
+
+	<span class="nx">drg</span> <span class="o">:=</span> <span class="nx">DRG_I</span><span class="p">{</span>
+		<span class="nx">Config_</span><span class="p">:</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">DRGCfg</span><span class="p">(),</span>
+	<span class="p">}</span>
+
+	<span class="nx">expander</span> <span class="o">:=</span> <span class="nx">ExpanderGraph_I</span><span class="p">{</span>
+		<span class="nx">Config_</span><span class="p">:</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">ExpanderGraphCfg</span><span class="p">(),</span>
+	<span class="p">}</span>
+
+	<span class="nx">nodeSize</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">sdr</span><span class="p">.</span><span class="nf">NodeSize</span><span class="p">())</span>
+	<span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GenerateOfflineChallenges</span><span class="p">(</span><span class="nx">randomSeed</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">sdr</span><span class="p">.</span><span class="nf">Challenges</span><span class="p">()))</span>
+
+	<span class="kd">var</span> <span class="nx">challengeProofs</span> <span class="p">[]</span><span class="nx">OfflineSDRChallengeProof</span>
+
+	<span class="k">for</span> <span class="nx">c</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">challenges</span> <span class="p">{</span>
+		<span class="nx">challengeProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">challengeProofs</span><span class="p">,</span> <span class="nf">CreateChallengeProof</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">drg</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">expander</span><span class="p">,</span> <span class="nx">replicaID</span><span class="p">,</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">c</span><span class="p">),</span> <span class="nx">nodeSize</span><span class="p">,</span> <span class="nx">aux</span><span class="p">))</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">CreateOfflineCircuitProof</span><span class="p">(</span><span class="nx">challengeProofs</span><span class="p">,</span> <span class="nx">aux</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">CreateChallengeProof</span><span class="p">(</span><span class="nx">drg</span> <span class="o">*</span><span class="nx">DRG_I</span><span class="p">,</span> <span class="nx">expander</span> <span class="o">*</span><span class="nx">ExpanderGraph_I</span><span class="p">,</span> <span class="nx">replicaID</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">challenge</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">aux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAuxTmp</span><span class="p">)</span> <span class="p">(</span><span class="nx">proof</span> <span class="nx">OfflineSDRChallengeProof</span><span class="p">)</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">columnElements</span> <span class="p">[]</span><span class="nx">UInt</span>
+	<span class="nx">columnElements</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">columnElements</span><span class="p">,</span> <span class="nx">challenge</span><span class="p">)</span>
+	<span class="nx">columnElements</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">columnElements</span><span class="p">,</span> <span class="nx">drg</span><span class="p">.</span><span class="nf">Parents</span><span class="p">(</span><span class="nx">challenge</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">columnElements</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">columnElements</span><span class="p">,</span> <span class="nx">expander</span><span class="p">.</span><span class="nf">Parents</span><span class="p">(</span><span class="nx">challenge</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
+
+	<span class="kd">var</span> <span class="nx">columnProofs</span> <span class="p">[]</span><span class="nx">SDRColumnProof</span>
+	<span class="k">for</span> <span class="nx">c</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">columnElements</span> <span class="p">{</span>
+		<span class="nx">columnProof</span> <span class="o">:=</span> <span class="nf">CreateColumnProof</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">c</span><span class="p">),</span> <span class="nx">nodeSize</span><span class="p">,</span> <span class="nx">aux</span><span class="p">)</span>
+		<span class="nx">columnProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">columnProofs</span><span class="p">,</span> <span class="nx">columnProof</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">dataProof</span> <span class="o">:=</span> <span class="nf">createInclusionProof</span><span class="p">(</span><span class="nx">aux</span><span class="p">.</span><span class="nf">Data</span><span class="p">()[</span><span class="nx">challenge</span><span class="o">*</span><span class="nx">nodeSize</span><span class="p">:(</span><span class="nx">challenge</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">nodeSize</span><span class="p">],</span> <span class="nx">aux</span><span class="p">.</span><span class="nf">Data</span><span class="p">())</span>
+	<span class="nx">replicaProof</span> <span class="o">:=</span> <span class="nf">createInclusionProof</span><span class="p">(</span><span class="nx">aux</span><span class="p">.</span><span class="nf">Replica</span><span class="p">()[</span><span class="nx">challenge</span><span class="o">*</span><span class="nx">nodeSize</span><span class="p">:(</span><span class="nx">challenge</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">nodeSize</span><span class="p">],</span> <span class="nx">aux</span><span class="p">.</span><span class="nf">Data</span><span class="p">())</span>
+
+	<span class="nx">proof</span> <span class="p">=</span> <span class="nx">OfflineSDRChallengeProof</span><span class="p">{</span>
+		<span class="nx">DataProof</span><span class="p">:</span>    <span class="nx">dataProof</span><span class="p">,</span>
+		<span class="nx">ColumnProofs</span><span class="p">:</span> <span class="nx">columnProofs</span><span class="p">,</span>
+		<span class="nx">ReplicaProof</span><span class="p">:</span> <span class="nx">replicaProof</span><span class="p">,</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">proof</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">CreateColumnProof</span><span class="p">(</span><span class="nx">c</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">aux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAuxTmp</span><span class="p">)</span> <span class="p">(</span><span class="nx">columnProof</span> <span class="nx">SDRColumnProof</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">commC</span> <span class="o">:=</span> <span class="nx">aux</span><span class="p">.</span><span class="nf">PersistentAux</span><span class="p">().</span><span class="nf">CommC</span><span class="p">()</span>
+	<span class="nx">layers</span> <span class="o">:=</span> <span class="nx">aux</span><span class="p">.</span><span class="nf">KeyLayers</span><span class="p">()</span>
+	<span class="kd">var</span> <span class="nx">column</span> <span class="p">[]</span><span class="kt">byte</span>
+
+	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">layers</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="nx">column</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">column</span><span class="p">,</span> <span class="nx">layers</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">c</span><span class="o">*</span><span class="nx">nodeSize</span><span class="p">:(</span><span class="nx">c</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nx">nodeSize</span><span class="p">]</span><span class="o">...</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">leaf</span> <span class="o">:=</span> <span class="nf">hashColumn</span><span class="p">(</span><span class="nx">column</span><span class="p">)</span>
+	<span class="nx">columnProof</span> <span class="p">=</span> <span class="nx">SDRColumnProof</span><span class="p">{</span>
+		<span class="nx">ColumnElements</span><span class="p">:</span> <span class="nx">column</span><span class="p">,</span>
+		<span class="nx">InclusionProof</span><span class="p">:</span> <span class="nf">createInclusionProof</span><span class="p">(</span><span class="nx">leaf</span><span class="p">,</span> <span class="nx">commC</span><span class="p">),</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">columnProof</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">createInclusionProof</span><span class="p">(</span><span class="nx">leaf</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">root</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">InclusionProof</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">OfflineSDRChallengeProof</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">CommRLast</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+	<span class="nx">CommC</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+
+	<span class="c1">// TODO: these proofs need to depend on hash function.
+</span><span class="c1"></span>	<span class="nx">DataProof</span>    <span class="nx">InclusionProof</span> <span class="c1">// Blake2s
+</span><span class="c1"></span>	<span class="nx">ColumnProofs</span> <span class="p">[]</span><span class="nx">SDRColumnProof</span>
+	<span class="nx">ReplicaProof</span> <span class="nx">InclusionProof</span> <span class="c1">// Pedersen
+</span><span class="c1"></span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">InclusionProof</span> <span class="kd">struct</span><span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">SDRColumnProof</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">ColumnElements</span> <span class="p">[]</span><span class="kt">byte</span>
+	<span class="nx">InclusionProof</span> <span class="nx">InclusionProof</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">CreateOfflineCircuitProof</span><span class="p">(</span><span class="nx">challengeProofs</span> <span class="p">[]</span><span class="nx">OfflineSDRChallengeProof</span><span class="p">,</span> <span class="nx">aux</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAuxTmp</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealProof</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GenerateOfflineChallenges</span><span class="p">(</span><span class="nx">randomSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">,</span> <span class="nx">challenges</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="nx">UInt</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">encodeNode</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">key</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">modulus</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="c1">// TODO: Make this a method of StackedDRG.
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">addEncode</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">modulus</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">addEncode</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">key</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">modulus</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+
+	<span class="nx">d</span> <span class="o">:=</span> <span class="nf">bigIntFromLittleEndianBytes</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+	<span class="nx">k</span> <span class="o">:=</span> <span class="nf">bigIntFromLittleEndianBytes</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
+
+	<span class="nx">sum</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">).</span><span class="nf">Add</span><span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">k</span><span class="p">)</span>
+	<span class="nx">result</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">).</span><span class="nf">Mod</span><span class="p">(</span><span class="nx">sum</span><span class="p">,</span> <span class="nx">modulus</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="nf">littleEndianBytesFromBigInt</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">// Verification
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nx">onChain</span> <span class="o">:=</span> <span class="nx">sv</span><span class="p">.</span><span class="nf">OnChain</span><span class="p">()</span>
+
+	<span class="nx">sealProof</span> <span class="o">:=</span> <span class="nx">onChain</span><span class="p">.</span><span class="nf">Proof</span><span class="p">()</span>
+
+	<span class="kd">var</span> <span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
+	<span class="nx">commR</span> <span class="o">:=</span> <span class="nf">Commitment_SealedSectorCID</span><span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nf">SealedSectorCID</span><span class="p">(</span><span class="nx">onChain</span><span class="p">.</span><span class="nf">SealedCID</span><span class="p">()))</span>
+
+	<span class="nx">sdr</span><span class="p">.</span><span class="nf">VerifyOfflineCircuitProof</span><span class="p">(</span><span class="nx">commD</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">sealProof</span><span class="p">)</span>
+
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">VerifyOfflineCircuitProof</span><span class="p">(</span><span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span><span class="p">,</span> <span class="nx">commR</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span><span class="p">,</span> <span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealProof</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">/// Generic Hashing and Merkle Tree generation
+</span><span class="c1"></span>
+<span class="c1">/// Binary hash compression.
+</span><span class="c1">// RepCompress&lt;T&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">RepCompress_T</span><span class="p">(</span><span class="nx">left</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">right</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">T</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">util</span><span class="p">.</span><span class="nx">T</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// RepCompress&lt;PedersenHash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">RepCompress_PedersenHash</span><span class="p">(</span><span class="nx">left</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">right</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">PedersenHash</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">PedersenHash</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// RepCompress&lt;Blake2sHash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">RepCompress_Blake2sHash</span><span class="p">(</span><span class="nx">left</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">right</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Blake2sHash</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">Blake2sHash</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="c1">/// Digest
+</span><span class="c1">// WideRepCompress&lt;T&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">WideRepCompress_T</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">T</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">util</span><span class="p">.</span><span class="nx">T</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// RepCompress&lt;PedersenHash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">WideRepCompress_PedersenHash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">PedersenHash</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">PedersenHash</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">// RepCompress&lt;Blake2sHash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">WideRepCompress_Blake2sHash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Blake2sHash</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">Blake2sHash</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="nf">DigestSize_T</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unspecialized&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">DigestSize_PedersenHash</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="mi">32</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">DigestSize_Blake2sHash</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="mi">32</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">/// Binary Merkle-tree generation
+</span><span class="c1"></span>
+<span class="c1">// RepHash&lt;T&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">RepHash_T</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nx">T</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// Plan: define this in terms of RepCompress_T, then copy-paste changes into T-specific specializations, for now.
+</span><span class="c1"></span>
+	<span class="c1">// Nodes are always the digest size so data cannot be compressed to digest for storage.
+</span><span class="c1"></span>	<span class="nx">nodeSize</span> <span class="o">:=</span> <span class="nf">DigestSize_T</span><span class="p">()</span>
+
+	<span class="c1">// TODO: Fail if len(dat) is not a power of 2 and a multiple of the node size.
+</span><span class="c1"></span>
+	<span class="nx">rows</span> <span class="o">:=</span> <span class="p">[][]</span><span class="kt">byte</span><span class="p">{</span><span class="nx">data</span><span class="p">}</span>
+
+	<span class="k">for</span> <span class="nx">row</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{};</span> <span class="nb">len</span><span class="p">(</span><span class="nx">row</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">nodeSize</span><span class="p">;</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nx">nodeSize</span> <span class="p">{</span>
+			<span class="nx">left</span> <span class="o">:=</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span> <span class="p">:</span> <span class="nx">i</span><span class="o">+</span><span class="nx">nodeSize</span><span class="p">]</span>
+			<span class="nx">right</span> <span class="o">:=</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="o">+</span><span class="nx">nodeSize</span> <span class="p">:</span> <span class="nx">i</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="nx">nodeSize</span><span class="p">]</span>
+			<span class="nx">hashed</span> <span class="o">:=</span> <span class="nf">RepCompress_T</span><span class="p">(</span><span class="nx">left</span><span class="p">,</span> <span class="nx">right</span><span class="p">)</span>
+
+			<span class="nx">row</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">row</span><span class="p">,</span> <span class="nf">asBytes</span><span class="p">(</span><span class="nx">hashed</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="nx">rows</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">rows</span><span class="p">,</span> <span class="nx">row</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Last row is the root
+</span><span class="c1"></span>	<span class="nx">root</span> <span class="o">:=</span> <span class="nx">rows</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">root</span><span class="p">)</span> <span class="o">!=</span> <span class="nx">nodeSize</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;math failed us&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="kd">var</span> <span class="nx">filePath</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span> <span class="c1">// TODO: dump tree to file.
+</span><span class="c1"></span>	<span class="c1">// NOTE: merkle tree file layout is illustrative, not prescriptive.
+</span><span class="c1"></span>
+	<span class="c1">// TODO: Check above more carefully. It&#39;s just an untested sketch for the moment.
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">fromBytes_T</span><span class="p">(</span><span class="nx">root</span><span class="p">),</span> <span class="nx">filePath</span>
+<span class="p">}</span>
+
+<span class="c1">// RepHash&lt;PedersenHash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">RepHash_PedersenHash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">PedersenHash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">PedersenHash</span><span class="p">{},</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Path</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// FIXME
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">//  RepHash&lt;Blake2sHash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">RepHash_Blake2sHash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">Blake2sHash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{},</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Path</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// FIXME
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nx">h</span> <span class="nx">Blake2sHash</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;not implemented -- re-arrange bits&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">SealedSectorCID</span><span class="p">(</span><span class="nx">h</span> <span class="nx">PedersenHash</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;not implemented -- re-arrange bits&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">Commitment_UnsealedSectorCID</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;not implemented -- re-arrange bits&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">Commitment_SealedSectorCID</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;not implemented -- re-arrange bits&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// TODO: make hash parameterizable
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">RepHash_Blake2sHash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// Compute CommP or CommD.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// TODO: check that len(data) &gt; minimum piece size and is a power of 2.
+</span><span class="c1"></span>	<span class="nx">hash</span><span class="p">,</span> <span class="nx">treePath</span> <span class="o">:=</span> <span class="nf">RepHash_Blake2sHash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nx">hash</span><span class="p">),</span> <span class="nx">treePath</span>
+<span class="p">}</span>
+
+<span class="c1">// Utilities
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="nf">reverse</span><span class="p">(</span><span class="nx">bytes</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">bytes</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">j</span><span class="p">;</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="p">=</span> <span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nx">j</span><span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
+		<span class="nx">bytes</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">bytes</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">bytes</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">bytes</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">bigIntFromLittleEndianBytes</span><span class="p">(</span><span class="nx">bytes</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
+	<span class="nf">reverse</span><span class="p">(</span><span class="nx">bytes</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nb">new</span><span class="p">(</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">).</span><span class="nf">SetBytes</span><span class="p">(</span><span class="nx">bytes</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// size is number of bytes to return
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">littleEndianBytesFromBigInt</span><span class="p">(</span><span class="nx">z</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">,</span> <span class="nx">size</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nx">bytes</span> <span class="o">:=</span> <span class="nx">z</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="nx">size</span><span class="p">]</span>
+	<span class="nf">reverse</span><span class="p">(</span><span class="nx">bytes</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="nx">bytes</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">asBytes</span><span class="p">(</span><span class="nx">t</span> <span class="nx">util</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unimplemented for T&#34;</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">fromBytes_T</span><span class="p">(</span><span class="nx">_</span> <span class="kd">interface</span><span class="p">{})</span> <span class="nx">util</span><span class="p">.</span><span class="nx">T</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unimplemented for T&#34;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">util</span><span class="p">.</span><span class="nx">T</span><span class="p">{}</span>
 <span class="p">}</span>
 </code></pre></div>
 

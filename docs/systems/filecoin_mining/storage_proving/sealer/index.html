@@ -4597,14 +4597,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">SectorSealer</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">SealSector</span><span class="p">()</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">SealOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
     <span class="nf">CreateSealProof</span><span class="p">(</span><span class="nx">si</span> <span class="nx">CreateSealProofInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">CreateSealProofOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-
-    <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">unsealedPath</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">ComputeReplicaID</span><span class="p">(</span>
-        <span class="nx">sid</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-        <span class="nx">commD</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span>
-        <span class="nx">seed</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
-    <span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">replicaID</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
     <span class="nf">MaxUnsealedBytesPerSector</span><span class="p">(</span><span class="nx">SectorSize</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">UInt</span>
 <span class="p">}</span>

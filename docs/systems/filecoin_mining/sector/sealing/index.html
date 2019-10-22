@@ -4585,6 +4585,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>
     <span class="nx">OnChain</span> <span class="nx">OnChainSealVerifyInfo</span>
+    <span class="nx">SealCfg</span>
 <span class="p">}</span>
 
 <span class="c1">// OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -4612,23 +4613,26 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// for a sector, for example PoSt.
 </span><span class="c1">// These should be stored and indexed somewhere by CommR.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">CommRLast</span>             <span class="nx">Commitment</span>
-    <span class="nx">CommC</span>                 <span class="nx">Commitment</span>
+    <span class="nx">CommRLast</span>          <span class="nx">Commitment</span>
+    <span class="nx">CommC</span>              <span class="nx">Commitment</span>
 
     <span class="c1">// TODO: This may be a partially-cached tree.
 </span><span class="c1"></span>    <span class="c1">// this may be empty
-</span><span class="c1"></span>    <span class="nx">CachedMerkleTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+</span><span class="c1"></span>    <span class="nx">CommRLastTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ProofAuxTmp</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PersistentAux</span>  <span class="nx">ProofAux</span>
 
-    <span class="nx">CommD</span>          <span class="nx">UnsealedSectorCID</span>
+    <span class="nx">SectorID</span>
+    <span class="nx">CommD</span>          <span class="nx">Commitment</span>
     <span class="nx">CommR</span>          <span class="nx">SealedSectorCID</span>
+    <span class="nx">CommDTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
 
+    <span class="nx">Seed</span>           <span class="nx">SealRandomness</span>
     <span class="nx">Data</span>           <span class="nx">Bytes</span>
     <span class="nx">Replica</span>        <span class="nx">Bytes</span>
-    <span class="nx">KeyLayers</span>      <span class="nx">BytesArray</span>
+    <span class="nx">KeyLayers</span>      <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealArguments</span> <span class="kd">struct</span> <span class="p">{</span>
