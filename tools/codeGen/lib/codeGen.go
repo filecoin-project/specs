@@ -144,7 +144,6 @@ func TranslateGoIdent(name string, ctx GoGenContext) GoIdent {
 		"Assert",
 		"BigInt",
 		"Bytes",
-		"BytesArray",
 		"CID",
 		"Float",
 		"T",

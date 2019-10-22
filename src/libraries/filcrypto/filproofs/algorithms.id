@@ -1,26 +1,25 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-type StackedDRGLayers struct {
-    Layers UInt
-}
-type StackedDRGNodeSize struct {
-    Size UInt
-}
-
+type StackedDRGLayers UInt
+type StackedDRGNodeSize UInt
+type StackedDRGChallenges UInt
 type DRGDepth struct {}
 type DRGFraction struct {}
-type DRGDegree struct {}
+type DRGDegree UInt
 type DRGSeed struct {}
-type DRGNodeCount struct {}
-type ChungExpanderPermutationFeistelSeed struct {}
-type ChungExpanderPermutationFeistelRound struct {}
-type ChungExpanderPermutationFeistelHashFunction struct {}
+type DRGNodeCount UInt
+type ExpanderGraphNodeCount UInt
+type ChungExpanderPermutationFeistelKeys [UInt]
+type ChungExpanderPermutationFeistelRounds UInt
+type ChungExpanderPermutationFeistelHashFunction enum {
+    Blake2S
+}
 type ChungExpanderAlpha struct {}
 type ChungExpanderBeta struct {}
-type ExpanderGraphDegree struct {}
+type ExpanderGraphDegree UInt
 type ExpanderGraphSeed struct {}
-type DRGNodeSize struct {}
+type DRGNodeSize UInt
 
 type SealAlgorithmArtifacts struct {
     AlgorithmWideSetupArtifacts struct {
@@ -42,12 +41,14 @@ type SealAlgorithmArtifacts struct {
 
 // per-sector setup artifacts go here   
 type SealSetupArtifacts struct {
+    CommD              sector.Commitment
     CommR              sector.SealedSectorCID
     CommC              sector.Commitment
     CommRLast          sector.Commitment
+    CommDTreePath      file.Path
     CommCTreePath      file.Path
     CommRLastTreePath  file.Path
-    KeyLayers          BytesArray
+    KeyLayers          [Bytes]
     Replica            Bytes
 }
 
@@ -72,10 +73,11 @@ type EllipticCurve struct {
 type StackedDRG struct {
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
+    Challenges        StackedDRGChallenges
     Algorithm         struct {}
     DRGCfg
     ExpanderGraphCfg
-    // invariant: DRGCfg.NodeSize == ExpanderGraphCfg.NodeSize
+    // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve             EllipticCurve
 }
 
@@ -98,31 +100,37 @@ type DRGCfg struct {
 }
 
 type DRG struct {
-    Config DRGCfg
-    Parents(Bytes, UInt) UInts
+    Config         DRGCfg
+    Parents(UInt)  [UInt]
 }
 
 type ExpanderGraphCfg struct {
     Algorithm union {
-        ChungExpanderAlgorithm struct {
-            Alpha  ChungExpanderAlpha
-            Beta   ChungExpanderBeta
-            PermutationAlgorithm union {
-                Feistel struct {
-                    Seed          ChungExpanderPermutationFeistelSeed
-                    Round         ChungExpanderPermutationFeistelRound
-                    HashFunction  ChungExpanderPermutationFeistelHashFunction
-                }
-            }
-        }
+        ChungExpanderAlgorithm
     }
 
-    Degree    ExpanderGraphDegree
-    Seed      ExpanderGraphSeed
-    NodeSize  DRGNodeSize
+    Degree  ExpanderGraphDegree
+    Seed    ExpanderGraphSeed
+    Nodes   ExpanderGraphNodeCount
 }
 
 type ExpanderGraph struct {
-    Config DRGCfg
-    Parents(Bytes, UInt) UInts
+    Config         ExpanderGraphCfg
+    Parents(UInt)  [UInt]
+}
+
+type ChungExpanderAlgorithm struct {
+    Alpha  ChungExpanderAlpha
+    Beta   ChungExpanderBeta
+    PermutationAlgorithm union {
+        Feistel
+    }
+    Parents(node UInt, ExpanderGraphDegree, nodes ExpanderGraphNodeCount) [UInt]
+}
+
+type Feistel struct {
+    Keys          ChungExpanderPermutationFeistelKeys
+    Rounds        ChungExpanderPermutationFeistelRounds
+    HashFunction  ChungExpanderPermutationFeistelHashFunction
+    Permute(size UInt, n UInt) UInt
 }
