@@ -39,6 +39,11 @@ type SectorOnChainInfo struct {
     State           SectorState
 }
 
+type ChallengeStatus struct {
+    LastChallengeEpoch  block.ChainEpoch  // get updated by NotifyOfPoStChallenge
+    LastResponseEpoch   block.ChainEpoch  // get updated upon successful submitPoSt
+}
+
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 
@@ -53,11 +58,10 @@ type StorageMinerActor struct {
     // and update ProvingSet with NextProvingSet at the end
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     ProvingSet               sector.CompactSectorSet
-    isChallenged             bool
-    LastChallengePoSt        block.ChainEpoch
 
     SectorTable
     SectorExpirationQueue
+    ChallengeStatus
 
     // contains mostly static info about this miner
     Info                     &MinerInfo

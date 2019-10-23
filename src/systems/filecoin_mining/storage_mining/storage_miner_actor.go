@@ -15,13 +15,33 @@ func (st *SectorTable_I) InactivePower() block.StoragePower {
 	return block.StoragePower((st.CommittedSectors_ + st.RecoveringSectors_ + st.FailingSectors_) * util.UVarint(st.SectorSize_))
 }
 
+func (cs *ChallengeStatus_I) OnNewChallenge(currEpoch block.ChainEpoch) ChallengeStatus {
+	cs.LastChallengeEpoch_ = currEpoch
+	return cs
+}
+
+// Call by either SubmitPoSt or OnMissedPoSt
+// TODO: verify this is correct and if we need to distinguish SubmitPoSt vs OnMissedPoSt
+func (cs *ChallengeStatus_I) OnChallengeResponse(currEpoch block.ChainEpoch) ChallengeStatus {
+	cs.LastResponseEpoch_ = currEpoch
+	return cs
+}
+
+func (cs *ChallengeStatus_I) isChallenged() bool {
+	// true (isChallenged) when LastChallengeEpoch is later than LastResponseEpoch
+	return cs.LastChallengeEpoch() > cs.LastResponseEpoch()
+}
+
 // called by CronActor to notify StorageMiner of PoSt Challenge
 func (sm *StorageMinerActor_I) NotifyOfPoStChallenge() {
-	if sm.isChallenged() {
+
+	if sm.ChallengeStatus().Impl().isChallenged() {
 		return // silent return, dont re-challenge
 	}
 
-	sm.isChallenged_ = true
+	// TODO: get currEpoch from runtime
+	var currEpoch block.ChainEpoch
+	sm.ChallengeStatus().Impl().OnNewChallenge(currEpoch)
 
 	// TODO: commit state change
 }
@@ -91,7 +111,9 @@ func (sm *StorageMinerActor_I) onMissedPoSt() {
 	sm.submitPowerReport()
 
 	// end of challenge
-	sm.isChallenged_ = false
+	// TODO: get currEpoch from runtime
+	var currEpoch block.ChainEpoch
+	sm.ChallengeStatus().Impl().OnChallengeResponse(currEpoch)
 	sm.loadStagedCommittedSectors()
 
 	// TODO: commit state change
@@ -102,15 +124,11 @@ func (sm *StorageMinerActor_I) onMissedPoSt() {
 // because the miner run out of time, every sector is reported as failing
 // for the current proving period.
 func (sm *StorageMinerActor_I) CheckPoStSubmissionHappened() {
-	if !sm.isChallenged() {
-		// Miner gets out of a challenge when submit a successful PoSt
-		// or when detected by CronActor. Hence, not being in means that we are good here
-		return
-	}
 
-	var challengeEpoch block.ChainEpoch // TODO
-	if sm.LastChallengePoSt() >= challengeEpoch {
-		return // success
+	if !sm.ChallengeStatus().Impl().isChallenged() {
+		// Miner gets out of a challenge when submit a successful PoSt
+		// or when detected by CronActor. Hence, not being in isChallenged means that we are good here
+		return
 	}
 
 	// oh no -- we missed it. rekt
@@ -261,7 +279,7 @@ func (sm *StorageMinerActor_I) failSector(sectorNo sector.SectorNumber, incremen
 //     - Remove SectorNumber from Sectors, ProvingSet
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) {
 
-	if !sm.isChallenged() {
+	if !sm.ChallengeStatus().Impl().isChallenged() {
 		// TODO: proper throw
 		panic("cannot SubmitPoSt when sm not isChallenged")
 	}
@@ -328,14 +346,12 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	// TODO: check EnsurePledgeCollateralSatisfied
 	// pledgeCollateralSatisfied
 
-	// TODO: make sure sm.LastChallengePost gets updated properly
-	var challengeEpoch block.ChainEpoch
-	sm.LastChallengePoSt_ = challengeEpoch
-
 	// Reset Proving Period and report power updates
 	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
 
-	sm.isChallenged_ = false
+	// TODO: get currEpoch from runtime
+	var currEpoch block.ChainEpoch
+	sm.ChallengeStatus().Impl().OnChallengeResponse(currEpoch)
 	sm.loadStagedCommittedSectors()
 }
 
@@ -386,7 +402,7 @@ func (sm *StorageMinerActor_I) expireSectors() {
 // Note that power is not updated until it is active
 func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorSet) {
 
-	if sm.isChallenged() {
+	if sm.ChallengeStatus().Impl().isChallenged() {
 		// TODO: proper throw
 		panic("cannot RecoverFaults when sm isChallenged")
 	}
@@ -429,7 +445,7 @@ func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorS
 // - Remove Active / Commited / Recovering from ProvingSet
 func (sm *StorageMinerActor_I) DeclareFaults(faultSet sector.CompactSectorSet) {
 
-	if sm.isChallenged() {
+	if sm.ChallengeStatus().Impl().isChallenged() {
 		// TODO: proper throw
 		panic("cannot DeclareFaults when sm isChallenged")
 	}
@@ -531,7 +547,7 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 		State_:          SectorCommitted(),
 	}
 
-	if sm.isChallenged() {
+	if sm.ChallengeStatus().Impl().isChallenged() {
 		// Add Sector to StagedCommittedSectors
 		sm.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 	} else {
