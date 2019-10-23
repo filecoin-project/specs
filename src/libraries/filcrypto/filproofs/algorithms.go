@@ -32,6 +32,7 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 		Layers_:     StackedDRGLayers(LAYERS),
 		Challenges_: StackedDRGChallenges(OFFLINE_CHALLENGES),
 		NodeSize_:   StackedDRGNodeSize(NODE_SIZE),
+		Nodes_:      StackedDRGNodes(nodes),
 		Algorithm_:  &StackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
@@ -89,6 +90,8 @@ func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node UI
 }
 
 func randInRange(lowInclusive int, highExclusive int) UInt {
+	// NOTE: current implementation uses a more sophisticated method for repeated sampling within a range.
+	// We need to converge on and fully specify the actual method, since this must be deterministic.
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
@@ -297,7 +300,7 @@ func (sdr *StackedDRG_I) verifyPrivateProof(privateProof []OfflineSDRChallengePr
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) CreatePrivateSealProof(challengeSeed sector.SealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
+func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.SealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
 	sealSeed := aux.Seed()
 
 	drg := DRG_I{
@@ -309,7 +312,7 @@ func (sdr *StackedDRG_I) CreatePrivateSealProof(challengeSeed sector.SealRandomn
 	}
 
 	nodeSize := UInt(sdr.NodeSize())
-	challenges := sdr.GenerateOfflineChallenges(challengeSeed, sdr.Challenges())
+	challenges := sdr.GenerateOfflineChallenges(aux.Seed(), randomness, sdr.Challenges())
 
 	for c := range challenges {
 		challengeProofs = append(challengeProofs, CreateChallengeProof(&drg, &expander, sealSeed, UInt(c), nodeSize, aux))
@@ -389,8 +392,30 @@ func (sdr *StackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRC
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomness sector.SealRandomness, challenges StackedDRGChallenges) []UInt {
-	panic("TODO")
+func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeed sector.SealSeed, randomness sector.SealRandomness, challengeCount StackedDRGChallenges) (challenges []UInt) {
+	nodeSize := int(sdr.NodeSize())
+	nodes := sdr.Nodes()
+
+	challengeRangeSize := nodes - 1 // Never challenge the first node.
+	challengeModulus := new(big.Int)
+	challengeModulus.SetUint64(uint64(challengeRangeSize))
+
+	count := int(challengeCount)
+	for i := 0; i < count; i++ {
+		bytes := []byte(sealSeed)
+		bytes = append(bytes, randomness...)
+		bytes = append(bytes, littleEndianBytesFromInt(i, nodeSize)...)
+
+		hash := WideRepCompress_Blake2sHash(bytes)
+		bigChallenge := bigIntFromLittleEndianBytes(hash)
+		bigChallenge = bigChallenge.Mod(bigChallenge, challengeModulus)
+
+		// Sectors nodes must be 64-bit addressable, always a safe assumption.
+		challenge := bigChallenge.Uint64()
+		challenge += 1 // Never challenge the first node.
+		challenges = append(challenges, challenge)
+	}
+	return challenges
 }
 
 func encodeNode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
@@ -432,7 +457,7 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	commD := rootPieceInfo.CommP()
 	sealSeed := ComputeSealSeed(sv.SectorID(), AsBytes_UnsealedSectorCID(commD), sv.Randomness())
 
-	challenges := sdr.GenerateOfflineChallenges(sv.InteractiveRandomness(), sdr.Challenges())
+	challenges := sdr.GenerateOfflineChallenges(sealSeed, sv.InteractiveRandomness(), sdr.Challenges())
 	_ = challenges
 	return sdr.VerifyOfflineCircuitProof(commD, commR, sealSeed, sealProof)
 }
@@ -594,6 +619,7 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 		for i := 0; i < len(data); i += 2 * nodeSize {
 			left := data[i : i+nodeSize]
 			right := data[i+nodeSize : i+2*nodeSize]
+
 			hashed := RepCompress_T(left, right)
 
 			row = append(row, AsBytes_T(hashed)...)
@@ -684,6 +710,12 @@ func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
 	reverse(bytes)
 
 	return bytes
+}
+
+func littleEndianBytesFromInt(n int, size int) []byte {
+	z := new(big.Int)
+	z.SetInt64(int64(n))
+	return littleEndianBytesFromBigInt(z, size)
 }
 
 func AsBytes_T(t util.T) []byte {

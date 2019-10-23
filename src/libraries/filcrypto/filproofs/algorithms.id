@@ -3,6 +3,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StackedDRGLayers UInt
 type StackedDRGNodeSize UInt
+type StackedDRGNodes UInt
 type StackedDRGChallenges UInt
 type DRGDepth struct {}
 type DRGFraction struct {}
@@ -74,6 +75,7 @@ type EllipticCurve struct {
 type StackedDRG struct {
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
+    Nodes             StackedDRGNodes
     Challenges        StackedDRGChallenges
     Algorithm         struct {}
     DRGCfg
