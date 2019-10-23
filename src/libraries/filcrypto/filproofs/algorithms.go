@@ -279,7 +279,7 @@ func hashColumn(column []byte) PedersenHash {
 	return WideRepCompress_PedersenHash(column)
 }
 
-func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
 	sealSeed := aux.Seed()
 
 	drg := DRG_I{
@@ -291,7 +291,7 @@ func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux s
 	}
 
 	nodeSize := UInt(sdr.NodeSize())
-	challenges := sdr.GenerateOfflineChallenges(randomSeed, int(sdr.Challenges()))
+	challenges := sdr.GenerateOfflineChallenges(challengeSeed, sdr.Challenges())
 
 	var challengeProofs []OfflineSDRChallengeProof
 
@@ -367,10 +367,11 @@ type SDRColumnProof struct {
 }
 
 func (sdr *StackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
+	//	publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomSeed sector.SealRandomness, challenges int) []UInt {
+func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomness sector.SealRandomness, challenges StackedDRGChallenges) []UInt {
 	panic("TODO")
 }
 
@@ -395,33 +396,34 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 
 func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	onChain := sv.OnChain()
-
 	sealProof := onChain.Proof()
-
 	pieceInfos := sv.PieceInfos()
-
 	commR := Commitment_SealedSectorCID(sector.SealedSectorCID(onChain.SealedCID()))
-
 	sealCfg := sv.SealCfg()
-	util.Assert(sealCfg.SubsectorCount() == 1) // A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
-	sectorSize := sealCfg.SectorSize()
 
+	// A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
+	util.Assert(sealCfg.SubsectorCount() == 1)
+
+	sectorSize := sealCfg.SectorSize()
 	rootPieceInfo := sdr.ComputeRootPieceInfo(pieceInfos)
 	rootSize := rootPieceInfo.Size()
-	commD := rootPieceInfo.CommP()
-
 	if rootSize != sectorSize {
 		return false
 	}
 
-	return sdr.VerifyOfflineCircuitProof(commD, commR, sealProof)
+	commD := rootPieceInfo.CommP()
+	sealSeed := ComputeSealSeed(sv.SectorID(), AsBytes_UnsealedSectorCID(commD), sv.Randomness())
+
+	challenges := sdr.GenerateOfflineChallenges(sv.InteractiveRandomness(), sdr.Challenges())
+	_ = challenges
+	return sdr.VerifyOfflineCircuitProof(commD, commR, sealSeed, sealProof)
 }
 
 func (sdr *StackedDRG_I) ComputeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
-	// Construct root PieceInfo by (shift-reduce) parsing the constituent pieceInfo array.
+	// Construct root PieceInfo by (shift-reduce) parsing the constituent PieceInfo array.
 	// Later pieces must always be joined with equal-sized predecessors to create a new root twice their size.
 	// So if a piece is larger than the current root (top of stack), add padding until it is not.
-	// If a piece is smaller than the root, let it be the new root (top of stack) until reduced to a new root that can be joined
+	// If a piece is smaller than the root, let it be the new root (top of stack) until reduced to a replacement that can be joined
 	// with the previous.
 	var stack []PieceInfo
 
@@ -439,7 +441,7 @@ func (sdr *StackedDRG_I) ComputeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo 
 		return stack[len(stack)-1]
 	}
 	reduce1 := func() bool {
-		if peek().Size() == peek2().Size() {
+		if len(stack) > 1 && peek().Size() == peek2().Size() {
 			right := pop()
 			left := pop()
 			joined := joinPieceInfos(left, right)
@@ -497,8 +499,8 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	}
 }
 
-func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.Commitment, sv sector.SealProof) bool {
-
+func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.Commitment, sealSeed sector.SealSeed, sv sector.SealProof) bool {
+	//publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
 
@@ -687,4 +689,8 @@ func AsBytes_SealedSectorCID(CID sector.SealedSectorCID) []byte {
 func fromBytes_T(_ interface{}) util.T {
 	panic("Unimplemented for T")
 	return util.T{}
+}
+
+func isPow2(n int) bool {
+	return n != 0 && n&(n-1) == 0
 }

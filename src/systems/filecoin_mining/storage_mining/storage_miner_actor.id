@@ -1,5 +1,4 @@
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-import util "github.com/filecoin-project/specs/util"
 import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -119,17 +118,19 @@ type MinerInfo struct {
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
-    Owner       address.Address
+    Owner           address.Address
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
-    Worker      address.Address
+    Worker          address.Address
 
     // Libp2p identity that should be used when connecting to this miner.
-    PeerId      libp2p.PeerID
+    PeerId          libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    SectorSize  util.BytesAmount
+    SectorSize      util.BytesAmount
+    SubsectorCount  UVarint
+    Partitions      UVarint
 }
