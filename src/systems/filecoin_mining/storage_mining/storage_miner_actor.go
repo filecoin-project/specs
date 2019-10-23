@@ -18,8 +18,7 @@ func (st *SectorTable_I) InactivePower() block.StoragePower {
 // called by CronActor to notify StorageMiner of PoSt Challenge
 func (sm *StorageMinerActor_I) NotifyOfPoStChallenge() {
 	if sm.isChallenged() {
-		// TODO: proper throw
-		panic("should not be challenged when isChallenged")
+		return // silent return, dont re-challenge
 	}
 
 	sm.isChallenged_ = true
@@ -90,8 +89,9 @@ func (sm *StorageMinerActor_I) onMissedPoSt() {
 // for the current proving period.
 func (sm *StorageMinerActor_I) CheckPoStSubmissionHappened() {
 	if !sm.isChallenged() {
-		// TODO: proper throw
-		panic("cannot CheckPoStSubmissionHappened when sm not isChallenged")
+		// Miner gets out of a challenge when submit a successful PoSt
+		// or when detected by CronActor. Hence, not being in means that we are good here
+		return
 	}
 
 	var challengeEpoch block.ChainEpoch // TODO
@@ -297,6 +297,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	// Reset Proving Period and report power updates
 	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
 
+	sm.isChallenged_ = false
 }
 
 func (sm *StorageMinerActor_I) expireSectors() {
@@ -336,8 +337,6 @@ func (sm *StorageMinerActor_I) expireSectors() {
 
 	// Return PledgeCollateral for active expirations
 	// SendMessage(spa.Depledge) // TODO
-
-	sm.isChallenged_ = false
 
 	// TODO: commit state change
 }
