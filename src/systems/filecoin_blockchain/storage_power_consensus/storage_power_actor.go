@@ -88,7 +88,13 @@ func (spa *StoragePowerActor_I) EnsurePledgeCollateralSatisfied() bool {
 	// TODO: convert msgSender to minerID
 	var minerID addr.Address
 
-	powerEntry := spa.PowerTable()[minerID]
+	powerEntry, found := spa.PowerTable()[minerID]
+
+	if !found {
+		// TODO: proper throw
+		panic("TODO")
+	}
+
 	pledgeCollateralRequired := spa.GetPledgeCollateralReq(powerEntry.ActivePower() + powerEntry.InactivePower())
 
 	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
@@ -112,7 +118,6 @@ func (spa *StoragePowerActor_I) AddBalance() {
 	isMinerVerified := spa.verifyMiner(msgSender)
 	if !isMinerVerified {
 		// TODO: proper throw
-		// TODO: this might be okay, create new miner
 		panic("TODO")
 	}
 
@@ -126,22 +131,16 @@ func (spa *StoragePowerActor_I) AddBalance() {
 	var minerID addr.Address
 
 	currEntry, found := spa.PowerTable()[minerID]
-	if found {
-		currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
-		spa.PowerTable()[minerID] = currEntry
 
-		// TODO: commit state change
-	} else {
-		newEntry := &PowerTableEntry_I{
-			ActivePower_:            block.StoragePower(0),
-			InactivePower_:          block.StoragePower(0),
-			AvailableBalance_:       msgValue,
-			LockedPledgeCollateral_: actor.TokenAmount(0),
-		}
-		spa.PowerTable_[minerID] = newEntry
-
-		// TODO: commit state change
+	if !found {
+		// AddBalance will just fail if miner is not created before hand
+		// TODO: proper throw
+		panic("TODO")
 	}
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
+	spa.PowerTable()[minerID] = currEntry
+
+	// TODO: commit state change
 }
 
 func (spa *StoragePowerActor_I) WithdrawBalance(amount actor.TokenAmount) {
@@ -150,7 +149,6 @@ func (spa *StoragePowerActor_I) WithdrawBalance(amount actor.TokenAmount) {
 	isMinerVerified := spa.verifyMiner(msgSender)
 	if !isMinerVerified {
 		// TODO: proper throw
-		// TODO: this might be okay, create new miner
 		panic("TODO")
 	}
 
@@ -307,7 +305,12 @@ func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
 
-	powerEntry := spa.PowerTable()[minerID]
+	powerEntry, found := spa.PowerTable()[minerID]
+
+	if !found {
+		// TODO: proper throw
+		panic("TODO")
+	}
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
 	spa.PowerTable_[minerID] = powerEntry
