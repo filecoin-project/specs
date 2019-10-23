@@ -279,7 +279,25 @@ func hashColumn(column []byte) PedersenHash {
 	return WideRepCompress_PedersenHash(column)
 }
 
+type PrivateOfflineSDRProof []OfflineSDRChallengeProof
+
 func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+	privateProof := sdr.CreatePrivateSealProof(challengeSeed, aux)
+
+	util.Assert(sdr.verifyPrivateProof(privateProof, challengeSeed, aux.CommD(), aux.CommR()))
+
+	return sdr.CreateOfflineCircuitProof(privateProof, aux)
+}
+
+// Verify a private proof.
+// NOTE: Verification of a private proof is exactly the computation we will prove we have performed in a zk-SNARK.
+// If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
+// Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
+func (sdr *StackedDRG_I) verifyPrivateProof(privateProof []OfflineSDRChallengeProof, challengeSeed sector.SealRandomness, commD sector.Commitment, commR sector.SealedSectorCID) bool {
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) CreatePrivateSealProof(challengeSeed sector.SealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
 	sealSeed := aux.Seed()
 
 	drg := DRG_I{
@@ -293,13 +311,13 @@ func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.SealRandomness, au
 	nodeSize := UInt(sdr.NodeSize())
 	challenges := sdr.GenerateOfflineChallenges(challengeSeed, sdr.Challenges())
 
-	var challengeProofs []OfflineSDRChallengeProof
-
 	for c := range challenges {
 		challengeProofs = append(challengeProofs, CreateChallengeProof(&drg, &expander, sealSeed, UInt(c), nodeSize, aux))
 	}
 
-	return sdr.CreateOfflineCircuitProof(challengeProofs, aux)
+	privateProof := challengeProofs
+
+	return privateProof
 }
 
 func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, challenge UInt, nodeSize UInt, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
