@@ -22,15 +22,16 @@ type SectorExpirationQueue struct {
 }
 
 type SectorTable struct {
-    SectorSize         sector.SectorSize
-    ActiveSectors      util.UVarint
-    CommittedSectors   util.UVarint
-    RecoveringSectors  util.UVarint
-    FailingSectors     util.UVarint
-    TerminatedSectors  util.UVarint  // transient State that get reset on every constructPowerReport
+    SectorSize             sector.SectorSize
+    ActiveSectors          util.UVarint
+    CommittedSectors       util.UVarint
+    RecoveringSectors      util.UVarint
+    FailingSectors         util.UVarint
 
-    ActivePower()      block.StoragePower
-    InactivePower()    block.StoragePower
+    ActivePower()          block.StoragePower
+    InactivePower()        block.StoragePower
+
+    TerminationFaultCount  util.UVarint  // transient State that get reset on every constructPowerReport
 }
 
 type SectorOnChainInfo struct {
