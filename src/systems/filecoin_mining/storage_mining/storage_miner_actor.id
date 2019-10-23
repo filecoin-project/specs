@@ -5,7 +5,6 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 
 type Seed struct {}
 type SectorCommitment struct {}
@@ -44,47 +43,44 @@ type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
-    Sectors                SectorsAMT
+    Sectors                  SectorsAMT
 
-    ProvingSet             sector.CompactSectorSet
-    LastChallengePoSt      block.ChainEpoch
+    // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
+    // successful SubmitPoSt will perform changes to NextProvingSet
+    // and update ProvingSet with NextProvingSet at the end
+    // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
+    ProvingSet               sector.CompactSectorSet
+    isChallenged             bool
+    LastChallengePoSt        block.ChainEpoch
 
     SectorTable
     SectorExpirationQueue
 
     // contains mostly static info about this miner
-    Info                   &MinerInfo
+    Info                     &MinerInfo
 
-    // TODO: add the DePledgeCollateral
-    // TODO: add the Sectors
-    // TODO sectors []SectorInfo CID to AMT
-    // TODO provingSet []SectorInfo CID to AMT
-
-    // TODO: should we keep the same structure as before or putting all of that into a struct?
-    // TODO do we need a `slashedAt`?
-    // TODO owedStorageCollateral
     // TODO ProvingPeriodEnd   Epoch
+
+    NotifyOfPoStChallenge()
 
     CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
 
     SubmitPoSt(postSubmission poster.PoStSubmission)
 
     CheckPoStSubmissionHappened()
+    onMissedPoSt()
+
     // TODO: should depledge be in here or in storage market actor?
-
-    // TODO: add GetOwner()
-    // TODO: add GetPeerID()
-    // TODO: add GetSectorSize()
-    // TODO: add UpdatePeerID()
-    // TODO: add UpdatePeerID()
-    // TODO: add ChangeWorker()
-
-    // TODO: do IsSlashed, IsLate belong here?
 
     DeclareFaults(failingSet sector.CompactSectorSet)
     RecoverFaults(recoveringSet sector.CompactSectorSet)
 
-    constructPowerReport() power.PowerReport
+    constructFaultReport(
+        declared    util.UVarint
+        detected    util.UVarint
+        terminated  util.UVarint
+    )
+    constructPowerReport()
 
     computeProvingPeriodEndSectorState()  // TODO
 

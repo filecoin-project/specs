@@ -12,8 +12,11 @@ type PowerTableEntry struct {
 }
 
 type PowerReport struct {
-    ActivePower          block.StoragePower  // set value
-    InactivePower        block.StoragePower  // set value
+    ActivePower    block.StoragePower  // set value
+    InactivePower  block.StoragePower  // set value
+}
+
+type FaultReport struct {
     NewDeclaredFaults    util.UVarint  // diff value
     NewDetectedFaults    util.UVarint  // diff value
     NewTerminatedFaults  util.UVarint  // diff value

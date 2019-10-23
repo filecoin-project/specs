@@ -252,6 +252,18 @@ func (spa *StoragePowerActor_I) getTerminatedFaultSlash(util.UVarint) actor.Toke
 	return actor.TokenAmount(0)
 }
 
+func (spa *StoragePowerActor_I) ProcessFaultReport(report FaultReport) {
+	var msgSender addr.Address // TODO replace this
+
+	declaredFaultSlash := spa.getDeclaredFaultSlash(report.NewDeclaredFaults())
+	detectedFaultSlash := spa.getDetectedFaultSlash(report.NewDetectedFaults())
+	terminatedFaultSlash := spa.getTerminatedFaultSlash(report.NewTerminatedFaults())
+
+	spa.slashPledgeCollateral(msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
+
+	// TODO: commit state change
+}
+
 func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
 	var msgSender addr.Address // TODO replace this
 
@@ -259,12 +271,6 @@ func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
 	spa.PowerTable_[msgSender] = powerEntry
-
-	declaredFaultSlash := spa.getDeclaredFaultSlash(report.NewDeclaredFaults())
-	detectedFaultSlash := spa.getDetectedFaultSlash(report.NewDetectedFaults())
-	terminatedFaultSlash := spa.getTerminatedFaultSlash(report.NewTerminatedFaults())
-
-	spa.slashPledgeCollateral(msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
 
 	// TODO: commit state change
 }

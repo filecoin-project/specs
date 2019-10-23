@@ -19,3 +19,8 @@ func (css *CompactSectorSet) Remove(sectorNo SectorNumber) CompactSectorSet {
 	var newCompactSectorSet CompactSectorSet
 	return newCompactSectorSet
 }
+
+func (css *CompactSectorSet) DeepCopy() CompactSectorSet {
+	var newCompactSectorSet CompactSectorSet
+	return newCompactSectorSet
+}
