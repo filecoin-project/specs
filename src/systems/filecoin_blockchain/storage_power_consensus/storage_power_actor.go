@@ -347,10 +347,29 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	// var currBlockHeight util.UInt
 
 	// The number of miners that are challenged at this block
-	numSurprised := uint(len(spa.PowerTable())) / provingPeriod
+	challengeCount := uint(len(spa.PowerTable())) / provingPeriod
 
 	// TODO: seem inefficient but spa.PowerTable() is now a map from address to power
 	minerAddresses := make([]addr.Address, len(spa.PowerTable()))
+
+	// {
+	// NOTE and TODO:
+	// this picks challengeCount consecutive miners, starting from random offset
+	// good for sampling w/o replacement, but may be bad as it would be the same cohort always challenged at the same time
+	// if we want to pick properly random set, can:
+	// 	make a list of indices first, shuffle it, then pick consecutive from those
+	//  or pick at random every time, but skip ones we've seen already (sample w/ replacement, but skip doubles)
+	// table := spa.PowerTable()
+	// totalMinerCount := len(table)
+	// random := 4 // TODO: get randomness from chain
+	// offset := random % totalMinerCount
+	// for i := 0; i < challengeCount; i++ {
+	//   j := (offset + i) % totalMinerCount
+	//   minerAddresses[i] = table[j]
+	// }
+
+	// return minerAddresses
+	// }
 
 	index := 0
 	for address, _ := range spa.PowerTable() {
@@ -358,7 +377,7 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 		index++
 	}
 
-	for i := uint(0); i < numSurprised; i++ {
+	for i := uint(0); i < challengeCount; i++ {
 		// TODO: randomNumber := hash(ticket, i)
 		var randomNumber uint
 		minerIndex := randomNumber % uint(len(spa.PowerTable()))
@@ -374,4 +393,5 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	}
 
 	return surprisedMiners
+
 }
