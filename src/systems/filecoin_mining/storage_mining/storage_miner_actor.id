@@ -40,11 +40,13 @@ type SectorOnChainInfo struct {
 }
 
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
     Sectors                  SectorsAMT
+    StagedCommittedSectors   StagedCommittedSectorAMT
 
     // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
     // successful SubmitPoSt will perform changes to NextProvingSet
@@ -86,6 +88,7 @@ type StorageMinerActor struct {
     computeProvingPeriodEndSectorState()  // TODO
 
     verifyPoStSubmission(postSubmission poster.PoStSubmission) bool
+    loadStagedCommittedSectors()
 
     clearSector(sectorNo sector.SectorNumber)
     activateSector(sectorNo sector.SectorNumber)

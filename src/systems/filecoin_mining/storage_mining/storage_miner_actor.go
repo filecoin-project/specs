@@ -26,6 +26,19 @@ func (sm *StorageMinerActor_I) NotifyOfPoStChallenge() {
 	// TODO: commit state change
 }
 
+func (sm *StorageMinerActor_I) loadStagedCommittedSectors() {
+	for sectorNo, sealOnChainInfo := range sm.StagedCommittedSectors() {
+		sm.Sectors()[sectorNo] = sealOnChainInfo
+		sm.ProvingSet_.Add(sectorNo)
+		sm.SectorTable().Impl().CommittedSectors_ += 1
+	}
+
+	// empty StagedCommittedSectors
+	sm.StagedCommittedSectors_ = make(map[sector.SectorNumber]SectorOnChainInfo)
+
+	// TODO: commit state change
+}
+
 // construct FaultReport
 // reset NewTerminatedFaults
 func (sm *StorageMinerActor_I) submitFaultReport(
@@ -79,6 +92,7 @@ func (sm *StorageMinerActor_I) onMissedPoSt() {
 
 	// end of challenge
 	sm.isChallenged_ = false
+	sm.loadStagedCommittedSectors()
 
 	// TODO: commit state change
 
@@ -260,9 +274,6 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 		panic("TODO")
 	}
 
-	// TODO: check IsSatisfyingPledgeCollateral
-	// pledgeCollateralSatisfied
-
 	// The proof is verified, process ProvingSet.SectorsOn():
 	// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
 	// ProvingSet itself does not store states, states are all stored in Sectors.State
@@ -314,6 +325,9 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 
 	sm.submitPowerReport()
 
+	// TODO: check EnsurePledgeCollateralSatisfied
+	// pledgeCollateralSatisfied
+
 	// TODO: make sure sm.LastChallengePost gets updated properly
 	var challengeEpoch block.ChainEpoch
 	sm.LastChallengePoSt_ = challengeEpoch
@@ -322,6 +336,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
 
 	sm.isChallenged_ = false
+	sm.loadStagedCommittedSectors()
 }
 
 func (sm *StorageMinerActor_I) expireSectors() {
@@ -474,18 +489,13 @@ func (sm *StorageMinerActor_I) checkIfSectorExists(sectorNo sector.SectorNumber)
 // TODO(optimization): CommitSector could contain a list of deals that are not published yet.
 func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerifyInfo) {
 
-	if sm.isChallenged() {
-		// TODO: proper throw
-		panic("cannot CommitSector when sm isChallenged")
-	}
-
 	isSealVerified := sm.verifySeal(onChainInfo)
 	if !isSealVerified {
 		// TODO: proper failure
 		panic("Seal is not verified")
 	}
 
-	// TODO: check IsSatisfyingPledgeCollateral
+	// TODO: check EnsurePledgeCollateralSatisfied
 	// pledgeCollateralSatisfied
 
 	sectorExists := sm.checkIfSectorExists(onChainInfo.SectorNumber())
@@ -520,9 +530,15 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 		SealCommitment_: sealCommitment,
 		State_:          SectorCommitted(),
 	}
-	sm.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
-	sm.ProvingSet_.Add(onChainInfo.SectorNumber())
-	sm.SectorTable().Impl().CommittedSectors_ += 1
+
+	if sm.isChallenged() {
+		// Add Sector to StagedCommittedSectors
+		sm.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
+	} else {
+		sm.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
+		sm.ProvingSet_.Add(onChainInfo.SectorNumber())
+		sm.SectorTable().Impl().CommittedSectors_ += 1
+	}
 
 	// TODO: commit state change
 
