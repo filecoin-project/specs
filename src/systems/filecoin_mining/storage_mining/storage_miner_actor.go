@@ -53,7 +53,7 @@ func (sm *StorageMinerActor_I) CheckPoStSubmissionHappened() {
 	// or should this be what is in FailingSectors after fail and expire?
 	newDetectedFaults := sm.SectorTable().ActiveSectors() + sm.SectorTable().CommittedSectors() + sm.SectorTable().RecoveringSectors()
 
-	failingSectorNumbers := getSectorNums(sm.SectorStates())
+	failingSectorNumbers := getSectorNums(sm.Sectors())
 	for _, sectorNo := range failingSectorNumbers {
 		sm.failSector(sectorNo, true)
 	}
@@ -98,7 +98,6 @@ func (sm *StorageMinerActor_I) verifyPoStSubmission(postSubmission poster.PoStSu
 // does not update SectorTable
 func (sm *StorageMinerActor_I) clearSector(sectorNo sector.SectorNumber) {
 	delete(sm.Sectors(), sectorNo)
-	delete(sm.SectorStates(), sectorNo)
 	sm.ProvingSet_.Remove(sectorNo)
 	sm.SectorExpirationQueue().Remove(sectorNo)
 }
@@ -107,7 +106,7 @@ func (sm *StorageMinerActor_I) clearSector(sectorNo sector.SectorNumber) {
 // reset FaultCount to zero
 // update SectorTable
 func (sm *StorageMinerActor_I) activateSector(sectorNo sector.SectorNumber) {
-	state := sm.SectorStates()[sectorNo]
+	state := sm.Sectors()[sectorNo].State()
 	switch state.StateNumber {
 	case SectorCommittedSN:
 		sm.SectorTable().Impl().CommittedSectors_ -= 1
@@ -118,7 +117,7 @@ func (sm *StorageMinerActor_I) activateSector(sectorNo sector.SectorNumber) {
 		panic("invalid state in activateSector")
 	}
 
-	sm.SectorStates()[sectorNo] = SectorActive()
+	sm.Sectors()[sectorNo].Impl().State_ = SectorActive()
 	sm.SectorTable().Impl().ActiveSectors_ += 1
 
 	// TODO: decide if commit state change here
@@ -130,13 +129,13 @@ func (sm *StorageMinerActor_I) activateSector(sectorNo sector.SectorNumber) {
 // update SectorTable
 // remove from ProvingSet
 func (sm *StorageMinerActor_I) failSector(sectorNo sector.SectorNumber, increment bool) {
-	newFaultCount := sm.SectorStates()[sectorNo].FaultCount
+	newFaultCount := sm.Sectors()[sectorNo].State().FaultCount
 
 	if increment {
 		newFaultCount += 1
 	}
 
-	state := sm.SectorStates()[sectorNo]
+	state := sm.Sectors()[sectorNo].State()
 	switch state.StateNumber {
 	case SectorActiveSN:
 		// wont be terminated from Active
@@ -163,7 +162,7 @@ func (sm *StorageMinerActor_I) failSector(sectorNo sector.SectorNumber, incremen
 	}
 
 	sm.ProvingSet_.Remove(sectorNo)
-	sm.SectorStates()[sectorNo] = SectorFailing(newFaultCount)
+	sm.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
 
 	// TODO: decide if commit state change here
 	// TODO: SendMessage(sma.SlashStorageDealCollateral)
@@ -191,7 +190,7 @@ func (sm *StorageMinerActor_I) failSector(sectorNo sector.SectorNumber, incremen
 // - Process Expired Sectors (settle deals and return storage collateral to miners)
 //     - State Transition
 //       - Failing / Recovering / Active / Committed -> Cleared
-//     - Remove SectorNumber from Sectors, SectorStates, ProvingSet
+//     - Remove SectorNumber from Sectors, ProvingSet
 func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) {
 	// Verify correct PoSt Submission
 	isPoStVerified := sm.verifyPoStSubmission(postSubmission)
@@ -207,9 +206,9 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 
 	// The proof is verified, process ProvingSet.SectorsOn():
 	// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
-	// ProvingSet itself does not store states, states are all stored in SectorStates
+	// ProvingSet itself does not store states, states are all stored in Sectors.State
 	for _, sectorNo := range sm.ProvingSet_.SectorsOn() {
-		state := sm.SectorStates()[sectorNo]
+		state := sm.Sectors()[sectorNo].State()
 		switch state.StateNumber {
 		case SectorCommittedSN, SectorRecoveringSN:
 			sm.activateSector(sectorNo)
@@ -230,9 +229,9 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	// ProvingSet.SectorsOff() contains SectorFailing
 	// SectorRecovering is Proving and hence will not be in GetZeros()
 	// heavy penalty if Failing for more than or equal to MAX_CONSECUTIVE_FAULTS
-	// otherwise increment FaultCount in SectorStates()
+	// otherwise increment FaultCount in Sectors().State
 	for _, sectorNo := range sm.ProvingSet_.SectorsOff() {
-		state := sm.SectorStates()[sectorNo]
+		state := sm.Sectors()[sectorNo].State()
 		switch state.StateNumber {
 		case SectorFailingSN:
 			sm.failSector(sectorNo, true)
@@ -270,7 +269,7 @@ func (sm *StorageMinerActor_I) expireSectors() {
 	for queue.Peek().Expiration() <= currEpoch {
 		expiredSectorNo := queue.Pop().SectorNumber()
 
-		state := sm.SectorStates()[expiredSectorNo]
+		state := sm.Sectors()[expiredSectorNo].State()
 		// sc := sm.Sectors()[expiredSectorNo]
 		switch state.StateNumber {
 		case SectorActiveSN:
@@ -311,7 +310,7 @@ func (sm *StorageMinerActor_I) expireSectors() {
 func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorSet) {
 	// for all SectorNumber marked as recovering by recoveringSet
 	for _, sectorNo := range recoveringSet.SectorsOn() {
-		state := sm.SectorStates()[sectorNo]
+		state := sm.Sectors()[sectorNo].State()
 		switch state.StateNumber {
 		case SectorFailingSN:
 			// Check if miners have sufficient balances in sma
@@ -322,7 +321,7 @@ func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorS
 			// Check if miners have sufficient pledgeCollateral
 
 			// copy over the same FaultCount
-			sm.SectorStates()[sectorNo] = SectorRecovering(state.FaultCount)
+			sm.Sectors()[sectorNo].Impl().State_ = SectorRecovering(state.FaultCount)
 			sm.ProvingSet_.Add(sectorNo)
 
 			sm.SectorTable().Impl().FailingSectors_ -= 1
@@ -343,7 +342,7 @@ func (sm *StorageMinerActor_I) RecoverFaults(recoveringSet sector.CompactSectorS
 // TODO: decide how much storage collateral to slash
 // - State Transition
 //   - Active / Commited / Recovering -> Failing
-// - Update SectorStates
+// - Update State in Sectors()
 // - Remove Active / Commited / Recovering from ProvingSet
 func (sm *StorageMinerActor_I) DeclareFaults(faultSet sector.CompactSectorSet) {
 
@@ -434,12 +433,14 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	}
 
 	// add SectorNumber and SealCommitment to Sectors
-	// set SectorState to SectorCommitted
+	// set Sectors.State to SectorCommitted
 	// Note that SectorNumber will only become Active at the next successful PoSt
-	sm.Sectors()[onChainInfo.SectorNumber()] = sealCommitment
-	sm.SectorStates()[onChainInfo.SectorNumber()] = SectorCommitted()
+	sealOnChainInfo := &SectorOnChainInfo_I{
+		SealCommitment_: sealCommitment,
+		State_:          SectorCommitted(),
+	}
+	sm.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 	sm.ProvingSet_.Add(onChainInfo.SectorNumber())
-
 	sm.SectorTable().Impl().CommittedSectors_ += 1
 
 	// TODO: commit state change
@@ -448,7 +449,7 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	// PowerReport get processed at SubmitPoSt
 }
 
-func getSectorNums(m map[sector.SectorNumber]SectorState) []sector.SectorNumber {
+func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {
 	var l []sector.SectorNumber
 	for i, _ := range m {
 		l = append(l, i)

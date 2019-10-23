@@ -34,13 +34,17 @@ type SectorTable struct {
     InactivePower()    block.StoragePower
 }
 
+type SectorOnChainInfo struct {
+    SealCommitment  sector.SealCommitment
+    State           SectorState
+}
+
+type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
-    // TODO: consider merging SectorState into sector.SealCommitment to keep
-    // only one map, instead of two.
-    Sectors                {sector.SectorNumber: sector.SealCommitment}  // this should be an AMT
-    SectorStates           {sector.SectorNumber: SectorState}
+    Sectors                SectorsAMT
 
     ProvingSet             sector.CompactSectorSet
     LastChallengePoSt      block.ChainEpoch
