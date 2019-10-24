@@ -35,6 +35,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CommD_:         sealArtifacts.CommD(),
 					CommR_:         sealArtifacts.CommR(),
 					CommDTreePath_: sealArtifacts.CommDTreePath(),
+					CommCTreePath_: sealArtifacts.CommCTreePath(),
 					Seed_:          sealArtifacts.Seed(),
 					Data_:          data,
 					KeyLayers_:     sealArtifacts.KeyLayers(),

@@ -69,6 +69,7 @@ type ProofAuxTmp struct {
     CommD          Commitment
     CommR          SealedSectorCID
     CommDTreePath  file.Path
+    CommCTreePath  file.Path
 
     Seed           SealSeed
     Data           Bytes
