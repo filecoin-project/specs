@@ -97,8 +97,6 @@ func (provider *StorageProvider_I) verifyPieceCID(pieceCID piece.PieceCID, paylo
 	return true
 }
 
-
-
 func (provider *StorageProvider_I) NotifyOfOnChainDealStatus(dealID deal.DealID, newStatus StorageDealStatus) {
 	_, found := provider.DealStatus()[dealID]
 	if found {

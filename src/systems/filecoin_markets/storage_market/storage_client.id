@@ -5,7 +5,7 @@ import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 type StorageClient struct {
     // generate PieceCID(CommP) from payload
     // so that client can identify their deal
-    generateCommP(payloadCID ipld.CID) piece.PieceCID
+    generatePieceCID(payloadCID ipld.CID) piece.PieceCID
 
     // Call by StorageProvider to pull data with GraphSync
     PullPayload(payloadCID ipld.CID)
