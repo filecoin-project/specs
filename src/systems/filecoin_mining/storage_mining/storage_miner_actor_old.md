@@ -1,4 +1,3 @@
-
 # Storage Miner Actor (DEPRECATED)
 
 * **Code Cid**: `<codec:raw><mhType:identity><"sminer">`
@@ -722,3 +721,107 @@ func AddFaults(faults FaultSet) {
     }
 }
 ```
+
+/*
+type CollateralVault struct {
+    Pledged(Collateral) TokenAmount
+    Pledge(Collateral, TokenAmount)
+    DePledge(Collateral, TokenAmount)
+
+    pledgedStorageCollateral UVarint
+    pledgedConsensusCollateral UVarint
+}
+
+type Collateral union {
+    | StorageDealCollateral
+    | ConsensusCollateral
+}
+
+type TokenAmount UVarint # What are the units? Attofil?
+
+type MinedSector {
+    SectorID           UInt
+    CommR              sector.Commitment
+    FaultStatus(Epoch) Fault
+}
+
+type Fault union {
+    | None
+    | GracePeriod
+    | Fault
+}
+
+<!-- type StorageMinerActor struct {
+  // Amount of power this miner has.
+  power UInt
+
+  provingPeriodEnd Epoch
+
+
+  // Collateral that is waiting to be withdrawn.
+  dePledgeCollateral TokenAmount
+
+  // Time at which the depledged collateral may be withdrawn.
+  dePledgeTime Epoch
+
+  // All sectors this miner has committed.
+  sectors &SectorSet
+
+  // Sectors this miner is currently mining. It is only updated
+  // when a PoSt is submitted (not as each new sector commitment is added).
+  provingSet &SectorSet
+
+  // Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
+  currentFaultSet FaultSet
+
+  // Faults submitted after the current proving period's challenge time, but before the PoSt for that period
+  // is submitted. These become the currentFaultSet when a PoSt is submitted.
+  nextFaultSet FaultSet
+
+  // Sectors reported during the last PoSt submission as being 'done'. The collateral
+  // for them is still being held until the next PoSt submission in case early sector
+  // removal penalization is needed.
+  nextDoneSet DoneSet
+
+  // List of sectors that this miner was slashed for.
+  slashedSet optional &SectorSet
+
+  // Deals this miner has been slashed for since the last post submission.
+  arbitratedDeals {Cid:Null} // TODO
+
+  // The height at which this miner was slashed at.
+  slashedAt optional Epoch
+
+  // The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
+  owedStorageCollateral TokenAmount
+
+  // Internal methods
+  verifySeal(sectorID SectorID, comm SealCommitment, proof SealProof)
+  verifyPoSt(proofs base.PoStProof, doneSet Bitfield)
+
+  // Getters
+  GetOwner() address.Address
+  GetWorkerAddr() address.Address
+  GetPower() BytesAmount
+  GetPeerID() PeerID
+  GetSectorSize() BytesAmount
+  GetCurrentProvingSet() BitField
+
+  // SubmitPost verifies the PoSt
+  SubmitPost(proofs base.PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
+  DePledge(amt TokenAmount)
+
+  AddCollateral()
+
+  AbitrateDeal (deal Deal)
+  SlashStorageFault() // TODO maybe add CheckStorageFault?
+  UpdateFaults(faults FaultSet) // TODO rename into ReportFaults
+  IsLate() (bool)
+  IsSlashed() (bool)
+
+  UpdatePeerID(pid PeerID)
+  ChangeWorker(addr address.Address)
+
+  PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
+  PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)
+} -->

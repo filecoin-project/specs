@@ -52,10 +52,4 @@ type ExpectedConsensus struct {
     IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
 }
 
-type ConsensusFaultType union {
-    DoubleForkMiningFault  ConsensusFault
-    ParentGrindingFault    ConsensusFault
-}
-
-type ConsensusFault struct {}
 type StoragePowerConsensusError struct {}

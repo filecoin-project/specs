@@ -12,11 +12,17 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (sms *StorageMiningSubsystem_I) CreateMiner(ownerPubKey filcrypto.PubKey, workerPubKey filcrypto.PubKey, sectorSize util.UInt, peerId libp2p.PeerID) address.Address {
-	ownerAddr := sms.generateOwnerAddress(workerPubKey)
+func (sms *StorageMiningSubsystem_I) CreateMiner(
+	ownerAddr address.Address,
+	workerAddr address.Address,
+	sectorSize util.UInt,
+	peerId libp2p.PeerID,
+) address.Address {
+	// ownerAddr := sms.generateOwnerAddress(workerPubKey)
 	// var pledgeAmt actor.TokenAmount TODO: unclear how to pass the amount/pay
 	// TODO compute PledgeCollateral for 0 bytes
-	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
+	// return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
+	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerAddr, peerId)
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
