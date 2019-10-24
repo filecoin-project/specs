@@ -40,8 +40,8 @@ type SectorOnChainInfo struct {
 }
 
 type ChallengeStatus struct {
-    LastChallengeEpoch  block.ChainEpoch  // get updated by NotifyOfPoStChallenge
-    LastResponseEpoch   block.ChainEpoch  // get updated upon successful submitPoSt
+    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStChallenge
+    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon successful submitPoSt
 }
 
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
@@ -92,7 +92,7 @@ type StorageMinerActor struct {
     computeProvingPeriodEndSectorState()  // TODO
 
     verifyPoStSubmission(postSubmission poster.PoStSubmission) bool
-    loadStagedCommittedSectors()
+    processStagedCommittedSectors()
 
     clearSector(sectorNo sector.SectorNumber)
     activateSector(sectorNo sector.SectorNumber)

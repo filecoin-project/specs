@@ -23,13 +23,13 @@ func (cs *ChallengeStatus_I) OnNewChallenge(currEpoch block.ChainEpoch) Challeng
 // Call by either SubmitPoSt or OnMissedPoSt
 // TODO: verify this is correct and if we need to distinguish SubmitPoSt vs OnMissedPoSt
 func (cs *ChallengeStatus_I) OnChallengeResponse(currEpoch block.ChainEpoch) ChallengeStatus {
-	cs.LastResponseEpoch_ = currEpoch
+	cs.LastChallengeEndEpoch_ = currEpoch
 	return cs
 }
 
 func (cs *ChallengeStatus_I) isChallenged() bool {
-	// true (isChallenged) when LastChallengeEpoch is later than LastResponseEpoch
-	return cs.LastChallengeEpoch() > cs.LastResponseEpoch()
+	// true (isChallenged) when LastChallengeEpoch is later than LastChallengeEndEpoch
+	return cs.LastChallengeEpoch() > cs.LastChallengeEndEpoch()
 }
 
 // called by CronActor to notify StorageMiner of PoSt Challenge
@@ -46,7 +46,7 @@ func (sm *StorageMinerActor_I) NotifyOfPoStChallenge() {
 	// TODO: commit state change
 }
 
-func (sm *StorageMinerActor_I) loadStagedCommittedSectors() {
+func (sm *StorageMinerActor_I) processStagedCommittedSectors() {
 	for sectorNo, sealOnChainInfo := range sm.StagedCommittedSectors() {
 		sm.Sectors()[sectorNo] = sealOnChainInfo
 		sm.ProvingSet_.Add(sectorNo)
@@ -114,7 +114,7 @@ func (sm *StorageMinerActor_I) onMissedPoSt() {
 	// TODO: get currEpoch from runtime
 	var currEpoch block.ChainEpoch
 	sm.ChallengeStatus().Impl().OnChallengeResponse(currEpoch)
-	sm.loadStagedCommittedSectors()
+	sm.processStagedCommittedSectors()
 
 	// TODO: commit state change
 
@@ -159,20 +159,15 @@ func (sm *StorageMinerActor_I) verifyPoStSubmission(postSubmission poster.PoStSu
 // into Cleared State which means deleting the Sector from state
 // remove SectorNumber from all states on chain
 // update SectorTable
-func (sm *StorageMinerActor_I) clearSector(sectorNo sector.SectorNumber, isTerminated bool) {
+func (sm *StorageMinerActor_I) clearSector(sectorNo sector.SectorNumber) {
 	state := sm.Sectors()[sectorNo].State()
 	switch state.StateNumber {
 	case SectorActiveSN:
 		// expiration case
 		sm.SectorTable().Impl().ActiveSectors_ -= 1
 	case SectorFailingSN:
-		if isTerminated {
-			sm.SectorTable().Impl().TerminationFaultCount_ += 1
-			sm.SectorTable().Impl().FailingSectors_ -= 1
-		} else {
-			// expiration case
-			sm.SectorTable().Impl().FailingSectors_ -= 1
-		}
+		// expiration and termination cases
+		sm.SectorTable().Impl().FailingSectors_ -= 1
 	default:
 		// Committed and Recovering should not go to Cleared directly
 		panic("invalid state in clearSector")
@@ -248,7 +243,8 @@ func (sm *StorageMinerActor_I) failSector(sectorNo sector.SectorNumber, incremen
 		// TODO: heavy penalization: slash pledge collateral and delete sector
 		// TODO: SendMessage(SPA.SlashPledgeCollateral)
 
-		sm.clearSector(sectorNo, true)
+		sm.clearSector(sectorNo)
+		sm.SectorTable().Impl().TerminationFaultCount_ += 1
 	}
 
 	// TODO: decide if commit state change here
@@ -352,7 +348,7 @@ func (sm *StorageMinerActor_I) SubmitPoSt(postSubmission poster.PoStSubmission) 
 	// TODO: get currEpoch from runtime
 	var currEpoch block.ChainEpoch
 	sm.ChallengeStatus().Impl().OnChallengeResponse(currEpoch)
-	sm.loadStagedCommittedSectors()
+	sm.processStagedCommittedSectors()
 }
 
 func (sm *StorageMinerActor_I) expireSectors() {
@@ -371,14 +367,14 @@ func (sm *StorageMinerActor_I) expireSectors() {
 
 			// Settle deals
 			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
-			sm.clearSector(expiredSectorNo, false)
+			sm.clearSector(expiredSectorNo)
 		case SectorFailingSN:
 			// TODO: check if there is any fault that we should handle here
 			// If a SectorFailing Expires, return remaining StorageDealCollateral and remove sector
 			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
 
 			// a failing sector expires, no change to FaultCount
-			sm.clearSector(expiredSectorNo, false)
+			sm.clearSector(expiredSectorNo)
 		default:
 			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
 			// TODO: proper failure
