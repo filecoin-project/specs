@@ -1,8 +1,8 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
-// PieceID is the main reference to pieces in Filecoin. It is the CID
+// PieceCID is the main reference to pieces in Filecoin. It is the CID
 // of the Piece.
-type PieceID ipld.CID
+type PieceCID ipld.CID
 
 type NumBytes UVarint  // TODO: move into util
 
@@ -18,7 +18,7 @@ type PieceSize struct {
 // decoupling storage of this information from the piece itself.
 type PieceInfo struct {
     ID    PieceID
-    Size  UVarint
+    Size  PieceSize
     // TODO: store which algorithms were used to construct this piece.
 }
 
