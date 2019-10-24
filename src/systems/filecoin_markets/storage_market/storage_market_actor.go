@@ -59,6 +59,7 @@ func (sma *StorageMarketActor_I) PublishStorageDeals(newStorageDeals []deal.Stor
 	response := make([]PublishStorageDealResponse, l)
 	for i, newDeal := range newStorageDeals {
 		if sma.verifyStorageDeal(newDeal) {
+			// TODO lockFunds
 			id := sma.generateStorageDealID(newDeal)
 			sma.Deals()[id] = newDeal
 			response[i] = PublishStorageDealSuccess
