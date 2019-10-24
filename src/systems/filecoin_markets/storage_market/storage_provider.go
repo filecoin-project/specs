@@ -1,10 +1,11 @@
 package storage_market
 
 import (
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 )
 
 // import deal_status "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
@@ -13,7 +14,9 @@ func (provider *StorageProvider_I) HandleNewStorageDealProposal(proposal deal.St
 	if provider.verifyStorageClient(proposal.Client(), proposal.ProposerSignature(), proposal.StoragePrice()) {
 		// status := &deal.StorageDealStatus_StorageDealProposed_I{}
 		// s := deal.StorageDealStatus_Make_StorageDealProposed(status)
-		provider.DealStatus()[proposal.PieceRef()] = StorageDealProposed
+		// TODO fix this
+		var dealID deal.DealID
+		provider.DealStatus()[dealID] = StorageDealProposed
 		// TODO notify StorageClient that a deal has been received
 		// TODO notify StorageMiningSubsystem to add deals to sector
 		provider.signStorageDealProposal(proposal)
@@ -28,8 +31,15 @@ func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.Storage
 }
 
 func (provider *StorageProvider_I) rejectStorageDealProposal(proposal deal.StorageDealProposal) {
-	provider.DealStatus()[proposal.PieceRef()] = StorageDealRejected
+	// TODO fix this
+	var dealID deal.DealID
+	provider.DealStatus()[dealID] = StorageDealRejected
 	// TODO send notification to client
+}
+
+func (provider *StorageProvider_I) verifyCommP(pieceCID piece.PieceCID, payloadCID ipld.CID) bool {
+	panic("TODO")
+	return true
 }
 
 func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, signature deal.Signature, price actor.TokenAmount) bool {
@@ -45,6 +55,7 @@ func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, sig
 	// }
 
 	// TODO Check on Signature
+	// TODO Verify CommP
 	// return true
 	panic("TODO")
 }
@@ -53,8 +64,8 @@ func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, sig
 // 	panic("TODO")
 // }
 
-func (provider *StorageProvider_I) HandleStorageDealQuery(dealCID deal.DealCID) StorageDealStatus {
-	dealStatus, found := provider.DealStatus()[dealCID]
+func (provider *StorageProvider_I) HandleStorageDealQuery(dealID deal.DealID) StorageDealStatus {
+	dealStatus, found := provider.DealStatus()[dealID]
 
 	if found {
 		return dealStatus

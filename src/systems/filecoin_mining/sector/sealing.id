@@ -22,8 +22,9 @@ type SealCfg struct {
 // needs to verify a Seal.
 type SealVerifyInfo struct {
     SectorID
-    OnChain OnChainSealVerifyInfo
+    OnChain     OnChainSealVerifyInfo
     SealCfg
+    PieceInfos  [PieceInfo]
 }
 
 // OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -41,10 +42,9 @@ type OnChainSealVerifyInfo struct {
 // SealCommitment is the information kept in the state tree about a sector.
 // SealCommitment is a subset of OnChainSealVerifyInfo.
 type SealCommitment struct {
-    UnsealedCID  UnsealedSectorCID  // CommD
-    SealedCID    SealedSectorCID  // CommR
-    DealIDs      [deal.DealID]
-    Expiration   block.ChainEpoch
+    SealedCID   SealedSectorCID  // CommR
+    DealIDs     [deal.DealID]
+    Expiration  block.ChainEpoch
 }
 
 // ProofAux is meta data required to generate certain proofs
@@ -96,3 +96,5 @@ type SealAlgorithm enum {
 
 // TODO
 type SealOutputArtifacts struct {}
+
+type PieceInfo struct {}

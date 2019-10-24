@@ -3,6 +3,7 @@ package storage_mining
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 
 // If a Post is missed (either due to faults being not declared on time or
 // because the miner run out of time, every sector is reported as failing
@@ -293,7 +294,27 @@ func (sm *StorageMinerActor_I) verifySeal(onChainInfo sector.OnChainSealVerifyIn
 	// TODO: verify seal @nicola
 	// TODO: get var sealRandomness sector.SealRandomness from onChainInfo.Epoch
 	// TODO: sm.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
-	panic("TODO")
+
+	// verifySeal will also generate CommD on the fly from CommP and PieceSize
+
+	var pieceInfos []sector.PieceInfo // = make([]sector.PieceInfo, 0)
+
+	for dealId := range onChainInfo.DealIDs() {
+		// FIXME: Actually get the deal info from the storage market actor and use it to create a sector.PieceInfo.
+		_ = dealId
+
+		pieceInfos = append(pieceInfos, nil)
+	}
+
+	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
+		SectorID_: &sector.SectorID_I{
+			MinerID_: sm.Info().Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
+			Number_:  onChainInfo.SectorNumber(),
+		},
+
+		OnChain_:    onChainInfo,
+		PieceInfos_: pieceInfos,
+	})
 	return true
 }
 
@@ -332,13 +353,11 @@ func (sm *StorageMinerActor_I) CommitSector(onChainInfo sector.OnChainSealVerify
 	})
 
 	// no need to store the proof and randomseed in the state tree
-	// verify and drop, only SealCommitments{CommD, CommR, DealIDs} on chain
-	// TODO: @porcuquine verifies
+	// verify and drop, only SealCommitments{CommR, DealIDs} on chain
 	sealCommitment := &sector.SealCommitment_I{
-		// UnsealedCID_: onChainInfo.UnsealedCID(), // no longer need this? remove from SealCommitment?
-		SealedCID_: onChainInfo.SealedCID(),
-		DealIDs_:   onChainInfo.DealIDs(),
-		// Expiration_:  lastDealExpiration,
+		SealedCID_:  onChainInfo.SealedCID(),
+		DealIDs_:    onChainInfo.DealIDs(),
+		Expiration_: lastDealExpiration, // TODO decide if we need this too
 	}
 
 	// add SectorNumber and SealCommitment to Sectors
