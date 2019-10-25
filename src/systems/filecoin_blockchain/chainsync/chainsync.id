@@ -25,19 +25,25 @@ type ValidationGraph struct {
     // nodes needed for validation, and keeps both forward and back links.
     // Graph graph.BlockGraph
 
-    // FinalityTipset contains the latest tipset declared to be final.
-    // This is what we use to check against.
+    // FinalityTipset contains the latest finalized tipset -- this is the
+    // local node's notion of finality. It will not automatically unwind
+    // history before this point. All automatic ChainSync is forward from
+    // this tipset.
+    //
+    // This is what we use to check state against for users/clients of the
+    // blockchain subsystem. If users request FinalityEpoch, it corresponds
+    // to FinalityTipset.
     FinalityTipset   PartialGraph
 
     // ValidG contains all the blocks we have validated, but are not
     // yet declared Final. This means all the blocks connected into the
-    // main blockchain, but which ValidationGraph has not yet picked.
+    // main blockchain, but not yet past finality (ie after FinalityTipset)
     ValidG           PartialGraph
 
-    // ToValidateG is the set of unvalidated Blocks fully connected
+    // FetchedG is the set of unvalidated Blocks fully connected
     // to the validated graph. These are ready to be validated, all the
     // data is local, and are ordered by total ChainWeight.
-    ToValidateG      PartialGraph
+    FetchedG         PartialGraph
 
     // ConnectedG is the set of connected Blocks (BlockHeaders) fully connected
     // to the ToValidateG graph. These are close to ready to be validated.
@@ -50,7 +56,7 @@ type ValidationGraph struct {
     // blocks.
     UnconnectedG     PartialGraph
 
-    // TargetHeads is a list of candidate heads sorted by likelihood of being the
+    // TargetHeads is a list of candidate blocks sorted by likelihood of being the
     // best chain. (eg sorted by block.ChainWeight, even if not validated yet)
     // TargetHeads SHOULD be a small set (<10)
     //

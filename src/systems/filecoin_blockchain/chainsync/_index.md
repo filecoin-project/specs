@@ -45,7 +45,7 @@ At a high level, `ChainSync` does the following:
   - Step 2. Get the block it points to, and that block's parents
   - Step 3. Graphsync the `StateTree`
 - **Part 4: Catch up to the chain  (`CHAIN_CATCHUP`)**
-  - Step 1. Maintain a set of `TargetHeads`, and select the `BestTargetHead` from it
+  - Step 1. Maintain a set of `TargetHeads` (`BlockCIDs`), and select the `BestTargetHead` from it
   - Step 2. Synchronize to the latest heads observed, validating blocks towards them (requesting intermediate points)
   - Step 3. As validation progresses, `TargetHeads` and `BestTargetHead` will likely change, as new blocks at the production fringe will arrive,
     and some target heads or paths to them may fail to validate.
@@ -455,3 +455,36 @@ If you imagine that you will receive the header once per gossipsub peer (or if l
 ```
 
 2MB in <5s may not be worth saving-- and maybe gossipsub can be much better about supressing dups.
+
+
+# Notes (TODO: move elsewhere)
+
+## Checkpoints
+
+- A checkpoint is the CID of a block (not a tipset list of CIDs, or StateTree)
+- The reason a block is OK is that it uniquely identifies a tipset.
+- using tipsets directly would make Checkpoints harder to communicate. we want to make checkpoints a single hash, as short as we can have it. They will be shared in tweets, URLs, emails, printed into newspapers, etc. Compactness, ease of copy-paste, etc matters.
+- we'll make human readable lists of checkpoints, and making "lists of lists" is more annoying.
+- When we have `EC.E_PARENTS > 5` or `= 10`, tipsets will get annoyingly large.
+- the big quirk/weirdness with blocks it that it also must be in the chain. (if you relaxed that constraint you could end up in a weird case where a checkpoint isnt in the chain and that's weird/violates assumptions).
+
+
+![](https://user-images.githubusercontent.com/138401/67015561-8c929000-f0ab-11e9-847a-ec42f23b14da.png)
+
+## Bootstrap chain stub
+
+- the mainnet filecoin chain will need to start with a small chain stub of blocks.
+- we must include some data in different blocks.
+- we do need a genesis block -- we derive randomness from the ticket there. Rather than special casing, it is easier/less complex to ensure a well-formed chain always, including at the beginning
+- A lot of code expects lookbacks, especially actor code. Rather than introducing a bunch of special case logic for what happens ostensibly once in network history (special case logic which adds complexity and likelihood of problems), it is easiest to assume the chain is always at least X blocks long, and the system lookback parameters are all fine and dont need to be scaled in the beginning of network's history.
+
+## PartialGraph
+
+The `PartialGraph` of blocks.
+
+> Is a graph necessarily connected, or is this just a bag of blocks, with each disconnected subgraph being reported in heads/tails?
+
+The latter.  the partial graph is a DAG fragment-- including disconnected components.
+here's a visual example, 4 example PartialGraphs, with Heads and Tails. (note they aren't tipsets)
+
+![](https://user-images.githubusercontent.com/138401/67014349-90bdae00-f0a9-11e9-9f29-bdca6c673c4b.png)
