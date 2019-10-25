@@ -16,6 +16,7 @@ type Bytes32 []byte
 type UInt = util.UInt
 type PieceInfo = sector.PieceInfo
 type Label Bytes32
+type Commitment = sector.Commitment
 
 func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
@@ -161,18 +162,15 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness secto
 
 	keyLayers := generateSDRKeyLayers(sdr.drg(), sdr.expander(), sealSeed, nodes, layers, nodeSize, curveModulus)
 	key := keyLayers[len(keyLayers)-1]
-
 	replica := encodeData(data, key, nodeSize, &curveModulus)
 
-	commRLast, commRLastTreePath := RepHash_PedersenHash(replica)
-	commC, commCTreePath := computeCommC(keyLayers, nodeSize)
-	commR := RepCompress_PedersenHash(commC, commRLast)
+	commC, commRLast, commR, commCTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, keyLayers)
 
 	result := SealSetupArtifacts_I{
-		CommD_:             sector.Commitment(commC),
+		CommD_:             Commitment(commC),
 		CommR_:             SealedSectorCID(commR),
-		CommC_:             sector.Commitment(commC),
-		CommRLast_:         sector.Commitment(commRLast),
+		CommC_:             Commitment(commC),
+		CommRLast_:         Commitment(commRLast),
 		CommDTreePath_:     commDTreePath,
 		CommCTreePath_:     commCTreePath,
 		CommRLastTreePath_: commRLastTreePath,
@@ -183,7 +181,14 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness secto
 	return &result
 }
 
-func ComputeSealSeed(sid sector.SectorID, commD sector.Commitment, randomness sector.SealRandomness) sector.SealSeed {
+func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte) (commC PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commRLastTreePath file.Path) {
+	commRLast, commRLastTreePath = RepHash_PedersenHash(replica)
+	commC, commCTreePath = computeCommC(keyLayers, int(sdr.NodeSize()))
+	commR = RepCompress_PedersenHash(commC, commRLast)
+	panic("TODO")
+}
+
+func ComputeSealSeed(sid sector.SectorID, commD Commitment, randomness sector.SealRandomness) sector.SealSeed {
 	_, _ = sid.MinerID(), (sid.Number())
 
 	// FIXME: Implement
@@ -323,7 +328,7 @@ func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.SealRandomness
 // NOTE: Verification of a private proof is exactly the computation we will prove we have performed in a zk-SNARK.
 // If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
 // Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
-func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeed sector.SealSeed, randomness sector.SealRandomness, commD sector.Commitment, commR sector.SealedSectorCID) bool {
+func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeed sector.SealSeed, randomness sector.SealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
 	challenges := sdr.GenerateOfflineChallenges(sealSeed, randomness, sdr.Challenges())
 
 	// commC and commRLast must be the same for all challenge proofs, so we can arbitrarily verify against the first.
@@ -454,8 +459,8 @@ func CreateColumnProof(c UInt, nodeSize UInt, columnTree *MerkleTree, aux sector
 }
 
 type OfflineSDRChallengeProof struct {
-	CommRLast sector.Commitment
-	CommC     sector.Commitment
+	CommRLast Commitment
+	CommC     Commitment
 
 	// TODO: these proofs need to depend on hash function.
 	DataProof    InclusionProof // Blake2s
@@ -474,7 +479,7 @@ func (ip *InclusionProof) leafIndex() UInt {
 	panic("TODO")
 }
 
-func (ip *InclusionProof) root() sector.Commitment {
+func (ip *InclusionProof) root() Commitment {
 	panic("TODO")
 }
 
@@ -652,7 +657,7 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	}
 }
 
-func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.Commitment, sealSeed sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
+func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR Commitment, sealSeed sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
 	//publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
@@ -781,11 +786,11 @@ func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
 	panic("not implemented -- re-arrange bits")
 }
 
-func Commitment_UnsealedSectorCID(cid sector.UnsealedSectorCID) sector.Commitment {
+func Commitment_UnsealedSectorCID(cid sector.UnsealedSectorCID) Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
-func Commitment_SealedSectorCID(cid sector.SealedSectorCID) sector.Commitment {
+func Commitment_SealedSectorCID(cid sector.SealedSectorCID) Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
