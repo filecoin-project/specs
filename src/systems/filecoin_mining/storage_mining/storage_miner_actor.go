@@ -72,7 +72,7 @@ func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) {
 	h.Commit(st)
 }
 
-func (st *StorageMinerActorState_I) _updateProcessStagedCommittedSectors(rt Runtime) {
+func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
 	for sectorNo, sealOnChainInfo := range st.StagedCommittedSectors() {
 		st.Sectors()[sectorNo] = sealOnChainInfo
 		st.Impl().ProvingSet_.Add(sectorNo)
@@ -97,8 +97,8 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 		NewTerminatedFaults_: newTerminatedFaults,
 	}
 
+	rt.Fatal("TODO") // TODO: Send(SPA, ProcessFaultReport(faultReport))
 	panic(faultReport)
-	// TODO: Send(SPA, ProcessFaultReport(faultReport))
 
 	h, st := a.State(rt)
 	st.SectorTable().Impl().TerminationFaultCount_ = util.UVarint(0)
@@ -114,8 +114,8 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	}
 	h.Release(st)
 
+	rt.Fatal("TODO") // TODO: Send(SPA, ProcessPowerReport(powerReport))
 	panic(powerReport)
-	// TODO: Send(SPA, ProcessPowerReport(powerReport))
 }
 
 func (a *StorageMinerActorCode_I) _onMissedPoSt(rt Runtime) {
@@ -148,7 +148,7 @@ func (a *StorageMinerActorCode_I) _onMissedPoSt(rt Runtime) {
 	// end of challenge
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
-	st._updateProcessStagedCommittedSectors(rt)
+	st._updateCommittedSectors(rt)
 	h.Commit(st)
 }
 
@@ -170,7 +170,7 @@ func (a *StorageMinerActorCode_I) _verifyPoStSubmission(rt Runtime, postSubmissi
 	// 1. A proof must be submitted after the postRandomness for this proving
 	// period is on chain
 	// if rt.ChainEpoch < sm.ProvingPeriodEnd - challengeTime {
-	//   panic("too early")
+	//   rt.Fatal("too early")
 	// }
 
 	// 2. A proof must be a valid snark proof with the correct public inputs
@@ -181,7 +181,7 @@ func (a *StorageMinerActorCode_I) _verifyPoStSubmission(rt Runtime, postSubmissi
 	// 2.3 Verify the PoSt Proof
 	// verifyPoSt(challenges, TODO)
 
-	panic("TODO")
+	rt.Fatal("TODO") // TODO: finish
 	return false
 }
 
@@ -200,7 +200,8 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 		st.SectorTable().Impl().FailingSectors_ -= 1
 	default:
 		// Committed and Recovering should not go to Cleared directly
-		panic("invalid state in clearSector")
+		rt.Fatal("invalid state in clearSector")
+		// TODO: determine proper error here and error-handling machinery
 	}
 
 	delete(st.Sectors(), sectorNo)
@@ -219,8 +220,8 @@ func (st *StorageMinerActorState_I) _updateActivateSector(rt Runtime, sectorNo s
 	case SectorRecoveringSN:
 		st.SectorTable().Impl().RecoveringSectors_ -= 1
 	default:
-		// TODO: proper throw
-		panic("invalid state in activateSector")
+		// TODO: determine proper error here and error-handling machinery
+		rt.Fatal("invalid state in activateSector")
 	}
 
 	st.Sectors()[sectorNo].Impl().State_ = SectorActive()
@@ -261,11 +262,9 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 		// no change to SectorTable but increase in FaultCount
 		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
 	default:
-		// TODO: proper failure
-		panic("Invalid sector state in CronAction")
+		// TODO: determine proper error here and error-handling machinery
+		rt.Fatal("Invalid sector state in CronAction")
 	}
-
-	// TODO commit state change
 
 	if newFaultCount > MAX_CONSECUTIVE_FAULTS {
 		// TODO: heavy penalization: slash pledge collateral and delete sector
@@ -301,16 +300,16 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission) {
 
 	if !a._isChallenged(rt) {
-		// TODO: proper throw
-		panic("cannot SubmitPoSt when not challenged")
+		// TODO: determine proper error here and error-handling machinery
+		rt.Fatal("cannot SubmitPoSt when not challenged")
 	}
 
 	// Verify correct PoSt Submission
 	isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
 	if !isPoStVerified {
 		// no state transition, just error out and miner should submitPoSt again
-		// TODO: proper failure
-		panic("TODO")
+		// TODO: determine proper error here and error-handling machinery
+		rt.Fatal("TODO")
 	}
 
 	h, st := a.State(rt)
@@ -321,6 +320,7 @@ func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.P
 	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
 		sectorState, found := st.Sectors()[sectorNo]
 		if !found {
+			// TODO: determine proper error here and error-handling machinery
 			rt.Fatal("Sector state not found in map")
 		}
 		switch sectorState.State().StateNumber {
@@ -332,8 +332,8 @@ func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.P
 			// TODO: Pay miner in a single batch message
 			// SendMessage(sma.ProcessStorageDealsPayment(sm.Sectors()[sectorNumber].DealIDs()))
 		default:
-			// TODO: proper failure
-			panic("Invalid sector state in ProvingSet.SectorsOn()")
+			// TODO: determine proper error here and error-handling machinery
+			rt.Fatal("Invalid sector state in ProvingSet.SectorsOn()")
 		}
 	}
 
@@ -353,8 +353,8 @@ func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.P
 		case SectorFailingSN:
 			st._updateFailSector(rt, sectorNo, true)
 		default:
-			// TODO: proper failure
-			panic("Invalid sector state in ProvingSet.SectorsOff")
+			// TODO: determine proper error here and error-handling machinery
+			rt.Fatal("Invalid sector state in ProvingSet.SectorsOff")
 		}
 	}
 
@@ -384,7 +384,7 @@ func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.P
 
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
-	st._updateProcessStagedCommittedSectors(rt)
+	st._updateCommittedSectors(rt)
 }
 
 func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
@@ -413,14 +413,14 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 			st._updateClearSector(rt, expiredSectorNo)
 		default:
 			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
-			// TODO: proper failure
-			panic("Invalid sector state in SectorExpirationQueue")
+			// TODO: determine proper error here and error-handling machinery
+			rt.Fatal("Invalid sector state in SectorExpirationQueue")
 		}
 	}
 
 	// Return PledgeCollateral for active expirations
 	// SendMessage(spa.Depledge) // TODO
-	panic("TODO: refactor use of this method in order for caller to send this message")
+	rt.Fatal("TODO: refactor use of this method in order for caller to send this message")
 }
 
 // RecoverFaults checks if miners have sufficent collateral
@@ -432,8 +432,8 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) {
 
 	if a._isChallenged(rt) {
-		// TODO: proper throw
-		panic("cannot RecoverFaults when sm isChallenged")
+		// TODO: determine proper error here and error-handling machinery
+		rt.Fatal("cannot RecoverFaults when sm isChallenged")
 	}
 
 	h, st := a.State(rt)
@@ -442,6 +442,7 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	for _, sectorNo := range recoveringSet.SectorsOn() {
 		sectorState, found := st.Sectors()[sectorNo]
 		if !found {
+			// TODO: determine proper error here and error-handling machinery
 			rt.Fatal("Sector state not found in map")
 		}
 		switch sectorState.State().StateNumber {
@@ -461,10 +462,10 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 			st.SectorTable().Impl().RecoveringSectors_ += 1
 
 		default:
-			// TODO: proper failure
+			// TODO: determine proper error here and error-handling machinery
 			// TODO: consider this a no-op (as opposed to a failure), because this is a user
 			// call that may be delayed by the chain beyond some other state transition.
-			panic("Invalid sector state in RecoverFaults")
+			rt.Fatal("Invalid sector state in RecoverFaults")
 		}
 	}
 
@@ -479,6 +480,7 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 // - Remove Active / Commited / Recovering from ProvingSet
 func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.CompactSectorSet) {
 	if a._isChallenged(rt) {
+		// TODO: determine proper error here and error-handling machinery
 		rt.Fatal("cannot DeclareFaults when challenged")
 	}
 
@@ -542,6 +544,7 @@ func (a *StorageMinerActorCode_I) CommitSector(rt Runtime, onChainInfo sector.On
 
 	isSealVerificationCorrect := st._isSealVerificationCorrect(rt, onChainInfo)
 	if !isSealVerificationCorrect {
+		// TODO: determine proper error here and error-handling machinery
 		rt.Fatal("Seal verification failed")
 	}
 
@@ -550,6 +553,7 @@ func (a *StorageMinerActorCode_I) CommitSector(rt Runtime, onChainInfo sector.On
 
 	sectorExists := st._sectorExists(rt, onChainInfo.SectorNumber())
 	if sectorExists {
+		// TODO: determine proper error here and error-handling machinery
 		rt.Fatal("Sector already exists")
 	}
 

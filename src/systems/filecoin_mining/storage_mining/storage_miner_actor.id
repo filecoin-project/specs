@@ -80,7 +80,7 @@ type StorageMinerActorState struct {
         incrementFaultCount  bool
     )
     _updateExpireSectors(rt Runtime)
-    _updateProcessStagedCommittedSectors(rt Runtime)
+    _updateCommittedSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
 }
