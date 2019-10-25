@@ -4584,8 +4584,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// needs to verify a Seal.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>
-    <span class="nx">OnChain</span> <span class="nx">OnChainSealVerifyInfo</span>
+    <span class="nx">OnChain</span>     <span class="nx">OnChainSealVerifyInfo</span>
     <span class="nx">SealCfg</span>
+    <span class="nx">PieceInfos</span>  <span class="p">[</span><span class="nx">PieceInfo</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="c1">// OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -4603,10 +4604,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// SealCommitment is the information kept in the state tree about a sector.
 </span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">UnsealedCID</span>  <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
-</span><span class="c1"></span>    <span class="nx">SealedCID</span>    <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">DealIDs</span>      <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
-    <span class="nx">Expiration</span>   <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">SealedCID</span>   <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">DealIDs</span>     <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nx">Expiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="c1">// ProofAux is meta data required to generate certain proofs
@@ -4658,6 +4658,8 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
 

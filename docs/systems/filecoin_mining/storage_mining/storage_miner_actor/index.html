@@ -4585,51 +4585,84 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">Remove</span><span class="p">(</span><span class="nx">n</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 <span class="p">}</span>
 
+<span class="kd">type</span> <span class="nx">SectorTable</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorSize</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
+    <span class="nx">ActiveSectors</span>          <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="nx">CommittedSectors</span>       <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="nx">RecoveringSectors</span>      <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="nx">FailingSectors</span>         <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+
+    <span class="nf">ActivePower</span><span class="p">()</span>          <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">InactivePower</span><span class="p">()</span>        <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+
+    <span class="nx">TerminationFaultCount</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// transient State that get reset on every constructPowerReport
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SectorOnChainInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SealCommitment</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span>
+    <span class="nx">State</span>           <span class="nx">SectorState</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ChallengeStatus</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">LastChallengeEpoch</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by NotifyOfPoStChallenge
+</span><span class="c1"></span>    <span class="nx">LastChallengeEndEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon successful submitPoSt
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SectorsAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">StagedCommittedSectorAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">StorageMinerActor</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// CollateralVault CollateralVault
 </span><span class="c1"></span>
-    <span class="c1">// TODO: consider merging SectorState into sector.SealCommitment to keep
-</span><span class="c1"></span>    <span class="c1">// only one map, instead of two.
-</span><span class="c1"></span>    <span class="nx">Sectors</span>                <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span><span class="p">}</span>  <span class="c1">// this should be an AMT
-</span><span class="c1"></span>    <span class="nx">SectorStates</span>           <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorState</span><span class="p">}</span>
-    <span class="nx">ProvingSet</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
-    <span class="nx">LastChallengePoSt</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Sectors</span>                  <span class="nx">SectorsAMT</span>
+    <span class="nx">StagedCommittedSectors</span>   <span class="nx">StagedCommittedSectorAMT</span>
 
+    <span class="c1">// ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
+</span><span class="c1"></span>    <span class="c1">// successful SubmitPoSt will perform changes to NextProvingSet
+</span><span class="c1"></span>    <span class="c1">// and update ProvingSet with NextProvingSet at the end
+</span><span class="c1"></span>    <span class="c1">// No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
+</span><span class="c1"></span>    <span class="nx">ProvingSet</span>               <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+
+    <span class="nx">SectorTable</span>
     <span class="nx">SectorExpirationQueue</span>
+    <span class="nx">ChallengeStatus</span>
 
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">Info</span>                   <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                     <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
-    <span class="c1">// TODO: add the DePledgeCollateral
-</span><span class="c1"></span>    <span class="c1">// TODO: add the Sectors
-</span><span class="c1"></span>    <span class="c1">// TODO sectors []SectorInfo CID to AMT
-</span><span class="c1"></span>    <span class="c1">// TODO provingSet []SectorInfo CID to AMT
+    <span class="c1">// TODO ProvingPeriodEnd   Epoch
 </span><span class="c1"></span>
-    <span class="c1">// TODO: should we keep the same structure as before or putting all of that into a struct?
-</span><span class="c1"></span>    <span class="c1">// TODO do we need a `slashedAt`?
-</span><span class="c1"></span>    <span class="c1">// TODO owedStorageCollateral
-</span><span class="c1"></span>    <span class="c1">// TODO ProvingPeriodEnd   Epoch
-</span><span class="c1"></span>
+    <span class="nf">NotifyOfPoStChallenge</span><span class="p">()</span>
+
     <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>
     <span class="nf">SubmitPoSt</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
 
+    <span class="nf">CheckPoStSubmissionHappened</span><span class="p">()</span>
+    <span class="nf">onMissedPoSt</span><span class="p">()</span>
+
     <span class="c1">// TODO: should depledge be in here or in storage market actor?
 </span><span class="c1"></span>
-    <span class="c1">// TODO: add GetOwner()
-</span><span class="c1"></span>    <span class="c1">// TODO: add GetPeerID()
-</span><span class="c1"></span>    <span class="c1">// TODO: add GetSectorSize()
-</span><span class="c1"></span>    <span class="c1">// TODO: add UpdatePeerID()
-</span><span class="c1"></span>    <span class="c1">// TODO: add UpdatePeerID()
-</span><span class="c1"></span>    <span class="c1">// TODO: add ChangeWorker()
-</span><span class="c1"></span>
-    <span class="c1">// TODO: do IsSlashed, IsLate belong here?
-</span><span class="c1"></span>
-    <span class="nf">DeclareFault</span><span class="p">(</span><span class="nx">faultSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">)</span>
+    <span class="nf">DeclareFaults</span><span class="p">(</span><span class="nx">failingSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
+    <span class="nf">RecoverFaults</span><span class="p">(</span><span class="nx">recoveringSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
+
+    <span class="nf">constructFaultReport</span><span class="p">(</span>
+        <span class="nx">declared</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+        <span class="nx">detected</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+        <span class="nx">terminated</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="p">)</span>
+    <span class="nf">constructPowerReport</span><span class="p">()</span>
 
     <span class="nf">computeProvingPeriodEndSectorState</span><span class="p">()</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
     <span class="nf">verifyPoStSubmission</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">processStagedCommittedSectors</span><span class="p">()</span>
+
+    <span class="nf">clearSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+    <span class="nf">activateSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+    <span class="nf">failSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">incrementFaultCount</span> <span class="kt">bool</span><span class="p">)</span>
+
+    <span class="nf">expireSectors</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MinerInfo</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4650,114 +4683,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
 </span><span class="c1"></span>    <span class="nx">SectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
 <span class="p">}</span>
-
-<span class="cm">/*
-</span><span class="cm">type CollateralVault struct {
-</span><span class="cm">    Pledged(Collateral) TokenAmount
-</span><span class="cm">    Pledge(Collateral, TokenAmount)
-</span><span class="cm">    DePledge(Collateral, TokenAmount)
-</span><span class="cm">
-</span><span class="cm">    pledgedStorageCollateral UVarint
-</span><span class="cm">    pledgedConsensusCollateral UVarint
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">type Collateral union {
-</span><span class="cm">    | StorageDealCollateral
-</span><span class="cm">    | ConsensusCollateral
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">type TokenAmount UVarint # What are the units? Attofil?
-</span><span class="cm">
-</span><span class="cm">type MinedSector {
-</span><span class="cm">    SectorID           UInt
-</span><span class="cm">    CommR              sector.Commitment
-</span><span class="cm">    FaultStatus(Epoch) Fault
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">type Fault union {
-</span><span class="cm">    | None
-</span><span class="cm">    | GracePeriod
-</span><span class="cm">    | Fault
-</span><span class="cm">}
-</span><span class="cm">*/</span>
-
-<span class="cm">/*
-</span><span class="cm">ype StorageMinerActor struct {
-</span><span class="cm">  // Amount of power this miner has.
-</span><span class="cm">  power UInt
-</span><span class="cm">
-</span><span class="cm">  provingPeriodEnd Epoch
-</span><span class="cm">
-</span><span class="cm">
-</span><span class="cm">  // Collateral that is waiting to be withdrawn.
-</span><span class="cm">  dePledgeCollateral TokenAmount
-</span><span class="cm">
-</span><span class="cm">  // Time at which the depledged collateral may be withdrawn.
-</span><span class="cm">  dePledgeTime Epoch
-</span><span class="cm">
-</span><span class="cm">  // All sectors this miner has committed.
-</span><span class="cm">  sectors &amp;SectorSet
-</span><span class="cm">
-</span><span class="cm">  // Sectors this miner is currently mining. It is only updated
-</span><span class="cm">  // when a PoSt is submitted (not as each new sector commitment is added).
-</span><span class="cm">  provingSet &amp;SectorSet
-</span><span class="cm">
-</span><span class="cm">  // Faulty sectors reported since last SubmitPost, up to the current proving period&#39;s challenge time.
-</span><span class="cm">  currentFaultSet FaultSet
-</span><span class="cm">
-</span><span class="cm">  // Faults submitted after the current proving period&#39;s challenge time, but before the PoSt for that period
-</span><span class="cm">  // is submitted. These become the currentFaultSet when a PoSt is submitted.
-</span><span class="cm">  nextFaultSet FaultSet
-</span><span class="cm">
-</span><span class="cm">  // Sectors reported during the last PoSt submission as being &#39;done&#39;. The collateral
-</span><span class="cm">  // for them is still being held until the next PoSt submission in case early sector
-</span><span class="cm">  // removal penalization is needed.
-</span><span class="cm">  nextDoneSet DoneSet
-</span><span class="cm">
-</span><span class="cm">  // List of sectors that this miner was slashed for.
-</span><span class="cm">  slashedSet optional &amp;SectorSet
-</span><span class="cm">
-</span><span class="cm">  // Deals this miner has been slashed for since the last post submission.
-</span><span class="cm">  arbitratedDeals {Cid:Null} // TODO
-</span><span class="cm">
-</span><span class="cm">  // The height at which this miner was slashed at.
-</span><span class="cm">  slashedAt optional Epoch
-</span><span class="cm">
-</span><span class="cm">  // The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
-</span><span class="cm">  owedStorageCollateral TokenAmount
-</span><span class="cm">
-</span><span class="cm">  // Internal methods
-</span><span class="cm">  verifySeal(sectorID SectorID, comm SealCommitment, proof SealProof)
-</span><span class="cm">  verifyPoSt(proofs base.PoStProof, doneSet Bitfield)
-</span><span class="cm">
-</span><span class="cm">  // Getters
-</span><span class="cm">  GetOwner() address.Address
-</span><span class="cm">  GetWorkerAddr() address.Address
-</span><span class="cm">  GetPower() BytesAmount
-</span><span class="cm">  GetPeerID() PeerID
-</span><span class="cm">  GetSectorSize() BytesAmount
-</span><span class="cm">  GetCurrentProvingSet() BitField
-</span><span class="cm">
-</span><span class="cm">  // SubmitPost verifies the PoSt
-</span><span class="cm">  SubmitPost(proofs base.PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
-</span><span class="cm">  DePledge(amt TokenAmount)
-</span><span class="cm">
-</span><span class="cm">  AddCollateral()
-</span><span class="cm">
-</span><span class="cm">  AbitrateDeal (deal Deal)
-</span><span class="cm">  SlashStorageFault() // TODO maybe add CheckStorageFault?
-</span><span class="cm">  UpdateFaults(faults FaultSet) // TODO rename into ReportFaults
-</span><span class="cm">  IsLate() (bool)
-</span><span class="cm">  IsSlashed() (bool)
-</span><span class="cm">
-</span><span class="cm">  UpdatePeerID(pid PeerID)
-</span><span class="cm">  ChangeWorker(addr address.Address)
-</span><span class="cm">
-</span><span class="cm">  PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
-</span><span class="cm">  PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">*/</span>
 </code></pre></div>
 
 

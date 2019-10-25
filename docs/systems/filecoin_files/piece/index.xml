@@ -17,7 +17,7 @@
       
       <guid>/docs/systems/filecoin_files/piece/piece_store/</guid>
       <description>A PieceStore is an object that can store and retrieve pieces from some local storage. The PieceStore additionally keeps an index of pieces.
-import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; // PieceStore is an object that stores pieces into some local storage. // it is internally backed by an IpldStore. type PieceStore struct { Store ipld.Store Index {PieceID: Piece} Get(i PieceID) struct {p Piece, e error} Put(p Piece) error Delete(i PieceID) error }  </description>
+import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; type PieceID UVarint // PieceStore is an object that stores pieces into some local storage. // it is internally backed by an IpldStore. type PieceStore struct { Store ipld.Store Index {PieceID: Piece} Get(i PieceID) struct {p Piece, e error} Put(p Piece) error Delete(i PieceID) error }  </description>
     </item>
     
   </channel>

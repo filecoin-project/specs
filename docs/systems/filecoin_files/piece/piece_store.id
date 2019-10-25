@@ -1,5 +1,7 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
+type PieceID UVarint
+
 // PieceStore is an object that stores pieces into some local storage.
 // it is internally backed by an IpldStore.
 type PieceStore struct {

@@ -4640,24 +4640,30 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 
 <span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">DealCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+<span class="kd">type</span> <span class="nx">PayloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PieceRef</span>            <span class="nx">DealCID</span>
-    <span class="nx">PieceSize</span>           <span class="nx">UInt</span>
-    <span class="nx">Client</span>              <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Provider</span>            <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">ProposalExpiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">DealExpiration</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">StoragePrice</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">StorageCollateral</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">ProposerSignature</span>   <span class="nx">Signature</span>
+    <span class="c1">// The data hashed in a form that is compatible with the proofs system.
+</span><span class="c1"></span>    <span class="c1">// Reference for actual storage in a sector.
+</span><span class="c1"></span>    <span class="nx">PieceCID</span>                <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// 35 bytes CommP
+</span><span class="c1"></span>    <span class="nx">PieceSize</span>               <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+    <span class="nx">Client</span>                  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">Provider</span>                <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">ProposalExpiration</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">DealExpiration</span>          <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// potentially change to DealDuration
+</span><span class="c1"></span>    <span class="nx">StoragePrice</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// potentially per epoch
+</span><span class="c1"></span>    <span class="nx">ProviderDealCollateral</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">ClientDealCollateral</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// potentially collapse into one with ProviderDealCollateral
+</span><span class="c1"></span>    <span class="nx">ProposerSignature</span>       <span class="nx">Signature</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="c1">// Everything in this struct will go on chain
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Proposal</span>          <span class="nx">StorageDealProposal</span>
     <span class="nx">CounterSignature</span>  <span class="nx">Signature</span>
 <span class="p">}</span>

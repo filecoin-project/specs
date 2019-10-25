@@ -4629,12 +4629,6 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">])</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">ConsensusFaultType</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">DoubleForkMiningFault</span>  <span class="nx">ConsensusFault</span>
-    <span class="nx">ParentGrindingFault</span>    <span class="nx">ConsensusFault</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">ConsensusFault</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusError</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 

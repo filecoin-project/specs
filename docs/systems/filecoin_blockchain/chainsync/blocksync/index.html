@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PieceStore - storing and indexing pieces | Filecoin Spec</title>
+<title>Block Syncer | Filecoin Spec</title>
 
 
 
@@ -15,6 +15,7 @@
 <link rel="icon" href="../../../../../favicon.png" type="image/x-icon">
 
 
+<link rel="alternate" type="application/rss+xml" href="../../../../../docs/systems/filecoin_blockchain/chainsync/blocksync/index.xml" title="Filecoin Spec" />
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
@@ -59,7 +60,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <style>
-  nav ul a[href$="\2f docs\2fsystems\2f filecoin_files\2fpiece\2fpiece_store\2f "] {
+  nav ul a[href$="\2f docs\2fsystems\2f filecoin_blockchain\2f chainsync\2f blocksync\2f "] {
       color: #0b3a53;
   }
   </style>
@@ -2047,11 +2048,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4536,56 +4539,70 @@ https://github.com/alex-shpak/hugo-book
   <label for="menu-control">
     <img src="../../../../../svg/menu.svg" alt="Menu" />
   </label>
-  <strong>PieceStore - storing and indexing pieces</strong>
+  <strong>Block Syncer</strong>
 </header>
 
       
 <article class="markdown">
-  <p>A <code>PieceStore</code> is an object that can store and retrieve pieces
-from some local storage. The <code>PieceStore</code> additionally keeps
-an index of pieces.</p>
 
+<p>In order to ensure they are always on the correct latest state of the blockchain,
+a Filecoin node must continuously monitor and propagate blocks on the network.</p>
 
+<p>When a node receives blocks, it must also <em>validate</em> them.
+Validation is split into two stages, syntactic and semantic.
+The syntactic stage may be validated without reference to additional data, the semantic stage requires access to the chain which the block extends.</p>
 
+<p>For clarity, we separate these stages into separate components:
+syntactic validation is performed by the <a href="../../../../../#systems__filecoin_blockchain__chainsync___index"></a>,
+and once collected and validated, the blocks are forwarded
+to the <a href="../../../../../#systems__filecoin_blockchain__struct__chain_manager___index"></a> which performs semantic validation and adds the blocks to the node&rsquo;s current view of the blockchain state.</p>
 
+<p>The block syncer interfaces and functions are included here, but we expand on important details below for clarity.</p>
 
+<p>goFile block_syncer</p>
 
+<h1 id="block-reception-and-syntactic-validation">Block reception and Syntactic Validation</h1>
 
+<ul>
+<li>Called by: libp2p <a href="../../../../../#systems__filecoin_blockchain__chainsync___index"></a></li>
+<li>Calls on: <a href="../../../../../#systems__filecoin_blockchain__struct__chain_manager___index"></a></li>
+</ul>
 
+<p>On reception of a new block over the appropriate libp2p channel (see gossib_sub), the <em>Block Syncer</em>&rsquo;s <em>OnNewBlock</em> method is invoked. Thereafter, the syncer must perform syntactic validation on the block to discard invalid blocks and forward the others for further validation by the <a href="../../../../../#systems__filecoin_blockchain__struct__chain_manager___index"></a>. At a high level, a syntactically valid block:</p>
 
+<ul>
+<li>must include a well-formed miner address</li>
+<li>must include at least one well-formed ticket</li>
+<li>must include an election proof which is a valid signature by the miner address of the final ticket</li>
+<li>must include at least one parent CID</li>
+<li>must include a positive parent weight</li>
+<li>must include a positive height</li>
+<li>must include a well-formed state root</li>
+<li>must include well-formed messages, and corresponding receipts CIDs</li>
+<li>must include a valid timestamp</li>
+</ul>
 
+<h2 id="timestamp-syntactic-validation">Timestamp Syntactic validation</h2>
 
+<p>In order to ensure that block producers release blocks as soon as possible, filecoin nodes have a cutoff time within each leader election round after which they cease to accept new blocks for this round.</p>
 
+<p>Specifically, the block syncer validation process will use the <a href="../../../../../#systems__filecoin_nodes__clock___index"></a> subsystem to associate a wall clock time to the given round number. Any block coming in after the cutoff time is discarded.</p>
 
+<p>In practice, appropriate parameters will not impact nodes regardless of their network connectivity, but helps clearly demarkate rounds by creating a buffer between a round&rsquo;s end and another&rsquo;s beginning.</p>
 
+<h1 id="block-propagation">Block Propagation</h1>
 
+<ul>
+<li>Called by: <a href="../../../../../#systems__filecoin_blockchain__struct__block_producer___index">Block Producer</a></li>
+<li>Calls on: libp2p <a href="../../../../../#systems__filecoin_blockchain__chainsync___index"></a></li>
+</ul>
 
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-
-<span class="kd">type</span> <span class="nx">PieceID</span> <span class="nx">UVarint</span>
-
-<span class="c1">// PieceStore is an object that stores pieces into some local storage.
-</span><span class="c1">// it is internally backed by an IpldStore.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceStore</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Store</span>              <span class="nx">ipld</span><span class="p">.</span><span class="nx">Store</span>
-    <span class="nx">Index</span>              <span class="p">{</span><span class="nx">PieceID</span><span class="p">:</span> <span class="nx">Piece</span><span class="p">}</span>
-
-    <span class="nf">Get</span><span class="p">(</span><span class="nx">i</span> <span class="nx">PieceID</span><span class="p">)</span>     <span class="kd">struct</span> <span class="p">{</span><span class="nx">p</span> <span class="nx">Piece</span><span class="p">,</span> <span class="nx">e</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">Put</span><span class="p">(</span><span class="nx">p</span> <span class="nx">Piece</span><span class="p">)</span>       <span class="kt">error</span>
-    <span class="nf">Delete</span><span class="p">(</span><span class="nx">i</span> <span class="nx">PieceID</span><span class="p">)</span>  <span class="kt">error</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
-
-
-
-</article>
+<p>Blocks are propagated over the libp2p pubsub channel <code>/fil/blocks</code>. The following structure is filled out with the appropriate information, serialized (with IPLD), and sent over the wire:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">type</span> BlockMessage struct <span class="o">{</span>
+  header BlockHeader
+  secpkMessages <span class="o">[]</span><span class="p">&amp;</span>SignedMessage
+  blsMessages <span class="o">[]</span><span class="p">&amp;</span>Message
+<span class="o">}</span></code></pre></div></article>
 
       
 
@@ -4594,6 +4611,18 @@ an index of pieces.</p>
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#block-reception-and-syntactic-validation">Block reception and Syntactic Validation</a>
+<ul>
+<li><a href="#timestamp-syntactic-validation">Timestamp Syntactic validation</a></li>
+</ul></li>
+<li><a href="#block-propagation">Block Propagation</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

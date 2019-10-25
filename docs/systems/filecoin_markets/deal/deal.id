@@ -2,23 +2,29 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 
 type DealID UVarint
 type DealCID ipld.CID
+type PayloadCID ipld.CID
 type Signature struct {}  // TODO
 
 type StorageDealProposal struct {
-    PieceRef            DealCID
-    PieceSize           UInt
-    Client              addr.Address
-    Provider            addr.Address
-    ProposalExpiration  block.ChainEpoch
-    DealExpiration      block.ChainEpoch
-    StoragePrice        actor.TokenAmount
-    StorageCollateral   actor.TokenAmount
-    ProposerSignature   Signature
+    // The data hashed in a form that is compatible with the proofs system.
+    // Reference for actual storage in a sector.
+    PieceCID                piece.PieceCID  // 35 bytes CommP
+    PieceSize               piece.PieceSize
+    Client                  addr.Address
+    Provider                addr.Address
+    ProposalExpiration      block.ChainEpoch
+    DealExpiration          block.ChainEpoch  // potentially change to DealDuration
+    StoragePrice            actor.TokenAmount  // potentially per epoch
+    ProviderDealCollateral  actor.TokenAmount
+    ClientDealCollateral    actor.TokenAmount  // potentially collapse into one with ProviderDealCollateral
+    ProposerSignature       Signature
 }
 
+// Everything in this struct will go on chain
 type StorageDeal struct {
     Proposal          StorageDealProposal
     CounterSignature  Signature

@@ -21,51 +21,84 @@ type SectorExpirationQueue struct {
     Remove(n sector.SectorNumber)
 }
 
+type SectorTable struct {
+    SectorSize             sector.SectorSize
+    ActiveSectors          util.UVarint
+    CommittedSectors       util.UVarint
+    RecoveringSectors      util.UVarint
+    FailingSectors         util.UVarint
+
+    ActivePower()          block.StoragePower
+    InactivePower()        block.StoragePower
+
+    TerminationFaultCount  util.UVarint  // transient State that get reset on every constructPowerReport
+}
+
+type SectorOnChainInfo struct {
+    SealCommitment  sector.SealCommitment
+    State           SectorState
+}
+
+type ChallengeStatus struct {
+    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStChallenge
+    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon successful submitPoSt
+}
+
+type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
+
 type StorageMinerActor struct {
     // CollateralVault CollateralVault
 
-    // TODO: consider merging SectorState into sector.SealCommitment to keep
-    // only one map, instead of two.
-    Sectors                {sector.SectorNumber: sector.SealCommitment}  // this should be an AMT
-    SectorStates           {sector.SectorNumber: SectorState}
-    ProvingSet             sector.CompactSectorSet
-    LastChallengePoSt      block.ChainEpoch
+    Sectors                  SectorsAMT
+    StagedCommittedSectors   StagedCommittedSectorAMT
 
+    // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
+    // successful SubmitPoSt will perform changes to NextProvingSet
+    // and update ProvingSet with NextProvingSet at the end
+    // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
+    ProvingSet               sector.CompactSectorSet
+
+    SectorTable
     SectorExpirationQueue
+    ChallengeStatus
 
     // contains mostly static info about this miner
-    Info                   &MinerInfo
+    Info                     &MinerInfo
 
-    // TODO: add the DePledgeCollateral
-    // TODO: add the Sectors
-    // TODO sectors []SectorInfo CID to AMT
-    // TODO provingSet []SectorInfo CID to AMT
-
-    // TODO: should we keep the same structure as before or putting all of that into a struct?
-    // TODO do we need a `slashedAt`?
-    // TODO owedStorageCollateral
     // TODO ProvingPeriodEnd   Epoch
+
+    NotifyOfPoStChallenge()
 
     CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
 
     SubmitPoSt(postSubmission poster.PoStSubmission)
 
+    CheckPoStSubmissionHappened()
+    onMissedPoSt()
+
     // TODO: should depledge be in here or in storage market actor?
 
-    // TODO: add GetOwner()
-    // TODO: add GetPeerID()
-    // TODO: add GetSectorSize()
-    // TODO: add UpdatePeerID()
-    // TODO: add UpdatePeerID()
-    // TODO: add ChangeWorker()
+    DeclareFaults(failingSet sector.CompactSectorSet)
+    RecoverFaults(recoveringSet sector.CompactSectorSet)
 
-    // TODO: do IsSlashed, IsLate belong here?
-
-    DeclareFault(faultSet sector.FaultSet)
+    constructFaultReport(
+        declared    util.UVarint
+        detected    util.UVarint
+        terminated  util.UVarint
+    )
+    constructPowerReport()
 
     computeProvingPeriodEndSectorState()  // TODO
 
     verifyPoStSubmission(postSubmission poster.PoStSubmission) bool
+    processStagedCommittedSectors()
+
+    clearSector(sectorNo sector.SectorNumber)
+    activateSector(sectorNo sector.SectorNumber)
+    failSector(sectorNo sector.SectorNumber, incrementFaultCount bool)
+
+    expireSectors()
 }
 
 type MinerInfo struct {
@@ -86,111 +119,3 @@ type MinerInfo struct {
     // Amount of space in each sector committed to the network by this miner.
     SectorSize  util.BytesAmount
 }
-
-/*
-type CollateralVault struct {
-    Pledged(Collateral) TokenAmount
-    Pledge(Collateral, TokenAmount)
-    DePledge(Collateral, TokenAmount)
-
-    pledgedStorageCollateral UVarint
-    pledgedConsensusCollateral UVarint
-}
-
-type Collateral union {
-    | StorageDealCollateral
-    | ConsensusCollateral
-}
-
-type TokenAmount UVarint # What are the units? Attofil?
-
-type MinedSector {
-    SectorID           UInt
-    CommR              sector.Commitment
-    FaultStatus(Epoch) Fault
-}
-
-type Fault union {
-    | None
-    | GracePeriod
-    | Fault
-}
-*/
-
-/*
-ype StorageMinerActor struct {
-  // Amount of power this miner has.
-  power UInt
-
-  provingPeriodEnd Epoch
-
-
-  // Collateral that is waiting to be withdrawn.
-  dePledgeCollateral TokenAmount
-
-  // Time at which the depledged collateral may be withdrawn.
-  dePledgeTime Epoch
-
-  // All sectors this miner has committed.
-  sectors &SectorSet
-
-  // Sectors this miner is currently mining. It is only updated
-  // when a PoSt is submitted (not as each new sector commitment is added).
-  provingSet &SectorSet
-
-  // Faulty sectors reported since last SubmitPost, up to the current proving period's challenge time.
-  currentFaultSet FaultSet
-
-  // Faults submitted after the current proving period's challenge time, but before the PoSt for that period
-  // is submitted. These become the currentFaultSet when a PoSt is submitted.
-  nextFaultSet FaultSet
-
-  // Sectors reported during the last PoSt submission as being 'done'. The collateral
-  // for them is still being held until the next PoSt submission in case early sector
-  // removal penalization is needed.
-  nextDoneSet DoneSet
-
-  // List of sectors that this miner was slashed for.
-  slashedSet optional &SectorSet
-
-  // Deals this miner has been slashed for since the last post submission.
-  arbitratedDeals {Cid:Null} // TODO
-
-  // The height at which this miner was slashed at.
-  slashedAt optional Epoch
-
-  // The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
-  owedStorageCollateral TokenAmount
-
-  // Internal methods
-  verifySeal(sectorID SectorID, comm SealCommitment, proof SealProof)
-  verifyPoSt(proofs base.PoStProof, doneSet Bitfield)
-
-  // Getters
-  GetOwner() address.Address
-  GetWorkerAddr() address.Address
-  GetPower() BytesAmount
-  GetPeerID() PeerID
-  GetSectorSize() BytesAmount
-  GetCurrentProvingSet() BitField
-
-  // SubmitPost verifies the PoSt
-  SubmitPost(proofs base.PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
-  DePledge(amt TokenAmount)
-
-  AddCollateral()
-
-  AbitrateDeal (deal Deal)
-  SlashStorageFault() // TODO maybe add CheckStorageFault?
-  UpdateFaults(faults FaultSet) // TODO rename into ReportFaults
-  IsLate() (bool)
-  IsSlashed() (bool)
-
-  UpdatePeerID(pid PeerID)
-  ChangeWorker(addr address.Address)
-
-  PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
-  PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)
-}
-
-*/

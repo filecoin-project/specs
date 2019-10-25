@@ -4562,92 +4562,80 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
+<span class="kd">type</span> <span class="nx">PowerTableEntry</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ActivePower</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">InactivePower</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">AvailableBalance</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">LockedPledgeCollateral</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PowerReport</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ActivePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// set value
+</span><span class="c1"></span>    <span class="nx">InactivePower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// set value
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">FaultReport</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">NewDeclaredFaults</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span>    <span class="nx">NewDetectedFaults</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span>    <span class="nx">NewTerminatedFaults</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">// type PowerTableHAMT {actor.ActorID: PowerTableEntry}
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PowerTableHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">PowerTableEntry</span><span class="p">}</span>  <span class="c1">// TODO: covert ActorID to address
+</span><span class="c1"></span>
+<span class="c1">// TODO: Diagram for state transition to someones power
+</span><span class="c1">// TODO: increment and decrement?
+</span><span class="c1">// TODO: What does graceful removal look like?
+</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StoragePowerActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// TODO: bytesamount might be inefficient
-</span><span class="c1"></span>    <span class="c1">// Miners [addr.Address]
-</span><span class="c1"></span>    <span class="nx">Miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">}</span>
+    <span class="c1">// PowerTable is a mapping from MinerActorID to PowerTableEntry
+</span><span class="c1"></span>    <span class="nx">PowerTable</span>  <span class="nx">PowerTableHAMT</span>
+    <span class="nx">EC</span>          <span class="nx">ExpectedConsensus</span>
 
     <span class="c1">// call by StorageMiningSubsytem on miner creation
 </span><span class="c1"></span>    <span class="nf">CreateStorageMiner</span><span class="p">(</span>
-        <span class="nx">ownerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-        <span class="nx">sectorSize</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
-        <span class="nx">peerId</span>        <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>  <span class="c1">// TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
+        <span class="c1">// TODO: document differences in Addr, Key and ID accross spec
+</span><span class="c1"></span>        <span class="nx">ownerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">workerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>  <span class="c1">// TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
 </span><span class="c1"></span>    <span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-    <span class="c1">// TODO add NotifyConsensusFault(addr.Address, [block.Block]) TODO maybe rename to Arbitrate
-</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span>
+    <span class="nf">RemoveStorageMiner</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">verifyStorageMiner</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="c1">// PowerTable Operations
+</span><span class="c1"></span>    <span class="nf">GetTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 
-    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">GetPledgeCollateralReq</span><span class="p">(</span><span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">EnsurePledgeCollateralSatisfied</span><span class="p">()</span> <span class="kt">bool</span>
+    <span class="nf">AddBalance</span><span class="p">()</span>
+    <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
-    <span class="c1">// call by StorageMinerActor on successful seal
-</span><span class="c1"></span>    <span class="c1">// TODO: workerKey of type StorageMiner.WorkerPubKey
-</span><span class="c1"></span>    <span class="nf">IncrementPower</span><span class="p">(</span><span class="nx">minerAddress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">getDeclaredFaultSlash</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">getDetectedFaultSlash</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">getTerminatedFaultSlash</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">slashPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
-    <span class="nf">SuspendMiner</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">lockPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+    <span class="nf">unlockPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
-    <span class="nx">expectedConsensus</span> <span class="nx">ExpectedConsensus</span>
+    <span class="nf">ProcessPowerReport</span><span class="p">(</span><span class="nx">report</span> <span class="nx">PowerReport</span><span class="p">)</span>
     <span class="nf">ReportConsensusFault</span><span class="p">(</span>
-        <span class="nx">slasherAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">faultType</span>    <span class="nx">ConsensusFaultType</span>
-        <span class="nx">proof</span>        <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">]</span>
+        <span class="c1">// slasherAddr  addr.Address TODO: fromActor
+</span><span class="c1"></span>        <span class="nx">faultType</span>  <span class="nx">ConsensusFaultType</span>
+        <span class="nx">proof</span>      <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">]</span>
     <span class="p">)</span>
-    <span class="nf">ReportUncommittedPowerFault</span><span class="p">(</span><span class="nx">cheaterAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nx">PowerTable</span>
 
-    <span class="c1">// VerifyElectionProof(addr.Address, ElectionProof)    bool
-</span><span class="c1"></span>
     <span class="nf">Surprise</span><span class="p">(</span><span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-
-    <span class="nf">CheckFaults</span><span class="p">()</span>
-
-    <span class="c1">// // What does graceful removal look like?
-</span><span class="c1"></span>
-    <span class="c1">// TODO: old methods, should be removed
-</span><span class="c1"></span>    <span class="c1">// UpdateStoragePowerSubsystem(Tipset, StateTree)
-</span><span class="c1"></span>    <span class="c1">// VerifyElectionProof(addr.Address, ElectionProof)    bool
-</span><span class="c1"></span>    <span class="c1">// NotifyStorageFault(addr.Address)
-</span><span class="c1"></span>    <span class="c1">// TryPublishBlock(StateTree)                    block.Block
-</span><span class="c1"></span>    <span class="nf">CommitPledgeCollateral</span><span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span>
-    <span class="nf">DecommitPledgeCollateral</span><span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span>
-
-    <span class="nx">pledgeCollateralBalances</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">UVarint</span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PowerTable</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// all power here is always verified
-</span><span class="c1"></span>    <span class="nf">RegisterMiner</span><span class="p">(</span>
-        <span class="nx">addr</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">pk</span>          <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-        <span class="nx">sectorSize</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
-    <span class="p">)</span>
-    <span class="nx">miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StorageMiner</span><span class="p">}</span>
-    <span class="nf">GetMinerPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nf">GetTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nf">GetMinerPublicKey</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-    <span class="nf">IncrementPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">SuspendPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">UnsuspendPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">RemovePower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">RemoveAllPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">StorageMiner</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">MinerAddress</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">MinerStoragePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nx">MinerSuspendedPower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nx">MinerPK</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-    <span class="nx">MinerSectorSize</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
-<span class="p">}</span>
+    <span class="c1">// this should be part of ReportConsensusFault, numSectors should be all sectors
+</span><span class="c1"></span>    <span class="c1">// ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
+</span><span class="c1"></span><span class="p">}</span>
 </code></pre></div>
 
 

@@ -4718,8 +4718,8 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.0</span>-<span id="spec-version-hash">69d3ee9</span>
-    <br /><span id="spec-version-date">2019-10-22_03:00:40Z</span>
+    spec doc version: <span id="spec-version-number">v1.0</span>-<span id="spec-version-hash">e0a1642</span>
+    <br /><span id="spec-version-date">2019-10-25_11:31:03Z</span>
   </div>
 </div>
 
@@ -9596,9 +9596,9 @@ to store <code>Pieces</code>.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
-<span class="c1">// PieceID is the main reference to pieces in Filecoin. It is the CID
+<span class="c1">// PieceCID is the main reference to pieces in Filecoin. It is the CID
 </span><span class="c1">// of the Piece.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 
 <span class="kd">type</span> <span class="nx">NumBytes</span> <span class="nx">UVarint</span>  <span class="c1">// TODO: move into util
 </span><span class="c1"></span>
@@ -9614,7 +9614,7 @@ to store <code>Pieces</code>.</p>
 </span><span class="c1">// decoupling storage of this information from the piece itself.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ID</span>    <span class="nx">PieceID</span>
-    <span class="nx">Size</span>  <span class="nx">UVarint</span>
+    <span class="nx">Size</span>  <span class="nx">PieceSize</span>
     <span class="c1">// TODO: store which algorithms were used to construct this piece.
 </span><span class="c1"></span><span class="p">}</span>
 
@@ -9751,6 +9751,8 @@ an index of pieces.</p>
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+
+<span class="kd">type</span> <span class="nx">PieceID</span> <span class="nx">UVarint</span>
 
 <span class="c1">// PieceStore is an object that stores pieces into some local storage.
 </span><span class="c1">// it is internally backed by an IpldStore.
@@ -14856,12 +14858,6 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">])</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">ConsensusFaultType</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">DoubleForkMiningFault</span>  <span class="nx">ConsensusFault</span>
-    <span class="nx">ParentGrindingFault</span>    <span class="nx">ConsensusFault</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">ConsensusFault</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusError</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
@@ -15369,92 +15365,80 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
+<span class="kd">type</span> <span class="nx">PowerTableEntry</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ActivePower</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">InactivePower</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nx">AvailableBalance</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">LockedPledgeCollateral</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">PowerReport</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ActivePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// set value
+</span><span class="c1"></span>    <span class="nx">InactivePower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>  <span class="c1">// set value
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">FaultReport</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">NewDeclaredFaults</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span>    <span class="nx">NewDetectedFaults</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span>    <span class="nx">NewTerminatedFaults</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">// type PowerTableHAMT {actor.ActorID: PowerTableEntry}
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PowerTableHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">PowerTableEntry</span><span class="p">}</span>  <span class="c1">// TODO: covert ActorID to address
+</span><span class="c1"></span>
+<span class="c1">// TODO: Diagram for state transition to someones power
+</span><span class="c1">// TODO: increment and decrement?
+</span><span class="c1">// TODO: What does graceful removal look like?
+</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StoragePowerActor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// TODO: bytesamount might be inefficient
-</span><span class="c1"></span>    <span class="c1">// Miners [addr.Address]
-</span><span class="c1"></span>    <span class="nx">Miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">}</span>
+    <span class="c1">// PowerTable is a mapping from MinerActorID to PowerTableEntry
+</span><span class="c1"></span>    <span class="nx">PowerTable</span>  <span class="nx">PowerTableHAMT</span>
+    <span class="nx">EC</span>          <span class="nx">ExpectedConsensus</span>
 
     <span class="c1">// call by StorageMiningSubsytem on miner creation
 </span><span class="c1"></span>    <span class="nf">CreateStorageMiner</span><span class="p">(</span>
-        <span class="nx">ownerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-        <span class="nx">sectorSize</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
-        <span class="nx">peerId</span>        <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>  <span class="c1">// TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
+        <span class="c1">// TODO: document differences in Addr, Key and ID accross spec
+</span><span class="c1"></span>        <span class="nx">ownerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">workerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">peerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>  <span class="c1">// TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
 </span><span class="c1"></span>    <span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-    <span class="c1">// TODO add NotifyConsensusFault(addr.Address, [block.Block]) TODO maybe rename to Arbitrate
-</span><span class="c1"></span>    <span class="nf">UpdatePower</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span>
+    <span class="nf">RemoveStorageMiner</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">verifyStorageMiner</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">TotalStorage</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="c1">// PowerTable Operations
+</span><span class="c1"></span>    <span class="nf">GetTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 
-    <span class="nf">PowerLookup</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">GetPledgeCollateralReq</span><span class="p">(</span><span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">EnsurePledgeCollateralSatisfied</span><span class="p">()</span> <span class="kt">bool</span>
+    <span class="nf">AddBalance</span><span class="p">()</span>
+    <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
-    <span class="c1">// call by StorageMinerActor on successful seal
-</span><span class="c1"></span>    <span class="c1">// TODO: workerKey of type StorageMiner.WorkerPubKey
-</span><span class="c1"></span>    <span class="nf">IncrementPower</span><span class="p">(</span><span class="nx">minerAddress</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">getDeclaredFaultSlash</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">getDetectedFaultSlash</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">getTerminatedFaultSlash</span><span class="p">(</span><span class="nx">amount</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">slashPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
-    <span class="nf">SuspendMiner</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+    <span class="nf">lockPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
+    <span class="nf">unlockPledgeCollateral</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
-    <span class="nx">expectedConsensus</span> <span class="nx">ExpectedConsensus</span>
+    <span class="nf">ProcessPowerReport</span><span class="p">(</span><span class="nx">report</span> <span class="nx">PowerReport</span><span class="p">)</span>
     <span class="nf">ReportConsensusFault</span><span class="p">(</span>
-        <span class="nx">slasherAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">faultType</span>    <span class="nx">ConsensusFaultType</span>
-        <span class="nx">proof</span>        <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">]</span>
+        <span class="c1">// slasherAddr  addr.Address TODO: fromActor
+</span><span class="c1"></span>        <span class="nx">faultType</span>  <span class="nx">ConsensusFaultType</span>
+        <span class="nx">proof</span>      <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">]</span>
     <span class="p">)</span>
-    <span class="nf">ReportUncommittedPowerFault</span><span class="p">(</span><span class="nx">cheaterAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nx">PowerTable</span>
 
-    <span class="c1">// VerifyElectionProof(addr.Address, ElectionProof)	bool
-</span><span class="c1"></span>
     <span class="nf">Surprise</span><span class="p">(</span><span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-
-    <span class="nf">CheckFaults</span><span class="p">()</span>
-
-    <span class="c1">// // What does graceful removal look like?
-</span><span class="c1"></span>
-    <span class="c1">// TODO: old methods, should be removed
-</span><span class="c1"></span>    <span class="c1">// UpdateStoragePowerSubsystem(Tipset, StateTree)
-</span><span class="c1"></span>    <span class="c1">// VerifyElectionProof(addr.Address, ElectionProof)	bool
-</span><span class="c1"></span>    <span class="c1">// NotifyStorageFault(addr.Address)
-</span><span class="c1"></span>    <span class="c1">// TryPublishBlock(StateTree)					block.Block
-</span><span class="c1"></span>    <span class="nf">CommitPledgeCollateral</span><span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span>
-    <span class="nf">DecommitPledgeCollateral</span><span class="p">(</span><span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span>
-
-    <span class="nx">pledgeCollateralBalances</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">UVarint</span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PowerTable</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// all power here is always verified
-</span><span class="c1"></span>    <span class="nf">RegisterMiner</span><span class="p">(</span>
-        <span class="nx">addr</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">pk</span>          <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-        <span class="nx">sectorSize</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
-    <span class="p">)</span>
-    <span class="nx">miners</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StorageMiner</span><span class="p">}</span>
-    <span class="nf">GetMinerPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nf">GetTotalPower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nf">GetMinerPublicKey</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-    <span class="nf">IncrementPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">SuspendPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">UnsuspendPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">RemovePower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-    <span class="nf">RemoveAllPower</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">numSectors</span> <span class="nx">UVarint</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">StorageMiner</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">MinerAddress</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">MinerStoragePower</span>    <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nx">MinerSuspendedPower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
-    <span class="nx">MinerPK</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-    <span class="nx">MinerSectorSize</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
-<span class="p">}</span>
+    <span class="c1">// this should be part of ReportConsensusFault, numSectors should be all sectors
+</span><span class="c1"></span>    <span class="c1">// ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
+</span><span class="c1"></span><span class="p">}</span>
 </code></pre></div>
 
 
@@ -17435,51 +17419,84 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="nf">Remove</span><span class="p">(</span><span class="nx">n</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 <span class="p">}</span>
 
+<span class="kd">type</span> <span class="nx">SectorTable</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SectorSize</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSize</span>
+    <span class="nx">ActiveSectors</span>          <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="nx">CommittedSectors</span>       <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="nx">RecoveringSectors</span>      <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="nx">FailingSectors</span>         <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+
+    <span class="nf">ActivePower</span><span class="p">()</span>          <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">InactivePower</span><span class="p">()</span>        <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+
+    <span class="nx">TerminationFaultCount</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// transient State that get reset on every constructPowerReport
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SectorOnChainInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SealCommitment</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span>
+    <span class="nx">State</span>           <span class="nx">SectorState</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ChallengeStatus</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">LastChallengeEpoch</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by NotifyOfPoStChallenge
+</span><span class="c1"></span>    <span class="nx">LastChallengeEndEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon successful submitPoSt
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SectorsAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">StagedCommittedSectorAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">StorageMinerActor</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// CollateralVault CollateralVault
 </span><span class="c1"></span>
-    <span class="c1">// TODO: consider merging SectorState into sector.SealCommitment to keep
-</span><span class="c1"></span>    <span class="c1">// only one map, instead of two.
-</span><span class="c1"></span>    <span class="nx">Sectors</span>                <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCommitment</span><span class="p">}</span>  <span class="c1">// this should be an AMT
-</span><span class="c1"></span>    <span class="nx">SectorStates</span>           <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorState</span><span class="p">}</span>
-    <span class="nx">ProvingSet</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
-    <span class="nx">LastChallengePoSt</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Sectors</span>                  <span class="nx">SectorsAMT</span>
+    <span class="nx">StagedCommittedSectors</span>   <span class="nx">StagedCommittedSectorAMT</span>
 
+    <span class="c1">// ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
+</span><span class="c1"></span>    <span class="c1">// successful SubmitPoSt will perform changes to NextProvingSet
+</span><span class="c1"></span>    <span class="c1">// and update ProvingSet with NextProvingSet at the end
+</span><span class="c1"></span>    <span class="c1">// No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
+</span><span class="c1"></span>    <span class="nx">ProvingSet</span>               <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+
+    <span class="nx">SectorTable</span>
     <span class="nx">SectorExpirationQueue</span>
+    <span class="nx">ChallengeStatus</span>
 
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">Info</span>                   <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                     <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
-    <span class="c1">// TODO: add the DePledgeCollateral
-</span><span class="c1"></span>    <span class="c1">// TODO: add the Sectors
-</span><span class="c1"></span>    <span class="c1">// TODO sectors []SectorInfo CID to AMT
-</span><span class="c1"></span>    <span class="c1">// TODO provingSet []SectorInfo CID to AMT
+    <span class="c1">// TODO ProvingPeriodEnd   Epoch
 </span><span class="c1"></span>
-    <span class="c1">// TODO: should we keep the same structure as before or putting all of that into a struct?
-</span><span class="c1"></span>    <span class="c1">// TODO do we need a `slashedAt`?
-</span><span class="c1"></span>    <span class="c1">// TODO owedStorageCollateral
-</span><span class="c1"></span>    <span class="c1">// TODO ProvingPeriodEnd   Epoch
-</span><span class="c1"></span>
+    <span class="nf">NotifyOfPoStChallenge</span><span class="p">()</span>
+
     <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>
     <span class="nf">SubmitPoSt</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
 
+    <span class="nf">CheckPoStSubmissionHappened</span><span class="p">()</span>
+    <span class="nf">onMissedPoSt</span><span class="p">()</span>
+
     <span class="c1">// TODO: should depledge be in here or in storage market actor?
 </span><span class="c1"></span>
-    <span class="c1">// TODO: add GetOwner()
-</span><span class="c1"></span>    <span class="c1">// TODO: add GetPeerID()
-</span><span class="c1"></span>    <span class="c1">// TODO: add GetSectorSize()
-</span><span class="c1"></span>    <span class="c1">// TODO: add UpdatePeerID()
-</span><span class="c1"></span>    <span class="c1">// TODO: add UpdatePeerID()
-</span><span class="c1"></span>    <span class="c1">// TODO: add ChangeWorker()
-</span><span class="c1"></span>
-    <span class="c1">// TODO: do IsSlashed, IsLate belong here?
-</span><span class="c1"></span>
-    <span class="nf">DeclareFault</span><span class="p">(</span><span class="nx">faultSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">)</span>
+    <span class="nf">DeclareFaults</span><span class="p">(</span><span class="nx">failingSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
+    <span class="nf">RecoverFaults</span><span class="p">(</span><span class="nx">recoveringSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
+
+    <span class="nf">constructFaultReport</span><span class="p">(</span>
+        <span class="nx">declared</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+        <span class="nx">detected</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+        <span class="nx">terminated</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="p">)</span>
+    <span class="nf">constructPowerReport</span><span class="p">()</span>
 
     <span class="nf">computeProvingPeriodEndSectorState</span><span class="p">()</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
     <span class="nf">verifyPoStSubmission</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">processStagedCommittedSectors</span><span class="p">()</span>
+
+    <span class="nf">clearSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+    <span class="nf">activateSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+    <span class="nf">failSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">incrementFaultCount</span> <span class="kt">bool</span><span class="p">)</span>
+
+    <span class="nf">expireSectors</span><span class="p">()</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MinerInfo</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -17500,114 +17517,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
 </span><span class="c1"></span>    <span class="nx">SectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
 <span class="p">}</span>
-
-<span class="cm">/*
-</span><span class="cm">type CollateralVault struct {
-</span><span class="cm">    Pledged(Collateral) TokenAmount
-</span><span class="cm">    Pledge(Collateral, TokenAmount)
-</span><span class="cm">    DePledge(Collateral, TokenAmount)
-</span><span class="cm">
-</span><span class="cm">    pledgedStorageCollateral UVarint
-</span><span class="cm">    pledgedConsensusCollateral UVarint
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">type Collateral union {
-</span><span class="cm">    | StorageDealCollateral
-</span><span class="cm">    | ConsensusCollateral
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">type TokenAmount UVarint # What are the units? Attofil?
-</span><span class="cm">
-</span><span class="cm">type MinedSector {
-</span><span class="cm">    SectorID           UInt
-</span><span class="cm">    CommR              sector.Commitment
-</span><span class="cm">    FaultStatus(Epoch) Fault
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">type Fault union {
-</span><span class="cm">    | None
-</span><span class="cm">    | GracePeriod
-</span><span class="cm">    | Fault
-</span><span class="cm">}
-</span><span class="cm">*/</span>
-
-<span class="cm">/*
-</span><span class="cm">ype StorageMinerActor struct {
-</span><span class="cm">  // Amount of power this miner has.
-</span><span class="cm">  power UInt
-</span><span class="cm">
-</span><span class="cm">  provingPeriodEnd Epoch
-</span><span class="cm">
-</span><span class="cm">
-</span><span class="cm">  // Collateral that is waiting to be withdrawn.
-</span><span class="cm">  dePledgeCollateral TokenAmount
-</span><span class="cm">
-</span><span class="cm">  // Time at which the depledged collateral may be withdrawn.
-</span><span class="cm">  dePledgeTime Epoch
-</span><span class="cm">
-</span><span class="cm">  // All sectors this miner has committed.
-</span><span class="cm">  sectors &amp;SectorSet
-</span><span class="cm">
-</span><span class="cm">  // Sectors this miner is currently mining. It is only updated
-</span><span class="cm">  // when a PoSt is submitted (not as each new sector commitment is added).
-</span><span class="cm">  provingSet &amp;SectorSet
-</span><span class="cm">
-</span><span class="cm">  // Faulty sectors reported since last SubmitPost, up to the current proving period&#39;s challenge time.
-</span><span class="cm">  currentFaultSet FaultSet
-</span><span class="cm">
-</span><span class="cm">  // Faults submitted after the current proving period&#39;s challenge time, but before the PoSt for that period
-</span><span class="cm">  // is submitted. These become the currentFaultSet when a PoSt is submitted.
-</span><span class="cm">  nextFaultSet FaultSet
-</span><span class="cm">
-</span><span class="cm">  // Sectors reported during the last PoSt submission as being &#39;done&#39;. The collateral
-</span><span class="cm">  // for them is still being held until the next PoSt submission in case early sector
-</span><span class="cm">  // removal penalization is needed.
-</span><span class="cm">  nextDoneSet DoneSet
-</span><span class="cm">
-</span><span class="cm">  // List of sectors that this miner was slashed for.
-</span><span class="cm">  slashedSet optional &amp;SectorSet
-</span><span class="cm">
-</span><span class="cm">  // Deals this miner has been slashed for since the last post submission.
-</span><span class="cm">  arbitratedDeals {Cid:Null} // TODO
-</span><span class="cm">
-</span><span class="cm">  // The height at which this miner was slashed at.
-</span><span class="cm">  slashedAt optional Epoch
-</span><span class="cm">
-</span><span class="cm">  // The amount of storage collateral that is owed to clients, and cannot be used for collateral anymore.
-</span><span class="cm">  owedStorageCollateral TokenAmount
-</span><span class="cm">
-</span><span class="cm">  // Internal methods
-</span><span class="cm">  verifySeal(sectorID SectorID, comm SealCommitment, proof SealProof)
-</span><span class="cm">  verifyPoSt(proofs base.PoStProof, doneSet Bitfield)
-</span><span class="cm">
-</span><span class="cm">  // Getters
-</span><span class="cm">  GetOwner() address.Address
-</span><span class="cm">  GetWorkerAddr() address.Address
-</span><span class="cm">  GetPower() BytesAmount
-</span><span class="cm">  GetPeerID() PeerID
-</span><span class="cm">  GetSectorSize() BytesAmount
-</span><span class="cm">  GetCurrentProvingSet() BitField
-</span><span class="cm">
-</span><span class="cm">  // SubmitPost verifies the PoSt
-</span><span class="cm">  SubmitPost(proofs base.PoStProof, doneSet DoneSet) bool // TODO: rename to ProvePower?
-</span><span class="cm">  DePledge(amt TokenAmount)
-</span><span class="cm">
-</span><span class="cm">  AddCollateral()
-</span><span class="cm">
-</span><span class="cm">  AbitrateDeal (deal Deal)
-</span><span class="cm">  SlashStorageFault() // TODO maybe add CheckStorageFault?
-</span><span class="cm">  UpdateFaults(faults FaultSet) // TODO rename into ReportFaults
-</span><span class="cm">  IsLate() (bool)
-</span><span class="cm">  IsSlashed() (bool)
-</span><span class="cm">
-</span><span class="cm">  UpdatePeerID(pid PeerID)
-</span><span class="cm">  ChangeWorker(addr address.Address)
-</span><span class="cm">
-</span><span class="cm">  PaymentVerifyInclusion(extra PieceInclusionVoucherData, proof InclusionProof) (bool)
-</span><span class="cm">  PaymentVerifyInclusion(extra BigInt, proof Bytes) (bool)
-</span><span class="cm">}
-</span><span class="cm">
-</span><span class="cm">*/</span>
 </code></pre></div>
 
 
@@ -18134,8 +18043,9 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1">// needs to verify a Seal.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>
-    <span class="nx">OnChain</span> <span class="nx">OnChainSealVerifyInfo</span>
+    <span class="nx">OnChain</span>     <span class="nx">OnChainSealVerifyInfo</span>
     <span class="nx">SealCfg</span>
+    <span class="nx">PieceInfos</span>  <span class="p">[</span><span class="nx">PieceInfo</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="c1">// OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -18153,10 +18063,9 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="c1">// SealCommitment is the information kept in the state tree about a sector.
 </span><span class="c1">// SealCommitment is a subset of OnChainSealVerifyInfo.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealCommitment</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">UnsealedCID</span>  <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
-</span><span class="c1"></span>    <span class="nx">SealedCID</span>    <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">DealIDs</span>      <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
-    <span class="nx">Expiration</span>   <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">SealedCID</span>   <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">DealIDs</span>     <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nx">Expiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="c1">// ProofAux is meta data required to generate certain proofs
@@ -18208,6 +18117,8 @@ and serves to make storage conform to a set of expectations.</p>
 
 <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
 
@@ -18690,7 +18601,7 @@ and serves to make storage conform to a set of expectations.</p>
 
     <span class="nf">SealSector</span><span class="p">(</span><span class="nx">si</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">SealInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">SealOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
     <span class="nf">CreateSealProof</span><span class="p">(</span><span class="nx">si</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">CreateSealProofInputs</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">so</span> <span class="nx">sealer</span><span class="p">.</span><span class="nx">CreateSealProofOutputs</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
     <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span>
 
@@ -19477,7 +19388,7 @@ and serves to make storage conform to a set of expectations.</p>
 
 <p>The Filecoin project is a protocol, a platform, and a marketplace. There are two major components to Filecoin markets, storage market and retrieval market. While both markets are expected to happen primarily off the blockchain, storage deals made in storage market will be published on chain and enforced by the protocol. Storage deal negotiation and order matching are expected to happen off chain in the first version of Filecoin. Retrieval deals are also negotiated off chain and executed with micropayments between transacting parties in payment channels.</p>
 
-<p>Even though most of the market actions happen off the blockchain, there are on-chain invariant and structure that create economic structure for network success and allow for positive emergent behavior. Storage Mining in Filecoin can be compared to maintaining a storage cargo container (a <code>Sector</code> reference to <code>Sector</code> here) with storage deals sitting in them. There must be at least one active deal in a <code>Sector</code> for the <code>Sector</code> to count towards a miner&rsquo;s power. Miners should be able to update storage deals in a <code>Sector</code> without changing their power. Once a <code>Sector</code> is filled with active <code>StorageDeals</code>, retrieval miners can then serve data stored in the <code>Sector</code> to users.</p>
+<p>Even though most of the market actions happen off the blockchain, there are on-chain invariant and structure that create economic structure for network success and allow for positive emergent behavior. Storage Mining in Filecoin can be compared to maintaining a storage cargo container (reference to <code>Sector</code>) with storage deals sitting in them. There must be at least one active deal in a <code>Sector</code> for the <code>Sector</code> to count towards a miner&rsquo;s power. The <code>Sector</code> is only considered Active after submitting it first PoSt successfully (reference to Sector FSM). A<code>Sector</code> no longer counts for power when it leaves the Active state either through fault or expiration. A <code>Sector</code> expires when all the deals in the <code>Sector</code> have expired and all <code>StorageDealCollateral</code> will only be returned then. In the first version of Filecoin, deals are immutable once added to the chain.</p>
 
 
 </div>
@@ -19753,24 +19664,30 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 
 <span class="kd">type</span> <span class="nx">DealID</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">DealCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+<span class="kd">type</span> <span class="nx">PayloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PieceRef</span>            <span class="nx">DealCID</span>
-    <span class="nx">PieceSize</span>           <span class="nx">UInt</span>
-    <span class="nx">Client</span>              <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Provider</span>            <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">ProposalExpiration</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">DealExpiration</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">StoragePrice</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">StorageCollateral</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nx">ProposerSignature</span>   <span class="nx">Signature</span>
+    <span class="c1">// The data hashed in a form that is compatible with the proofs system.
+</span><span class="c1"></span>    <span class="c1">// Reference for actual storage in a sector.
+</span><span class="c1"></span>    <span class="nx">PieceCID</span>                <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// 35 bytes CommP
+</span><span class="c1"></span>    <span class="nx">PieceSize</span>               <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
+    <span class="nx">Client</span>                  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">Provider</span>                <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">ProposalExpiration</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">DealExpiration</span>          <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// potentially change to DealDuration
+</span><span class="c1"></span>    <span class="nx">StoragePrice</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// potentially per epoch
+</span><span class="c1"></span>    <span class="nx">ProviderDealCollateral</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">ClientDealCollateral</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// potentially collapse into one with ProviderDealCollateral
+</span><span class="c1"></span>    <span class="nx">ProposerSignature</span>       <span class="nx">Signature</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="c1">// Everything in this struct will go on chain
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Proposal</span>          <span class="nx">StorageDealProposal</span>
     <span class="nx">CounterSignature</span>  <span class="nx">Signature</span>
 <span class="p">}</span>
@@ -20106,9 +20023,11 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageDealStagedNotification</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Deal</span>      <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span>
@@ -20116,7 +20035,7 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageProvider</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">DealStatus</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">:</span> <span class="nx">StorageDealStatus</span><span class="p">}</span>
+    <span class="nx">DealStatus</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">StorageDealStatus</span><span class="p">}</span>
 
     <span class="c1">// calls between StorageClient and StorageProvider happen over libp2p
 </span><span class="c1"></span>    <span class="c1">// Client calls this to submit new StorageDealProposal
@@ -20128,14 +20047,20 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
     <span class="c1">// Call by StorageProvider to reject a StorageDealProposal
 </span><span class="c1"></span>    <span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
 
+    <span class="c1">// Check CommP provided by StorageClient in StorageDealProposal
+</span><span class="c1"></span>    <span class="c1">// Provider needs to verify and reject deal if incorrect.
+</span><span class="c1"></span>    <span class="c1">// If on-chain CommP does not match actual piece, Seal proof will not verify.
+</span><span class="c1"></span>    <span class="nf">verifyCommP</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span>
+
     <span class="c1">// Check client balance and signature
 </span><span class="c1"></span>    <span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span> <span class="kt">bool</span>
 
     <span class="c1">// TODO: Call by StorageMiningSubsystem
+</span><span class="c1"></span>    <span class="c1">// TODO: not sure if this will get called
 </span><span class="c1"></span>    <span class="nf">NotifyStorageDealStaged</span><span class="p">(</span><span class="nx">storageDealNotification</span> <span class="nx">StorageDealStagedNotification</span><span class="p">)</span>
 
     <span class="c1">// Call by StorageClient
-</span><span class="c1"></span>    <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
+</span><span class="c1"></span>    <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -20166,10 +20091,11 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+	<span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-
-	<span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="p">)</span>
 
 <span class="c1">// import deal_status &#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;
@@ -20178,7 +20104,9 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 	<span class="k">if</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">ProposerSignature</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">StoragePrice</span><span class="p">())</span> <span class="p">{</span>
 		<span class="c1">// status := &amp;deal.StorageDealStatus_StorageDealProposed_I{}
 </span><span class="c1"></span>		<span class="c1">// s := deal.StorageDealStatus_Make_StorageDealProposed(status)
-</span><span class="c1"></span>		<span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceRef</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealProposed</span>
+</span><span class="c1"></span>		<span class="c1">// TODO fix this
+</span><span class="c1"></span>		<span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+		<span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">StorageDealProposed</span>
 		<span class="c1">// TODO notify StorageClient that a deal has been received
 </span><span class="c1"></span>		<span class="c1">// TODO notify StorageMiningSubsystem to add deals to sector
 </span><span class="c1"></span>		<span class="nx">provider</span><span class="p">.</span><span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
@@ -20193,9 +20121,16 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceRef</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealRejected</span>
+	<span class="c1">// TODO fix this
+</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+	<span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">StorageDealRejected</span>
 	<span class="c1">// TODO send notification to client
 </span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyCommP</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="kc">true</span>
+<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="c1">// TODO make call to StorageMarketActor
@@ -20210,6 +20145,7 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 </span><span class="c1"></span>	<span class="c1">// }
 </span><span class="c1"></span>
 	<span class="c1">// TODO Check on Signature
+</span><span class="c1"></span>	<span class="c1">// TODO Verify CommP
 </span><span class="c1"></span>	<span class="c1">// return true
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
@@ -20218,8 +20154,8 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 </span><span class="c1">// 	panic(&#34;TODO&#34;)
 </span><span class="c1">// }
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span> <span class="p">{</span>
-	<span class="nx">dealStatus</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span> <span class="p">{</span>
+	<span class="nx">dealStatus</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span>
 
 	<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">dealStatus</span>
@@ -20324,16 +20260,23 @@ Its value is agreed upon by the storage provider and client off-chain, but must 
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageClient</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// TODO: confirm on input type here
+</span><span class="c1"></span>    <span class="c1">// generate CommP from data stored in a storage deal
+</span><span class="c1"></span>    <span class="c1">// so that client can identify their deal
+</span><span class="c1"></span>    <span class="nf">generateCommP</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+
     <span class="c1">// calls between StorageClient and StorageProvider happen over libp2p
 </span><span class="c1"></span>    <span class="c1">// make call to StorageProvider in StorageDealProposal
 </span><span class="c1"></span>    <span class="nf">ProposeStorageDeal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
 
     <span class="c1">// make call to StorageProvider
-</span><span class="c1"></span>    <span class="nf">QueryStorageDeal</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">provider</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">QueryStorageDeal</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">provider</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
 <span class="p">}</span>
 </code></pre></div>
 
