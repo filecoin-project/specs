@@ -503,7 +503,8 @@ type SDRColumnProof struct {
 }
 
 func (sdr *StackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
-	//	publicInputs := GeneratePublicInputs()
+	// partitions := sdr.Partitions()
+	// publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
 

@@ -4,6 +4,8 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 type StackedDRGLayers UInt
 type StackedDRGNodeSize UInt
 type StackedDRGNodes UInt
+type StackedDRGSubsectorCount UInt
+type StackedDRGPartitions UInt
 type StackedDRGChallenges UInt
 type DRGDepth struct {}
 type DRGFraction struct {}
@@ -76,6 +78,8 @@ type StackedDRG struct {
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
     Nodes             StackedDRGNodes
+    SubSectorCount    StackedDRGSubsectorCount
+    Partitions        StackedDRGPartitions
     Challenges        StackedDRGChallenges
     Algorithm         struct {}
     DRGCfg
