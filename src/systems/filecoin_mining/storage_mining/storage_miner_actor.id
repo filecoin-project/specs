@@ -42,63 +42,77 @@ type SectorOnChainInfo struct {
 type ChallengeStatus struct {
     LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStChallenge
     LastChallengeEndEpoch  block.ChainEpoch  // get updated upon successful submitPoSt
+
+    IsChallenged()         bool
 }
 
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 
-type StorageMinerActor struct {
+type StorageMinerActorState struct {
     // CollateralVault CollateralVault
 
-    Sectors                  SectorsAMT
-    StagedCommittedSectors   StagedCommittedSectorAMT
+    Sectors                    SectorsAMT
+    StagedCommittedSectors     StagedCommittedSectorAMT
 
     // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
     // successful SubmitPoSt will perform changes to NextProvingSet
     // and update ProvingSet with NextProvingSet at the end
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-    ProvingSet               sector.CompactSectorSet
+    ProvingSet                 sector.CompactSectorSet
 
     SectorTable
     SectorExpirationQueue
     ChallengeStatus
 
     // contains mostly static info about this miner
-    Info                     &MinerInfo
+    Info                       &MinerInfo
 
     // TODO ProvingPeriodEnd   Epoch
 
-    NotifyOfPoStChallenge()
+    _isChallenged(rt Runtime)  bool
+    _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
+    _sectorExists(rt Runtime, sectorNo sector.SectorNumber) bool
 
-    CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
+    _updateFailSector(
+        rt                   Runtime
+        sectorNo             sector.SectorNumber
+        incrementFaultCount  bool
+    )
+    _updateExpireSectors(rt Runtime)
+    _updateProcessStagedCommittedSectors(rt Runtime)
+    _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
+    _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
+}
 
-    SubmitPoSt(postSubmission poster.PoStSubmission)
+type StorageMinerActorCode struct {
+    NotifyOfPoStChallenge(rt Runtime)
 
-    CheckPoStSubmissionHappened()
-    onMissedPoSt()
+    CommitSector(rt Runtime, onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
+
+    SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+
+    CheckPoStSubmissionHappened(rt Runtime)
 
     // TODO: should depledge be in here or in storage market actor?
 
-    DeclareFaults(failingSet sector.CompactSectorSet)
-    RecoverFaults(recoveringSet sector.CompactSectorSet)
+    DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
 
-    constructFaultReport(
+    RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
+
+    _onMissedPoSt(rt Runtime)
+
+    _submitFaultReport(
+        rt          Runtime
         declared    util.UVarint
         detected    util.UVarint
         terminated  util.UVarint
     )
-    constructPowerReport()
+    _submitPowerReport(rt Runtime)
 
-    computeProvingPeriodEndSectorState()  // TODO
+    _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
 
-    verifyPoStSubmission(postSubmission poster.PoStSubmission) bool
-    processStagedCommittedSectors()
-
-    clearSector(sectorNo sector.SectorNumber)
-    activateSector(sectorNo sector.SectorNumber)
-    failSector(sectorNo sector.SectorNumber, incrementFaultCount bool)
-
-    expireSectors()
+    // _computeProvingPeriodEndSectorState(rt Runtime)  // TODO
 }
 
 type MinerInfo struct {

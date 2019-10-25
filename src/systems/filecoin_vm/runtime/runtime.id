@@ -1,19 +1,37 @@
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 
 // Randomness is a string of random bytes
 type Randomness Bytes
+
+type ActorStateHandle struct {
+    InitValue util.Any
+    Runtime
+
+    Commit(newValue util.Any)
+    Release(checkValue util.Any)
+}
 
 // Runtime is the VM's internal runtime object.
 // this is everything that is accessible to actors, beyond parameters.
 // FKA as vm.Context
 type Runtime struct {
     // Invocation is the inputs for the current invocation
-    Invocation     InvocInput
-    State          VMState
+    Invocation      InvocInput
+    State           VMState
+
+    CurrEpoch()     block.ChainEpoch
+
+    AcquireState()  ActorStateHandle
+
+    ValidateCallerIs(caller addr.Address)
+
+    CronActorAddress()          addr.Address
+    StoragePowerActorAddress()  addr.Address
 
     // Fatal is a fatal error, and halts VM execution.
     // This is the normal error condition of actor execution.

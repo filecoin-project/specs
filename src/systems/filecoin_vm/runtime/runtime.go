@@ -1,5 +1,6 @@
 package runtime
 
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -7,6 +8,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import util "github.com/filecoin-project/specs/util"
 
 // InvocInput represents inputs to a particular actor invocation.
 type InvocInput struct {
@@ -77,5 +79,29 @@ func (s *VMStorage_I) Commit(old ipld.CID, new ipld.CID) error {
 }
 
 func (s *VMStorage_I) Head() ipld.CID {
+	panic("TODO")
+}
+
+func (rt *Runtime_I) CurrEpoch() block.ChainEpoch {
+	panic("TODO")
+}
+
+func (rt *Runtime_I) ReadState() util.Any {
+	panic("TODO")
+}
+
+func (rt *Runtime_I) AcquireState() ActorStateHandle {
+	panic("TODO")
+}
+
+func (rt *Runtime_I) ValidateCallerIs(addr.Address) Runtime_ValidateCallerIs_FunRet {
+	panic("TODO")
+}
+
+func (rt *Runtime_I) CronActorAddress() addr.Address {
+	panic("TODO")
+}
+
+func (rt *Runtime_I) StoragePowerActorAddress() addr.Address {
 	panic("TODO")
 }
