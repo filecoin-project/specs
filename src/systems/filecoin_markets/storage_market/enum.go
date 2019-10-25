@@ -1,25 +1,19 @@
 package storage_market
 
-type StorageDealProposalStatus int
-
-const (
-	StorageDealProposalNotFound StorageDealProposalStatus = 0
-	StorageDealProposalRejected StorageDealProposalStatus = 1
-	StorageDealProposalAccepted StorageDealProposalStatus = 2
-	StorageDealProposalSigned   StorageDealProposalStatus = 3
-)
-
 type StorageDealStatus int
 
 const (
-	StorageDealNotFound   StorageDealStatus = 0
-	StorageDealCreated    StorageDealStatus = 1
-	StorageDealPublished  StorageDealStatus = 2
-	StorageDealCommitted  StorageDealStatus = 3
-	StorageDealActive     StorageDealStatus = 4
-	StorageDealFailing    StorageDealStatus = 5
-	StorageDealRecovering StorageDealStatus = 6
-	StorageDealExpired    StorageDealStatus = 7
+	StorageDealProposalNotFound  StorageDealStatus = 0
+	StorageDealProposalRejected  StorageDealStatus = 1
+	StorageDealProposalAccepted  StorageDealStatus = 2
+	StorageDealProposalSigned    StorageDealStatus = 3
+	StorageDealPublished         StorageDealStatus = 4
+	StorageDealCommitted         StorageDealStatus = 5
+	StorageDealActive            StorageDealStatus = 6
+	StorageDealFailing           StorageDealStatus = 7
+	StorageDealRecovering        StorageDealStatus = 8
+	StorageDealExpired           StorageDealStatus = 9
+	StorageDealNotFound          StorageDealStatus = 10
 )
 
 type PublishStorageDealResponse int
