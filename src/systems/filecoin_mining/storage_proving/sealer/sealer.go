@@ -1,7 +1,8 @@
 package sealer
 
-import util "github.com/filecoin-project/specs/util"
+import "errors"
 
+import util "github.com/filecoin-project/specs/util"
 import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -9,19 +10,33 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunRet_I {
 	sdr := filproofs.SDRParams(si.SealCfg())
 	sid := si.SectorID()
+	subsectorCount := int(si.SealCfg().SubsectorCount())
+	sectorSize := int(si.SealCfg().SectorSize())
+	subsectorSize := sectorSize / subsectorCount
 
-	data := make(util.Bytes, si.SealCfg().SectorSize())
-	f := file.FromPath(si.SealedPath())
-	length, _ := f.Read(data)
+	if len(si.UnsealedPaths()) != subsectorCount {
+		return SectorSealer_SealSector_FunRet_Make_err(
+			errors.New("Wrong number of subsector files."),
+		).Impl()
+	}
 
-	if util.UInt(length) != util.UInt(si.SealCfg().SectorSize()) {
-		return &SectorSealer_SealSector_FunRet_I{
-			rawValue: "Sector file is wrong size",
-			which:    SectorSealer_SealSector_FunRet_Case_err,
+	var subsectorData [][]byte
+	for _, unsealedPath := range si.UnsealedPaths() {
+		data := make(util.Bytes, si.SealCfg().SectorSize())
+		f := file.FromPath(unsealedPath)
+		length, _ := f.Read(data)
+
+		_ = subsectorSize
+		subsectorData = append(subsectorData, data)
+
+		if length != subsectorSize {
+			return SectorSealer_SealSector_FunRet_Make_err(
+				errors.New("Subsector file is wrong size"),
+			).Impl()
 		}
 	}
 
-	sealArtifacts := sdr.Seal(sid, data, si.RandomSeed())
+	sealArtifacts := sdr.Seal(sid, subsectorData, si.RandomSeed())
 
 	return SectorSealer_SealSector_FunRet_Make_so(
 		SectorSealer_SealSector_FunRet_so(
@@ -37,7 +52,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CommDTreePath_: sealArtifacts.CommDTreePath(),
 					CommCTreePath_: sealArtifacts.CommCTreePath(),
 					Seed_:          sealArtifacts.Seed(),
-					Data_:          data,
+					SubsectorData_: subsectorData,
 					KeyLayers_:     sealArtifacts.KeyLayers(),
 					Replica_:       sealArtifacts.Replica(),
 				}})).Impl()

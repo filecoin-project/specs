@@ -78,7 +78,7 @@ type StackedDRG struct {
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
     Nodes             StackedDRGNodes
-    SubSectorCount    StackedDRGSubsectorCount
+    SubsectorCount    StackedDRGSubsectorCount
     Partitions        StackedDRGPartitions
     Challenges        StackedDRGChallenges
     Algorithm         struct {}

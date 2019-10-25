@@ -152,20 +152,22 @@ func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness sector.SealRandomness) SealSetupArtifacts {
-	commD, commDTreePath := ComputeDataCommitment(data)
-	sealSeed := ComputeSealSeed(sid, commD, randomness)
-	nodeSize := int(sdr.NodeSize())
-	nodes := len(data) / nodeSize
-	curveModulus := sdr.Curve().FieldModulus()
-	layers := int(sdr.Layers())
+func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, randomness sector.SealRandomness) SealSetupArtifacts {
+	subsectorCount := int(sdr.SubsectorCount())
+	util.Assert(len(subsectorData) == subsectorCount)
 
-	keyLayers := generateSDRKeyLayers(sdr.drg(), sdr.expander(), sealSeed, nodes, layers, nodeSize, curveModulus)
-	key := keyLayers[len(keyLayers)-1]
-	replica := encodeData(data, key, nodeSize, &curveModulus)
+	for _, data := range subsectorData {
+		_ = data
+		// keyLayers, replica, sealSeed, commD, commDTreePath := sdr.SealSubsector(sid, data, randomness)
+
+	}
+
+	// FIXME: Remove this line, which is just here temporarily for compilation.
+	keyLayers, replica, sealSeed, commD, commDTreePath := sdr.SealSubsector(sid, subsectorData[0], randomness)
 
 	commC, commRLast, commR, commCTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, keyLayers)
 
+	_ = commD
 	result := SealSetupArtifacts_I{
 		CommD_:             Commitment(commC),
 		CommR_:             SealedSectorCID(commR),
@@ -179,6 +181,21 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness secto
 		Replica_:           replica,
 	}
 	return &result
+}
+
+func (sdr *StackedDRG_I) SealSubsector(sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, Blake2sHash, file.Path) {
+	commD, commDTreePath := ComputeDataCommitment(data)
+	sealSeed := ComputeSealSeed(sid, commD, randomness)
+	nodeSize := int(sdr.NodeSize())
+	nodes := len(data) / nodeSize
+	curveModulus := sdr.Curve().FieldModulus()
+	layers := int(sdr.Layers())
+
+	keyLayers := generateSDRKeyLayers(sdr.drg(), sdr.expander(), sealSeed, nodes, layers, nodeSize, curveModulus)
+	key := keyLayers[len(keyLayers)-1]
+	replica := encodeData(data, key, nodeSize, &curveModulus)
+
+	return keyLayers, replica, sealSeed, commD, commDTreePath
 }
 
 func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte) (commC PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commRLastTreePath file.Path) {
