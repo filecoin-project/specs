@@ -155,6 +155,10 @@ func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 
 func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, randomness sector.SealRandomness) SealSetupArtifacts {
 	subsectorCount := int(sdr.SubsectorCount())
+	nodeSize := int(sdr.NodeSize())
+	nodes := int(sdr.Nodes())
+	subsectorSize := nodes * nodeSize
+
 	util.Assert(len(subsectorData) == subsectorCount)
 
 	var allKeyLayers [][]byte
@@ -174,12 +178,19 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 		subsectorCommDTreePaths = append(subsectorCommDTreePaths, subsectorCommDTreePath)
 	}
 
-	// FIXME: Remove this line, which is just here temporarily for compilation.
-	_, replica, _, commD, _ := sdr.SealSubsector(0, sid, subsectorData[0], randomness)
+	var replicaColumns [][]Label
+	for _, replica := range replicas {
+		for i := 0; i < subsectorSize; i += nodeSize {
+			replicaColumns[i] = append(replicaColumns[i], Label(replica[i:i+nodeSize]))
+		}
+	}
+	var columnReplica []byte
+	for i, column := range replicaColumns {
+		copy(columnReplica[i*nodeSize:(i+1)*nodeSize], []byte(hashColumn(column)))
+	}
 
-	commC, commRLast, commR, commCTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, allKeyLayers)
+	commC, commRLast, commR, commCTreePath, commRLastTreePath := sdr.GenerateCommitments(columnReplica, allKeyLayers)
 
-	_ = commD
 	result := SealSetupArtifacts_I{
 		CommD_:             Commitment(commC),
 		CommR_:             SealedSectorCID(commR),
@@ -214,7 +225,8 @@ func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte)
 	commRLast, commRLastTreePath = BuildTree_PedersenHash(replica)
 	commC, commCTreePath = computeCommC(keyLayers, int(sdr.NodeSize()))
 	commR = BinaryHash_PedersenHash(commC, commRLast)
-	panic("TODO")
+
+	return commC, commRLast, commR, commCTreePath, commRLastTreePath
 }
 
 func computeSealSeed(sid sector.SectorID, subsectorIndex int, randomness sector.SealRandomness, commD Commitment) sector.SealSeed {
