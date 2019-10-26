@@ -8,6 +8,11 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
+const (
+	StoragePowerActor_ProcessPowerReport actor.MethodNum = 1
+	StoragePowerActor_ProcessFaultReport actor.MethodNum = 2
+)
+
 func (spa *StoragePowerActor_I) CreateStorageMiner(
 	ownerAddr addr.Address,
 	workerAddr addr.Address,

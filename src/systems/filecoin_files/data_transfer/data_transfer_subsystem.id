@@ -1,3 +1,5 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+
 type Address struct {}
 type Storage struct {}
 type StorageDealID struct {}
@@ -13,7 +15,7 @@ type DataTransferSubsystem struct @(mutable) {
     TransferChannelStatus(x UInt) DataTransferStatus
     ReportDataTransferEvent(x Function) union {Ret DataTransferStatus, Err error}
 
-    findData(x CID) Piece
+    findData(x ipld.CID) Piece
 }
 
 // Assumes access to error-checked, ordered, reliable transmission protocol
@@ -25,7 +27,7 @@ type Scheduler struct {
 
 type DataTransferChannel struct {
     channelID      UInt
-    contentID      CID
+    contentID      ipld.CID
     dataIncrement  UVarint
     sender         Address
     recipient      Address
@@ -39,7 +41,7 @@ type DataTransferChannel struct {
 
 type DataTransferParams struct {
     channelType    DataTransferType
-    contentID      CID
+    contentID      ipld.CID
     dataIncrement  UVarint
     sender         Address
     recipient      Address

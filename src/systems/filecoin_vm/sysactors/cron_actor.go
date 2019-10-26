@@ -1,11 +1,11 @@
 package sysactors
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
-// TODO invariant: always use MethodNum 1 for cron?
-var CronMethodNumber = actor.MethodNum(1)
+type Runtime = vmr.Runtime
 
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) {
 	// Nothing. intentionally left blank.
@@ -17,16 +17,22 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) {
 	// a.actors is basically a static registry for now, loaded
 	// in the interpreter static registry.
 	for _, a := range a.Actors() {
-		rt.Send(a, CronMethodNumber, nil, actor.TokenAmount(0))
+		rt.SendAllowingErrors(a, msg.InvocInput_Make(
+			vmr.Reserved_CronMethod,
+			[]actor.MethodParam{},
+			actor.TokenAmount(0)),
+		)
 	}
+
+	rt.ReturnSuccess()
 }
 
-func (a *CronActorCode_I) InvokeMethod(input vmr.InvocInput, method actor.MethodNum, params actor.MethodParams) vmr.InvocOutput {
+func (a *CronActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) {
 	switch method {
-	case 1:
-		a.EpochTick(input.Runtime)
-		return vmr.InvocOutput{} // todo: grab the updated state tree + return success
+	case vmr.Reserved_CronMethod:
+		rt.Check(len(params) == 0)
+		a.EpochTick(rt)
 	default:
-		return vmr.ErrorInvocOutput(input.InTree, exitcode.InvalidMethod)
+		rt.ReturnError(exitcode.SystemError(exitcode.InvalidMethod))
 	}
 }

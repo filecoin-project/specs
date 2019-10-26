@@ -1,14 +1,15 @@
 package interpreter
 
-import "errors"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 import util "github.com/filecoin-project/specs/util"
+
+var TODO = util.TODO
 
 func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree st.StateTree, msgs []MessageRef) (outTree st.StateTree, ret []msg.MessageReceipt) {
 	compTree := inTree
@@ -20,177 +21,118 @@ func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree st.StateTree, msgs []Messag
 	return compTree, ret
 }
 
-func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.UnsignedMessage, minerAddr addr.Address) (outTree st.StateTree, ret msg.MessageReceipt) {
+func _applyError(errCode exitcode.SystemErrorCode) msg.MessageReceipt {
+	// TODO: should this gasUsed value be zero?
+	// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
+	gasUsed := gascost.ApplyMessageFail
+	TODO()
+	return msg.MessageReceipt_MakeSystemError(errCode, gasUsed)
+}
+
+func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {
+	transferRet := tree.WithFundsTransfer(from, to, amount)
+	if transferRet.Which() == st.StateTree_WithFundsTransfer_FunRet_Case_error {
+		panic("Interpreter error: insufficient funds (or transfer error) despite checks")
+	} else {
+		return transferRet.As_StateTree()
+	}
+}
+
+func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.UnsignedMessage, minerAddr addr.Address) (
+	st.StateTree, msg.MessageReceipt) {
 
 	compTree := inTree
+	var outTree st.StateTree
+
 	fromActor := compTree.GetActor(message.From())
 	if fromActor == nil {
-		return applyError(inTree, exitcode.InvalidMethod, gascost.ApplyMessageFail)
+		// TODO: This was originally exitcode.InvalidMethod; which is correct?
+		return inTree, _applyError(exitcode.ActorNotFound)
 	}
 
 	// make sure fromActor has enough money to run the max invocation
 	maxGasCost := gasToFIL(message.GasLimit(), message.GasPrice())
 	totalCost := message.Value() + actor.TokenAmount(maxGasCost)
 	if fromActor.State().Balance() < totalCost {
-		return applyError(inTree, exitcode.InsufficientFunds, gascost.ApplyMessageFail)
+		return inTree, _applyError(exitcode.InsufficientFunds)
 	}
 
 	// make sure this is the right message order for fromActor
 	// (this is protection against replay attacks, and useful sequencing)
 	if message.CallSeqNum() != fromActor.State().CallSeqNum()+1 {
-		return applyError(inTree, exitcode.InvalidCallSeqNum, gascost.ApplyMessageFail)
+		return inTree, _applyError(exitcode.InvalidCallSeqNum)
 	}
 
-	// may return a different tree on succeess.
-	// this MUST get rolled back if the invocation fails.
-	var toActor actor.Actor
-	var err error
-	compTree, toActor, err = treeGetOrCreateAccountActor(compTree, message.To())
-	if err != nil {
-		return applyError(inTree, exitcode.ActorNotFound, gascost.ApplyMessageFail)
+	// TODO: Should we allow messages to implicitly create actors?
+	// - If so, need to specify how the actor code is determined
+	// - We should be able to disallow this and still preserve functionality by
+	//   requiring two separate messages (create actor, transfer initial funds)
+	createRet := compTree.WithNewActorIfMissing(message.To())
+	if createRet.Which() == st.StateTree_WithNewActorIfMissing_FunRet_Case_error {
+		return inTree, _applyError(exitcode.ActorNotFound)
+	} else {
+		compTree = createRet.As_StateTree()
+	}
+
+	toActor := compTree.GetActor(message.To())
+	if toActor == nil {
+		panic("Interpreter error: actor present (or created) but not retrieved")
 	}
 
 	// deduct maximum expenditure gas funds first
-	// TODO: use a single "transfer"
-	compTree = treeDeductFunds(compTree, fromActor, maxGasCost)
+	compTree = _withTransferFundsAssert(compTree, message.From(), vmr.BurntFundsActorAddr, maxGasCost)
 
-	// transfer funds fromActor -> toActor
-	// (yes deductions can be combined, spelled out here for clarity)
-	// TODO: use a single "transfer"
-	compTree = treeDeductFunds(compTree, fromActor, message.Value())
-	compTree = treeDepositFunds(compTree, toActor, message.Value())
+	rt := vmr.Runtime_Make(
+		compTree,
+		message.From(),
+		actor.TokenAmount(0),
+		message.GasLimit(),
+	)
 
-	// Prepare invocInput.
-	invocInput := vmr.InvocInput{
-		InTree:    compTree,
-		FromActor: fromActor,
-		ToActor:   toActor,
-		Method:    message.Method(),
-		Params:    message.Params(),
-		Value:     message.Value(),
-		GasLimit:  message.GasLimit(),
-	}
-	// TODO: this is mega jank. need to rework invocationInput + runtime boundaries.
-	invocInput.Runtime = makeRuntime(compTree, invocInput)
+	sendRet, sendRetStateTree := rt.Impl().SendToplevelFromInterpreter(
+		message.To(),
+		msg.InvocInput_Make(
+			message.Method(),
+			message.Params(),
+			message.Value(),
+		),
+		false,
+	)
 
-	// perform the method call to the actor
-	// TODO: eval if we should lift gas tracking and calc to the beginning of invocation
-	// (ie, include account creation, gas accounting itself)
-	out := invocationMethodDispatch(invocInput)
-
-	// var outTree StateTree
-	if out.ExitCode != 0 {
-		// error -- revert all state changes -- ie drop updates. burn used gas.
-		outTree = inTree // wipe!
-		outTree = treeDeductFunds(outTree, fromActor, gasToFIL(out.GasUsed, message.GasPrice()))
-
-	} else {
+	if sendRet.ExitCode().AllowsStateUpdate() {
 		// success -- refund unused gas
-		outTree = out.OutTree // take the state from the invocation output
-		refundGas := message.GasLimit() - out.GasUsed
-		outTree = treeDepositFunds(outTree, fromActor, gasToFIL(refundGas, message.GasPrice()))
-		outTree = treeIncrementActorSeqNo(outTree, fromActor)
+		outTree = sendRetStateTree
+		refundGas := message.GasLimit() - sendRet.GasUsed()
+		TODO() // TODO: assert refundGas is nonnegative
+		outTree = _withTransferFundsAssert(
+			outTree,
+			vmr.BurntFundsActorAddr,
+			message.From(),
+			gasToFIL(refundGas, message.GasPrice()),
+		)
+	} else {
+		// error -- revert all state changes -- ie drop updates. burn used gas.
+		outTree = inTree
+		outTree = _withTransferFundsAssert(
+			outTree,
+			message.From(),
+			vmr.BurntFundsActorAddr,
+			gasToFIL(sendRet.GasUsed(), message.GasPrice()),
+		)
+		TODO() // TODO: still increment fromActor sequence number on failure?
 	}
 
 	// reward miner gas fees
-	minerActor := compTree.GetActor(minerAddr) // TODO: may be nil.
-	outTree = treeDepositFunds(outTree, minerActor, gasToFIL(out.GasUsed, message.GasPrice()))
+	outTree = _withTransferFundsAssert(
+		outTree,
+		vmr.BurntFundsActorAddr,
+		minerAddr, // TODO: may not exist
+		gasToFIL(sendRet.GasUsed(), message.GasPrice()),
+	)
 
-	return outTree, &msg.MessageReceipt_I{
-		ExitCode_:    out.ExitCode,
-		ReturnValue_: out.ReturnValue,
-		GasUsed_:     out.GasUsed,
-	}
-}
-
-func invocationMethodDispatch(input vmr.InvocInput) vmr.InvocOutput {
-	if input.Method == 0 {
-		// just sending money. move along.
-		return vmr.InvocOutput{
-			OutTree:     input.InTree,
-			GasUsed:     gascost.SimpleValueSend,
-			ExitCode:    exitcode.OK,
-			ReturnValue: nil,
-		}
-	}
-
-	//TODO: actually invoke the funtion here.
-	// put any vtable lookups in this function.
-
-	actorCode, err := loadActorCode(input, input.ToActor.State().CodeCID())
-	if err != nil {
-		return vmr.InvocOutput{
-			OutTree:     input.InTree,
-			GasUsed:     gascost.ApplyMessageFail,
-			ExitCode:    exitcode.ActorCodeNotFound,
-			ReturnValue: nil, // TODO: maybe: err
-		}
-	}
-
-	return actorCode.InvokeMethod(input, input.Method, input.Params)
-}
-
-func treeIncrementActorSeqNo(inTree st.StateTree, a actor.Actor) (outTree st.StateTree) {
-	panic("todo")
-}
-
-func treeDeductFunds(inTree st.StateTree, a actor.Actor, amt actor.TokenAmount) (outTree st.StateTree) {
-	// TODO: turn this into a single transfer call.
-	panic("todo")
-}
-
-func treeDepositFunds(inTree st.StateTree, a actor.Actor, amt actor.TokenAmount) (outTree st.StateTree) {
-	// TODO: turn this into a single transfer call.
-	panic("todo")
-}
-
-func treeGetOrCreateAccountActor(inTree st.StateTree, a addr.Address) (outTree st.StateTree, _ actor.Actor, err error) {
-
-	toActor := inTree.GetActor(a)
-	if toActor != nil { // found
-		return inTree, toActor, nil
-	}
-
-	switch a.Type().Which() {
-	case addr.Address_Type_Case_BLS:
-		return treeNewBLSAccountActor(inTree, a)
-	case addr.Address_Type_Case_Secp256k1:
-		return treeNewSecp256k1AccountActor(inTree, a)
-	case addr.Address_Type_Case_ID:
-		return inTree, nil, errors.New("no actor with given ID")
-	case addr.Address_Type_Case_Actor:
-		return inTree, nil, errors.New("no such actor")
-	default:
-		return inTree, nil, errors.New("unknown address type")
-	}
-}
-
-func treeNewBLSAccountActor(inTree st.StateTree, addr addr.Address) (outTree st.StateTree, _ actor.Actor, err error) {
-	panic("todo")
-}
-
-func treeNewSecp256k1AccountActor(inTree st.StateTree, addr addr.Address) (outTree st.StateTree, _ actor.Actor, err error) {
-	panic("todo")
-}
-
-func applyError(tree st.StateTree, exitCode msg.ExitCode, gasUsed msg.GasAmount) (outTree st.StateTree, ret msg.MessageReceipt) {
-	return outTree, &msg.MessageReceipt_I{
-		ExitCode_:    exitCode,
-		ReturnValue_: nil,
-		GasUsed_:     gasUsed,
-	}
+	return outTree, sendRet
 }
 
 func gasToFIL(gas msg.GasAmount, price msg.GasPrice) actor.TokenAmount {
 	return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
-}
-
-func makeRuntime(tree st.StateTree, input vmr.InvocInput) vmr.Runtime {
-	return &vmr.Runtime_I{
-		Invocation_: input,
-		State_: &vmr.VMState_I{
-			StateTree_: tree, // TODO: also in input.InTree.
-			Storage_:   &vmr.VMStorage_I{},
-		},
-	}
 }

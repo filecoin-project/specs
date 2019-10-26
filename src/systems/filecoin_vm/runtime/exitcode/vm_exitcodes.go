@@ -1,28 +1,124 @@
-package runtime
+package exitcode
 
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import util "github.com/filecoin-project/specs/util"
+
+import (
+	"fmt"
+)
+
+type SystemErrorCode util.UVarint
 
 // TODO: assign all of these.
 var (
-	// OK is the success return value, similar to unix exit code 0.
-	OK = msg.ExitCode(0)
+	// // OK is the success return value, similar to unix exit code 0.
+	// OK = SystemErrorCode(0)
 
 	// ActorNotFound represents a failure to find an actor.
-	ActorNotFound = msg.ExitCode(1)
+	ActorNotFound = SystemErrorCode(1)
 
 	// ActorCodeNotFound represents a failure to find the code for a
 	// particular actor in the VM registry.
-	ActorCodeNotFound = msg.ExitCode(2)
+	ActorCodeNotFound = SystemErrorCode(2)
 
 	// InvalidMethod represents a failure to find a method in
 	// an actor
-	InvalidMethod = msg.ExitCode(3)
+	InvalidMethod = SystemErrorCode(3)
 
 	// InsufficientFunds represents a failure to apply a message, as
 	// it did not carry sufficient funds for its application.
-	InsufficientFunds = msg.ExitCode(4)
+	InsufficientFunds = SystemErrorCode(4)
 
 	// InvalidCallSeqNum represents a message invocation out of sequence.
 	// This happens when message.CallSeqNum is not exactly actor.CallSeqNum + 1
-	InvalidCallSeqNum = msg.ExitCode(5)
+	InvalidCallSeqNum = SystemErrorCode(5)
+
+	// OutOfGasError is returned when the execution of an actor method
+	// (including its subcalls) uses more gas than initially allocated.
+	OutOfGas = SystemErrorCode(6)
+
+	// RuntimeAPIError is returned when an actor method invocation makes a call
+	// to the runtime that does not satisfy its preconditions.
+	RuntimeAPIError = SystemErrorCode(7)
+
+	// MethodPanic is returned when an actor method invocation calls rt.Abort.
+	MethodAbort = SystemErrorCode(8)
+
+	// MethodPanic is returned when the runtime intercepts a panic within
+	// an actor method invocation (not via rt.Abort).
+	MethodPanic = SystemErrorCode(9)
+
+	// MethodSubcallError is returned when an actor method's Send call has
+	// returned with a failure error code (and the Send call did not specify
+	// to ignore errors).
+	MethodSubcallError = SystemErrorCode(10)
 )
+
+func OK() ExitCode {
+	return ExitCode_Make_Success(&ExitCode_Success_I{})
+}
+
+func SystemError(x SystemErrorCode) ExitCode {
+	return ExitCode_Make_SystemError(ExitCode_SystemError(x))
+}
+
+func (x *ExitCode_I) IsSuccess() bool {
+	return x.Which() == ExitCode_Case_Success
+}
+
+func (x *ExitCode_I) IsError() bool {
+	return !x.IsSuccess()
+}
+
+func (x *ExitCode_I) AllowsStateUpdate() bool {
+	// TODO: Confirm whether this is the desired behavior
+
+	// return x.IsSuccess() || x.Which() == ExitCode_Case_UserDefinedError
+	return x.IsSuccess()
+}
+
+func EnsureErrorCode(x ExitCode) ExitCode {
+	if !x.IsError() {
+		// Throwing an error with a non-error exit code is itself an error
+		x = SystemError(RuntimeAPIError)
+	}
+	return x
+}
+
+type RuntimeError struct {
+	exitCode ExitCode
+	errMsg   string
+}
+
+func (x *RuntimeError) String() string {
+	ret := fmt.Sprintf("Runtime error: %v", x.exitCode)
+	if x.errMsg != "" {
+		ret += fmt.Sprintf(" (\"%v\")", x.errMsg)
+	}
+	return ret
+}
+
+func RuntimeError_Make(exitCode ExitCode, errMsg string) *RuntimeError {
+	exitCode = EnsureErrorCode(exitCode)
+	return &RuntimeError{
+		exitCode: exitCode,
+		errMsg:   errMsg,
+	}
+}
+
+func CatchRuntimeErrors(f func()) (retCode ExitCode) {
+	retCode = OK()
+
+	defer func() {
+		if r := recover(); r != nil {
+			switch r.(type) {
+			case *RuntimeError:
+				retCode = EnsureErrorCode(r.(*RuntimeError).exitCode)
+			default:
+				retCode = SystemError(MethodPanic)
+			}
+		}
+	}()
+
+	f()
+	return
+}

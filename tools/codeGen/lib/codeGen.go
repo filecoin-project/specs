@@ -142,9 +142,7 @@ func TranslateGoIdent(name string, ctx GoGenContext) GoIdent {
 	ret := name
 	utilNames := []string{
 		"Assert",
-		"BigInt",
 		"Bytes",
-		"CID",
 		"Float",
 		"T",
 		"UInt",
@@ -256,13 +254,15 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 			})
 		}
 
-		interfaceFields = append(interfaceFields, GoField{
-			fieldName: RefString("Impl"),
-			fieldType: GoFunType{
-				retType: GoPtrType{targetType: implID},
-				args:    []GoField{},
-			},
-		})
+		if !xr.isInterface {
+			interfaceFields = append(interfaceFields, GoField{
+				fieldName: RefString("Impl"),
+				fieldType: GoFunType{
+					retType: GoPtrType{targetType: implID},
+					args:    []GoField{},
+				},
+			})
+		}
 
 		// TODO: re-enable
 		//

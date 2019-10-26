@@ -1,6 +1,7 @@
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
 // GasAmount is a quantity of gas.
 type GasAmount UVarint
@@ -34,10 +35,19 @@ type SignedMessage struct {
     Signature  filcrypto.Signature
 }  // representation tuple
 
-type ExitCode UVarint
+type InvocInput struct {
+    Method  actor.MethodNum
+    Params  actor.MethodParams
+    Value   actor.TokenAmount
+}
+
+type InvocOutput struct {
+    ExitCode     exitcode.ExitCode
+    ReturnValue  Bytes
+}
 
 type MessageReceipt struct {
-    ExitCode
+    ExitCode     exitcode.ExitCode
     ReturnValue  Bytes
     GasUsed      GasAmount
 }  // representation tuple
