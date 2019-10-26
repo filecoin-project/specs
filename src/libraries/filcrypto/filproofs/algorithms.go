@@ -149,6 +149,7 @@ func (chung *ChungExpanderAlgorithm_I) ithParent(node UInt, i UInt, degree Expan
 }
 
 func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
+	// Call into feisel.go.
 	panic("TODO")
 }
 
@@ -196,7 +197,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 
 func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, Blake2sHash, file.Path) {
 	commD, commDTreePath := ComputeDataCommitment(data)
-	sealSeed := ComputeSealSeed(sid, subsectorIndex, commD, randomness)
+	sealSeed := computeSealSeed(sid, subsectorIndex, randomness, commD)
 	nodeSize := int(sdr.NodeSize())
 	nodes := len(data) / nodeSize
 	curveModulus := sdr.Curve().FieldModulus()
@@ -216,8 +217,16 @@ func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte)
 	panic("TODO")
 }
 
-func ComputeSealSeed(sid sector.SectorID, subsectorIndex int, commD Commitment, randomness sector.SealRandomness) sector.SealSeed {
-	_, _ = sid.MinerID(), (sid.Number())
+func computeSealSeed(sid sector.SectorID, subsectorIndex int, randomness sector.SealRandomness, commD Commitment) sector.SealSeed {
+	var proverId []byte // TODO: Derive this from sid.MinerID()
+	sectorNumber := sid.Number()
+
+	var preimage []byte
+	preimage = append(preimage, proverId...)
+	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorNumber), 8)...)
+	preimage = append(preimage, littleEndianBytesFromInt(subsectorIndex, 8)...)
+	preimage = append(preimage, randomness...)
+	preimage = append(preimage, commD...)
 
 	// FIXME: Implement
 	return sector.SealSeed{}
@@ -629,7 +638,7 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 
 	var sealSeeds []sector.SealSeed
 	for i := 0; i < subsectorCount; i++ {
-		sealSeed := ComputeSealSeed(sv.SectorID(), i, AsBytes_UnsealedSectorCID(commD), sv.Randomness())
+		sealSeed := computeSealSeed(sv.SectorID(), i, sv.Randomness(), AsBytes_UnsealedSectorCID(commD))
 		sealSeeds = append(sealSeeds, sealSeed)
 	}
 	challenges := sdr.GenerateOfflineChallenges(sealSeeds, sv.InteractiveRandomness(), sdr.Challenges())
@@ -890,6 +899,12 @@ func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
 func littleEndianBytesFromInt(n int, size int) []byte {
 	z := new(big.Int)
 	z.SetInt64(int64(n))
+	return littleEndianBytesFromBigInt(z, size)
+}
+
+func littleEndianBytesFromUInt(n UInt, size int) []byte {
+	z := new(big.Int)
+	z.SetUint64(uint64(n))
 	return littleEndianBytesFromBigInt(z, size)
 }
 
