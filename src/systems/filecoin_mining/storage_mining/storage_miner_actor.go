@@ -385,6 +385,7 @@ func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.P
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
 	st._updateCommittedSectors(rt)
+	h.Commit(st)
 }
 
 func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
