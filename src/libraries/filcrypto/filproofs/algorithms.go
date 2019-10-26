@@ -210,9 +210,9 @@ func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, 
 }
 
 func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte) (commC PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commRLastTreePath file.Path) {
-	commRLast, commRLastTreePath = RepHash_PedersenHash(replica)
+	commRLast, commRLastTreePath = BuildTree_PedersenHash(replica)
 	commC, commCTreePath = computeCommC(keyLayers, int(sdr.NodeSize()))
-	commR = RepCompress_PedersenHash(commC, commRLast)
+	commR = BinaryHash_PedersenHash(commC, commRLast)
 	panic("TODO")
 }
 
@@ -292,7 +292,7 @@ func generateLabel(sealSeed sector.SealSeed, node int, dependencies []Label) []b
 }
 
 func deriveLabel(elements []byte) []byte {
-	return WideRepCompress_Blake2sHash(elements)
+	return HashBytes_Blake2sHash(elements)
 }
 
 func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
@@ -315,7 +315,7 @@ func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
 	}
 
 	// Return the root of and path to the column tree.
-	return RepHash_PedersenHash(leaves)
+	return BuildTree_PedersenHash(leaves)
 }
 
 func hashColumn(column []Label) PedersenHash {
@@ -323,7 +323,7 @@ func hashColumn(column []Label) PedersenHash {
 	for _, label := range column {
 		preimage = append(preimage, label...)
 	}
-	return WideRepCompress_PedersenHash(preimage)
+	return HashBytes_PedersenHash(preimage)
 }
 
 type PrivateOfflineSDRProof []OfflineSDRChallengeProof
@@ -426,7 +426,7 @@ func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengePr
 		}
 	}
 
-	commRCalculated := RepCompress_PedersenHash(commC, commRLast)
+	commRCalculated := BinaryHash_PedersenHash(commC, commRLast)
 
 	if !bytes.Equal(commRCalculated, AsBytes_SealedSectorCID(commR)) {
 		return false
@@ -576,7 +576,7 @@ func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, 
 		bytes = append(bytes, randomness...)
 		bytes = append(bytes, littleEndianBytesFromInt(i, nodeSize)...)
 
-		hash := WideRepCompress_Blake2sHash(bytes)
+		hash := HashBytes_Blake2sHash(bytes)
 		bigChallenge := bigIntFromLittleEndianBytes(hash)
 		bigChallenge = bigChallenge.Mod(bigChallenge, challengeModulus)
 
@@ -713,7 +713,7 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
 	return &sector.PieceInfo_I{
 		Size_:  left.Size() + right.Size(),
-		CommP_: UnsealedSectorCID(RepCompress_Blake2sHash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
+		CommP_: UnsealedSectorCID(BinaryHash_Blake2sHash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
 	}
 }
 
@@ -726,18 +726,18 @@ func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCI
 /// Generic Hashing and Merkle Tree generation
 
 /// Binary hash compression.
-// RepCompress<T>
-func RepCompress_T(left []byte, right []byte) util.T {
+// BinaryHash<T>
+func BinaryHash_T(left []byte, right []byte) util.T {
 	return util.T{}
 }
 
-// RepCompress<PedersenHash>
-func RepCompress_PedersenHash(left []byte, right []byte) PedersenHash {
+// BinaryHash<PedersenHash>
+func BinaryHash_PedersenHash(left []byte, right []byte) PedersenHash {
 	return PedersenHash{}
 }
 
-// RepCompress<Blake2sHash>
-func RepCompress_Blake2sHash(left []byte, right []byte) Blake2sHash {
+// BinaryHash<Blake2sHash>
+func BinaryHash_Blake2sHash(left []byte, right []byte) Blake2sHash {
 	result := Blake2sHash{}
 	return trimToFr32(result)
 }
@@ -745,18 +745,18 @@ func RepCompress_Blake2sHash(left []byte, right []byte) Blake2sHash {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Digest
-// WideRepCompress<T>
-func WideRepCompress_T(data []byte) util.T {
+// HashBytes<T>
+func HashBytes_T(data []byte) util.T {
 	return util.T{}
 }
 
-// RepCompress<PedersenHash>
-func WideRepCompress_PedersenHash(data []byte) PedersenHash {
+// HashBytes<PedersenHash>
+func HashBytes_PedersenHash(data []byte) PedersenHash {
 	return PedersenHash{}
 }
 
-// RepCompress<Blake2sHash>
-func WideRepCompress_Blake2sHash(data []byte) Blake2sHash {
+// HashBytes<Blake2sHash.
+func HashBytes_Blake2sHash(data []byte) Blake2sHash {
 	// Digest is truncated to 254 bits.
 	result := Blake2sHash{}
 	return trimToFr32(result)
@@ -779,9 +779,9 @@ func DigestSize_Blake2sHash() int {
 ////////////////////////////////////////////////////////////////////////////////
 /// Binary Merkle-tree generation
 
-// RepHash<T>
-func RepHash_T(data []byte) (util.T, file.Path) {
-	// Plan: define this in terms of RepCompress_T, then copy-paste changes into T-specific specializations, for now.
+// BuildTree<T>
+func BuildTree_T(data []byte) (util.T, file.Path) {
+	// Plan: define this in terms of BinaryHash_T, then copy-paste changes into T-specific specializations, for now.
 
 	// Nodes are always the digest size so data cannot be compressed to digest for storage.
 	nodeSize := DigestSize_T()
@@ -795,7 +795,7 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 			left := data[i : i+nodeSize]
 			right := data[i+nodeSize : i+2*nodeSize]
 
-			hashed := RepCompress_T(left, right)
+			hashed := BinaryHash_T(left, right)
 
 			row = append(row, AsBytes_T(hashed)...)
 		}
@@ -816,13 +816,13 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 	return fromBytes_T(root), filePath
 }
 
-// RepHash<PedersenHash>
-func RepHash_PedersenHash(data []byte) (PedersenHash, file.Path) {
+// BuildTree<PedersenHash>
+func BuildTree_PedersenHash(data []byte) (PedersenHash, file.Path) {
 	return PedersenHash{}, file.Path("") // FIXME
 }
 
-//  RepHash<Blake2sHash>
-func RepHash_Blake2sHash(data []byte) (Blake2sHash, file.Path) {
+//  BuildTree<Blake2sHash>
+func BuildTree_Blake2sHash(data []byte) (Blake2sHash, file.Path) {
 	return []byte{}, file.Path("") // FIXME
 }
 
@@ -856,13 +856,13 @@ func Commitment_SealedSectorCID(cid sector.SealedSectorCID) Commitment {
 
 func ComputeDataCommitment(data []byte) ([]byte, file.Path) {
 	// TODO: make hash parameterizable
-	return RepHash_Blake2sHash(data)
+	return BuildTree_Blake2sHash(data)
 }
 
 // Compute CommP or CommD.
 func ComputeUnsealedSectorCID(data []byte) (sector.UnsealedSectorCID, file.Path) {
 	// TODO: check that len(data) > minimum piece size and is a power of 2.
-	hash, treePath := RepHash_Blake2sHash(data)
+	hash, treePath := BuildTree_Blake2sHash(data)
 	return UnsealedSectorCID(hash), treePath
 }
 
