@@ -4,69 +4,64 @@ import (
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 )
 
-func (provider *StorageProvider_I) HandleStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID) {
+func (provider *StorageProvider_I) OnNewStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID) {
 
-	_, found := provider.ProposalStatus()[payloadCID]
+	_, found := provider.ProposalStatus()[proposal.CID()]
 	if found {
-		// TODO: may want to throw here
+		// TODO: return error
 		return
 	}
 
 	var shouldReject bool // specified by StorageProvider
 	if shouldReject {
-		provider.rejectStorageDealProposal(payloadCID)
+		provider.rejectStorageDealProposal(proposal)
 		return
 	}
 
 	if provider.verifyStorageDealProposal(proposal, payloadCID) {
-		provider.acceptStorageDealProposal(payloadCID)
-		// TODO: PullPayload(proposal.PieceCID) over libp2p
+		provider.acceptStorageDealProposal(proposal)
 	} else {
-		provider.rejectStorageDealProposal(payloadCID)
+		provider.rejectStorageDealProposal(proposal)
 		return
 	}
 
 }
 
-func (provider *StorageProvider_I) OnReceivingPayload(payloadCID ipld.CID) {
-	_, found := provider.ProposalStatus()[payloadCID]
-	if !found {
-		// TODO: error here
+func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.StorageDealProposal) msg.Message {
+	// TODO: construct StorageDeal Message
+	var storageDealMessage msg.Message
+
+	// TODO: notify StorageClient StorageDealSigned
+	return storageDealMessage
+}
+
+func (provider *StorageProvider_I) publishStorageDealMessage(message msg.Message) deal.StorageDeal_I {
+	// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
+	var dealID deal.DealID
+	var dealCID deal.DealCID
+
+	storageDeal := &deal.StorageDeal_I{
+		ProposalMessage_: message,
+		ID_:              dealID,
 	}
 
-	// TODO: may want to check on proposalStatus here
+	provider.DealStatus()[dealCID] = StorageDealPublished
 
-	// TODO: do we need to know storage client somewhere or can get this from libp2p
-	// TODO: get proposal
-	var proposal deal.StorageDealProposal
-	isProposalVerified := provider.verifyStorageDealProposal(proposal, payloadCID)
-
-	if !isProposalVerified {
-		provider.rejectStorageDealProposal(payloadCID)
-		return
-	}
-
-	provider.signStorageDealProposal(proposal)
-
+	// TODO: notify StorageClient StorageDealPublished
+	return *storageDeal
 }
 
-func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.StorageDealProposal) deal.StorageDeal {
-	// TODO add signature to the proposal
-	// TODO notify StorageClient StorageDealProposalSigned
-	// TODO notify StorageClient StorageDealCreated
-	panic("TODO")
+func (provider *StorageProvider_I) acceptStorageDealProposal(proposal deal.StorageDealProposal) {
+	provider.ProposalStatus()[proposal.CID()] = StorageDealProposalAccepted
+	// TODO: notify StorageClient StorageDealAccepted
 }
 
-func (provider *StorageProvider_I) acceptStorageDealProposal(payloadCID ipld.CID) {
-	provider.ProposalStatus()[payloadCID] = StorageDealProposalAccepted
-	// TODO: notify StorageClient StorageDealProposalAccepted
-}
-
-func (provider *StorageProvider_I) rejectStorageDealProposal(payloadCID ipld.CID) {
-	provider.ProposalStatus()[payloadCID] = StorageDealProposalRejected
-	// TODO: notify StorageClient StorageDealProposalRejected
+func (provider *StorageProvider_I) rejectStorageDealProposal(proposal deal.StorageDealProposal) {
+	provider.ProposalStatus()[proposal.CID()] = StorageDealProposalRejected
+	// TODO: notify StorageClient StorageDealRejected
 }
 
 func (provider *StorageProvider_I) verifyStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID) bool {
@@ -94,23 +89,44 @@ func (provider *StorageProvider_I) verifyStorageDealProposal(proposal deal.Stora
 
 func (provider *StorageProvider_I) verifyPieceCID(pieceCID piece.PieceCID, payloadCID ipld.CID) bool {
 	panic("TODO")
-	return true
+	return false
 }
 
-func (provider *StorageProvider_I) NotifyOfOnChainDealStatus(dealID deal.DealID, newStatus StorageDealStatus) {
-	_, found := provider.DealStatus()[dealID]
+func (provider *StorageProvider_I) NotifyOfOnChainDealStatus(dealCID deal.DealCID, newStatus StorageDealStatus) {
+	_, found := provider.DealStatus()[dealCID]
 	if found {
-		if newStatus == StorageDealCreated || newStatus == StorageDealNotFound {
-			// TODO error out
-			panic("invalid onchain deal status")
-		} else {
-			provider.DealStatus()[dealID] = newStatus
-		}
+		provider.DealStatus()[dealCID] = newStatus
 	}
 }
 
-func (provider *StorageProvider_I) HandleStorageDealProposalQuery(payloadCID ipld.CID) StorageDealProposalStatus {
-	proposalStatus, found := provider.ProposalStatus()[payloadCID]
+// the entire payload graph is now in local IPLD store
+// TODO: integrate with Data Transfer
+func (provider *StorageProvider_I) OnReceivingPayload(payloadCID ipld.CID) {
+	// TODO: get proposalCID from local storage
+	var proposalCID deal.ProposalCID
+
+	_, found := provider.ProposalStatus()[proposalCID]
+	if !found {
+		// TODO: error here
+	}
+
+	// TODO: get client addr from libp2p
+	// TODO: get proposal from local storage
+	var proposal deal.StorageDealProposal
+	isProposalVerified := provider.verifyStorageDealProposal(proposal, payloadCID)
+
+	if !isProposalVerified {
+		provider.rejectStorageDealProposal(proposal)
+		return
+	}
+
+	// StorageProvider can decide what to do here
+	provider.signStorageDealProposal(proposal)
+
+}
+
+func (provider *StorageProvider_I) OnStorageDealProposalQuery(proposalCID deal.ProposalCID) StorageDealStatus {
+	proposalStatus, found := provider.ProposalStatus()[proposalCID]
 
 	if found {
 		return proposalStatus
@@ -119,8 +135,8 @@ func (provider *StorageProvider_I) HandleStorageDealProposalQuery(payloadCID ipl
 	return StorageDealProposalNotFound
 }
 
-func (provider *StorageProvider_I) HandleStorageDealQuery(dealID deal.DealID) StorageDealStatus {
-	dealStatus, found := provider.DealStatus()[dealID]
+func (provider *StorageProvider_I) OnStorageDealQuery(dealCID deal.DealCID) StorageDealStatus {
+	dealStatus, found := provider.DealStatus()[dealCID]
 
 	if found {
 		return dealStatus

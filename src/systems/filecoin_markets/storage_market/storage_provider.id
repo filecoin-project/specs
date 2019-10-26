@@ -1,30 +1,30 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type StorageProvider struct {
-    // PieceCID to status
-    ProposalStatus  {ipld.CID: StorageDealProposalStatus}
-    // DealID to status
-    // TODO: confirm on the data type here
-    DealStatus      {deal.DealID: StorageDealStatus}
+    // StorageDealProposalCID: StorageDealStatus
+    ProposalStatus  {deal.ProposalCID: StorageDealStatus}
+    // DealCID: StorageDeal
+    DealStatus      {deal.DealCID: StorageDealStatus}
 
-    // call by StorageClient over libp2p to submit new StorageDealProposal
-    HandleStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID)
+    // libp2p listener on new StorageDealProposal
+    OnNewStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID)
 
-    // Call by StorageProvider to sign a StorageDealProposal and notify StorageClient
-    signStorageDealProposal(proposal deal.StorageDealProposal) deal.StorageDeal
+    // Call by StorageProvider to sign proposal and construct StorageDeal message
+    signStorageDealProposal(proposal deal.StorageDealProposal) msg.Message
+
+    // Call by StorageProvider to call sma.PublishStorageDeal
+    publishStorageDealMessage(message msg.Message)
 
     // Call by StorageProvider to accept a StorageDealProposal and notify StorageClient
-    acceptStorageDealProposal(payloadCID ipld.CID)
+    acceptStorageDealProposal(proposal deal.StorageDealProposal)
 
     // Call by StorageProvider to reject a StorageDealProposal and notify StorageClient
-    rejectStorageDealProposal(payloadCID ipld.CID)
+    rejectStorageDealProposal(proposal deal.StorageDealProposal)
 
-    // libp2p handler on receiving payload
-    OnReceivingPayload(payloadCID ipld.CID)
-
-    // Check client balance and signature
+    // Call by StorageProvider to check client balance and signature
     verifyStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID) bool
 
     // Check PieceCID(CommP) provided by StorageClient in StorageDealProposal
@@ -35,9 +35,12 @@ type StorageProvider struct {
     // Call by StorageMiningSubsystem
     NotifyOfOnChainDealStatus(dealID deal.DealID, newStatus StorageDealStatus)
 
-    // Call by StorageClient
-    HandleStorageDealProposalQuery(payloadCID ipld.CID) StorageDealProposalStatus
+    // libp2p listener on receiving payload
+    OnReceivingPayload(payloadCID ipld.CID)
 
-    // Call by StorageClient
-    HandleStorageDealQuery(dealID deal.DealID) StorageDealStatus
+    // libp2p listener on storage deal proposal query
+    OnStorageDealProposalQuery(proposalCID deal.ProposalCID) StorageDealStatus
+
+    // libp2p listener on storage deal query
+    OnStorageDealQuery(dealCID deal.DealCID) StorageDealStatus
 }

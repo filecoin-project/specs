@@ -79,8 +79,8 @@ func (sma *StorageMarketActor_I) verifyStorageDeal(d deal.StorageDeal) bool {
 	clientBalanceA := sma.Balances()[p.Client()].Available()
 	providerBalanceA := sma.Balances()[p.Provider()].Available()
 
-	if clientBalanceA < (p.StoragePrice()+p.ClientDealCollateral()) ||
-		providerBalanceA < p.ProviderDealCollateral() {
+	if clientBalanceA < (p.ClientBalanceRequirement()) ||
+		providerBalanceA < p.ProviderBalanceRequirement() {
 		return false
 	}
 	return true
@@ -147,7 +147,7 @@ func (sma *StorageMarketActor_I) GetLastDealExpirationFromDealIDs(dealIDs []deal
 			// TODO: proper failure
 			panic("Invalid Deal")
 		}
-		currExpiration := deal.Proposal().DealExpiration()
+		currExpiration := deal.Proposal().EndEpoch()
 		if currExpiration > lastDealExpiration {
 			lastDealExpiration = currExpiration
 		}

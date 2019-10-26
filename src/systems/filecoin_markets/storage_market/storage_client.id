@@ -11,7 +11,7 @@ type StorageClient struct {
     PullPayload(payloadCID ipld.CID)
 
     // Call by StorageProvider to inform StorageDealProposalStatus
-    NotifyOfStorageDealProposalStatus(pieceCID piece.PieceCID, status StorageDealProposalStatus)
+    NotifyOfStorageDealProposalStatus(proposalCID deal.ProposalCID, status StorageDealStatus)
 
     // Call by StorageProvider to inform StorageDealStatus
     NotifyOfStorageDealStatus(dealCID deal.DealCID, status StorageDealStatus)

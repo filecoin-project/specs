@@ -16,7 +16,7 @@ func (client *StorageClient_I) PullPayload(payloadCID ipld.CID) {
 	panic("TODO")
 }
 
-func (client *StorageClient_I) NotifyOfStorageDealProposalStatus(pieceCID piece.PieceCID, status StorageDealProposalStatus) {
+func (client *StorageClient_I) NotifyOfStorageDealProposalStatus(pieceCID piece.PieceCID, status StorageDealStatus) {
 	panic("TODO")
 }
 
