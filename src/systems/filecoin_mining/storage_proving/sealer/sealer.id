@@ -14,10 +14,10 @@ type SealInputs struct {
 }
 
 type CreateSealProofInputs struct {
-    SectorID     sector.SectorID
-    SealCfg      sector.SealCfg
-    RandomSeed   sector.SealRandomness
-    SealedPaths  [file.Path]
+    SectorID               sector.SectorID
+    SealCfg                sector.SealCfg
+    InteractiveRandomSeed  sector.InteractiveSealRandomness
+    SealedPaths            [file.Path]
     SealOutputs
 }
 

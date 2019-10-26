@@ -337,7 +337,7 @@ func hashColumn(column []Label) PedersenHash {
 
 type PrivateOfflineSDRProof []OfflineSDRChallengeProof
 
-func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
 	privateProof := sdr.CreatePrivateSealProof(challengeSeed, aux)
 
 	// Sanity check: newly-created proofs must pass verification.
@@ -346,7 +346,7 @@ func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.SealRandomness, au
 	return sdr.CreateOfflineCircuitProof(privateProof, aux)
 }
 
-func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.SealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
+func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
 	sealSeeds := aux.Seeds()
 	nodeSize := UInt(sdr.NodeSize())
 	challenges := sdr.GenerateOfflineChallenges(sealSeeds, randomness, sdr.Challenges())
@@ -366,7 +366,7 @@ func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.SealRandomness
 // NOTE: Verification of a private proof is exactly the computation we will prove we have performed in a zk-SNARK.
 // If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
 // Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
-func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeeds []sector.SealSeed, randomness sector.SealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
+func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
 	subsectorCount := int(sdr.SubsectorCount())
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
@@ -568,7 +568,7 @@ func (sdr *StackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRC
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, randomness sector.SealRandomness, challengeCount StackedDRGChallenges) (challenges []UInt) {
+func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, challengeCount StackedDRGChallenges) (challenges []UInt) {
 	nodeSize := int(sdr.NodeSize())
 	nodes := sdr.Nodes()
 

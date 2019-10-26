@@ -80,7 +80,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 
 func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer_CreateSealProof_FunRet_I {
 	sid := si.SectorID()
-	randomSeed := si.RandomSeed()
+	randomSeed := si.InteractiveRandomSeed()
 	auxTmp := si.SealOutputs().ProofAuxTmp()
 	aux := auxTmp.PersistentAux()
 
