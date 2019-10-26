@@ -23,10 +23,13 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	var subsectorData [][]byte
 	for _, unsealedPath := range si.UnsealedPaths() {
 		data := make(util.Bytes, si.SealCfg().SectorSize())
-		f := file.FromPath(unsealedPath)
-		length, _ := f.Read(data)
+		in := file.FromPath(unsealedPath)
+		length, err := in.Read(data)
 
-		_ = subsectorSize
+		if err != nil {
+			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
+		}
+
 		subsectorData = append(subsectorData, data)
 
 		if length != subsectorSize {
@@ -37,6 +40,23 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	}
 
 	sealArtifacts := sdr.Seal(sid, subsectorData, si.RandomSeed())
+	sealedPaths := si.SealedPaths()
+
+	for i, data := range subsectorData {
+		out := file.FromPath(sealedPaths[i])
+		length, err := out.Write(data)
+
+		if err != nil {
+			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
+		}
+
+		if length != subsectorSize {
+			return SectorSealer_SealSector_FunRet_Make_err(
+				errors.New("Wrote wrong sealed subsector size"),
+			).Impl()
+		}
+
+	}
 
 	return SectorSealer_SealSector_FunRet_Make_so(
 		SectorSealer_SealSector_FunRet_so(
@@ -47,14 +67,14 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 						CommRLast_:         sealArtifacts.CommRLast(),
 						CommRLastTreePath_: sealArtifacts.CommRLastTreePath(),
 					},
-					CommD_:         sealArtifacts.CommD(),
-					CommR_:         sealArtifacts.CommR(),
-					CommDTreePath_: sealArtifacts.CommDTreePath(),
-					CommCTreePath_: sealArtifacts.CommCTreePath(),
-					Seed_:          sealArtifacts.Seed(),
-					SubsectorData_: subsectorData,
-					KeyLayers_:     sealArtifacts.KeyLayers(),
-					Replica_:       sealArtifacts.Replica(),
+					CommD_:          sealArtifacts.CommD(),
+					CommR_:          sealArtifacts.CommR(),
+					CommDTreePaths_: sealArtifacts.CommDTreePaths(),
+					CommCTreePath_:  sealArtifacts.CommCTreePath(),
+					Seeds_:          sealArtifacts.Seeds(),
+					SubsectorData_:  subsectorData,
+					KeyLayers_:      sealArtifacts.KeyLayers(),
+					Replicas_:       sealArtifacts.Replicas(),
 				}})).Impl()
 }
 

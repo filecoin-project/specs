@@ -48,12 +48,12 @@ type SealSetupArtifacts struct {
     CommR              sector.SealedSectorCID
     CommC              sector.Commitment
     CommRLast          sector.Commitment
-    CommDTreePath      file.Path
+    CommDTreePaths     [file.Path]
     CommCTreePath      file.Path
     CommRLastTreePath  file.Path
-    Seed               sector.SealSeed
+    Seeds              [sector.SealSeed]
     KeyLayers          [Bytes]
-    Replica            Bytes
+    Replicas           [Bytes]
 }
 
 type PoRep union {

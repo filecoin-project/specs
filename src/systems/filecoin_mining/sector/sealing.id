@@ -63,18 +63,18 @@ type ProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    PersistentAux  ProofAux
+    PersistentAux   ProofAux
 
     SectorID
-    CommD          Commitment
-    CommR          SealedSectorCID
-    CommDTreePath  file.Path
-    CommCTreePath  file.Path
+    CommD           Commitment
+    CommR           SealedSectorCID
+    CommDTreePaths  [file.Path]
+    CommCTreePath   file.Path
 
-    Seed           SealSeed
-    SubsectorData  [Bytes]
-    Replica        Bytes
-    KeyLayers      [Bytes]
+    Seeds           [SealSeed]
+    SubsectorData   [Bytes]
+    Replicas        [Bytes]
+    KeyLayers       [Bytes]
 }
 
 type SealArguments struct {
