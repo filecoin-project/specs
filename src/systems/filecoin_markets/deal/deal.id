@@ -27,6 +27,7 @@ type StorageDealProposal struct {
     ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * (EndEpoch - StartEpoch)
     ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateralPerEpoch * (EndEpoch - StartEpoch)
     Duration()                    block.ChainEpoch
+
     CID()                         ProposalCID
 }
 

@@ -38,7 +38,7 @@ func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.Storage
 	return storageDealMessage
 }
 
-func (provider *StorageProvider_I) publishStorageDealMessage(message msg.Message) deal.StorageDeal_I {
+func (provider *StorageProvider_I) publishStorageDealMessage(message msg.Message) deal.StorageDeal {
 	// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
 	var dealID deal.DealID
 	var dealCID deal.DealCID
@@ -51,7 +51,7 @@ func (provider *StorageProvider_I) publishStorageDealMessage(message msg.Message
 	provider.DealStatus()[dealCID] = StorageDealPublished
 
 	// TODO: notify StorageClient StorageDealPublished
-	return *storageDeal
+	return storageDeal
 }
 
 func (provider *StorageProvider_I) acceptStorageDealProposal(proposal deal.StorageDealProposal) {
