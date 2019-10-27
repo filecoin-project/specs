@@ -6,6 +6,15 @@ title: "Data Transfer in Filecoin"
 
 _Data Transfer_ is a system for transferring all or part of a `Piece` across the network when a deal is made.
 
+# Modules
+
+This diagram shows how Data Tranfer and its modules fit into the picture with the Storage and Retrieval Markets.
+In particular, note how the Data Transfer Request Validators from the markets are plugged into the Data Transfer module,
+but their code belongs in the Markets system.
+
+{{< diagram src="data-transfer-modules.png" title="Data Transfer - Push Flow" >}}
+
+
 # Terminology
 
 - **Push Request**: A request to send data to the other party
