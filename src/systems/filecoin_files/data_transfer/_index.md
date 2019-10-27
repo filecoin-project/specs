@@ -32,7 +32,7 @@ or potentially the same round trip, where the requesting party implicitly agrees
 
 ## Push Flow
 
-{{< diagram src="./docs/systems/filecoin_files/data_transfer/push-flow.mmd.svg" title="Data Transfer - Push Flow" >}}
+{{< diagram src="push-flow.mmd.svg" title="Data Transfer - Push Flow" >}}
 
 1. A requestor initiates a Push transfer when it wants to send data to another party.
 2. The requestors' data transfer module will send a push request to the responder along with the data transfer voucher. It also puts the data transfer in the scheduler queue, meaning it expects the responder to initiate a transfer once the request is verified
@@ -48,7 +48,7 @@ once it verifies the the deal is signed and on chain
 
 ## Pull Flow
 
-{{< diagram src="./docs/systems/filecoin_files/data_transfer/pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
+{{< diagram src="pull-flow.mmd.svg" title="Data Transfer - Pull Flow" >}}
 
 1. A requestor initiates a Pull transfer when it wants to receive data from another party.
 2. The requestors' data transfer module will send a pull request to the responder along with the data transfer voucher.
@@ -65,7 +65,7 @@ The pull flow is ideal for retrieval deals, where the client initiates the pull 
 
 # Alternater Pull Flow - Single Round Trip
 
-{{< diagram src="./docs/systems/filecoin_files/data_transfer/alternate-pull-flow.mmd.svg" title="Data Transfer - Single Round Trip Pull Flow" >}}
+{{< diagram src="alternate-pull-flow.mmd.svg" title="Data Transfer - Single Round Trip Pull Flow" >}}
 
 1. A requestor initiates a Pull transfer when it wants to receive data from another party.
 2. The requestor’s DTM schedules the data transfer
