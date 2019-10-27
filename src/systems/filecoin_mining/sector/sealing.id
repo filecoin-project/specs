@@ -6,7 +6,6 @@ type Path struct {}  // TODO
 
 type SealRandomness Bytes
 type InteractiveSealRandomness Bytes
-type PoStRandomness Bytes
 
 // SealSeed is unique to each Sector
 // SealSeed is:

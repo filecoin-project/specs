@@ -4,7 +4,7 @@ import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproof
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) StorageProvingSubsystem_VerifySeal_FunRet {
-	sdr := filproofs.SDRParams(sv.SealCfg())
+	sdr := filproofs.SDRParams(sv.SealCfg(), nil)
 
 	result := sdr.VerifySeal(sv)
 

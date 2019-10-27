@@ -18,7 +18,7 @@ type PieceInfo = sector.PieceInfo
 type Label Bytes32
 type Commitment = sector.Commitment
 
-func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
+func SDRParams(sealCfg sector.SealCfg, postCfg sector.PostCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const NODE_SIZE = 32
@@ -61,6 +61,8 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
 		},
+		SealCfg_: sealCfg,
+		PostCfg_: postCfg,
 	}
 }
 
@@ -740,6 +742,17 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 
 func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR Commitment, sealSeeds []sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
 	//publicInputs := GeneratePublicInputs()
+	panic("TODO")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PoSt
+
+func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, faults sector.FaultSet) (sectors []sector.SectorID, challenges []UInt) {
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) GeneratePoSt(challengedSector []sector.SectorID, challenges []UInt, proofAuxs []sector.ProofAux) sector.PoStProof {
 	panic("TODO")
 }
 
