@@ -1,16 +1,16 @@
 sequenceDiagram
 
   participant Requestor
-  participant ReqDT as Data Transfer Module (Requestor)
-  participant ReqSC as Scheduler (Requestor)
-  participant ReqGS as Graphsync (Requestor)
-  participant ResGS as Graphsync (Requestor)
-  participant ResSC as Scheduler (Requestor)
-  participant ResDT as Data Transfer Module (Responder)
+  participant ReqDT as Data Transfer Module <br /> (Requestor)
+  participant ReqSC as Scheduler  <br /> (Requestor)
+  participant ReqGS as Graphsync  <br /> (Requestor)
+  participant ResGS as Graphsync  <br /> (Responder)
+  participant ResSC as Scheduler  <br /> (Responder)
+  participant ResDT as Data Transfer Module <br /> (Responder)
   participant Responder
 
-  Note over Requestor: Likely A Client
-  Note over Responder: Likely A Miner
+  Note over Requestor,ReqGS: One system. Likely A Client
+  Note over ResGS,Responder: One system. Likely A Miner
 
   Requestor ->> ReqDT : Initiate Push
   ReqDT ->> ReqSC : Schedule Transfer
