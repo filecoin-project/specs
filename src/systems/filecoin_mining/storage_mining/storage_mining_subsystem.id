@@ -10,62 +10,104 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 
 type StorageMiningSubsystem struct {
+
+    // --- Handlers to outside calls ---
+
+    ExternalInterface struct {
+        // TODO: why are these here? remove?
+        StartMining()
+        StopMining()
+
+        // call by StorageMarket.StorageProvider at the start of a deal.
+        // Triggers AddNewDeal on SectorIndexer
+        // StorageDeal contains DealCID
+        HandleStorageDeal(deal deal.StorageDeal)
+
+        // call by StorageMiningSubsystem itself in BlockProduction
+        DrawElectionProof(
+            lookbackTicket  block.Ticket
+            nonce           block.ElectionNonce
+            vrfKP           filcrypto.VRFKeyPair
+        ) block.ElectionProof
+
+        // call by BlockChain when a new block is produced
+        OnNewBestChain()
+
+        // call by clock during BlockProduction
+        // TODO: define clock better
+        OnNewRound()
+
+        // TODO: we need to define what this looks like, and what kinds of CIDs do we accept.
+        // is it only PieceCIDs? is it PayloadCIDs? what internal indexing do we provide?
+        RetrieveData(cid)
+
+        // decide on the following, based on complexity tradeoffs:
+        // - blockchain -> storage mining subsystem -> storage provider
+        // - blockchain -> storage provider
+        NotifyOfOnChainDealStatus()
+    }
+
+    // HandlesToExternalSubsystems are pointers to external systems that
+    // StorageMinerSubsystem and its internal components need to send
+    // messages/function calls to.
+    HandlesToExternalSubsystems struct {
+        // Need access to SPC in order to mine a block
+        Consensus          spc.StoragePowerConsensusSubsystem
+
+        // Need access to the blockchain system in order to query for things in the chain
+        Blockchain         blockchain.BlockchainSubsystem
+
+        // TODO: turn these into blockchain.Send calls
+        StoragePowerActor  spc.StoragePowerActor
+        MinerActor         StorageMinerActor
+        MarketActor        mkts.StorageMarketActor
+
+        // StorageProvider    storage_provider.StorageProvider
+    }
+
+
     // TODO: constructor
     // InitStorageMiningSubsystem() struct{}
 
     // Component subsystems
-    // StorageProvider    storage_provider.StorageProvider
-    StoragePowerActor  spc.StoragePowerActor
-    MinerActor         StorageMinerActor
-    SectorIndex        sectoridx.SectorIndexerSubsystem
-    StorageProving     storage_proving.StorageProvingSubsystem
-    BlockProducer      blockproducer.BlockProducer
-    electionNonce      block.ElectionNonce
 
-    // Need access to SPC in order to mine a block
-    Consensus          spc.StoragePowerConsensusSubsystem
+    // InternalComponents are sub-components of StorageMiningSubsystem.
+    InternalComponents struct {
 
-    // Need access to the blockchain system in order to query for things in the chain
-    Blockchain         blockchain.BlockchainSubsystem
+        // LocalMinerInfo is the stuff MiningSubsystem needs in order
+        // to interact with the StorageMinerActor
+        LocalMinerInfo struct{
+            MinerAddress   addr.Address
+            WorkerKey      key.Name // TOOD (use from keystore)
+        }
 
-    // TODO: why are these here? remove?
-    StartMining()
-    StopMining()
+        SectorIndex        sectoridx.SectorIndexerSubsystem
+        StorageProving     storage_proving.StorageProvingSubsystem
+        BlockProducer      blockproducer.BlockProducer
+        // electionNonce      block.ElectionNonce // TODO: do we need this at all?
+    }
 
-    // call by StorageMiningSubsystem itself to create miner
-    createMiner(
-        ownerPubKey   filcrypto.PubKey
-        workerPubKey  filcrypto.PubKey
-        pledgeAmt     actor.TokenAmount
-    )
 
-    // get miner key by address
-    GetMinerKeyByAddress(addr address.Address) filcrypto.PubKey
+    InternalFunctions struct {
+        // call by StorageMiningSubsystem itself to create miner
+        // TODO check with why and anorth whether StorgeMiner should
+        // be instantiated w/ a StorageMinerActor address, or whether
+        // it should construct it itself.
+        createMiner(
+            ownerPubKey   filcrypto.PubKey
+            workerPubKey  filcrypto.PubKey
+            pledgeAmt     actor.TokenAmount
+        )
 
-    // call by StorageMarket.StorageProvider at the start of a deal.
-    // Triggers AddNewDeal on SectorIndexer
-    // StorageDeal contains DealCID
-    HandleStorageDeal(deal deal.StorageDeal)
+        // get miner key by address
+        GetMinerKeyByAddress(addr address.Address) filcrypto.PubKey
 
-    // call by StorageMinerActor when error in sealing
-    CommitSectorError()
+        // call by StorageMinerActor when error in sealing
+        CommitSectorError()
 
-    // call by StorageMiningSubsystem itself in BlockProduction
-    DrawElectionProof(
-        lookbackTicket  block.Ticket
-        nonce           block.ElectionNonce
-        vrfKP           filcrypto.VRFKeyPair
-    ) block.ElectionProof
+        // call by StorageMiningSubsystem itself in BlockProduction
+        PrepareNewTicket(priorTicket block.Ticket, workerKeyPair filcrypto.VRFKeyPair) block.Ticket
 
-    // call by StorageMiningSubsystem itself in BlockProduction
-    PrepareNewTicket(priorTicket block.Ticket, workerKeyPair filcrypto.VRFKeyPair) block.Ticket
-
-    // call by BlockChain when a new block is produced
-    OnNewBestChain()
-
-    // call by clock during BlockProduction
-    // TODO: define clock better
-    OnNewRound()
-
-    tryLeaderElection()
+        tryLeaderElection()
+    }
 }
