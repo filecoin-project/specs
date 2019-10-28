@@ -25,7 +25,7 @@ group of smaller protocols, which handle different parts of the sync process.
   `ChainSync` takes `LastCheckpoint` on faith, and builds on it, never switching away from its history.
 - `TargetHeads` a list of `BlockCIDs` that represent blocks at the fringe of block production.
   These are the newest and best blocks `ChainSync` knows about. They are "target" heads because
-  `ChainSync` will try to sync to them. This list is sorted by "likelihood of being the best chain".
+  `ChainSync` will try to sync to them. This list is sorted by "likelihood of being the best chain" (eg for now, simply `ChainWeight`)
 - `BestTargetHead` the single best chain head `BlockCID` to try to sync to.
   This is the first element of `TargetHeads`
 
