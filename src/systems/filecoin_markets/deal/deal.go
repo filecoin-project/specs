@@ -3,6 +3,9 @@ package deal
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
+const MIN_PROVIDER_DEAL_COLLATERAL_PER_EPOCH = actor.TokenAmount(1) // TODO: Placeholder
+const MIN_CLIENT_DEAL_COLLATERAL_PER_EPOCH = actor.TokenAmount(1)   // TODO: Placeholder
+
 func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	// TODO: extract from d.ProposalMessage
 	var proposal StorageDealProposal
