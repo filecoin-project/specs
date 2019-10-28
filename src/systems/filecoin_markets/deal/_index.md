@@ -64,4 +64,4 @@ On every PoSt Submission, the following steps happen.
 
 # Deal Flow
 
-{{< diagram src="../diagrams/sequence/deal_flow.mmd.svg" title="Deal Flow Sequence Diagram" >}}
+{{< diagram src="diagrams/deal-flow.mmd.svg" title="Deal Flow Sequence Diagram" >}}
