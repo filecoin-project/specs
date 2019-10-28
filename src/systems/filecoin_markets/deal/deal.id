@@ -3,31 +3,43 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type DealID UVarint
 type DealCID ipld.CID
+type ProposalCID ipld.CID
 type PayloadCID ipld.CID
 type Signature struct {}  // TODO
 
 type StorageDealProposal struct {
-    // The data hashed in a form that is compatible with the proofs system.
-    // Reference for actual storage in a sector.
-    PieceCID                piece.PieceCID  // 35 bytes CommP
-    PieceSize               piece.PieceSize
-    Client                  addr.Address
-    Provider                addr.Address
-    ProposalExpiration      block.ChainEpoch
-    DealExpiration          block.ChainEpoch  // potentially change to DealDuration
-    StoragePrice            actor.TokenAmount  // potentially per epoch
-    ProviderDealCollateral  actor.TokenAmount
-    ClientDealCollateral    actor.TokenAmount  // potentially collapse into one with ProviderDealCollateral
-    ProposerSignature       Signature
+    PieceCID                      piece.PieceCID  // 35 bytes CommP
+    PieceSize                     piece.PieceSize
+    Client                        addr.Address
+    Provider                      addr.Address
+    ClientSignature               Signature
+
+    StartEpoch                    block.ChainEpoch  // a deal is invalid if it is published to the chain after StartEpoch
+    EndEpoch                      block.ChainEpoch
+    StoragePricePerEpoch          actor.TokenAmount
+    ProviderCollateralPerEpoch    actor.TokenAmount
+    ClientCollateralPerEpoch      actor.TokenAmount  // potentially collapse into one with ProviderDealCollateral
+
+    ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * (EndEpoch - StartEpoch)
+    ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateralPerEpoch * (EndEpoch - StartEpoch)
+    Duration()                    block.ChainEpoch
+
+    CID()                         ProposalCID
 }
 
 // Everything in this struct will go on chain
+// We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
+// Provider's signature is implicit in the onchain call
 type StorageDeal struct {
-    Proposal          StorageDealProposal
-    CounterSignature  Signature
+    Proposal()       StorageDealProposal  // can extract proposal from the message
+    ProposalMessage  msg.Message  // counter signature is implicit in the message
+    ID               DealID
+
+    CID()            DealCID
 }
 
 type RetrievalDealProposal struct {}  // TODO
