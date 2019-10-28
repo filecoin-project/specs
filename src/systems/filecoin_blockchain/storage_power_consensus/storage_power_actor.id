@@ -36,8 +36,6 @@ type StoragePowerActorState struct {
     PowerTable  PowerTableHAMT
     EC          ExpectedConsensus
 
-    _verifyStorageMiner(rt Runtime, addr addr.Address) bool
-
     _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)

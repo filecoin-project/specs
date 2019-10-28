@@ -65,20 +65,6 @@ func (r *FaultReport_I) GetTerminatedFaultSlash() actor.TokenAmount {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (st *StoragePowerActorState_I) _verifyStorageMiner(rt, address addr.Address) bool {
-	// TODO: anything else to check?
-	// TODO: check miner pledge collateral balances?
-	// TODO: decide on what should be checked here
-	// TODO: convert address to MinerActorID
-
-	var minerID addr.Address
-	_, found := st.PowerTable()[minerID]
-	if !found {
-		return false
-	}
-	return true
-}
-
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
 		rt.Abort("negative amount.")
@@ -172,13 +158,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	h, st := a.State(rt)
 
-	var msgSender addr.Address // TODO replace this
 	var msgValue actor.TokenAmount
-
-	isMinerVerified := st._verifyStorageMiner(rt, msgSender)
-	if !isMinerVerified {
-		rt.Abort("miner not verified.")
-	}
 
 	// TODO: this should be enforced somewhere else
 	if msgValue < 0 {
@@ -186,7 +166,6 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 	}
 
 	// TODO: convert msgSender to MinerActorID
-	// if not possible, MinerActorID needs to be passed in
 	var minerID addr.Address
 
 	currEntry, found := st.PowerTable()[minerID]
@@ -196,7 +175,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 		rt.Abort("minerID not found.")
 	}
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
-	st.PowerTable()[minerID] = currEntry
+	st.Impl().PowerTable_[minerID] = currEntry
 
 	UpdateRelease(rt, h, st)
 }
@@ -204,13 +183,6 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
 	h, st := a.State(rt)
-
-	var msgSender addr.Address // TODO replace this
-
-	isMinerVerified := st._verifyStorageMiner(rt, msgSender)
-	if !isMinerVerified {
-		rt.Abort("miner not verified.")
-	}
 
 	if amount < 0 {
 		rt.Abort("negative amount.")
@@ -274,13 +246,7 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Ad
 
 	h, st := a.State(rt)
 
-	isMinerVerified := st._verifyStorageMiner(rt, address)
-	if !isMinerVerified {
-		rt.Abort("miner not verified.")
-	}
-
 	// TODO: make explicit address type
-	// TODO: decide if verifyMiner takes in an Address or ActorID and if perform conversion
 	var minerID addr.Address
 
 	if (st.PowerTable()[minerID].ActivePower() + st.PowerTable()[minerID].InactivePower()) > 0 {
@@ -311,8 +277,8 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bo
 	h, st := a.State(rt)
 
 	ret := false
-	// var msgSender addr.Address // TODO replace this
-	// TODO: convert msgSender to minerID
+
+	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
 
 	powerEntry, found := st.PowerTable()[minerID]
@@ -354,21 +320,13 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 
 	h, st := a.State(rt)
 
-	var msgSender addr.Address // TODO replace this
-	isMinerVerified := st._verifyStorageMiner(rt, msgSender)
-
-	if !isMinerVerified {
-		rt.Abort("miner not verified.")
-	}
-
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
 
 	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
-		// TODO: proper throw
-		panic("TODO")
+		rt.Abort("miner not found.")
 	}
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
