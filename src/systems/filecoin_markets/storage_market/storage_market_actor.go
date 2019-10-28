@@ -72,9 +72,9 @@ func (sma *StorageMarketActor_I) PublishStorageDeals(newStorageDeals []deal.Stor
 			// TODO lockFunds
 			id := sma.generateStorageDealID(newDeal)
 			sma.Deals()[id] = newDeal
-			response[i] = PublishStorageDealSuccess
+			response[i] = PublishStorageDealSuccess(id)
 		} else {
-			response[i] = PublishStorageDealError
+			response[i] = PublishStorageDealError()
 		}
 	}
 
@@ -97,7 +97,9 @@ func (sma *StorageMarketActor_I) verifyStorageDeal(d deal.StorageDeal) bool {
 }
 
 func (sma *StorageMarketActor_I) generateStorageDealID(storageDeal deal.StorageDeal) deal.DealID {
-	panic("TODO")
+	// TODO
+	var dealID deal.DealID
+	return dealID
 }
 
 func (sma *StorageMarketActor_I) HandleCronAction() {
