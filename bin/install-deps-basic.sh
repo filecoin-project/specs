@@ -36,7 +36,7 @@ main() {
   prun git submodule update --init --recursive
 
   # other packages
-  require_version "$(hugo version)" hugo 0.56 "recommended install from package manager"
+  require_version "$(hugo version)" hugo 0.54 "recommended install from package manager"
   require_version "$(go version)" go 1.12 "recommended install from https://golang.org/dl/"
   return 0
 }

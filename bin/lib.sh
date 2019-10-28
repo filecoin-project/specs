@@ -1,7 +1,7 @@
 # no shbang, not meant to be run directly
 
 find_pkgmgr() {
-  pkgmgrs=(apt-get brew)
+  pkgmgrs=(brew snap apt-get)
   for pm in ${pkgmgrs[@]}; do
     which "$pm" >/dev/null && printf "$pm" && return 0
   done
@@ -51,9 +51,14 @@ tryinstall() {
   else
     which_v "$1" && return 0 # have it
   fi
+  version="$3"
 
   # pkg mgr, try using it
-  prun "$pkgmgr" install "$2"
+  if [ "$pkgmgr" = "apt-get" ]; then
+    prun sudo "$pkgmgr" install "$2"
+  else
+    prun "$pkgmgr" install "$2"
+  fi
 }
 
 get_user_confirmation() {

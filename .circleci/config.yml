@@ -7,32 +7,42 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Generate code"
+          command: make gen-code
+      - run:
+          name: "Build code"
+          command: make build-code
+      - run:
+          name: "Test code"
+          command: make test
+      - run:
+          name: "Check code is formatted"
           command: |
-            make test
-
-  format:
+            make fmt-code
+            git diff --exit-code
+  deps_basic:
     docker:
       - image: circleci/golang:1.12
     steps:
       - checkout
       - run:
-          command: |
-            make fmt-code
-            git diff --exit-code
-
+          name: "Install basic dependencies"
+          command: make deps-basic
   build:
     docker:
       - image: circleci/golang:1.12
     steps:
       - checkout
+      - run: # need it to make sure build works
+          name: "Install basic dependencies"
+          command: make deps-basic
       - run:
-          command: |
-            make build
+          command: make build
 
 workflows:
   version: 2.1
   test_all:
     jobs:
       - test
-      - format
+      - deps_basic
       - build
