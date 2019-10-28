@@ -8,6 +8,8 @@ This is the [Filecoin Specification](https://github.com/filecoin-project/specs),
 
 https://filecoin-project.github.io/specs is the user-friendly website rendering, which we recommend for reading this repository.
 
+**Note**: The website is periodically updated. It does not update automatically with every merge to master. The rendered spec notes the version and build time. The best way to make sure you are seeing the latest is to verify the hash matches master in this repository. If not, build it yourself.
+
 ## Contributing
 
 Please [read the spec process](https://filecoin-project.github.io/specs/#intro__process). Please file PRs on github with fixes.
