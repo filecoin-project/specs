@@ -20,6 +20,35 @@ type CID struct {
 type _UnusedCompileAssert1 = [unsafe.Sizeof(int(0)) - 8]byte
 type _UnusedCompileAssert2 = [8 - unsafe.Sizeof(int(0))]byte
 
+type Bool bool
+type Int int
+type Any = interface{}
+type String string
+
+func (x Bool) Native() bool {
+	return bool(x)
+}
+
+func (x Int) Native() int {
+	return int(x)
+}
+
+func (x String) Native() string {
+	return string(x)
+}
+
+func Bool_FromNative(x bool) Bool {
+	return Bool(x)
+}
+
+func Int_FromNative(x int) Int {
+	return Int(x)
+}
+
+func String_FromNative(x string) String {
+	return String(x)
+}
+
 type UVarint = uint64
 type Varint = int64
 type UInt = uint64
@@ -28,7 +57,6 @@ type BigInt = big.Int
 type Bytes = []byte
 type BytesKey = string // to use Bytes in map keys.
 type BytesAmount = UVarint
-type String = string
 type T = struct{} // For use in generic definitions.
 
 func Assert(b bool) {

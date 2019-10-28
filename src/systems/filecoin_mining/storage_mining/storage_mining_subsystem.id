@@ -16,7 +16,7 @@ type StorageMiningSubsystem struct {
     // Component subsystems
     // StorageProvider    storage_provider.StorageProvider
     StoragePowerActor  spc.StoragePowerActor
-    MinerActor         StorageMinerActor
+    MinerActor         StorageMinerActorCode
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
     BlockProducer      blockproducer.BlockProducer
