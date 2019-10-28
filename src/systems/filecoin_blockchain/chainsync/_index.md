@@ -341,6 +341,7 @@ State Machine:
 - Blocks can be validated in progressive stages, in order to minimize resource expenditure.
 - Validation computation is considerable, and a serious DOS attack vector.
 - Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.
+- `ChainSync` SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by `FinalityTipset`, or when `ChainSync` is under significant resource load.
 - **Progressive Stages of Block Validation**
   - _(TODO: move this to blockchain/Block section)_
   - **BV0 - Syntactic Validation**: Validate data structure packing and ensure correct typing.
