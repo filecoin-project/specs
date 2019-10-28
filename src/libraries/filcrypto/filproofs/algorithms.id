@@ -3,6 +3,9 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StackedDRGLayers UInt
 type StackedDRGNodeSize UInt
+type StackedDRGNodes UInt
+type StackedDRGSubsectorCount UInt
+type StackedDRGPartitions UInt
 type StackedDRGChallenges UInt
 type DRGDepth struct {}
 type DRGFraction struct {}
@@ -45,11 +48,12 @@ type SealSetupArtifacts struct {
     CommR              sector.SealedSectorCID
     CommC              sector.Commitment
     CommRLast          sector.Commitment
-    CommDTreePath      file.Path
+    CommDTreePaths     [file.Path]
     CommCTreePath      file.Path
     CommRLastTreePath  file.Path
+    Seeds              [sector.SealSeed]
     KeyLayers          [Bytes]
-    Replica            Bytes
+    Replicas           [Bytes]
 }
 
 type PoRep union {
@@ -73,12 +77,17 @@ type EllipticCurve struct {
 type StackedDRG struct {
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
+    Nodes             StackedDRGNodes
+    SubsectorCount    StackedDRGSubsectorCount
+    Partitions        StackedDRGPartitions
     Challenges        StackedDRGChallenges
     Algorithm         struct {}
     DRGCfg
     ExpanderGraphCfg
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve             EllipticCurve
+    SealCfg           sector.SealCfg
+    PostCfg           sector.PostCfg
 }
 
 type DRGCfg struct {

@@ -507,7 +507,6 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
 	// TODO: verify seal @nicola
-	// TODO: get var sealRandomness sector.SealRandomness from onChainInfo.Epoch
 	// TODO: st.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
 
 	// verifySeal will also generate CommD on the fly from CommP and PieceSize
@@ -526,8 +525,19 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 			MinerID_: st.Info().Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
 			Number_:  onChainInfo.SectorNumber(),
 		},
+		OnChain_: onChainInfo,
 
-		OnChain_:    onChainInfo,
+		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
+		SealCfg_: &sector.SealCfg_I{
+			SectorSize_:     st.Info().SectorSize(),
+			SubsectorCount_: st.Info().SubsectorCount(),
+			Partitions_:     st.Info().Partitions(),
+		},
+
+		// TODO: get Randomness sector.SealRandomness using onChainInfo.Epoch
+		//Randomness_:
+		// TODO: get InteractiveRandomness sector.SealRandomness using onChainInfo.InteractiveEpoch
+		//InteractiveRandomness_:
 		PieceInfos_: pieceInfos,
 	})
 	return false // TODO: finish

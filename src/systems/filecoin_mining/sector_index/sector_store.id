@@ -15,6 +15,11 @@ type SectorStore struct {
     // returns an error.
     GetSectorFiles(id sector.SectorID) union {f SectorFiles, err error}
 
+    // Get information, including a merkle tree file/path, needed to generate PoSt for a sector.
+    GetSectorProofAux(id sector.SectorID) sector.ProofAux
+
+    StoreSectorProofAux(id sector.SectorID, proofAux sector.ProofAux) union {proofAux sector.ProofAux, err error}
+
     // CreateSectorFiles allocates two sector files, one for unsealed and one for
     // sealed sector.
     CreateSectorFiles(id sector.SectorID) union {f SectorFiles, err error}
