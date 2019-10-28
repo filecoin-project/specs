@@ -1,6 +1,7 @@
 package storage_power_consensus
 
 import (
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -20,14 +21,229 @@ const (
 ////////////////////////////////////////////////////////////////////////////////
 type InvocOutput = msg.InvocOutput
 type Runtime = vmr.Runtime
+type Bytes = util.Bytes
+type State = StoragePowerActorState
+
+func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
+	h := rt.AcquireState()
+	stateCID := h.Take()
+	stateBytes := rt.IpldGet(ipld.CID(stateCID))
+	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
+		rt.Abort("IPLD lookup error")
+	}
+	state := DeserializeState(stateBytes.As_Bytes())
+	return h, state
+}
+func Release(rt Runtime, h vmr.ActorStateHandle, st State) {
+	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.Release(checkCID)
+}
+func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st State) {
+	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
+	h.UpdateRelease(newCID)
+}
+func (st *StoragePowerActorState_I) CID() ipld.CID {
+	panic("TODO")
+}
+func DeserializeState(x Bytes) State {
+	panic("TODO")
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (spa *StoragePowerActor_I) CreateStorageMiner(
+func (r *FaultReport_I) GetDeclaredFaultSlash() actor.TokenAmount {
+	return actor.TokenAmount(0)
+}
+
+func (r *FaultReport_I) GetDetectedFaultSlash() actor.TokenAmount {
+	return actor.TokenAmount(0)
+}
+
+func (r *FaultReport_I) GetTerminatedFaultSlash() actor.TokenAmount {
+	return actor.TokenAmount(0)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (st *StoragePowerActorState_I) _verifyStorageMiner(rt, address addr.Address) bool {
+	// TODO: anything else to check?
+	// TODO: check miner pledge collateral balances?
+	// TODO: decide on what should be checked here
+	// TODO: convert address to MinerActorID
+
+	var minerID addr.Address
+	_, found := st.PowerTable()[minerID]
+	if !found {
+		return false
+	}
+	return true
+}
+
+func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
+	if amount < 0 {
+		rt.Abort("negative amount.")
+	}
+
+	// TODO: convert address to MinerActorID
+	var minerID addr.Address
+
+	currEntry, found := st.PowerTable()[minerID]
+	if !found {
+		rt.Abort("minerID not found.")
+	}
+
+	amountToSlash := amount
+
+	if currEntry.Impl().LockedPledgeCollateral() < amount {
+		amountToSlash = currEntry.Impl().LockedPledgeCollateral_
+		currEntry.Impl().LockedPledgeCollateral_ = 0
+		// TODO: extra handling of not having enough pledgecollateral to be slashed
+	} else {
+		currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
+	}
+
+	// TODO: send amountToSlash to TreasuryActor
+	panic(amountToSlash)
+	st.Impl().PowerTable_[minerID] = currEntry
+
+	// TODO: commit state change
+}
+
+// TODO: batch process this if possible
+func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
+	// AvailableBalance -> LockedPledgeCollateral
+	// TODO: potentially unnecessary check
+	if amount < 0 {
+		rt.Abort("negative amount.")
+	}
+
+	// TODO: convert address to MinerActorID
+	var minerID addr.Address
+
+	currEntry, found := st.PowerTable()[minerID]
+	if !found {
+		rt.Abort("minerID not found.")
+	}
+
+	if currEntry.Impl().AvailableBalance() < amount {
+		rt.Abort("insufficient available balance.")
+	}
+
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
+	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() + amount
+	st.Impl().PowerTable_[minerID] = currEntry
+}
+
+func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
+	// lockedPledgeCollateral -> AvailableBalance
+	if amount < 0 {
+		rt.Abort("negative amount.")
+	}
+
+	// TODO: convert address to MinerActorID
+	var minerID addr.Address
+
+	currEntry, found := st.PowerTable()[minerID]
+	if !found {
+		rt.Abort("minerID not found.")
+	}
+
+	if currEntry.Impl().LockedPledgeCollateral() < amount {
+		rt.Abort("insufficient locked balance.")
+	}
+
+	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + amount
+	st.Impl().PowerTable_[minerID] = currEntry
+
+}
+
+func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power block.StoragePower) actor.TokenAmount {
+
+	// TODO: Implement
+	pcRequired := actor.TokenAmount(0)
+
+	return pcRequired
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
+
+	h, st := a.State(rt)
+
+	var msgSender addr.Address // TODO replace this
+	var msgValue actor.TokenAmount
+
+	isMinerVerified := st._verifyStorageMiner(rt, msgSender)
+	if !isMinerVerified {
+		rt.Abort("miner not verified.")
+	}
+
+	// TODO: this should be enforced somewhere else
+	if msgValue < 0 {
+		rt.Abort("negative message value.")
+	}
+
+	// TODO: convert msgSender to MinerActorID
+	// if not possible, MinerActorID needs to be passed in
+	var minerID addr.Address
+
+	currEntry, found := st.PowerTable()[minerID]
+
+	if !found {
+		// AddBalance will just fail if miner is not created before hand
+		rt.Abort("minerID not found.")
+	}
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
+	st.PowerTable()[minerID] = currEntry
+
+	UpdateRelease(rt, h, st)
+}
+
+func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
+
+	h, st := a.State(rt)
+
+	var msgSender addr.Address // TODO replace this
+
+	isMinerVerified := st._verifyStorageMiner(rt, msgSender)
+	if !isMinerVerified {
+		rt.Abort("miner not verified.")
+	}
+
+	if amount < 0 {
+		rt.Abort("negative amount.")
+	}
+
+	// TODO: convert msgSender to MinerActorID
+	var minerID addr.Address
+
+	currEntry, found := st.PowerTable()[minerID]
+	if !found {
+		rt.Abort("minerID not found.")
+	}
+
+	if currEntry.AvailableBalance() < amount {
+		rt.Abort("insufficient balance.")
+	}
+
+	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
+	st.Impl().PowerTable_[minerID] = currEntry
+
+	UpdateRelease(rt, h, st)
+
+	// TODO: send funds to msgSender
+}
+
+func (a *StoragePowerActorCode_I) CreateStorageMiner(
+	rt Runtime,
 	ownerAddr addr.Address,
 	workerAddr addr.Address,
 	peerId libp2p.PeerID,
 ) addr.Address {
+
+	h, st := a.State(rt)
 
 	// TODO: anything to check here?
 	newMiner := &PowerTableEntry_I{
@@ -46,281 +262,109 @@ func (spa *StoragePowerActor_I) CreateStorageMiner(
 	// TODO: minerID should be a MinerActorID
 	// which is smaller than MinerAddress
 	var minerID addr.Address
-	spa.PowerTable()[minerID] = newMiner
+	st.PowerTable()[minerID] = newMiner
+
+	UpdateRelease(rt, h, st)
+
 	return minerID
+
 }
 
-func (spa *StoragePowerActor_I) RemoveStorageMiner(address addr.Address) {
-	isMinerVerified := spa.verifyMiner(address)
+func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Address) {
+
+	h, st := a.State(rt)
+
+	isMinerVerified := st._verifyStorageMiner(rt, address)
 	if !isMinerVerified {
-		// TODO: proper throw
-		panic("TODO")
+		rt.Abort("miner not verified.")
 	}
 
 	// TODO: make explicit address type
 	// TODO: decide if verifyMiner takes in an Address or ActorID and if perform conversion
 	var minerID addr.Address
 
-	if (spa.PowerTable()[minerID].ActivePower() + spa.PowerTable()[minerID].InactivePower()) > 0 {
-		// TODO: proper throw
-		panic("TODO")
+	if (st.PowerTable()[minerID].ActivePower() + st.PowerTable()[minerID].InactivePower()) > 0 {
+		rt.Abort("power still remains.")
 	}
 
-	delete(spa.PowerTable(), minerID)
+	delete(st.PowerTable(), minerID)
 
-	// TODO: commit state
+	UpdateRelease(rt, h, st)
 }
 
-func (spa *StoragePowerActor_I) verifyMiner(address addr.Address) bool {
-	// TODO: anything else to check?
-	// TODO: check miner pledge collateral balances?
-	// TODO: decide on what should be checked here
-	// TODO: convert address to MinerActorID
+func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
 
-	var minerID addr.Address
-	_, found := spa.PowerTable()[minerID]
-	if !found {
-		return false
-	}
-	return true
-}
+	h, st := a.State(rt)
 
-func (spa *StoragePowerActor_I) GetTotalPower() block.StoragePower {
 	totalPower := block.StoragePower(0)
-	for _, miner := range spa.PowerTable() {
+	for _, miner := range st.PowerTable() {
 		totalPower = totalPower + miner.ActivePower() + miner.InactivePower()
 	}
+
+	Release(rt, h, st)
+
 	return totalPower
 }
 
-func (spa *StoragePowerActor_I) GetPledgeCollateralReq(power block.StoragePower) actor.TokenAmount {
-	// TODO: Implement
-	return actor.TokenAmount(0)
-}
+func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bool {
 
-func (spa *StoragePowerActor_I) EnsurePledgeCollateralSatisfied() bool {
+	h, st := a.State(rt)
+
+	ret := false
 	// var msgSender addr.Address // TODO replace this
 	// TODO: convert msgSender to minerID
 	var minerID addr.Address
 
-	powerEntry, found := spa.PowerTable()[minerID]
+	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
-		// TODO: proper throw
-		panic("TODO")
+		rt.Abort("miner not found.")
 	}
 
-	pledgeCollateralRequired := spa.GetPledgeCollateralReq(powerEntry.ActivePower() + powerEntry.InactivePower())
+	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
 
 	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
-		return true
+		ret = true
+	} else if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
+		st._lockPledgeCollateral(rt, minerID, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
+		ret = true
 	}
 
-	if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
-		spa.lockPledgeCollateral(minerID, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
+	UpdateRelease(rt, h, st)
 
-		// TODO: commit state change
-		return true
-	}
-
-	return false
+	return ret
 }
 
-func (spa *StoragePowerActor_I) AddBalance() {
+func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report FaultReport) {
+
+	h, st := a.State(rt)
+
 	var msgSender addr.Address // TODO replace this
-	var msgValue actor.TokenAmount
 
-	isMinerVerified := spa.verifyMiner(msgSender)
-	if !isMinerVerified {
-		// TODO: proper throw
-		panic("TODO")
-	}
+	declaredFaultSlash := report.GetDeclaredFaultSlash()
+	detectedFaultSlash := report.GetDetectedFaultSlash()
+	terminatedFaultSlash := report.GetTerminatedFaultSlash()
 
-	if msgValue < 0 {
-		// TODO: proper throw
-		panic("TODO")
-	}
+	st._slashPledgeCollateral(rt, msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
 
-	// TODO: convert msgSender to MinerActorID
-	// if not possible, MinerActorID needs to be passed in
-	var minerID addr.Address
-
-	currEntry, found := spa.PowerTable()[minerID]
-
-	if !found {
-		// AddBalance will just fail if miner is not created before hand
-		// TODO: proper throw
-		panic("TODO")
-	}
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
-	spa.PowerTable()[minerID] = currEntry
-
-	// TODO: commit state change
+	UpdateRelease(rt, h, st)
 }
 
-func (spa *StoragePowerActor_I) WithdrawBalance(amount actor.TokenAmount) {
+func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
+
+	h, st := a.State(rt)
+
 	var msgSender addr.Address // TODO replace this
+	isMinerVerified := st._verifyStorageMiner(rt, msgSender)
 
-	isMinerVerified := spa.verifyMiner(msgSender)
 	if !isMinerVerified {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	if amount < 0 {
-		// TODO: proper throw
-		panic("TODO")
+		rt.Abort("miner not verified.")
 	}
 
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
 
-	currEntry, found := spa.PowerTable()[minerID]
-	if !found {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	if currEntry.AvailableBalance() < amount {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
-	spa.PowerTable_[minerID] = currEntry
-
-	// TODO: send funds to msgSender
-	// TODO: commit state change
-
-}
-
-func (spa *StoragePowerActor_I) slashPledgeCollateral(address addr.Address, amount actor.TokenAmount) {
-	if amount < 0 {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	// TODO: convert address to MinerActorID
-	var minerID addr.Address
-
-	currEntry, found := spa.PowerTable()[minerID]
-	if !found {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	amountToSlash := amount
-
-	if currEntry.Impl().LockedPledgeCollateral() < amount {
-		amountToSlash = currEntry.Impl().LockedPledgeCollateral_
-		currEntry.Impl().LockedPledgeCollateral_ = 0
-		// TODO: extra handling of not having enough pledgecollateral to be slashed
-	} else {
-		currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
-	}
-
-	// TODO: send amountToSlash to TreasuryActor
-	panic(amountToSlash)
-	spa.PowerTable_[minerID] = currEntry
-
-	// TODO: commit state change
-}
-
-// TODO: batch process this if possible
-func (spa *StoragePowerActor_I) lockPledgeCollateral(address addr.Address, amount actor.TokenAmount) {
-	// AvailableBalance -> LockedPledgeCollateral
-	// TODO: potentially unnecessary check
-	if amount < 0 {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	// TODO: convert address to MinerActorID
-	var minerID addr.Address
-
-	currEntry, found := spa.PowerTable()[minerID]
-	if !found {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	if currEntry.Impl().AvailableBalance() < amount {
-		// TODO: proper throw cannot lock more than one has available
-		panic("TODO")
-	}
-
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
-	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() + amount
-	spa.PowerTable_[minerID] = currEntry
-
-	// TODO: commit state change
-}
-
-func (spa *StoragePowerActor_I) unlockPledgeCollateral(address addr.Address, amount actor.TokenAmount) {
-	// lockedPledgeCollateral -> AvailableBalance
-	if amount < 0 {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	// TODO: convert address to MinerActorID
-	var minerID addr.Address
-
-	currEntry, found := spa.PowerTable()[minerID]
-	if !found {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	if currEntry.Impl().LockedPledgeCollateral() < amount {
-		// TODO: proper throw cannot unlock more than one has locked
-		panic("TODO")
-	}
-
-	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + amount
-	spa.PowerTable_[minerID] = currEntry
-
-	// TODO: commit state change
-}
-
-func (spa *StoragePowerActor_I) getDeclaredFaultSlash(util.UVarint) actor.TokenAmount {
-	return actor.TokenAmount(0)
-}
-
-func (spa *StoragePowerActor_I) getDetectedFaultSlash(util.UVarint) actor.TokenAmount {
-	return actor.TokenAmount(0)
-}
-
-func (spa *StoragePowerActor_I) getTerminatedFaultSlash(util.UVarint) actor.TokenAmount {
-	return actor.TokenAmount(0)
-}
-
-func (spa *StoragePowerActor_I) ProcessFaultReport(report FaultReport) {
-	var msgSender addr.Address // TODO replace this
-
-	declaredFaultSlash := spa.getDeclaredFaultSlash(report.NewDeclaredFaults())
-	detectedFaultSlash := spa.getDetectedFaultSlash(report.NewDetectedFaults())
-	terminatedFaultSlash := spa.getTerminatedFaultSlash(report.NewTerminatedFaults())
-
-	spa.slashPledgeCollateral(msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
-
-	// TODO: commit state change
-}
-
-func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
-	var msgSender addr.Address // TODO replace this
-	isMinerVerified := spa.verifyMiner(msgSender)
-
-	if !isMinerVerified {
-		// TODO: proper throw
-		panic("TODO")
-	}
-
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
-
-	powerEntry, found := spa.PowerTable()[minerID]
+	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
 		// TODO: proper throw
@@ -328,12 +372,12 @@ func (spa *StoragePowerActor_I) ProcessPowerReport(report PowerReport) {
 	}
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
-	spa.PowerTable_[minerID] = powerEntry
+	st.Impl().PowerTable_[minerID] = powerEntry
 
-	// TODO: commit state change
+	UpdateRelease(rt, h, st)
 }
 
-func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
+func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr addr.Address, faultType ConsensusFaultType, proof []block.Block) {
 	panic("TODO")
 
 	// Use EC's IsValidConsensusFault method to validate the proof
@@ -347,7 +391,9 @@ func (spa *StoragePowerActor_I) ReportConsensusFault(slasherAddr addr.Address, f
 }
 
 // TODO: add Surprise to the chron actor
-func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
+func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) []addr.Address {
+	h, st := a.State(rt)
+
 	surprisedMiners := []addr.Address{}
 
 	// The number of blocks that a challenged miner has to respond
@@ -362,10 +408,10 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	// var currBlockHeight util.UInt
 
 	// The number of miners that are challenged at this block
-	challengeCount := uint(len(spa.PowerTable())) / provingPeriod
+	challengeCount := uint(len(st.PowerTable())) / provingPeriod
 
 	// TODO: seem inefficient but spa.PowerTable() is now a map from address to power
-	minerAddresses := make([]addr.Address, len(spa.PowerTable()))
+	minerAddresses := make([]addr.Address, len(st.PowerTable()))
 
 	// {
 	// NOTE and TODO:
@@ -387,7 +433,7 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	// }
 
 	index := 0
-	for address, _ := range spa.PowerTable() {
+	for address, _ := range st.PowerTable() {
 		minerAddresses[index] = address
 		index++
 	}
@@ -395,7 +441,7 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 	for i := uint(0); i < challengeCount; i++ {
 		// TODO: randomNumber := hash(ticket, i)
 		var randomNumber uint
-		minerIndex := randomNumber % uint(len(spa.PowerTable()))
+		minerIndex := randomNumber % uint(len(st.PowerTable()))
 		minerAddress := minerAddresses[minerIndex]
 		surprisedMiners = append(surprisedMiners, minerAddress)
 		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
@@ -407,10 +453,12 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 		// SendMessage(sm.ExtendProvingPeriod)
 	}
 
+	UpdateRelease(rt, h, st)
+
 	return surprisedMiners
 
 }
 
-func (a *StoragePowerActor_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
+func (a *StoragePowerActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	panic("TODO")
 }

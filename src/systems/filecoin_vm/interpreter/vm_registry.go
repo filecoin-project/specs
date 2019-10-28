@@ -65,7 +65,7 @@ func _registerBuiltinActors() {
 
 	RegisterActor(InitActorCodeCID, &sysactors.InitActorCode_I{})
 	RegisterActor(CronActorCodeCID, cron)
-	RegisterActor(StoragePowerActorCodeCID, &spc.StoragePowerActor_I{})
+	RegisterActor(StoragePowerActorCodeCID, &spc.StoragePowerActorCode_I{})
 	RegisterActor(StorageMarketActorCodeCID, &market.StorageMarketActorCode_I{})
 
 	// wire in CRON actions.
