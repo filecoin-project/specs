@@ -1,5 +1,4 @@
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-import util "github.com/filecoin-project/specs/util"
 import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -42,80 +41,96 @@ type SectorOnChainInfo struct {
 type ChallengeStatus struct {
     LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStChallenge
     LastChallengeEndEpoch  block.ChainEpoch  // get updated upon successful submitPoSt
+
+    IsChallenged()         bool
 }
 
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 
-type StorageMinerActor struct {
+type StorageMinerActorState struct {
     // CollateralVault CollateralVault
 
-    Sectors                  SectorsAMT
-    StagedCommittedSectors   StagedCommittedSectorAMT
+    Sectors                    SectorsAMT
+    StagedCommittedSectors     StagedCommittedSectorAMT
 
     // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
     // successful SubmitPoSt will perform changes to NextProvingSet
     // and update ProvingSet with NextProvingSet at the end
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-    ProvingSet               sector.CompactSectorSet
+    ProvingSet                 sector.CompactSectorSet
 
     SectorTable
     SectorExpirationQueue
     ChallengeStatus
 
     // contains mostly static info about this miner
-    Info                     &MinerInfo
+    Info                       &MinerInfo
 
     // TODO ProvingPeriodEnd   Epoch
 
-    NotifyOfPoStChallenge()
+    _isChallenged(rt Runtime)  bool
+    _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
+    _sectorExists(rt Runtime, sectorNo sector.SectorNumber) bool
 
-    CommitSector(onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
+    _updateFailSector(
+        rt                   Runtime
+        sectorNo             sector.SectorNumber
+        incrementFaultCount  bool
+    )
+    _updateExpireSectors(rt Runtime)
+    _updateCommittedSectors(rt Runtime)
+    _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
+    _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
+}
 
-    SubmitPoSt(postSubmission poster.PoStSubmission)
+type StorageMinerActorCode struct {
+    NotifyOfPoStChallenge(rt Runtime)
 
-    CheckPoStSubmissionHappened()
-    onMissedPoSt()
+    CommitSector(rt Runtime, onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
+
+    SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+
+    CheckPoStSubmissionHappened(rt Runtime)
 
     // TODO: should depledge be in here or in storage market actor?
 
-    DeclareFaults(failingSet sector.CompactSectorSet)
-    RecoverFaults(recoveringSet sector.CompactSectorSet)
+    DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
 
-    constructFaultReport(
+    RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
+
+    _onMissedPoSt(rt Runtime)
+
+    _submitFaultReport(
+        rt          Runtime
         declared    util.UVarint
         detected    util.UVarint
         terminated  util.UVarint
     )
-    constructPowerReport()
+    _submitPowerReport(rt Runtime)
 
-    computeProvingPeriodEndSectorState()  // TODO
+    _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
 
-    verifyPoStSubmission(postSubmission poster.PoStSubmission) bool
-    processStagedCommittedSectors()
-
-    clearSector(sectorNo sector.SectorNumber)
-    activateSector(sectorNo sector.SectorNumber)
-    failSector(sectorNo sector.SectorNumber, incrementFaultCount bool)
-
-    expireSectors()
+    // _computeProvingPeriodEndSectorState(rt Runtime)  // TODO
 }
 
 type MinerInfo struct {
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
-    Owner       address.Address
+    Owner           address.Address
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
-    Worker      address.Address
+    Worker          address.Address
 
     // Libp2p identity that should be used when connecting to this miner.
-    PeerId      libp2p.PeerID
+    PeerId          libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    SectorSize  util.BytesAmount
+    SectorSize      util.BytesAmount
+    SubsectorCount  UVarint
+    Partitions      UVarint
 }

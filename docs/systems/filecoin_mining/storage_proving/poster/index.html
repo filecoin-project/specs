@@ -2048,11 +2048,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4563,23 +4565,28 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
-<span class="kd">type</span> <span class="nx">Challenge</span> <span class="nx">UInt64</span>
-<span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
-</span><span class="c1"></span>
+
 <span class="c1">// TODO: move this to somewhere the blockchain can import
 </span><span class="c1">// candidates:
 </span><span class="c1">// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
 </span><span class="c1">// - &#34;blockchain/builtins&#34; or something like that - a component in the blockchain that handles storage verification
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStSubmission</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PostProof</span>   <span class="nx">PoStProof</span>
+    <span class="nx">PostProof</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
     <span class="nx">ChainEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PostGenerator</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">GeneratePoSt</span><span class="p">(</span><span class="nx">challenge</span> <span class="nx">Challenge</span><span class="p">,</span> <span class="nx">IDs</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">])</span> <span class="nx">PoStProof</span>
+    <span class="nf">GeneratePoSt</span><span class="p">(</span>
+        <span class="nx">postCfg</span>        <span class="nx">sector</span><span class="p">.</span><span class="nx">PostCfg</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">faults</span>         <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span>
+        <span class="nx">sectors</span>        <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
+        <span class="nx">sectorStore</span>    <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span>
+    <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4609,28 +4616,42 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">poster</span>
 
+<span class="kn">import</span> <span class="nx">filproofs</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto/filproofs&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
+
 <span class="c1">// See &#34;Proof-of-Spacetime Parameters&#34; Section
+</span><span class="c1">// TODO: Unify with orient model.
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_PROVING_PERIOD</span> <span class="p">=</span> <span class="nb">uint</span><span class="p">(</span><span class="mi">5760</span><span class="p">)</span>
 <span class="kd">const</span> <span class="nx">POST_CHALLENGE_DEADLINE</span> <span class="p">=</span> <span class="nb">uint</span><span class="p">(</span><span class="mi">480</span><span class="p">)</span>
 
-<span class="c1">// // this must  GetRandFromBlock(self.ProvingPeriodEnd - POST_CHALLENGE_TIME)
-</span><span class="c1">//   GetChallenge(minerActor &amp;StorageMinerActor, currBlock) Challenge
+<span class="kd">func</span> <span class="nf">GeneratePoSt</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PostCfg</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="c1">// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
+</span><span class="c1"></span>	<span class="c1">// Like this:
+</span><span class="c1"></span>	<span class="c1">// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
 </span><span class="c1"></span>
-<span class="c1">//   GeneratePoSt(challenge Challenge, sectors [Sector]) PoStProof {
-</span><span class="c1">//       sectorsMetadata := sectors.map(func(sector) { SectorStorage.GetMetadata(sector.CommR) });
+	<span class="c1">// Question: Or should we resolve + manifest trees here and pass them in?
+</span><span class="c1"></span>	<span class="c1">// Like this:
+</span><span class="c1"></span>	<span class="c1">// trees := sectorsMetadata.map(func(md) { SectorStorage.GetMerkleTree(md.MerkleTreePath) });
+</span><span class="c1"></span>	<span class="c1">// Done this way, we redundantly pass the tree paths in the metadata. At first thought, the other way
+</span><span class="c1"></span>	<span class="c1">// seems cleaner.
+</span><span class="c1"></span>	<span class="c1">// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetadata, trees);
 </span><span class="c1"></span>
-<span class="c1">//       // Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
-</span><span class="c1">//       // Like this:
-</span><span class="c1">//       PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
+	<span class="c1">// Poroposed answer: An alternative, which avoids the downsides of both of the above, by adding a new filproofs API call:
 </span><span class="c1"></span>
-<span class="c1">//       // Question: Or should we resolve + manifest trees here and pass them in?
-</span><span class="c1">//       // Like this:
-</span><span class="c1">//       trees := sectorsMetadata.map(func(md) { SectorStorage.GetMerkleTree(md.MerkleTreePath) });
-</span><span class="c1">//       // Done this way, we redundantly pass the tree paths in the metadata. At first thought, the other way
-</span><span class="c1">//       // seems cleaner.
-</span><span class="c1">//       PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetadata, trees);
-</span><span class="c1">//   }
-</span></code></pre></div>
+	<span class="nx">sdr</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">SDRParams</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="nx">postCfg</span><span class="p">)</span>
+
+	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
+	<span class="kd">var</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
+
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sector</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">challengedSectors</span> <span class="p">{</span>
+		<span class="nx">proofAux</span> <span class="o">:=</span> <span class="nx">sectorStore</span><span class="p">.</span><span class="nf">GetSectorProofAux</span><span class="p">(</span><span class="nx">sector</span><span class="p">)</span>
+		<span class="nx">proofAuxs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofAuxs</span><span class="p">,</span> <span class="nx">proofAux</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GeneratePoSt</span><span class="p">(</span><span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span><span class="p">,</span> <span class="nx">proofAuxs</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 

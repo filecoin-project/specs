@@ -2047,11 +2047,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4567,7 +4569,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">Path</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">SealRandomness</span> <span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">InteractiveSealRandomness</span> <span class="nx">Bytes</span>
 
 <span class="c1">// SealSeed is unique to each Sector
 </span><span class="c1">// SealSeed is:
@@ -4575,7 +4577,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSeed</span> <span class="nx">Bytes</span>
 
 <span class="kd">type</span> <span class="nx">SealCfg</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SectorSize</span>
+    <span class="nx">SectorSize</span>      <span class="nx">UInt</span>
     <span class="nx">SubsectorCount</span>  <span class="nx">UInt</span>
     <span class="nx">Partitions</span>      <span class="nx">UInt</span>
 <span class="p">}</span>
@@ -4584,9 +4586,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// needs to verify a Seal.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>
-    <span class="nx">OnChain</span>     <span class="nx">OnChainSealVerifyInfo</span>
+    <span class="nx">OnChain</span>                <span class="nx">OnChainSealVerifyInfo</span>
     <span class="nx">SealCfg</span>
-    <span class="nx">PieceInfos</span>  <span class="p">[</span><span class="nx">PieceInfo</span><span class="p">]</span>
+    <span class="nx">Randomness</span>             <span class="nx">SealRandomness</span>
+    <span class="nx">InteractiveRandomness</span>  <span class="nx">InteractiveSealRandomness</span>
+    <span class="nx">PieceInfos</span>             <span class="p">[</span><span class="nx">PieceInfo</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="c1">// OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -4594,10 +4598,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// state tree but will be verified in sm.CommitSector. See SealCommitment for
 </span><span class="c1">// data stored on the state tree for each sector.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">OnChainSealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SealedCID</span>     <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
-</span><span class="c1"></span>    <span class="nx">Epoch</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="nx">Proof</span>         <span class="nx">SealProof</span>
-    <span class="nx">DealIDs</span>       <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nx">SealedCID</span>         <span class="nx">SealedSectorCID</span>  <span class="c1">// CommR
+</span><span class="c1"></span>    <span class="nx">Epoch</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">InteractiveEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">Proof</span>             <span class="nx">SealProof</span>
+    <span class="nx">DealIDs</span>           <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
     <span class="nx">SectorNumber</span>
 <span class="p">}</span>
 
@@ -4622,17 +4627,18 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ProofAuxTmp</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PersistentAux</span>  <span class="nx">ProofAux</span>
+    <span class="nx">PersistentAux</span>   <span class="nx">ProofAux</span>
 
     <span class="nx">SectorID</span>
-    <span class="nx">CommD</span>          <span class="nx">Commitment</span>
-    <span class="nx">CommR</span>          <span class="nx">SealedSectorCID</span>
-    <span class="nx">CommDTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">CommD</span>           <span class="nx">Commitment</span>
+    <span class="nx">CommR</span>           <span class="nx">SealedSectorCID</span>
+    <span class="nx">CommDTreePaths</span>  <span class="p">[</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">]</span>
+    <span class="nx">CommCTreePath</span>   <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
 
-    <span class="nx">Seed</span>           <span class="nx">SealRandomness</span>
-    <span class="nx">Data</span>           <span class="nx">Bytes</span>
-    <span class="nx">Replica</span>        <span class="nx">Bytes</span>
-    <span class="nx">KeyLayers</span>      <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
+    <span class="nx">Seeds</span>           <span class="p">[</span><span class="nx">SealSeed</span><span class="p">]</span>
+    <span class="nx">SubsectorData</span>   <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
+    <span class="nx">Replicas</span>        <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
+    <span class="nx">KeyLayers</span>       <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealArguments</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4659,7 +4665,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{}</span>
 
-<span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Size</span>   <span class="nx">UInt</span>  <span class="c1">// Size in nodes. For BLS12-381 (capacity 254 bits), must be &gt;= 16. (16 * 8 = 128)
+</span><span class="c1"></span>    <span class="nx">CommP</span>  <span class="nx">UnsealedSectorCID</span>
+<span class="p">}</span>
 </code></pre></div>
 
 

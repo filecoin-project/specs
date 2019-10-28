@@ -4,45 +4,67 @@ import (
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 )
 
-// import deal_status "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+func (provider *StorageProvider_I) OnNewStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID) {
 
-func (provider *StorageProvider_I) HandleNewStorageDealProposal(proposal deal.StorageDealProposal) {
-	if provider.verifyStorageClient(proposal.Client(), proposal.ProposerSignature(), proposal.StoragePrice()) {
-		// status := &deal.StorageDealStatus_StorageDealProposed_I{}
-		// s := deal.StorageDealStatus_Make_StorageDealProposed(status)
-		// TODO fix this
-		var dealID deal.DealID
-		provider.DealStatus()[dealID] = StorageDealProposed
-		// TODO notify StorageClient that a deal has been received
-		// TODO notify StorageMiningSubsystem to add deals to sector
-		provider.signStorageDealProposal(proposal)
-		// DO THIS TODAY Call StorageMarketActor.publishStorageDeal()
+	_, found := provider.ProposalStatus()[proposal.CID()]
+	if found {
+		// TODO: return error
+		return
 	}
+
+	var shouldReject bool // specified by StorageProvider
+	if shouldReject {
+		provider.rejectStorageDealProposal(proposal)
+		return
+	}
+
+	if provider.verifyStorageDealProposal(proposal, payloadCID) {
+		provider.acceptStorageDealProposal(proposal)
+	} else {
+		provider.rejectStorageDealProposal(proposal)
+		return
+	}
+
 }
 
-func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.StorageDealProposal) deal.StorageDeal {
-	// TODO add signature to the proposal
-	// TODO notify StorageClient that a deal has been signed
-	panic("TODO")
+func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.StorageDealProposal) msg.Message {
+	// TODO: construct StorageDeal Message
+	var storageDealMessage msg.Message
+
+	// TODO: notify StorageClient StorageDealSigned
+	return storageDealMessage
+}
+
+func (provider *StorageProvider_I) publishStorageDealMessage(message msg.Message) deal.StorageDeal {
+	// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
+	var dealID deal.DealID
+	var dealCID deal.DealCID
+
+	storageDeal := &deal.StorageDeal_I{
+		ProposalMessage_: message,
+		ID_:              dealID,
+	}
+
+	provider.DealStatus()[dealCID] = StorageDealPublished
+
+	// TODO: notify StorageClient StorageDealPublished
+	return storageDeal
+}
+
+func (provider *StorageProvider_I) acceptStorageDealProposal(proposal deal.StorageDealProposal) {
+	provider.ProposalStatus()[proposal.CID()] = StorageDealProposalAccepted
+	// TODO: notify StorageClient StorageDealAccepted
 }
 
 func (provider *StorageProvider_I) rejectStorageDealProposal(proposal deal.StorageDealProposal) {
-	// TODO fix this
-	var dealID deal.DealID
-	provider.DealStatus()[dealID] = StorageDealRejected
-	// TODO send notification to client
+	provider.ProposalStatus()[proposal.CID()] = StorageDealProposalRejected
+	// TODO: notify StorageClient StorageDealRejected
 }
 
-func (provider *StorageProvider_I) verifyCommP(pieceCID piece.PieceCID, payloadCID ipld.CID) bool {
-	panic("TODO")
-	return true
-}
-
-func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, signature deal.Signature, price actor.TokenAmount) bool {
+func (provider *StorageProvider_I) verifyStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID) bool {
 	// TODO make call to StorageMarketActor
 	// balance, found := StorageMarketActor.Balances()[address]
 
@@ -54,27 +76,71 @@ func (provider *StorageProvider_I) verifyStorageClient(address addr.Address, sig
 	// 	return false
 	// }
 
+	isPieceCIDVerified := provider.verifyPieceCID(proposal.PieceCID(), payloadCID)
+	if !isPieceCIDVerified {
+		// TODO: error out
+		panic("TODO")
+	}
+
 	// TODO Check on Signature
-	// TODO Verify CommP
 	// return true
 	panic("TODO")
 }
 
-// TODO: func (provider *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
-// 	panic("TODO")
-// }
+func (provider *StorageProvider_I) verifyPieceCID(pieceCID piece.PieceCID, payloadCID ipld.CID) bool {
+	panic("TODO")
+	return false
+}
 
-func (provider *StorageProvider_I) HandleStorageDealQuery(dealID deal.DealID) StorageDealStatus {
-	dealStatus, found := provider.DealStatus()[dealID]
+func (provider *StorageProvider_I) NotifyOfOnChainDealStatus(dealCID deal.DealCID, newStatus StorageDealStatus) {
+	_, found := provider.DealStatus()[dealCID]
+	if found {
+		provider.DealStatus()[dealCID] = newStatus
+	}
+}
+
+// the entire payload graph is now in local IPLD store
+// TODO: integrate with Data Transfer
+func (provider *StorageProvider_I) OnReceivingPayload(payloadCID ipld.CID) {
+	// TODO: get proposalCID from local storage
+	var proposalCID deal.ProposalCID
+
+	_, found := provider.ProposalStatus()[proposalCID]
+	if !found {
+		// TODO: error here
+	}
+
+	// TODO: get client addr from libp2p
+	// TODO: get proposal from local storage
+	var proposal deal.StorageDealProposal
+	isProposalVerified := provider.verifyStorageDealProposal(proposal, payloadCID)
+
+	if !isProposalVerified {
+		provider.rejectStorageDealProposal(proposal)
+		return
+	}
+
+	// StorageProvider can decide what to do here
+	provider.signStorageDealProposal(proposal)
+
+}
+
+func (provider *StorageProvider_I) OnStorageDealProposalQuery(proposalCID deal.ProposalCID) StorageDealStatus {
+	proposalStatus, found := provider.ProposalStatus()[proposalCID]
+
+	if found {
+		return proposalStatus
+	}
+
+	return StorageDealProposalNotFound
+}
+
+func (provider *StorageProvider_I) OnStorageDealQuery(dealCID deal.DealCID) StorageDealStatus {
+	dealStatus, found := provider.DealStatus()[dealCID]
 
 	if found {
 		return dealStatus
 	}
 
 	return StorageDealNotFound
-}
-
-// TODO this should be moved into storage market
-func (sp *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
-	panic("TODO")
 }

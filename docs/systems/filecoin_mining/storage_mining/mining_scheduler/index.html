@@ -2047,11 +2047,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4566,8 +4568,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
 <span class="c1">// import storage_indexer &#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&#34;
 </span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">ReplicaID</span> <span class="nx">CID</span>
-
 <span class="kd">type</span> <span class="nx">MiningScheduler</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">getStagedSectors</span><span class="p">()</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span>
     <span class="nf">getSealedSectors</span><span class="p">()</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorSet</span>
@@ -4580,7 +4580,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">VerifyPost</span><span class="p">(</span><span class="nx">sectors</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span><span class="p">)</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span>
 
     <span class="nf">ReportFaults</span><span class="p">(</span>
-        <span class="nx">actor</span> <span class="o">&amp;</span><span class="nx">StorageMinerActor</span>
+        <span class="nx">actor</span> <span class="o">&amp;</span><span class="nx">StorageMinerActorCode</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">RemoveSectors</span><span class="p">(</span><span class="nx">remove</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span><span class="p">)</span> <span class="kt">bool</span>
@@ -4599,9 +4599,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">sectorID</span>  <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
         <span class="nx">comm</span>      <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span>
     <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-
-    <span class="c1">// generateReplicaID(CommD Commitment, block Block)
-</span><span class="c1"></span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
 
 

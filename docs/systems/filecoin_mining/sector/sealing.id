@@ -5,7 +5,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 type Path struct {}  // TODO
 
 type SealRandomness Bytes
-type PoStRandomness Bytes
+type InteractiveSealRandomness Bytes
 
 // SealSeed is unique to each Sector
 // SealSeed is:
@@ -13,7 +13,7 @@ type PoStRandomness Bytes
 type SealSeed Bytes
 
 type SealCfg struct {
-    SectorSize
+    SectorSize      UInt
     SubsectorCount  UInt
     Partitions      UInt
 }
@@ -22,9 +22,11 @@ type SealCfg struct {
 // needs to verify a Seal.
 type SealVerifyInfo struct {
     SectorID
-    OnChain     OnChainSealVerifyInfo
+    OnChain                OnChainSealVerifyInfo
     SealCfg
-    PieceInfos  [PieceInfo]
+    Randomness             SealRandomness
+    InteractiveRandomness  InteractiveSealRandomness
+    PieceInfos             [PieceInfo]
 }
 
 // OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -32,10 +34,11 @@ type SealVerifyInfo struct {
 // state tree but will be verified in sm.CommitSector. See SealCommitment for
 // data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
-    SealedCID     SealedSectorCID  // CommR
-    Epoch         block.ChainEpoch
-    Proof         SealProof
-    DealIDs       [deal.DealID]
+    SealedCID         SealedSectorCID  // CommR
+    Epoch             block.ChainEpoch
+    InteractiveEpoch  block.ChainEpoch
+    Proof             SealProof
+    DealIDs           [deal.DealID]
     SectorNumber
 }
 
@@ -60,17 +63,18 @@ type ProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    PersistentAux  ProofAux
+    PersistentAux   ProofAux
 
     SectorID
-    CommD          Commitment
-    CommR          SealedSectorCID
-    CommDTreePath  file.Path
+    CommD           Commitment
+    CommR           SealedSectorCID
+    CommDTreePaths  [file.Path]
+    CommCTreePath   file.Path
 
-    Seed           SealRandomness
-    Data           Bytes
-    Replica        Bytes
-    KeyLayers      [Bytes]
+    Seeds           [SealSeed]
+    SubsectorData   [Bytes]
+    Replicas        [Bytes]
+    KeyLayers       [Bytes]
 }
 
 type SealArguments struct {
@@ -97,4 +101,7 @@ type SealAlgorithm enum {
 // TODO
 type SealOutputArtifacts struct {}
 
-type PieceInfo struct {}
+type PieceInfo struct {
+    Size   UInt  // Size in nodes. For BLS12-381 (capacity 254 bits), must be >= 16. (16 * 8 = 128)
+    CommP  UnsealedSectorCID
+}

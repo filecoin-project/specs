@@ -2047,11 +2047,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4563,43 +4565,50 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-
-<span class="kd">type</span> <span class="nx">StorageDealStagedNotification</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Deal</span>      <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span>
-    <span class="nx">SectorID</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-<span class="p">}</span>
+<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageProvider</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">DealStatus</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">StorageDealStatus</span><span class="p">}</span>
+    <span class="c1">// StorageDealProposalCID: StorageDealStatus
+</span><span class="c1"></span>    <span class="nx">ProposalStatus</span>  <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">ProposalCID</span><span class="p">:</span> <span class="nx">StorageDealStatus</span><span class="p">}</span>
+    <span class="c1">// DealCID: StorageDeal
+</span><span class="c1"></span>    <span class="nx">DealStatus</span>      <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">:</span> <span class="nx">StorageDealStatus</span><span class="p">}</span>
 
-    <span class="c1">// calls between StorageClient and StorageProvider happen over libp2p
-</span><span class="c1"></span>    <span class="c1">// Client calls this to submit new StorageDealProposal
-</span><span class="c1"></span>    <span class="nf">HandleNewStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="c1">// libp2p listener on new StorageDealProposal
+</span><span class="c1"></span>    <span class="nf">OnNewStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span>
 
-    <span class="c1">// Call by StorageProvider to sign a StorageDealProposal
-</span><span class="c1"></span>    <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span>
+    <span class="c1">// Call by StorageProvider to sign proposal and construct StorageDeal message
+</span><span class="c1"></span>    <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span>
 
-    <span class="c1">// Call by StorageProvider to reject a StorageDealProposal
+    <span class="c1">// Call by StorageProvider to call sma.PublishStorageDeal
+</span><span class="c1"></span>    <span class="nf">publishStorageDealMessage</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
+
+    <span class="c1">// Call by StorageProvider to accept a StorageDealProposal and notify StorageClient
+</span><span class="c1"></span>    <span class="nf">acceptStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+
+    <span class="c1">// Call by StorageProvider to reject a StorageDealProposal and notify StorageClient
 </span><span class="c1"></span>    <span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
 
-    <span class="c1">// Check CommP provided by StorageClient in StorageDealProposal
+    <span class="c1">// Call by StorageProvider to check client balance and signature
+</span><span class="c1"></span>    <span class="nf">verifyStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="c1">// Check PieceCID(CommP) provided by StorageClient in StorageDealProposal
 </span><span class="c1"></span>    <span class="c1">// Provider needs to verify and reject deal if incorrect.
 </span><span class="c1"></span>    <span class="c1">// If on-chain CommP does not match actual piece, Seal proof will not verify.
-</span><span class="c1"></span>    <span class="nf">verifyCommP</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">verifyPieceCID</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="c1">// Check client balance and signature
-</span><span class="c1"></span>    <span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="c1">// Call by StorageMiningSubsystem
+</span><span class="c1"></span>    <span class="nf">NotifyOfOnChainDealStatus</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="nx">newStatus</span> <span class="nx">StorageDealStatus</span><span class="p">)</span>
 
-    <span class="c1">// TODO: Call by StorageMiningSubsystem
-</span><span class="c1"></span>    <span class="c1">// TODO: not sure if this will get called
-</span><span class="c1"></span>    <span class="nf">NotifyStorageDealStaged</span><span class="p">(</span><span class="nx">storageDealNotification</span> <span class="nx">StorageDealStagedNotification</span><span class="p">)</span>
+    <span class="c1">// libp2p listener on receiving payload
+</span><span class="c1"></span>    <span class="nf">OnReceivingPayload</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span>
 
-    <span class="c1">// Call by StorageClient
-</span><span class="c1"></span>    <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
+    <span class="c1">// libp2p listener on storage deal proposal query
+</span><span class="c1"></span>    <span class="nf">OnStorageDealProposalQuery</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">ProposalCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
+
+    <span class="c1">// libp2p listener on storage deal query
+</span><span class="c1"></span>    <span class="nf">OnStorageDealQuery</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4633,45 +4642,67 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
     <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
     <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-    <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-    <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+    <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="p">)</span>
 
-<span class="c1">// import deal_status &#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;
-</span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleNewStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">ProposerSignature</span><span class="p">(),</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">StoragePrice</span><span class="p">())</span> <span class="p">{</span>
-        <span class="c1">// status := &amp;deal.StorageDealStatus_StorageDealProposed_I{}
-</span><span class="c1"></span>        <span class="c1">// s := deal.StorageDealStatus_Make_StorageDealProposed(status)
-</span><span class="c1"></span>        <span class="c1">// TODO fix this
-</span><span class="c1"></span>        <span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
-        <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">StorageDealProposed</span>
-        <span class="c1">// TODO notify StorageClient that a deal has been received
-</span><span class="c1"></span>        <span class="c1">// TODO notify StorageMiningSubsystem to add deals to sector
-</span><span class="c1"></span>        <span class="nx">provider</span><span class="p">.</span><span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
-        <span class="c1">// DO THIS TODAY Call StorageMarketActor.publishStorageDeal()
-</span><span class="c1"></span>    <span class="p">}</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">OnNewStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">ProposalStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">CID</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+        <span class="c1">// TODO: return error
+</span><span class="c1"></span>        <span class="k">return</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">shouldReject</span> <span class="kt">bool</span> <span class="c1">// specified by StorageProvider
+</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">shouldReject</span> <span class="p">{</span>
+        <span class="nx">provider</span><span class="p">.</span><span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">verifyStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">,</span> <span class="nx">payloadCID</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">provider</span><span class="p">.</span><span class="nf">acceptStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">provider</span><span class="p">.</span><span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
+
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span> <span class="p">{</span>
-    <span class="c1">// TODO add signature to the proposal
-</span><span class="c1"></span>    <span class="c1">// TODO notify StorageClient that a deal has been signed
-</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span> <span class="p">{</span>
+    <span class="c1">// TODO: construct StorageDeal Message
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">storageDealMessage</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span>
+
+    <span class="c1">// TODO: notify StorageClient StorageDealSigned
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">storageDealMessage</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// TODO fix this
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">publishStorageDealMessage</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span> <span class="p">{</span>
+    <span class="c1">// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
 </span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
-    <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">StorageDealRejected</span>
-    <span class="c1">// TODO send notification to client
+    <span class="kd">var</span> <span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span>
+
+    <span class="nx">storageDeal</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal_I</span><span class="p">{</span>
+        <span class="nx">ProposalMessage_</span><span class="p">:</span> <span class="nx">message</span><span class="p">,</span>
+        <span class="nx">ID_</span><span class="p">:</span>              <span class="nx">dealID</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">StorageDealPublished</span>
+
+    <span class="c1">// TODO: notify StorageClient StorageDealPublished
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">storageDeal</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">acceptStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">provider</span><span class="p">.</span><span class="nf">ProposalStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">CID</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealProposalAccepted</span>
+    <span class="c1">// TODO: notify StorageClient StorageDealAccepted
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyCommP</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="kc">true</span>
-<span class="p">}</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">provider</span><span class="p">.</span><span class="nf">ProposalStatus</span><span class="p">()[</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">CID</span><span class="p">()]</span> <span class="p">=</span> <span class="nx">StorageDealProposalRejected</span>
+    <span class="c1">// TODO: notify StorageClient StorageDealRejected
+</span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyStorageClient</span><span class="p">(</span><span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="c1">// TODO make call to StorageMarketActor
 </span><span class="c1"></span>    <span class="c1">// balance, found := StorageMarketActor.Balances()[address]
 </span><span class="c1"></span>
@@ -4683,29 +4714,73 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">//     return false
 </span><span class="c1"></span>    <span class="c1">// }
 </span><span class="c1"></span>
+    <span class="nx">isPieceCIDVerified</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">verifyPieceCID</span><span class="p">(</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceCID</span><span class="p">(),</span> <span class="nx">payloadCID</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">isPieceCIDVerified</span> <span class="p">{</span>
+        <span class="c1">// TODO: error out
+</span><span class="c1"></span>        <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+
     <span class="c1">// TODO Check on Signature
-</span><span class="c1"></span>    <span class="c1">// TODO Verify CommP
 </span><span class="c1"></span>    <span class="c1">// return true
 </span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="c1">// TODO: func (provider *StorageProvider_I) NotifyStorageDealStaged(storageDealNotification StorageDealStagedNotification) {
-</span><span class="c1">//     panic(&#34;TODO&#34;)
-</span><span class="c1">// }
-</span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">HandleStorageDealQuery</span><span class="p">(</span><span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span> <span class="p">{</span>
-    <span class="nx">dealStatus</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">verifyPieceCID</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">false</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">NotifyOfOnChainDealStatus</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">newStatus</span> <span class="nx">StorageDealStatus</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+        <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">newStatus</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// the entire payload graph is now in local IPLD store
+</span><span class="c1">// TODO: integrate with Data Transfer
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">OnReceivingPayload</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// TODO: get proposalCID from local storage
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">proposalCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">ProposalCID</span>
+
+    <span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">ProposalStatus</span><span class="p">()[</span><span class="nx">proposalCID</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+        <span class="c1">// TODO: error here
+</span><span class="c1"></span>    <span class="p">}</span>
+
+    <span class="c1">// TODO: get client addr from libp2p
+</span><span class="c1"></span>    <span class="c1">// TODO: get proposal from local storage
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span>
+    <span class="nx">isProposalVerified</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">verifyStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">,</span> <span class="nx">payloadCID</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">!</span><span class="nx">isProposalVerified</span> <span class="p">{</span>
+        <span class="nx">provider</span><span class="p">.</span><span class="nf">rejectStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
+
+    <span class="c1">// StorageProvider can decide what to do here
+</span><span class="c1"></span>    <span class="nx">provider</span><span class="p">.</span><span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span><span class="p">)</span>
+
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">OnStorageDealProposalQuery</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">ProposalCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span> <span class="p">{</span>
+    <span class="nx">proposalStatus</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">ProposalStatus</span><span class="p">()[</span><span class="nx">proposalCID</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">proposalStatus</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">StorageDealProposalNotFound</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">OnStorageDealQuery</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">)</span> <span class="nx">StorageDealStatus</span> <span class="p">{</span>
+    <span class="nx">dealStatus</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nx">dealStatus</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="nx">StorageDealNotFound</span>
-<span class="p">}</span>
-
-<span class="c1">// TODO this should be moved into storage market
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">sp</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">NotifyStorageDealStaged</span><span class="p">(</span><span class="nx">storageDealNotification</span> <span class="nx">StorageDealStagedNotification</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

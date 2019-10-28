@@ -1,5 +1,6 @@
 package filproofs
 
+import "bytes"
 import "math"
 import "math/rand"
 import big "math/big"
@@ -13,8 +14,11 @@ type Blake2sHash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 type UInt = util.UInt
+type PieceInfo = sector.PieceInfo
+type Label Bytes32
+type Commitment = sector.Commitment
 
-func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
+func SDRParams(sealCfg sector.SealCfg, postCfg sector.PostCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const NODE_SIZE = 32
@@ -31,6 +35,7 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 		Layers_:     StackedDRGLayers(LAYERS),
 		Challenges_: StackedDRGChallenges(OFFLINE_CHALLENGES),
 		NodeSize_:   StackedDRGNodeSize(NODE_SIZE),
+		Nodes_:      StackedDRGNodes(nodes),
 		Algorithm_:  &StackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
@@ -56,6 +61,20 @@ func SDRParams(sealCfg sector.SealCfg) *StackedDRG_I {
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
 		},
+		SealCfg_: sealCfg,
+		PostCfg_: postCfg,
+	}
+}
+
+func (sdr *StackedDRG_I) drg() *DRG_I {
+	return &DRG_I{
+		Config_: sdr.DRGCfg(),
+	}
+}
+
+func (sdr *StackedDRG_I) expander() *ExpanderGraph_I {
+	return &ExpanderGraph_I{
+		Config_: sdr.ExpanderGraphCfg(),
 	}
 }
 
@@ -88,6 +107,8 @@ func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node UI
 }
 
 func randInRange(lowInclusive int, highExclusive int) UInt {
+	// NOTE: current implementation uses a more sophisticated method for repeated sampling within a range.
+	// We need to converge on and fully specify the actual method, since this must be deterministic.
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
@@ -130,62 +151,107 @@ func (chung *ChungExpanderAlgorithm_I) ithParent(node UInt, i UInt, degree Expan
 }
 
 func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
+	// Call into feisel.go.
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, data []byte, seed sector.SealRandomness) SealSetupArtifacts {
+func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, randomness sector.SealRandomness) SealSetupArtifacts {
+	subsectorCount := int(sdr.SubsectorCount())
+	nodeSize := int(sdr.NodeSize())
+	nodes := int(sdr.Nodes())
+	subsectorSize := nodes * nodeSize
+
+	util.Assert(len(subsectorData) == subsectorCount)
+
+	var allKeyLayers [][]byte
+	var replicas [][]byte
+	var sealSeeds []sector.SealSeed
+	var subsectorCommDs []Blake2sHash
+	var subsectorCommDTreePaths []file.Path
+
+	for i, data := range subsectorData {
+		_ = data
+		keyLayers, replica, sealSeed, subsectorCommD, subsectorCommDTreePath := sdr.SealSubsector(i, sid, data, randomness)
+
+		allKeyLayers = append(allKeyLayers, keyLayers...)
+		replicas = append(replicas, replica)
+		sealSeeds = append(sealSeeds, sealSeed)
+		subsectorCommDs = append(subsectorCommDs, subsectorCommD)
+		subsectorCommDTreePaths = append(subsectorCommDTreePaths, subsectorCommDTreePath)
+	}
+
+	var replicaColumns [][]Label
+	for _, replica := range replicas {
+		for i := 0; i < subsectorSize; i += nodeSize {
+			replicaColumns[i] = append(replicaColumns[i], Label(replica[i:i+nodeSize]))
+		}
+	}
+	var columnReplica []byte
+	for i, column := range replicaColumns {
+		copy(columnReplica[i*nodeSize:(i+1)*nodeSize], []byte(hashColumn(column)))
+	}
+
+	commC, commRLast, commR, commCTreePath, commRLastTreePath := sdr.GenerateCommitments(columnReplica, allKeyLayers)
+
+	result := SealSetupArtifacts_I{
+		CommD_:             Commitment(commC),
+		CommR_:             SealedSectorCID(commR),
+		CommC_:             Commitment(commC),
+		CommRLast_:         Commitment(commRLast),
+		CommDTreePaths_:    subsectorCommDTreePaths,
+		CommCTreePath_:     commCTreePath,
+		CommRLastTreePath_: commRLastTreePath,
+		Seeds_:             sealSeeds,
+		KeyLayers_:         allKeyLayers,
+		Replicas_:          replicas,
+	}
+	return &result
+}
+
+func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, Blake2sHash, file.Path) {
 	commD, commDTreePath := ComputeDataCommitment(data)
-	replicaID := ComputeReplicaID(sid, commD, seed)
-
-	drg := DRG_I{
-		Config_: sdr.DRGCfg(),
-	}
-
-	expander := ExpanderGraph_I{
-		Config_: sdr.ExpanderGraphCfg(),
-	}
-
+	sealSeed := computeSealSeed(sid, subsectorIndex, randomness, commD)
 	nodeSize := int(sdr.NodeSize())
 	nodes := len(data) / nodeSize
 	curveModulus := sdr.Curve().FieldModulus()
 	layers := int(sdr.Layers())
 
-	keyLayers := generateSDRKeyLayers(&drg, &expander, replicaID, nodes, layers, nodeSize, curveModulus)
+	keyLayers := generateSDRKeyLayers(sdr.drg(), sdr.expander(), sealSeed, nodes, layers, nodeSize, curveModulus)
 	key := keyLayers[len(keyLayers)-1]
-
 	replica := encodeData(data, key, nodeSize, &curveModulus)
 
-	commRLast, commRLastTreePath := RepHash_PedersenHash(replica)
-	commC, commCTreePath := computeCommC(keyLayers, nodeSize)
-	commR := RepCompress_PedersenHash(commC, commRLast)
-
-	result := SealSetupArtifacts_I{
-		CommD_:             sector.Commitment(commC),
-		CommR_:             SealedSectorCID(commR),
-		CommC_:             sector.Commitment(commC),
-		CommRLast_:         sector.Commitment(commRLast),
-		CommDTreePath_:     commDTreePath,
-		CommCTreePath_:     commCTreePath,
-		CommRLastTreePath_: commRLastTreePath,
-		KeyLayers_:         keyLayers,
-		Replica_:           replica,
-	}
-	return &result
+	return keyLayers, replica, sealSeed, commD, commDTreePath
 }
 
-func ComputeReplicaID(sid sector.SectorID, commD sector.Commitment, seed sector.SealRandomness) Bytes32 {
-	_, _ = sid.MinerID(), (sid.Number())
+func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte) (commC PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commRLastTreePath file.Path) {
+	commRLast, commRLastTreePath = BuildTree_PedersenHash(replica)
+	commC, commCTreePath = computeCommC(keyLayers, int(sdr.NodeSize()))
+	commR = BinaryHash_PedersenHash(commC, commRLast)
+
+	return commC, commRLast, commR, commCTreePath, commRLastTreePath
+}
+
+func computeSealSeed(sid sector.SectorID, subsectorIndex int, randomness sector.SealRandomness, commD Commitment) sector.SealSeed {
+	var proverId []byte // TODO: Derive this from sid.MinerID()
+	sectorNumber := sid.Number()
+
+	var preimage []byte
+	preimage = append(preimage, proverId...)
+	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorNumber), 8)...)
+	preimage = append(preimage, littleEndianBytesFromInt(subsectorIndex, 8)...)
+	preimage = append(preimage, randomness...)
+	preimage = append(preimage, commD...)
 
 	// FIXME: Implement
-	return Bytes32{}
+	return sector.SealSeed{}
 }
 
-func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodes int, layers int, nodeSize int, modulus big.Int) [][]byte {
+func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, nodes int, layers int, nodeSize int, modulus big.Int) [][]byte {
 	var keyLayers [][]byte
 	var prevLayer []byte
 
 	for i := 0; i <= layers; i++ {
-		currentLayer := labelLayer(drg, expander, replicaID, nodes, nodeSize, prevLayer)
+		currentLayer := labelLayer(drg, expander, sealSeed, nodes, nodeSize, prevLayer)
 		keyLayers = append(keyLayers, currentLayer)
 		prevLayer = currentLayer
 	}
@@ -193,18 +259,18 @@ func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byt
 	return keyLayers
 }
 
-func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSize int, nodes int, prevLayer []byte) []byte {
+func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, nodeSize int, nodes int, prevLayer []byte) []byte {
 	size := nodes * nodeSize
 	labels := make([]byte, size)
 
 	for i := 0; i < nodes; i++ {
-		var parents []byte
+		var parents []Label
 
 		// The first node of every layer has no DRG Parents.
 		if i > 0 {
 			for parent := range drg.Parents(UInt(i)) {
 				start := parent * nodeSize
-				parents = append(parents, labels[start:start+nodeSize]...)
+				parents = append(parents, labels[start:start+nodeSize])
 			}
 		}
 
@@ -212,11 +278,11 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, nodeSiz
 		if prevLayer != nil {
 			for parent := range expander.Parents(UInt(i)) {
 				start := parent * nodeSize
-				parents = append(parents, labels[start:start+nodeSize]...)
+				parents = append(parents, labels[start:start+nodeSize])
 			}
 		}
 
-		label := generateLabel(replicaID, i, parents)
+		label := generateLabel(sealSeed, i, parents)
 		labels = append(labels, label...)
 	}
 
@@ -236,18 +302,20 @@ func encodeData(data []byte, key []byte, nodeSize int, modulus *big.Int) []byte 
 	return encoded
 }
 
-func generateLabel(replicaID []byte, node int, dependencies []byte) []byte {
+func generateLabel(sealSeed sector.SealSeed, node int, dependencies []Label) []byte {
 	nodeBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(nodeBytes, uint64(node))
 
-	preimage := append(replicaID, nodeBytes...)
-	preimage = append(preimage, dependencies...)
+	preimage := append(sealSeed, nodeBytes...)
+	for _, dependency := range dependencies {
+		preimage = append(preimage, dependency...)
+	}
 
 	return deriveLabel(preimage)
 }
 
 func deriveLabel(elements []byte) []byte {
-	return WideRepCompress_Blake2sHash(elements)
+	return HashBytes_Blake2sHash(elements)
 }
 
 func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
@@ -257,11 +325,11 @@ func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
 	for start := 0; start < len(leaves); start += nodeSize {
 		end := start + nodeSize
 
-		var column []byte
+		var column []Label
 		// Concatenate that node's label at each layer, in order, into a column.
 		for i := 0; i < len(keyLayers); i++ {
 			label := keyLayers[i][start:end]
-			column = append(column, label...)
+			column = append(column, label)
 		}
 
 		// And hash that column to create the leaf of a new tree.
@@ -270,53 +338,157 @@ func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
 	}
 
 	// Return the root of and path to the column tree.
-	return RepHash_PedersenHash(leaves)
+	return BuildTree_PedersenHash(leaves)
 }
 
-func hashColumn(column []byte) PedersenHash {
-	return WideRepCompress_PedersenHash(column)
+func hashColumn(column []Label) PedersenHash {
+	var preimage []byte
+	for _, label := range column {
+		preimage = append(preimage, label...)
+	}
+	return HashBytes_PedersenHash(preimage)
 }
 
-func (sdr *StackedDRG_I) CreateSealProof(randomSeed sector.SealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
-	replicaID := ComputeReplicaID(aux.SectorID(), aux.CommD(), aux.Seed())
+type PrivateOfflineSDRProof []OfflineSDRChallengeProof
 
-	drg := DRG_I{
-		Config_: sdr.DRGCfg(),
-	}
+func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+	privateProof := sdr.CreatePrivateSealProof(challengeSeed, aux)
 
-	expander := ExpanderGraph_I{
-		Config_: sdr.ExpanderGraphCfg(),
-	}
+	// Sanity check: newly-created proofs must pass verification.
+	util.Assert(sdr.VerifyPrivateProof(privateProof, aux.Seeds(), challengeSeed, aux.CommD(), aux.CommR()))
 
+	return sdr.CreateOfflineCircuitProof(privateProof, aux)
+}
+
+func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
+	sealSeeds := aux.Seeds()
 	nodeSize := UInt(sdr.NodeSize())
-	challenges := sdr.GenerateOfflineChallenges(randomSeed, int(sdr.Challenges()))
+	challenges := sdr.GenerateOfflineChallenges(sealSeeds, randomness, sdr.Challenges())
 
-	var challengeProofs []OfflineSDRChallengeProof
-
+	columnTree := LoadMerkleTree(aux.CommCTreePath())
 	for c := range challenges {
-		challengeProofs = append(challengeProofs, CreateChallengeProof(&drg, &expander, replicaID, UInt(c), nodeSize, aux))
+		challengeProof := CreateChallengeProof(sdr.drg(), sdr.expander(), sealSeeds, UInt(c), nodeSize, columnTree, aux)
+		challengeProofs = append(challengeProofs, challengeProof)
 	}
 
-	return sdr.CreateOfflineCircuitProof(challengeProofs, aux)
+	privateProof := challengeProofs
+
+	return privateProof
 }
 
-func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byte, challenge UInt, nodeSize UInt, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
-	var columnElements []UInt
-	columnElements = append(columnElements, challenge)
-	columnElements = append(columnElements, drg.Parents(challenge)...)
-	columnElements = append(columnElements, expander.Parents(challenge)...)
+// Verify a private proof.
+// NOTE: Verification of a private proof is exactly the computation we will prove we have performed in a zk-SNARK.
+// If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
+// Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
+func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
+	subsectorCount := int(sdr.SubsectorCount())
+	layers := int(sdr.Layers())
+	curveModulus := sdr.Curve().FieldModulus()
+	challenges := sdr.GenerateOfflineChallenges(sealSeeds, randomness, sdr.Challenges())
+
+	// commC and commRLast must be the same for all challenge proofs, so we can arbitrarily verify against the first.
+	firstChallengeProof := privateProof[0]
+	commRLast := firstChallengeProof.ReplicaProof.InclusionProof.root()
+	commC := firstChallengeProof.ColumnProofs[0].InclusionProof.root()
+
+	for i, challenge := range challenges {
+		// Verify one OfflineSDRChallengeProof.
+		challengeProof := privateProof[i]
+		dataProofs := challengeProof.DataProofs
+		columnProofs := challengeProof.ColumnProofs
+		replicaProof := challengeProof.ReplicaProof
+
+		// Verify column proofs and that they represent the right columns.
+		columnElements := getColumnElements(sdr.drg(), sdr.expander(), challenge)
+
+		for i, columnElement := range columnElements {
+			columnProof := columnProofs[i]
+
+			// The provided column proofs must correspond to the expected columns.
+			if !columnProof.verify(commC, UInt(columnElement)) {
+				return false
+			}
+		}
+
+		for layer := 0; layer < int(sdr.Layers()); layer++ {
+			var sealSeed sector.SealSeed // FIXME: Get the right seed
+			var parents []Label
+
+			for _, parentProof := range columnProofs[1:] {
+				parent := parentProof.Column[layer]
+				parents = append(parents, parent)
+			}
+			providedLabel := columnProofs[columnElements[0]].Column[layer]
+			calculatedLabel := generateLabel(sealSeed, i, parents)
+
+			if !bytes.Equal(calculatedLabel, providedLabel) {
+				return false
+			}
+		}
+
+		for i, dataProof := range dataProofs {
+			if !dataProof.verify(commD, challenge) {
+				return false
+			}
+			dataNode := dataProof.leaf()
+			dataColumn := columnProofs[0]
+
+			keyNode := dataColumn.Column[i*subsectorCount+layers-1]
+
+			replicaNode := replicaProof.Column[i]
+
+			encodedNode := encodeData(dataNode, keyNode, int(sdr.NodeSize()), &curveModulus)
+			if !bytes.Equal(encodedNode, replicaNode) {
+				return false
+			}
+
+		}
+
+		if !replicaProof.verify(commRLast, challenge) {
+			return false
+		}
+	}
+
+	commRCalculated := BinaryHash_PedersenHash(commC, commRLast)
+
+	if !bytes.Equal(commRCalculated, AsBytes_SealedSectorCID(commR)) {
+		return false
+	}
+
+	return true
+}
+
+func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds []sector.SealSeed, challenge UInt, nodeSize UInt, columnTree *MerkleTree, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
+	columnElements := getColumnElements(drg, expander, challenge)
 
 	var columnProofs []SDRColumnProof
 	for c := range columnElements {
-		columnProof := CreateColumnProof(UInt(c), nodeSize, aux)
+		columnProof := createColumnProof(UInt(c), nodeSize, columnTree, aux)
 		columnProofs = append(columnProofs, columnProof)
 	}
 
-	dataProof := createInclusionProof(aux.Data()[challenge*nodeSize:(challenge+1)*nodeSize], aux.Data())
-	replicaProof := createInclusionProof(aux.Replica()[challenge*nodeSize:(challenge+1)*nodeSize], aux.Data())
+	var dataProofs []InclusionProof
+
+	for _, treePath := range aux.CommDTreePaths() {
+		dataTree := LoadMerkleTree(treePath)
+		dataProof := dataTree.proveInclusion(challenge)
+		dataProofs = append(dataProofs, dataProof)
+	}
+
+	replicas := aux.Replicas()
+	var replicaColumn []Label
+	for _, replica := range replicas {
+		replicaColumn = append(replicaColumn, replica[challenge*nodeSize:(challenge+1)*nodeSize])
+	}
+
+	replicaTree := LoadMerkleTree(aux.PersistentAux().CommRLastTreePath())
+	replicaProof := SDRColumnProof{
+		Column:         replicaColumn,
+		InclusionProof: replicaTree.proveInclusion(challenge),
+	}
 
 	proof = OfflineSDRChallengeProof{
-		DataProof:    dataProof,
+		DataProofs:   dataProofs,
 		ColumnProofs: columnProofs,
 		ReplicaProof: replicaProof,
 	}
@@ -324,52 +496,119 @@ func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, replicaID []byt
 	return proof
 }
 
-func CreateColumnProof(c UInt, nodeSize UInt, aux sector.ProofAuxTmp) (columnProof SDRColumnProof) {
-	commC := aux.PersistentAux().CommC()
+func getColumnElements(drg *DRG_I, expander *ExpanderGraph_I, challenge UInt) (columnElements []UInt) {
+	columnElements = append(columnElements, challenge)
+	columnElements = append(columnElements, drg.Parents(challenge)...)
+	columnElements = append(columnElements, expander.Parents(challenge)...)
+
+	return columnElements
+}
+
+func createColumnProof(c UInt, nodeSize UInt, columnTree *MerkleTree, aux sector.ProofAuxTmp) (columnProof SDRColumnProof) {
 	layers := aux.KeyLayers()
-	var column []byte
+	var column []Label
 
 	for i := 0; i < len(layers); i++ {
-		column = append(column, layers[i][c*nodeSize:(c+1)*nodeSize]...)
+		column = append(column, layers[i][c*nodeSize:(c+1)*nodeSize])
 	}
 
-	leaf := hashColumn(column)
 	columnProof = SDRColumnProof{
-		ColumnElements: column,
-		InclusionProof: createInclusionProof(leaf, commC),
+		Column:         column,
+		InclusionProof: columnTree.proveInclusion(c),
 	}
 
 	return columnProof
 }
 
-func createInclusionProof(leaf []byte, root []byte) InclusionProof {
-	panic("TODO")
-}
-
 type OfflineSDRChallengeProof struct {
-	CommRLast sector.Commitment
-	CommC     sector.Commitment
+	CommRLast Commitment
+	CommC     Commitment
 
 	// TODO: these proofs need to depend on hash function.
-	DataProof    InclusionProof // Blake2s
+	DataProofs   []InclusionProof // Blake2s
 	ColumnProofs []SDRColumnProof
-	ReplicaProof InclusionProof // Pedersen
+	ReplicaProof SDRColumnProof // Pedersen
 
 }
 
 type InclusionProof struct{}
 
+func (ip *InclusionProof) leaf() []byte {
+	panic("TODO")
+}
+
+func (ip *InclusionProof) leafIndex() UInt {
+	panic("TODO")
+}
+
+func (ip *InclusionProof) root() Commitment {
+	panic("TODO")
+}
+
+type MerkleTree struct{}
+
+func (mt *MerkleTree) proveInclusion(challenge UInt) InclusionProof {
+	panic("TODO")
+}
+
+func LoadMerkleTree(path file.Path) *MerkleTree {
+	panic("TODO")
+}
+
+func (ip *InclusionProof) verify(root []byte, challenge UInt) bool {
+	panic("TODO")
+}
+
 type SDRColumnProof struct {
-	ColumnElements []byte
+	Column         []Label
 	InclusionProof InclusionProof
 }
 
+func (proof *SDRColumnProof) verify(root []byte, challenge UInt) bool {
+	if !bytes.Equal(hashColumn(proof.Column), proof.InclusionProof.leaf()) {
+		return false
+	}
+
+	if proof.InclusionProof.leafIndex() != challenge {
+		return false
+	}
+
+	return proof.InclusionProof.verify(root, challenge)
+}
+
 func (sdr *StackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
+	// partitions := sdr.Partitions()
+	// publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GenerateOfflineChallenges(randomSeed sector.SealRandomness, challenges int) []UInt {
-	panic("TODO")
+func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, challengeCount StackedDRGChallenges) (challenges []UInt) {
+	nodeSize := int(sdr.NodeSize())
+	nodes := sdr.Nodes()
+
+	challengeRangeSize := nodes - 1 // Never challenge the first node.
+	challengeModulus := new(big.Int)
+	challengeModulus.SetUint64(uint64(challengeRangeSize))
+
+	count := int(challengeCount)
+	for i := 0; i < count; i++ {
+		var bytes []byte
+		for _, sealSeed := range sealSeeds {
+			bytes = append(bytes, sealSeed...)
+		}
+		bytes = append(bytes, randomness...)
+		bytes = append(bytes, littleEndianBytesFromInt(i, nodeSize)...)
+
+		hash := HashBytes_Blake2sHash(bytes)
+		bigChallenge := bigIntFromLittleEndianBytes(hash)
+		bigChallenge = bigChallenge.Mod(bigChallenge, challengeModulus)
+
+		// Sectors nodes must be 64-bit addressable, always a safe assumption.
+		challenge := bigChallenge.Uint64()
+		challenge += 1 // Never challenge the first node.
+		challenges = append(challenges, challenge)
+	}
+	return challenges
 }
 
 func encodeNode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
@@ -393,18 +632,127 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 
 func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	onChain := sv.OnChain()
-
 	sealProof := onChain.Proof()
-
-	var commD sector.Commitment
+	pieceInfos := sv.PieceInfos()
 	commR := Commitment_SealedSectorCID(sector.SealedSectorCID(onChain.SealedCID()))
+	sealCfg := sv.SealCfg()
 
-	sdr.VerifyOfflineCircuitProof(commD, commR, sealProof)
+	// A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
+	util.Assert(sealCfg.SubsectorCount() == 1)
 
+	sectorSize := sealCfg.SectorSize()
+	subsectorCount := int(sealCfg.SubsectorCount())
+	rootPieceInfo := sdr.ComputeRootPieceInfo(pieceInfos)
+	rootSize := rootPieceInfo.Size()
+	if rootSize != sectorSize {
+		return false
+	}
+
+	commD := rootPieceInfo.CommP()
+
+	var sealSeeds []sector.SealSeed
+	for i := 0; i < subsectorCount; i++ {
+		sealSeed := computeSealSeed(sv.SectorID(), i, sv.Randomness(), AsBytes_UnsealedSectorCID(commD))
+		sealSeeds = append(sealSeeds, sealSeed)
+	}
+	challenges := sdr.GenerateOfflineChallenges(sealSeeds, sv.InteractiveRandomness(), sdr.Challenges())
+
+	return sdr.VerifyOfflineCircuitProof(commD, commR, sealSeeds, challenges, sealProof)
+}
+
+func (sdr *StackedDRG_I) ComputeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
+	// Construct root PieceInfo by (shift-reduce) parsing the constituent PieceInfo array.
+	// Later pieces must always be joined with equal-sized predecessors to create a new root twice their size.
+	// So if a piece is larger than the current root (top of stack), add padding until it is not.
+	// If a piece is smaller than the root, let it be the new root (top of stack) until reduced to a replacement that can be joined
+	// with the previous.
+	var stack []PieceInfo
+
+	shift := func(p PieceInfo) {
+		stack = append(stack, p)
+	}
+	peek := func() PieceInfo {
+		return stack[len(stack)-1]
+	}
+	peek2 := func() PieceInfo {
+		return stack[len(stack)-2]
+	}
+	pop := func() PieceInfo {
+		stack = stack[:len(stack)-1]
+		return stack[len(stack)-1]
+	}
+	reduce1 := func() bool {
+		if len(stack) > 1 && peek().Size() == peek2().Size() {
+			right := pop()
+			left := pop()
+			joined := joinPieceInfos(left, right)
+			shift(joined)
+			return true
+		}
+		return false
+	}
+	reduce := func() {
+		for reduce1() {
+		}
+	}
+	shiftReduce := func(p PieceInfo) {
+		shift(p)
+		reduce()
+	}
+
+	// Prime the pump with first pieceInfo.
+	shift(pieceInfos[0])
+
+	// Consume the remainder.
+	for _, pieceInfo := range pieceInfos[1:] {
+		// TODO: Assert that pieceInfo.Size() is a power of 2.
+
+		// Add padding until top of stack is large enough to receive current pieceInfo.
+		for peek().Size() < pieceInfo.Size() {
+			shiftReduce(zeroPadding(peek().Size()))
+		}
+
+		// Add the current piece.
+		shiftReduce(pieceInfo)
+	}
+
+	// Add any necessary final padding.
+	for len(stack) > 1 {
+		shiftReduce(zeroPadding(peek().Size()))
+	}
+	util.Assert(len(stack) == 1)
+
+	return pop()
+}
+
+func zeroPadding(size UInt) PieceInfo {
+	return &sector.PieceInfo_I{
+		Size_: size,
+		// CommP_: FIXME: Implement.
+	}
+}
+
+func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
+	util.Assert(left.Size() == right.Size())
+	return &sector.PieceInfo_I{
+		Size_:  left.Size() + right.Size(),
+		CommP_: UnsealedSectorCID(BinaryHash_Blake2sHash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
+	}
+}
+
+func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR Commitment, sealSeeds []sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
+	//publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.Commitment, commR sector.Commitment, sv sector.SealProof) bool {
+////////////////////////////////////////////////////////////////////////////////
+// PoSt
+
+func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, faults sector.FaultSet) (sectors []sector.SectorID, challenges []UInt) {
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) GeneratePoSt(challengedSector []sector.SectorID, challenges []UInt, proofAuxs []sector.ProofAux) sector.PoStProof {
 	panic("TODO")
 }
 
@@ -412,37 +760,40 @@ func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.Commitment, comm
 /// Generic Hashing and Merkle Tree generation
 
 /// Binary hash compression.
-// RepCompress<T>
-func RepCompress_T(left []byte, right []byte) util.T {
+// BinaryHash<T>
+func BinaryHash_T(left []byte, right []byte) util.T {
 	return util.T{}
 }
 
-// RepCompress<PedersenHash>
-func RepCompress_PedersenHash(left []byte, right []byte) PedersenHash {
+// BinaryHash<PedersenHash>
+func BinaryHash_PedersenHash(left []byte, right []byte) PedersenHash {
 	return PedersenHash{}
 }
 
-// RepCompress<Blake2sHash>
-func RepCompress_Blake2sHash(left []byte, right []byte) Blake2sHash {
-	return Blake2sHash{}
+// BinaryHash<Blake2sHash>
+func BinaryHash_Blake2sHash(left []byte, right []byte) Blake2sHash {
+	result := Blake2sHash{}
+	return trimToFr32(result)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Digest
-// WideRepCompress<T>
-func WideRepCompress_T(data []byte) util.T {
+// HashBytes<T>
+func HashBytes_T(data []byte) util.T {
 	return util.T{}
 }
 
-// RepCompress<PedersenHash>
-func WideRepCompress_PedersenHash(data []byte) PedersenHash {
+// HashBytes<PedersenHash>
+func HashBytes_PedersenHash(data []byte) PedersenHash {
 	return PedersenHash{}
 }
 
-// RepCompress<Blake2sHash>
-func WideRepCompress_Blake2sHash(data []byte) Blake2sHash {
-	return Blake2sHash{}
+// HashBytes<Blake2sHash.
+func HashBytes_Blake2sHash(data []byte) Blake2sHash {
+	// Digest is truncated to 254 bits.
+	result := Blake2sHash{}
+	return trimToFr32(result)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -462,9 +813,9 @@ func DigestSize_Blake2sHash() int {
 ////////////////////////////////////////////////////////////////////////////////
 /// Binary Merkle-tree generation
 
-// RepHash<T>
-func RepHash_T(data []byte) (util.T, file.Path) {
-	// Plan: define this in terms of RepCompress_T, then copy-paste changes into T-specific specializations, for now.
+// BuildTree<T>
+func BuildTree_T(data []byte) (util.T, file.Path) {
+	// Plan: define this in terms of BinaryHash_T, then copy-paste changes into T-specific specializations, for now.
 
 	// Nodes are always the digest size so data cannot be compressed to digest for storage.
 	nodeSize := DigestSize_T()
@@ -477,9 +828,10 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 		for i := 0; i < len(data); i += 2 * nodeSize {
 			left := data[i : i+nodeSize]
 			right := data[i+nodeSize : i+2*nodeSize]
-			hashed := RepCompress_T(left, right)
 
-			row = append(row, asBytes(hashed)...)
+			hashed := BinaryHash_T(left, right)
+
+			row = append(row, AsBytes_T(hashed)...)
 		}
 		rows = append(rows, row)
 	}
@@ -498,17 +850,27 @@ func RepHash_T(data []byte) (util.T, file.Path) {
 	return fromBytes_T(root), filePath
 }
 
-// RepHash<PedersenHash>
-func RepHash_PedersenHash(data []byte) (PedersenHash, file.Path) {
+// BuildTree<PedersenHash>
+func BuildTree_PedersenHash(data []byte) (PedersenHash, file.Path) {
 	return PedersenHash{}, file.Path("") // FIXME
 }
 
-//  RepHash<Blake2sHash>
-func RepHash_Blake2sHash(data []byte) (Blake2sHash, file.Path) {
+//  BuildTree<Blake2sHash>
+func BuildTree_Blake2sHash(data []byte) (Blake2sHash, file.Path) {
 	return []byte{}, file.Path("") // FIXME
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// Destructively trim data so most significant two bits of last byte are 0.
+// This ensure data interpreted as little-endian will not exceed a field with 254-bit capacity.
+// NOTE: 254 bits is the capacity of BLS12-381, but other curves with ~32-byte field elements
+// may have a different capacity. (Example: BLS12-377 has a capacity of 252 bits.)
+func trimToFr32(data []byte) []byte {
+	util.Assert(len(data) == 32)
+	data[31] &= 0x3f // 0x3f = 0b0011_1111
+	return data
+}
 
 func UnsealedSectorCID(h Blake2sHash) sector.UnsealedSectorCID {
 	panic("not implemented -- re-arrange bits")
@@ -518,23 +880,23 @@ func SealedSectorCID(h PedersenHash) sector.SealedSectorCID {
 	panic("not implemented -- re-arrange bits")
 }
 
-func Commitment_UnsealedSectorCID(cid sector.UnsealedSectorCID) sector.Commitment {
+func Commitment_UnsealedSectorCID(cid sector.UnsealedSectorCID) Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
-func Commitment_SealedSectorCID(cid sector.SealedSectorCID) sector.Commitment {
+func Commitment_SealedSectorCID(cid sector.SealedSectorCID) Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
 func ComputeDataCommitment(data []byte) ([]byte, file.Path) {
 	// TODO: make hash parameterizable
-	return RepHash_Blake2sHash(data)
+	return BuildTree_Blake2sHash(data)
 }
 
 // Compute CommP or CommD.
 func ComputeUnsealedSectorCID(data []byte) (sector.UnsealedSectorCID, file.Path) {
 	// TODO: check that len(data) > minimum piece size and is a power of 2.
-	hash, treePath := RepHash_Blake2sHash(data)
+	hash, treePath := BuildTree_Blake2sHash(data)
 	return UnsealedSectorCID(hash), treePath
 }
 
@@ -559,7 +921,31 @@ func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
 	return bytes
 }
 
-func asBytes(t util.T) []byte {
+func littleEndianBytesFromInt(n int, size int) []byte {
+	z := new(big.Int)
+	z.SetInt64(int64(n))
+	return littleEndianBytesFromBigInt(z, size)
+}
+
+func littleEndianBytesFromUInt(n UInt, size int) []byte {
+	z := new(big.Int)
+	z.SetUint64(uint64(n))
+	return littleEndianBytesFromBigInt(z, size)
+}
+
+func AsBytes_T(t util.T) []byte {
+	panic("Unimplemented for T")
+
+	return []byte{}
+}
+
+func AsBytes_UnsealedSectorCID(cid sector.UnsealedSectorCID) []byte {
+	panic("Unimplemented for T")
+
+	return []byte{}
+}
+
+func AsBytes_SealedSectorCID(CID sector.SealedSectorCID) []byte {
 	panic("Unimplemented for T")
 
 	return []byte{}
@@ -568,4 +954,8 @@ func asBytes(t util.T) []byte {
 func fromBytes_T(_ interface{}) util.T {
 	panic("Unimplemented for T")
 	return util.T{}
+}
+
+func isPow2(n int) bool {
+	return n != 0 && n&(n-1) == 0
 }

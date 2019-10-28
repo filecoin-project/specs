@@ -2047,11 +2047,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4564,21 +4566,21 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageClient</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// TODO: confirm on input type here
-</span><span class="c1"></span>    <span class="c1">// generate CommP from data stored in a storage deal
+    <span class="c1">// generate PieceCID(CommP) from payload
 </span><span class="c1"></span>    <span class="c1">// so that client can identify their deal
-</span><span class="c1"></span>    <span class="nf">generateCommP</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+</span><span class="c1"></span>    <span class="nf">generatePieceCID</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
 
-    <span class="c1">// calls between StorageClient and StorageProvider happen over libp2p
-</span><span class="c1"></span>    <span class="c1">// make call to StorageProvider in StorageDealProposal
-</span><span class="c1"></span>    <span class="nf">ProposeStorageDeal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="c1">// Call by StorageProvider to pull data with GraphSync
+</span><span class="c1"></span>    <span class="nf">PullPayload</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span>
 
-    <span class="c1">// make call to StorageProvider
-</span><span class="c1"></span>    <span class="nf">QueryStorageDeal</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">provider</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageDealStatus</span>
+    <span class="c1">// Call by StorageProvider to inform StorageDealProposalStatus
+</span><span class="c1"></span>    <span class="nf">NotifyOfStorageDealProposalStatus</span><span class="p">(</span><span class="nx">proposalCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">ProposalCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span>
+
+    <span class="c1">// Call by StorageProvider to inform StorageDealStatus
+</span><span class="c1"></span>    <span class="nf">NotifyOfStorageDealStatus</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4603,7 +4605,38 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p style="color: #D74848"><b><i>Something's not right. The <code>storage_client.go</code> file was not found.</i></b></p>
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+    <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+    <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">generatePieceCID</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+    <span class="kd">var</span> <span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+    <span class="k">return</span> <span class="nx">pieceCID</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">PullPayload</span><span class="p">(</span><span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">NotifyOfStorageDealProposalStatus</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">client</span> <span class="o">*</span><span class="nx">StorageClient_I</span><span class="p">)</span> <span class="nf">NotifyOfStorageDealStatus</span><span class="p">(</span><span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span><span class="p">,</span> <span class="nx">status</span> <span class="nx">StorageDealStatus</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
 
 
 

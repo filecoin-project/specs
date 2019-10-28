@@ -2047,11 +2047,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4563,7 +4565,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="kn">import</span> <span class="nx">sealing</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
@@ -4606,82 +4607,98 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">ChallengeStatus</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">LastChallengeEpoch</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by NotifyOfPoStChallenge
 </span><span class="c1"></span>    <span class="nx">LastChallengeEndEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon successful submitPoSt
-</span><span class="c1"></span><span class="p">}</span>
+</span><span class="c1"></span>
+    <span class="nf">IsChallenged</span><span class="p">()</span>         <span class="kt">bool</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorsAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
 <span class="kd">type</span> <span class="nx">StagedCommittedSectorAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">SectorOnChainInfo</span><span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">StorageMinerActor</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="kd">type</span> <span class="nx">StorageMinerActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// CollateralVault CollateralVault
 </span><span class="c1"></span>
-    <span class="nx">Sectors</span>                  <span class="nx">SectorsAMT</span>
-    <span class="nx">StagedCommittedSectors</span>   <span class="nx">StagedCommittedSectorAMT</span>
+    <span class="nx">Sectors</span>                    <span class="nx">SectorsAMT</span>
+    <span class="nx">StagedCommittedSectors</span>     <span class="nx">StagedCommittedSectorAMT</span>
 
     <span class="c1">// ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
 </span><span class="c1"></span>    <span class="c1">// successful SubmitPoSt will perform changes to NextProvingSet
 </span><span class="c1"></span>    <span class="c1">// and update ProvingSet with NextProvingSet at the end
 </span><span class="c1"></span>    <span class="c1">// No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-</span><span class="c1"></span>    <span class="nx">ProvingSet</span>               <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+</span><span class="c1"></span>    <span class="nx">ProvingSet</span>                 <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
 
     <span class="nx">SectorTable</span>
     <span class="nx">SectorExpirationQueue</span>
     <span class="nx">ChallengeStatus</span>
 
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">Info</span>                     <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                       <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
     <span class="c1">// TODO ProvingPeriodEnd   Epoch
 </span><span class="c1"></span>
-    <span class="nf">NotifyOfPoStChallenge</span><span class="p">()</span>
+    <span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>  <span class="kt">bool</span>
+    <span class="nf">_isSealVerificationCorrect</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_sectorExists</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
+    <span class="nf">_updateFailSector</span><span class="p">(</span>
+        <span class="nx">rt</span>                   <span class="nx">Runtime</span>
+        <span class="nx">sectorNo</span>             <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span>
+        <span class="nx">incrementFaultCount</span>  <span class="kt">bool</span>
+    <span class="p">)</span>
+    <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">_updateCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">_updateClearSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+    <span class="nf">_updateActivateSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">StorageMinerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">NotifyOfPoStChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+
+    <span class="nf">CommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sealing</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>
-    <span class="nf">SubmitPoSt</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
+    <span class="nf">SubmitPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
 
-    <span class="nf">CheckPoStSubmissionHappened</span><span class="p">()</span>
-    <span class="nf">onMissedPoSt</span><span class="p">()</span>
+    <span class="nf">CheckPoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="c1">// TODO: should depledge be in here or in storage market actor?
 </span><span class="c1"></span>
-    <span class="nf">DeclareFaults</span><span class="p">(</span><span class="nx">failingSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
-    <span class="nf">RecoverFaults</span><span class="p">(</span><span class="nx">recoveringSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
+    <span class="nf">DeclareFaults</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">failingSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
 
-    <span class="nf">constructFaultReport</span><span class="p">(</span>
+    <span class="nf">RecoverFaults</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">recoveringSet</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span><span class="p">)</span>
+
+    <span class="nf">_onMissedPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+
+    <span class="nf">_submitFaultReport</span><span class="p">(</span>
+        <span class="nx">rt</span>          <span class="nx">Runtime</span>
         <span class="nx">declared</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
         <span class="nx">detected</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
         <span class="nx">terminated</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
     <span class="p">)</span>
-    <span class="nf">constructPowerReport</span><span class="p">()</span>
+    <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
-    <span class="nf">computeProvingPeriodEndSectorState</span><span class="p">()</span>  <span class="c1">// TODO
-</span><span class="c1"></span>
-    <span class="nf">verifyPoStSubmission</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">processStagedCommittedSectors</span><span class="p">()</span>
+    <span class="nf">_verifyPoStSubmission</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">clearSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
-    <span class="nf">activateSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
-    <span class="nf">failSector</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">incrementFaultCount</span> <span class="kt">bool</span><span class="p">)</span>
-
-    <span class="nf">expireSectors</span><span class="p">()</span>
-<span class="p">}</span>
+    <span class="c1">// _computeProvingPeriodEndSectorState(rt Runtime)  // TODO
+</span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MinerInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">Owner</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>           <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">Worker</span>      <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>          <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">PeerId</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">PeerId</span>          <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">SectorSize</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>      <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+    <span class="nx">SubsectorCount</span>  <span class="nx">UVarint</span>
+    <span class="nx">Partitions</span>      <span class="nx">UVarint</span>
 <span class="p">}</span>
 </code></pre></div>
 

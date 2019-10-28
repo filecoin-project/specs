@@ -18,14 +18,14 @@ func (a *InitActorCode_I) Exec(rt vmr.Runtime, state InitActorState, codeCID act
 		rt.Fatal("cannot launch actor instance that is not a builtin actor")
 	}
 
-	// Get the actor ID for this actor.
-	actorID := a._assignNextID(state)
-
 	// Ensure that singeltons can only be launched once.
 	// TODO: do we want to enforce this? If so how should actors be marked as such?
 	if a._isSingletonActor(codeCID) {
 		rt.Fatal("cannot launch another actor of this type")
 	}
+
+	// Get the actor ID for this actor.
+	actorID := a._assignNextID(state)
 
 	// This generates a unique address for this actor that is stable across message
 	// reordering

@@ -2047,11 +2047,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4629,14 +4631,14 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot launch actor instance that is not a builtin actor&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// Get the actor ID for this actor.
-</span><span class="c1"></span>    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_assignNextID</span><span class="p">(</span><span class="nx">state</span><span class="p">)</span>
-
     <span class="c1">// Ensure that singeltons can only be launched once.
 </span><span class="c1"></span>    <span class="c1">// TODO: do we want to enforce this? If so how should actors be marked as such?
 </span><span class="c1"></span>    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_isSingletonActor</span><span class="p">(</span><span class="nx">codeCID</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;cannot launch another actor of this type&#34;</span><span class="p">)</span>
     <span class="p">}</span>
+
+    <span class="c1">// Get the actor ID for this actor.
+</span><span class="c1"></span>    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_assignNextID</span><span class="p">(</span><span class="nx">state</span><span class="p">)</span>
 
     <span class="c1">// This generates a unique address for this actor that is stable across message
 </span><span class="c1"></span>    <span class="c1">// reordering

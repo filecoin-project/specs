@@ -98,10 +98,6 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/chainsync/</loc>
-  </url>
-  
-  <url>
     <loc>/docs/systems/filecoin_blockchain/struct/</loc>
   </url>
   
@@ -119,6 +115,10 @@
   
   <url>
     <loc>/docs/systems/filecoin_nodes/node_types/verifier_node/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_blockchain/chainsync/</loc>
   </url>
   
   <url>

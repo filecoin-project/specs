@@ -2047,11 +2047,13 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#systems__filecoin_blockchain__chainsync" class="menu-item depth-3">
     
     
-        Block Syncer
+        ChainSync
     
 </a>
 
@@ -4728,7 +4730,7 @@ TODO: Just interpolate a table of the Orient parameters and reconcile naming.</p
 
 <ul>
 <li><code>TAPER</code> : <code>Float</code>: Fraction of each layer&rsquo;s challenges by which to reduce next-lowest layer&rsquo;s challenge count.</li>
-<li><code>TAPER_LAYERS</code>: <code>uint</code>: Number of layers
+<li><code>TAPER_LAYERS</code>: <code>uint</code>: Number of layers which should be tapered. FIXME: update for current tapering.
 <code>Data</code> is a byte array initialized to the content of <strong><em>unsealed sector</em></strong> and will be mutated in-place by the replication process.</li>
 </ul>
 
@@ -4795,36 +4797,7 @@ TODO: Just interpolate a table of the Orient parameters and reconcile naming.</p
 <p><code>RepHash</code> is a vector commitment used to generate commitments to sealed sectors, unsealed sectors, piece commitments and intermediate stepds of the Proof-of-Replication. Filecoin uses a balanced binary Merkle tree for <code>RepHash</code>. The leaves of the Merkle tree are pairs of adjacent nodes.</p>
 
 <p><code>RepHash</code> inputs MUST respect a valid Storage Format. [TODO: What does this mean?]</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">node</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span><span class="kt">uint8</span>
 
-<span class="c1">// Create and return a balanced binary Merkle tree and its root commitment.
-</span><span class="c1">// len(leaves) must be a power of 2.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">RepHash</span><span class="p">(</span><span class="nx">leaves</span> <span class="p">[]</span><span class="nx">node</span><span class="p">)</span> <span class="p">([][]</span><span class="nx">node</span><span class="p">,</span> <span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">rows</span> <span class="p">=</span> <span class="p">[][]</span><span class="nx">node</span>
-
-    <span class="nx">currentRow</span> <span class="o">:=</span> <span class="nx">leaves</span>
-    <span class="k">for</span> <span class="nx">height</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">currentRow</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">height</span> <span class="o">+=</span> <span class="mi">1</span> <span class="p">{</span>
-        <span class="nx">rows</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">currentRow</span><span class="p">)</span>
-        <span class="kd">var</span> <span class="nx">nextRow</span> <span class="p">[]</span><span class="nx">node</span>
-
-        <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">row</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">{</span>
-            <span class="nx">left</span> <span class="o">:=</span> <span class="nx">row</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-            <span class="nx">right</span> <span class="o">:=</span> <span class="nx">row</span><span class="p">[</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-
-            <span class="c1">// NOTE: Depending on choice of RepCompress, heightPart may be trimmed to fewer than 8 bits.
-</span><span class="c1"></span>            <span class="nx">heightPart</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">uint8</span><span class="p">{</span><span class="nx">height</span><span class="p">}</span>
-
-            <span class="nx">input1</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">heightPart</span><span class="p">,</span> <span class="nx">left</span><span class="o">...</span><span class="p">)</span>
-            <span class="nx">input</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">input1</span><span class="p">,</span> <span class="nx">right</span><span class="o">...</span><span class="p">)</span>
-            <span class="nx">hashed</span> <span class="p">=</span> <span class="nf">RepCompress</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">height</span><span class="p">)</span>
-            <span class="nx">nextRow</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">nextRow</span><span class="p">,</span> <span class="nx">hashed</span><span class="p">)</span>
-        <span class="p">}</span>
-
-        <span class="nx">currentRow</span> <span class="p">=</span> <span class="nx">nextRow</span>
-    <span class="p">}</span>
-    <span class="c1">// The tree returned here is just a vector of rows for later use. Its representation is not part of the spec.
-</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">rows</span><span class="p">,</span> <span class="nx">currentRow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="p">}</span></code></pre></div>
 <h2 id="stacked-drg-graph">Stacked DRG Graph</h2>
 
 <p>The slow sequential encoding required is enforced by the depth robusness property of the SDR graph.</p>
@@ -4904,44 +4877,9 @@ TODO: Just interpolate a table of the Orient parameters and reconcile naming.</p
 </ul></li>
 </ul>
 
-<h4 id="pseudocode">Pseudocode</h4>
-
 <p>We provide below a more succinct representation of the algorithm:</p>
 
-<pre><code>func SDRParents(node uint, layer uint) {
-
-  if layer == 1 {
-      // On first layer
-      let drgParents = BucketSample(node)
-      return drgParents
-  } else {
-    // On subsequent layers
-    let drgParents = BucketSample(node)
-      let expanderParents = ChungExpander(node)
-      return concat(drgParents, expanderParents)
-  }
-}
-</code></pre>
-
-<h4 id="tests">Tests</h4>
-
-<p>FIXME: Change this.</p>
-
-<ul>
-<li>Each <code>parent</code> in <code>parents</code> MUST not be greater than <code>GRAPH_SIZE-1</code> and lower than <code>0</code></li>
-<li>If <code>layer</code> is even:
-
-<ul>
-<li>Each <code>parent</code> in <code>parents</code> MUST be greater than <code>node</code></li>
-<li>EXCEPT: if <code>node</code> is <code>0</code>, then all parents MUST be <code>0</code></li>
-</ul></li>
-<li>if <code>layer</code> is odd:
-
-<ul>
-<li>Each <code>parent</code> in <code>parents</code> MUST be less than <code>node</code></li>
-<li>EXCEPT: if <code>node</code> is <code>GRAPH_SIZE-1</code>, then all parents MUST be <code>GRAPH_SIZE-1</code></li>
-</ul></li>
-</ul>
+<p>TODO: Reference to code in filproofs/algorithms.go  — or restructure all this.</p>
 
 <h4 id="time-space-tradeoff">Time-space tradeoff</h4>
 
@@ -4956,39 +4894,7 @@ TODO: Just interpolate a table of the Orient parameters and reconcile naming.</p
 <p><code>BucketSample</code> DRG graphs are random graphs that can be deterministically generated from a seed; different seed lead with high probability to different graphs. In SDR, we use the same seed <code>GRAPH_SEED</code> for each layer of the SDR graph such that they are all based on the same underlying DRG graph.</p>
 
 <p>The parents of any node can be locally computed without computing the entire graph. We call the parents of a node calculated in this way <em>base parents</em>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">BucketSampleInner</span><span class="p">(</span><span class="nx">node</span> <span class="kt">uint</span><span class="p">)</span> <span class="p">(</span><span class="nx">parents</span> <span class="p">[</span><span class="nx">BASE_DEGREE</span><span class="p">]</span><span class="kt">uint</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">switch</span> <span class="nx">node</span> <span class="p">{</span>
-        <span class="c1">// Special case for the first node, it self references.
-</span><span class="c1"></span>        <span class="c1">// Special case for the second node, it references only the first one.
-</span><span class="c1"></span>        <span class="k">case</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">BASE_DEGREE</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-                <span class="nx">parents</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="mi">0</span>
-            <span class="p">}</span>
-        <span class="k">default</span><span class="p">:</span>
-            <span class="nx">rng</span> <span class="o">:=</span> <span class="nx">ChaChaRng</span><span class="p">.</span><span class="nf">from_seed</span><span class="p">(</span><span class="nx">GRAPH_SEED</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="nx">k</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">k</span> <span class="p">&lt;</span> <span class="nx">BASE_DEGREE</span><span class="p">;</span> <span class="nx">k</span><span class="o">++</span> <span class="p">{</span>
-                <span class="c1">// iterate over m meta nodes of the ith real node
-</span><span class="c1"></span>                <span class="c1">// simulate the edges that we would add from previous graph nodes
-</span><span class="c1"></span>                <span class="c1">// if any edge is added from a meta node of jth real node then add edge (j,i)
-</span><span class="c1"></span>                <span class="nx">logi</span> <span class="o">:=</span> <span class="nf">floor</span><span class="p">(</span><span class="nf">log2</span><span class="p">(</span><span class="nx">node</span> <span class="o">*</span> <span class="nx">BASE_DEGREE</span><span class="p">))</span>
-                <span class="nx">j</span> <span class="o">:=</span> <span class="nx">rng</span><span class="p">.</span><span class="nf">gen</span><span class="p">()</span> <span class="o">%</span> <span class="nx">logi</span>
-                <span class="nx">jj</span> <span class="o">:=</span> <span class="nf">min</span><span class="p">(</span><span class="nx">node</span> <span class="o">*</span> <span class="nx">BASE_DEGREE</span> <span class="o">+</span> <span class="nx">k</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="nx">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-                <span class="nx">backDist</span> <span class="o">:=</span> <span class="nx">rng</span><span class="p">.</span><span class="nf">gen_range</span><span class="p">(</span><span class="nf">max</span><span class="p">(</span><span class="nx">jj</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nx">jj</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="nx">out</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">node</span> <span class="o">*</span> <span class="nx">BASE_DEGREE</span> <span class="o">+</span> <span class="nx">k</span> <span class="o">-</span> <span class="nx">backDist</span><span class="p">)</span> <span class="o">/</span> <span class="nx">BASE_DEGREE</span>
-
-                <span class="c1">// remove self references and replace with reference to previous node
-</span><span class="c1"></span>                <span class="k">if</span> <span class="nx">out</span> <span class="o">==</span> <span class="nx">node</span> <span class="p">{</span>
-                    <span class="nx">parents</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">node</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-                    <span class="nx">parents</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">out</span><span class="p">;</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-
-            <span class="nf">sort</span><span class="p">(</span><span class="nx">parents</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
 <p><code>BucketSample</code> extends <code>BucketSampleInner</code> to include the node&rsquo;s &lsquo;immediate predecessor&rsquo;. Each node except the first in a
 DRG generated by <code>BucketSample</code> has the node whose index is one less than its own as a parent. This ensures that
 visiting nodes whose indexes are sequential will result in a graph traversal in topological order.</p>
@@ -4999,21 +4905,9 @@ visiting nodes whose indexes are sequential will result in a graph traversal in 
 
 <p>Each node in layers other than the first has <code>EXPANSION_DEGREE</code> parents generated via the <code>ChungExpander</code>
 algorithm. Note that the indexes returned refer to labels from the <em>previous</em> layer. TODO: Make this all clearer with explicit notation.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ChungExpander</span><span class="p">(</span><span class="nx">node</span> <span class="kt">uint</span><span class="p">)</span> <span class="p">(</span><span class="nx">parents</span> <span class="p">[]</span><span class="kt">uint</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">parents</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">uint</span><span class="p">,</span> <span class="nx">EXPANSION_DEGREE</span><span class="p">)</span>
 
-    <span class="nx">feistelKeys</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">uint</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">}</span> <span class="c1">// TODO
-</span><span class="c1"></span>
-    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">p</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">EXPANSION_DEGREE</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">a</span> <span class="o">:=</span> <span class="nx">node</span> <span class="o">*</span> <span class="nx">EXPANSION_DEGREE</span> <span class="o">+</span> <span class="nx">i</span>
-    <span class="nx">transformed</span> <span class="o">:=</span> <span class="nf">feistelPermute</span><span class="p">(</span><span class="nx">GRAPH_SIZE</span> <span class="o">*</span> <span class="nx">EXPANSION_DEGREE</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">feistelKeys</span><span class="p">)</span>
-    <span class="nx">other</span> <span class="o">:=</span> <span class="nx">transformed</span> <span class="o">/</span> <span class="nx">EXPANSION_DEGREE</span>
-    <span class="k">if</span> <span class="nx">other</span> <span class="p">&lt;</span> <span class="nx">node</span> <span class="p">{</span>
-      <span class="nx">parents</span><span class="p">[</span><span class="nx">p</span><span class="p">]</span> <span class="p">=</span> <span class="nx">other</span>
-      <span class="nx">p</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
+<p>// TODO: link to relevant filproofs/algorithms.go</p>
+
 <h4 id="time-space-tradeoff-1">Time-Space tradeoff</h4>
 
 <p>Computing these parents can be expensive (especially due to the hashing required by the Feistel algorithm). A miner can trade this computation by storing the expansion parents.</p>
@@ -5022,105 +4916,8 @@ algorithm. Note that the indexes returned refer to labels from the <em>previous<
 
 <p>We use three rounds of <code>Feistel</code> to generate a permutation to compute the parents of the Bipartite Expander graph.</p>
 
-<p>TODO: Add <code>FEISTEL_ROUNDS</code> and <code>FEISTEL_BYTES</code> (or find its definitions)</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">permute</span><span class="p">(</span><span class="nx">numElements</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">keys</span> <span class="p">[</span><span class="nx">FEISTEL_ROUNDS</span><span class="p">]</span><span class="kt">uint</span><span class="p">)</span> <span class="kt">uint</span> <span class="p">{</span>
-    <span class="nx">u</span> <span class="o">:=</span> <span class="nf">feistelEncode</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">keys</span><span class="p">)</span>
+<p>TODO: link to filproofs/feistel</p>
 
-    <span class="nx">while</span> <span class="nx">u</span> <span class="o">&gt;=</span> <span class="nx">numElements</span> <span class="p">{</span>
-        <span class="nx">u</span> <span class="p">=</span> <span class="nf">feistelEncode</span><span class="p">(</span><span class="nx">u</span><span class="p">,</span> <span class="nx">keys</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="c1">// Since we are representing `numElements` using an even number of bits,
-</span><span class="c1"></span>    <span class="c1">// that can encode many values above it, so keep repeating the operation
-</span><span class="c1"></span>    <span class="c1">// until we land in the permitted range.
-</span><span class="c1"></span>
-    <span class="k">return</span> <span class="nx">u</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">feistelEncode</span><span class="p">(</span><span class="nx">index</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">keys</span> <span class="p">[</span><span class="nx">FEISTEL_ROUNDS</span><span class="p">]</span><span class="kt">uint</span><span class="p">)</span> <span class="kt">uint</span> <span class="p">{</span>
-    <span class="nx">left</span><span class="p">,</span> <span class="nx">right</span><span class="p">,</span> <span class="nx">rightMask</span><span class="p">,</span> <span class="nx">halfBits</span> <span class="o">:=</span> <span class="nf">commonSetup</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">key</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">keys</span> <span class="p">{</span>
-        <span class="nx">left</span><span class="p">,</span> <span class="nx">right</span> <span class="p">=</span> <span class="nx">right</span><span class="p">,</span> <span class="nx">left</span> <span class="p">^</span> <span class="nf">feistel</span><span class="p">(</span><span class="nx">right</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">rightMask</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span>  <span class="p">(</span><span class="nx">left</span> <span class="o">&lt;&lt;</span> <span class="nx">halfBits</span><span class="p">)</span> <span class="p">|</span> <span class="nx">right</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">commonSetup</span><span class="p">(</span><span class="nx">index</span> <span class="kt">uint</span><span class="p">)</span> <span class="p">(</span><span class="kt">uint</span><span class="p">,</span> <span class="kt">uint</span><span class="p">,</span> <span class="kt">uint</span><span class="p">,</span> <span class="kt">uint</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">numElements</span> <span class="o">:=</span> <span class="nx">GRAPH_SIZE</span> <span class="o">*</span> <span class="nx">EXPANSION_DEGREE</span>
-    <span class="nx">nextPow4</span> <span class="o">:=</span> <span class="mi">4</span><span class="p">;</span>
-    <span class="nx">halfBits</span> <span class="o">:=</span> <span class="mi">1</span>
-    <span class="nx">while</span> <span class="nx">nextPow4</span> <span class="p">&lt;</span> <span class="nx">numElements</span> <span class="p">{</span>
-        <span class="nx">nextPow4</span> <span class="o">*=</span> <span class="mi">4</span>
-        <span class="nx">halfBits</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="p">}</span>
-
-    <span class="nx">rightMask</span> <span class="p">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="nx">halfBits</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="nx">leftMask</span> <span class="p">=</span> <span class="nx">rightMask</span> <span class="o">&lt;&lt;</span> <span class="nx">halfBits</span>
-
-    <span class="nx">right</span> <span class="o">:=</span> <span class="nx">index</span> <span class="o">&amp;</span> <span class="nx">rightMask</span>
-    <span class="nx">left</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">index</span> <span class="o">&amp;</span> <span class="nx">leftMask</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="nx">halfBits</span>
-
-    <span class="k">return</span>  <span class="p">(</span><span class="nx">left</span><span class="p">,</span> <span class="nx">right</span><span class="p">,</span> <span class="nx">rightMask</span><span class="p">,</span> <span class="nx">halfBits</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Round function of the Feistel network: `F(Ri, Ki)`. Joins the `right`
-</span><span class="c1">// piece and the `key`, hashes it and returns the lower `uint32` part of
-</span><span class="c1">// the hash filtered trough the `rightMask`.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">feistel</span><span class="p">(</span><span class="nx">right</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">key</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">rightMask</span> <span class="kt">uint</span><span class="p">)</span> <span class="kt">uint</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">data</span> <span class="p">[</span><span class="nx">FEISTEL_BYTES</span><span class="p">]</span><span class="kt">uint</span>
-
-    <span class="kd">var</span> <span class="nx">r</span> <span class="kt">uint</span>
-    <span class="k">if</span> <span class="nx">FEISTEL_BYTES</span> <span class="o">&lt;=</span> <span class="mi">8</span> <span class="p">{</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span><span class="p">)</span>
-
-        <span class="nx">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
-
-        <span class="nx">hash</span> <span class="o">:=</span> <span class="nf">blake2b</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-
-        <span class="nx">r</span> <span class="p">=</span>   <span class="nx">hash</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">56</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">48</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">40</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">right</span><span class="p">)</span>
-
-        <span class="nx">data</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">56</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>  <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">48</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">40</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="nx">data</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span> <span class="p">=</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
-
-        <span class="nx">hash</span> <span class="o">:=</span> <span class="nf">blake2b</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-
-        <span class="nx">r</span> <span class="p">=</span>   <span class="nx">hash</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">56</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">48</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">40</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span>
-            <span class="p">|</span> <span class="nx">hash</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nx">r</span> <span class="o">&amp;</span> <span class="nx">rightMask</span>
-<span class="p">}</span></code></pre></div>
 <h1 id="replication">Replication</h1>
 
 <blockquote>
@@ -5153,48 +4950,12 @@ algorithm. Note that the indexes returned refer to labels from the <em>previous<
 </code></pre></li>
 </ul>
 
-<p>For each of <code>LAYERS</code> layers, <code>l</code>, perform one <strong><em>Layer Replication</em></strong>, yielding a replica, tree, and commitment (<code>CommR_&lt;l&gt;</code>) per layer:</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">let</span> <span class="nx">layer_replicas</span> <span class="p">=</span> <span class="p">[</span><span class="nx">LAYERS</span><span class="p">][</span><span class="nx">nodes</span><span class="p">]</span><span class="kt">uint8</span>
-<span class="nx">let</span> <span class="nx">layer_trees</span> <span class="p">=</span> <span class="p">[</span><span class="nx">LAYERS</span><span class="p">]</span><span class="nx">MerkleTree</span>
-<span class="nx">let</span> <span class="nx">CommRs</span> <span class="p">=</span> <span class="p">[]</span><span class="nx">commitment</span>
-
-<span class="nx">let</span> <span class="nx">layer</span> <span class="p">=</span> <span class="nx">data</span>
-<span class="k">for</span> <span class="nx">l</span> <span class="nx">in</span> <span class="mf">0.</span><span class="p">.</span><span class="nx">layers</span> <span class="p">{</span>
-    <span class="nx">let</span> <span class="nx">layer_replica</span> <span class="p">=</span> <span class="nf">ReplicateLayer</span><span class="p">(</span><span class="nx">layer</span><span class="p">)</span>
-    <span class="nx">layer_replicas</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">=</span> <span class="nx">layer_replica</span>
-    <span class="nx">CommRs</span><span class="p">[</span><span class="nx">l</span><span class="p">],</span> <span class="nx">layers_trees</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">=</span> <span class="nf">RepTree</span><span class="p">(</span><span class="nx">layer_replica</span><span class="p">)</span>
-    <span class="nx">layer</span> <span class="p">=</span> <span class="nx">layer_replica</span>
-<span class="p">}</span></code></pre></div>
-<p>The replicated data is the output of the final <strong><em>Layer Replication</em></strong>,<code>layer_replicas[layers-1]</code>.
-Set <code>CommRLast</code> to be  <code>CommR_&lt;Layers&gt;</code>.
-Set <code>CommRStar</code> to be <code>CommRHash(ReplicaID || CommR_0 || CommR_&lt;i&gt; || ... || CommRLast)</code>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">Replica</span> <span class="o">:=</span> <span class="nx">layer_replicas</span><span class="p">[</span><span class="nx">layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-<span class="nx">CommRLast</span> <span class="p">:</span><span class="o">-</span> <span class="nx">CommRs</span><span class="p">[</span><span class="nx">layers</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="nx">CommRStar</span> <span class="o">:=</span> <span class="nf">CommRHash</span><span class="p">(</span><span class="nx">replicaID</span><span class="p">,</span> <span class="o">...</span><span class="nx">CommRs</span><span class="p">)</span></code></pre></div>
 <h2 id="layer-labeling">Layer Labeling</h2>
 
 <p>TODO: Define <code>Graph</code>. We need to decide if this is an object we&rsquo;ll explicitly define or if its properties (e.g., <code>GRAPH_SIZE</code>) are just part of the replication parameters and all the functions just refer to the <em>same</em> graphs being manipulated across the entire replication process. (At the moment I&rsquo;ve avoided defining a <code>Graph</code> structure as in other specs I didn&rsquo;t see any object methods, just standalone functions.)</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">FIXME</span><span class="p">,</span> <span class="nx">move</span> <span class="nx">these</span> <span class="nx">to</span> <span class="p">.</span><span class="k">go</span> <span class="nx">files</span><span class="p">.</span>
 
-<span class="kd">func</span> <span class="nf">generateKey</span> <span class="p">(</span><span class="nx">replicaId</span> <span class="nx">Domain</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="nx">Domain</span><span class="p">)</span> <span class="p">[</span><span class="nx">LAYERS</span><span class="p">][</span><span class="nx">NODES</span><span class="p">]</span><span class="nx">Domain</span>
-<span class="kd">func</span> <span class="nf">encodeData</span> <span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="nx">Domain</span><span class="p">,</span> <span class="nx">key</span> <span class="p">[]</span><span class="nx">Domain</span><span class="p">)</span> <span class="p">[]</span><span class="nx">Domain</span>
-<span class="kd">func</span> <span class="nf">replicate</span> <span class="p">(</span><span class="nx">replicaId</span> <span class="nx">Domain</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="nx">Domain</span><span class="p">)</span> <span class="p">([]</span><span class="nx">Domain</span><span class="p">,</span> <span class="p">[]</span><span class="nx">Tree</span><span class="p">)</span>
+<p>// TODO: link to filproofs/algorithms</p>
 
-<span class="nx">fun</span> <span class="nf">seal</span> <span class="p">(</span><span class="nx">replicaId</span> <span class="nx">Domain</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="nx">Domain</span><span class="p">)</span> <span class="p">([]</span><span class="nx">Domain</span><span class="p">,</span>  <span class="err">????</span><span class="p">)</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">label</span><span class="p">(</span><span class="nx">replicaId</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">parents</span> <span class="p">[</span><span class="nx">PARENT_COUNT</span><span class="p">]</span><span class="kt">uint</span>
-    <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">GRAPH_SIZE</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">node</span> <span class="kt">uint</span> <span class="o">:=</span> <span class="nx">n</span>
-
-        <span class="nx">parents</span> <span class="p">=</span> <span class="nf">parents</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
-
-        <span class="nx">key</span> <span class="o">:=</span> <span class="nf">KDFHash</span><span class="p">(</span><span class="nx">replicaId</span><span class="p">,</span> <span class="nx">node</span><span class="p">,</span> <span class="nx">parents</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span>
-
-        <span class="nx">start</span> <span class="o">:=</span> <span class="nx">node</span> <span class="o">*</span> <span class="nx">NODE_SIZE</span>
-        <span class="nx">end</span> <span class="o">:=</span> <span class="nx">start</span> <span class="o">+</span> <span class="nx">NODE_SIZE</span><span class="p">;</span>
-
-        <span class="nx">data</span><span class="p">[</span><span class="nx">start</span><span class="p">:</span><span class="nx">end</span><span class="p">]</span> <span class="p">=</span> <span class="nx">key</span>
-    <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
 <h1 id="proof-generation">Proof Generation</h1>
 
 <p>Overview:</p>
@@ -5207,90 +4968,22 @@ Set <code>CommRStar</code> to be <code>CommRHash(ReplicaID || CommR_0 || CommR_&
 
 <p>TODO: write a single algorithm which includes the spec below</p>
 
-<h2 id="challenge-derivation">Challenge Derivation</h2>
-
-<p>TODO: define <code>Domain</code> (for practical purposes a <code>uint</code>) and <code>LayerChallenges</code> (or find existing definition).</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// TODO: we should replace the word commitment with the word seed, this will be more interactive porep friendly
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">DeriveChallenges</span><span class="p">(</span><span class="nx">challenges</span> <span class="nx">LayerChallenges</span><span class="p">,</span> <span class="nx">layer</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">leaves</span> <span class="kt">uint</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">RandomSeed</span><span class="p">,</span> <span class="nx">k</span> <span class="kt">uint</span><span class="p">)</span> <span class="p">[]</span><span class="kt">uint</span> <span class="p">{</span>
-
-    <span class="nx">n</span> <span class="o">:=</span> <span class="nx">challenges</span><span class="p">.</span><span class="nf">ChallengesForLayer</span><span class="p">(</span><span class="nx">layer</span><span class="p">)</span>
-    <span class="kd">var</span> <span class="nx">derivedChallenges</span> <span class="p">[</span><span class="nx">n</span><span class="p">]</span><span class="kt">uint</span>
-    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">bytes</span> <span class="o">:=</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">ranodomness</span><span class="p">)</span>
-        <span class="nx">bytes</span><span class="p">.</span><span class="nb">append</span><span class="p">(</span><span class="nx">layer</span><span class="p">);</span>
-        <span class="nx">bytes</span><span class="p">.</span><span class="nb">append</span><span class="p">(</span><span class="nf">toLittleEndian</span><span class="p">(</span><span class="nx">n</span> <span class="o">*</span> <span class="nx">k</span> <span class="o">+</span> <span class="nx">i</span><span class="p">))</span>
-
-        <span class="c1">// For now, we cannot try to prove the first or last node, so make
-</span><span class="c1"></span>        <span class="c1">// sure the challenge can never be 0 or leaves - 1.
-</span><span class="c1"></span>        <span class="nx">big_mod_challenge</span> <span class="o">:=</span> <span class="nf">blake2s</span><span class="p">(</span><span class="nx">bytes</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="nx">leaves</span> <span class="o">-</span> <span class="mi">2</span><span class="p">);</span>
-        <span class="nx">derivedChallenges</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">big_mod_challenge</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
 <h2 id="challenge-generation">Challenge Generation</h2>
 
-<p>TODO: we may need to remove this section.</p>
+<p>TODO: Link to filproofs/algorithms</p>
 
 <p>Calculate <code>LAYER_CHALLENGES : [LAYERS]uint</code>: Number of challenges per layer. (This will be passed to the SDR circuit proof.)</p>
 
 <p>Derive challenges for each layer (call <code>DeriveChallenges()</code>).</p>
 
 <h2 id="witness-generation">Witness Generation</h2>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="nx">let</span> <span class="nx">layer_proofs</span> <span class="p">=</span> <span class="p">[]</span>
 
-<span class="k">for</span> <span class="nx">l</span> <span class="nx">in</span> <span class="mf">0.</span><span class="p">.</span><span class="nx">LAYERS</span> <span class="p">{</span>
-  <span class="nx">let</span> <span class="nx">replica</span> <span class="p">=</span> <span class="nx">layer_replicas</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span>
-  <span class="nx">let</span> <span class="nx">replica_tree</span> <span class="p">=</span> <span class="nx">layer_trees</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span>
-
-  <span class="k">for</span> <span class="nx">c</span> <span class="nx">in</span> <span class="nf">derive_challenges</span><span class="p">(</span><span class="nx">LAYER_CHALLENGES</span><span class="p">[</span><span class="nx">l</span><span class="p">])</span>
-    <span class="nx">data_inclusion_proof</span> <span class="p">=</span> <span class="nf">inclusion_proof</span><span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="nx">c</span><span class="p">],</span> <span class="nx">DataTree</span><span class="p">,</span> <span class="nx">CommR_</span><span class="p">&lt;</span><span class="nx">l</span><span class="p">&gt;)</span>
-    <span class="nx">replica_inclusion_proof</span> <span class="p">=</span> <span class="nf">inclusion_proof</span><span class="p">(</span><span class="nx">replica</span><span class="p">[</span><span class="nx">c</span><span class="p">],</span> <span class="nx">replica_tree</span><span class="p">,</span> <span class="nx">CommR_</span><span class="p">&lt;</span><span class="nx">l</span><span class="o">+</span><span class="mi">1</span><span class="p">&gt;)</span> <span class="o">||</span> <span class="nx">FAIL</span><span class="c1">// Prove the replica. TODO explain replica[].
-</span><span class="c1"></span>
-    <span class="c1">// *** let kdf_preimage = [replica_id] ***
-</span><span class="c1"></span>    <span class="nx">let</span> <span class="nx">parent_replica_inclusion_proofs</span> <span class="p">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="nx">p</span> <span class="nx">in</span> <span class="nf">parents</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// *** kdf_preimage.push(p)***
-</span><span class="c1"></span>      <span class="nx">parent_replica_inclusion_proofs</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nf">inclusion_proof</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span> <span class="nx">CommR_</span><span class="p">&lt;</span><span class="nx">l</span><span class="o">+</span><span class="mi">1</span><span class="p">&gt;))</span>
-    <span class="p">}</span>
-    <span class="c1">// *** let key = kdf(kdf_preimage); ***
-</span><span class="c1"></span>
-    <span class="c1">// *** encode(key, data[c]) == replica[c]
-</span><span class="c1"></span>    <span class="c1">// *** We don&#39;t actually need to encode in the proof. ***
-</span><span class="c1"></span>    <span class="c1">// TODO: move this ***stuff*** to verification.
-</span><span class="c1"></span>
-    <span class="nx">layer_proof</span><span class="p">.</span><span class="nf">push</span><span class="p">((</span><span class="nx">data_inclusion_proof</span><span class="p">,</span> <span class="nx">replication_inclusion_proof</span><span class="p">,</span> <span class="nx">parent_replica_inclusion_proofs</span><span class="p">))</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">return</span> <span class="nx">layer_proofs</span><span class="p">,</span> <span class="nx">CommRstar</span><span class="p">,</span> <span class="nx">CommRLast</span></code></pre></div>
-<p>TODO: reconcile outputs of non-circuit proof with inputs to circuit proof.</p>
+<p>TODO: link to filproofs/algorithms</p>
 
 <h2 id="layer-challenge-counts">Layer Challenge Counts</h2>
 
-<p>TODO: define <code>Challenge</code> (or find existing definition)</p>
-
 <p>TODO: we should just list current parameters and show this as a calculation for correctness, this should not mandatory to implement.</p>
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">ChallengesForLayer</span><span class="p">(</span><span class="nx">challenge</span> <span class="nx">Challenge</span><span class="p">,</span> <span class="nx">layer</span> <span class="kt">uint</span><span class="p">)</span> <span class="kt">uint</span> <span class="p">{</span>
 
-    <span class="k">switch</span> <span class="nx">challenge</span><span class="p">.</span><span class="nx">Type</span> <span class="p">{</span>
-      <span class="c1">// TODO: remove ambiguity, there should not be a &#34;fixed&#34; case
-</span><span class="c1"></span>        <span class="k">case</span> <span class="nx">Fixed</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nx">challenge</span><span class="p">.</span><span class="nx">Count</span>
-        <span class="k">case</span> <span class="nx">Tapered</span><span class="p">:</span>
-      <span class="c1">// FIXME
-</span><span class="c1"></span>            <span class="nf">assert</span><span class="p">(</span><span class="nx">layer</span> <span class="p">&lt;</span> <span class="nx">LAYERS</span><span class="p">)</span>
-            <span class="nx">l</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">LAYERS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="nx">layer</span>
-            <span class="nx">r</span> <span class="o">:=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="nx">TAPER</span><span class="p">;</span>
-            <span class="nx">t</span> <span class="o">:=</span> <span class="nf">min</span><span class="p">(</span><span class="nx">l</span><span class="p">,</span> <span class="nx">TAPER_LAYERS</span><span class="p">)</span>
-
-            <span class="nx">totalTaper</span> <span class="o">:=</span> <span class="nf">pow</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span> <span class="nx">t</span><span class="p">)</span>
-
-            <span class="nx">calculated</span> <span class="o">:=</span> <span class="nf">ceil</span><span class="p">(</span><span class="nx">totalTaper</span> <span class="o">*</span> <span class="nx">challenge</span><span class="p">.</span><span class="nx">count</span><span class="p">)</span>
-
-            <span class="c1">// Although implied by the call to `ceil()` above, be explicit
-</span><span class="c1"></span>            <span class="c1">// that a layer cannot contain 0 challenges.
-</span><span class="c1"></span>            <span class="nf">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">calculated</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
 </article>
 
       
@@ -5325,8 +5018,6 @@ Set <code>CommRStar</code> to be <code>CommRHash(ReplicaID || CommR_0 || CommR_&
 <li><a href="#inputs">Inputs</a></li>
 <li><a href="#outputs">Outputs</a></li>
 <li><a href="#algorithm">Algorithm</a></li>
-<li><a href="#pseudocode">Pseudocode</a></li>
-<li><a href="#tests">Tests</a></li>
 <li><a href="#time-space-tradeoff">Time-space tradeoff</a></li>
 </ul></li>
 <li><a href="#bucketsample-depth-robust-graphs-algorithm"><code>BucketSample</code>: Depth Robust Graphs algorithm</a></li>
@@ -5343,7 +5034,6 @@ Set <code>CommRStar</code> to be <code>CommRHash(ReplicaID || CommR_0 || CommR_&
 </ul></li>
 <li><a href="#proof-generation">Proof Generation</a>
 <ul>
-<li><a href="#challenge-derivation">Challenge Derivation</a></li>
 <li><a href="#challenge-generation">Challenge Generation</a></li>
 <li><a href="#witness-generation">Witness Generation</a></li>
 <li><a href="#layer-challenge-counts">Layer Challenge Counts</a></li>

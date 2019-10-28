@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Block Syncer on Filecoin Spec</title>
+    <title>ChainSync - synchronizing the Blockchain on Filecoin Spec</title>
     <link>/docs/systems/filecoin_blockchain/chainsync/</link>
-    <description>Recent content in Block Syncer on Filecoin Spec</description>
+    <description>Recent content in ChainSync - synchronizing the Blockchain on Filecoin Spec</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     

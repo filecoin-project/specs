@@ -1,0 +1,16 @@
+type PoStRandomness Bytes
+
+// Can move to a new posting.id if we think worth it.
+type PostCfg struct {
+    SectorSize      UInt
+    SubsectorCount  UInt
+    Partitions      UInt
+}
+
+type PoStProof struct {//<curve, system> {
+    Config      PostProofConfig
+    ProofBytes  Bytes
+}
+
+type PostProofConfig struct {// TODO
+}
