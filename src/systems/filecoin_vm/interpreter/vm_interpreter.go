@@ -75,14 +75,14 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	// deduct maximum expenditure gas funds first
 	compTree = _withTransferFundsAssert(compTree, message.From(), addr.BurntFundsActorAddr, maxGasCost)
 
-	rt := vmr.Runtime_Make(
+	rt := vmr.VMContext_Make(
 		compTree,
 		message.From(),
 		actor.TokenAmount(0),
 		message.GasLimit(),
 	)
 
-	sendRet, sendRetStateTree := rt.Impl().SendToplevelFromInterpreter(
+	sendRet, sendRetStateTree := rt.SendToplevelFromInterpreter(
 		msg.InvocInput_Make(
 			message.To(),
 			message.Method(),

@@ -29,32 +29,71 @@ type ActorCode interface {
 	InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput
 }
 
+type ActorStateHandle struct {
+	_initValue *ActorSubstateCID
+	_rt        *VMContext
+}
+
+func (h *ActorStateHandle) UpdateRelease(newStateCID ActorSubstateCID) {
+	h._rt._updateReleaseActorState(newStateCID)
+}
+
+func (h *ActorStateHandle) Release(checkStateCID ActorSubstateCID) {
+	h._rt._releaseActorState(checkStateCID)
+}
+
+func (h *ActorStateHandle) Take() ActorSubstateCID {
+	if h._initValue == nil {
+		h._rt._apiError("Must call Take() only once on actor substate object")
+	}
+	ret := *h._initValue
+	h._initValue = nil
+	return ret
+}
+
+// Concrete instantiation of the Runtime interface. This should be instantiated by the
+// interpreter once per actor method invocation, and responds to that method's Runtime
+// API calls.
+type VMContext struct {
+	_globalStateInit        st.StateTree
+	_globalStatePending     st.StateTree
+	_running                bool
+	_actorAddress           addr.Address
+	_actorStateAcquired     bool
+	_actorStateAcquiredInit actor.ActorSubstateCID
+
+	_valueSupplied    actor.TokenAmount
+	_gasRemaining     msg.GasAmount
+	_numValidateCalls int
+	_output           msg.InvocOutput
+}
+
 const (
 	Reserved_NoopMethod        actor.MethodNum = 0
 	Reserved_CronMethod        actor.MethodNum = 1
 	Reserved_ConstructorMethod actor.MethodNum = 2
 )
 
-func Runtime_Make(
+func VMContext_Make(
 	globalState st.StateTree,
 	actorAddress addr.Address,
 	valueSupplied actor.TokenAmount,
-	gasRemaining msg.GasAmount) Runtime {
+	gasRemaining msg.GasAmount) *VMContext {
 
 	actorStateInit := globalState.GetActor(actorAddress).State()
 
-	return &Runtime_I{
-		_globalStateInit_:        globalState,
-		_globalStatePending_:     globalState,
-		_running_:                false,
-		_actorAddress_:           actorAddress,
-		_actorStateAcquired_:     false,
-		_actorStateAcquiredInit_: actorStateInit.State(),
+	return &VMContext{
+		_globalStateInit:        globalState,
+		_globalStatePending:     globalState,
+		_running:                false,
+		_actorAddress:           actorAddress,
+		_actorStateAcquired:     false,
+		_actorStateAcquiredInit: actorStateInit.State(),
 
-		_valueSupplied_:    valueSupplied,
-		_gasRemaining_:     gasRemaining,
-		_numValidateCalls_: 0,
-		_output_:           nil,
+		_valueSupplied:    valueSupplied,
+		_gasRemaining:     gasRemaining,
+		_numValidateCalls: 0,
+		_output:           nil,
 	}
 }
 
@@ -67,88 +106,71 @@ func _generateActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Ad
 	panic("TODO")
 }
 
-func (rt *Runtime_I) CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
+func (rt *VMContext) CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
 	rt.ValidateCallerIs(addr.InitActorAddr)
 	// TODO: _generateActorAddress
 	// TODO: finish
 	panic("TODO")
 }
 
-func (h *ActorStateHandle_I) UpdateRelease(newStateCID ActorSubstateCID) {
-	h._rt().Impl()._updateReleaseActorState(newStateCID)
-}
-
-func (h *ActorStateHandle_I) Release(checkStateCID ActorSubstateCID) {
-	h._rt().Impl()._releaseActorState(checkStateCID)
-}
-
-func (h *ActorStateHandle_I) Take() ActorSubstateCID {
-	if h._initValue().Which() == ActorStateHandle__initValue_Case_None {
-		h._rt().Impl()._apiError("Must call Take() only once on actor substate object")
-	}
-	ret := ActorSubstateCID(h._initValue().As_Some())
-	h._initValue_ = ActorStateHandle__initValue_Make_None(&ActorStateHandle__initValue_None_I{})
-	return ret
-}
-
-func (rt *Runtime_I) _updateReleaseActorState(newStateCID ActorSubstateCID) {
+func (rt *VMContext) _updateReleaseActorState(newStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
-	newGlobalStatePending, err := rt._globalStatePending().Impl().WithActorState(rt._actorAddress(), newStateCID)
+	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorState(rt._actorAddress, newStateCID)
 	if err != nil {
 		panic("Error in runtime implementation: failed to update actor state")
 	}
-	rt._globalStatePending_ = newGlobalStatePending
-	rt._actorStateAcquired_ = false
+	rt._globalStatePending = newGlobalStatePending
+	rt._actorStateAcquired = false
 }
 
-func (rt *Runtime_I) _releaseActorState(checkStateCID ActorSubstateCID) {
+func (rt *VMContext) _releaseActorState(checkStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
 
-	prevState := rt._globalStatePending().GetActor(rt._actorAddress()).State()
+	prevState := rt._globalStatePending.GetActor(rt._actorAddress).State()
 	prevStateCID := prevState.State()
 	if !ActorSubstateCID_Equals(prevStateCID, checkStateCID) {
 		rt.Abort("State CID differs upon release call")
 	}
 
-	rt._actorStateAcquired_ = false
+	rt._actorStateAcquired = false
 }
 
-func (rt *Runtime_I) Assert(cond bool) Runtime_Assert_FunRet {
+func (rt *VMContext) Assert(cond bool) Runtime_Assert_FunRet {
 	if !cond {
 		rt.Abort("Runtime check failed")
 	}
 	return &Runtime_Assert_FunRet_I{}
 }
 
-func (rt *Runtime_I) _checkActorStateAcquired() {
-	if !rt._running() {
+func (rt *VMContext) _checkActorStateAcquired() {
+	if !rt._running {
 		panic("Error in runtime implementation: actor interface invoked without running actor")
 	}
 
-	if !rt._actorStateAcquired() {
+	if !rt._actorStateAcquired {
 		rt.Abort("Actor state not acquired")
 	}
 }
 
-func (rt *Runtime_I) Abort(errMsg string) Runtime_Abort_FunRet {
+func (rt *VMContext) Abort(errMsg string) Runtime_Abort_FunRet {
 	rt._throwErrorFull(exitcode.SystemError(exitcode.MethodAbort), errMsg)
 	return &Runtime_Abort_FunRet_I{}
 }
 
-func (rt *Runtime_I) Caller() addr.Address {
+func (rt *VMContext) Caller() addr.Address {
 	panic("TODO")
 }
 
-func (rt *Runtime_I) ValidateCallerMatches(callerExpectedPattern CallerPattern) Runtime_ValidateCallerMatches_FunRet {
+func (rt *VMContext) ValidateCallerMatches(callerExpectedPattern CallerPattern) Runtime_ValidateCallerMatches_FunRet {
 	rt._checkRunning()
 	rt._checkNumValidateCalls(0)
 	caller := rt.Caller()
 	if !callerExpectedPattern.Matches(caller) {
 		rt.Abort("Method invoked by incorrect caller")
 	}
-	rt._numValidateCalls_ += 1
+	rt._numValidateCalls += 1
 	return &Runtime_ValidateCallerMatches_FunRet_I{}
 }
 
@@ -164,95 +186,95 @@ func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
 	}
 }
 
-func (rt *Runtime_I) ValidateCallerIs(callerExpected addr.Address) Runtime_ValidateCallerIs_FunRet {
+func (rt *VMContext) ValidateCallerIs(callerExpected addr.Address) Runtime_ValidateCallerIs_FunRet {
 	rt.ValidateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
 	return &Runtime_ValidateCallerIs_FunRet_I{}
 }
 
-func (rt *Runtime_I) _checkNumValidateCalls(x int) {
-	if rt._numValidateCalls() != x {
+func (rt *VMContext) _checkNumValidateCalls(x int) {
+	if rt._numValidateCalls != x {
 		rt.Abort("Method must validate caller identity exactly once")
 	}
 }
 
-func (rt *Runtime_I) _checkRunning() {
-	if !rt._running() {
+func (rt *VMContext) _checkRunning() {
+	if !rt._running {
 		panic("Internal runtime error: actor API called with no actor code running")
 	}
 }
-func (rt *Runtime_I) SuccessReturn() InvocOutput {
+func (rt *VMContext) SuccessReturn() InvocOutput {
 	return msg.InvocOutput_Make(exitcode.OK(), nil)
 }
 
-func (rt *Runtime_I) ValueReturn(value util.Bytes) InvocOutput {
+func (rt *VMContext) ValueReturn(value util.Bytes) InvocOutput {
 	return msg.InvocOutput_Make(exitcode.OK(), value)
 }
 
-func (rt *Runtime_I) ErrorReturn(exitCode ExitCode) InvocOutput {
+func (rt *VMContext) ErrorReturn(exitCode ExitCode) InvocOutput {
 	exitCode = exitcode.EnsureErrorCode(exitCode)
 	return msg.InvocOutput_Make(exitCode, nil)
 }
 
-func (rt *Runtime_I) _throwError(exitCode ExitCode) {
+func (rt *VMContext) _throwError(exitCode ExitCode) {
 	rt._throwErrorFull(exitCode, "")
 }
 
-func (rt *Runtime_I) _throwErrorFull(exitCode ExitCode, errMsg string) {
+func (rt *VMContext) _throwErrorFull(exitCode ExitCode, errMsg string) {
 	panic(exitcode.RuntimeError_Make(exitCode, errMsg))
 }
 
-func (rt *Runtime_I) _apiError(errMsg string) {
+func (rt *VMContext) _apiError(errMsg string) {
 	rt._throwErrorFull(exitcode.SystemError(exitcode.RuntimeAPIError), errMsg)
 }
 
-func (rt *Runtime_I) _checkStateLock(expected bool) {
-	if rt._actorStateAcquired() != expected {
+func (rt *VMContext) _checkStateLock(expected bool) {
+	if rt._actorStateAcquired != expected {
 		rt._apiError("State update and message send blocks must be disjoint")
 	}
 }
 
-func (rt *Runtime_I) _checkGasRemaining() {
-	if rt._gasRemaining().LessThan(msg.GasAmount_Zero()) {
+func (rt *VMContext) _checkGasRemaining() {
+	if rt._gasRemaining.LessThan(msg.GasAmount_Zero()) {
 		rt._throwError(exitcode.SystemError(exitcode.OutOfGas))
 	}
 }
 
-func (rt *Runtime_I) _deductGasRemaining(x msg.GasAmount) {
+func (rt *VMContext) _deductGasRemaining(x msg.GasAmount) {
 	// TODO: check x >= 0
 	rt._checkGasRemaining()
-	rt._gasRemaining_ = rt._gasRemaining().Subtract(x)
+	rt._gasRemaining = rt._gasRemaining.Subtract(x)
 	rt._checkGasRemaining()
 }
 
-func (rt *Runtime_I) _refundGasRemaining(x msg.GasAmount) {
+func (rt *VMContext) _refundGasRemaining(x msg.GasAmount) {
 	// TODO: check x >= 0
 	rt._checkGasRemaining()
-	rt._gasRemaining_ = rt._gasRemaining().Add(x)
+	rt._gasRemaining = rt._gasRemaining.Add(x)
 	rt._checkGasRemaining()
 }
 
-func (rt *Runtime_I) _transferFunds(from addr.Address, to addr.Address, amount actor.TokenAmount) error {
+func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount actor.TokenAmount) error {
 	rt._checkRunning()
 	rt._checkStateLock(false)
 
-	newGlobalStatePending, err := rt._globalStatePending().Impl().WithFundsTransfer(from, to, amount)
+	newGlobalStatePending, err := rt._globalStatePending.Impl().WithFundsTransfer(from, to, amount)
 	if err != nil {
 		return err
 	}
 
-	rt._globalStatePending_ = newGlobalStatePending
+	rt._globalStatePending = newGlobalStatePending
 	return nil
 }
 
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
-func (rt *Runtime_I) SendToplevelFromInterpreter(input InvocInput, ignoreErrors bool) (
+func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput, ignoreErrors bool) (
 	msg.MessageReceipt, st.StateTree) {
 
-	rt._running_ = true
+	rt._running = true
 	ret := rt._sendInternal(input, ignoreErrors)
-	rt._running_ = false
-	return ret, rt._globalStatePending()
+	rt._running = false
+	return ret, rt._globalStatePending
 }
 
 func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
@@ -272,7 +294,7 @@ func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
 }
 
 func _invokeMethodInternal(
-	rt *Runtime_I,
+	rt *VMContext,
 	actorCode ActorCode,
 	method actor.MethodNum,
 	params actor.MethodParams) (ret InvocOutput, gasUsed msg.GasAmount) {
@@ -283,14 +305,14 @@ func _invokeMethodInternal(
 		return
 	}
 
-	rt._running_ = true
+	rt._running = true
 	ret = _catchRuntimeErrors(func() InvocOutput {
 		methodOutput := actorCode.InvokeMethod(rt, method, params)
 		rt._checkStateLock(false)
 		rt._checkNumValidateCalls(1)
 		return methodOutput
 	})
-	rt._running_ = false
+	rt._running = false
 
 	// TODO: Update gasUsed
 	TODO()
@@ -298,11 +320,11 @@ func _invokeMethodInternal(
 	return
 }
 
-func (rtOuter *Runtime_I) _sendInternal(input InvocInput, ignoreErrors bool) msg.MessageReceipt {
+func (rtOuter *VMContext) _sendInternal(input InvocInput, ignoreErrors bool) msg.MessageReceipt {
 	rtOuter._checkRunning()
 	rtOuter._checkStateLock(false)
 
-	toActor := rtOuter._globalStatePending().GetActor(input.To()).State()
+	toActor := rtOuter._globalStatePending.GetActor(input.To()).State()
 
 	toActorCode, err := loadActorCode(toActor.CodeCID())
 	if err != nil {
@@ -315,20 +337,20 @@ func (rtOuter *Runtime_I) _sendInternal(input InvocInput, ignoreErrors bool) msg
 	// TODO: gasUsed may be larger than toActorMethodGasBound if toActor itself makes sub-calls.
 	// To prevent this, we would need to calculate the gas bounds recursively.
 
-	err = rtOuter._transferFunds(rtOuter._actorAddress(), input.To(), input.Value())
+	err = rtOuter._transferFunds(rtOuter._actorAddress, input.To(), input.Value())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds))
 	}
 
-	rtInner := Runtime_Make(
-		rtOuter._globalStatePending(),
+	rtInner := VMContext_Make(
+		rtOuter._globalStatePending,
 		input.To(),
 		input.Value(),
-		rtOuter._gasRemaining(),
+		rtOuter._gasRemaining,
 	)
 
 	invocOutput, gasUsed := _invokeMethodInternal(
-		rtInner.Impl(),
+		rtInner,
 		toActorCode,
 		input.Method(),
 		input.Params(),
@@ -342,42 +364,42 @@ func (rtOuter *Runtime_I) _sendInternal(input InvocInput, ignoreErrors bool) msg
 	}
 
 	if invocOutput.ExitCode().AllowsStateUpdate() {
-		rtOuter._globalStatePending_ = rtInner._globalStatePending()
+		rtOuter._globalStatePending = rtInner._globalStatePending
 	}
 
 	return msg.MessageReceipt_Make(invocOutput, gasUsed)
 }
 
-func (rt *Runtime_I) Send(input InvocInput) msg.MessageReceipt {
+func (rt *VMContext) Send(input InvocInput) msg.MessageReceipt {
 	return rt._sendInternal(input, false)
 }
 
-func (rt *Runtime_I) SendAllowingErrors(input InvocInput) msg.MessageReceipt {
+func (rt *VMContext) SendAllowingErrors(input InvocInput) msg.MessageReceipt {
 	return rt._sendInternal(input, true)
 }
 
-func (rt *Runtime_I) ValueSupplied() actor.TokenAmount {
-	return rt._valueSupplied()
+func (rt *VMContext) ValueSupplied() actor.TokenAmount {
+	return rt._valueSupplied
 }
 
-func (rt *Runtime_I) Randomness(e block.ChainEpoch, offset uint64) Randomness {
+func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) Randomness {
 	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
 	// TODO: finish
 	panic("TODO")
 }
 
-func (rt *Runtime_I) IpldPut(x ipld.Object) ipld.CID {
+func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
 	panic("TODO")
 }
 
-func (rt *Runtime_I) IpldGet(c ipld.CID) Runtime_IpldGet_FunRet {
+func (rt *VMContext) IpldGet(c ipld.CID) Runtime_IpldGet_FunRet {
 	panic("TODO")
 }
 
-func (rt *Runtime_I) CurrEpoch() block.ChainEpoch {
+func (rt *VMContext) CurrEpoch() block.ChainEpoch {
 	panic("TODO")
 }
 
-func (rt *Runtime_I) AcquireState() ActorStateHandle {
+func (rt *VMContext) AcquireState() ActorStateHandle {
 	panic("TODO")
 }
