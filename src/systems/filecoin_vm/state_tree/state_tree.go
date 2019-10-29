@@ -45,6 +45,10 @@ func (st *StateTree_I) WithNewAccountActor(a addr.Address) (StateTree, actor.Act
 	panic("TODO")
 }
 
+func (st *StateTree_I) WithIncrementedCallSeqNum(a addr.Address) (StateTree, error) {
+	panic("TODO")
+}
+
 /*
 TODO: finish
 

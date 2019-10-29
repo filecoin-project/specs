@@ -261,10 +261,6 @@ func (rt *Runtime_I) _transferFunds(from addr.Address, to addr.Address, amount a
 	return nil
 }
 
-func (rt *Runtime_I) _incrementCallSeqNum(a addr.Address) {
-	panic("TODO")
-}
-
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
 func (rt *Runtime_I) SendToplevelFromInterpreter(input InvocInput, ignoreErrors bool) (
@@ -337,8 +333,6 @@ func (rtOuter *Runtime_I) _sendInternal(input InvocInput, ignoreErrors bool) msg
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds))
 	}
-
-	rtOuter._incrementCallSeqNum(input.To())
 
 	rtInner := Runtime_Make(
 		rtOuter._globalStatePending(),

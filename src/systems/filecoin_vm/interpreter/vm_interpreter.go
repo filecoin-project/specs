@@ -30,6 +30,7 @@ func _applyError(errCode exitcode.SystemErrorCode) msg.MessageReceipt {
 }
 
 func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {
+	// TODO: assert amount nonnegative
 	retTree, err := tree.Impl().WithFundsTransfer(from, to, amount)
 	if err != nil {
 		panic("Interpreter error: insufficient funds (or transfer error) despite checks")
@@ -44,6 +45,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	compTree := inTree
 	var outTree st.StateTree
 	var toActor actor.Actor
+	var err error
 
 	fromActor := compTree.GetActor(message.From())
 	if fromActor == nil {
@@ -99,7 +101,6 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 			vmr.BurntFundsActorAddr,
 			gasToFIL(sendRet.GasUsed(), message.GasPrice()),
 		)
-		TODO() // TODO: still increment fromActor sequence number on failure?
 	} else {
 		// success -- refund unused gas
 		outTree = sendRetStateTree
@@ -111,6 +112,12 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 			message.From(),
 			gasToFIL(refundGas, message.GasPrice()),
 		)
+	}
+
+	outTree, err = outTree.Impl().WithIncrementedCallSeqNum(message.To())
+	if err != nil {
+		// TODO: if actor deletion is possible at some point, may need to allow this case
+		panic("Internal interpreter error: failed to increment call sequence number")
 	}
 
 	// reward miner gas fees
