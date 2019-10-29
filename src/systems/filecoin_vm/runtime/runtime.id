@@ -47,7 +47,7 @@ type Runtime struct {
     Abort(string)
 
     // Check that the given condition is true (and call Abort if not).
-    Check(bool)
+    Assert(bool)
 
     ValueSupplied()                                   actor.TokenAmount
 

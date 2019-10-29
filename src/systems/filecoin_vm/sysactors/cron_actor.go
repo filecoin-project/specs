@@ -31,7 +31,7 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) {
 func (a *CronActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) {
 	switch method {
 	case vmr.Reserved_CronMethod:
-		rt.Check(len(params) == 0)
+		rt.Assert(len(params) == 0)
 		a.EpochTick(rt)
 	default:
 		rt.ReturnError(exitcode.SystemError(exitcode.InvalidMethod))

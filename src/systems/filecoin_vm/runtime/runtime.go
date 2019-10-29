@@ -114,11 +114,11 @@ func (rt *Runtime_I) _releaseActorState(checkStateCID ActorSubstateCID) {
 	rt._actorStateAcquired_ = false
 }
 
-func (rt *Runtime_I) Check(cond bool) Runtime_Check_FunRet {
+func (rt *Runtime_I) Assert(cond bool) Runtime_Assert_FunRet {
 	if !cond {
 		rt.Abort("Runtime check failed")
 	}
-	return &Runtime_Check_FunRet_I{}
+	return &Runtime_Assert_FunRet_I{}
 }
 
 func (rt *Runtime_I) _checkActorStateAcquired() {
