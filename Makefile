@@ -150,8 +150,16 @@ watch-hugo: .PHONY
 clean-hugo: .PHONY
 	rm -rf hugo/content/docs
 
-orient: .PHONY
+all-orient: .PHONY
 	bin/build-spec-orient.sh
+
+ORIENT_FILES=$(shell find src -name '*.orient')
+ORIENT_INPUT_FILES= $(patsubst %.orient, %.json, $(ORIENT_FILES))
+ORIENT_OUTPUT_FILES=$(patsubst src/%.orient, build/%.orient.json, $(ORIENT_FILES))
+orient: $(ORIENT_OUTPUT_FILES)
+
+$(ORIENT_OUTPUT_FILES): build/%.orient.json: src/%.orient src/%.json
+	bin/build-spec-orient.sh $+ $@
 
 # convert orgmode to markdown
 ORG_FILES=$(shell find src | grep .org)
