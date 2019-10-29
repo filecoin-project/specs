@@ -4,6 +4,16 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+
+////////////////////////////////////////////////////////////////////////////////
+// Boilerplate
+////////////////////////////////////////////////////////////////////////////////
+type InvocOutput = msg.InvocOutput
+type Runtime = vmr.Runtime
+
+////////////////////////////////////////////////////////////////////////////////
 
 func (sma *StorageMarketActor_I) WithdrawBalance(balance actor.TokenAmount) {
 	var msgSender addr.Address // TODO replace this from VM runtime
@@ -154,4 +164,8 @@ func (sma *StorageMarketActor_I) GetLastDealExpirationFromDealIDs(dealIDs []deal
 	}
 
 	return lastDealExpiration
+}
+
+func (a *StorageMarketActor_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
+	panic("TODO")
 }

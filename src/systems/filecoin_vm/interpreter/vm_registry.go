@@ -3,6 +3,8 @@ package interpreter
 import "errors"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 import sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
@@ -63,6 +65,8 @@ func _registerBuiltinActors() {
 
 	RegisterActor(InitActorCodeCID, &sysactors.InitActorCode_I{})
 	RegisterActor(CronActorCodeCID, cron)
+	RegisterActor(StoragePowerActorCodeCID, &spc.StoragePowerActor_I{})
+	RegisterActor(StorageMarketActorCodeCID, &market.StorageMarketActor_I{})
 
 	// wire in CRON actions.
 	// TODO: there's probably a better place to put this, but for now, do it here.
