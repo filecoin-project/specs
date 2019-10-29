@@ -5,7 +5,6 @@
         "drg_layers": 1,
         "drg_d": 0.003,
         "spacegap": 0.6,
-        "hashing_amax": 3,
         "node_size": 32,
         "challenges": 1250,
         "rig_size": 1,
@@ -22,7 +21,13 @@
     [
         {
             "hash_function": "SHA256",
+            "hashing_amax": 3,
             "hashing_time": 0.0000000128
+        },
+        {
+            "hash_function": "BLAKE2S",
+            "hashing_amax": 12,
+            "hashing_time": 0.0000000314
         }
     ]
 ]
