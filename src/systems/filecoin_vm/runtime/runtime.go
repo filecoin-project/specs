@@ -67,7 +67,7 @@ func _generateActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Ad
 }
 
 func (rt *Runtime_I) CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
-	rt.ValidateCallerIs(InitActorAddr)
+	rt.ValidateCallerIs(addr.InitActorAddr)
 	// TODO: _generateActorAddress
 	// TODO: finish
 	panic("TODO")

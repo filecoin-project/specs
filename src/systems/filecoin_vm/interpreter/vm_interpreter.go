@@ -73,7 +73,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	}
 
 	// deduct maximum expenditure gas funds first
-	compTree = _withTransferFundsAssert(compTree, message.From(), vmr.BurntFundsActorAddr, maxGasCost)
+	compTree = _withTransferFundsAssert(compTree, message.From(), addr.BurntFundsActorAddr, maxGasCost)
 
 	rt := vmr.Runtime_Make(
 		compTree,
@@ -98,7 +98,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 		outTree = _withTransferFundsAssert(
 			outTree,
 			message.From(),
-			vmr.BurntFundsActorAddr,
+			addr.BurntFundsActorAddr,
 			gasToFIL(sendRet.GasUsed(), message.GasPrice()),
 		)
 	} else {
@@ -108,7 +108,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 		TODO() // TODO: assert refundGas is nonnegative
 		outTree = _withTransferFundsAssert(
 			outTree,
-			vmr.BurntFundsActorAddr,
+			addr.BurntFundsActorAddr,
 			message.From(),
 			gasToFIL(refundGas, message.GasPrice()),
 		)
@@ -123,7 +123,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	// reward miner gas fees
 	outTree = _withTransferFundsAssert(
 		outTree,
-		vmr.BurntFundsActorAddr,
+		addr.BurntFundsActorAddr,
 		minerAddr, // TODO: may not exist
 		gasToFIL(sendRet.GasUsed(), message.GasPrice()),
 	)

@@ -1,6 +1,7 @@
 package storage_mining
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
@@ -43,7 +44,6 @@ func (st *StorageMinerActorState_I) CID() ipld.CID {
 func DeserializeState(x Bytes) State {
 	panic("TODO")
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 
 // TODO: placeholder epoch value -- this will be set later
@@ -87,7 +87,7 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 
 // called by CronActor to notify StorageMiner of PoSt Challenge
 func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) {
-	rt.ValidateCallerIs(vmr.CronActorAddr)
+	rt.ValidateCallerIs(addr.CronActorAddr)
 
 	if a._isChallenged(rt) {
 		rt.ReturnSuccess() // silent return, dont re-challenge
