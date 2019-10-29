@@ -25,8 +25,11 @@
 <div class="tocMap-item {{ $expandedclass }}">
     <div class="tocMap-item-label">
         <a href="/#{{ $tag }}">
-            {{ $title | markdownify }}
+        {{ if (not (eq nil (.Page.Param "statusIcon"))) }}
+            <i class="statusIcon">{{ $page.Param "statusIcon" }}</i>
+        {{ end }}
 
+        {{ $title | markdownify }}
 
         {{ if (not (eq nil (.Page.Param "menuIcon"))) }}
             <br /><br /><i class="menuIcon">{{ $page.Param "menuIcon" }}</i>

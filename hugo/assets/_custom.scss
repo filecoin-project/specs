@@ -287,11 +287,21 @@ html {
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
 .tocMap-item-label i.menuIcon {
   font-size: 30px;
   font-style: inherit;
+}
+
+.tocMap-item-label i.statusIcon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 20px;
+  font-style: inherit;
+  opacity: 0.50;
 }
 
 .tocMap-item-label > a {
