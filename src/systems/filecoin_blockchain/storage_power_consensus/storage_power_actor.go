@@ -152,6 +152,37 @@ func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power bl
 	return pcRequired
 }
 
+func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int) []addr.Address {
+	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
+	// support enumerating by int index. maybe we need that as an interface too,
+	// or something similar to an iterator (or iterator over the keys)
+	// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int)
+
+	allMiners := make([]addr.Address, len(st.PowerTable()))
+	index := 0
+
+	for address, _ := range st.PowerTable() {
+		allMiners[index] = address
+		index++
+	}
+
+	return postSurpriseSample(rt, allMiners, challengeCount)
+}
+
+// postSurpriseSample implements the PoSt-Surprise sampling algorithm
+func postSurpriseSample(rt Runtime, allMiners []addr.Address, challengeCount int) []addr.Address {
+
+	sm := make([]addr.Address, challengeCount)
+	for i := 0; i < challengeCount; i++ {
+		// rInt := rt.NextRandomInt() // we need something like this in the runtime
+		rInt := 4 // xkcd prng for now.
+		miner := allMiners[rInt%len(allMiners)]
+		sm = append(sm, miner)
+	}
+
+	return sm
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
@@ -348,74 +379,28 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 }
 
-// TODO: add Surprise to the chron actor
-func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) []addr.Address {
+// TODO: add Surprise to the cron actor
+func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 
-	surprisedMiners := []addr.Address{}
-
-	// The number of blocks that a challenged miner has to respond
-	// TODO: this should be set in.. spa?
-	var provingPeriod uint
 	// The number of blocks that a challenged miner has to respond
 	// TODO: this should be set in.. spa?
 	// var postChallengeTime util.UInt
 
-	// The current currBlockHeight
-	// TODO: should be found in vm context
-	// var currBlockHeight util.UInt
+	var provingPeriod uint // TODO
 
+	// sample the actor addresses
 	h, st := a.State(rt)
 
-	// The number of miners that are challenged at this block
-	challengeCount := uint(len(st.PowerTable())) / provingPeriod
-
-	// TODO: seem inefficient but spa.PowerTable() is now a map from address to power
-	minerAddresses := make([]addr.Address, len(st.PowerTable()))
-
-	// {
-	// NOTE and TODO:
-	// this picks challengeCount consecutive miners, starting from random offset
-	// good for sampling w/o replacement, but may be bad as it would be the same cohort always challenged at the same time
-	// if we want to pick properly random set, can:
-	// 	make a list of indices first, shuffle it, then pick consecutive from those
-	//  or pick at random every time, but skip ones we've seen already (sample w/ replacement, but skip doubles)
-	// table := spa.PowerTable()
-	// totalMinerCount := len(table)
-	// random := 4 // TODO: get randomness from chain
-	// offset := random % totalMinerCount
-	// for i := 0; i < challengeCount; i++ {
-	//   j := (offset + i) % totalMinerCount
-	//   minerAddresses[i] = table[j]
-	// }
-
-	// return minerAddresses
-	// }
-
-	index := 0
-	for address, _ := range st.PowerTable() {
-		minerAddresses[index] = address
-		index++
-	}
-
-	for i := uint(0); i < challengeCount; i++ {
-		// TODO: randomNumber := hash(ticket, i)
-		var randomNumber uint
-		minerIndex := randomNumber % uint(len(st.PowerTable()))
-		minerAddress := minerAddresses[minerIndex]
-		surprisedMiners = append(surprisedMiners, minerAddress)
-		// TODO: minerActor := GetActorFromID(actor).(storage_mining.StorageMinerActor)
-
-		// TODO: send message to StorageMinerActor to update ProvingPeriod
-		// TODO: should this update be done after surprisedMiners respond with a successful PoSt?
-		// var minerActor storage_mining.StorageMinerActor
-		// minerActor.ProvingPeriodEnd_ = currBlockHeight + postChallengeTime
-		// SendMessage(sm.ExtendProvingPeriod)
-	}
+	challengeCount := len(st.PowerTable()) / int(provingPeriod)
+	surprisedMiners := st._sampleMinersToSurprise(rt, challengeCount)
 
 	UpdateRelease(rt, h, st)
 
-	return surprisedMiners
-
+	// now send the messages
+	for _, addr := range surprisedMiners {
+		// TODO: rt.SendMessage(addr, ...)
+		panic(addr)
+	}
 }
 
 func (a *StoragePowerActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
