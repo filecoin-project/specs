@@ -52,7 +52,6 @@ func Runtime_Make(
 		_gasRemaining_:     gasRemaining,
 		_numValidateCalls_: 0,
 		_numReturnCalls_:   0,
-		_messageQueue_:     []MessageQueueItem{},
 		_output_:           nil,
 	}
 }
@@ -290,10 +289,6 @@ func _invokeMethodInternal(
 		rt._checkStateLock(false)
 		rt._checkNumValidateCalls(1)
 		rt._checkNumReturnCalls(1)
-		for _, item := range rt._messageQueue() {
-			rt._sendInternal(item.input, item.ignoreErrors)
-		}
-		rt._messageQueue_ = []MessageQueueItem{}
 	})
 	rt._running_ = false
 
@@ -368,35 +363,6 @@ func (rt *Runtime_I) Send(input InvocInput) msg.MessageReceipt {
 
 func (rt *Runtime_I) SendAllowingErrors(input InvocInput) msg.MessageReceipt {
 	return rt._sendInternal(input, true)
-}
-
-type MessageQueue []MessageQueueItem
-type MessageQueueItem struct {
-	input        InvocInput
-	ignoreErrors bool
-}
-
-func MessageQueueItem_Make(input InvocInput, ignoreErrors bool) MessageQueueItem {
-	return MessageQueueItem{
-		input:        input,
-		ignoreErrors: ignoreErrors,
-	}
-}
-
-func (rt *Runtime_I) _deferredSendInternal(input InvocInput, ignoreErrors bool) {
-	rt._checkRunning()
-	rt._checkStateLock(false)
-	rt._messageQueue_ = append(rt._messageQueue(), MessageQueueItem_Make(input, ignoreErrors))
-}
-
-func (rt *Runtime_I) DeferredSend(input InvocInput) Runtime_DeferredSend_FunRet {
-	rt._deferredSendInternal(input, false)
-	return &Runtime_DeferredSend_FunRet_I{}
-}
-
-func (rt *Runtime_I) DeferredSendAllowingErrors(input InvocInput) Runtime_DeferredSendAllowingErrors_FunRet {
-	rt._deferredSendInternal(input, true)
-	return &Runtime_DeferredSendAllowingErrors_FunRet_I{}
 }
 
 func (rt *Runtime_I) ValueSupplied() actor.TokenAmount {

@@ -44,6 +44,7 @@ func (st *StorageMinerActorState_I) CID() ipld.CID {
 func DeserializeState(x Bytes) State {
 	panic("TODO")
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // TODO: placeholder epoch value -- this will be set later
