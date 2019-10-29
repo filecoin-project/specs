@@ -1,5 +1,6 @@
 ---
 title: Sector Index
+statusIcon: ✅
 entries:
 - sector
 - sector_index

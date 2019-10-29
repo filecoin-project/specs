@@ -1,5 +1,6 @@
 ---
 menuTitle: Deals
+statusIcon: 🔁
 title: Market Deals
 ---
 

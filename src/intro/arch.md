@@ -5,6 +5,41 @@ title: "Architecture Diagrams"
 
 # Filecoin Systems
 
+<script type="text/javascript">
+
+function statusIndicatorsShow() {
+  var $uls = document.querySelectorAll('.statusIcon')
+  $uls.forEach(function (el) {
+    el.classList.remove('hidden')
+  })
+  return false; // stop click event
+}
+
+function statusIndicatorsHide() {
+  var $uls = document.querySelectorAll('.statusIcon')
+  $uls.forEach(function (el) {
+    el.classList.add('hidden')
+  })
+  return false; // stop click event
+}
+
+</script>
+
+
+Status Legend:
+
+- 🛑 **Bare** - Very incomplete at this time.
+  - **Implementors:** This is far from ready for you.
+- ⚠️ **Rough** -- work in progress, heavy changes coming, as we put in place key functionality.
+  - **Implementors:** This will be ready for you soon.
+- 🔁 **Refining** - Key functionality is there, some small things expected to change. Some big things may change.
+  - **Implementors:** Almost ready for you. You can start building these parts, but beware there may be changes still.
+- ✅ **Stable** - Mostly complete, minor things expected to change, no major changes expected.
+  - **Implementors:** Ready for you. You can build these parts.
+
+[<a href="#" onclick="return statusIndicatorsShow();">Show</a> / <a href="#" onclick="return statusIndicatorsHide();">Hide</a> ] status indicators
+
+
 {{< incTocMap "/docs/systems" 2 "colorful" >}}
 
 

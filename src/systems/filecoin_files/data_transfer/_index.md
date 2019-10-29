@@ -1,5 +1,6 @@
 ---
 menuTitle: Data Transfer
+statusIcon: ⚠️
 title: "Data Transfer in Filecoin"
 ---
 

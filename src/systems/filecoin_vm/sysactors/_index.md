@@ -1,5 +1,6 @@
 ---
 title: System Actors
+statusIcon: 🔁
 entries:
 - init_actor
 - cron_actor

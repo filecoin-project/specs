@@ -1,5 +1,6 @@
 ---
 title: State Tree
+statusIcon: 🔁
 ---
 
 The State Tree is the output of applying operations on the Filecoin Blockchain.

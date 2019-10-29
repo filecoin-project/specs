@@ -1,5 +1,6 @@
 ---
 menuTitle: Retrieval Market
+statusIcon: 🛑
 title: "Retrieval Market in Filecoin"
 entries:
 - retrieval_client

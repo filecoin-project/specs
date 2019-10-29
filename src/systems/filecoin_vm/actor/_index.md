@@ -1,5 +1,6 @@
 ---
 menuTitle: Actor
+statusIcon: ✅
 title: VM Actor Interface
 entries:
 - address

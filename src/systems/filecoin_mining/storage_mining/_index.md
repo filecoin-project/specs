@@ -1,5 +1,6 @@
 ---
 menuTitle: Storage Miner
+statusIcon: 🔁
 title: Storage Miner
 entries:
   - mining_cycle

@@ -1,5 +1,6 @@
 ---
 menuTitle: Orders
+statusIcon: 🛑
 title: Market Orders - Asks and Bids
 ---
 
