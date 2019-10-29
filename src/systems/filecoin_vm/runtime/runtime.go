@@ -267,11 +267,11 @@ func (rt *Runtime_I) _incrementCallSeqNum(a addr.Address) {
 
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
-func (rt *Runtime_I) SendToplevelFromInterpreter(to addr.Address, input InvocInput, ignoreErrors bool) (
+func (rt *Runtime_I) SendToplevelFromInterpreter(input InvocInput, ignoreErrors bool) (
 	msg.MessageReceipt, st.StateTree) {
 
 	rt._running_ = true
-	ret := rt._sendInternal(to, input, ignoreErrors)
+	ret := rt._sendInternal(input, ignoreErrors)
 	rt._running_ = false
 	return ret, rt._globalStatePending()
 }
@@ -295,7 +295,7 @@ func _invokeMethodInternal(
 		rt._checkNumValidateCalls(1)
 		rt._checkNumReturnCalls(1)
 		for _, item := range rt._messageQueue() {
-			rt._sendInternal(item.to, item.input, item.ignoreErrors)
+			rt._sendInternal(item.input, item.ignoreErrors)
 		}
 		rt._messageQueue_ = []MessageQueueItem{}
 	})
@@ -316,11 +316,11 @@ func _invokeMethodInternal(
 	return
 }
 
-func (rtOuter *Runtime_I) _sendInternal(to addr.Address, input InvocInput, ignoreErrors bool) msg.MessageReceipt {
+func (rtOuter *Runtime_I) _sendInternal(input InvocInput, ignoreErrors bool) msg.MessageReceipt {
 	rtOuter._checkRunning()
 	rtOuter._checkStateLock(false)
 
-	toActor := rtOuter._globalStatePending().GetActor(to).State()
+	toActor := rtOuter._globalStatePending().GetActor(input.To()).State()
 
 	toActorCode, err := loadActorCode(toActor.CodeCID())
 	if err != nil {
@@ -333,16 +333,16 @@ func (rtOuter *Runtime_I) _sendInternal(to addr.Address, input InvocInput, ignor
 	// TODO: gasUsed may be larger than toActorMethodGasBound if toActor itself makes sub-calls.
 	// To prevent this, we would need to calculate the gas bounds recursively.
 
-	err = rtOuter._transferFunds(rtOuter._actorAddress(), to, input.Value())
+	err = rtOuter._transferFunds(rtOuter._actorAddress(), input.To(), input.Value())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds))
 	}
 
-	rtOuter._incrementCallSeqNum(to)
+	rtOuter._incrementCallSeqNum(input.To())
 
 	rtInner := Runtime_Make(
 		rtOuter._globalStatePending(),
-		to,
+		input.To(),
 		input.Value(),
 		rtOuter._gasRemaining(),
 	)
@@ -368,42 +368,40 @@ func (rtOuter *Runtime_I) _sendInternal(to addr.Address, input InvocInput, ignor
 	return msg.MessageReceipt_Make(invocOutput, gasUsed)
 }
 
-func (rt *Runtime_I) Send(to addr.Address, input InvocInput) msg.MessageReceipt {
-	return rt._sendInternal(to, input, false)
+func (rt *Runtime_I) Send(input InvocInput) msg.MessageReceipt {
+	return rt._sendInternal(input, false)
 }
 
-func (rt *Runtime_I) SendAllowingErrors(to addr.Address, input InvocInput) msg.MessageReceipt {
-	return rt._sendInternal(to, input, true)
+func (rt *Runtime_I) SendAllowingErrors(input InvocInput) msg.MessageReceipt {
+	return rt._sendInternal(input, true)
 }
 
 type MessageQueue []MessageQueueItem
 type MessageQueueItem struct {
-	to           addr.Address
 	input        InvocInput
 	ignoreErrors bool
 }
 
-func MessageQueueItem_Make(to addr.Address, input InvocInput, ignoreErrors bool) MessageQueueItem {
+func MessageQueueItem_Make(input InvocInput, ignoreErrors bool) MessageQueueItem {
 	return MessageQueueItem{
-		to:           to,
 		input:        input,
 		ignoreErrors: ignoreErrors,
 	}
 }
 
-func (rt *Runtime_I) _deferredSendInternal(to addr.Address, input InvocInput, ignoreErrors bool) {
+func (rt *Runtime_I) _deferredSendInternal(input InvocInput, ignoreErrors bool) {
 	rt._checkRunning()
 	rt._checkStateLock(false)
-	rt._messageQueue_ = append(rt._messageQueue(), MessageQueueItem_Make(to, input, ignoreErrors))
+	rt._messageQueue_ = append(rt._messageQueue(), MessageQueueItem_Make(input, ignoreErrors))
 }
 
-func (rt *Runtime_I) DeferredSend(to addr.Address, input InvocInput) Runtime_DeferredSend_FunRet {
-	rt._deferredSendInternal(to, input, false)
+func (rt *Runtime_I) DeferredSend(input InvocInput) Runtime_DeferredSend_FunRet {
+	rt._deferredSendInternal(input, false)
 	return &Runtime_DeferredSend_FunRet_I{}
 }
 
-func (rt *Runtime_I) DeferredSendAllowingErrors(to addr.Address, input InvocInput) Runtime_DeferredSendAllowingErrors_FunRet {
-	rt._deferredSendInternal(to, input, true)
+func (rt *Runtime_I) DeferredSendAllowingErrors(input InvocInput) Runtime_DeferredSendAllowingErrors_FunRet {
+	rt._deferredSendInternal(input, true)
 	return &Runtime_DeferredSendAllowingErrors_FunRet_I{}
 }
 

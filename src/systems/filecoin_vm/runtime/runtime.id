@@ -49,15 +49,15 @@ type Runtime struct {
     // Check that the given condition is true (and call Abort if not).
     Check(bool)
 
-    ValueSupplied() actor.TokenAmount
+    ValueSupplied()                                   actor.TokenAmount
 
     // Send allows the current execution context to invoke methods on other actors in the system.
     // TODO: what are the return values here?
-    Send(to addr.Address, input msg.InvocInput) msg.MessageReceipt
-    DeferredSend(to addr.Address, input msg.InvocInput)
+    Send(input msg.InvocInput) msg.MessageReceipt
+    DeferredSend(input msg.InvocInput)
 
-    SendAllowingErrors(to addr.Address, input msg.InvocInput) msg.MessageReceipt
-    DeferredSendAllowingErrors(to addr.Address, input msg.InvocInput)
+    SendAllowingErrors(input msg.InvocInput) msg.MessageReceipt
+    DeferredSendAllowingErrors(input msg.InvocInput)
 
     // Create an actor in the state tree. May only be called by InitActor.
     CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams)

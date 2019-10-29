@@ -36,6 +36,7 @@ type SignedMessage struct {
 }  // representation tuple
 
 type InvocInput struct {
+    To      addr.Address
     Method  actor.MethodNum
     Params  actor.MethodParams
     Value   actor.TokenAmount

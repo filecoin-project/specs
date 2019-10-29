@@ -1,6 +1,7 @@
 package message
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import util "github.com/filecoin-project/specs/util"
 
@@ -28,8 +29,9 @@ func GasAmount_Zero() GasAmount {
 	panic("TODO")
 }
 
-func InvocInput_Make(method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {
+func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {
 	return &InvocInput_I{
+		To_:     to,
 		Method_: method,
 		Params_: params,
 		Value_:  value,

@@ -81,8 +81,8 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	)
 
 	sendRet, sendRetStateTree := rt.Impl().SendToplevelFromInterpreter(
-		message.To(),
 		msg.InvocInput_Make(
+			message.To(),
 			message.Method(),
 			message.Params(),
 			message.Value(),
