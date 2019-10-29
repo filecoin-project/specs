@@ -1,5 +1,6 @@
 ---
 title: Message Pool
+statusIcon: 🛑
 entries:
 - message_syncer
 - message_storage

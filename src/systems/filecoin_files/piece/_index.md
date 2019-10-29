@@ -1,5 +1,6 @@
 ---
 menuTitle: Piece
+statusIcon: 🔁
 title: Piece - a part of a file
 entries:
 - piece_store

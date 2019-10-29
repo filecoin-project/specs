@@ -1,5 +1,6 @@
 ---
 title: Node Types
+statusIcon: ✅
 entries:
   - node
   - node_types

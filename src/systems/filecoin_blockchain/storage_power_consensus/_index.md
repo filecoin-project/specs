@@ -1,5 +1,6 @@
 ---
 title: Storage Power Consensus
+statusIcon: ✅
 entries:
 - expected_consensus
 - storage_power_actor

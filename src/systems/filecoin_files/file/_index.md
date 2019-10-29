@@ -1,5 +1,6 @@
 ---
 title: File
+statusIcon: ✅
 entries:
 - filestore
 ---

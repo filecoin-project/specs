@@ -1,5 +1,6 @@
 ---
 title: Clock
+statusIcon: ⚠️
 ---
 
 ```go

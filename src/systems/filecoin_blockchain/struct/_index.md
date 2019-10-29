@@ -1,5 +1,6 @@
 ---
 title: "Blocks"
+statusIcon: ✅
 entries:
 - block
 - chain

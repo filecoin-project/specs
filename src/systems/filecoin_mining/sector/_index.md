@@ -1,5 +1,6 @@
 ---
 title: Sector
+statusIcon: ✅
 entries:
 - sectorset
 - sealing
