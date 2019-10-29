@@ -159,7 +159,7 @@ ORIENT_OUTPUT_FILES=$(patsubst src/%.orient, build/%.orient.json, $(ORIENT_FILES
 orient: $(ORIENT_OUTPUT_FILES)
 
 $(ORIENT_OUTPUT_FILES): build/%.orient.json: src/%.orient src/%.json
-	bin/build-spec-orient.sh $+ $@
+	bin/solve-orient.sh $+ $@
 
 # convert orgmode to markdown
 ORG_FILES=$(shell find src | grep .org)
