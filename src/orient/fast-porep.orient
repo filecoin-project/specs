@@ -54,6 +54,6 @@ FastPoRep:
   Onboarding:
     onboard_storage = seal_throughput * onboard_time
     onboard_storage_tb = onboard_storage / 1000
-    onboard_time_hours = onboard_time / 60 / 60
-    onboard_time_days = onboard_time / 60 / 60 / 24
+    onboard_time_hours = onboard_time / (60 * 60)
+    onboard_time_days = onboard_time / (60 * 60 * 24)
 
