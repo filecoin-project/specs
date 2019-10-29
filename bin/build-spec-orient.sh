@@ -8,6 +8,7 @@ mkdir -p $diagram_dir
 orient/bin/orient solve --system=$input_dir/filecoin.orient --in=$input_dir/snark-table.json | jq > $output_dir/snark-table.json
 orient/bin/orient solve --system=$input_dir/filecoin.orient --in=$input_dir/params.json | jq > $output_dir/solved-parameters.json
 orient/bin/orient solve --system=$input_dir/filecoin.orient --in=$input_dir/multi-params.json | jq > $output_dir/multi-solved-parameters.json
+orient/bin/orient solve --system=$input_dir/fast-porep.orient --in=$input_dir/fast-porep.json | jq > $output_dir/fast-porep.json
 
 orient/bin/orient report --system=$input_dir/filecoin.orient --in=$input_dir/params.json  > $output_dir/filecoin-report.html
 
