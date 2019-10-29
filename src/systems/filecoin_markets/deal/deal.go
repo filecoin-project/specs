@@ -23,8 +23,8 @@ func (p *StorageDealProposal_I) Duration() block.ChainEpoch {
 }
 
 func (p *StorageDealProposal_I) ClientBalanceRequirement() actor.TokenAmount {
-	collateralPerEpoch := p.ClientCollateralPerEpoch() + p.ProviderCollateralPerEpoch()
-	return actor.TokenAmount(uint64(collateralPerEpoch) * uint64(p.Duration()))
+	balanceRequirementPerEpoch := p.ClientCollateralPerEpoch() + p.StoragePricePerEpoch()
+	return actor.TokenAmount(uint64(balanceRequirementPerEpoch) * uint64(p.Duration()))
 }
 
 func (p *StorageDealProposal_I) ProviderBalanceRequirement() actor.TokenAmount {
