@@ -93,8 +93,11 @@ func (h *ActorStateHandle_I) Take() ActorSubstateCID {
 func (rt *Runtime_I) _updateReleaseActorState(newStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
-
-	rt._globalStatePending_ = rt._globalStatePending().WithActorState(rt._actorAddress(), newStateCID)
+	newGlobalStatePending, err := rt._globalStatePending().Impl().WithActorState(rt._actorAddress(), newStateCID)
+	if err != nil {
+		panic("Error in runtime implementation: failed to update actor state")
+	}
+	rt._globalStatePending_ = newGlobalStatePending
 	rt._actorStateAcquired_ = false
 }
 
@@ -245,16 +248,17 @@ func (rt *Runtime_I) _refundGasRemaining(x msg.GasAmount) {
 	rt._checkGasRemaining()
 }
 
-func (rt *Runtime_I) _transferFunds(from addr.Address, to addr.Address, amount actor.TokenAmount) {
+func (rt *Runtime_I) _transferFunds(from addr.Address, to addr.Address, amount actor.TokenAmount) error {
 	rt._checkRunning()
 	rt._checkStateLock(false)
 
-	transferRet := rt._globalStatePending().WithFundsTransfer(from, to, amount)
-	if transferRet.Which() == st.StateTree_WithFundsTransfer_FunRet_Case_error {
-		rt._throwError(exitcode.SystemError(exitcode.InsufficientFunds))
-	} else {
-		rt._globalStatePending_ = transferRet.As_StateTree()
+	newGlobalStatePending, err := rt._globalStatePending().Impl().WithFundsTransfer(from, to, amount)
+	if err != nil {
+		return err
 	}
+
+	rt._globalStatePending_ = newGlobalStatePending
+	return nil
 }
 
 func (rt *Runtime_I) _incrementCallSeqNum(a addr.Address) {
@@ -329,7 +333,11 @@ func (rtOuter *Runtime_I) _sendInternal(to addr.Address, input InvocInput, ignor
 	// TODO: gasUsed may be larger than toActorMethodGasBound if toActor itself makes sub-calls.
 	// To prevent this, we would need to calculate the gas bounds recursively.
 
-	rtOuter._transferFunds(rtOuter._actorAddress(), to, input.Value())
+	err = rtOuter._transferFunds(rtOuter._actorAddress(), to, input.Value())
+	if err != nil {
+		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds))
+	}
+
 	rtOuter._incrementCallSeqNum(to)
 
 	rtInner := Runtime_Make(

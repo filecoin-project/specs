@@ -30,11 +30,11 @@ func _applyError(errCode exitcode.SystemErrorCode) msg.MessageReceipt {
 }
 
 func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {
-	transferRet := tree.WithFundsTransfer(from, to, amount)
-	if transferRet.Which() == st.StateTree_WithFundsTransfer_FunRet_Case_error {
+	retTree, err := tree.Impl().WithFundsTransfer(from, to, amount)
+	if err != nil {
 		panic("Interpreter error: insufficient funds (or transfer error) despite checks")
 	} else {
-		return transferRet.As_StateTree()
+		return retTree
 	}
 }
 
@@ -43,6 +43,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 
 	compTree := inTree
 	var outTree st.StateTree
+	var toActor actor.Actor
 
 	fromActor := compTree.GetActor(message.From())
 	if fromActor == nil {
@@ -63,20 +64,10 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 		return inTree, _applyError(exitcode.InvalidCallSeqNum)
 	}
 
-	// TODO: Should we allow messages to implicitly create actors?
-	// - If so, need to specify how the actor code is determined
-	// - We should be able to disallow this and still preserve functionality by
-	//   requiring two separate messages (create actor, transfer initial funds)
-	createRet := compTree.WithNewActorIfMissing(message.To())
-	if createRet.Which() == st.StateTree_WithNewActorIfMissing_FunRet_Case_error {
-		return inTree, _applyError(exitcode.ActorNotFound)
-	} else {
-		compTree = createRet.As_StateTree()
-	}
-
-	toActor := compTree.GetActor(message.To())
+	// WithActorForAddress may create new account actors
+	compTree, toActor = compTree.Impl().WithActorForAddress(message.To())
 	if toActor == nil {
-		panic("Interpreter error: actor present (or created) but not retrieved")
+		return inTree, _applyError(exitcode.ActorNotFound)
 	}
 
 	// deduct maximum expenditure gas funds first

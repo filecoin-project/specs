@@ -22,3 +22,7 @@ func (a *Address_I) VerifySyntax(addrType Address_Type) bool {
 func (a *Address_I) String() AddressString {
 	return AddressString("") // TODo
 }
+
+func (a *Address_I) IsKeyType() bool {
+	panic("TODO")
+}
