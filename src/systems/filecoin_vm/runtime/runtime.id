@@ -22,12 +22,12 @@ type ActorStateHandle struct {
 // this is everything that is accessible to actors, beyond parameters.
 // FKA as vm.Context
 type Runtime struct {
-    CurrEpoch()              block.ChainEpoch
+    CurrEpoch() block.ChainEpoch
 
     // Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
-    Randomness(offset UInt)  Randomness
+    Randomness(e block.ChainEpoch, offset UInt) Randomness
 
-    Caller()                 addr.Address
+    Caller() addr.Address
     ValidateCallerIs(caller addr.Address)
     ValidateCallerMatches(CallerPattern)
 

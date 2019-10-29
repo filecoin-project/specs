@@ -360,7 +360,9 @@ func (rt *Runtime_I) ValueSupplied() actor.TokenAmount {
 	return rt._valueSupplied()
 }
 
-func (rt *Runtime_I) Randomness(offset uint64) Randomness {
+func (rt *Runtime_I) Randomness(e block.ChainEpoch, offset uint64) Randomness {
+	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
+	// TODO: finish
 	panic("TODO")
 }
 
