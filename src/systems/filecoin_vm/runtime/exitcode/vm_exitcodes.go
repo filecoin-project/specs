@@ -85,14 +85,14 @@ func EnsureErrorCode(x ExitCode) ExitCode {
 }
 
 type RuntimeError struct {
-	exitCode ExitCode
-	errMsg   string
+	ExitCode ExitCode
+	ErrMsg   string
 }
 
 func (x *RuntimeError) String() string {
-	ret := fmt.Sprintf("Runtime error: %v", x.exitCode)
-	if x.errMsg != "" {
-		ret += fmt.Sprintf(" (\"%v\")", x.errMsg)
+	ret := fmt.Sprintf("Runtime error: %v", x.ExitCode)
+	if x.ErrMsg != "" {
+		ret += fmt.Sprintf(" (\"%v\")", x.ErrMsg)
 	}
 	return ret
 }
@@ -100,25 +100,11 @@ func (x *RuntimeError) String() string {
 func RuntimeError_Make(exitCode ExitCode, errMsg string) *RuntimeError {
 	exitCode = EnsureErrorCode(exitCode)
 	return &RuntimeError{
-		exitCode: exitCode,
-		errMsg:   errMsg,
+		ExitCode: exitCode,
+		ErrMsg:   errMsg,
 	}
 }
 
-func CatchRuntimeErrors(f func()) (retCode ExitCode) {
-	retCode = OK()
-
-	defer func() {
-		if r := recover(); r != nil {
-			switch r.(type) {
-			case *RuntimeError:
-				retCode = EnsureErrorCode(r.(*RuntimeError).exitCode)
-			default:
-				retCode = SystemError(MethodPanic)
-			}
-		}
-	}()
-
-	f()
-	return
+func UserDefinedError(e util.UVarint) ExitCode {
+	return ExitCode_Make_UserDefinedError(ExitCode_UserDefinedError(e))
 }

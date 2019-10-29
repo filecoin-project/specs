@@ -4,12 +4,14 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -18,7 +20,10 @@ type State = StorageMinerActorState
 type Any = util.Any
 type Bool = util.Bool
 type Bytes = util.Bytes
+type InvocOutput = msg.InvocOutput
 type Runtime = vmr.Runtime
+
+var TODO = util.TODO
 
 func (a *StorageMinerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
 	h := rt.AcquireState()
@@ -87,11 +92,11 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 }
 
 // called by CronActor to notify StorageMiner of PoSt Challenge
-func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) {
+func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
 	rt.ValidateCallerIs(addr.CronActorAddr)
 
 	if a._isChallenged(rt) {
-		rt.ReturnSuccess() // silent return, dont re-challenge
+		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
 
 	a._expirePreCommittedSectors(rt)
@@ -100,7 +105,7 @@ func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) {
 	st.ChallengeStatus().Impl().LastChallengeEpoch_ = rt.CurrEpoch()
 	UpdateRelease(rt, h, st)
 
-	rt.ReturnSuccess()
+	return rt.SuccessReturn()
 }
 
 func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
@@ -187,11 +192,13 @@ func (a *StorageMinerActorCode_I) _onMissedPoSt(rt Runtime) {
 // If a Post is missed (either due to faults being not declared on time or
 // because the miner run out of time, every sector is reported as failing
 // for the current proving period.
-func (a *StorageMinerActorCode_I) CheckPoStSubmissionHappened(rt Runtime) {
+func (a *StorageMinerActorCode_I) CheckPoStSubmissionHappened(rt Runtime) InvocOutput {
+	TODO() // TODO: validate caller
+
 	if !a._isChallenged(rt) {
 		// Miner gets out of a challenge when submit a successful PoSt
 		// or when detected by CronActor. Hence, not being in isChallenged means that we are good here
-		rt.ReturnSuccess()
+		return rt.SuccessReturn()
 	}
 
 	a._expirePreCommittedSectors(rt)
@@ -199,7 +206,7 @@ func (a *StorageMinerActorCode_I) CheckPoStSubmissionHappened(rt Runtime) {
 	// oh no -- we missed it. rekt
 	a._onMissedPoSt(rt)
 
-	rt.ReturnSuccess()
+	return rt.SuccessReturn()
 }
 
 func (a *StorageMinerActorCode_I) _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool {
@@ -348,7 +355,8 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 //     - State Transition
 //       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, ProvingSet
-func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission) {
+func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+	TODO() // TODO: validate caller
 
 	if !a._isChallenged(rt) {
 		// TODO: determine proper error here and error-handling machinery
@@ -437,6 +445,8 @@ func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.P
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
 	st._updateCommittedSectors(rt)
 	UpdateRelease(rt, h, st)
+
+	return rt.SuccessReturn()
 }
 
 func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
@@ -481,7 +491,8 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 //   - Failing -> Recovering with the same FaultCount
 // - Add SectorNumber to ProvingSet
 // Note that power is not updated until it is active
-func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) {
+func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) InvocOutput {
+	TODO() // TODO: validate caller
 
 	if a._isChallenged(rt) {
 		// TODO: determine proper error here and error-handling machinery
@@ -522,6 +533,8 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	}
 
 	UpdateRelease(rt, h, st)
+
+	return rt.SuccessReturn()
 }
 
 // DeclareFaults penalizes miners (slashStorageDealCollateral and suspendPower)
@@ -530,7 +543,9 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 //   - Active / Commited / Recovering -> Failing
 // - Update State in Sectors()
 // - Remove Active / Commited / Recovering from ProvingSet
-func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.CompactSectorSet) {
+func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.CompactSectorSet) InvocOutput {
+	TODO() // TODO: validate caller
+
 	if a._isChallenged(rt) {
 		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("cannot DeclareFaults when challenged")
@@ -554,6 +569,8 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 	)
 
 	a._submitPowerReport(rt)
+
+	return rt.SuccessReturn()
 }
 
 func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
@@ -601,7 +618,8 @@ func (st *StorageMinerActorState_I) _sectorExists(sectorNo sector.SectorNumber) 
 
 // Deals must be posted on chain via sma.PublishStorageDeals before PreCommitSector
 // TODO(optimization): PreCommitSector could contain a list of deals that are not published yet.
-func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) {
+func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) InvocOutput {
+	TODO() // TODO: validate caller
 
 	// no checks needed
 	// can be called regardless of Challenged status
@@ -635,10 +653,11 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 	st.PreCommittedSectors()[info.SectorNumber()] = precommittedSector
 
 	UpdateRelease(rt, h, st)
-
+	return rt.SuccessReturn()
 }
 
-func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) {
+func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) InvocOutput {
+	TODO() // TODO: validate caller
 
 	h, st := a.State(rt)
 
@@ -664,7 +683,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		// expired
 		delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 		UpdateRelease(rt, h, st)
-		return
+		return rt.ErrorReturn(exitcode.UserDefinedError(0)) // TODO: user dfined error code?
 	}
 
 	onChainInfo := &sector.OnChainSealVerifyInfo_I{
@@ -727,6 +746,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// now remove SectorNumber from PreCommittedSectors (processed)
 	delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 	UpdateRelease(rt, h, st)
+
+	return rt.SuccessReturn()
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {

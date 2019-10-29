@@ -31,11 +31,11 @@ type Runtime struct {
     ValidateCallerIs(caller addr.Address)
     ValidateCallerMatches(CallerPattern)
 
-    AcquireState() ActorStateHandle
+    AcquireState()      ActorStateHandle
 
-    ReturnSuccess()
-    ReturnValue(Bytes)
-    ReturnError(exitCode exitcode.ExitCode)
+    SuccessReturn()     msg.InvocOutput
+    ValueReturn(Bytes)  msg.InvocOutput
+    ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
 
     // Throw an error indicating a failure condition has occurred, from which the given actor
     // code is unable to recover. If an error is thrown in actor code, and not handled by any
@@ -72,6 +72,5 @@ type Runtime struct {
     _valueSupplied           actor.TokenAmount
     _gasRemaining            msg.GasAmount
     _numValidateCalls        int
-    _numReturnCalls          int
     _output                  msg.InvocOutput
 }

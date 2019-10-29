@@ -13,7 +13,10 @@ type ActorSubstateCID = actor.ActorSubstateCID
 type InvocInput = msg.InvocInput
 type InvocOutput = msg.InvocOutput
 type ExitCode = exitcode.ExitCode
+type RuntimeError = exitcode.RuntimeError
 
+var EnsureErrorCode = exitcode.EnsureErrorCode
+var SystemError = exitcode.SystemError
 var TODO = util.TODO
 
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
@@ -23,7 +26,7 @@ func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
 // ActorCode is the interface that all actor code types should satisfy.
 // It is merely a method dispatch interface.
 type ActorCode interface {
-	InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams)
+	InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput
 }
 
 const (
@@ -51,7 +54,6 @@ func Runtime_Make(
 		_valueSupplied_:    valueSupplied,
 		_gasRemaining_:     gasRemaining,
 		_numValidateCalls_: 0,
-		_numReturnCalls_:   0,
 		_output_:           nil,
 	}
 }
@@ -173,40 +175,22 @@ func (rt *Runtime_I) _checkNumValidateCalls(x int) {
 	}
 }
 
-func (rt *Runtime_I) _checkNumReturnCalls(x int) {
-	if rt._numReturnCalls() != x {
-		rt.Abort("Method must call return exactly once")
-	}
-}
-
 func (rt *Runtime_I) _checkRunning() {
 	if !rt._running() {
 		panic("Internal runtime error: actor API called with no actor code running")
 	}
 }
-
-func (rt *Runtime_I) _returnInternal(output InvocOutput) {
-	rt._checkRunning()
-	rt._checkStateLock(false)
-	rt._checkNumReturnCalls(0)
-	rt._output_ = output
-	rt._numReturnCalls_ += 1
+func (rt *Runtime_I) SuccessReturn() InvocOutput {
+	return msg.InvocOutput_Make(exitcode.OK(), nil)
 }
 
-func (rt *Runtime_I) ReturnSuccess() Runtime_ReturnSuccess_FunRet {
-	rt._returnInternal(msg.InvocOutput_Make(exitcode.OK(), nil))
-	return &Runtime_ReturnSuccess_FunRet_I{}
+func (rt *Runtime_I) ValueReturn(value util.Bytes) InvocOutput {
+	return msg.InvocOutput_Make(exitcode.OK(), value)
 }
 
-func (rt *Runtime_I) ReturnValue(value util.Bytes) Runtime_ReturnValue_FunRet {
-	rt._returnInternal(msg.InvocOutput_Make(exitcode.OK(), value))
-	return &Runtime_ReturnValue_FunRet_I{}
-}
-
-func (rt *Runtime_I) ReturnError(exitCode ExitCode) Runtime_ReturnError_FunRet {
+func (rt *Runtime_I) ErrorReturn(exitCode ExitCode) InvocOutput {
 	exitCode = exitcode.EnsureErrorCode(exitCode)
-	rt._returnInternal(msg.InvocOutput_Make(exitCode, nil))
-	return &Runtime_ReturnError_FunRet_I{}
+	return msg.InvocOutput_Make(exitCode, nil)
 }
 
 func (rt *Runtime_I) _throwError(exitCode ExitCode) {
@@ -271,6 +255,22 @@ func (rt *Runtime_I) SendToplevelFromInterpreter(input InvocInput, ignoreErrors 
 	return ret, rt._globalStatePending()
 }
 
+func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
+	defer func() {
+		if r := recover(); r != nil {
+			switch r.(type) {
+			case *RuntimeError:
+				output = msg.InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
+			default:
+				output = msg.InvocOutput_Make(SystemError(exitcode.MethodPanic), nil)
+			}
+		}
+	}()
+
+	output = f()
+	return
+}
+
 func _invokeMethodInternal(
 	rt *Runtime_I,
 	actorCode ActorCode,
@@ -284,22 +284,13 @@ func _invokeMethodInternal(
 	}
 
 	rt._running_ = true
-	catchRetCode := exitcode.CatchRuntimeErrors(func() {
-		actorCode.InvokeMethod(rt, method, params)
+	ret = _catchRuntimeErrors(func() InvocOutput {
+		methodOutput := actorCode.InvokeMethod(rt, method, params)
 		rt._checkStateLock(false)
 		rt._checkNumValidateCalls(1)
-		rt._checkNumReturnCalls(1)
+		return methodOutput
 	})
 	rt._running_ = false
-
-	if catchRetCode.IsSuccess() {
-		if rt._output() == nil {
-			panic("Internal error: return call recorded but no output object returned")
-		}
-		ret = rt._output()
-	} else {
-		ret = msg.InvocOutput_Make(catchRetCode, nil)
-	}
 
 	// TODO: Update gasUsed
 	TODO()

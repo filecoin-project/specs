@@ -2,17 +2,18 @@ package sysactors
 
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+
+// import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
 // import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 // import util "github.com/filecoin-project/specs/util"
 
-func (a *InitActorCode_I) Constructor(rt vmr.Runtime) {
+func (a *InitActorCode_I) Constructor(rt Runtime) {
 	panic("TODO")
 }
 
-func (a *InitActorCode_I) Exec(rt vmr.Runtime, codeCID actor.CodeCID, constructorParams actor.MethodParams) addr.Address {
+func (a *InitActorCode_I) Exec(rt Runtime, codeCID actor.CodeCID, constructorParams actor.MethodParams) InvocOutput {
 	rt.CreateActor(codeCID, constructorParams)
 
 	panic("TODO")
@@ -112,7 +113,7 @@ func (_ *InitActorCode_I) _isBuiltinActor(codeCID actor.CodeCID) bool {
 }
 
 // TODO
-func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) {
+func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	// TODO: load state
 	// var state InitActorState
 	// storage := input.Runtime().State().Storage()
@@ -128,6 +129,6 @@ func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 	// case 4:
 	// 	return a.GetActorIDForAddress(input, state, params[0])
 	default:
-		rt.ReturnError(exitcode.SystemError(exitcode.InvalidMethod))
+		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
 	}
 }
