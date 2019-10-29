@@ -2,12 +2,11 @@
 title: Storage Power Consensus
 statusIcon: ✅
 entries:
-- expected_consensus
 - storage_power_actor
 ---
 
 {{<label storage_power_consensus>}}
-The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners' effective power over consensus in given chains in its _Power Table_. It also runs _Expected Consensus_ (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.
+The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners' effective power over consensus in given chains in its _Power Table_. It also runs {{<sref expected_consensus>}} (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.
 
 Succinctly, the SPC subsystem offers the following services:
 - Access to the _Power Table_ for every subchain, accounting for individual storage miner power and total power on-chain.
