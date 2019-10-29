@@ -99,7 +99,17 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 		false,
 	)
 
-	if sendRet.ExitCode().AllowsStateUpdate() {
+	if !sendRet.ExitCode().AllowsStateUpdate() {
+		// error -- revert all state changes -- ie drop updates. burn used gas.
+		outTree = inTree
+		outTree = _withTransferFundsAssert(
+			outTree,
+			message.From(),
+			vmr.BurntFundsActorAddr,
+			gasToFIL(sendRet.GasUsed(), message.GasPrice()),
+		)
+		TODO() // TODO: still increment fromActor sequence number on failure?
+	} else {
 		// success -- refund unused gas
 		outTree = sendRetStateTree
 		refundGas := message.GasLimit() - sendRet.GasUsed()
@@ -110,16 +120,6 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 			message.From(),
 			gasToFIL(refundGas, message.GasPrice()),
 		)
-	} else {
-		// error -- revert all state changes -- ie drop updates. burn used gas.
-		outTree = inTree
-		outTree = _withTransferFundsAssert(
-			outTree,
-			message.From(),
-			vmr.BurntFundsActorAddr,
-			gasToFIL(sendRet.GasUsed(), message.GasPrice()),
-		)
-		TODO() // TODO: still increment fromActor sequence number on failure?
 	}
 
 	// reward miner gas fees
