@@ -22,7 +22,7 @@ type StorageMarketActorState struct {
     // check if StorageDeal has the right signatures
     // check if minimum StoragePrice and StorageCollateral are met
     // check if provider and client have sufficient balances
-    _verifyStorageDeal(rt Runtime, deal deal.StorageDeal) bool
+    _validateNewStorageDeal(rt Runtime, deal deal.StorageDeal) bool
 
     _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
     _processStorageDealPayment(rt Runtime, deal deal.StorageDeal, duration block.ChainEpoch)
@@ -31,6 +31,13 @@ type StorageMarketActorState struct {
 
     _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
     _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
+    _transferBalance(
+        rt           Runtime
+        fromLocked   addr.Address
+        toAvailable  addr.Address
+        amount       actor.TokenAmount
+    )
+    _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool
 }
 
 type StorageMarketActorCode struct {

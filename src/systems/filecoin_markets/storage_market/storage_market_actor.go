@@ -58,7 +58,7 @@ func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageD
 //   - verify client and provider address and signature are correct (TODO may not be needed)
 //   - verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
 //   - verify client and provider has sufficient balance
-func (st *StorageMarketActorState_I) _verifyStorageDeal(rt Runtime, d deal.StorageDeal) bool {
+func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.StorageDeal) bool {
 	// TODO verify client and provider signature
 	// TODO verify minimum StoragePrice, ProviderCollateralPerEpoch, and ClientCollateralPerEpoch
 	// TODO: verify deal did not expire when it is signed
@@ -80,11 +80,10 @@ func (st *StorageMarketActorState_I) _verifyStorageDeal(rt Runtime, d deal.Stora
 	}
 
 	// verify client and provider has sufficient balance
-	clientBalanceA := st.Balances()[p.Client()].Available()
-	providerBalanceA := st.Balances()[p.Provider()].Available()
+	isClientBalAvailable := st._isBalanceAvailable(p.Client(), p.ClientBalanceRequirement())
+	isProviderBalAvailable := st._isBalanceAvailable(p.Provider(), p.ProviderBalanceRequirement())
 
-	if clientBalanceA < (p.ClientBalanceRequirement()) ||
-		providerBalanceA < p.ProviderBalanceRequirement() {
+	if !isClientBalAvailable || !isProviderBalAvailable {
 		return false
 	}
 
@@ -120,20 +119,37 @@ func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Addres
 	currBalance.Impl().Available_ += amount
 }
 
+// move funds from locked in client to available in provider
+func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked addr.Address, toAvailable addr.Address, amount actor.TokenAmount) {
+	fromB := st.Balances()[fromLocked]
+	toB := st.Balances()[toAvailable]
+
+	if fromB.Locked() < amount {
+		rt.Abort("attempt to lock funds greater than actor has")
+		return
+	}
+
+	fromB.Impl().Locked_ -= amount
+	toB.Impl().Available_ += amount
+}
+
+func (st *StorageMarketActorState_I) _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool {
+	bal := st.Balances()[a]
+	return bal.Available() >= amount
+}
+
 func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal) {
 	p := deal.Proposal()
 
 	st._lockBalance(rt, p.Client(), p.ClientBalanceRequirement())
 	st._lockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
-
 }
 
 func (st *StorageMarketActorState_I) _processStorageDealPayment(rt Runtime, deal deal.StorageDeal, duration block.ChainEpoch) {
 	p := deal.Proposal()
 
-	// move funds from locked in client to available in provider
-	st.Balances()[p.Client()].Impl().Locked_ -= actor.TokenAmount(uint64(p.StoragePricePerEpoch()) * uint64(duration))
-	st.Balances()[p.Provider()].Impl().Available_ += actor.TokenAmount(uint64(p.StoragePricePerEpoch()) * uint64(duration))
+	amount := actor.TokenAmount(uint64(p.StoragePricePerEpoch()) * uint64(duration))
+	st._transferBalance(rt, p.Client(), p.Provider(), amount)
 }
 
 func (st *StorageMarketActorState_I) _settleExpiredStorageDeal(rt Runtime, deal deal.StorageDeal) {
@@ -211,7 +227,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	// all later storage deals will return error
 	// TODO: confirm st here will be changing
 	for i, newDeal := range newStorageDeals {
-		if st._verifyStorageDeal(rt, newDeal) {
+		if st._validateNewStorageDeal(rt, newDeal) {
 			st._lockFundsForStorageDeal(rt, newDeal)
 			id := st._generateStorageDealID(rt, newDeal)
 			st.Deals()[id] = newDeal
@@ -283,13 +299,8 @@ func (a *StorageMarketActorCode_I) GetLastDealExpirationFromDealIDs(rt Runtime, 
 			rt.Abort("dealID not found.")
 		}
 
-		// this function is also called at sma.PublishStorageDeals()
-		// TODO: decide if we want to refactor this
-		// check balances, deal and proposal expiration, signatures
-		isDealValid := st._verifyStorageDeal(rt, deal)
-		if !isDealValid {
-			rt.Abort("invalid deal.")
-		}
+		// TODO: more checks or be convinced that it's enough to assume deals are still valid
+
 		currExpiration := deal.Proposal().EndEpoch()
 		if currExpiration > lastDealExpiration {
 			lastDealExpiration = currExpiration
