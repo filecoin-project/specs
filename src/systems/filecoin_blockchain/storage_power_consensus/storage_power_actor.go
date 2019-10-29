@@ -156,8 +156,6 @@ func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power bl
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
-	h, st := a.State(rt)
-
 	var msgValue actor.TokenAmount
 
 	// TODO: this should be enforced somewhere else
@@ -167,6 +165,8 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
+
+	h, st := a.State(rt)
 
 	currEntry, found := st.PowerTable()[minerID]
 
@@ -182,14 +182,14 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
-	h, st := a.State(rt)
-
 	if amount < 0 {
 		rt.Abort("negative amount.")
 	}
 
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
+
+	h, st := a.State(rt)
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
@@ -215,8 +215,6 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	peerId libp2p.PeerID,
 ) addr.Address {
 
-	h, st := a.State(rt)
-
 	// TODO: anything to check here?
 	newMiner := &PowerTableEntry_I{
 		ActivePower_:            block.StoragePower(0),
@@ -225,8 +223,6 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 		LockedPledgeCollateral_: actor.TokenAmount(0),
 	}
 
-	// TODO: commit state
-
 	// TODO: call constructor of StorageMinerActor
 	// store ownerAddr and workerAddr there
 	// and return StorageMinerActor address
@@ -234,6 +230,9 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	// TODO: minerID should be a MinerActorID
 	// which is smaller than MinerAddress
 	var minerID addr.Address
+
+	h, st := a.State(rt)
+
 	st.PowerTable()[minerID] = newMiner
 
 	UpdateRelease(rt, h, st)
@@ -244,10 +243,10 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Address) {
 
-	h, st := a.State(rt)
-
 	// TODO: make explicit address type
 	var minerID addr.Address
+
+	h, st := a.State(rt)
 
 	if (st.PowerTable()[minerID].ActivePower() + st.PowerTable()[minerID].InactivePower()) > 0 {
 		rt.Abort("power still remains.")
@@ -260,9 +259,10 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Ad
 
 func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
 
+	totalPower := block.StoragePower(0)
+
 	h, st := a.State(rt)
 
-	totalPower := block.StoragePower(0)
 	for _, miner := range st.PowerTable() {
 		totalPower = totalPower + miner.ActivePower() + miner.InactivePower()
 	}
@@ -274,12 +274,12 @@ func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
 
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bool {
 
-	h, st := a.State(rt)
-
 	ret := false
 
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
+
+	h, st := a.State(rt)
 
 	powerEntry, found := st.PowerTable()[minerID]
 
@@ -303,9 +303,9 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bo
 
 func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report FaultReport) {
 
-	h, st := a.State(rt)
-
 	var msgSender addr.Address // TODO replace this
+
+	h, st := a.State(rt)
 
 	declaredFaultSlash := report.GetDeclaredFaultSlash()
 	detectedFaultSlash := report.GetDetectedFaultSlash()
@@ -318,10 +318,10 @@ func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report FaultRep
 
 func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
 
-	h, st := a.State(rt)
-
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
+
+	h, st := a.State(rt)
 
 	powerEntry, found := st.PowerTable()[minerID]
 
@@ -350,7 +350,6 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 // TODO: add Surprise to the chron actor
 func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) []addr.Address {
-	h, st := a.State(rt)
 
 	surprisedMiners := []addr.Address{}
 
@@ -364,6 +363,8 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) []ad
 	// The current currBlockHeight
 	// TODO: should be found in vm context
 	// var currBlockHeight util.UInt
+
+	h, st := a.State(rt)
 
 	// The number of miners that are challenged at this block
 	challengeCount := uint(len(st.PowerTable())) / provingPeriod
