@@ -150,7 +150,7 @@ watch-hugo: .PHONY
 clean-hugo: .PHONY
 	rm -rf hugo/content/docs
 
-all-orient: .PHONY
+all-orient: .PHONY orient
 	bin/build-spec-orient.sh
 
 ORIENT_FILES=$(shell find src -name '*.orient')
