@@ -1,0 +1,59 @@
+FastPoRep:
+  declare(rig_ram_gb, gb)
+  declare(block_time, seconds)
+  declare(drg_layers, drg_layers)
+  declare(drg_d, ratio)
+  declare(num_parallel_encoding, integer)
+  declare(encoding_time, seconds)
+  declare(sector_size_gb, gb)
+  declare(rig_cores, integer)
+  declare(seal_throughput, gb/s)
+  declare(onboard_storage, gb)
+  declare(onboard_time, seconds)
+  declare(onboard_time_hours, hours)
+  declare(onboard_time_days, days)
+  declare(rig_size, integer)
+  declare(onboard_storage_tb, tb)
+  declare(sealing_per_gb, s/gb)
+  declare(node_gen_time, seconds)
+  declare(rig_storage_latency, seconds)
+  declare(challenges, integer)
+  declare(hashes_per_node, integer)
+  declare(hashing_time, seconds)
+  declare(response_honest, seconds)
+  declare(response_malicious, seconds)
+  declare(node_size, bytes)
+  declare(nodes, nodes)
+  declare(node_gen_path, nodes)
+  declare(hashing_amax, integer)
+  declare(spacegap, ratio)
+  declare(miner_size_min, gb)
+  declare(miner_sectors_min, integer)
+
+  miner_size_min = 100 * 1024
+  miner_sectors_min = miner_size_min / sector_size_gb
+
+  Encoding:
+    nodes = (sector_size_gb * 1024 * 1024 * 1024) / node_size
+    encoding_time = nodes * hashes_per_node * hashing_time * drg_layers
+
+  Throughput:
+    num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
+    rig_cores = num_parallel_encoding
+    seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
+
+  Response:
+    Malicious:
+      node_gen_path = drg_d * nodes
+      node_gen_time = node_gen_path * hashes_per_node * hashing_time / hashing_amax
+      response_malicious = node_gen_time * challenges
+
+    Honest:
+      response_honest = challenges * rig_storage_latency
+
+  Onboarding:
+    onboard_storage = seal_throughput * onboard_time
+    onboard_storage_tb = onboard_storage / 1000
+    onboard_time_hours = onboard_time / (60 * 60)
+    onboard_time_days = onboard_time / (60 * 60 * 24)
+
