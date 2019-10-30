@@ -3,7 +3,6 @@ import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 
-type CID ipld.CID
 type StorageDeal struct {}
 type RetrievalDeal struct {}
 
@@ -47,7 +46,7 @@ type DataTransferChannel struct {
     // an identifier for this channel shared by request and responder, set by requestor through protocol
     transferID  TransferID
     // base CID for the piece being transferred
-    PieceRef    CID
+    PieceRef    ipld.CID
     // portion of Piece to return, specified by an IPLD selector
     Selector    ipld.Selector
     // used to verify this channel
@@ -90,13 +89,13 @@ type RequestValidator struct {
     ValidatePush(
         sender    libp2p.PeerID
         voucher   DataTransferVoucher
-        PieceRef  CID
+        PieceRef  ipld.CID
         Selector  ipld.Selector
     )
     ValidatePull(
         receiver  libp2p.PeerID
         voucher   DataTransferVoucher
-        PieceRef  CID
+        PieceRef  ipld.CID
         Selector  ipld.Selector
     )
 }
@@ -113,7 +112,7 @@ type DataTransferSubsystem struct @(mutable) {
     OpenPushDataChannel(
         to        libp2p.PeerID
         voucher   DataTransferVoucher
-        PieceRef  CID
+        PieceRef  ipld.CID
         Selector  ipld.Selector
     ) ChannelID
 
@@ -122,7 +121,7 @@ type DataTransferSubsystem struct @(mutable) {
     OpenPullDataChannel(
         to        libp2p.PeerID
         voucher   DataTransferVoucher
-        PieceRef  CID
+        PieceRef  ipld.CID
         Selector  ipld.Selector
     ) ChannelID
 
