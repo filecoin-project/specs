@@ -34,11 +34,11 @@ type SealVerifyInfo struct {
 // state tree but will be verified in sm.CommitSector. See SealCommitment for
 // data stored on the state tree for each sector.
 type OnChainSealVerifyInfo struct {
-    SealedCID         SealedSectorCID  // CommR
-    Epoch             block.ChainEpoch
-    InteractiveEpoch  block.ChainEpoch
-    Proof             SealProof
-    DealIDs           [deal.DealID]
+    SealedCID                  SealedSectorCID  // CommR
+    SealRandomness
+    InteractiveSealRandomness
+    Proof                      SealProof
+    DealIDs                    [deal.DealID]
     SectorNumber
 }
 
@@ -48,6 +48,19 @@ type SealCommitment struct {
     SealedCID   SealedSectorCID  // CommR
     DealIDs     [deal.DealID]
     Expiration  block.ChainEpoch
+}
+
+type SectorPreCommitInfo struct {
+    SectorNumber
+    SealedCID       SealedSectorCID  // CommR
+    SealRandomness
+    DealIDs         [deal.DealID]
+}
+
+type SectorProveCommitInfo struct {
+    SectorNumber
+    Proof SealProof
+    InteractiveSealRandomness
 }
 
 // ProofAux is meta data required to generate certain proofs
