@@ -20,7 +20,7 @@ Much of the Storage Power Consensus' subsystem functionality is detailed in the 
 
 {{< readfile file="storage_power_consensus_subsystem.id" code="true" lang="go" >}}
 
-## Distinguishing between storage miners and block miners
+# Distinguishing between storage miners and block miners
 
 There are two ways to earn Filecoin tokens in the Filecoin network:
 - By participating in the {{<sref storage_market>}} as a storage provider and being paid by clients for file storage deals.
@@ -30,12 +30,12 @@ We must distinguish between both types of "miners" (storage and block miners). {
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
 
-## Repeated leader election attempts
+# Repeated leader election attempts
 
 In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid `ElectionProof` and trying again.
 
 {{<label ticket_chain>}}
-### The Ticket chain and randomness on-chain
+## The Ticket chain and randomness on-chain
 
 While each Filecoin block header contains a ticket field (see {{<sref tickets>}}), it is useful to provide nodes with a ticket chain abstraction.
 
@@ -82,7 +82,7 @@ Because a Tipset can contain multiple blocks, the smallest ticket in the Tipset 
 
 In the above diagram, a miner will use block A's Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.
 
-## Drawing randomness for sector commitments
+# Drawing randomness for sector commitments
 
 Tickets are used as input to the SEAL above in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).
 
@@ -103,15 +103,15 @@ We expect Filecoin will be able to produce estimates for sector commitment time 
 `(estimate, variance) <--- SEALTime(sectors)`
 G and T will be selected using these.
 
-#### Picking a Ticket to Seal
+## Picking a Ticket to Seal
 
 When starting to prepare a SEAL in round X, the miner should draw a ticket from X-F with which to compute the SEAL.
 
-#### Verifying a Seal's ticket
+## Verifying a Seal's ticket
 
 When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds [Z-T-F-G, Z-T-F+G].
 
-#### In Detail
+## In Detail
 
 ```
                                Prover
