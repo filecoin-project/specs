@@ -543,36 +543,89 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 	return false // TODO: finish
 }
 
-func (st *StorageMinerActorState_I) _sectorExists(rt Runtime, sectorNo sector.SectorNumber) bool {
+func (st *StorageMinerActorState_I) _sectorExists(sectorNo sector.SectorNumber) bool {
 	_, found := st.Sectors()[sectorNo]
 	return found
 }
 
-// Currently deals must be posted on chain via sma.PublishStorageDeals before CommitSector
-// TODO(optimization): CommitSector could contain a list of deals that are not published yet.
-func (a *StorageMinerActorCode_I) CommitSector(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) {
+// Deals must be posted on chain via sma.PublishStorageDeals before PreCommitSector
+// TODO(optimization): PreCommitSector could contain a list of deals that are not published yet.
+func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) {
+
+	// no checks needed
+	// can be called regardless of Challenged status
+
+	// TODO: might record CurrEpoch for PreCommitSector expiration
+	// in other words, a ProveCommitSector must be on chain X Epoch after a PreCommitSector goes on chain
+	// TODO: might take collateral in case no ProveCommit follows within sometime
+	// TODO: collateral also penalizes repeated precommit to get randomness that one likes
+	// TODO: might be a good place for Treasury
+
 	h, st := a.State(rt)
+
+	_, found := st.PreCommittedSectors()[info.SectorNumber()]
+
+	if found {
+		// TODO: burn some funds?
+		rt.Fatal("sm.PreCommitSector: sector already pre committed.")
+	}
+
+	sectorExists := st._sectorExists(info.SectorNumber())
+
+	if sectorExists {
+		rt.Fatal("sm.PreCommitSector: sector already exists.")
+	}
+
+	// TODO: verify every DealID has been published and not yet expired
+
+	st.PreCommittedSectors()[info.SectorNumber()] = info
+
+	h.Commit(st)
+
+}
+
+func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) {
+
+	h, st := a.State(rt)
+
+	preCommitInfo, found := st.PreCommittedSectors()[info.SectorNumber()]
+
+	if !found {
+		rt.Fatal("sm.ProveCommitSector: sector not pre committed.")
+	}
+
+	sectorExists := st._sectorExists(info.SectorNumber())
+
+	if sectorExists {
+		rt.Fatal("sm.ProveCommitSector: sector already exists.")
+	}
+
+	// TODO: check on if ProveCommitSector comes too late after PreCommitSector
+
+	onChainInfo := &sector.OnChainSealVerifyInfo_I{
+		SealedCID_:                 preCommitInfo.SealedCID(),
+		SealRandomness_:            preCommitInfo.SealRandomness(),
+		InteractiveSealRandomness_: info.InteractiveSealRandomness(),
+		Proof_:                     info.Proof(),
+		DealIDs_:                   preCommitInfo.DealIDs(),
+		SectorNumber_:              preCommitInfo.SectorNumber(),
+	}
 
 	isSealVerificationCorrect := st._isSealVerificationCorrect(rt, onChainInfo)
 	if !isSealVerificationCorrect {
-		// TODO: determine proper error here and error-handling machinery
-		rt.Fatal("Seal verification failed")
+		rt.Fatal("sm.ProveCommitSector: seal verification failed.")
 	}
 
 	// TODO: check EnsurePledgeCollateralSatisfied
 	// pledgeCollateralSatisfied
-
-	sectorExists := st._sectorExists(rt, onChainInfo.SectorNumber())
-	if sectorExists {
-		// TODO: determine proper error here and error-handling machinery
-		rt.Fatal("Sector already exists")
-	}
 
 	// determine lastDealExpiration from sma
 	// TODO: proper onchain transaction
 	// lastDealExpiration := SendMessage(sma, GetLastDealExpirationFromDealIDs(onChainInfo.DealIDs()))
 	var lastDealExpiration block.ChainEpoch
 
+	// Note: in the current iteration, a Sector expires only when all storage deals in it have expired.
+	// This is likely to change but it aims to meet user requirement that users can enter into deals of any size.
 	// add sector expiration to SectorExpirationQueue
 	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
 		SectorNumber_: onChainInfo.SectorNumber(),
@@ -580,7 +633,7 @@ func (a *StorageMinerActorCode_I) CommitSector(rt Runtime, onChainInfo sector.On
 	})
 
 	// no need to store the proof and randomseed in the state tree
-	// verify and drop, only SealCommitments{CommR, DealIDs} on chain
+	// verify and drop, only SealCommitment{CommR, DealIDs} on chain
 	sealCommitment := &sector.SealCommitment_I{
 		SealedCID_:  onChainInfo.SealedCID(),
 		DealIDs_:    onChainInfo.DealIDs(),
@@ -596,18 +649,23 @@ func (a *StorageMinerActorCode_I) CommitSector(rt Runtime, onChainInfo sector.On
 	}
 
 	if st._isChallenged(rt) {
-		// Add Sector to StagedCommittedSectors
+		// move PreCommittedSector to StagedCommittedSectors if in Challenged status
 		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 	} else {
+		// move PreCommittedSector to CommittedSectors if not in Challenged status
 		st.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 		st.Impl().ProvingSet_.Add(onChainInfo.SectorNumber())
 		st.SectorTable().Impl().CommittedSectors_ += 1
 	}
 
+	// now remove SectorNumber from PreCommittedSectors
+	delete(st.PreCommittedSectors(), onChainInfo.SectorNumber())
+
 	h.Commit(st)
 
 	// TODO: verify no need to ProcessPowerReport here
 	// PowerReport get processed at SubmitPoSt
+
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {
