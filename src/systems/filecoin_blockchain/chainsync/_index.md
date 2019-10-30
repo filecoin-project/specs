@@ -343,10 +343,12 @@ State Machine:
 - Validation computation is considerable, and a serious DOS attack vector.
 - Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.
 - `ChainSync` SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by `FinalityTipset`, or when `ChainSync` is under significant resource load.
+- It is key to note that any block received after the `ROUND_CUTOFF` time must be automatically discarded by the miner until the start of the next epoch.
+
 - **Progressive Stages of Block Validation**
   - _(TODO: move this to blockchain/Block section)_
   - **BV0 - Syntactic Validation**: Validate data structure packing and ensure correct typing.
-  - **BV1 - Light Consensus State Checks**: Validate `b.ChainWeight`, `b.ChainEpoch`, `b.MinerAddress`, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at `b.ChainEpoch - consensus.LookbackParameter`. Eg Weight and Epoch have well defined valid ranges, and `b.MinerAddress`
+  - **BV1 - Light Consensus State Checks**: Validate `b.ChainWeight`, `b.ChainEpoch`, `b.MinerAddress`, `b.Timestamp`, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at `b.ChainEpoch - consensus.LookbackParameter`. Eg Weight and Epoch have well defined valid ranges, and `b.MinerAddress`
   must exist in the lookback state). This requires some chain state, enough to establish plausibility levels of each of these values. A node should be able to estimate valid ranges for `b.ChainEpoch` based on the `LastTrustedCheckpoint`. `b.ChainWeight` is easy if some of the relatively recent chain is available, otherwise hard.
   - **BV2 - Signature Validation**: Verify `b.BlockSig` is correct.
   - **BV3 - Verify ElectionProof**: Verify `b.ElectionProof` is correct. This requires having state for relevant lookback parameters.

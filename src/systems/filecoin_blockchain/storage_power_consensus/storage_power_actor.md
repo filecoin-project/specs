@@ -4,7 +4,6 @@ title: Storage Power Actor
 
 {{< readfile file="storage_power_actor.id" code="true" lang="go" >}}
 
-
 {{<label power_table>}}
 ## The Power Table
 
@@ -28,6 +27,7 @@ The Miner lifecycle in the power table should be roughly as follows:
     - Power is decremented immediately after faults are declared, proportional to the faulty sector size.
     - Power is incremented after a PoSt recovering from a fault.
     - Power is definitively removed from the Power Table past the sector failure timeout (see {{<sref storage_faults>}})
+To summarize, only sectors in the Active state will command power. A Sector becomes Active after their first PoSt from Committed and Recovering stages. Power is immediately decremented when an Active Sector enters the Failing state (through DeclareFaults or Cron) and when an Active Sector expires.
 
 {{<label pledge_collateral>}}
 ## Pledge Collateral
