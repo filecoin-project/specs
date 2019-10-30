@@ -68,12 +68,6 @@ type VMContext struct {
 	_output           msg.InvocOutput
 }
 
-const (
-	Reserved_NoopMethod        actor.MethodNum = 0
-	Reserved_CronMethod        actor.MethodNum = 1
-	Reserved_ConstructorMethod actor.MethodNum = 2
-)
-
 func VMContext_Make(
 	globalState st.StateTree,
 	actorAddress addr.Address,
@@ -312,7 +306,7 @@ func _invokeMethodInternal(
 	method actor.MethodNum,
 	params actor.MethodParams) (ret InvocOutput, gasUsed msg.GasAmount) {
 
-	if method == Reserved_NoopMethod {
+	if method == actor.MethodSend {
 		ret = msg.InvocOutput_Make(exitcode.OK(), nil)
 		gasUsed = msg.GasAmount_Zero() // TODO: verify
 		return

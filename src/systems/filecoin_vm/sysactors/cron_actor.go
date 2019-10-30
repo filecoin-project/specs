@@ -15,12 +15,12 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 	// a.actors is basically a static registry for now, loaded
 	// in the interpreter static registry.
 	for _, a := range a.Actors() {
-		rt.SendAllowingErrors(msg.InvocInput_Make(
-			a,
-			vmr.Reserved_CronMethod,
-			[]actor.MethodParam{},
-			actor.TokenAmount(0)),
-		)
+		rt.SendAllowingErrors(&msg.InvocInput_I{
+			To_:     a,
+			Method_: actor.MethodCron,
+			Params_: []actor.MethodParam{},
+			Value_:  actor.TokenAmount(0),
+		})
 	}
 
 	return rt.SuccessReturn()
@@ -28,7 +28,7 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 
 func (a *CronActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	switch method {
-	case vmr.Reserved_CronMethod:
+	case actor.MethodCron:
 		rt.Assert(len(params) == 0)
 		return a.EpochTick(rt)
 	default:
