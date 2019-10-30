@@ -7,7 +7,7 @@ Compute:
 
   declare(hash_gbs_fastest, gb/s)
   describe(hash_gbs_fastest, "GB that can be hashed in a second by the fastest possible hardware")
-  hash_gbs_fastest = hash_gbs / hash_time_amax
+  hash_gbs_fastest = hash_gbs * hash_time_amax
 
   describe(hash_time_single_node, "Time it takes to hash a single node")
   hash_time_single_node = node_size_gb / hash_gbs_fastest
