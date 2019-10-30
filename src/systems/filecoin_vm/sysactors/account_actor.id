@@ -1,12 +1,10 @@
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+
+type AccountActorCode struct {
+    // SignedByKey(sig)
+}
 
 type AccountActorState struct {
     // normal keypair backed accounts
     Address addr.Address
-}
-
-type AccountActor struct {
-    actorState    actor.ActorState
-    accountState  AccountActorState
 }
