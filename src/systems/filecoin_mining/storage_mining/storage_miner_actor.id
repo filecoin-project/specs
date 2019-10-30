@@ -120,6 +120,8 @@ type StorageMinerActorCode struct {
     _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
 
     // _computeProvingPeriodEndSectorState(rt Runtime)  // TODO
+
+    _expirePreCommittedSectors(rt Runtime)
 }
 
 type MinerInfo struct {
