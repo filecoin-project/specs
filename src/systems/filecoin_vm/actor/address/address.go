@@ -36,3 +36,10 @@ func (a *Address_I) String() AddressString {
 func (a *Address_I) IsKeyType() bool {
 	panic("TODO")
 }
+
+func MakeAddress(net Address_NetworkID, t Address_Type) Address {
+	return &Address_I{
+		NetworkID_: net,
+		Type_:      t,
+	}
+}

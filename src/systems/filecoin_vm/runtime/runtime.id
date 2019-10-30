@@ -47,7 +47,11 @@ type Runtime interface {
     SendAllowingErrors(input msg.InvocInput) msg.MessageReceipt
 
     // Create an actor in the state tree. May only be called by InitActor.
-    CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams)
+    CreateActor(
+        cid                actor.StateCID
+        a                  addr.Address
+        constructorParams  actor.MethodParams
+    )
 
     IpldGet(c ipld.CID) union {Bytes, error}
     IpldPut(x ipld.Object) ipld.CID

@@ -68,12 +68,6 @@ type VMContext struct {
 	_output           msg.InvocOutput
 }
 
-const (
-	Reserved_NoopMethod        actor.MethodNum = 0
-	Reserved_CronMethod        actor.MethodNum = 1
-	Reserved_ConstructorMethod actor.MethodNum = 2
-)
-
 func VMContext_Make(
 	globalState st.StateTree,
 	actorAddress addr.Address,
@@ -106,9 +100,22 @@ func _generateActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Ad
 	panic("TODO")
 }
 
-func (rt *VMContext) CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
+func (rt *VMContext) CreateActor(stateCID actor.StateCID, address addr.Address, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
 	rt.ValidateCallerIs(addr.InitActorAddr)
-	// TODO: _generateActorAddress
+
+	// TODO: set actor state in global states
+	// rt._globalStatePending.ActorStates()[address] = stateCID
+
+	// TODO: call constructor
+	// TODO: can constructors fail?
+	// TODO: maybe do this directly form InitActor, and only do the StateTree.ActorStates() updating here?
+	rt.Send(&msg.InvocInput_I{
+		To_:     address,
+		Method_: actor.MethodConstructor,
+		Params_: constructorParams,
+		Value_:  rt.ValueSupplied(),
+	})
+
 	// TODO: finish
 	panic("TODO")
 }
@@ -299,7 +306,7 @@ func _invokeMethodInternal(
 	method actor.MethodNum,
 	params actor.MethodParams) (ret InvocOutput, gasUsed msg.GasAmount) {
 
-	if method == Reserved_NoopMethod {
+	if method == actor.MethodSend {
 		ret = msg.InvocOutput_Make(exitcode.OK(), nil)
 		gasUsed = msg.GasAmount_Zero() // TODO: verify
 		return
