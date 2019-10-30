@@ -10,15 +10,15 @@ func (self *BLS_I) Verify(input util.Bytes, pk PublicKey, sig util.Bytes) (valid
 	// 	https://tools.ietf.org/html/draft-boneh-bls-signature-00#page-8
 }
 
-func (self *BLS) Sign(input util.Bytes, sk *PrivateKey) bool {
+func (self *BLS_I) Sign(input util.Bytes, sk *SecretKey) bool {
 	panic("see 2.3 in https://tools.ietf.org/html/draft-boneh-bls-signature-00#page-8")
 
 }
 
-func (self *BLS) Aggregate(sig2 util.Bytes) util.Bytes {
+func (self *BLS_I) Aggregate(sig2 util.Bytes) util.Bytes {
 	panic("see 2.5 in https://tools.ietf.org/html/draft-boneh-bls-signature-00#page-8")
 }
 
-func (self *BLS) VerifyAggregate(messages []util.Bytes, aggPk PublicKey, aggSig util.Bytes) (valid bool, err error) {
+func (self *BLS_I) VerifyAggregate(messages []util.Bytes, aggPk PublicKey, aggSig util.Bytes) (valid bool, err error) {
 	panic("see 2.5.2 in https://tools.ietf.org/html/draft-boneh-bls-signature-00#page-9")
 }
