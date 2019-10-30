@@ -22,6 +22,9 @@ exhaustive list):
 To generate a signature for the [`Message`](data-structures.md#message) type,
 first serialize it, then hash the serialized bytes with blake2b-256. Then, take
 the 32 byte digest output the hash and compute the signature over it.
+**Note**: for each specific use of a signature scheme, it is recommended to use
+a domain separation tag to treat the hash function as an independent random
+oracle. These tags are indicated in the relevant places throughout the specs.
 
 ## Signature Types
 
@@ -92,7 +95,9 @@ signatures**.
 explained in the [RFC Section
 2.6.1](https://tools.ietf.org/html/draft-boneh-bls-signature-00#section-2.6.1). 
 
-**Rationale**: BLS signatures have two main characteristics that are making them ideal candidates in recent blockchain systems:
+**Rationale**: 
+BLS signatures have two main characteristics that are making them ideal
+candidates in recent blockchain systems:
 - BLS signatures are deterministic: for a given message and a given secret key,
   the signature is always the same.  That feature removes an important security 
   weakness of most randomized signature schemes: signer must never re-use the
