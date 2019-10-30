@@ -8,21 +8,24 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-	address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(
-	ownerAddr address.Address,
-	workerAddr address.Address,
+	ownerAddr addr.Address,
+	workerAddr addr.Address,
 	sectorSize util.UInt,
 	peerId libp2p.PeerID,
-) address.Address {
+) addr.Address {
 	// ownerAddr := sms.generateOwnerAddress(workerPubKey)
 	// var pledgeAmt actor.TokenAmount TODO: unclear how to pass the amount/pay
 	// TODO compute PledgeCollateral for 0 bytes
 	// return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
-	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerAddr, peerId)
+	// TODO: access this from runtime
+	// return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerAddr, peerId)
+	var minerAddr addr.Address
+	return minerAddr
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
@@ -35,7 +38,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) address.Address {
+func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) addr.Address {
 	panic("TODO")
 }
 

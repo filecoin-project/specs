@@ -17,58 +17,62 @@ type PowerReport struct {
 }
 
 type FaultReport struct {
-    NewDeclaredFaults    util.UVarint  // diff value
-    NewDetectedFaults    util.UVarint  // diff value
-    NewTerminatedFaults  util.UVarint  // diff value
+    NewDeclaredFaults          util.UVarint  // diff value
+    NewDetectedFaults          util.UVarint  // diff value
+    NewTerminatedFaults        util.UVarint  // diff value
+
+    GetDeclaredFaultSlash()    actor.TokenAmount
+    GetDetectedFaultSlash()    actor.TokenAmount
+    GetTerminatedFaultSlash()  actor.TokenAmount
 }
 
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
-type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: covert ActorID to address
+type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
 
-// TODO: Diagram for state transition to someones power
-// TODO: increment and decrement?
 // TODO: What does graceful removal look like?
 
-type StoragePowerActor struct {
+type StoragePowerActorState struct {
     // PowerTable is a mapping from MinerActorID to PowerTableEntry
     PowerTable  PowerTableHAMT
     EC          ExpectedConsensus
 
+    _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
+    _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
+    _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
+    _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount
+    _sampleMinersToSurprise(rt Runtime, challengeCount int) [addr.Address]
+}
+
+type StoragePowerActorCode struct {
+    AddBalance(rt Runtime)
+    WithdrawBalance(rt Runtime, amount actor.TokenAmount)
+
     // call by StorageMiningSubsytem on miner creation
     CreateStorageMiner(
         // TODO: document differences in Addr, Key and ID accross spec
+        rt          Runtime
         ownerAddr   addr.Address
         workerAddr  addr.Address
         peerId      libp2p.PeerID  // TODO: will be removed likely (see: https://github.com/filecoin-project/specs/pull/555#pullrequestreview-300991681)
     ) addr.Address
 
-    RemoveStorageMiner(addr addr.Address)
-    verifyStorageMiner(addr addr.Address) bool
+    RemoveStorageMiner(rt Runtime, addr addr.Address)
 
     // PowerTable Operations
-    GetTotalPower() block.StoragePower
+    GetTotalPower(rt Runtime) block.StoragePower
 
-    GetPledgeCollateralReq(newPower block.StoragePower) actor.TokenAmount
-    EnsurePledgeCollateralSatisfied() bool
-    AddBalance()
-    WithdrawBalance(amount actor.TokenAmount)
+    EnsurePledgeCollateralSatisfied(rt Runtime) bool
 
-    getDeclaredFaultSlash(amount util.UVarint) actor.TokenAmount
-    getDetectedFaultSlash(amount util.UVarint) actor.TokenAmount
-    getTerminatedFaultSlash(amount util.UVarint) actor.TokenAmount
-    slashPledgeCollateral(address addr.Address, amount actor.TokenAmount)
-
-    lockPledgeCollateral(address addr.Address, amount actor.TokenAmount)
-    unlockPledgeCollateral(address addr.Address, amount actor.TokenAmount)
-
-    ProcessPowerReport(report PowerReport)
+    ProcessPowerReport(rt Runtime, report PowerReport)
+    ProcessFaultReport(rt Runtime, report FaultReport)
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
+        rt         Runtime
         faultType  ConsensusFaultType
         proof      [block.Block]
     )
 
-    Surprise(ticket block.Ticket) [addr.Address]
+    Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
     // this should be part of ReportConsensusFault, numSectors should be all sectors
     // ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
 }
