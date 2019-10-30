@@ -7,6 +7,7 @@ digraph sectoRecovering {
   edge [penwidth=2]
 
   Cleared [shape=doublecircle] // doublecircle because it is the init state
+  Precommitted
 
   subgraph cluster_0 {
       label="Proving Set"
@@ -34,9 +35,13 @@ digraph sectoRecovering {
   // magenta: sm.SubmitPoSt - MaxFCount - ClearSector
   // purple: sm.CronAction - MaxFCount - ClearSector
 
-  Cleared -> Committed [color="black"]
+  Cleared -> Precommitted [color="gray"]
+  Precommitted -> Committed [color="black"]
   Committed -> Active [color="green"]
   Recovering -> Active [color="green"]
+
+  // fail to commit sector (expiry)
+  Precommitted -> Cleared [color="blue:white:purple"]
 
   // either declare Fault or miss PoSt
   Active -> Failing [color="red:gray90:orange"]
