@@ -3,17 +3,25 @@ type SecretKey Bytes
 type PublicKey Bytes
 type SignatureBytes Bytes
 
-type Signature struct {
+type SigKeyPair struct {
+    PublicKey  SigPublicKey
+    SecretKey  SigSecretKey
+
     // Sign generates a proof that miner `M` generate message `m`
     //
     // Out:
-    //    sig - a series of bytes representing a signature usually `r`|`s`
+    //    sig - a signature 
     //    err - a standard error message indicating any process issues
     // In:
     //    m - a series of bytes representing a message to be signed
-    //    sk - a private key which cryptographically links `M` to `sig`
     //
-    Sign(m Message, sk SecretKey) struct {sig SignatureBytes, err error}
+    Sign(m Message) struct {sig Signature, err error}
+}
+
+type Signature struct {
+
+    Sig SignatureBytes @(internal)
+    Type SigType @(internal)
 
     // Verify validates the statement: only `M` could have generated `sig`
     // given the validator has a message `m`, a signature `sig`, and a
@@ -25,7 +33,11 @@ type Signature struct {
     // In:
     //    m - a series of bytes representing the signed message
     //    pk - the public key belonging to the signer `M`
-    //    sig - a series of bytes representing a signature usually `r`|`s`
     //
-    Verify(m Message, pk PublicKey, sig SignatureBytes) struct {valid bool, err error}
+    Verify(m Message, pk PublicKey) struct {valid bool, err error}
+}
+
+type SigType enum {
+    BLSSigType
+    ECDSASigType
 }
