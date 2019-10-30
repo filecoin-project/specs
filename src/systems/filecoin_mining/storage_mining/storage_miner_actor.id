@@ -45,7 +45,12 @@ type ChallengeStatus struct {
     IsChallenged()         bool
 }
 
-type PreCommittedSectorsAMT {sector.SectorNumber: sealing.SectorPreCommitInfo}
+type PreCommittedSector struct {
+    Info           sealing.SectorPreCommitInfo
+    ReceivedEpoch  block.ChainEpoch
+}
+
+type PreCommittedSectorsAMT {sector.SectorNumber: PreCommittedSector}
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 

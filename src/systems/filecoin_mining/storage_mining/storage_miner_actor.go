@@ -578,7 +578,12 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 	// TODO: verify every DealID has been published and not yet expired
 
-	st.PreCommittedSectors()[info.SectorNumber()] = info
+	precommittedSector := &PreCommittedSector_I{
+		Info_:           info,
+		ReceivedEpoch_:  rt.CurrEpoch(),
+	}
+
+	st.PreCommittedSectors()[info.SectorNumber()] = precommittedSector
 
 	h.Commit(st)
 
@@ -588,7 +593,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	h, st := a.State(rt)
 
-	preCommitInfo, found := st.PreCommittedSectors()[info.SectorNumber()]
+	preCommitSector, found := st.PreCommittedSectors()[info.SectorNumber()]
 
 	if !found {
 		rt.Fatal("sm.ProveCommitSector: sector not pre committed.")
@@ -603,12 +608,12 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// TODO: check on if ProveCommitSector comes too late after PreCommitSector
 
 	onChainInfo := &sector.OnChainSealVerifyInfo_I{
-		SealedCID_:                 preCommitInfo.SealedCID(),
-		SealRandomness_:            preCommitInfo.SealRandomness(),
-		InteractiveSealRandomness_: info.InteractiveSealRandomness(),
-		Proof_:                     info.Proof(),
-		DealIDs_:                   preCommitInfo.DealIDs(),
-		SectorNumber_:              preCommitInfo.SectorNumber(),
+		SealedCID_:         preCommitSector.Info().SealedCID(),
+		SealEpoch_:         preCommitSector.Info().SealEpoch(),
+		InteractiveEpoch_:  info.InteractiveEpoch(),
+		Proof_:             info.Proof(),
+		DealIDs_:           preCommitSector.Info().DealIDs(),
+		SectorNumber_:      preCommitSector.Info().SectorNumber(),
 	}
 
 	isSealVerificationCorrect := st._isSealVerificationCorrect(rt, onChainInfo)
