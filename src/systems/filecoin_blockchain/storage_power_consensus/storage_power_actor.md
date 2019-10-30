@@ -2,10 +2,17 @@
 title: Storage Power Actor
 ---
 
+# `StoragePowerActor` interface
+
 {{< readfile file="storage_power_actor.id" code="true" lang="go" >}}
 
+# `StoragePowerActor` implementation
+
+{{< readfile file="storage_power_actor.go" code="true" lang="go" >}}
+
+
 {{<label power_table>}}
-## The Power Table
+# The Power Table
 
 The portion of blocks a given miner generates through leader election in EC (and so the block rewards they earn) is proportional to their `Power Fraction` over time. That is, a miner whose storage represents 1% of total storage on the network should mine 1% of blocks on expectation.
 
@@ -30,7 +37,7 @@ The Miner lifecycle in the power table should be roughly as follows:
 To summarize, only sectors in the Active state will command power. A Sector becomes Active after their first PoSt from Committed and Recovering stages. Power is immediately decremented when an Active Sector enters the Failing state (through DeclareFaults or Cron) and when an Active Sector expires.
 
 {{<label pledge_collateral>}}
-## Pledge Collateral
+# Pledge Collateral
 
 Consensus in Filecoin is secured in part by economic incentives enforced by Pledge Collateral.
 
