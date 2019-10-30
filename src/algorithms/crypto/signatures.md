@@ -36,7 +36,7 @@ Filecoin currently uses two types of signatures:
 Both signature types fulfill the `Signature` interface 
 and each type have additional functionality as explained below.
 
-TODO: link with signatures.id file
+{{< readfile file="signatures.id" code="true" lang="go" >}}
 
 ### ECDSA Signatures
 
@@ -48,7 +48,7 @@ useful functionality as well: to recover the public key from a given signature.
 That feature can allow to save space on the blockchain by extracting the public
 key locally from the signature rather than specify an ID of the public key.
 
-TODO: link with ecdsa.id file
+{{< readfile file="ecdsa.id" code="true" lang="go" >}}
 
 **Wire Format**: Filecoin uses the standard secp256k1 signature serialization,
 as described below. For more details on how the Filecoin `Signature` type is
@@ -78,7 +78,8 @@ SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 
 Filecoin uses the [BLS signature scheme](https://datatracker.ietf.org/doc/draft-boneh-bls-signature/) over the [BLS12-381](BLS12-381](https://electriccoin.co/blog/new-snark-curve/) group of elliptic curves. You can find the default Rust implementation in [Filecoin's repo](https://github.com/filecoin-project/bls-signatures/).
 
-TODO: link with bls.id file
+{{< readfile file="bls.id" code="true" lang="go" >}}
+{{< readfile file="bls.go" code="true" lang="go" >}}
 
 **Choice of group**: The BLS signature requires the use of a pairing-equipped
 curve which generally yield three groups: G_1, G_2 and G_T. In the BLS signature

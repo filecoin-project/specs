@@ -4,8 +4,8 @@ type PublicKey Bytes
 type SignatureBytes Bytes
 
 type SigKeyPair struct {
-    PublicKey  SigPublicKey
-    SecretKey  SigSecretKey
+    PublicKey  PublicKey
+    SecretKey  SecretKey
 
     // Sign generates a proof that miner `M` generate message `m`
     //
