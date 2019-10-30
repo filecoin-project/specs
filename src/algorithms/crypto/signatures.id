@@ -4,8 +4,8 @@ type PublicKey Bytes
 type SignatureBytes Bytes
 
 type SigKeyPair struct {
-    PublicKey  PublicKey
-    SecretKey  SecretKey
+    PublicKey
+    SecretKey
 
     // Sign generates a proof that miner `M` generate message `m`
     //
@@ -19,9 +19,8 @@ type SigKeyPair struct {
 }
 
 type Signature struct {
-
-    Sig SignatureBytes @(internal)
-    Type SigType @(internal)
+    Sig   SignatureBytes  @(internal)
+    Type  SigType         @(internal)
 
     // Verify validates the statement: only `M` could have generated `sig`
     // given the validator has a message `m`, a signature `sig`, and a

@@ -4,7 +4,7 @@ package storage_mining
 // import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
-	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
@@ -38,7 +38,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) addr.Address {
+func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PublicKey) address.Address {
 	panic("TODO")
 }
 

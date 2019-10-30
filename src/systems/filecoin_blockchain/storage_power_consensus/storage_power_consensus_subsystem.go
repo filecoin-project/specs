@@ -1,7 +1,7 @@
 package storage_power_consensus
 
 import (
-	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -56,7 +56,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) 
 	// return nil
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.PubKey) bool {
+func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.PublicKey) bool {
 	panic("")
 	// T1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 	// input := VRFPersonalizationTicket

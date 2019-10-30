@@ -1,8 +1,11 @@
+type VRFPublicKey PublicKey
+type VRFSecretKey SecretKey
+
 // VRFKeyPair holds the private key and respectively the public key to create 
 // and respectively verify a VRF output.
 type VRFKeyPair struct {
-    PublicKey
-    SecretKey
+    VRFPublicKey
+    VRFSecretKey
 
     // Generate a VRF from the given input with the SecretKey that can be
     // verified with the PublicKey
@@ -10,7 +13,9 @@ type VRFKeyPair struct {
 }
 
 type VRFResult struct {
-    Output Bytes @(internal)
+    Output            Bytes  @(internal)
 
-    Verify(input Bytes, pk PublicKey) struct { valid bool, err error }
+    ValidateSyntax()  bool
+
+    Verify(input Bytes, pk VRFPublicKey) bool
 }
