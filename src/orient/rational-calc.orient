@@ -20,6 +20,8 @@ Storage:
   cost_storage_gb_polling_time = cost_storage_gbs * (sector_size_gb * polling_time)
 
 Attack:
+  nodes = (sector_size_gb*(1024*1024*1024)) / node_size 
   // after hashes_threshold is more expensive to hash than to keep storage
   hashes_threshold = cost_storage_gb_polling_time / cost_hash_single_node
-  depth = hashes_threshold / ((sector_size_gb*(1024*1024*1024))/node_size)
+  drg_depth = hashes_threshold / nodes 
+  node_gen_path = drg_depth * nodes 
