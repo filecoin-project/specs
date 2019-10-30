@@ -7,3 +7,5 @@ entries:
 ---
 
 {{< readfile file="actor.id" code="true" lang="go" >}}
+
+{{< readfile file="actor.go" code="true" lang="go" >}}
