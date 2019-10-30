@@ -14,9 +14,8 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 type InvocOutput = msg.InvocOutput
 type Runtime = vmr.Runtime
 type Bytes = util.Bytes
-type State = InitActorState
 
-func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
+func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
@@ -26,18 +25,18 @@ func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
 }
-func Release(rt Runtime, h vmr.ActorStateHandle, st State) {
+func Release(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 	checkCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.Release(checkCID)
 }
-func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st State) {
+func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 	newCID := actor.ActorSubstateCID(rt.IpldPut(st.Impl()))
 	h.UpdateRelease(newCID)
 }
 func (st *InitActorState_I) CID() ipld.CID {
 	panic("TODO")
 }
-func DeserializeState(x Bytes) State {
+func DeserializeState(x Bytes) InitActorState {
 	panic("TODO")
 }
 
