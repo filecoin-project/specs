@@ -23,7 +23,7 @@ func (a *StorageMinerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO: placeholder
+// TODO: placeholder epoch value -- this will be set later
 const MAX_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(3)
 
 func (st *SectorTable_I) ActivePower() block.StoragePower {
@@ -637,72 +637,73 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// check if ProveCommitSector comes too late after PreCommitSector
 	elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
 
-	// if fewer than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
-	if elapsedEpoch <= MAX_PROVE_COMMIT_SECTOR_EPOCH {
-
-		onChainInfo := &sector.OnChainSealVerifyInfo_I{
-			SealedCID_:        preCommitSector.Info().SealedCID(),
-			SealEpoch_:        preCommitSector.Info().SealEpoch(),
-			InteractiveEpoch_: info.InteractiveEpoch(),
-			Proof_:            info.Proof(),
-			DealIDs_:          preCommitSector.Info().DealIDs(),
-			SectorNumber_:     preCommitSector.Info().SectorNumber(),
-		}
-
-		isSealVerificationCorrect := st._isSealVerificationCorrect(rt, onChainInfo)
-		if !isSealVerificationCorrect {
-			rt.Fatal("sm.ProveCommitSector: seal verification failed.")
-		}
-
-		// TODO: check EnsurePledgeCollateralSatisfied
-		// pledgeCollateralSatisfied
-
-		// determine lastDealExpiration from sma
-		// TODO: proper onchain transaction
-		// lastDealExpiration := SendMessage(sma, GetLastDealExpirationFromDealIDs(onChainInfo.DealIDs()))
-		var lastDealExpiration block.ChainEpoch
-
-		// Note: in the current iteration, a Sector expires only when all storage deals in it have expired.
-		// This is likely to change but it aims to meet user requirement that users can enter into deals of any size.
-		// add sector expiration to SectorExpirationQueue
-		st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
-			SectorNumber_: onChainInfo.SectorNumber(),
-			Expiration_:   lastDealExpiration,
-		})
-
-		// no need to store the proof and randomseed in the state tree
-		// verify and drop, only SealCommitment{CommR, DealIDs} on chain
-		sealCommitment := &sector.SealCommitment_I{
-			SealedCID_:  onChainInfo.SealedCID(),
-			DealIDs_:    onChainInfo.DealIDs(),
-			Expiration_: lastDealExpiration, // TODO decide if we need this too
-		}
-
-		// add SectorNumber and SealCommitment to Sectors
-		// set Sectors.State to SectorCommitted
-		// Note that SectorNumber will only become Active at the next successful PoSt
-		sealOnChainInfo := &SectorOnChainInfo_I{
-			SealCommitment_: sealCommitment,
-			State_:          SectorCommitted(),
-		}
-
-		if st._isChallenged(rt) {
-			// move PreCommittedSector to StagedCommittedSectors if in Challenged status
-			st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
-		} else {
-			// move PreCommittedSector to CommittedSectors if not in Challenged status
-			st.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
-			st.Impl().ProvingSet_.Add(onChainInfo.SectorNumber())
-			st.SectorTable().Impl().CommittedSectors_ += 1
-		}
-	} else {
-
+	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
+	if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_EPOCH {
 		// TODO: potentially some slashing if ProveCommitSector comes late
 
+		// expired
+		delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
+		h.Commit(st)
+		return
 	}
 
-	// now remove SectorNumber from PreCommittedSectors
-	// either processed or expired
+	onChainInfo := &sector.OnChainSealVerifyInfo_I{
+		SealedCID_:        preCommitSector.Info().SealedCID(),
+		SealEpoch_:        preCommitSector.Info().SealEpoch(),
+		InteractiveEpoch_: info.InteractiveEpoch(),
+		Proof_:            info.Proof(),
+		DealIDs_:          preCommitSector.Info().DealIDs(),
+		SectorNumber_:     preCommitSector.Info().SectorNumber(),
+	}
+
+	isSealVerificationCorrect := st._isSealVerificationCorrect(rt, onChainInfo)
+	if !isSealVerificationCorrect {
+		rt.Fatal("sm.ProveCommitSector: seal verification failed.")
+	}
+
+	// TODO: check EnsurePledgeCollateralSatisfied
+	// pledgeCollateralSatisfied
+
+	// determine lastDealExpiration from sma
+	// TODO: proper onchain transaction
+	// lastDealExpiration := SendMessage(sma, GetLastDealExpirationFromDealIDs(onChainInfo.DealIDs()))
+	var lastDealExpiration block.ChainEpoch
+
+	// Note: in the current iteration, a Sector expires only when all storage deals in it have expired.
+	// This is likely to change but it aims to meet user requirement that users can enter into deals of any size.
+	// add sector expiration to SectorExpirationQueue
+	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
+		SectorNumber_: onChainInfo.SectorNumber(),
+		Expiration_:   lastDealExpiration,
+	})
+
+	// no need to store the proof and randomseed in the state tree
+	// verify and drop, only SealCommitment{CommR, DealIDs} on chain
+	sealCommitment := &sector.SealCommitment_I{
+		SealedCID_:  onChainInfo.SealedCID(),
+		DealIDs_:    onChainInfo.DealIDs(),
+		Expiration_: lastDealExpiration, // TODO decide if we need this too
+	}
+
+	// add SectorNumber and SealCommitment to Sectors
+	// set Sectors.State to SectorCommitted
+	// Note that SectorNumber will only become Active at the next successful PoSt
+	sealOnChainInfo := &SectorOnChainInfo_I{
+		SealCommitment_: sealCommitment,
+		State_:          SectorCommitted(),
+	}
+
+	if st._isChallenged(rt) {
+		// move PreCommittedSector to StagedCommittedSectors if in Challenged status
+		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
+	} else {
+		// move PreCommittedSector to CommittedSectors if not in Challenged status
+		st.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
+		st.Impl().ProvingSet_.Add(onChainInfo.SectorNumber())
+		st.SectorTable().Impl().CommittedSectors_ += 1
+	}
+
+	// now remove SectorNumber from PreCommittedSectors (processed)
 	delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 
 	h.Commit(st)
