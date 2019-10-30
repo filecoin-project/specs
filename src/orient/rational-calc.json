@@ -1,0 +1,9 @@
+{
+  "hash_cost_per_gbs": 0.15,
+  "hash_time": 0.0000000128,
+  "cost_gb_per_month": 0.23,
+  "polling_time": 15,
+  "sector_size_gb": 32,
+  "node_size": 32,
+  "hash_time_amax": 10
+}
