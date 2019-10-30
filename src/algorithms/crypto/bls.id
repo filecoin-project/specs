@@ -1,6 +1,8 @@
 // BLS implements the Signature interface using the BLS signature scheme
 // with the BLS12-381 group of elliptic curves.
 type BLS struct {
+    // This signature is the one returned from SigKeyPair.Sign(). It can be
+    // casted to a BLS signature struct to get the additional functionalities.
     Signature
 
     // Aggregates this BLS signature and `sig` into one BLS signature that can
