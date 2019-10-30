@@ -45,12 +45,19 @@ type ChallengeStatus struct {
     IsChallenged()         bool
 }
 
+type PreCommittedSector struct {
+    Info           sealing.SectorPreCommitInfo
+    ReceivedEpoch  block.ChainEpoch
+}
+
+type PreCommittedSectorsAMT {sector.SectorNumber: PreCommittedSector}
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 
 type StorageMinerActorState struct {
     // CollateralVault CollateralVault
 
+    PreCommittedSectors        PreCommittedSectorsAMT
     Sectors                    SectorsAMT
     StagedCommittedSectors     StagedCommittedSectorAMT
 
@@ -71,7 +78,7 @@ type StorageMinerActorState struct {
 
     _isChallenged(rt Runtime)  bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
-    _sectorExists(rt Runtime, sectorNo sector.SectorNumber) bool
+    _sectorExists(sectorNo sector.SectorNumber) bool
 
     _updateFailSector(
         rt                   Runtime
@@ -87,7 +94,8 @@ type StorageMinerActorState struct {
 type StorageMinerActorCode struct {
     NotifyOfPoStChallenge(rt Runtime)
 
-    CommitSector(rt Runtime, onChainInfo sealing.OnChainSealVerifyInfo)  // TODO: check with Magik on sizes
+    PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
+    ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
 
     SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission)
 
@@ -112,6 +120,8 @@ type StorageMinerActorCode struct {
     _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
 
     // _computeProvingPeriodEndSectorState(rt Runtime)  // TODO
+
+    _expirePreCommittedSectors(rt Runtime)
 }
 
 type MinerInfo struct {
