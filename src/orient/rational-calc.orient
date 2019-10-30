@@ -2,10 +2,16 @@ Compute:
   declare(hash_cost_per_gbs, $/gb/s)
   declare(hash_time_gbs, gb/s)
   declare(hash_cost, $/gb)
- 
+
   node_size_gb = node_size / (1024*1024*1024)
+
+  declare(hash_time_gbs, gb/s)
+  describe(hash_time_gbs, "GB that can be hashed in a second by the fastest possible hardware")
   hash_time_gbs = hash_time / hash_time_amax
-  hash_time_single_node = hash_time_single_node * node_size_gb
+
+  describe(hash_time_single_node, "Time it takes to hash a single node")
+  hash_time_single_node = hash_time_gbs * node_size_gb
+  describe(hash_cost_single_node, "Time it takes to hash a single node")
   hash_cost_single_node = hash_cost_per_gbs * hash_time_single_node * node_size_gb
 
 Storage:
