@@ -1,17 +1,29 @@
 package storage_mining
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import util "github.com/filecoin-project/specs/util"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+
+	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+
+	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+
+	proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
+
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+	util "github.com/filecoin-project/specs/util"
+
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -537,7 +549,7 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	return rt.SuccessReturn()
 }
 
-// DeclareFaults penalizes miners (slashStorageDealCollateral and suspendPower)
+// DeclareFaults penalizes miners (slashStorageDealCollateral and remove power)
 // TODO: decide how much storage collateral to slash
 // - State Transition
 //   - Active / Commited / Recovering -> Failing

@@ -24,7 +24,6 @@ In order to achieve this, Filecoin delays updating power for new sector commitme
 Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.
 
 Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
-Finally, we also account for "suspended" power in order to make accounting simple in the presence of faults (see {{<sref consensus_faults>}}) and subsequent recovery.
 
 The Miner lifecycle in the power table should be roughly as follows:
 - MinerRegistration: A new miner with an associated worker public key and address is registered on the power table by the storage mining subsystem, along with their associated sector size (there is only one per worker).
