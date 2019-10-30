@@ -38,12 +38,12 @@
     </item>
     
     <item>
-      <title>Selectors</title>
+      <title>Selectors - IPLD Query Language</title>
       <link>/docs/libraries/ipld/selectors/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/libraries/ipld/selectors/</guid>
-      <description></description>
+      <description>// This is a compression of the IPLD Selector Spec // Full spec: https://github.com/ipld/specs/blob/master/selectors/selectors.md  type Selector union { Matcher ExploreAll ExploreFields ExploreIndex ExploreRange ExploreRecursive ExploreUnion ExploreConditional ExploreRecursiveEdge } // ExploreAll is similar to a `*` -- it traverses all elements of an array, // or all entries in a map, and applies a next selector to the reached nodes. type ExploreAll struct { next Selector } // ExploreFields traverses named fields in a map (or equivalently, struct, if // traversing on typed/schema nodes) and applies a next selector to the // reached nodes.</description>
     </item>
     
   </channel>

@@ -23,5 +23,9 @@ type StateTree struct {
 
     // TODO: API ConvenienceAPI
 
+    // TODO: rename to GetActorState and change return type?
     GetActor(a addr.Address)  actor.Actor
+
+    // Balance returns the balance of a given actor
+    Balance(a addr.Address)   actor.TokenAmount
 }

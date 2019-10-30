@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4565,6 +4600,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 
 <span class="c1">// GasAmount is a quantity of gas.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasAmount</span> <span class="nx">UVarint</span>
@@ -4598,14 +4634,103 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">Signature</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
 <span class="p">}</span>  <span class="c1">// representation tuple
 </span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">ExitCode</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">InvocInput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">To</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">Method</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
+    <span class="nx">Params</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
+    <span class="nx">Value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ExitCode</span>     <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span>
+    <span class="nx">ReturnValue</span>  <span class="nx">Bytes</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ExitCode</span>
+    <span class="nx">ExitCode</span>     <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span>
     <span class="nx">ReturnValue</span>  <span class="nx">Bytes</span>
     <span class="nx">GasUsed</span>      <span class="nx">GasAmount</span>
 <span class="p">}</span>  <span class="c1">// representation tuple
 </span></code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">message</span>
+
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+<span class="kd">func</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">MessageReceipt_I</span><span class="p">{</span>
+		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">output</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(),</span>
+		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">output</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">(),</span>
+		<span class="nx">GasUsed_</span><span class="p">:</span>     <span class="nx">gasUsed</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nf">Subtract</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nf">LessThan</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">GasAmount_Zero</span><span class="p">()</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">InvocInput_Make</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">InvocInput</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+		<span class="nx">To_</span><span class="p">:</span>     <span class="nx">to</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">method</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">params</span><span class="p">,</span>
+		<span class="nx">Value_</span><span class="p">:</span>  <span class="nx">value</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">returnValue</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">InvocOutput_I</span><span class="p">{</span>
+		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">exitCode</span><span class="p">,</span>
+		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">returnValue</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span>
+		<span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">),</span> <span class="kc">nil</span><span class="p">),</span>
+		<span class="nx">gasUsed</span><span class="p">,</span>
+	<span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 

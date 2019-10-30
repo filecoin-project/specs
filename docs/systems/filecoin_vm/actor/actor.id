@@ -29,7 +29,8 @@ type MethodNum UVarint
 //
 // TODO: serialized or deserialized? (serialized for now)
 // TODO: force CIDs or by value is fine?
-type MethodParams [Bytes]
+type MethodParam Bytes
+type MethodParams [MethodParam]
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
 // This is a value used for securing against replay attacks:
@@ -86,6 +87,8 @@ type ActorState struct {
 // ActorIDs are assigned by the InitActor, when an Actor is introduced into
 // the Runtime.
 type ActorID UVarint
+
+type StateCID ipld.CID
 
 type ActorSubstateCID ipld.CID
 

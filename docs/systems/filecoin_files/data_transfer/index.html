@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4545,6 +4580,219 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
+<p><em>Data Transfer</em> is a system for transferring all or part of a <code>Piece</code> across the network when a deal is made.</p>
+
+<h1 id="modules">Modules</h1>
+
+<p>This diagram shows how Data Tranfer and its modules fit into the picture with the Storage and Retrieval Markets.
+In particular, note how the Data Transfer Request Validators from the markets are plugged into the Data Transfer module,
+but their code belongs in the Markets system.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Data Transfer - Push Flow</span>
+
+
+
+
+(<a href="docs/systems/filecoin_files/data_transfer/data-transfer-modules.png" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_files/data_transfer/data-transfer-modules.png" />
+
+
+
+
+</div>
+
+
+<h1 id="terminology">Terminology</h1>
+
+<ul>
+<li><strong>Push Request</strong>: A request to send data to the other party</li>
+<li><strong>Pull Request</strong>: A request to have the other party send data</li>
+<li><strong>Requestor</strong>: The party that initiates the data transfer request (whether Push or Pull)</li>
+<li><strong>Responder</strong>: The party that receives the data transfer request</li>
+<li><strong>Data Transfer Voucher</strong>: A wrapper around storage or retrieval data that can identify and validate the transfer request to the other party</li>
+<li><strong>Request Validator</strong>: The data transfer module only initiates a transfer when the responder can validate that the request is tied directly to either an existing storage deal or retrieval deal. Validation is not performed by the data transfer module itself. Instead, a request validator inspects the data transfer voucher to determine whether to respond to the request.</li>
+<li><strong>Scheduler</strong>:  Once a request is negotiated and validated, actual transfer is managed by a scheduler on both sides. The scheduler is part of the data transfer module but is isolated from the negotiation process. It has access to an underlying verifiable transport protocol and uses it to send data and track progress.</li>
+<li><strong>Subscriber</strong>: An external component that monitors progress of a data transfer by subscribing to data transfer events, such as progress or completion.</li>
+<li><strong>GraphSync</strong>: The default underlying transfer protocol used by the Scheduler. The full graphsync specification can be found at <a href="https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md">https://github.com/ipld/specs/blob/master/block-layer/graphsync/graphsync.md</a></li>
+</ul>
+
+<h1 id="request-phases">Request Phases</h1>
+
+<p>There are two basic phases to any data transfer:</p>
+
+<ol>
+<li>Negotiation - the requestor and responder agree to the transfer by validating with the data transfer voucher</li>
+<li>Transfer - Once both parties have negotiated and agreed upon, the data is actually transferred. The default protocol used to do the transfer is Graphsync</li>
+</ol>
+
+<p>Note that the Negotiation and Transfer stages can occur in seperate round trips,
+or potentially the same round trip, where the requesting party implicitly agrees by sending the request, and the responding party can agree and immediately send or receive data.</p>
+
+<h1 id="example-flows">Example Flows</h1>
+
+<h2 id="push-flow">Push Flow</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Data Transfer - Push Flow</span>
+
+
+
+
+(<a href="docs/systems/filecoin_files/data_transfer/push-flow.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_files/data_transfer/push-flow.mmd.svg" />
+
+
+
+
+</div>
+
+
+<ol>
+<li>A requestor initiates a Push transfer when it wants to send data to another party.</li>
+<li>The requestors&rsquo; data transfer module will send a push request to the responder along with the data transfer voucher. It also puts the data transfer in the scheduler queue, meaning it expects the responder to initiate a transfer once the request is verified</li>
+<li>The responder&rsquo;s data transfer module validates the data transfer request via the Validator provided as a dependency by the responder</li>
+<li>The responder&rsquo;s data transfer module schedules the transfer</li>
+<li>The responder makes a GraphSync request for the data</li>
+<li>The requestor receives the graphsync request, verifies it&rsquo;s in the scheduler and begins sending data</li>
+<li>The responder receives data and can produce an indication of progress</li>
+<li>The responder completes receiving data, and notifies any listeners</li>
+</ol>
+
+<p>The push flow is ideal for storage deals, where the client initiates the push
+once it verifies the the deal is signed and on chain</p>
+
+<h2 id="pull-flow">Pull Flow</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Data Transfer - Pull Flow</span>
+
+
+
+
+(<a href="docs/systems/filecoin_files/data_transfer/pull-flow.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_files/data_transfer/pull-flow.mmd.svg" />
+
+
+
+
+</div>
+
+
+<ol>
+<li>A requestor initiates a Pull transfer when it wants to receive data from another party.</li>
+<li>The requestors&rsquo; data transfer module will send a pull request to the responder along with the data transfer voucher.</li>
+<li>The responder&rsquo;s data transfer module validates the data transfer request via a PullValidator provided as a dependency by the responder</li>
+<li>The responder&rsquo;s data transfer module schedules the transfer (meaning it is expecting the requestor to initiate the actual transfer)</li>
+<li>The responder&rsquo;s data transfer module sends a response to the requestor saying it has accepted the transfer and is waiting for the requestor to initiate the transfer</li>
+<li>The requestor schedules the data transfer</li>
+<li>The requestor makes a GraphSync request for the data</li>
+<li>The responder receives the graphsync request, verifies it&rsquo;s in the scheduler and begins sending data</li>
+<li>The requestor receives data and can produce an indication of progress</li>
+<li>The requestor completes receiving data, and notifies any listeners</li>
+</ol>
+
+<p>The pull flow is ideal for retrieval deals, where the client initiates the pull when the deal is agreed upon.</p>
+
+<h1 id="alternater-pull-flow-single-round-trip">Alternater Pull Flow - Single Round Trip</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Data Transfer - Single Round Trip Pull Flow</span>
+
+
+
+
+(<a href="docs/systems/filecoin_files/data_transfer/alternate-pull-flow.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_files/data_transfer/alternate-pull-flow.mmd.svg" />
+
+
+
+
+</div>
+
+
+<ol>
+<li>A requestor initiates a Pull transfer when it wants to receive data from another party.</li>
+<li>The requestor’s DTM schedules the data transfer</li>
+<li>The requestor makes a Graphsync request to the responder with a data transfer request</li>
+<li>The responder receives the graphsync request, and forwards the data transfer request to the data transfer module</li>
+<li>The requestors&rsquo; data transfer module will send a pull request to the responder along with the data transfer voucher.</li>
+<li>The responder&rsquo;s data transfer module validates the data transfer request via a PullValidator provided as a dependency by the responder</li>
+<li>The responder&rsquo;s data transfer module schedules the transfer</li>
+<li>The responder sends a graphsync response along with a data transfer accepted response piggypacked</li>
+<li>The requestor receives data and can produce an indication of progress</li>
+<li>The requestor completes receiving data, and notifies any listeners</li>
+</ol>
+
+<h1 id="protocol">Protocol</h1>
+
+<p>A data transfer CAN be negotiated over the network via the <a href="../../../../#listings__libp2p_protocols__data_transfer_protocol">Data Transfer Protocol</a>, a Libp2p protocol type</p>
+
+<p>A Pull request expects a response. The requestor does not initiate the transfer
+until they know the request is accepted.</p>
+
+<p>The responder should send a response to a push request as well so the requestor can release the resources (if not accepted). However, if the Responder accepts the request they can immediately initiate the transfer</p>
+
+<p>Using the Data Transfer Protocol as an independent libp2p communciation mechanism is not a hard requirement &ndash; as long as both parties have an implementation of the Data Transfer Subsystem that can talk to the other, any
+transport mechanism (including offline mechanisms) is acceptable.</p>
+
+<h1 id="data-structures">Data Structures</h1>
 
 
 
@@ -4562,71 +4810,147 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Address</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">Storage</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">StorageDealID</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">Function</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">Piece</span> <span class="kd">struct</span> <span class="p">{}</span>
 
-<span class="kd">type</span> <span class="nx">DataTransferSubsystem</span> <span class="kd">struct</span> <span class="err">@</span><span class="p">(</span><span class="nx">mutable</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">dataTransfers</span>  <span class="p">{</span><span class="nx">UInt</span><span class="p">:</span> <span class="nx">DataTransferChannel</span><span class="p">}</span>
-    <span class="nx">volumes</span>        <span class="p">[</span><span class="nx">Storage</span><span class="p">]</span>
 
-    <span class="nf">OpenDataTransferChannel</span><span class="p">(</span><span class="nx">x</span> <span class="nx">StorageDealID</span><span class="p">)</span> <span class="nx">UInt</span>
-    <span class="nf">CloseDataTransferChannel</span><span class="p">(</span><span class="nx">x</span> <span class="nx">UInt</span><span class="p">)</span>
-    <span class="nf">TransferChannelStatus</span><span class="p">(</span><span class="nx">x</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">DataTransferStatus</span>
-    <span class="nf">ReportDataTransferEvent</span><span class="p">(</span><span class="nx">x</span> <span class="nx">Function</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">Ret</span> <span class="nx">DataTransferStatus</span><span class="p">,</span> <span class="nx">Err</span> <span class="kt">error</span><span class="p">}</span>
 
-    <span class="nf">findData</span><span class="p">(</span><span class="nx">x</span> <span class="nx">CID</span><span class="p">)</span> <span class="nx">Piece</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
+
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+
+<span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">RetrievalDeal</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="c1">// A DataTransferVoucher is used to validate
+</span><span class="c1">// a data transfer request against the underlying storage or retrieval deal
+</span><span class="c1">// that precipitated it
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DataTransferVoucher</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">StorageDealVoucher</span>
+    <span class="nx">RetrievalDealVoucher</span>
 <span class="p">}</span>
 
-<span class="c1">// Assumes access to error-checked, ordered, reliable transmission protocol
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Scheduler</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">ScheduleTransfer</span><span class="p">(</span><span class="nx">x</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">y</span> <span class="nx">Piece</span><span class="p">)</span>
-    <span class="nf">requestData</span><span class="p">(</span><span class="nx">x</span> <span class="nx">DataTransferChannel</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">Ret</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">Err</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">sendData</span><span class="p">(</span><span class="nx">x</span> <span class="nx">DataTransferChannel</span><span class="p">,</span> <span class="nx">y</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="kt">error</span><span class="err">?</span>
+<span class="kd">type</span> <span class="nx">StorageDealVoucher</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">deal</span> <span class="nx">StorageDeal</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">DataTransferChannel</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">channelID</span>      <span class="nx">UInt</span>
-    <span class="nx">contentID</span>      <span class="nx">CID</span>
-    <span class="nx">dataIncrement</span>  <span class="nx">UVarint</span>
-    <span class="nx">sender</span>         <span class="nx">Address</span>
-    <span class="nx">recipient</span>      <span class="nx">Address</span>
-    <span class="nx">totalSize</span>      <span class="nx">UVarint</span>
-    <span class="nx">sent</span>           <span class="nx">UVarint</span>
-    <span class="nx">received</span>       <span class="nx">UVarint</span>
-
-    <span class="nf">channelType</span><span class="p">()</span>  <span class="nx">DataTransferType</span>  <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
-    <span class="nf">transferNum</span><span class="p">()</span>  <span class="nx">Float</span>             <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+<span class="kd">type</span> <span class="nx">RetrievalDealVoucher</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">deal</span> <span class="nx">RetrievalDeal</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">DataTransferParams</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">channelType</span>    <span class="nx">DataTransferType</span>
-    <span class="nx">contentID</span>      <span class="nx">CID</span>
-    <span class="nx">dataIncrement</span>  <span class="nx">UVarint</span>
-    <span class="nx">sender</span>         <span class="nx">Address</span>
-    <span class="nx">recipient</span>      <span class="nx">Address</span>
-    <span class="nx">totalSize</span>      <span class="nx">Address</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">DataTransferType</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">Sender</span>
-    <span class="nx">Recipient</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">Sender</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO: remove this
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Recipient</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO: remove this
-</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">Ongoing</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">Completed</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">Failed</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">ChannelNotFoundError</span> <span class="kd">struct</span> <span class="p">{}</span>
+
 <span class="kd">type</span> <span class="nx">DataTransferStatus</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">Ongoing</span>
     <span class="nx">Completed</span>
     <span class="nx">Failed</span>
     <span class="nx">ChannelNotFoundError</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">TransferID</span> <span class="nx">UInt</span>
+
+<span class="kd">type</span> <span class="nx">ChannelID</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">to</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="nx">id</span> <span class="nx">TransferID</span>
+<span class="p">}</span>
+
+<span class="c1">// All immutable data for a channel
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DataTransferChannel</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="c1">// an identifier for this channel shared by request and responder, set by requestor through protocol
+</span><span class="c1"></span>    <span class="nx">transferID</span>  <span class="nx">TransferID</span>
+    <span class="c1">// base CID for the piece being transferred
+</span><span class="c1"></span>    <span class="nx">PieceRef</span>    <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+    <span class="c1">// portion of Piece to return, specified by an IPLD selector
+</span><span class="c1"></span>    <span class="nx">Selector</span>    <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
+    <span class="c1">// used to verify this channel
+</span><span class="c1"></span>    <span class="nx">voucher</span>     <span class="nx">DataTransferVoucher</span>
+    <span class="c1">// the party that is sending the data (not who initiated the request)
+</span><span class="c1"></span>    <span class="nx">sender</span>      <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="c1">// the party that is receiving the data (not who initiated the request)
+</span><span class="c1"></span>    <span class="nx">recipient</span>   <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="c1">// expected amount of data to be transferred
+</span><span class="c1"></span>    <span class="nx">totalSize</span>   <span class="nx">UVarint</span>
+<span class="p">}</span>
+
+<span class="c1">// DataTransferState is immutable channel data plus mutable state
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">DataTransferState</span> <span class="kd">struct</span> <span class="err">@</span><span class="p">(</span><span class="nx">mutable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">DataTransferChannel</span>
+    <span class="c1">// total bytes sent from this node (0 if receiver)
+</span><span class="c1"></span>    <span class="nx">sent</span>                 <span class="nx">UVarint</span>
+    <span class="c1">// total bytes received by this node (0 if sender)
+</span><span class="c1"></span>    <span class="nx">received</span>             <span class="nx">UVarint</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Open</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Progress</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Error</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Complete</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">DataTransferEvent</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">Open</span>
+    <span class="nx">Progress</span>
+    <span class="nx">Error</span>
+    <span class="nx">Complete</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">DataTransferSubscriber</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">OnEvent</span><span class="p">(</span><span class="nx">event</span> <span class="nx">DataTransferEvent</span><span class="p">,</span> <span class="nx">channelState</span> <span class="nx">DataTransferState</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// RequestValidator is an interface implemented by the client of the data transfer module to validate requests
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">RequestValidator</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">ValidatePush</span><span class="p">(</span>
+        <span class="nx">sender</span>    <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
+        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
+    <span class="p">)</span>
+    <span class="nf">ValidatePull</span><span class="p">(</span>
+        <span class="nx">receiver</span>  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
+        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
+    <span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">DataTransferSubsystem</span> <span class="kd">struct</span> <span class="err">@</span><span class="p">(</span><span class="nx">mutable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">host</span>              <span class="nx">libp2p</span><span class="p">.</span><span class="nx">Node</span>
+    <span class="nx">dataTransfers</span>     <span class="p">{</span><span class="nx">ChannelID</span><span class="p">:</span> <span class="nx">DataTransferState</span><span class="p">}</span>
+    <span class="nx">requestValidator</span>  <span class="nx">RequestValidator</span>
+    <span class="nx">pieceStore</span>        <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceStore</span>
+
+    <span class="c1">// open a data transfer that will send data to the recipient peer and
+</span><span class="c1"></span>    <span class="c1">// open a data transfer that will send data to the recipient peer and
+</span><span class="c1"></span>    <span class="c1">// transfer parts of the piece that match the selector
+</span><span class="c1"></span>    <span class="nf">OpenPushDataChannel</span><span class="p">(</span>
+        <span class="nx">to</span>        <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
+        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
+    <span class="p">)</span> <span class="nx">ChannelID</span>
+
+    <span class="c1">// open a data transfer that will request data from the sending peer and
+</span><span class="c1"></span>    <span class="c1">// transfer parts of the piece that match the selector
+</span><span class="c1"></span>    <span class="nf">OpenPullDataChannel</span><span class="p">(</span>
+        <span class="nx">to</span>        <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
+        <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
+    <span class="p">)</span> <span class="nx">ChannelID</span>
+
+    <span class="c1">// close an open channel (effectively a cancel)
+</span><span class="c1"></span>    <span class="nf">CloseDataTransferChannel</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ChannelID</span><span class="p">)</span>
+
+    <span class="c1">// get status of a transfer
+</span><span class="c1"></span>    <span class="nf">TransferChannelStatus</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ChannelID</span><span class="p">)</span> <span class="nx">DataTransferStatus</span>
+
+    <span class="c1">// get notified when certain types of events happen
+</span><span class="c1"></span>    <span class="nf">SubscribeToEvents</span><span class="p">(</span><span class="nx">subscriber</span> <span class="nx">DataTransferSubscriber</span><span class="p">)</span>
+
+    <span class="c1">// get all in progress transfers
+</span><span class="c1"></span>    <span class="nf">InProgressChannels</span><span class="p">()</span> <span class="p">{</span><span class="nx">ChannelID</span><span class="p">:</span> <span class="nx">DataTransferState</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4643,6 +4967,24 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#modules">Modules</a></li>
+<li><a href="#terminology">Terminology</a></li>
+<li><a href="#request-phases">Request Phases</a></li>
+<li><a href="#example-flows">Example Flows</a>
+<ul>
+<li><a href="#push-flow">Push Flow</a></li>
+<li><a href="#pull-flow">Pull Flow</a></li>
+</ul></li>
+<li><a href="#alternater-pull-flow-single-round-trip">Alternater Pull Flow - Single Round Trip</a></li>
+<li><a href="#protocol">Protocol</a></li>
+<li><a href="#data-structures">Data Structures</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

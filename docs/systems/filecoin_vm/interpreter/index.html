@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4543,7 +4578,11 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown"><p>(You can see the <em>old</em> VM interpreter <a href="docs/systems/filecoin_vm/vm_interpreter_old">here</a> )</p>
+<article class="markdown">
+
+<p>(You can see the <em>old</em> VM interpreter <a href="docs/systems/filecoin_vm/vm_interpreter_old">here</a> )</p>
+
+<h1 id="vm-interpreter-interface"><code>vm/interpreter</code> interface</h1>
 
 
 
@@ -4584,6 +4623,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+<h1 id="vm-interpreter-implementation"><code>vm/interpreter</code> implementation</h1>
+
 
 
 
@@ -4605,15 +4646,16 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">interpreter</span>
 
-<span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+<span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessageBatch</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="p">[]</span><span class="nx">MessageRef</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[]</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">compTree</span> <span class="o">:=</span> <span class="nx">inTree</span>
@@ -4625,180 +4667,119 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">compTree</span><span class="p">,</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+	<span class="c1">// TODO: should this gasUsed value be zero?
+</span><span class="c1"></span>	<span class="c1">// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
+</span><span class="c1"></span>	<span class="nx">gasUsed</span> <span class="o">:=</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span>
+	<span class="nf">TODO</span><span class="p">()</span>
+	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
+	<span class="c1">// TODO: assert amount nonnegative
+</span><span class="c1"></span>	<span class="nx">retTree</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: insufficient funds (or transfer error) despite checks&#34;</span><span class="p">)</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">retTree</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
+	<span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">compTree</span> <span class="o">:=</span> <span class="nx">inTree</span>
+	<span class="kd">var</span> <span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+	<span class="kd">var</span> <span class="nx">toActor</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
+	<span class="kd">var</span> <span class="nx">err</span> <span class="kt">error</span>
+
 	<span class="nx">fromActor</span> <span class="o">:=</span> <span class="nx">compTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">fromActor</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nf">applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidMethod</span><span class="p">,</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span><span class="p">)</span>
+		<span class="c1">// TODO: This was originally exitcode.InvalidMethod; which is correct?
+</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// make sure fromActor has enough money to run the max invocation
 </span><span class="c1"></span>	<span class="nx">maxGasCost</span> <span class="o">:=</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
 	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span> <span class="o">+</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">maxGasCost</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nf">applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds</span><span class="p">,</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// make sure this is the right message order for fromActor
 </span><span class="c1"></span>	<span class="c1">// (this is protection against replay attacks, and useful sequencing)
 </span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">CallSeqNum</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nf">applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">,</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="c1">// may return a different tree on succeess.
-</span><span class="c1"></span>	<span class="c1">// this MUST get rolled back if the invocation fails.
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">toActor</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
-	<span class="kd">var</span> <span class="nx">err</span> <span class="kt">error</span>
-	<span class="nx">compTree</span><span class="p">,</span> <span class="nx">toActor</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nf">treeGetOrCreateAccountActor</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nf">applyError</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">,</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span><span class="p">)</span>
+	<span class="c1">// WithActorForAddress may create new account actors
+</span><span class="c1"></span>	<span class="nx">compTree</span><span class="p">,</span> <span class="nx">toActor</span> <span class="p">=</span> <span class="nx">compTree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithActorForAddress</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+	<span class="k">if</span> <span class="nx">toActor</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// deduct maximum expenditure gas funds first
-</span><span class="c1"></span>	<span class="c1">// TODO: use a single &#34;transfer&#34;
-</span><span class="c1"></span>	<span class="nx">compTree</span> <span class="p">=</span> <span class="nf">treeDeductFunds</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">fromActor</span><span class="p">,</span> <span class="nx">maxGasCost</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">compTree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">maxGasCost</span><span class="p">)</span>
 
-	<span class="c1">// transfer funds fromActor -&gt; toActor
-</span><span class="c1"></span>	<span class="c1">// (yes deductions can be combined, spelled out here for clarity)
-</span><span class="c1"></span>	<span class="c1">// TODO: use a single &#34;transfer&#34;
-</span><span class="c1"></span>	<span class="nx">compTree</span> <span class="p">=</span> <span class="nf">treeDeductFunds</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">fromActor</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">())</span>
-	<span class="nx">compTree</span> <span class="p">=</span> <span class="nf">treeDepositFunds</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">toActor</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">())</span>
+	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
+		<span class="nx">compTree</span><span class="p">,</span>
+		<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
+		<span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+		<span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span>
+	<span class="p">)</span>
 
-	<span class="c1">// Prepare invocInput.
-</span><span class="c1"></span>	<span class="nx">invocInput</span> <span class="o">:=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">{</span>
-		<span class="nx">InTree</span><span class="p">:</span>    <span class="nx">compTree</span><span class="p">,</span>
-		<span class="nx">FromActor</span><span class="p">:</span> <span class="nx">fromActor</span><span class="p">,</span>
-		<span class="nx">ToActor</span><span class="p">:</span>   <span class="nx">toActor</span><span class="p">,</span>
-		<span class="nx">Method</span><span class="p">:</span>    <span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
-		<span class="nx">Params</span><span class="p">:</span>    <span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
-		<span class="nx">Value</span><span class="p">:</span>     <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span>
-		<span class="nx">GasLimit</span><span class="p">:</span>  <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span>
-	<span class="p">}</span>
-	<span class="c1">// TODO: this is mega jank. need to rework invocationInput + runtime boundaries.
-</span><span class="c1"></span>	<span class="nx">invocInput</span><span class="p">.</span><span class="nx">Runtime</span> <span class="p">=</span> <span class="nf">makeRuntime</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">invocInput</span><span class="p">)</span>
+	<span class="nx">sendRet</span><span class="p">,</span> <span class="nx">sendRetStateTree</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span>
+		<span class="nx">msg</span><span class="p">.</span><span class="nf">InvocInput_Make</span><span class="p">(</span>
+			<span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(),</span>
+			<span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
+			<span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
+			<span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span>
+		<span class="p">),</span>
+		<span class="kc">false</span><span class="p">,</span>
+	<span class="p">)</span>
 
-	<span class="c1">// perform the method call to the actor
-</span><span class="c1"></span>	<span class="c1">// TODO: eval if we should lift gas tracking and calc to the beginning of invocation
-</span><span class="c1"></span>	<span class="c1">// (ie, include account creation, gas accounting itself)
-</span><span class="c1"></span>	<span class="nx">out</span> <span class="o">:=</span> <span class="nf">invocationMethodDispatch</span><span class="p">(</span><span class="nx">invocInput</span><span class="p">)</span>
-
-	<span class="c1">// var outTree StateTree
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">out</span><span class="p">.</span><span class="nx">ExitCode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">().</span><span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="p">{</span>
 		<span class="c1">// error -- revert all state changes -- ie drop updates. burn used gas.
-</span><span class="c1"></span>		<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">inTree</span> <span class="c1">// wipe!
-</span><span class="c1"></span>		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">treeDeductFunds</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">fromActor</span><span class="p">,</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">out</span><span class="p">.</span><span class="nx">GasUsed</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()))</span>
-
+</span><span class="c1"></span>		<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">inTree</span>
+		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span>
+			<span class="nx">outTree</span><span class="p">,</span>
+			<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
+			<span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span>
+			<span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
+		<span class="p">)</span>
 	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 		<span class="c1">// success -- refund unused gas
-</span><span class="c1"></span>		<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">out</span><span class="p">.</span><span class="nx">OutTree</span> <span class="c1">// take the state from the invocation output
-</span><span class="c1"></span>		<span class="nx">refundGas</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">()</span> <span class="o">-</span> <span class="nx">out</span><span class="p">.</span><span class="nx">GasUsed</span>
-		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">treeDepositFunds</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">fromActor</span><span class="p">,</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">refundGas</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()))</span>
-		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">treeIncrementActorSeqNo</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">fromActor</span><span class="p">)</span>
+</span><span class="c1"></span>		<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">sendRetStateTree</span>
+		<span class="nx">refundGas</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">()</span> <span class="o">-</span> <span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">()</span>
+		<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: assert refundGas is nonnegative
+</span><span class="c1"></span>		<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span>
+			<span class="nx">outTree</span><span class="p">,</span>
+			<span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span>
+			<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
+			<span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">refundGas</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
+		<span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">outTree</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">outTree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithIncrementedCallSeqNum</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="c1">// TODO: if actor deletion is possible at some point, may need to allow this case
+</span><span class="c1"></span>		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Internal interpreter error: failed to increment call sequence number&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// reward miner gas fees
-</span><span class="c1"></span>	<span class="nx">minerActor</span> <span class="o">:=</span> <span class="nx">compTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">)</span> <span class="c1">// TODO: may be nil.
-</span><span class="c1"></span>	<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">treeDepositFunds</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">minerActor</span><span class="p">,</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">out</span><span class="p">.</span><span class="nx">GasUsed</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()))</span>
+</span><span class="c1"></span>	<span class="nx">outTree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span>
+		<span class="nx">outTree</span><span class="p">,</span>
+		<span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span>
+		<span class="nx">minerAddr</span><span class="p">,</span> <span class="c1">// TODO: may not exist
+</span><span class="c1"></span>		<span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
+	<span class="p">)</span>
 
-	<span class="k">return</span> <span class="nx">outTree</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt_I</span><span class="p">{</span>
-		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">out</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span>
-		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">out</span><span class="p">.</span><span class="nx">ReturnValue</span><span class="p">,</span>
-		<span class="nx">GasUsed_</span><span class="p">:</span>     <span class="nx">out</span><span class="p">.</span><span class="nx">GasUsed</span><span class="p">,</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">invocationMethodDispatch</span><span class="p">(</span><span class="nx">input</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">input</span><span class="p">.</span><span class="nx">Method</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-		<span class="c1">// just sending money. move along.
-</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">{</span>
-			<span class="nx">OutTree</span><span class="p">:</span>     <span class="nx">input</span><span class="p">.</span><span class="nx">InTree</span><span class="p">,</span>
-			<span class="nx">GasUsed</span><span class="p">:</span>     <span class="nx">gascost</span><span class="p">.</span><span class="nx">SimpleValueSend</span><span class="p">,</span>
-			<span class="nx">ExitCode</span><span class="p">:</span>    <span class="nx">exitcode</span><span class="p">.</span><span class="nx">OK</span><span class="p">,</span>
-			<span class="nx">ReturnValue</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
-
-	<span class="c1">//TODO: actually invoke the funtion here.
-</span><span class="c1"></span>	<span class="c1">// put any vtable lookups in this function.
-</span><span class="c1"></span>
-	<span class="nx">actorCode</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nx">ToActor</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">CodeCID</span><span class="p">())</span>
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">{</span>
-			<span class="nx">OutTree</span><span class="p">:</span>     <span class="nx">input</span><span class="p">.</span><span class="nx">InTree</span><span class="p">,</span>
-			<span class="nx">GasUsed</span><span class="p">:</span>     <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span><span class="p">,</span>
-			<span class="nx">ExitCode</span><span class="p">:</span>    <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorCodeNotFound</span><span class="p">,</span>
-			<span class="nx">ReturnValue</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span> <span class="c1">// TODO: maybe: err
-</span><span class="c1"></span>		<span class="p">}</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">actorCode</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nx">Method</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nx">Params</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">treeIncrementActorSeqNo</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;todo&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">treeDeductFunds</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span><span class="p">,</span> <span class="nx">amt</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// TODO: turn this into a single transfer call.
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;todo&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">treeDepositFunds</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span><span class="p">,</span> <span class="nx">amt</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// TODO: turn this into a single transfer call.
-</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;todo&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">treeGetOrCreateAccountActor</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">_</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="nx">toActor</span> <span class="o">:=</span> <span class="nx">inTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">toActor</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span> <span class="c1">// found
-</span><span class="c1"></span>		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nx">toActor</span><span class="p">,</span> <span class="kc">nil</span>
-	<span class="p">}</span>
-
-	<span class="k">switch</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Type</span><span class="p">().</span><span class="nf">Which</span><span class="p">()</span> <span class="p">{</span>
-	<span class="k">case</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address_Type_Case_BLS</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nf">treeNewBLSAccountActor</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address_Type_Case_Secp256k1</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nf">treeNewSecp256k1AccountActor</span><span class="p">(</span><span class="nx">inTree</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address_Type_Case_ID</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;no actor with given ID&#34;</span><span class="p">)</span>
-	<span class="k">case</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address_Type_Case_Actor</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;no such actor&#34;</span><span class="p">)</span>
-	<span class="k">default</span><span class="p">:</span>
-		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;unknown address type&#34;</span><span class="p">)</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">treeNewBLSAccountActor</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">_</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;todo&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">treeNewSecp256k1AccountActor</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">_</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;todo&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">applyError</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">outTree</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt_I</span><span class="p">{</span>
-		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">exitCode</span><span class="p">,</span>
-		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
-		<span class="nx">GasUsed_</span><span class="p">:</span>     <span class="nx">gasUsed</span><span class="p">,</span>
-	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">outTree</span><span class="p">,</span> <span class="nx">sendRet</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="nx">gas</span><span class="p">)</span> <span class="o">*</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="nx">price</span><span class="p">))</span>
 <span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">makeRuntime</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">input</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime_I</span><span class="p">{</span>
-		<span class="nx">Invocation_</span><span class="p">:</span> <span class="nx">input</span><span class="p">,</span>
-		<span class="nx">State_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">VMState_I</span><span class="p">{</span>
-			<span class="nx">StateTree_</span><span class="p">:</span> <span class="nx">tree</span><span class="p">,</span> <span class="c1">// TODO: also in input.InTree.
-</span><span class="c1"></span>			<span class="nx">Storage_</span><span class="p">:</span>   <span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">VMStorage_I</span><span class="p">{},</span>
-		<span class="p">},</span>
-	<span class="p">}</span>
-<span class="p">}</span>
 </code></pre></div>
 
 
@@ -4806,43 +4787,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">interpreter</span>
-
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">runtime</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-
-<span class="kd">func</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">input</span> <span class="nx">runtime</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="p">(</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="c1">// load the code from StateTree.
-</span><span class="c1"></span>	<span class="c1">// TODO: this is going to be enabled in the future.
-</span><span class="c1"></span>	<span class="c1">// code, err := loadCodeFromStateTree(input.InTree, codeCID)
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">LoadActor</span><span class="p">(</span><span class="nx">codeCID</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
-
-
+<h1 id="vm-interpreter-registry"><code>vm/interpreter/registry</code></h1>
 
 
 
@@ -4868,14 +4813,14 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+<span class="kn">import</span> <span class="nx">market</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;</span>
+<span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
 <span class="kn">import</span> <span class="nx">sysactors</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/sysactors&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 
 <span class="kd">var</span> <span class="p">(</span>
 	<span class="nx">ErrActorNotFound</span> <span class="p">=</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Actor Not Found&#34;</span><span class="p">)</span>
 <span class="p">)</span>
-
-<span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{}</span>
 
 <span class="c1">// CodeCIDs for system actors
 </span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
@@ -4888,14 +4833,31 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">PaymentChannelActorCodeCID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/PaymentChannelActor&#34;</span><span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c1">// Addresses for singleton system actors
-</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-	<span class="nx">InitActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">CronActorAddr</span>           <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">StoragePowerActorAddr</span>   <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">StorageMarketActorAddr</span>  <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span>	<span class="nx">PaymentChannelActorAddr</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_I</span><span class="p">{}</span> <span class="c1">// TODO
-</span><span class="c1"></span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">actorCodeRegistry</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">code</span> <span class="kd">map</span><span class="p">[</span><span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_registerActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">cid</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_loadActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">a</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">cid</span><span class="p">]</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">ErrActorNotFound</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">a</span><span class="p">,</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_registerActor</span><span class="p">(</span><span class="nx">cid</span><span class="p">,</span> <span class="nx">actor</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">LoadActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_loadActor</span><span class="p">(</span><span class="nx">cid</span><span class="p">)</span>
+<span class="p">}</span>
 
 <span class="c1">// init is called in Go during initialization of a program.
 </span><span class="c1">// this is an idiomatic way to do this. Implementations should approach this
@@ -4903,43 +4865,24 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// built in pure types that have the code for each actor. Once we have
 </span><span class="c1">// a way to load code from the StateTree, use that instead.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
-	<span class="nf">registerBuiltinActors</span><span class="p">(</span><span class="nx">staticActorCodeRegistry</span><span class="p">)</span>
+	<span class="nf">_registerBuiltinActors</span><span class="p">()</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">registerBuiltinActors</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_registerBuiltinActors</span><span class="p">()</span> <span class="p">{</span>
 	<span class="c1">// TODO
 </span><span class="c1"></span>
 	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">CronActorCode_I</span><span class="p">{}</span>
 
-	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
-	<span class="nx">r</span><span class="p">.</span><span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">CronActorCodeCID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">CronActorCodeCID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">AccountActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">AccountActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StoragePowerActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StorageMarketActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">market</span><span class="p">.</span><span class="nx">StorageMarketActorCode_I</span><span class="p">{})</span>
 
 	<span class="c1">// wire in CRON actions.
 </span><span class="c1"></span>	<span class="c1">// TODO: there&#39;s probably a better place to put this, but for now, do it here.
-</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">StoragePowerActorAddr</span><span class="p">)</span>
-	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">StorageMarketActorAddr</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// ActorCode is the interface that all actor code types should satisfy.
-</span><span class="c1">// It is merely a method dispatch interface.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorCode</span> <span class="kd">interface</span> <span class="p">{</span>
-	<span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">actorCodeRegistry</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">code</span> <span class="kd">map</span><span class="p">[</span><span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">]</span><span class="nx">ActorCode</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">cid</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">LoadActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="p">(</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">a</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">cid</span><span class="p">]</span>
-	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">ErrActorNotFound</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">a</span><span class="p">,</span> <span class="kc">nil</span>
+</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">)</span>
+	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4956,6 +4899,16 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#vm-interpreter-interface"><code>vm/interpreter</code> interface</a></li>
+<li><a href="#vm-interpreter-implementation"><code>vm/interpreter</code> implementation</a></li>
+<li><a href="#vm-interpreter-registry"><code>vm/interpreter/registry</code></a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

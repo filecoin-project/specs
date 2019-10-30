@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4567,16 +4602,7 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 <span class="kn">import</span> <span class="nx">sealer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer&#34;</span>
-
-<span class="c1">// type seal.SealOutput struct {}
-</span><span class="c1">// type seal.SectorSealer struct {}
-</span><span class="c1">// type seal.Seed struct {}
-</span><span class="c1">// type sector.SectorID struct {}
-</span><span class="c1">// type sector.SealCfg struct {}
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Commitment</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">SectorSealer</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageProvingSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorSealer</span>   <span class="nx">sealer</span><span class="p">.</span><span class="nx">SectorSealer</span>
@@ -4584,7 +4610,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">ok</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 
-    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span>
+    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span>
 
     <span class="c1">// TODO: remove this?
 </span><span class="c1"></span>    <span class="c1">// GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }

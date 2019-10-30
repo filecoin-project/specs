@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4545,7 +4580,7 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
-<p>There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with <code>CommitSector</code> to gain storage power on chain. Hence, there is a <code>StorageDealProposal</code> and a <code>RetrievalDealProposal</code> that are half-signed contracts submitted by clients to be counter-signed and posted on-chain by the miners.</p>
+<p>There are two types of deals in Filecoin markets, storage deals and retrieval deals. Storage deals are recorded on the blockchain and enforced by the protocol. Retrieval deals are off chain and enabled by micropayment channel by transacting parties. All deal negotiation happen off chain and a request-response style storage deal protocol is in place to submit agreed-upon storage deals onto the network with <code>PublishStorageDeal</code> and <code>CommitSector</code> to gain storage power on chain. Hence, there is a <code>StorageDealProposal</code> and a <code>RetrievalDealProposal</code> that are half-signed contracts submitted by clients to be counter-signed and posted on-chain by the miners.</p>
 
 <p>Filecoin Storage Market Deal Flow</p>
 
@@ -4560,28 +4595,36 @@ https://github.com/alex-shpak/hugo-book
 <li>2. <code>StorageClient</code> and <code>StorageProvider</code> negotiate a deal off chain. <code>StorageClient</code> sends a <code>StorageDealProposal</code> to a <code>StorageProvider</code>.
 
 <ul>
-<li><code>StorageProvider</code> verifies the <code>StorageDeal</code> by checking address and signature of <code>StorageClient</code>, checking the proposal has not expired, checking <code>StorageClient</code> did not call withdraw in the last X Epoch, checking both <code>StorageProvider</code> and <code>StorageClient</code> have sufficient available balances in <code>StorageMarketActor</code>.</li>
+<li><code>StorageProvider</code> verifies the <code>StorageDeal</code> by checking address and signature of <code>StorageClient</code>, checking the proposal&rsquo;s <code>StartEpoch</code> is after the current Epoch, checking <code>StorageClient</code> did not call withdraw in the last X Epoch (<code>WithdrawBalance</code> should take at least X Epoch), checking both <code>StorageProvider</code> and <code>StorageClient</code> have sufficient available balances in <code>StorageMarketActor</code>.</li>
 </ul></li>
-<li>3. <code>StorageProvider</code> signs the <code>StorageDealProposal</code>  gets a <code>StorageDeal</code>.
+<li>3. <code>StorageProvider</code> signs the <code>StorageDealProposal</code>  by constructing an on-chain message.
 
 <ul>
-<li>a. <code>StorageProvider</code> calls <code>PublishStorageDeals</code> in <code>StorageMarketActor</code> which will generate a <code>DealID</code> for each <code>StorageDeal</code> and store a mapping from <code>DealID</code> to <code>StorageDeal</code>. However, the deals are not active at this point.
+<li><code>StorageProvider</code> calls <code>PublishStorageDeals</code> in <code>StorageMarketActor</code> to publish this on-chain message which will generate a <code>DealID</code> for each <code>StorageDeal</code> and store a mapping from <code>DealID</code> to <code>StorageDeal</code>. However, the deals are not active at this point.
 
 <ul>
-<li>As a backup, <code>StorageClient</code> MAY call <code>PublishStorageDeals</code> with the <code>StorageDeal</code>, to activate the deal.</li>
-<li>It is possible for either <code>StorageProvider</code> or <code>StorageClient</code> to try to enter into two deals simultaneously with funds available only for one. Only the first deal to commit in the chain would clear, the second would fail with error <code>errorcode.InsufficientFunds</code>.</li>
+<li>As a backup, <code>StorageClient</code> MAY call <code>PublishStorageDeals</code> with the <code>StorageDeal</code>, to activate the deal if they can obtain the signed on-chain message from <code>StorageProvider</code>.</li>
+<li>It is possible for either <code>StorageProvider</code> or <code>StorageClient</code> to try to enter into two deals simultaneously with funds available only for one. Only the first deal to commit to the chain will clear, the second will fail with error <code>errorcode.InsufficientFunds</code>.</li>
 </ul></li>
-<li>b. <code>StorageProvider</code> calls <code>HandleStorageDeal</code> in <code>StorageMiningSubsystem</code> which will then add the <code>StorageDeal</code> into a <code>Sector</code>.</li>
+<li><code>StorageProvider</code> calls <code>HandleStorageDeal</code> in <code>StorageMiningSubsystem</code> which will then add the <code>StorageDeal</code> into a <code>Sector</code>.</li>
 </ul></li>
-<li>4. Once the miner finishes packing a <code>Sector</code>, it generates a Sealed Sector and calls <code>StorageMinerActor.CommitSector</code> to verify the seal, store sector expiration, and record the mapping from <code>SectorNumber</code> to <code>SealCommitment</code>. It will also place this newly added <code>Sector</code> in the list of <code>CommittedSectors</code> in <code>StorageMinerActor</code>. <code>StorageMiner</code> does not earn any power for this newly added sector until its first PoSt has been submitted.</li>
+<li>4. Once the miner finishes packing a <code>Sector</code>, it generates a Sealed Sector and calls <code>StorageMinerActor.CommitSector</code> to verify the seal, store sector expiration, and record the mapping from <code>SectorNumber</code> to <code>SealCommitment</code>. It will also place this newly added <code>Sector</code> in the list of <code>CommittedSectors</code> in <code>StorageMinerActor</code>. <code>StorageMiner</code> does not earn any power for this newly added sector until its first PoSt has been submitted. Note that <code>CommitSector</code> can be called any time. However, sectors will be added to a staging buffer <code>StagedCommittedSectors</code> when miners are in the <code>Challenged</code> status (see 5 below).</li>
+</ul>
+
+<h1 id="receive-challenge">Receive Challenge</h1>
+
+<ul>
+<li>5. Miners enter the <code>Challenged</code> status whenever <code>NotifyOfPoStChallenge</code> is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before <code>
+CheckPoStSubmissionHappened</code> is called by the chain. Miners can only get out the challenge with <code>SubmitPoSt</code> or <code>onMissedPoSt</code>.</li>
+<li>6. Miners are not allowed to call <code>DeclareFaults</code> or <code>RecoverFaults</code> when they are in the <code>Challneged</code> state but <code>CommitSector</code> is allowed and sectors will be added to a <code>StagedCommittedSectors</code> buffer. When miners get out of the <code>Challenged</code> status, <code>StagedCommittedSectors</code> will be copied over to their <code>Sectors</code>, <code>ProvingSet</code> and <code>SectorTable</code> and emptied.</li>
 </ul>
 
 <h1 id="declare-and-recover-faults">Declare and Recover Faults</h1>
 
 <ul>
-<li>5. Declared faults are penalized to a smaller degree than spotted faults by <code>CronActor</code>. Miners declare faulty sectors by invoking <code>StorageMinerActor.DeclareFaults</code> and X of the <code>StorageDealCollateral</code> will be slashed and power corresponding to these sectors will be tempororily lost.</li>
-<li>6. Miners can then recover faults by invoking <code>StorageMinerActor.RecoverFaults</code> and have sufficient <code>StorageDealCollateral</code> in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission.</li>
-<li>7. Sectors that are declared faulty for <code>storagemining.MaxFaults</code> consecutive ChainEpochs will result in <code>StoragePowerActor.SlashPledgeCollateral</code>.
+<li>7. Declared faults are penalized to a smaller degree than detected faults by <code>CronActor</code>. Miners declare failing sectors by invoking <code>StorageMinerActor.DeclareFaults</code> and X of the <code>StorageDealCollateral</code> will be slashed and power corresponding to these sectors will be tempororily lost. However, miners can only declare faults when they are not in <code>Challenged</code> status.</li>
+<li>8. Miners can then recover faults by invoking <code>StorageMinerActor.RecoverFaults</code> and have sufficient <code>StorageDealCollateral</code> in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission. Miners will not be able to invoke <code>RecoverFaults</code> when they are in the <code>Challenged</code> status.</li>
+<li>9. Sectors that are failing for <code>storagemining.MaxFaults</code> consecutive ChainEpochs will be cleared and result in <code>StoragePowerActor.SlashPledgeCollateral</code>.
 
 <ul>
 <li>TODO: set <code>X</code> parameter</li>
@@ -4595,25 +4638,27 @@ https://github.com/alex-shpak/hugo-book
 <p>On every PoSt Submission, the following steps happen.</p>
 
 <ul>
-<li>8. <code>StorageMinerActor</code> first verifies the PoSt Submission. All Sectors will be considered in <code>SpottedFaults</code> if PoSt submission has failed (move to State 14).</li>
-<li>9. If <code>CommittedSectors</code> are proven in <code>PoStSubmission.SectorSet</code>, Storage Miner gains power for these newly committed sectors.</li>
-<li>10. If there are <code>DeclaredFaultySectors</code> , <code>Sector</code> in that set will not be challenged.</li>
-<li>11. For all other sectors, payment will be processed by invoking <code>StorageMarketActor.ProcessStorageDealsPayment</code> and miner available balances will be updated.</li>
-<li>12. Decide which Sectors have expired by looking at the <code>SectorExpirationQueue</code>. Sectors expire when all deals in that Sector have expired. <code>StorageDealCollateral</code> for both miners and users will only be returned when all deals in the Sector have expired. This is done by calling <code>StorageMarketActor.SettleExpiredDeals</code> and the Sector will be deleted from <code>StorageMinerActor.Sectors</code>.</li>
+<li>10. <code>StorageMinerActor</code> first verifies the PoSt Submission. If PoSt is done correctly, all <code>Committed</code> and <code>Recovering</code> sectors will be marked as <code>Active</code> and power is credited to these sectors. Payments will be processed for deals that are <code>Active</code> by invoking <code>StorageMarketActor.ProcessStorageDealsPayment</code>.</li>
+<li>11. For all sectors that are off from the <code>ProvingSet</code>, these sectors are failing. Increment <code>FaultCount</code> on these sectors and if any of these sectors are failing for <code>MaxFaultCount</code> consecutive <code>ChainEpoch</code>, these sectors are terminated and cleared from the network.</li>
+<li>13. Process sector expiration. Sectors expire when all deals in that sector have expired. Expired sectors will be cleared and <code>StorageDealCollateral</code> for both miners and users returned depending on the state that the sectors are in.</li>
+<li>14. Submit <code>FaultReport</code> and <code>PowerReport</code> to <code>StoragePowerActor</code> for slashing and power accounting.</li>
+<li>15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.</li>
+<li>16. Update challenge status and add <code>Committed</code> sectors received during the challenge to the <code>Sectors</code>, <code>ProvingSet</code>, and <code>SectorTable</code>.</li>
+<li>17. All Sectors will be considered in <code>DetectedFaults</code> when a miner fail to <code>SubmitPoSt</code> in a proving period and detected by <code>onMissedPoSt</code> in <code>CheckPoStSubmissionHappened</code> (move to State 18).</li>
 </ul>
 
-<h1 id="spot-faults">Spot Faults</h1>
+<h1 id="detect-faults">Detect Faults</h1>
 
 <p>(TODO: move into Storage Mining)</p>
 
 <ul>
-<li>13. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckPoSt</code> on all the miners whose <code>ProvingPeriod</code> is up.
+<li>18. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckPoStSubmissionHappened</code> on all the miners whose <code>ProvingPeriod</code> is up.
 
 <ul>
-<li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>StorageMinerActor</code> spots the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
+<li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>onMissedPoSt</code> detects the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
 <li>TODO: reword in terms of a conditional in the mining cycle</li>
-<li>When there are sector faults are spotted, both <code>StorageDealCollateral</code> and <code>PledgeCollateral</code> are slashed, and power is lost.</li>
-<li>If the faults persist for <code>storagemining.MaxFaults</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
+<li>When there are sector faults are detected, some of <code>StorageDealCollateral</code> and <code>PledgeCollateral</code> are slashed, and power is lost.</li>
+<li>If the faults persist for <code>storagemining.MaxFaultCount</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
 </ul></li>
 </ul>
 
@@ -4651,7 +4696,16 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">PayloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// TODO
 </span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="c1">// Note: Deal Collateral is only released and returned to clients and miners
+</span><span class="c1">// when the storage deal stops counting towards power. In the current iteration,
+</span><span class="c1">// it will be released when the sector containing the storage deals expires,
+</span><span class="c1">// even though some storage deals can expire earlier than the sector does.
+</span><span class="c1">// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
+</span><span class="c1">// minimal deals that last for a long time.
+</span><span class="c1">// TODO: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
+</span><span class="c1">// TODO: StoragePrice is paid out by Epoch duration but the exact mechanics still lacks some details.
+</span><span class="c1">// There will be a Minimum value for both client and provider deal collateral.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PieceCID</span>                      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// 35 bytes CommP
 </span><span class="c1"></span>    <span class="nx">PieceSize</span>                     <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceSize</span>
     <span class="nx">Client</span>                        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -4693,6 +4747,37 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+
+<h1 id="deal-flow">Deal Flow</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Deal Flow Sequence Diagram</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/deal/diagrams/deal-flow.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/deal/diagrams/deal-flow.mmd.svg" />
+
+
+
+
+</div>
+
 </article>
 
       
@@ -4707,10 +4792,12 @@ https://github.com/alex-shpak/hugo-book
     <nav id="TableOfContents">
 <ul>
 <li><a href="#add-storage-deal-and-power">Add Storage Deal and Power</a></li>
+<li><a href="#receive-challenge">Receive Challenge</a></li>
 <li><a href="#declare-and-recover-faults">Declare and Recover Faults</a></li>
 <li><a href="#submit-post">Submit PoSt</a></li>
-<li><a href="#spot-faults">Spot Faults</a></li>
+<li><a href="#detect-faults">Detect Faults</a></li>
 <li><a href="#deal-code">Deal Code</a></li>
+<li><a href="#deal-flow">Deal Flow</a></li>
 </ul>
 </nav>
   </aside>

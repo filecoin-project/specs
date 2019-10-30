@@ -36,6 +36,7 @@ type StorageProvider struct {
     NotifyOfOnChainDealStatus(dealID deal.DealID, newStatus StorageDealStatus)
 
     // libp2p listener on receiving payload
+    // TODO: take in dt.DataTransferVoucher as an argument
     OnReceivingPayload(payloadCID ipld.CID)
 
     // libp2p listener on storage deal proposal query

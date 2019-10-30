@@ -11,6 +11,15 @@ type ProposalCID ipld.CID
 type PayloadCID ipld.CID
 type Signature struct {}  // TODO
 
+// Note: Deal Collateral is only released and returned to clients and miners
+// when the storage deal stops counting towards power. In the current iteration,
+// it will be released when the sector containing the storage deals expires,
+// even though some storage deals can expire earlier than the sector does.
+// Collaterals are denominated in PerEpoch to incur a cost for self dealing or
+// minimal deals that last for a long time.
+// TODO: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
+// TODO: StoragePrice is paid out by Epoch duration but the exact mechanics still lacks some details.
+// There will be a Minimum value for both client and provider deal collateral.
 type StorageDealProposal struct {
     PieceCID                      piece.PieceCID  // 35 bytes CommP
     PieceSize                     piece.PieceSize

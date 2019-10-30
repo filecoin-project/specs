@@ -17,7 +17,7 @@
       
       <guid>/docs/systems/filecoin_blockchain/struct/block/other/</guid>
       <description>TODO: - move this stuff elsewhere
-import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { VRFResult filcrypto.VRFResult Output Bytes @(cached) ValidateSyntax() bool Verify(input Bytes, pk filcrypto.VRFPublicKey) bool } type BytesAmount UVarint type StoragePower BytesAmount type ElectionProof struct { VRFResult filcrypto.VRFResult Verify(input Bytes, pk filcrypto.VRFPublicKey) bool Nonce ElectionNonce ValidateSyntax() bool } type ElectionNonce UVarint  package block import ( filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; util &amp;#34;github.</description>
+import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { VRFResult filcrypto.VRFResult Output Bytes @(cached) ValidateSyntax() bool Verify(input Bytes, pk filcrypto.VRFPublicKey) bool } type BytesAmount UVarint type StoragePower BytesAmount type ElectionProof struct { VRFResult filcrypto.VRFResult Verify(input Bytes, pk filcrypto.VRFPublicKey) bool ValidateSyntax() bool }  package block import ( filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; ) func (tix *Ticket_I) ValidateSyntax() bool { return tix.</description>
     </item>
     
     <item>

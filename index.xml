@@ -98,7 +98,7 @@ type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId 
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
       <description>(You can see the old AccountActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type AccountActorState struct { // normal keypair backed accounts  Address addr.Address } type AccountActor struct { actorState actor.ActorState accountState AccountActorState }  </description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type AccountActorCode struct { VerifySignature(rt vmr.Runtime, sig filcrypto.Signature) InvocOutput } type AccountActorState struct { // normal keypair backed accounts  Address addr.Address }  package sysactors import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; //////////////////////////////////////////////////////////////////////////////// // Boilerplate ////////////////////////////////////////////////////////////////////////////////  func (a *AccountActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, AccountActorState) { h := rt.</description>
     </item>
     
     <item>
@@ -116,7 +116,8 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/intro/arch/</guid>
-      <description>Filecoin Systems Systems   Filecoin Nodes ⚙️   Node Types     Repository     Network Interface     Clock       Files &amp;amp; Data 📑   File     Piece     Data Transfer       Virtual Machine 💻   Actor     State Tree     Message     Runtime     System Actors     Interpreter       Blockchain 📦   Blocks     Message Pool     ChainSync     Storage Power Consensus       Token 📀   Wallet     Payments     Payment Channels     Multisig Wallet       Storage Mining ⛏   Storage Miner     Sector     Sector Index     Storage Proving       Market ⚖️   Orders     Deals     Storage Market     Retrieval Market          Overview Diagram TODO:</description>
+      <description>Filecoin Systems function statusIndicatorsShow() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.remove(&#39;hidden&#39;) }) return false; // stop click event } function statusIndicatorsHide() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.add(&#39;hidden&#39;) }) return false; // stop click event }  Status Legend:
+ 🛑 Bare - Very incomplete at this time.  Implementors: This is far from ready for you.  ⚠️ Rough &amp;ndash; work in progress, heavy changes coming, as we put in place key functionality.</description>
     </item>
     
     <item>
@@ -222,6 +223,16 @@ The response contains the requested chain in reverse iteration order.</descripti
       <description>Address An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about:
  Network this address belongs to Type of data the address contains The data itself Checksum (depending on the type of address)  For more detail, see the full address spec.
 Block A block header contains information relevant to a particular point in time over which the network may achieve consensus.</description>
+    </item>
+    
+    <item>
+      <title>Data Transfer Protocol</title>
+      <link>/docs/listings/libp2p_protocols/data_transfer_protocol/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/listings/libp2p_protocols/data_transfer_protocol/</guid>
+      <description> Name: Data Transfer Protocol Protocol ID: /fil/data-transfer/0.0.1  Message Protobuf
+ message DataTransferMessage { message Request { int32 transferID = 1 bool isPull = 2 bytes voucher = 3 bytes pieceID = 4 bytes selector = 5 bool isPartial = 6 bool isCancel = 7 } message Response { int32 transferID = 1 boolean accepted = 2 } bool isResponse = 1 Request request = 2 Response response = 3 }  </description>
     </item>
     
     <item>
@@ -394,7 +405,7 @@ All Systems, as defined in this document, require the following:
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
       <description>(You can see the old InitActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID } type InitActorCode struct { // 0  Constructor(r vmr.Runtime) // 1  Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address // 2  GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID _assignNextID() actor.ActorID } type InitActorCode struct { Constructor(r vmr.Runtime) Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; import exitcode &amp;#34;github.</description>
     </item>
     
     <item>
@@ -416,15 +427,6 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor
  Data structures are collections of semantically-tagged data members (e.g., structs, interfaces, or enums).
  Functions are computational procedures that do not depend on external state (i.e., mathematical functions, or programming language functions that do not refer to global variables).
  Components are sets of functionality that are intended to be represented as single software units in the implementation structure.</description>
-    </item>
-    
-    <item>
-      <title>libp2p Protocols</title>
-      <link>/docs/listings/libp2p_protocols/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/listings/libp2p_protocols/</guid>
-      <description>TODO</description>
     </item>
     
     <item>
@@ -492,7 +494,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       
       <guid>/docs/systems/filecoin_blockchain/struct/block/other/</guid>
       <description>TODO: - move this stuff elsewhere
-import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { VRFResult filcrypto.VRFResult Output Bytes @(cached) ValidateSyntax() bool Verify(input Bytes, pk filcrypto.VRFPublicKey) bool } type BytesAmount UVarint type StoragePower BytesAmount type ElectionProof struct { VRFResult filcrypto.VRFResult Verify(input Bytes, pk filcrypto.VRFPublicKey) bool Nonce ElectionNonce ValidateSyntax() bool } type ElectionNonce UVarint  package block import ( filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; util &amp;#34;github.</description>
+import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { VRFResult filcrypto.VRFResult Output Bytes @(cached) ValidateSyntax() bool Verify(input Bytes, pk filcrypto.VRFPublicKey) bool } type BytesAmount UVarint type StoragePower BytesAmount type ElectionProof struct { VRFResult filcrypto.VRFResult Verify(input Bytes, pk filcrypto.VRFPublicKey) bool ValidateSyntax() bool }  package block import ( filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; ) func (tix *Ticket_I) ValidateSyntax() bool { return tix.</description>
     </item>
     
     <item>
@@ -675,12 +677,12 @@ Something&#39;s not right. The sector_sealer.id file was not found.</description
     </item>
     
     <item>
-      <title>Selectors</title>
+      <title>Selectors - IPLD Query Language</title>
       <link>/docs/libraries/ipld/selectors/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/libraries/ipld/selectors/</guid>
-      <description></description>
+      <description>// This is a compression of the IPLD Selector Spec // Full spec: https://github.com/ipld/specs/blob/master/selectors/selectors.md  type Selector union { Matcher ExploreAll ExploreFields ExploreIndex ExploreRange ExploreRecursive ExploreUnion ExploreConditional ExploreRecursiveEdge } // ExploreAll is similar to a `*` -- it traverses all elements of an array, // or all entries in a map, and applies a next selector to the reached nodes. type ExploreAll struct { next Selector } // ExploreFields traverses named fields in a map (or equivalently, struct, if // traversing on typed/schema nodes) and applies a next selector to the // reached nodes.</description>
     </item>
     
     <item>
@@ -769,7 +771,7 @@ Introduction Background on Proof-of-Replication Proof-of-Replication enables a p
       
       <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
       <description>(You can see the old Storage Miner Actor here )
-import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import poster &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&amp;#34; type Seed struct {} type SectorCommitment struct {} type SectorExpirationQueueItem struct { SectorNumber sector.SectorNumber Expiration block.ChainEpoch } type SectorExpirationQueue struct { Add(i SectorExpirationQueueItem) Pop() SectorExpirationQueueItem Peek() SectorExpirationQueueItem Remove(n sector.SectorNumber) } type SectorTable struct { SectorSize sector.SectorSize ActiveSectors util.UVarint CommittedSectors util.UVarint RecoveringSectors util.UVarint FailingSectors util.</description>
+StorageMinerActor interface import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import poster &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&amp;#34; type Seed struct {} type SectorCommitment struct {} type SectorExpirationQueueItem struct { SectorNumber sector.SectorNumber Expiration block.ChainEpoch } type SectorExpirationQueue struct { Add(i SectorExpirationQueueItem) Pop() SectorExpirationQueueItem Peek() SectorExpirationQueueItem Remove(n sector.SectorNumber) } type SectorTable struct { SectorSize sector.SectorSize ActiveSectors util.UVarint CommittedSectors util.</description>
     </item>
     
     <item>
@@ -797,7 +799,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; type PowerTableEntry struct { ActivePower block.StoragePower InactivePower block.StoragePower AvailableBalance actor.TokenAmount LockedPledgeCollateral actor.TokenAmount } type PowerReport struct { ActivePower block.StoragePower // set value  InactivePower block.StoragePower // set value } type FaultReport struct { NewDeclaredFaults util.UVarint // diff value  NewDetectedFaults util.UVarint // diff value  NewTerminatedFaults util.UVarint // diff value } // type PowerTableHAMT {actor.</description>
+      <description>StoragePowerActor interface import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; type PowerTableEntry struct { ActivePower block.StoragePower InactivePower block.StoragePower AvailableBalance actor.TokenAmount LockedPledgeCollateral actor.TokenAmount } type PowerReport struct { ActivePower block.StoragePower // set value  InactivePower block.StoragePower // set value } type FaultReport struct { NewDeclaredFaults util.UVarint // diff value  NewDetectedFaults util.UVarint // diff value  NewTerminatedFaults util.UVarint // diff value  GetDeclaredFaultSlash() actor.</description>
     </item>
     
     <item>

@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4678,7 +4713,7 @@ Heaviest tipset at H-1 is {B0}</p>
 
 <p>An eligible miner can start by filling out <code>Parents</code>, <code>Tickets</code> and <code>ElectionProof</code> with values from the ticket checking process.</p>
 
-<p>Next, they compute the aggregate state of their selected parent blocks, the <code>ParentState</code>. This is done by taking the aggregate parent state of the blocks&rsquo; parent Tipset, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipsets &lsquo;virtual block&rsquo;. For more details on message execution and state transitions, see the <a href="state-machine.md">Filecoin state machine</a> document.</p>
+<p>Next, they compute the aggregate state of their selected parent blocks, the <code>ParentState</code>. This is done by taking the aggregate parent state of the blocks&rsquo; parent Tipset, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipset&rsquo;s messages (one can think of a tipset as a &lsquo;virtual block&rsquo; of sorts). For more details on message execution and state transitions, see the <a href="state-machine.md">Filecoin state machine</a> document.</p>
 
 <p>Once the miner has the aggregate <code>ParentState</code>, they must apply the block reward. This is done by adding the correct block reward amount to the miner owner&rsquo;s account balance in the state tree. The reward will be spendable immediately in this block. See <a href="#block-rewards">block reward</a> for details on how the block reward is structured. See <a href="#notes-on-block-reward-application">Notes on Block Reward Application</a> for some of the nuances in applying block rewards.</p>
 
@@ -4741,7 +4776,7 @@ IV = TotalIssuance * (1-e^(-λ)) // Converted to attoFIL (10e18)
 <h1 id="open-questions">Open Questions</h1>
 
 <ul>
-<li>How should receipts for tipsets &lsquo;virtual blocks&rsquo; be referenced? It is common for applications to provide the merkleproof of a receipt to prove that a transaction was successfully executed.</li>
+<li>How should receipts for tipsets be referenced? It is common for applications to provide the merkleproof of a receipt to prove that a transaction was successfully executed.</li>
 </ul>
 </article>
 

@@ -3,14 +3,14 @@ package interpreter
 import "errors"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 import sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 var (
 	ErrActorNotFound = errors.New("Actor Not Found")
 )
-
-var staticActorCodeRegistry = &actorCodeRegistry{}
 
 // CodeCIDs for system actors
 var (
@@ -23,14 +23,31 @@ var (
 	PaymentChannelActorCodeCID = actor.CodeCID("filecoin/1.0/PaymentChannelActor")
 )
 
-// Addresses for singleton system actors
-var (
-	InitActorAddr           = &addr.Address_I{} // TODO
-	CronActorAddr           = &addr.Address_I{} // TODO
-	StoragePowerActorAddr   = &addr.Address_I{} // TODO
-	StorageMarketActorAddr  = &addr.Address_I{} // TODO
-	PaymentChannelActorAddr = &addr.Address_I{} // TODO
-)
+var staticActorCodeRegistry = &actorCodeRegistry{}
+
+type actorCodeRegistry struct {
+	code map[actor.CodeCID]vmr.ActorCode
+}
+
+func (r *actorCodeRegistry) _registerActor(cid actor.CodeCID, actor vmr.ActorCode) {
+	r.code[cid] = actor
+}
+
+func (r *actorCodeRegistry) _loadActor(cid actor.CodeCID) (vmr.ActorCode, error) {
+	a, ok := r.code[cid]
+	if !ok {
+		return nil, ErrActorNotFound
+	}
+	return a, nil
+}
+
+func RegisterActor(cid actor.CodeCID, actor vmr.ActorCode) {
+	staticActorCodeRegistry._registerActor(cid, actor)
+}
+
+func LoadActor(cid actor.CodeCID) (vmr.ActorCode, error) {
+	return staticActorCodeRegistry._loadActor(cid)
+}
 
 // init is called in Go during initialization of a program.
 // this is an idiomatic way to do this. Implementations should approach this
@@ -38,41 +55,22 @@ var (
 // built in pure types that have the code for each actor. Once we have
 // a way to load code from the StateTree, use that instead.
 func init() {
-	registerBuiltinActors(staticActorCodeRegistry)
+	_registerBuiltinActors()
 }
 
-func registerBuiltinActors(r *actorCodeRegistry) {
+func _registerBuiltinActors() {
 	// TODO
 
 	cron := &sysactors.CronActorCode_I{}
 
-	r.RegisterActor(InitActorCodeCID, &sysactors.InitActorCode_I{})
-	r.RegisterActor(CronActorCodeCID, cron)
+	RegisterActor(InitActorCodeCID, &sysactors.InitActorCode_I{})
+	RegisterActor(CronActorCodeCID, cron)
+	RegisterActor(AccountActorCodeCID, &sysactors.AccountActorCode_I{})
+	RegisterActor(StoragePowerActorCodeCID, &spc.StoragePowerActorCode_I{})
+	RegisterActor(StorageMarketActorCodeCID, &market.StorageMarketActorCode_I{})
 
 	// wire in CRON actions.
 	// TODO: there's probably a better place to put this, but for now, do it here.
-	cron.Actors_ = append(cron.Actors_, StoragePowerActorAddr)
-	cron.Actors_ = append(cron.Actors_, StorageMarketActorAddr)
-}
-
-// ActorCode is the interface that all actor code types should satisfy.
-// It is merely a method dispatch interface.
-type ActorCode interface {
-	InvokeMethod(input vmr.InvocInput, method actor.MethodNum, params actor.MethodParams) vmr.InvocOutput
-}
-
-type actorCodeRegistry struct {
-	code map[actor.CodeCID]ActorCode
-}
-
-func (r *actorCodeRegistry) RegisterActor(cid actor.CodeCID, actor ActorCode) {
-	r.code[cid] = actor
-}
-
-func (r *actorCodeRegistry) LoadActor(cid actor.CodeCID) (ActorCode, error) {
-	a, ok := r.code[cid]
-	if !ok {
-		return nil, ErrActorNotFound
-	}
-	return a, nil
+	cron.Actors_ = append(cron.Actors_, addr.StoragePowerActorAddr)
+	cron.Actors_ = append(cron.Actors_, addr.StorageMarketActorAddr)
 }

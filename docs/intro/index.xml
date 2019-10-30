@@ -16,7 +16,8 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/intro/arch/</guid>
-      <description>Filecoin Systems Systems   Filecoin Nodes ⚙️   Node Types     Repository     Network Interface     Clock       Files &amp;amp; Data 📑   File     Piece     Data Transfer       Virtual Machine 💻   Actor     State Tree     Message     Runtime     System Actors     Interpreter       Blockchain 📦   Blocks     Message Pool     ChainSync     Storage Power Consensus       Token 📀   Wallet     Payments     Payment Channels     Multisig Wallet       Storage Mining ⛏   Storage Miner     Sector     Sector Index     Storage Proving       Market ⚖️   Orders     Deals     Storage Market     Retrieval Market          Overview Diagram TODO:</description>
+      <description>Filecoin Systems function statusIndicatorsShow() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.remove(&#39;hidden&#39;) }) return false; // stop click event } function statusIndicatorsHide() { var $uls = document.querySelectorAll(&#39;.statusIcon&#39;) $uls.forEach(function (el) { el.classList.add(&#39;hidden&#39;) }) return false; // stop click event }  Status Legend:
+ 🛑 Bare - Very incomplete at this time.  Implementors: This is far from ready for you.  ⚠️ Rough &amp;ndash; work in progress, heavy changes coming, as we put in place key functionality.</description>
     </item>
     
     <item>

@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4562,34 +4597,151 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">runtime</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">ExitCode</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nf">IsSuccess</span><span class="p">()</span>          <span class="kt">bool</span>
+    <span class="nf">IsError</span><span class="p">()</span>            <span class="kt">bool</span>
+    <span class="nf">AllowsStateUpdate</span><span class="p">()</span>  <span class="kt">bool</span>
 
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+    <span class="nx">Success</span>              <span class="kd">struct</span> <span class="p">{}</span>
+    <span class="nx">SystemError</span>          <span class="nx">SystemErrorCode</span>
+    <span class="nx">UserDefinedError</span>     <span class="nx">UVarint</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">exitcode</span>
+
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;fmt&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">SystemErrorCode</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
 
 <span class="c1">// TODO: assign all of these.
 </span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-	<span class="c1">// OK is the success return value, similar to unix exit code 0.
-</span><span class="c1"></span>	<span class="nx">OK</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
+	<span class="c1">// // OK is the success return value, similar to unix exit code 0.
+</span><span class="c1"></span>	<span class="c1">// OK = SystemErrorCode(0)
+</span><span class="c1"></span>
 	<span class="c1">// ActorNotFound represents a failure to find an actor.
-</span><span class="c1"></span>	<span class="nx">ActorNotFound</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">ActorNotFound</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 	<span class="c1">// ActorCodeNotFound represents a failure to find the code for a
 </span><span class="c1"></span>	<span class="c1">// particular actor in the VM registry.
-</span><span class="c1"></span>	<span class="nx">ActorCodeNotFound</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">ActorCodeNotFound</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
 	<span class="c1">// InvalidMethod represents a failure to find a method in
 </span><span class="c1"></span>	<span class="c1">// an actor
-</span><span class="c1"></span>	<span class="nx">InvalidMethod</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">InvalidMethod</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 	<span class="c1">// InsufficientFunds represents a failure to apply a message, as
 </span><span class="c1"></span>	<span class="c1">// it did not carry sufficient funds for its application.
-</span><span class="c1"></span>	<span class="nx">InsufficientFunds</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">InsufficientFunds</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
 	<span class="c1">// InvalidCallSeqNum represents a message invocation out of sequence.
 </span><span class="c1"></span>	<span class="c1">// This happens when message.CallSeqNum is not exactly actor.CallSeqNum + 1
-</span><span class="c1"></span>	<span class="nx">InvalidCallSeqNum</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">InvalidCallSeqNum</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+	<span class="c1">// OutOfGasError is returned when the execution of an actor method
+</span><span class="c1"></span>	<span class="c1">// (including its subcalls) uses more gas than initially allocated.
+</span><span class="c1"></span>	<span class="nx">OutOfGas</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+	<span class="c1">// RuntimeAPIError is returned when an actor method invocation makes a call
+</span><span class="c1"></span>	<span class="c1">// to the runtime that does not satisfy its preconditions.
+</span><span class="c1"></span>	<span class="nx">RuntimeAPIError</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+
+	<span class="c1">// MethodPanic is returned when an actor method invocation calls rt.Abort.
+</span><span class="c1"></span>	<span class="nx">MethodAbort</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+	<span class="c1">// MethodPanic is returned when the runtime intercepts a panic within
+</span><span class="c1"></span>	<span class="c1">// an actor method invocation (not via rt.Abort).
+</span><span class="c1"></span>	<span class="nx">MethodPanic</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+
+	<span class="c1">// MethodSubcallError is returned when an actor method&#39;s Send call has
+</span><span class="c1"></span>	<span class="c1">// returned with a failure error code (and the Send call did not specify
+</span><span class="c1"></span>	<span class="c1">// to ignore errors).
+</span><span class="c1"></span>	<span class="nx">MethodSubcallError</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">OK</span><span class="p">()</span> <span class="nx">ExitCode</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">ExitCode_Make_Success</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">ExitCode_Success_I</span><span class="p">{})</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">SystemError</span><span class="p">(</span><span class="nx">x</span> <span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">ExitCode_Make_SystemError</span><span class="p">(</span><span class="nf">ExitCode_SystemError</span><span class="p">(</span><span class="nx">x</span><span class="p">))</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">IsSuccess</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">==</span> <span class="nx">ExitCode_Case_Success</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">IsError</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="c1">// TODO: Confirm whether this is the desired behavior
+</span><span class="c1"></span>
+	<span class="c1">// return x.IsSuccess() || x.Which() == ExitCode_Case_UserDefinedError
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">x</span><span class="p">.</span><span class="nf">IsError</span><span class="p">()</span> <span class="p">{</span>
+		<span class="c1">// Throwing an error with a non-error exit code is itself an error
+</span><span class="c1"></span>		<span class="nx">x</span> <span class="p">=</span> <span class="nf">SystemError</span><span class="p">(</span><span class="nx">RuntimeAPIError</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">x</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RuntimeError</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">ExitCode</span> <span class="nx">ExitCode</span>
+	<span class="nx">ErrMsg</span>   <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">RuntimeError</span><span class="p">)</span> <span class="nf">String</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;Runtime error: %v&#34;</span><span class="p">,</span> <span class="nx">x</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">x</span><span class="p">.</span><span class="nx">ErrMsg</span> <span class="o">!=</span> <span class="s">&#34;&#34;</span> <span class="p">{</span>
+		<span class="nx">ret</span> <span class="o">+=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34; (\&#34;%v\&#34;)&#34;</span><span class="p">,</span> <span class="nx">x</span><span class="p">.</span><span class="nx">ErrMsg</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">RuntimeError_Make</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">errMsg</span> <span class="kt">string</span><span class="p">)</span> <span class="o">*</span><span class="nx">RuntimeError</span> <span class="p">{</span>
+	<span class="nx">exitCode</span> <span class="p">=</span> <span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">RuntimeError</span><span class="p">{</span>
+		<span class="nx">ExitCode</span><span class="p">:</span> <span class="nx">exitCode</span><span class="p">,</span>
+		<span class="nx">ErrMsg</span><span class="p">:</span>   <span class="nx">errMsg</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">e</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">ExitCode_Make_UserDefinedError</span><span class="p">(</span><span class="nf">ExitCode_UserDefinedError</span><span class="p">(</span><span class="nx">e</span><span class="p">))</span>
+<span class="p">}</span>
 </code></pre></div>
 
 

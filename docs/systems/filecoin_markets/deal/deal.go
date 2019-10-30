@@ -3,6 +3,9 @@ package deal
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
+const MIN_PROVIDER_DEAL_COLLATERAL_PER_EPOCH = actor.TokenAmount(1) // TODO: Placeholder
+const MIN_CLIENT_DEAL_COLLATERAL_PER_EPOCH = actor.TokenAmount(1)   // TODO: Placeholder
+
 func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	// TODO: extract from d.ProposalMessage
 	var proposal StorageDealProposal
@@ -20,8 +23,8 @@ func (p *StorageDealProposal_I) Duration() block.ChainEpoch {
 }
 
 func (p *StorageDealProposal_I) ClientBalanceRequirement() actor.TokenAmount {
-	collateralPerEpoch := p.ClientCollateralPerEpoch() + p.ProviderCollateralPerEpoch()
-	return actor.TokenAmount(uint64(collateralPerEpoch) * uint64(p.Duration()))
+	balanceRequirementPerEpoch := p.ClientCollateralPerEpoch() + p.StoragePricePerEpoch()
+	return actor.TokenAmount(uint64(balanceRequirementPerEpoch) * uint64(p.Duration()))
 }
 
 func (p *StorageDealProposal_I) ProviderBalanceRequirement() actor.TokenAmount {

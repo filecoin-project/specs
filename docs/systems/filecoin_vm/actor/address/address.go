@@ -4,6 +4,16 @@ package address
 // 	util "github.com/filecoin-project/specs/util"
 // )
 
+// Addresses for singleton system actors
+var (
+	InitActorAddr           = &Address_I{} // TODO
+	CronActorAddr           = &Address_I{} // TODO
+	StoragePowerActorAddr   = &Address_I{} // TODO
+	StorageMarketActorAddr  = &Address_I{} // TODO
+	PaymentChannelActorAddr = &Address_I{} // TODO
+	BurntFundsActorAddr     = &Address_I{} // TODO
+)
+
 func (a *Address_I) VerifySyntax(addrType Address_Type) bool {
 	panic("TODO")
 	// switch aType := addrType; aType {
@@ -21,4 +31,15 @@ func (a *Address_I) VerifySyntax(addrType Address_Type) bool {
 
 func (a *Address_I) String() AddressString {
 	return AddressString("") // TODo
+}
+
+func (a *Address_I) IsKeyType() bool {
+	panic("TODO")
+}
+
+func MakeAddress(net Address_NetworkID, t Address_Type) Address {
+	return &Address_I{
+		NetworkID_: net,
+		Type_:      t,
+	}
 }

@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -450,6 +450,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2106,37 +2139,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3430,6 +3432,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4330,6 +4334,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4547,6 +4582,53 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="filecoin-systems">Filecoin Systems</h1>
 
+<script type="text/javascript">
+
+function statusIndicatorsShow() {
+  var $uls = document.querySelectorAll('.statusIcon')
+  $uls.forEach(function (el) {
+    el.classList.remove('hidden')
+  })
+  return false; // stop click event
+}
+
+function statusIndicatorsHide() {
+  var $uls = document.querySelectorAll('.statusIcon')
+  $uls.forEach(function (el) {
+    el.classList.add('hidden')
+  })
+  return false; // stop click event
+}
+
+</script>
+
+<p>Status Legend:</p>
+
+<ul>
+<li>🛑 <strong>Bare</strong> - Very incomplete at this time.
+
+<ul>
+<li><strong>Implementors:</strong> This is far from ready for you.</li>
+</ul></li>
+<li>⚠️ <strong>Rough</strong> &ndash; work in progress, heavy changes coming, as we put in place key functionality.
+
+<ul>
+<li><strong>Implementors:</strong> This will be ready for you soon.</li>
+</ul></li>
+<li>🔁 <strong>Refining</strong> - Key functionality is there, some small things expected to change. Some big things may change.
+
+<ul>
+<li><strong>Implementors:</strong> Almost ready for you. You can start building these parts, but beware there may be changes still.</li>
+</ul></li>
+<li>✅ <strong>Stable</strong> - Mostly complete, minor things expected to change, no major changes expected.
+
+<ul>
+<li><strong>Implementors:</strong> Ready for you. You can build these parts.</li>
+</ul></li>
+</ul>
+
+<p>[<a href="#" onclick="return statusIndicatorsShow();">Show</a> / <a href="#" onclick="return statusIndicatorsHide();">Hide</a> ] status indicators</p>
+
 
 <div class="tocMap colorful">
 
@@ -4572,8 +4654,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems">
-            Systems
+        
 
+        Systems
 
         
         </a>
@@ -4602,8 +4685,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_nodes">
-            <strong>Filecoin Nodes</strong>
+        
 
+        <strong>Filecoin Nodes</strong>
 
         
             <br /><br /><i class="menuIcon">⚙️</i>
@@ -4636,8 +4720,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_nodes__node_types">
-            Node Types
+        
+            <i class="statusIcon">✅</i>
+        
 
+        Node Types
 
         
         </a>
@@ -4674,8 +4761,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_nodes__repository">
-            Repository
+        
+            <i class="statusIcon">✅</i>
+        
 
+        Repository
 
         
         </a>
@@ -4710,8 +4800,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_nodes__network">
-            Network Interface
+        
+            <i class="statusIcon">⚠️</i>
+        
 
+        Network Interface
 
         
         </a>
@@ -4746,8 +4839,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_nodes__clock">
-            Clock
+        
+            <i class="statusIcon">⚠️</i>
+        
 
+        Clock
 
         
         </a>
@@ -4788,8 +4884,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_files">
-            <strong>Files &amp; Data</strong>
+        
 
+        <strong>Files &amp; Data</strong>
 
         
             <br /><br /><i class="menuIcon">📑</i>
@@ -4822,8 +4919,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_files__file">
-            File
+        
+            <i class="statusIcon">✅</i>
+        
 
+        File
 
         
         </a>
@@ -4860,8 +4960,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_files__piece">
-            Piece
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        Piece
 
         
         </a>
@@ -4898,8 +5001,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_files__data_transfer">
-            Data Transfer
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        Data Transfer
 
         
         </a>
@@ -4940,8 +5046,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_vm">
-            <strong>Virtual Machine</strong>
+        
 
+        <strong>Virtual Machine</strong>
 
         
             <br /><br /><i class="menuIcon">💻</i>
@@ -4976,8 +5083,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_vm__actor">
-            Actor
+        
+            <i class="statusIcon">✅</i>
+        
 
+        Actor
 
         
         </a>
@@ -5012,8 +5122,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_vm__state_tree">
-            State Tree
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        State Tree
 
         
         </a>
@@ -5050,8 +5163,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_vm__message">
-            Message
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        Message
 
         
         </a>
@@ -5088,8 +5204,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_vm__runtime">
-            Runtime
+        
+            <i class="statusIcon">⚠️</i>
+        
 
+        Runtime
 
         
         </a>
@@ -5124,8 +5243,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_vm__sysactors">
-            System Actors
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        System Actors
 
         
         </a>
@@ -5162,8 +5284,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_vm__interpreter">
-            Interpreter
+        
+            <i class="statusIcon">⚠️</i>
+        
 
+        Interpreter
 
         
         </a>
@@ -5202,8 +5327,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_blockchain">
-            <strong>Blockchain</strong>
+        
 
+        <strong>Blockchain</strong>
 
         
             <br /><br /><i class="menuIcon">📦</i>
@@ -5236,8 +5362,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_blockchain__struct">
-            Blocks
+        
+            <i class="statusIcon">✅</i>
+        
 
+        Blocks
 
         
         </a>
@@ -5272,8 +5401,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_blockchain__message_pool">
-            Message Pool
+        
+            <i class="statusIcon">🛑</i>
+        
 
+        Message Pool
 
         
         </a>
@@ -5310,8 +5442,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_blockchain__chainsync">
-            ChainSync
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        ChainSync
 
         
         </a>
@@ -5346,8 +5481,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_blockchain__storage_power_consensus">
-            Storage Power Consensus
+        
+            <i class="statusIcon">✅</i>
+        
 
+        Storage Power Consensus
 
         
         </a>
@@ -5386,8 +5524,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_token">
-            <strong>Token</strong>
+        
 
+        <strong>Token</strong>
 
         
             <br /><br /><i class="menuIcon">📀</i>
@@ -5422,8 +5561,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_token__wallets">
-            Wallet
+        
+            <i class="statusIcon">🛑</i>
+        
 
+        Wallet
 
         
         </a>
@@ -5460,8 +5602,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_token__payments">
-            Payments
+        
+            <i class="statusIcon">🛑</i>
+        
 
+        Payments
 
         
         </a>
@@ -5498,8 +5643,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_token__payment_channels">
-            Payment Channels
+        
+            <i class="statusIcon">🛑</i>
+        
 
+        Payment Channels
 
         
         </a>
@@ -5536,8 +5684,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_token__multisig">
-            Multisig Wallet
+        
+            <i class="statusIcon">🛑</i>
+        
 
+        Multisig Wallet
 
         
         </a>
@@ -5578,8 +5729,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_mining">
-            <strong>Storage Mining</strong>
+        
 
+        <strong>Storage Mining</strong>
 
         
             <br /><br /><i class="menuIcon">⛏</i>
@@ -5614,8 +5766,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_mining__storage_mining">
-            Storage Miner
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        Storage Miner
 
         
         </a>
@@ -5650,8 +5805,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_mining__sector">
-            Sector
+        
+            <i class="statusIcon">✅</i>
+        
 
+        Sector
 
         
         </a>
@@ -5686,8 +5844,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_mining__sector_index">
-            Sector Index
+        
+            <i class="statusIcon">✅</i>
+        
 
+        Sector Index
 
         
         </a>
@@ -5722,8 +5883,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_mining__storage_proving">
-            Storage Proving
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        Storage Proving
 
         
         </a>
@@ -5764,8 +5928,9 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item expanded">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_markets">
-            <strong>Market</strong>
+        
 
+        <strong>Market</strong>
 
         
             <br /><br /><i class="menuIcon">⚖️</i>
@@ -5800,8 +5965,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_markets__order">
-            Orders
+        
+            <i class="statusIcon">🛑</i>
+        
 
+        Orders
 
         
         </a>
@@ -5838,8 +6006,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_markets__deal">
-            Deals
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        Deals
 
         
         </a>
@@ -5876,8 +6047,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_markets__storage_market">
-            Storage Market
+        
+            <i class="statusIcon">🔁</i>
+        
 
+        Storage Market
 
         
         </a>
@@ -5914,8 +6088,11 @@ https://github.com/alex-shpak/hugo-book
 <div class="tocMap-item ">
     <div class="tocMap-item-label">
         <a href="../../../#systems__filecoin_markets__retrieval_market">
-            Retrieval Market
+        
+            <i class="statusIcon">🛑</i>
+        
 
+        Retrieval Market
 
         
         </a>

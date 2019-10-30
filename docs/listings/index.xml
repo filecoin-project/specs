@@ -39,14 +39,5 @@ Block A block header contains information relevant to a particular point in time
       <description>TODO</description>
     </item>
     
-    <item>
-      <title>libp2p Protocols</title>
-      <link>/docs/listings/libp2p_protocols/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/listings/libp2p_protocols/</guid>
-      <description>TODO</description>
-    </item>
-    
   </channel>
 </rss>

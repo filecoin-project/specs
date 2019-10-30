@@ -8,21 +8,24 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-	address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(
-	ownerAddr address.Address,
-	workerAddr address.Address,
+	ownerAddr addr.Address,
+	workerAddr addr.Address,
 	sectorSize util.UInt,
 	peerId libp2p.PeerID,
-) address.Address {
+) addr.Address {
 	// ownerAddr := sms.generateOwnerAddress(workerPubKey)
 	// var pledgeAmt actor.TokenAmount TODO: unclear how to pass the amount/pay
 	// TODO compute PledgeCollateral for 0 bytes
 	// return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerPubKey, sectorSize, peerId)
-	return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerAddr, peerId)
+	// TODO: access this from runtime
+	// return sms.StoragePowerActor().CreateStorageMiner(ownerAddr, workerAddr, peerId)
+	var minerAddr addr.Address
+	return minerAddr
 }
 
 func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
@@ -35,7 +38,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) address.Address {
+func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) addr.Address {
 	panic("TODO")
 }
 
@@ -46,27 +49,25 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 // triggered by new block reception and tipset assembly
 func (sms *StorageMiningSubsystem_I) OnNewBestChain() {
 	panic("")
-	// new election, reset nonce
-	// sms.electionNonce = 0
 	// sms.tryLeaderElection()
 }
 
 // triggered by wall clock
 func (sms *StorageMiningSubsystem_I) OnNewRound() {
 	panic("")
-	// repeat on prior tipset, increment nonce
-	// sms.electionNonce += 1
 	// sms.tryLeaderElection()
 }
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	panic("")
+	// new election, increment height
+	// sms.miningHeight += 1
 	// T1 := sms.Consensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 	// TK := sms.Consensus.GetElectionProofSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 
 	// for _, worker := range sms.workers {
 	// 	newTicket := PrepareNewTicket(worker.VRFKeyPair, T1)
-	// 	newEP := DrawElectionProof(TK, sms.electionNonce, worker.VRFKeyPair)
+	// 	newEP := DrawElectionProof(TK, , worker.VRFKeyPair)
 
 	// 	if sms.Consensus.IsWinningLeaderElection(newEP, worker.address) {
 	// 		BlockProducer.GenerateBlockHeader(newEP, newTicket, sms.CurrentTipset, worker.workerAddress)
@@ -89,7 +90,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, 
 	// return newTicket
 }
 
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Ticket, nonce block.ElectionNonce, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Ticket, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
 	panic("")
 	// // 0. Prepare new election proof
 	// var newEP ElectionProof
@@ -98,9 +99,8 @@ func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Tick
 	// // 1.i. # take the VRFOutput of that ticket as input, specified for the appropriate operation type
 	// input := VRFPersonalization.ElectionProof
 	// input.append(lookbackTicket.Output)
-	// input.append(nonce)
+	// input.append(height)
 	// // ii. # run it through the VRF and store the VRFProof in the new ticket
-	// newEP.VRFResult := vrfKP.Generate
-	// newEP.ElectionNonce := nonce
+	// newEP.VRFResult := vrfKP.Generate(input)
 	// return newEP
 }

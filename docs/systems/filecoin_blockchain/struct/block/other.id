@@ -16,9 +16,6 @@ type StoragePower BytesAmount
 type ElectionProof struct {
     VRFResult filcrypto.VRFResult
     Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
-    Nonce ElectionNonce
 
     ValidateSyntax() bool
 }
-
-type ElectionNonce UVarint

@@ -5,8 +5,8 @@ import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
 import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
-    actor                StoragePowerActor
-    associatedStateTree  &st.StateTree  // TODO: remove this. should not store this here.
+    // actor                StoragePowerActor
+    associatedStateTree &st.StateTree  // TODO: remove this. should not store this here.
 
     GenerateElectionProof(tipset block.Tipset) block.ElectionProof
     ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]

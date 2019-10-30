@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4728,19 +4763,23 @@ The Block is a unit of the Filecoin blockchain.</p>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset_I</span> <span class="p">{</span>
+<span class="c1">// should return the tipset from the nearest epoch to epoch containing a Tipset
+</span><span class="c1">// that is from the closest epoch less than or equal to epoch
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset_I</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+
 	<span class="c1">// dist := bl.Epoch - epoch - 1
 </span><span class="c1"></span>	<span class="c1">// current := bl.ParentTipset
 </span><span class="c1"></span>	<span class="c1">// parents := current.Parents
-</span><span class="c1"></span>	<span class="c1">// for i := range dist {
+</span><span class="c1"></span>	<span class="c1">// for current.Epoch &gt; epoch {
 </span><span class="c1"></span>	<span class="c1">// 	current = parents
 </span><span class="c1"></span>	<span class="c1">// 	parent = current.Parents
 </span><span class="c1"></span>	<span class="c1">// }
 </span><span class="c1"></span>	<span class="c1">// return current
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>
+<span class="c1">// should return the ticket from the Tipset generated at the nearest height leq to epoch
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>
 	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">bl</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">()</span>
 <span class="p">}</span>

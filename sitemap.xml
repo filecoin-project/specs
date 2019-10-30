@@ -122,6 +122,10 @@
   </url>
   
   <url>
+    <loc>/docs/intro/changelog/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/libraries/ipld/cid/</loc>
   </url>
   
@@ -163,6 +167,10 @@
   
   <url>
     <loc>/docs/systems/filecoin_files/data_transfer/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/listings/libp2p_protocols/data_transfer_protocol/</loc>
   </url>
   
   <url>

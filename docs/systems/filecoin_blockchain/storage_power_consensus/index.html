@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4546,7 +4581,7 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
 
 <p><div id="systems__filecoin_blockchain__storage_power_consensus__storage_power_consensus"></div>
-The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners&rsquo; effective power over consensus in given chains in its <em>Power Table</em>. It also runs <em>Expected Consensus</em> (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.</p>
+The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners&rsquo; effective power over consensus in given chains in its <em>Power Table</em>. It also runs <a href="../../../../#algorithms__expected_consensus">Expected Consensus</a> (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.</p>
 
 <p>Succinctly, the SPC subsystem offers the following services:
 - Access to the <em>Power Table</em> for every subchain, accounting for individual storage miner power and total power on-chain.
@@ -4584,8 +4619,8 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
-</span><span class="c1"></span>    <span class="nx">actor</span>                <span class="nx">StoragePowerActor</span>
-    <span class="nx">associatedStateTree</span>  <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>  <span class="c1">// TODO: remove this. should not store this here.
+</span><span class="c1"></span>    <span class="c1">// actor                StoragePowerActor
+</span><span class="c1"></span>    <span class="nx">associatedStateTree</span> <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>  <span class="c1">// TODO: remove this. should not store this here.
 </span><span class="c1"></span>
     <span class="nf">GenerateElectionProof</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
     <span class="nf">ChooseTipsetToMine</span><span class="p">(</span><span class="nx">tipsets</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">])</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">]</span>
@@ -4639,7 +4674,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 
 
-<h2 id="distinguishing-between-storage-miners-and-block-miners">Distinguishing between storage miners and block miners</h2>
+<h1 id="distinguishing-between-storage-miners-and-block-miners">Distinguishing between storage miners and block miners</h1>
 
 <p>There are two ways to earn Filecoin tokens in the Filecoin network:
 - By participating in the <a href="../../../../#systems__filecoin_markets__storage_market___index">Storage Market</a> as a storage provider and being paid by clients for file storage deals.
@@ -4649,13 +4684,13 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 <p>However, given Filecoin&rsquo;s &ldquo;useful Proof-of-Work&rdquo; is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a <a href="../../../../#systems__filecoin_mining__storage_mining__storage_miner_actor">Storage Miner Actor</a> need only register with the <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor">Storage Power Actor</a> in order to participate in Expected Consensus and mine blocks.</p>
 
-<h2 id="repeated-leader-election-attempts">Repeated leader election attempts</h2>
+<h1 id="repeated-leader-election-attempts">Repeated leader election attempts</h1>
 
 <p>In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid <code>ElectionProof</code> and trying again.</p>
 
 <div id="systems__filecoin_blockchain__storage_power_consensus__ticket_chain"></div>
 
-<h3 id="the-ticket-chain-and-randomness-on-chain">The Ticket chain and randomness on-chain</h3>
+<h2 id="the-ticket-chain-and-randomness-on-chain">The Ticket chain and randomness on-chain</h2>
 
 <p>While each Filecoin block header contains a ticket field (see <a href="../../../../#algorithms__expected_consenus__tickets">Tickets</a>), it is useful to provide nodes with a ticket chain abstraction.</p>
 
@@ -4705,75 +4740,6 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 </code></pre>
 
 <p>In the above diagram, a miner will use block A&rsquo;s Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.</p>
-
-<h2 id="drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</h2>
-
-<p>Tickets are used as input to the SEAL above in order to tie Proofs-of-Replication to a given chain, thereby preventing long-range attacks (from another miner in the future trying to reuse SEALs).</p>
-
-<p>The ticket has to be drawn from a finalized block in order to prevent the miner from potential losing storage (in case of a chain reorg) even though their storage is intact.</p>
-
-<p>Verification should ensure that the ticket was drawn no farther back than necessary by the miner. We note that tickets can uniquely be associated to a given round in the protocol (lest a hash collision be found), but that the round number is explicited by the miner in <code>commitSector</code>.</p>
-
-<p>We present precisely how ticket selection and verification should work. In the below, we use the following notation:</p>
-
-<ul>
-<li><code>F</code>&ndash; Finality (number of rounds)</li>
-<li><code>X</code>&ndash; round in which SEALing starts</li>
-<li><code>Z</code>&ndash; round in which the SEAL appears (in a block)</li>
-<li><code>Y</code>&ndash; round announced in the SEAL <code>commitSector</code> (should be X, but a miner could use any Y &lt;= X), denoted by the ticket selection
-
-<ul>
-<li><code>T</code>&ndash; estimated time for SEAL, dependent on sector size</li>
-<li><code>G = T + variance</code>&ndash; necessary flexibility to account for network delay and SEAL-time variance.</li>
-</ul></li>
-</ul>
-
-<p>We expect Filecoin will be able to produce estimates for sector commitment time based on sector sizes, e.g.:
-<code>(estimate, variance) &lt;--- SEALTime(sectors)</code>
-G and T will be selected using these.</p>
-
-<h4 id="picking-a-ticket-to-seal">Picking a Ticket to Seal</h4>
-
-<p>When starting to prepare a SEAL in round X, the miner should draw a ticket from X-F with which to compute the SEAL.</p>
-
-<h4 id="verifying-a-seal-s-ticket">Verifying a Seal&rsquo;s ticket</h4>
-
-<p>When verifying a SEAL in round Z, a verifier should ensure that the ticket used to generate the SEAL is found in the range of rounds [Z-T-F-G, Z-T-F+G].</p>
-
-<h4 id="in-detail">In Detail</h4>
-
-<pre><code>                               Prover
-           ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-          │
-
-          ▼
-         X-F ◀───────F────────▶ X ◀──────────T─────────▶ Z
-     -G   .  +G                 .                        .
-  ───(┌───────┐)───────────────( )──────────────────────( )────────▶
-      └───────┘                 '                        '        time
- [Z-T-F-G, Z-T-F+G]
-          ▲
-
-          └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-                              Verifier
-</code></pre>
-
-<p>Note that the prover here is submitting a message on chain (i.e. the SEAL). Using an older ticket than necessary to generate the SEAL is something the miner may do to gain more confidence about finality (since we are in a probabilistically final system). However it has a cost in terms of securing the chain in the face of long-range attacks (specifically, by mixing in chain randomness here, we ensure that an attacker going back a month in time to try and create their own chain would have to completely regenerate any and all sectors drawing randomness since to use for their fork&rsquo;s power).</p>
-
-<p>We break this down as follows:</p>
-
-<ul>
-<li>The miner should draw from <code>X-F</code>.</li>
-<li>The verifier wants to find what <code>X-F</code> should have been (to ensure the miner is not drawing from farther back) even though Y (i.e. the round of the ticket actually used) is an unverifiable value.</li>
-<li>Thus, the verifier will need to make an inference about what <code>X-F</code> is likely to have been based on:
-
-<ul>
-<li>(known) round in which the message is received (Z)</li>
-<li>(known) finality value (F)</li>
-<li>(approximate) SEAL time (T)</li>
-</ul></li>
-<li>Because T is an approximate value, and to account for network delay and variance in SEAL time across miners, the verifier allows for G offset from the assumed value of <code>X-F</code>: <code>Z-T-F</code>, hence verifying that the ticket is drawn from the range <code>[Z-T-F-G, Z-T-F+G]</code>.</li>
-</ul>
 </article>
 
       
@@ -4787,22 +4753,10 @@ G and T will be selected using these.</p>
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li>
-<ul>
 <li><a href="#distinguishing-between-storage-miners-and-block-miners">Distinguishing between storage miners and block miners</a></li>
 <li><a href="#repeated-leader-election-attempts">Repeated leader election attempts</a>
 <ul>
 <li><a href="#the-ticket-chain-and-randomness-on-chain">The Ticket chain and randomness on-chain</a></li>
-</ul></li>
-<li><a href="#drawing-randomness-for-sector-commitments">Drawing randomness for sector commitments</a>
-<ul>
-<li>
-<ul>
-<li><a href="#picking-a-ticket-to-seal">Picking a Ticket to Seal</a></li>
-<li><a href="#verifying-a-seal-s-ticket">Verifying a Seal&rsquo;s ticket</a></li>
-<li><a href="#in-detail">In Detail</a></li>
-</ul></li>
-</ul></li>
 </ul></li>
 </ul>
 </nav>

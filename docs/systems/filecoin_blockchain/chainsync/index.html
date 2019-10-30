@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -451,6 +451,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2107,37 +2140,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3431,6 +3433,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4331,6 +4335,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -5039,12 +5074,15 @@ be checked and used to make syncing decisions without fetching the <code>Message
 <li>Validation computation is considerable, and a serious DOS attack vector.</li>
 <li>Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.</li>
 <li><code>ChainSync</code> SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by <code>FinalityTipset</code>, or when <code>ChainSync</code> is under significant resource load.</li>
-<li><strong>Progressive Stages of Block Validation</strong>
+
+<li><p>It is key to note that any block received after the <code>ROUND_CUTOFF</code> time must be automatically discarded by the miner until the start of the next epoch.</p></li>
+
+<li><p><strong>Progressive Stages of Block Validation</strong></p>
 
 <ul>
 <li><em>(TODO: move this to blockchain/Block section)</em></li>
 <li><strong>BV0 - Syntactic Validation</strong>: Validate data structure packing and ensure correct typing.</li>
-<li><strong>BV1 - Light Consensus State Checks</strong>: Validate <code>b.ChainWeight</code>, <code>b.ChainEpoch</code>, <code>b.MinerAddress</code>, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at <code>b.ChainEpoch - consensus.LookbackParameter</code>. Eg Weight and Epoch have well defined valid ranges, and <code>b.MinerAddress</code>
+<li><strong>BV1 - Light Consensus State Checks</strong>: Validate <code>b.ChainWeight</code>, <code>b.ChainEpoch</code>, <code>b.MinerAddress</code>, <code>b.Timestamp</code>, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at <code>b.ChainEpoch - consensus.LookbackParameter</code>. Eg Weight and Epoch have well defined valid ranges, and <code>b.MinerAddress</code>
 must exist in the lookback state). This requires some chain state, enough to establish plausibility levels of each of these values. A node should be able to estimate valid ranges for <code>b.ChainEpoch</code> based on the <code>LastTrustedCheckpoint</code>. <code>b.ChainWeight</code> is easy if some of the relatively recent chain is available, otherwise hard.</li>
 <li><strong>BV2 - Signature Validation</strong>: Verify <code>b.BlockSig</code> is correct.</li>
 <li><strong>BV3 - Verify ElectionProof</strong>: Verify <code>b.ElectionProof</code> is correct. This requires having state for relevant lookback parameters.</li>
@@ -5052,7 +5090,8 @@ must exist in the lookback state). This requires some chain state, enough to est
 <li><strong>BV4 - Verify MessageSigs</strong>: Verify the signatures on messages</li>
 <li><strong>BV5 - Verify StateTree</strong>: Verify the application of <code>b.Parents.Messages()</code> correctly produces <code>b.StateTree</code> and <code>b.MessageReceipts</code></li>
 </ul></li>
-<li>These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.</li>
+
+<li><p>These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.</p></li>
 </ul>
 
 <p>Notes:

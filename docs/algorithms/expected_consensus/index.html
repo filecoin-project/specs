@@ -8,7 +8,7 @@
 
 
 
-<link rel="stylesheet" href="../../../book.min.3d86abdf7c40450032cdf5d2102c7d79cf825523eec169b72903b5e161959bff.css">
+<link rel="stylesheet" href="../../../book.min.80d177ba9eeab42f747930aec886ccdf593ccbbd4ea5800f45db583ed39a4aed.css">
 <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=EB+Garamond" />
 
 
@@ -450,6 +450,39 @@ https://github.com/alex-shpak/hugo-book
 
     
     </li>
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#intro__changelog" class="menu-item depth-2">
+    
+    
+        Change Log
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
 
 </ul>
 
@@ -2106,37 +2139,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#algorithms__expected_consensus" class="menu-item depth-2">
-    
-    
-        Expected Consensus
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-</ul>
-
-
-    
-    </li>
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
 <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor" class="menu-item depth-4">
     
     
@@ -3430,6 +3432,8 @@ https://github.com/alex-shpak/hugo-book
 
 
 
+  
+
 
 <a href="../../../#libraries__ipld__selectors" class="menu-item depth-3">
     
@@ -4330,6 +4334,37 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-2">
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#listings__libp2p_protocols__data_transfer_protocol" class="menu-item depth-3">
+    
+    
+        Data Transfer Protocol
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4551,7 +4586,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an <code>Election Proof</code>). All valid blocks submitted in a given round form a <code>Tipset</code>. Every block in a Tipset adds weight to its chain. The &lsquo;best&rsquo; chain is the one with the highest weight, which is to say that the fork choice rule is to choose the heaviest known chain. For more details on how to select the heaviest chain, see <a href="../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a>.</p>
 
-<p>At a very high level, with every new block generated, a miner will craft a new ticket from the prior one in the chain. While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner may increment a given nonce as part of the input with which they attempt to run leader election in order to ensure liveness in the protocol. These nonces help mark block height. Every block in a given Tipset will contain election proofs with the same nonce (i.e. they are mined at the same height).</p>
+<p>At a very high level, with every new block generated, a miner will craft a new ticket from the prior one in the chain appended with the current epoch number (i.e. parentTipset.epoch + 1 to start). While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner will increment the round number and attempt a new leader election (using the new input) thereby ensuring liveness in the protocol.</p>
 
 <p>The <a href="../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a> subsystem uses access to EC to use the following facilities:
 - Access to verifiable randomness for the protocol, derived from <a href="../../../#algorithms__expected_consenus__tickets">Tickets</a>.
@@ -4592,7 +4627,7 @@ On expectation, in Filecoin, every block header contains one ticket, though it c
 <ul>
 <li>A <code>Ticket</code> field — this stores the new ticket generated during this block generation attempt. It is from this ticket that miners will sample randomness to run leader election in <code>K</code> rounds.</li>
 
-<li><p>An <code>ElectionProof</code> — this stores a proof that a given miner has won a leader election using the appropriate ticket <code>K</code> rounds back along with a nonce showing how many rounds generating the EP took. It proves that the leader was elected in this round.</p>
+<li><p>An <code>ElectionProof</code> — this stores a proof that a given miner has won a leader election using the appropriate ticket <code>K</code> rounds back appended with the current epoch number. It proves that the leader was validly elected in this epoch.</p>
 
 <pre><code>But why the randomness lookback?
 
@@ -4663,14 +4698,14 @@ How is K selected?
     Secp256k1 for our curve
 </code></pre>
 
-<p>Note: We draw the miner power from the prior round. This means that if a miner wins a block on their ProvingPeriodEnd even if they have not yet resubmitted a PoSt, they retain their power (until the next round).</p>
+<p>Note: We draw the miner power from the prior round. This means that a miner can win a block in an epoch in which they were supposed to have proven storage again but did not. Put another way, <code>ElectionProof</code> validity is checked prior to executing transactions (including that which cuts miner power) at every epoch.</p>
 
-<p>If successful, the miner can craft a block, passing it to the block producer. If unsuccessful, it will wait to hear of another block mined this round to try again. In the case no other block was found in this round the miner can increment its nonce and try leader election again using the same past ticket and new nonce.
-While a miner could try to run through multiple nonces in parallel in order to quickly generate a block, this effort will be futile as the rational majority of miners will reject blocks crafted with ElectionProofs whose nonces prove too high (see below).</p>
+<p>If successful, the miner can craft a block, passing it to the block producer. If unsuccessful, it will wait to hear of another block mined this round to try again. In the case no other block was found in this round the miner can increment the epoch number and try leader election again using the same past ticket and new epoch number.
+While a miner could try to run through multiple epochs in parallel in order to quickly generate a block, this effort will be futile as the rational majority of miners will reject blocks crafted with ElectionProofs whose epochs prove too high (i.e. in the future &ndash; see below).</p>
 
 <h3 id="election-validation">Election Validation</h3>
 
-<p>In order to determine that the mined block was generated by an eligible miner, one must check its <code>ElectionProof</code>.</p>
+<p>In order to determine that the mined block was generated by an eligible miner, one must check its <code>ElectionProof</code>&rsquo;s validity and that its input was generated using the current epoch value.</p>
 
 <div id="algorithms__expected_consensus__chain_selection"></div>
 
@@ -4751,13 +4786,8 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 <p>This is detectable when a given miner submits two blocks that satisfy any of the following &ldquo;consensus faults&rdquo;:</p>
 
 <ul>
-<li>(1) <code>double-fork mining fault</code>: two blocks contains the same electionProof nonce, mined at the same height.</li>
-
-<li><p>(2) <code>parent grinding fault</code>: one block&rsquo;s parent is a Tipset that could have validly included the other block according to Tipset validity rules, however the parent of the first block does not include the other block.</p>
-
-<ul>
-<li>While it cannot be proven that a miner omits known blocks from a Tipset in general (i.e. network latency could simply mean the miner did not receive a particular block) in this case it can be proven because a miner must be aware of a block they mined in a previous round.</li>
-</ul></li>
+<li>(1) <code>double-fork mining fault</code>: two blocks mined off of the same Tipset at different epochs (i.e. with different <code>ElectionProof</code>s generated from the same input ticket).</li>
+<li>(2) <code>parent grinding fault</code>: one block&rsquo;s parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block. When a miner&rsquo;s block at epoch e + 1 references a Tipset that does not include the block they mined at e both blocks can be submitted to prove this fault.</li>
 </ul>
 
 <p>Any node that detects either of the above events should submit both block headers to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method. The &ldquo;slasher&rdquo; will receive a portion (TODO: define how much) of the offending miner&rsquo;s <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral"></a> as a reward for notifying the network of the fault.

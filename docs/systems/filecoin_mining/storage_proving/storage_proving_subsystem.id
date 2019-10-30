@@ -1,16 +1,7 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sealer "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/sealer"
-
-// type seal.SealOutput struct {}
-// type seal.SectorSealer struct {}
-// type seal.Seed struct {}
-// type sector.SectorID struct {}
-// type sector.SealCfg struct {}
-type Commitment struct {}
-type Ticket struct {}
-type Block struct {}
-type SectorSealer struct {}
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type StorageProvingSubsystem struct {
     SectorSealer   sealer.SectorSealer
@@ -18,7 +9,7 @@ type StorageProvingSubsystem struct {
 
     VerifySeal(sv sector.SealVerifyInfo, pieceInfos [sector.PieceInfo]) union {ok bool, err error}
 
-    ValidateBlock(block Block)
+    ValidateBlock(block block.Block)
 
     // TODO: remove this?
     // GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
