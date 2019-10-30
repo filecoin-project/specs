@@ -1,27 +1,33 @@
 Compute:
-  declare(cost_hash_gbs, $/gb/s)
-  declare(hash_gbs_fastest, gb/s)
-  declare(hash_cost, $/gb)
+  // declare(cost_hash_gbs, $/gb/s)
+  // declare(hash_gbs_fastest, gb/s)
+  // declare(hash_cost, $/gb)
 
-  node_size_gb = node_size / (1024*1024*1024)
+  b_in_gb = (1024 * 1024 * 1024)
+  node_size_gb = node_size / b_in_gb 
 
-  declare(hash_gbs_fastest, gb/s)
-  describe(hash_gbs_fastest, "GB that can be hashed in a second by the fastest possible hardware")
-  hash_gbs_fastest = hash_gbs / hash_time_amax
+  // declare(hash_gbs_fastest, gb/s)
+  // describe(hash_gbs_fastest, "GB that can be hashed in a second by the fastest possible hardware")
+  // hash_gbs_fastest = hash_gbs * hash_time_amax
 
-  describe(hash_time_single_node, "Time it takes to hash a single node")
-  hash_time_single_node = node_size_gb / hash_gbs_fastest
+  // describe(single_node_encoding_time, "Time it takes to hash a single node")
+  // single_node_encoding_time = parents * (node_size_gb / hash_gbs_fastest)
 
-  describe(cost_hash_single_node, "Time it takes to hash a single node")
-  cost_hash_single_node = cost_hash_gbs * (hash_time_single_node * node_size_gb)
+  // describe(cost_single_node_encoding, "Time it takes to hash a single node")
+  // cost_single_node_encoding = cost_hash_gbs * (single_node_encoding_time * node_size_gb)
+
+  single_node_hashes = parents
+  hashes_in_a_gb = b_in_gb / node_size 
+  cost_single_hash = (cost_hash_gbs / hashes_in_a_gb) / hash_time_amax
+
+  cost_single_node_encoding = cost_single_hash * single_node_hashes
 
 Storage:
   cost_storage_gbs = cost_gb_per_month / (24 * 30 * 60 * 60)
-  cost_storage_gb_polling_time = cost_storage_gbs * (sector_size_gb * polling_time)
+  cost_storage_gb_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
 
 Attack:
-  nodes = (sector_size_gb*(1024*1024*1024)) / node_size 
+  nodes = (sector_size_gb*b_in_gb) / node_size 
   // after hashes_threshold is more expensive to hash than to keep storage
-  hashes_threshold = cost_storage_gb_polling_time / cost_hash_single_node
-  drg_depth = hashes_threshold / nodes 
-  node_gen_path = drg_depth * nodes 
+  hashes_threshold = cost_storage_gb_polling_time / cost_single_node_encoding
+  drg_depth = hashes_threshold / nodes
