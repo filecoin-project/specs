@@ -1,103 +1,54 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 
 // Randomness is a string of random bytes
 type Randomness Bytes
 
-type ActorStateHandle struct {
-    InitValue util.Any
-    Runtime
-
-    Commit(newValue util.Any)
-    Release(checkValue util.Any)
-}
-
 // Runtime is the VM's internal runtime object.
 // this is everything that is accessible to actors, beyond parameters.
 // FKA as vm.Context
-type Runtime struct {
-    // Invocation is the inputs for the current invocation
-    Invocation      InvocInput
-    State           VMState
+type Runtime interface {
+    CurrEpoch() block.ChainEpoch
 
-    CurrEpoch()     block.ChainEpoch
+    // Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
+    Randomness(e block.ChainEpoch, offset UInt) Randomness
 
-    AcquireState()  ActorStateHandle
-
+    Caller() addr.Address
     ValidateCallerIs(caller addr.Address)
+    ValidateCallerMatches(CallerPattern)
 
-    CronActorAddress()          addr.Address
-    StoragePowerActorAddress()  addr.Address
+    AcquireState()      ActorStateHandle
 
-    // Fatal is a fatal error, and halts VM execution.
-    // This is the normal error condition of actor execution.
-    // On Fatal errors, the VM simply does not apply the state transition.
-    // This is atomic across the entire contract execution.
-    //
-    // TODO: @why wants to get rid of this.
-    Fatal(string)
+    SuccessReturn()     msg.InvocOutput
+    ValueReturn(Bytes)  msg.InvocOutput
+    ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
 
-    // Send allows the current execution context to invoke methods on other actors in the system
+    // Throw an error indicating a failure condition has occurred, from which the given actor
+    // code is unable to recover. If an error is thrown in actor code, and not handled by any
+    // of its callers, then the VM will not apply the state transition.
     //
-    // TODO: this should change to async -- put the message on the queue.
-    //       do definied callback methods, with maybe a glue closure to align params or carry intermediate state.
-    //
+    // Note: this should only be used for exceptional conditions, such as inconsistent state
+    // values or precondition violations. Operations that may fail during normal execution
+    // should use error return values, not call this method.
+    Abort(string)
+
+    // Check that the given condition is true (and call Abort if not).
+    Assert(bool)
+
+    ValueSupplied()             actor.TokenAmount
+
+    // Send allows the current execution context to invoke methods on other actors in the system.
     // TODO: what are the return values here?
-    Send(
-        to      addr.Address
-        method  actor.MethodNum
-        params  actor.MethodParams
-        value   actor.TokenAmount
-    ) msg.MessageReceipt
+    Send(input msg.InvocInput)  msg.MessageReceipt
+    SendAllowingErrors(input msg.InvocInput) msg.MessageReceipt
+
+    // Create an actor in the state tree. May only be called by InitActor.
+    CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams)
+
+    IpldGet(c ipld.CID) union {Bytes, error}
+    IpldPut(x ipld.Object) ipld.CID
 }
-
-// VMState is Chain state accessible to all contracts via the VM interface
-type VMState struct {
-    // StateTree returns the current state tree
-    StateTree  st.StateTree
-
-    // Storage provides access to the VM storage layer
-    Storage    VMStorage
-
-    // BlockHeight returns the height of the block this message was added to the chain in
-    Epoch()    st.Epoch
-
-    // Balance returns the balance of a given actor
-    Balance(id actor.ActorID) actor.TokenAmount
-
-    // Randomness returns the randomness (ticket) for a particular epoch, and offset.
-    Randomness(e st.Epoch, offset UInt) Randomness
-
-    // ComputeActorAddress computes the address of the contract,
-    // based on the creator (invoking address) and nonce given.
-    // TODO: why is this needed? -- InitActor
-    // TODO: this has to be the origin call. and it's broken: could yield the same address
-    //       need a truly unique way to assign an address.
-    ComputeActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Address
-}
-
-type VMStorage struct {
-    // Put writes the given object to the storage staging area and returns its CID
-    Put(o IpldObject) struct {c ipld.CID, err error}
-
-    // Get fetches the given object from storage (either staging, or local) and returns
-    // the serialized data.
-    Get(c ipld.CID) struct {o IpldObject, err error}
-
-    // Commit updates the actual stored state for the actor. This is a compare and swap
-    // operation, and will fail if 'old' is not equal to the current return value of `Head`.
-    // This functionality is used to prevent issues with re-entrancy
-    //
-    // TODO: YIKES i dont think we need commit to prevent re-entrancy. if we do, the model
-    // is wrong.
-    Commit(old ipld.CID, new ipld.CID) error
-
-    // Head returns the CID of the current actor state
-    Head() ipld.CID
-}
-
-type IpldObject struct {}

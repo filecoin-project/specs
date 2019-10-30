@@ -8,14 +8,6 @@ import (
 	"unsafe"
 )
 
-// TODO: finish
-type CID struct {
-}
-
-// TODO: finish
-// type BigInt struct {
-// }
-
 // Check that sizeof(int) == 8 (we only support 64-bit builds for now)
 type _UnusedCompileAssert1 = [unsafe.Sizeof(int(0)) - 8]byte
 type _UnusedCompileAssert2 = [8 - unsafe.Sizeof(int(0))]byte
@@ -47,6 +39,11 @@ func Int_FromNative(x int) Int {
 
 func String_FromNative(x string) String {
 	return String(x)
+}
+
+// Indirection to prevent the compiler from ignoring unreachable code
+func TODO() {
+	panic("TODO")
 }
 
 type UVarint = uint64

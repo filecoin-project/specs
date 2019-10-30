@@ -5,8 +5,23 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
+
+const (
+	StoragePowerActor_ProcessPowerReport actor.MethodNum = 1
+	StoragePowerActor_ProcessFaultReport actor.MethodNum = 2
+)
+
+////////////////////////////////////////////////////////////////////////////////
+// Boilerplate
+////////////////////////////////////////////////////////////////////////////////
+type InvocOutput = msg.InvocOutput
+type Runtime = vmr.Runtime
+
+////////////////////////////////////////////////////////////////////////////////
 
 func (spa *StoragePowerActor_I) CreateStorageMiner(
 	ownerAddr addr.Address,
@@ -394,4 +409,8 @@ func (spa *StoragePowerActor_I) Surprise(ticket block.Ticket) []addr.Address {
 
 	return surprisedMiners
 
+}
+
+func (a *StoragePowerActor_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
+	panic("TODO")
 }

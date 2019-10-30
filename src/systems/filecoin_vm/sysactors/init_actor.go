@@ -2,65 +2,81 @@ package sysactors
 
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+
+// import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
 // import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 // import util "github.com/filecoin-project/specs/util"
 
-func (a *InitActorCode_I) Constructor(rt vmr.Runtime) {
+func (a *InitActorCode_I) Constructor(rt Runtime) {
 	panic("TODO")
 }
 
-func (a *InitActorCode_I) Exec(rt vmr.Runtime, state InitActorState, codeCID actor.CodeCID, method actor.MethodNum, params actor.MethodParams) addr.Address {
-	// Make sure that only the actors defined in the spec can be launched.
-	if !a._isBuiltinActor(codeCID) {
-		rt.Fatal("cannot launch actor instance that is not a builtin actor")
-	}
+func (a *InitActorCode_I) Exec(rt Runtime, codeCID actor.CodeCID, constructorParams actor.MethodParams) InvocOutput {
+	rt.CreateActor(codeCID, constructorParams)
 
-	// Ensure that singeltons can only be launched once.
-	// TODO: do we want to enforce this? If so how should actors be marked as such?
-	if a._isSingletonActor(codeCID) {
-		rt.Fatal("cannot launch another actor of this type")
-	}
+	panic("TODO")
+	/*
+		// TODO: update
 
-	// Get the actor ID for this actor.
-	actorID := a._assignNextID(state)
+		// Make sure that only the actors defined in the spec can be launched.
+		if !a._isBuiltinActor(codeCID) {
+			rt.Fatal("cannot launch actor instance that is not a builtin actor")
+		}
 
-	// This generates a unique address for this actor that is stable across message
-	// reordering
-	// TODO: where do `creator` and `nonce` come from?
-	// TODO: CallSeqNum is not related to From -- it's related to Origin
-	// addr := rt.ComputeActorAddress(rt.Invocation().FromActor(), rt.Invocation().CallSeqNum())
-	var addr addr.Address // TODO
+		// Ensure that singeltons can only be launched once.
+		// TODO: do we want to enforce this? If so how should actors be marked as such?
+		if a._isSingletonActor(codeCID) {
+			rt.Fatal("cannot launch another actor of this type")
+		}
 
-	// Set up the actor itself
-	actorState := &actor.ActorState_I{
-		CodeCID_: codeCID,
-		// State_:   nil, // TODO: do we need to init the state? probably not
-		Balance_:    rt.Invocation().Value,
-		CallSeqNum_: 0,
-	}
+		// Get the actor ID for this actor.
+		actorID := a._assignNextID(state)
 
-	// The call to the actors constructor will set up the initial state
-	// from the given parameters, setting `actor.Head` to a new value when successfull.
-	// TODO: can constructors fail?
-	// TODO: this needs to be written such that the specific type Constructor is called.
-	//       right now actor.Constructor(p) calls the Actor type, not the concrete type.
-	// a.Constructor(params) // TODO: uncomment this.
+		// This generates a unique address for this actor that is stable across message
+		// reordering
+		// TODO: where do `creator` and `nonce` come from?
+		// TODO: CallSeqNum is not related to From -- it's related to Origin
+		// addr := rt.ComputeActorAddress(rt.Invocation().FromActor(), rt.Invocation().CallSeqNum())
+		var addr addr.Address // TODO
 
-	// TODO: where is this VM.GlobalState?
-	// TODO: do we need this?
-	// runtime.State().Storage().Set(actorID, actor)
 
-	// Store the mappings of address to actor ID.
-	state.AddressMap()[addr] = actorID
-	state.IDMap()[actorID] = addr
 
-	// TODO: adjust this to be proper state setting.
-	rt.State().StateTree().ActorStates()[addr] = actorState // atm it's nil
+		var initBalance actor.TokenAmount
+		panic("TODO")
+		// TODO: initBalance := rt.Invocation().InitSendInput.Value()
 
-	return addr
+
+
+		// Set up the actor itself
+		actorState := &actor.ActorState_I{
+			CodeCID_: codeCID,
+			// State_:   nil, // TODO: do we need to init the state? probably not
+			Balance_:    initBalance,
+			CallSeqNum_: 0,
+		}
+
+		// The call to the actors constructor will set up the initial state
+		// from the given parameters, setting `actor.Head` to a new value when successfull.
+		// TODO: can constructors fail?
+		// TODO: this needs to be written such that the specific type Constructor is called.
+		//       right now actor.Constructor(p) calls the Actor type, not the concrete type.
+		// a.Constructor(params) // TODO: uncomment this.
+
+		// TODO: where is this VM.GlobalState?
+		// TODO: do we need this?
+		// runtime.State().Storage().Set(actorID, actor)
+
+		// Store the mappings of address to actor ID.
+		state.AddressMap()[addr] = actorID
+		state.IDMap()[actorID] = addr
+
+		// TODO: adjust this to be proper state setting.
+		rt.State().StateTree().ActorStates()[addr] = actorState // atm it's nil
+
+		return addr
+	*/
 }
 
 func (_ *InitActorCode_I) _assignNextID(state InitActorState) actor.ActorID {
@@ -97,7 +113,7 @@ func (_ *InitActorCode_I) _isBuiltinActor(codeCID actor.CodeCID) bool {
 }
 
 // TODO
-func (a *InitActorCode_I) InvokeMethod(input vmr.InvocInput, method actor.MethodNum, params actor.MethodParams) vmr.InvocOutput {
+func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	// TODO: load state
 	// var state InitActorState
 	// storage := input.Runtime().State().Storage()
@@ -113,6 +129,6 @@ func (a *InitActorCode_I) InvokeMethod(input vmr.InvocInput, method actor.Method
 	// case 4:
 	// 	return a.GetActorIDForAddress(input, state, params[0])
 	default:
-		return vmr.ErrorInvocOutput(input.InTree, exitcode.InvalidMethod)
+		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
 	}
 }
