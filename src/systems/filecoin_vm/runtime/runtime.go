@@ -106,9 +106,22 @@ func _generateActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Ad
 	panic("TODO")
 }
 
-func (rt *VMContext) CreateActor(codeCID actor.CodeCID, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
+func (rt *VMContext) CreateActor(stateCID actor.StateCID, address addr.Address, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
 	rt.ValidateCallerIs(addr.InitActorAddr)
-	// TODO: _generateActorAddress
+
+	// TODO: set actor state in global states
+	// rt._globalStatePending.ActorStates()[address] = stateCID
+
+	// TODO: call constructor
+	// TODO: can constructors fail?
+	// TODO: maybe do this directly form InitActor, and only do the StateTree.ActorStates() updating here?
+	rt.Send(&msg.InvocInput_I{
+		To_:     address,
+		Method_: actor.MethodConstructor,
+		Params_: constructorParams,
+		Value_:  rt.ValueSupplied(),
+	})
+
 	// TODO: finish
 	panic("TODO")
 }

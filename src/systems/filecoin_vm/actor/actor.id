@@ -88,6 +88,8 @@ type ActorState struct {
 // the Runtime.
 type ActorID UVarint
 
+type StateCID ipld.CID
+
 type ActorSubstateCID ipld.CID
 
 // ActorState represents the on-chain storage actors keep. This type is a
