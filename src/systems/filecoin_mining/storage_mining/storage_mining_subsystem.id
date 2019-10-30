@@ -1,6 +1,6 @@
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -34,13 +34,13 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself to create miner
     createMiner(
-        ownerPubKey   filcrypto.PubKey
-        workerPubKey  filcrypto.PubKey
+        ownerPubKey   filcrypto.PublicKey
+        workerPubKey  filcrypto.PublicKey
         pledgeAmt     actor.TokenAmount
     )
 
     // get miner key by address
-    GetMinerKeyByAddress(addr address.Address) filcrypto.PubKey
+    GetMinerKeyByAddress(addr address.Address) filcrypto.PublicKey
 
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer

@@ -1,7 +1,7 @@
 package block
 
 import (
-	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	util "github.com/filecoin-project/specs/util"
 )
 

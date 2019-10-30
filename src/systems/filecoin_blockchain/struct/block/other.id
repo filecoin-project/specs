@@ -1,4 +1,4 @@
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
 // TODO: move all this stuff elsewhere. a consensus lib?
 
