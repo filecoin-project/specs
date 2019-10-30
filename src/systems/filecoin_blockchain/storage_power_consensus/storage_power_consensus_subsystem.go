@@ -107,7 +107,7 @@ func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain,
 func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.ChainEpoch, electionProof block.ElectionProof, workerAddr addr.Address) bool {
 	panic("")
 	// // 1. Check that ElectionProof was validated in appropriate time
-	// if height+electionProof.ElectionNonce > clock.roundTime+1 {
+	// if height > clock.roundTimeå {
 	// 	return false
 	// }
 
@@ -116,7 +116,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.
 	// input := VRFPersonalizationElectionProof
 	// TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain, sms.block.LatestEpoch())
 	// input.append(TK.Output)
-	// input.appent(electionProof.ElectionNonce)
+	// input.append(height)
 
 	// return electionProof.Verify(input, minerPK)
 }

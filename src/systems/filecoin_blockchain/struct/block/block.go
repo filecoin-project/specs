@@ -44,18 +44,22 @@ func (chain *Chain_I) HeadTipset() Tipset {
 	panic("")
 }
 
+// should return the tipset from the nearest epoch to epoch containing a Tipset
+// that is from the closest epoch less than or equal to epoch
 func (bl *Block_I) TipsetAtEpoch(epoch ChainEpoch) Tipset_I {
 	panic("")
+
 	// dist := bl.Epoch - epoch - 1
 	// current := bl.ParentTipset
 	// parents := current.Parents
-	// for i := range dist {
+	// for current.Epoch > epoch {
 	// 	current = parents
 	// 	parent = current.Parents
 	// }
 	// return current
 }
 
+// should return the ticket from the Tipset generated at the nearest height leq to epoch
 func (bl *Block_I) TicketAtEpoch(epoch ChainEpoch) Ticket {
 	ts := bl.TipsetAtEpoch(epoch)
 	return ts.MinTicket()

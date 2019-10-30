@@ -20,7 +20,7 @@ type StorageMiningSubsystem struct {
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
     BlockProducer      blockproducer.BlockProducer
-    electionNonce      block.ElectionNonce
+    miningHeight       block.ChainEpoch
 
     // Need access to SPC in order to mine a block
     Consensus          spc.StoragePowerConsensusSubsystem
@@ -53,7 +53,7 @@ type StorageMiningSubsystem struct {
     // call by StorageMiningSubsystem itself in BlockProduction
     DrawElectionProof(
         lookbackTicket  block.Ticket
-        nonce           block.ElectionNonce
+        height          block.ChainEpoch
         vrfKP           filcrypto.VRFKeyPair
     ) block.ElectionProof
 
