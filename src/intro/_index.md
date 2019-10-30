@@ -6,6 +6,7 @@ entries:
 - concepts
 - filecoin_vm
 - process
+- changelog
 - system
 ---
 
