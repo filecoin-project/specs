@@ -38,7 +38,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PublicKey) address.Address {
+func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PublicKey) addr.Address {
 	panic("TODO")
 }
 
