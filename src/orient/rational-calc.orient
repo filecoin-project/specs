@@ -18,8 +18,7 @@ Compute:
 
   single_node_hashes = parents
   hashes_in_a_gb = b_in_gb / node_size 
-  cost_single_hash = (cost_hash_gbs / hashes_in_a_gb) / hash_time_amax
-
+  cost_single_hash = cost_hash_gbs / (hashes_in_a_gb * hash_time_amax)
   cost_single_node_encoding = cost_single_hash * single_node_hashes
 
 Storage:
