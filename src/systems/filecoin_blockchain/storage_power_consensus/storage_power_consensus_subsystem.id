@@ -44,7 +44,8 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by StorageMiningSubsystem after sealing
     GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) base_mining.PoStChallenge
 
-    GetFinality() block.ChainEpoch
+    GetFinality()       block.ChainEpoch
+    FinalizedEpoch()    block.ChainEpoch
 }
 
 type ExpectedConsensus struct {
