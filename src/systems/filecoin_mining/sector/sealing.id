@@ -26,7 +26,7 @@ type SealVerifyInfo struct {
     SealCfg
     Randomness             SealRandomness
     InteractiveRandomness  InteractiveSealRandomness
-    PieceInfos             [PieceInfo]
+    UnsealedCID            UnsealedSectorCID  // CommD
 }
 
 // OnChainSealVerifyInfo is the structure of information that must be sent with
@@ -116,5 +116,5 @@ type SealOutputArtifacts struct {}
 
 type PieceInfo struct {
     Size   UInt  // Size in nodes. For BLS12-381 (capacity 254 bits), must be >= 16. (16 * 8 = 128)
-    CommP  UnsealedSectorCID
+    CommP  UnsealedSectorCID  // FIXME: create a distinct type for piece commitments.
 }

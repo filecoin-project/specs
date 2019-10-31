@@ -593,12 +593,9 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 
 	var pieceInfos []sector.PieceInfo // = make([]sector.PieceInfo, 0)
 
-	for dealId := range onChainInfo.DealIDs() {
-		// FIXME: Actually get the deal info from the storage market actor and use it to create a sector.PieceInfo.
-		_ = dealId
-
-		pieceInfos = append(pieceInfos, nil)
-	}
+	// FIXME: Actually get commD  from the storage market actor, in exchange for onChainInfo.DealIDs().
+	_ = pieceInfos
+	var unsealedCID sector.UnsealedSectorCID
 
 	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
@@ -618,7 +615,7 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 		//Randomness_:
 		// TODO: get InteractiveRandomness sector.SealRandomness using onChainInfo.InteractiveEpoch
 		//InteractiveRandomness_:
-		PieceInfos_: pieceInfos,
+		UnsealedCID_: unsealedCID,
 	})
 	return false // TODO: finish
 }
