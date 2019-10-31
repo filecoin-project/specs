@@ -28,8 +28,8 @@ type BlockHeader struct {
 
     // Consensus things
     Timestamp        clock.Time
-    Ticket
-    ElectionProof
+    Ticket           Ticket
+    ElectionProof    ElectionProof
 
     // Signatures
     BlockSig         filcrypto.Signature
@@ -55,7 +55,6 @@ type Block struct {
 type Chain struct {
     HeadEpoch()         ChainEpoch
     HeadTipset()        Tipset
-    FinalizedEpoch()    ChainEpoch
     LatestCheckpoint()  ChainEpoch
 
     TipsetAtEpoch(epoch ChainEpoch) Tipset
