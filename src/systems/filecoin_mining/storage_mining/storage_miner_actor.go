@@ -591,10 +591,21 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 
 	// verifySeal will also generate CommD on the fly from CommP and PieceSize
 
-	var pieceInfos []sector.PieceInfo // = make([]sector.PieceInfo, 0)
+	// var pieceInfos []sector.PieceInfo // = make([]sector.PieceInfo, 0)
 
 	// FIXME: Actually get commD  from the storage market actor, in exchange for onChainInfo.DealIDs().
-	_ = pieceInfos
+
+	// TODO: serialize method param
+	params := make([]actor.MethodParam, len(onChainInfo.DealIDs()))
+
+	rt.Send(&msg.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: actor.MethodSend, // TODO: need to define and register MethodNum for SMA
+		Params_: params,
+		Value_:  rt.ValueSupplied(), // TODO: figure out where tx fee should come from
+	}).ReturnValue()
+
+	// TODO: deserialize result from rt.Send into unsealedCID
 	var unsealedCID sector.UnsealedSectorCID
 
 	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
