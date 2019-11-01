@@ -1,6 +1,7 @@
 package filproofs
 
 import "bytes"
+import "errors"
 import "math"
 import "math/rand"
 import big "math/big"
@@ -653,19 +654,21 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	return sdr.VerifyOfflineCircuitProof(commD, commR, sealSeeds, challenges, sealProof)
 }
 
-// TODO:
-//func ComputeDataCommitment()
-// sectorSize := sealCfg.SectorSize()
-//
-// rootPieceInfo := sdr.ComputeRootPieceInfo(pieceInfos)
-// rootSize := rootPieceInfo.Size()
-// if rootSize != sectorSize {
-// 	return false
-// }
+func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize UInt, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
+
+	rootPieceInfo := computeRootPieceInfo(pieceInfos)
+	rootSize := rootPieceInfo.Size()
+	if rootSize != sectorSize {
+		return unsealedCID, errors.New("Wrong sector size.")
+	}
+	// TODO: Enforce maximum padding allowable padding.
+	return rootPieceInfo.CommP(), nil
+
+}
 
 // commD := rootPieceInfo.CommP()
 
-func (sdr *StackedDRG_I) ComputeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
+func computeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
 	// Construct root PieceInfo by (shift-reduce) parsing the constituent PieceInfo array.
 	// Later pieces must always be joined with equal-sized predecessors to create a new root twice their size.
 	// So if a piece is larger than the current root (top of stack), add padding until it is not.
