@@ -9,6 +9,7 @@ import "encoding/binary"
 
 import util "github.com/filecoin-project/specs/util"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
@@ -16,7 +17,7 @@ type SHA256Hash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 type UInt = util.UInt
-type PieceInfo = sector.PieceInfo
+type PieceInfo = *sector.PieceInfo_I
 type Label Bytes32
 type Commitment = sector.Commitment
 
@@ -655,15 +656,13 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 }
 
 func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize UInt, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
-
 	rootPieceInfo := computeRootPieceInfo(pieceInfos)
 	rootSize := rootPieceInfo.Size()
 	if rootSize != sectorSize {
 		return unsealedCID, errors.New("Wrong sector size.")
 	}
 	// TODO: Enforce maximum padding allowable padding.
-	return rootPieceInfo.CommP(), nil
-
+	return UnsealedSectorCID(AsBytes_PieceCID(rootPieceInfo.PieceCID())), nil
 }
 
 // commD := rootPieceInfo.CommP()
@@ -743,8 +742,8 @@ func zeroPadding(size UInt) PieceInfo {
 func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
 	return &sector.PieceInfo_I{
-		Size_:  left.Size() + right.Size(),
-		CommP_: UnsealedSectorCID(BinaryHash_SHA256Hash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
+		Size_:     left.Size() + right.Size(),
+		PieceCID_: piece.PieceCID(BinaryHash_SHA256Hash(AsBytes_PieceCID(left.PieceCID()), AsBytes_PieceCID(right.PieceCID()))), // FIXME: make this whole function generic?
 	}
 }
 
@@ -963,13 +962,19 @@ func AsBytes_T(t util.T) []byte {
 }
 
 func AsBytes_UnsealedSectorCID(cid sector.UnsealedSectorCID) []byte {
-	panic("Unimplemented for T")
+	panic("Unimplemented for UnsealedSectorCID")
 
 	return []byte{}
 }
 
 func AsBytes_SealedSectorCID(CID sector.SealedSectorCID) []byte {
-	panic("Unimplemented for T")
+	panic("Unimplemented for SealedSectorCID")
+
+	return []byte{}
+}
+
+func AsBytes_PieceCID(CID piece.PieceCID) []byte {
+	panic("Unimplemented for PieceCID")
 
 	return []byte{}
 }

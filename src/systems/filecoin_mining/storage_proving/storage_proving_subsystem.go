@@ -12,7 +12,7 @@ func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) Stora
 	return StorageProvingSubsystem_VerifySeal_FunRet_Make_ok(StorageProvingSubsystem_VerifySeal_FunRet_ok(result)) //,
 }
 
-func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize util.UInt, pieceInfos []sector.PieceInfo) StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet {
+func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize util.UInt, pieceInfos []*sector.PieceInfo_I) StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet {
 	unsealedCID, err := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
 
 	if err != nil {

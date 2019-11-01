@@ -9,7 +9,7 @@ import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import util "github.com/filecoin-project/specs/util"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -314,20 +314,20 @@ func (a *StorageMarketActorCode_I) GetLastDealExpirationFromDealIDs(rt Runtime, 
 	return lastDealExpiration
 }
 
-func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, dealIDs []deal.DealID) sector.UnsealedSectorCID {
-	pieceCIDs := make([]piece.PieceCID, len(dealIDs))
-	pieceSizes := make([]piece.PieceSize, len(dealIDs))
+func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) sector.UnsealedSectorCID {
+	pieceInfos := make([]*sector.PieceInfo_I, len(dealIDs))
 
 	h, st := a.State(rt)
 	for index, deal := range st.Deals() {
 		proposal := deal.Proposal()
 
-		pieceCIDs[index] = proposal.PieceCID()
-		pieceSizes[index] = proposal.PieceSize()
+		pieceInfos[index].PieceCID_ = proposal.PieceCID()
+		pieceInfos[index].Size_ = util.UInt(proposal.PieceSize().Total())
 	}
 
-	// call proof to compute UnsealedSectorCID
-	var commD sector.UnsealedSectorCID
+	ret := new(proving.StorageProvingSubsystem_I).ComputeUnsealedSectorCID(sectorSize, pieceInfos)
+
+	commD := sector.UnsealedSectorCID(ret.As_unsealedSectorCID())
 
 	Release(rt, h, st)
 

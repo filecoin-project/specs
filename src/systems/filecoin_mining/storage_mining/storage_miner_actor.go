@@ -596,17 +596,18 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 	// FIXME: Actually get commD  from the storage market actor, in exchange for onChainInfo.DealIDs().
 
 	// TODO: serialize method param
-	params := make([]actor.MethodParam, len(onChainInfo.DealIDs()))
+	sectorSize := st.Info().SectorSize()
+	params := make([]actor.MethodParam, sectorSize, len(onChainInfo.DealIDs()))
 
-	rt.Send(&msg.InvocInput_I{
+	ret := rt.Send(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
 		Method_: actor.MethodSend, // TODO: need to define and register MethodNum for SMA
 		Params_: params,
 		Value_:  rt.ValueSupplied(), // TODO: figure out where tx fee should come from
 	}).ReturnValue()
 
-	// TODO: deserialize result from rt.Send into unsealedCID
-	var unsealedCID sector.UnsealedSectorCID
+	// TODO: Is this actually the right way to turn these raw bytes ito an UnsealedSectorCID?
+	var unsealedCID sector.UnsealedSectorCID = sector.UnsealedSectorCID(ret)
 
 	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
@@ -617,16 +618,14 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 
 		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
 		SealCfg_: &sector.SealCfg_I{
-			SectorSize_:     st.Info().SectorSize(),
+			SectorSize_:     sectorSize,
 			SubsectorCount_: st.Info().SubsectorCount(),
 			Partitions_:     st.Info().Partitions(),
 		},
 
-		// TODO: get Randomness sector.SealRandomness using onChainInfo.Epoch
-		//Randomness_:
-		// TODO: get InteractiveRandomness sector.SealRandomness using onChainInfo.InteractiveEpoch
-		//InteractiveRandomness_:
-		UnsealedCID_: unsealedCID,
+		Randomness_:            sector.SealRandomness(rt.Randomness(onChainInfo.SealEpoch(), 0)),
+		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
+		UnsealedCID_:           unsealedCID,
 	})
 	return false // TODO: finish
 }
