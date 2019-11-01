@@ -8,6 +8,8 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import util "github.com/filecoin-project/specs/util"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -310,6 +312,26 @@ func (a *StorageMarketActorCode_I) GetLastDealExpirationFromDealIDs(rt Runtime, 
 	Release(rt, h, st)
 
 	return lastDealExpiration
+}
+
+func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, dealIDs []deal.DealID) sector.UnsealedSectorCID {
+	pieceCIDs := make([]piece.PieceCID, len(dealIDs))
+	pieceSizes := make([]piece.PieceSize, len(dealIDs))
+
+	h, st := a.State(rt)
+	for index, deal := range st.Deals() {
+		proposal := deal.Proposal()
+
+		pieceCIDs[index] = proposal.PieceCID()
+		pieceSizes[index] = proposal.PieceSize()
+	}
+
+	// call proof to compute UnsealedSectorCID
+	var commD sector.UnsealedSectorCID
+
+	Release(rt, h, st)
+
+	return commD
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
