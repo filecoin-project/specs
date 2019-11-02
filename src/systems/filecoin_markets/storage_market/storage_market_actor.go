@@ -19,6 +19,8 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type State = StorageMarketActorState
 
+const MAX_ALLOWABLE_PADDING_DENOMINATOR = 64
+
 func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
 	h := rt.AcquireState()
 	stateCID := h.Take()
@@ -318,20 +320,42 @@ func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSi
 	pieceInfos := make([]*sector.PieceInfo_I, len(dealIDs))
 
 	h, st := a.State(rt)
+
+	var totalPieceSize util.UInt
+
 	for index, deal := range st.Deals() {
 		proposal := deal.Proposal()
-
+		pieceSize := util.UInt(proposal.PieceSize().Total())
+		totalPieceSize += pieceSize
 		pieceInfos[index].PieceCID_ = proposal.PieceCID()
-		pieceInfos[index].Size_ = util.UInt(proposal.PieceSize().Total())
+		pieceInfos[index].Size_ = pieceSize
 	}
-
-	ret := new(proving.StorageProvingSubsystem_I).ComputeUnsealedSectorCID(sectorSize, pieceInfos)
-
-	commD := sector.UnsealedSectorCID(ret.As_unsealedSectorCID())
 
 	Release(rt, h, st)
 
+	maxAllowablePadding := sectorSize / MAX_ALLOWABLE_PADDING_DENOMINATOR
+	minTotalPiece := sectorSize - maxAllowablePadding
+
+	if totalPieceSize < minTotalPiece {
+		// How to return failure?
+		return sector.UnsealedSectorCID([]byte{})
+	}
+
+	SPS := new(proving.StorageProvingSubsystem_I)
+	ret := SPS.ComputeUnsealedSectorCID(sectorSize, pieceInfos)
+
+	var commD sector.UnsealedSectorCID
+
+	switch ret.Which() {
+	case proving.StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet_Case_unsealedSectorCID:
+		commD = sector.UnsealedSectorCID(ret.As_unsealedSectorCID())
+	case proving.StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet_Case_err:
+		// How to return failure?
+		return sector.UnsealedSectorCID([]byte{})
+	}
+
 	return commD
+
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {

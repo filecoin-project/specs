@@ -658,6 +658,7 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize UInt, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
 	rootPieceInfo := computeRootPieceInfo(pieceInfos)
 	rootSize := rootPieceInfo.Size()
+
 	if rootSize != sectorSize {
 		return unsealedCID, errors.New("Wrong sector size.")
 	}

@@ -599,12 +599,14 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 	sectorSize := st.Info().SectorSize()
 	params := make([]actor.MethodParam, sectorSize, len(onChainInfo.DealIDs()))
 
-	ret := rt.Send(&msg.InvocInput_I{
+	receipt := rt.Send(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: actor.MethodSend, // TODO: need to define and register MethodNum for SMA
+		Method_: actor.MethodGetUnsealedCIDForDealIDs,
 		Params_: params,
 		Value_:  rt.ValueSupplied(), // TODO: figure out where tx fee should come from
-	}).ReturnValue()
+	})
+
+	ret := receipt.ReturnValue()
 
 	// TODO: Is this actually the right way to turn these raw bytes ito an UnsealedSectorCID?
 	var unsealedCID sector.UnsealedSectorCID = sector.UnsealedSectorCID(ret)
