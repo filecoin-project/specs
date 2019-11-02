@@ -10,6 +10,7 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import util "github.com/filecoin-project/specs/util"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -316,7 +317,7 @@ func (a *StorageMarketActorCode_I) GetLastDealExpirationFromDealIDs(rt Runtime, 
 	return lastDealExpiration
 }
 
-func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) sector.UnsealedSectorCID {
+func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) vmr.InvocOutput {
 	pieceInfos := make([]*sector.PieceInfo_I, len(dealIDs))
 
 	h, st := a.State(rt)
@@ -337,25 +338,21 @@ func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSi
 	minTotalPiece := sectorSize - maxAllowablePadding
 
 	if totalPieceSize < minTotalPiece {
-		// How to return failure?
-		return sector.UnsealedSectorCID([]byte{})
+		return rt.ErrorReturn(exitcode.InvalidSectorPacking)
 	}
 
 	SPS := new(proving.StorageProvingSubsystem_I)
 	ret := SPS.ComputeUnsealedSectorCID(sectorSize, pieceInfos)
 
-	var commD sector.UnsealedSectorCID
-
 	switch ret.Which() {
 	case proving.StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet_Case_unsealedSectorCID:
-		commD = sector.UnsealedSectorCID(ret.As_unsealedSectorCID())
+		return rt.ValueReturn(util.Bytes(sector.UnsealedSectorCID(ret.As_unsealedSectorCID())))
 	case proving.StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet_Case_err:
-		// How to return failure?
-		return sector.UnsealedSectorCID([]byte{})
+		return rt.ErrorReturn(exitcode.InvalidSectorPacking)
 	}
 
-	return commD
-
+	// Unreachable -- just make the compiler happy.
+	return rt.ErrorReturn(exitcode.SystemError(exitcode.MethodSubcallError))
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {

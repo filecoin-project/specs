@@ -597,9 +597,13 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 		Value_:  rt.ValueSupplied(), // TODO: figure out where tx fee should come from
 	})
 
+	if receipt.ExitCode() == exitcode.InvalidSectorPacking {
+		return false
+	}
+
 	ret := receipt.ReturnValue()
 
-	// TODO: Is this actually the right way to turn these raw bytes into an UnsealedSectorCID?
+	// This assumes the raw bytes have been passed unmodified through the VM.
 	var unsealedCID sector.UnsealedSectorCID = sector.UnsealedSectorCID(ret)
 
 	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
