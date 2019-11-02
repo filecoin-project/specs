@@ -116,8 +116,8 @@ type SealAlgorithm enum {
 type SealOutputArtifacts struct {}
 
 // TODO: PieceInfo is the name used by proofs for this struct, but there also exists a piece.PieceInfo type, which is different.
-// We should probably rename one of them, since this is quite confusing.
+// We should probably rename one of them, since this is quite confusing. Or, if we can put `PieceCID` into pieces.PieceInfo, we can just use that.
 type PieceInfo struct {
     Size      UVarint  // Size in nodes. For BLS12-381 (capacity 254 bits), must be >= 16. (16 * 8 = 128)
-    PieceCID  piece.PieceCID  // FIXME: create a distinct type for piece commitments.
+    PieceCID  piece.PieceCID
 }

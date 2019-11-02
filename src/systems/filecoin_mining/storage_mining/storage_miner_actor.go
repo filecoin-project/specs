@@ -586,15 +586,6 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 }
 
 func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
-	// TODO: verify seal @nicola
-	// TODO: st.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
-
-	// verifySeal will also generate CommD on the fly from CommP and PieceSize
-
-	// var pieceInfos []sector.PieceInfo // = make([]sector.PieceInfo, 0)
-
-	// FIXME: Actually get commD  from the storage market actor, in exchange for onChainInfo.DealIDs().
-
 	// TODO: serialize method param
 	sectorSize := st.Info().SectorSize()
 	params := make([]actor.MethodParam, sectorSize, len(onChainInfo.DealIDs()))
@@ -608,7 +599,7 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 
 	ret := receipt.ReturnValue()
 
-	// TODO: Is this actually the right way to turn these raw bytes ito an UnsealedSectorCID?
+	// TODO: Is this actually the right way to turn these raw bytes into an UnsealedSectorCID?
 	var unsealedCID sector.UnsealedSectorCID = sector.UnsealedSectorCID(ret)
 
 	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
