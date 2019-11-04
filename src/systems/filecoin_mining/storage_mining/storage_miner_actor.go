@@ -586,9 +586,10 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 }
 
 func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
-	// TODO: serialize method param
 	sectorSize := st.Info().SectorSize()
-	params := make([]actor.MethodParam, sectorSize, len(onChainInfo.DealIDs()))
+	dealIDs := onChainInfo.DealIDs()
+	params := make([]actor.MethodParam, 1+len(dealIDs))
+	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 
 	receipt := rt.Send(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
