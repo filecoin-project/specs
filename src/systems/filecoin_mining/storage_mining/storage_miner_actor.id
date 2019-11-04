@@ -39,10 +39,11 @@ type SectorOnChainInfo struct {
 }
 
 type ChallengeStatus struct {
-    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStSurpriseChallenge
-    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon successful submitSurprisePoSt
+    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
+    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon _onSuccessfulPoSt and _onMissedPoSt
 
-    IsChallenged()         bool
+    IsChallenged()         bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+    ShouldChallenge(currEpoch block.ChainEpoch) bool  // only True when CurrEpoch > LastChallengeEpoch + MIN_CHALLENGE_PERIOD
 }
 
 type PreCommittedSector struct {
@@ -57,26 +58,27 @@ type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 type StorageMinerActorState struct {
     // CollateralVault CollateralVault
 
-    PreCommittedSectors        PreCommittedSectorsAMT
-    Sectors                    SectorsAMT
-    StagedCommittedSectors     StagedCommittedSectorAMT
+    PreCommittedSectors           PreCommittedSectorsAMT
+    Sectors                       SectorsAMT
+    StagedCommittedSectors        StagedCommittedSectorAMT
 
-    // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
+    // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckSurprisePoStSubmissionHappened
     // successful SubmitSurprisePoSt will perform changes to NextProvingSet
     // and update ProvingSet with NextProvingSet at the end
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-    ProvingSet                 sector.CompactSectorSet
+    ProvingSet                    sector.CompactSectorSet
 
     SectorTable
     SectorExpirationQueue
     ChallengeStatus
 
     // contains mostly static info about this miner
-    Info                       &MinerInfo
+    Info                          &MinerInfo
 
     // TODO ProvingPeriodEnd   Epoch
 
-    _isChallenged(rt Runtime)  bool
+    _isChallenged(rt Runtime)     bool
+    _shouldChallenge(rt Runtime)  bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _sectorExists(sectorNo sector.SectorNumber) bool
 
@@ -100,7 +102,7 @@ type StorageMinerActorCode struct {
     SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission)
     SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission)
 
-    CheckPoStSubmissionHappened(rt Runtime)
+    CheckSurprisePoStSubmissionHappened(rt Runtime)
 
     // TODO: should depledge be in here or in storage market actor?
 
