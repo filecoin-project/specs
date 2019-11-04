@@ -39,8 +39,8 @@ type SectorOnChainInfo struct {
 }
 
 type ChallengeStatus struct {
-    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStChallenge
-    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon successful submitPoSt
+    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStSurpriseChallenge
+    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon successful submitSurprisePoSt
 
     IsChallenged()         bool
 }
@@ -62,7 +62,7 @@ type StorageMinerActorState struct {
     StagedCommittedSectors     StagedCommittedSectorAMT
 
     // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
-    // successful SubmitPoSt will perform changes to NextProvingSet
+    // successful SubmitSurprisePoSt will perform changes to NextProvingSet
     // and update ProvingSet with NextProvingSet at the end
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     ProvingSet                 sector.CompactSectorSet
@@ -92,12 +92,13 @@ type StorageMinerActorState struct {
 }
 
 type StorageMinerActorCode struct {
-    NotifyOfPoStChallenge(rt Runtime)
+    NotifyOfPoStSurpriseChallenge(rt Runtime)
 
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
 
-    SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+    SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission)
+    SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission)
 
     CheckPoStSubmissionHappened(rt Runtime)
 
@@ -108,6 +109,7 @@ type StorageMinerActorCode struct {
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
 
     _onMissedPoSt(rt Runtime)
+    _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission)
 
     _submitFaultReport(
         rt          Runtime
