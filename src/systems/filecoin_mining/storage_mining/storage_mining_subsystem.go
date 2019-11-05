@@ -1,11 +1,11 @@
 package storage_mining
 
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-// import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -48,21 +48,18 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 
 // triggered by new block reception and tipset assembly
 func (sms *StorageMiningSubsystem_I) OnNewBestChain() {
-	panic("")
-	// sms.tryLeaderElection()
+	sms.tryLeaderElection()
 }
 
 // triggered by wall clock
 func (sms *StorageMiningSubsystem_I) OnNewRound() {
-	panic("")
-	// sms.tryLeaderElection()
+	sms.tryLeaderElection()
 }
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	panic("")
 	// new election, increment height
-	// sms.miningHeight += 1
-	// T1 := sms.Consensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
+	T1 := sms.consensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 	// TK := sms.Consensus.GetElectionProofSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 
 	// for _, worker := range sms.workers {
@@ -75,19 +72,22 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	// }
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, vrfKP filcrypto.VRFKeyPair) block.Ticket {
-	panic("")
-	// // 0. prepare new ticket
-	// var newTicket Ticket
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket spc.Ticket, vrfKP filcrypto.VRFKeyPair) spc.Ticket_I {
+	// run it through the VRF and get deterministic output
 
-	// // 1. run it through the VRF and get deterministic output
-	// // 1.i. take the VRFResult of that ticket as input, specifying the personalization (see data structures)
-	// input := VRFPersonalization.Ticket
-	// input.append(priorTicket.Output)
-	// // 2.ii. run through VRF
-	// newTicket.VRFResult := vrfKP.Generate(input)
+	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
+	var input []byte
+	input = append(input, spc.VRFPersonalizationTicket)
+	input = append(input, priorTicket.Output()...)
 
-	// return newTicket
+	// run through VRF
+	vrfRes := vrfKP.Generate(input)
+	var newTicket spc.Ticket_I
+
+	// return new ticket
+	newTicket.VRFResult_ = vrfRes
+	newTicket.Output_ = vrfRes.Output()
+	return newTicket
 }
 
 func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Ticket, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {

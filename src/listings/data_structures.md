@@ -61,10 +61,7 @@ A ticket contains a shared random value referenced by a particular `Block` in th
 Every miner must produce a new `Ticket` for each ticket used in a leader election attempt.
 
 To produce the ticket values,
-we use an [EC-VRF per Goldberg et al.](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-04#page-10)
-with Secp256k1 and SHA-256 to obtain a deterministic, pseudorandom output.
-
-{{<goFile Ticket>}}
+we use a {{<sref vrf>}} to obtain a deterministic, pseudorandom output.
 
 ## Ticket Comparison
 
@@ -85,9 +82,6 @@ The inclusion of the `ElectionProof` in the block allows other network participa
 to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket,
 (in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
 block height with every leader election attempt.
-
-{{<goFile ElectionProof>}}
-
 
 # Message
 

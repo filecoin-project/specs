@@ -11,6 +11,10 @@ type MessageRoot ipld.CID
 type ReceiptRoot ipld.CID
 type ChainWeight UVarint
 type ChainEpoch UVarint
+type ChainEpochState union {
+    Active
+    PastCutoff
+}
 
 type BlockHeader struct {
     // Chain linking

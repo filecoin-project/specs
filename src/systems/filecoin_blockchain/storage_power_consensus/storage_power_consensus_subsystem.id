@@ -24,9 +24,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey) bool
 
-    computeTipsetWeight(tipset block.Tipset) block.ChainWeight
-
-    IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool
+    computeChainWeight(tipset block.Tipset) block.ChainWeight
 
     StoragePowerConsensusError() StoragePowerConsensusError
 
@@ -46,11 +44,6 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     GetFinality()       block.ChainEpoch
     FinalizedEpoch()    block.ChainEpoch
-}
-
-type ExpectedConsensus struct {
-    ComputeWeight(chain block.Chain) block.ChainWeight
-    IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
 }
 
 type StoragePowerConsensusError struct {}

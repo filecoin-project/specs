@@ -3,6 +3,7 @@ crypto_signatures: [algorithms, crypto, signatures]
 data_structures: [data_structures]
 ds_address: [data_structures, address]
 app_address: [appendix, address]
+vrf: [algorithms, crypto, vrf]
 
 # blockchain
 sys_vm: [systems, filecoin_vm]
@@ -27,6 +28,10 @@ leader_election: [algorithms, expected_consensus, leader_election]
 chain_selection: [algorithms, expected_consensus, chain_selection]
 finality: [algorithms, expected_consensus, finality]
 consensus_faults: [algorithms, expected_consensus, consensus_faults]
+
+### Chain Sync
+chain_sync: [systems, filecoin_blockchain, chainsync]
+block_validation: [systems, filecoin_blockchain, chainsync, block_validation]
 
 ### Message Pool
 message_pool: [systems, filecoin_blockchain, message_pool]

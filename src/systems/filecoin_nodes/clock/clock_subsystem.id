@@ -1,5 +1,23 @@
-type Time int64
+type Time string // ISO nano timestamp
+type UnixTime int // unix timestamp
+type Round int // Blockchain round
+type ChainEpoch UVarint
+type ChainEpochState union {
+    Active
+    PastCutoff
+}
 
-type WallClock struct {
-    NowUTC() Time
+type Clock interface {
+  
+  UTCTime()             Time
+  UnixNano()            UnixTime
+
+  currentEpoch          ChainEpoch
+  currentEpochStart     UnixTime
+  epochDuration         UnixTime @(cached)
+  cutoffAt              UnixTime @(cached)
+
+  ResetEpoch(genesisTime UnixTime)  struct {}
+  CurrentEpoch()                    ChainEpoch
+  CurrentEpochState()               ChainEpochState
 }

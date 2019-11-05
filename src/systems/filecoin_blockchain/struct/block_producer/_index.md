@@ -6,17 +6,17 @@ title: Block Producer
 
 # Mining Blocks
 
-Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest [Tipsets](expected-consensus.md#tipsets) seen on the network.
+Having registered as a miner, it's time to start making and checking tickets. At this point, the miner should already be running chain validation, which includes keeping track of the latest tipsets seen on the network.
 
-For additional details around how consensus works in Filecoin, see the [expected consensus spec](expected-consensus.md). For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
+For additional details around how consensus works in Filecoin, see {{<sref expected_consensus>}}. For the purposes of this section, there is a consensus protocol (Expected Consensus) that guarantees a fair process for determining what blocks have been generated in a round, whether a miner should mine a block themselves, and some rules pertaining to how "Tickets" should be validated during block validation.
 
 ## Ticket Generation
 
-For details of ticket generation, see the [expected consensus spec](expected-consensus.md#ticket-generation).
+For details of ticket generation, see {{<sref expected_consensus>}}.
 
 New tickets are generated using the last ticket in the ticket-chain. Generating a new ticket will take some amount of time (as imposed by the VDF in Expected Consensus).
 
-Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block (see [block creation](#block-creation)).
+Because of this, on expectation, as it is produced, the miner will hear about other blocks being mined on the network. By the time they have generated their new ticket, they can check whether they themselves are eligible to mine a new block (see {{<sref leader_election>}}).
 
 At any height `H`, there are three possible situations:
 

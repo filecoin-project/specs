@@ -3,6 +3,7 @@ crypto_signatures: "Signatures"
 data_structures: "Data Structures"
 ds_address: "Address"
 app_address: "Address"
+vrf: "VRF"
 
 # blockchain
 sys_vm: "VM"
@@ -18,6 +19,9 @@ leader_election: "Secret Leader Election"
 chain_selection: "Chain Selection"
 finality: "EC Finality"
 consensus_faults: "Consensus Faults"
+### Chain Sync
+chain_sync: "Chain Sync"
+block_validation: "Block Validation"
 
 ### Message Pool
 message_pool: "Message Pool"

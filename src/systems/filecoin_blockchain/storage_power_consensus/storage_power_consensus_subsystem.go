@@ -64,7 +64,7 @@ func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket,
 	// return ticket.Verify(input, pk)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) computeTipsetWeight(tipset block.Tipset) block.ChainWeight {
+func (spc *StoragePowerConsensusSubsystem_I) computeChainWeight(tipset block.Tipset) block.ChainWeight {
 	panic("TODO")
 }
 
@@ -107,7 +107,7 @@ func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain,
 func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.ChainEpoch, electionProof block.ElectionProof, workerAddr addr.Address) bool {
 	panic("")
 	// // 1. Check that ElectionProof was validated in appropriate time
-	// if height > clock.roundTimeå {
+	// if height > clock.roundTime {
 	// 	return false
 	// }
 
@@ -119,18 +119,6 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.
 	// input.append(height)
 
 	// return electionProof.Verify(input, minerPK)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool {
-	panic("")
-	// 1. Determine miner power fraction
-	// minerPower := spc.PowerTable.GetMinerPower(workerAddr)
-	// totalPower := spc.PowerTable.GetTotalPower()
-
-	// // Conceptually we are mapping the pseudorandom, deterministic VRFOutput onto [0,1]
-	// // by dividing by 2^HashLen (64 Bytes using Sha256) and comparing that to the miner's
-	// // power (portion of network storage).
-	// return (minerPower*2^(len(electionProof.Output)*8) < electionProof.Output*totalPower)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetFinality() block.ChainEpoch {

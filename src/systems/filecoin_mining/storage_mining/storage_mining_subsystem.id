@@ -20,13 +20,12 @@ type StorageMiningSubsystem struct {
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
     BlockProducer      blockproducer.BlockProducer
-    miningHeight       block.ChainEpoch
 
     // Need access to SPC in order to mine a block
-    Consensus          spc.StoragePowerConsensusSubsystem
+    consensus          spc.StoragePowerConsensusSubsystem
 
     // Need access to the blockchain system in order to query for things in the chain
-    Blockchain         blockchain.BlockchainSubsystem
+    blockchain         blockchain.BlockchainSubsystem
 
     // TODO: why are these here? remove?
     StartMining()
