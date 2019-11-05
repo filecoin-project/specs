@@ -19,6 +19,8 @@ leader_election: "Secret Leader Election"
 chain_selection: "Chain Selection"
 finality: "EC Finality"
 consensus_faults: "Consensus Faults"
+ticket_generation: "Ticket Generation"
+
 ### Chain Sync
 chain_sync: "Chain Sync"
 block_validation: "Block Validation"

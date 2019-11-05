@@ -28,6 +28,7 @@ leader_election: [algorithms, expected_consensus, leader_election]
 chain_selection: [algorithms, expected_consensus, chain_selection]
 finality: [algorithms, expected_consensus, finality]
 consensus_faults: [algorithms, expected_consensus, consensus_faults]
+ticket_generation: [algorithms, expected_consensus, ticket_generation]
 
 ### Chain Sync
 chain_sync: [systems, filecoin_blockchain, chainsync]

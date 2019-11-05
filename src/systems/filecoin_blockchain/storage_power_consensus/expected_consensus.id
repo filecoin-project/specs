@@ -1,31 +1,28 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
 type ExpectedConsensus struct {
-    expectedMinersPerRound  UVarint
-    expectedRewardPerRound  UVarint
+    expectedBlocksPerEpoch  UVarint
+    expectedRewardPerEpoch  UVarint
 
+    ComputeChainWeight(tipset block.Tipset) block.ChainWeight
     IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
-    IsWinningElectionProof(electionProof ElectionProof, workerAddr addr.Address) bool
-    GetBlockRewards(electionProof ElectionProof, workerAddr addr.Address) UVarint
+    IsWinningElectionProof(
+        electionProof  block.ElectionProof
+        minerPower     block.StoragePower
+        totalPower     block.StoragePower
+    ) bool
+    GetBlockRewards(
+        electionProof  block.ElectionProof
+        minerPower     block.StoragePower
+        totalPower     block.StoragePower
+    ) UVarint
+
+    log2b(x UVarint) UVarint
+    wParams weightFunctionParameters
 }
 
-type Ticket struct {
-    VRFResult         filcrypto.VRFResult
-
-    Output            Bytes                @(cached)
-    ValidateSyntax()  bool
-    Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
-}
-
-type BytesAmount UVarint
-type StoragePower BytesAmount
-
-type ElectionProof struct {
-    VRFResult                                       filcrypto.VRFResult
-    Output                                          Bytes @(cached)
-    Verify(input Bytes, pk filcrypto.VRFPublicKey)  bool
-
-    ValidateSyntax()                                bool
+type weightFunctionParameters struct {
+    wRatio_num  UVarint
+    wRatio_den  UVarint
+    wPrecision  UVarint
 }

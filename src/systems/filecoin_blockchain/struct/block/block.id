@@ -11,10 +11,6 @@ type MessageRoot ipld.CID
 type ReceiptRoot ipld.CID
 type ChainWeight UVarint
 type ChainEpoch UVarint
-type ChainEpochState union {
-    Active
-    PastCutoff
-}
 
 type BlockHeader struct {
     // Chain linking
@@ -32,8 +28,8 @@ type BlockHeader struct {
 
     // Consensus things
     Timestamp        clock.Time
-    Ticket           Ticket
-    ElectionProof    ElectionProof
+    Ticket
+    ElectionProof
 
     // Signatures
     BlockSig         filcrypto.Signature

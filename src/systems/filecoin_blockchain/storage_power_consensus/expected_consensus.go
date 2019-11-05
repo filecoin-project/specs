@@ -1,49 +1,52 @@
 package storage_power_consensus
 
 import (
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
 
+func (self *ExpectedConsensus_I) ComputeChainWeight(tipset block.Tipset) block.ChainWeight {
+	panic("")
+	// see expected_consensus.md for detail
+
+	// wPowerFactor := self.log2b(spa.GetTotalPower())
+	// wBlocksFactor_num := (wPowerFactor * len(tipset.Blocks) * self.wParams.wRatio_num)
+	// wBlocksFactor_den := self.expectedBlocksPerEpoch * self.wParams.wRatio_den
+	// return tipset.ParentTipset.ChainWeight
+	// 	+wPowerFactor * self.wParams.wPrecision
+	// 	+(wBlocksFactor_num * self.wParams.wPrecision / wBlocksFactor_den)
+}
+
 func (self *ExpectedConsensus_I) IsValidConsensusFault(faults ConsensusFaultType, blocks []block.Block) bool {
 	panic("TODO")
+
+	// 1. double-fork mining fault
+	// return block1.Miner == block2.Miner && block1.Epoch == block2.Epoch
+
+	// 2. same-fork double-mining fault
+	// return block1.Miner == block2.Miner
+	// && block1.ParentTipset == block2.ParentTipset
+
+	// 3. parent grinding fault
+	// return block1.Miner == block2.Miner
+	// && abs(block1.Epoch - block2.Epoch) == 1
 }
 
-func (self *ExpectedConsensus_I) IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool {
+func (self *ExpectedConsensus_I) IsWinningElectionProof(electionProof block.ElectionProof, minerPower block.StoragePower, totalPower block.StoragePower) bool {
 	panic("")
-	// 1. Determine miner power fraction
-	// minerPower := spc.PowerTable.GetMinerPower(workerAddr)
-	// totalPower := spc.PowerTable.GetTotalPower()
+	// Conceptually we are mapping the pseudorandom, deterministic VRFOutput onto [0,1]
+	// by dividing by 2^HashLen and comparing that to the miner's power (portion of network storage).
+	// if the VRF Output is smaller than the miner's power fraction * expected number of blocks per round
+	// it is a winning election proof.
 
-	// // Conceptually we are mapping the pseudorandom, deterministic VRFOutput onto [0,1]
-	// // by dividing by 2^HashLen (64 Bytes using Sha256) and comparing that to the miner's
-	// // power (portion of network storage).
-	// return (minerPower*2^(len(electionProof.Output)*8) < electionProof.Output*totalPower)
-	return true
+	// return electionProof.Output()*totalPower < self.expectedBlocksPerEpoch*minerPower*electionProof.VRFResult_.MaxValue()
 }
-func (self *ExpectedConsensus_I) GetBlockRewards(electionProof ElectionProof, workerAddr addr.Address) UVarint {
+
+func (self *ExpectedConsensus_I) GetBlockRewards(electionProof block.ElectionProof, minerPower block.StoragePower, totalPower block.StoragePower) util.UVarint {
 	panic("")
 	// draw := electionProof.output / electionProof.VRFResult_.MaxValue()
-	// req := self.expectedMinersPerRound * spc.PowerTable.GetMinerPower(workerAddr) / spc.PowerTable.GetTotalPower()
+	// req := self.expectedBlocksPerEpoch * minerPower / totalPower
 	// rewardCount := ceil(req - draw)
-	// reward := rewardCount * self.expectedRewardPerRound / self.expectedMinersPerRound
+	// reward := rewardCount * self.expectedRewardPerEpoch / self.expectedBlocksPerEpoch
 	// return reward
-}
-
-func (tix *Ticket_I) ValidateSyntax() bool {
-	return tix.VRFResult_.ValidateSyntax()
-}
-
-func (tix *Ticket_I) Verify(input util.Bytes, pk filcrypto.VRFPublicKey) bool {
-	return tix.VRFResult_.Verify(input, pk)
-}
-
-func (ep *ElectionProof_I) ValidateSyntax() bool {
-	return ep.VRFResult_.ValidateSyntax()
-}
-
-func (ep *ElectionProof_I) Verify(input util.Bytes, pk filcrypto.VRFPublicKey) bool {
-	return ep.VRFResult_.Verify(input, pk)
 }

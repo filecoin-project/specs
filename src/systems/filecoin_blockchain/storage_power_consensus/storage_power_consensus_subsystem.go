@@ -49,7 +49,7 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) 
 	// }
 
 	// // 5. and value
-	// if !IsWinningElectionProof(block.ElectionProof, block.MinerAddress) {
+	// if !IsWinningElectionProof(block.ElectionProof, spa.GetMinerPower(), spa.GetTotalPower()) {
 	// 	return StoragePowerConsensusError("election proof was not a winner")
 	// }
 
@@ -64,8 +64,8 @@ func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket,
 	// return ticket.Verify(input, pk)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) computeChainWeight(tipset block.Tipset) block.ChainWeight {
-	panic("TODO")
+func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset block.Tipset) block.ChainWeight {
+	return spc.ec().ComputeChainWeight(tipset)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg string) StoragePowerConsensusError {
@@ -124,12 +124,6 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.
 func (spc *StoragePowerConsensusSubsystem_I) GetFinality() block.ChainEpoch {
 	panic("")
 	// return FINALITY
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) FinalizedEpoch() block.ChainEpoch {
-	panic("")
-	// currentEpoch := rt.HeadEpoch()
-	// return currentEpoch - spc.GetFinality()
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) FinalizedEpoch() block.ChainEpoch {

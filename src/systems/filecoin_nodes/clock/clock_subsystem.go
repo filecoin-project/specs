@@ -11,16 +11,18 @@ func (_ *Clock_I) UnixNano() Time {
 }
 
 func (self *Clock_I) CurrentEpoch() ChainEpoch {
-	// return self.currentEpoch
+	return self.currentEpoch_
 }
 
 func (self *Clock_I) CurrentEpochState() ChainEpoch {
-	// if self.UnixNano()-self.currentEpochStart > self.cutoffAt {
+	panic("")
+	// if self.UnixNano()-self.currentEpochStart > self.cutoffAt_ {
 	// 	return ChainEpochState.PastCutoff
 	// }
 	// return ChainEpochState.Active
 }
 
 func (self *Clock_I) ResetEpoch(genesisTime Time) struct{} {
+	panic("")
 	// self.currentEpoch = (self.UnixNano() - genesisTime) / epochDuration
 }

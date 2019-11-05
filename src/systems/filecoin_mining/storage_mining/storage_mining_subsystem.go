@@ -58,13 +58,13 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	panic("")
-	// new election, increment height
-	T1 := sms.consensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
-	// TK := sms.Consensus.GetElectionProofSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
+	// new election, incremented height
+	// T1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	// TK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
 
 	// for _, worker := range sms.workers {
 	// 	newTicket := PrepareNewTicket(worker.VRFKeyPair, T1)
-	// 	newEP := DrawElectionProof(TK, , worker.VRFKeyPair)
+	// 	newEP := DrawElectionProof(TK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair)
 
 	// 	if sms.Consensus.IsWinningLeaderElection(newEP, worker.address) {
 	// 		BlockProducer.GenerateBlockHeader(newEP, newTicket, sms.CurrentTipset, worker.workerAddress)
@@ -72,7 +72,7 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	// }
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket spc.Ticket, vrfKP filcrypto.VRFKeyPair) spc.Ticket_I {
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, vrfKP filcrypto.VRFKeyPair) block.Ticket_I {
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
@@ -82,7 +82,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket spc.Ticket, vr
 
 	// run through VRF
 	vrfRes := vrfKP.Generate(input)
-	var newTicket spc.Ticket_I
+	var newTicket block.Ticket_I
 
 	// return new ticket
 	newTicket.VRFResult_ = vrfRes

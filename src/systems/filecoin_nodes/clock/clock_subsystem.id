@@ -1,23 +1,22 @@
-type Time string // ISO nano timestamp
-type UnixTime int // unix timestamp
-type Round int // Blockchain round
+type Time string  // ISO nano timestamp
+type UnixTime int  // unix timestamp
+type Round int  // Blockchain round
 type ChainEpoch UVarint
 type ChainEpochState union {
-    Active
-    PastCutoff
+    InEpoch     int
+    PastCutoff  int
 }
 
-type Clock interface {
-  
-  UTCTime()             Time
-  UnixNano()            UnixTime
+type Clock struct {
+    UTCTime()          Time
+    UnixNano()         UnixTime
 
-  currentEpoch          ChainEpoch
-  currentEpochStart     UnixTime
-  epochDuration         UnixTime @(cached)
-  cutoffAt              UnixTime @(cached)
+    currentEpoch       ChainEpoch
+    currentEpochStart  UnixTime
+    epochDuration      UnixTime    @(cached)
+    cutoffAt           UnixTime    @(cached)
 
-  ResetEpoch(genesisTime UnixTime)  struct {}
-  CurrentEpoch()                    ChainEpoch
-  CurrentEpochState()               ChainEpochState
+    ResetEpoch(genesisTime UnixTime)
+    CurrentEpoch() ChainEpoch
+    CurrentEpochState() ChainEpochState
 }

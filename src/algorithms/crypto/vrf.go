@@ -13,7 +13,8 @@ func (self *VRFResult_I) Verify(input util.Bytes, pk VRFPublicKey) bool {
 }
 
 func (self *VRFResult_I) MaxValue() util.Bytes {
-	return new(BLS).MaxSigValue()
+	panic("")
+	// return new(BLS).MaxSigValue()
 }
 
 func (self *VRFKeyPair_I) Generate(input util.Bytes) VRFResult {

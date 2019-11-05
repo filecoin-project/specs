@@ -1,0 +1,20 @@
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+
+type Ticket struct {
+    VRFResult         filcrypto.VRFResult
+
+    Output            Bytes                @(cached)
+    ValidateSyntax()  bool
+    Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
+}
+
+type ElectionProof struct {
+    VRFResult  filcrypto.VRFResult
+    Output     Bytes                @(cached)
+    Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
+
+    ValidateSyntax() bool
+}
+
+type BytesAmount UVarint
+type StoragePower BytesAmount
