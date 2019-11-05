@@ -2,7 +2,7 @@ Compute:
   b_in_gb = (1024 * 1024 * 1024)
   node_size_gb = node_size / b_in_gb 
 
-  hash_gbs_fastest = hash_gbs * hash_time_amax
+  // hash_gbs_fastest = hash_gbs * hash_time_amax
 
   node_hash_size = parents * node_size_gb
   cost_hash_gbs_cheapest = cost_hash_gbs / cost_amax
