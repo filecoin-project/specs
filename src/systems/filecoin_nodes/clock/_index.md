@@ -3,6 +3,9 @@ title: Clock
 statusIcon: ⚠️
 ---
 
+{{< readfile file="clock_subsystem.id" code="true" lang="go" >}}
+{{< readfile file="clock_subsystem.go" code="true" lang="go" >}}
+
 Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock, tolerating bounded delay in honest clock lower than epoch time (more on this in a forthcoming paper).
 
 Filecoin relies on this system clock in order to secure consensus, specifically ensuring that participants are only running leader elections once per epoch and enabling miners to catch such deviations from the protocol. Given a system start and epoch time by the genesis block, the system clock allows miners to associate epoch and wall clock time, thereby enabling them to reason about block validity and give the protocol liveness.
