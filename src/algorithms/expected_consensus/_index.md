@@ -232,8 +232,13 @@ Due to the existence of potential forks in EC, a miner can try to unduly influen
 This is detectable when a given miner submits two blocks that satisfy any of the following "consensus faults":
 
 - (1) `double-fork mining fault`: two blocks mined at the same epoch.
-- (2) `same-fork double-mining fault`: two blocks mined off of the same Tipset at different epochs (i.e. with different `ElectionProof`s generated from the same input ticket).
-- (3) `parent grinding fault`: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block. When a miner's block at epoch e + 1 references a Tipset that does not include the block they mined at e both blocks can be submitted to prove this fault.
+{{< diagram src="diagrams/double_fork.dot.svg" title="Double-Fork Mining Fault" >}}
+
+- (2) `time-offset mining fault`: two blocks mined off of the same Tipset at different epochs (i.e. with different `ElectionProof`s generated from the same input ticket).
+{{< diagram src="diagrams/time_offset.dot.svg" title="Time-Offset Mining Fault" >}}
+
+- (3) `parent-grinding fault`: one block's parent is a Tipset that provably should have included a given block but does not. While it cannot be proven that a missing block was willfully omitted in general (i.e. network latency could simply mean the miner did not receive a particular block), it can when a miner has successfully mined a block two epochs in a row and omitted one. That is, this condition should be evoked when a miner omits their own prior block. When a miner's block at epoch e + 1 references a Tipset that does not include the block they mined at e both blocks can be submitted to prove this fault.
+{{< diagram src="diagrams/parent_grinding.dot.svg" title="Parent-Grinding fault" >}}
 
 Any node that detects any of the above events should submit both block headers to the `StoragePowerActor`'s `ReportConsensusFault` method. The "slasher" will receive a portion (TODO: define how much) of the offending miner's {{<sref pledge_collateral>}} as a reward for notifying the network of the fault.
 (TODO: FIP of submitting commitments to block headers to prevent miners censoring slashers in order to gain rewards).

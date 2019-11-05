@@ -46,7 +46,7 @@ Scratching a winning ticket, and armed with a valid `ElectionProof`, a miner can
 
 To create a block, the eligible miner must compute a few fields:
 
-- `Ticket` - new ticket generated from that in the prior epoch (see {{<sref ticket_generation>}).
+- `Ticket` - new ticket generated from that in the prior epoch (see {{<sref ticket_generation>}}).
 - `ElectionProof` - A specific signature over the min_ticket from `randomness_lokkback` epochs back (see {{<sref leader_election>}}).
 - `ParentWeight` - The parent chain's weight (see {{<sref chain_selection>}}).
 - `Parents` - the CIDs of the parent blocks.

@@ -12,12 +12,12 @@ Filecoin relies on this system clock in order to secure consensus, specifically 
 
 ## Clock uses
 Specifically, the Filecoin system clock is used:
-- to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block's `ElectionProof` (which contains the epoch number) (see {{<sref leader_election>} and {{<sref block_validation>}}).
+- to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block's `ElectionProof` (which contains the epoch number) (see {{<sref leader_election>}} and {{<sref block_validation>}}).
 - to help protocol convergence by giving miners a specific cutoff after which to reject incoming blocks in this round (see {{<sref chain_sync>}}).
 - to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in this round (see {{<sref storage_power_consensus>}}).
 
 In order to allow miners to do the above, the system clock must:
-1. have low clock drift: at most on the order of 2s (i.e. markedly lower than epoch time) at any given time.
+1. have low clock drift: at most on the order of 1s (i.e. markedly lower than epoch time) at any given time.
 2. maintain accurate network time over many epochs: resyncing and enforcing accurate network time.
 3. set epoch number on client initialization equal to `epoch ~= (current_time - genesis_time) / epoch_time`
 
@@ -27,6 +27,11 @@ It is expected that other subsystems will register to a NewRound() event from th
 
 Computer-grade clock crystals can be expected to have drift rates on the order of [1ppm](https://www.hindawi.com/journals/jcnc/2008/583162/) (i.e. 1 microsecond every second or .6 seconds a week), therefore, in order to respect the first above-requirement,
 - clients SHOULD query an NTP server (`pool.ntp.org` is recommended) on an hourly basis to adjust clock skew.
+  - We recommend one of the following:
+    - `pool.ntp.org` (can be catered to a [specific zone](https://www.ntppool.org/zone))
+    - `time.cloudflare.com:1234` (more on [Cloudflare time services](https://www.cloudflare.com/time/))
+    - `time.google.com` (more on [Google Public NTP](https://developers.google.com/time))
+    - `ntp-b.nist.gov` ([NIST](https://tf.nist.gov/tf-cgi/servers.cgi) servers require registration)
   - We further recommend making 3 measurements in order to drop by using the network to drop outliers
   - See how [go-ethereum does this](https://github.com/ethereum/go-ethereum/blob/master/p2p/discv5/ntp.go) for inspiration
 - clients CAN consider using cesium clocks instead for accurate synchrony within larger mining operations

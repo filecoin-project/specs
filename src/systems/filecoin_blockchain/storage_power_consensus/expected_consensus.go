@@ -23,7 +23,7 @@ func (self *ExpectedConsensus_I) IsValidConsensusFault(faults ConsensusFaultType
 	// 1. double-fork mining fault
 	// return block1.Miner == block2.Miner && block1.Epoch == block2.Epoch
 
-	// 2. same-fork double-mining fault
+	// 2. time-offset mining fault
 	// return block1.Miner == block2.Miner
 	// && block1.ParentTipset == block2.ParentTipset
 

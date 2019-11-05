@@ -8,15 +8,15 @@ type ChainEpochState union {
 }
 
 type Clock struct {
-    UTCTime()          Time
-    UnixNano()         UnixTime
+    NowUTC()       Time
+    NowUTCNano()   UnixTime
 
-    currentEpoch       ChainEpoch
-    currentEpochStart  UnixTime
-    epochDuration      UnixTime    @(cached)
-    cutoffAt           UnixTime    @(cached)
+    genesisTime    UnixTime
+    epochDuration  UnixTime  @(cached)
+    cutoffAt       UnixTime  @(cached)
+    epochAfterTime(start ChainEpoch, t UnixTime) ChainEpoch
+    currentEpochStart() UnixTime
 
-    ResetEpoch(genesisTime UnixTime)
-    CurrentEpoch() ChainEpoch
-    CurrentEpochState() ChainEpochState
+    EpochAfterGenesis()  ChainEpochState
+    CurrentEpochState()  ChainEpochState
 }

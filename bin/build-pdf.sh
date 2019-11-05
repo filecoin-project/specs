@@ -22,7 +22,6 @@ files=(
     bootstrap.md
     data-propagation.md
     sync.md
-    expected-consensus.md
     state-machine.md
     local-storage.md
     operation.md
