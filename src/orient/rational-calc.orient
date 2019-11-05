@@ -1,32 +1,20 @@
 Compute:
-  // declare(cost_hash_gbs, $/gb/s)
-  // declare(hash_gbs_fastest, gb/s)
-  // declare(hash_cost, $/gb)
-
   b_in_gb = (1024 * 1024 * 1024)
   node_size_gb = node_size / b_in_gb 
 
-  // declare(hash_gbs_fastest, gb/s)
-  // describe(hash_gbs_fastest, "GB that can be hashed in a second by the fastest possible hardware")
-  // hash_gbs_fastest = hash_gbs * hash_time_amax
+  hash_gbs_fastest = hash_gbs * hash_time_amax
 
-  // describe(single_node_encoding_time, "Time it takes to hash a single node")
-  // single_node_encoding_time = parents * (node_size_gb / hash_gbs_fastest)
-
-  // describe(cost_single_node_encoding, "Time it takes to hash a single node")
-  // cost_single_node_encoding = cost_hash_gbs * (single_node_encoding_time * node_size_gb)
-
-  single_node_hashes = parents
-  hashes_in_a_gb = b_in_gb / node_size 
-  cost_single_hash = cost_hash_gbs / (hashes_in_a_gb * hash_time_amax)
-  cost_single_node_encoding = cost_single_hash * single_node_hashes
+  node_hash_size = parents * node_size_gb
+  cost_hash_gbs_cheapest = cost_hash_gbs / cost_amax
+  node_hash_cost = cost_hash_gbs_cheapest * (node_hash_size / polling_time)
+  cost_single_node_encoding = node_hash_cost
 
 Storage:
   cost_storage_gbs = cost_gb_per_month / (24 * 30 * 60 * 60)
-  cost_storage_gb_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
+  cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
 
 Attack:
   nodes = (sector_size_gb*b_in_gb) / node_size 
   // after hashes_threshold is more expensive to hash than to keep storage
-  hashes_threshold = cost_storage_gb_polling_time / cost_single_node_encoding
+  hashes_threshold = cost_storage_sector_polling_time / cost_single_node_encoding
   drg_depth = hashes_threshold / nodes
