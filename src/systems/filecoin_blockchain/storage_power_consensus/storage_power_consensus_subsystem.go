@@ -131,3 +131,9 @@ func (spc *StoragePowerConsensusSubsystem_I) FinalizedEpoch() block.ChainEpoch {
 	// currentEpoch := rt.HeadEpoch()
 	// return currentEpoch - spc.GetFinality()
 }
+
+func (spc *StoragePowerConsensusSubsystem_I) FinalizedEpoch() block.ChainEpoch {
+	panic("")
+	// currentEpoch := rt.HeadEpoch()
+	// return currentEpoch - spc.GetFinality()
+}
