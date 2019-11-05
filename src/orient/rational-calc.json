@@ -5,7 +5,7 @@
     "polling_time": 15,
     "sector_size_gb": 32,
     "node_size": 32,
-    "hash_time_amax": 100,
+    "cost_amax": 100,
     "extra_storage_time": 0,
     "parents": 2
 }
