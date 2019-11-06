@@ -55,7 +55,7 @@ func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageD
 	return dealID
 }
 
-// Call by PublishStorageDeals and GetLastDealExpirationFromDealIDs (consider remove this)
+// Call by PublishStorageDeals and GetInitialUtilization (consider remove this)
 // This is the check before a StorageDeal appears onchain
 // It checks the following:
 //   - verify deal did not expire when it is signed
@@ -293,28 +293,51 @@ func (a *StorageMarketActorCode_I) SlashStorageDealsCollateral(rt Runtime, dealI
 }
 
 // Call by StorageMinerActor at CommitSector
-func (a *StorageMarketActorCode_I) GetLastDealExpirationFromDealIDs(rt Runtime, dealIDs []deal.DealID) block.ChainEpoch {
-
+func (a *StorageMarketActorCode_I) GetInitialUtilizationInfo(rt Runtime, dealIDs []deal.DealID) deal.UtilizationInfo {
 	h, st := a.State(rt)
 
-	var lastDealExpiration block.ChainEpoch
+	var dealExpirationQueue deal.DealExpirationQueue
+	var maxUtilization block.StoragePower
+	var lastExpiration block.ChainEpoch
+
 	for _, dealID := range dealIDs {
-		deal, found := st.Deals()[dealID]
+		d, found := st.Deals()[dealID]
 		if !found {
 			rt.Abort("dealID not found.")
 		}
 
 		// TODO: more checks or be convinced that it's enough to assume deals are still valid
+		// consider calling _validateNewStorageDeal
 
-		currExpiration := deal.Proposal().EndEpoch()
-		if currExpiration > lastDealExpiration {
-			lastDealExpiration = currExpiration
+		dealExpiration := d.Proposal().EndEpoch()
+
+		if dealExpiration > lastExpiration {
+			lastExpiration = dealExpiration
 		}
+
+		dealPayloadPower := block.StoragePower(d.Proposal().PieceSize().PayloadSize())
+
+		queueItem := &deal.DealExpirationQueueItem_I{
+			DealID_:       dealID,
+			PayloadPower_: dealPayloadPower,
+			Expiration_:   dealExpiration,
+		}
+		dealExpirationQueue.Add(queueItem)
+
+		maxUtilization += dealPayloadPower
+
+	}
+
+	initialUtilizationInfo := &deal.UtilizationInfo_I{
+		DealExpirationQueue_: dealExpirationQueue,
+		MaxUtilization_:      maxUtilization,
+		CurrUtilization_:     maxUtilization,
+		LastDealExpiration_:  lastExpiration,
 	}
 
 	Release(rt, h, st)
 
-	return lastDealExpiration
+	return initialUtilizationInfo
 }
 
 func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) []sector.PieceInfo_I {

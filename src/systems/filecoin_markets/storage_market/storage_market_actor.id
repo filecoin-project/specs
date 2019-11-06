@@ -72,7 +72,7 @@ type StorageMarketActorCode struct {
     // Deals should be slashed for a single proving period
     SlashStorageDealsCollateral(rt Runtime, dealIDs [deal.DealID])
 
-    GetLastExpirationFromDealIDs(rt Runtime, dealIDs [deal.DealID]) block.ChainEpoch
+    GetInitialUtilizationInfo(rt Runtime, dealIDs [deal.DealID]) deal.UtilizationInfo
 
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
