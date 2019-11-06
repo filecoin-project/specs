@@ -37,7 +37,6 @@ FastPorep:
         nodes_per_second = hash_gb_per_second / node_hash_size_gb
         nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
         node_hash_cost = rig_cost_per_year / nodes_per_year 
-        cost_single_node_encoding = node_hash_cost
 
       Storage:
         cost_storage_gbs = cost_gb_per_month / secs_in_month 
@@ -47,7 +46,7 @@ FastPorep:
   Adversary:
     Rationality:
       describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to pay store the entire sector, than re-encode those")
-      breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_single_node_encoding * challenge_periods_per_month))
+      breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (node_hash_cost * challenge_periods_per_month))
       regeneration_percentage = breakeven_nodes / nodes
 
     Sequentiality:

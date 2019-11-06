@@ -1,7 +1,6 @@
 {
     "hash_gb_per_second": 5,
     "rig_cost_per_year": 2.5,
-    "hash_gbs": 0.0000000128,
     "cost_gb_per_month": 0.005,
     "polling_time": 15,
     "sector_size_gb": 32,
