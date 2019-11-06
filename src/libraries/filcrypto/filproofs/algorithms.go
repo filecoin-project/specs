@@ -9,6 +9,7 @@ import "encoding/binary"
 import util "github.com/filecoin-project/specs/util"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
 type Blake2sHash Bytes32
 type PedersenHash Bytes32
@@ -18,7 +19,7 @@ type PieceInfo = sector.PieceInfo
 type Label Bytes32
 type Commitment = sector.Commitment
 
-func SDRParams(sealCfg sector.SealCfg, postCfg sector.PostCfg) *StackedDRG_I {
+func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const NODE_SIZE = 32
@@ -62,7 +63,7 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PostCfg) *StackedDRG_I {
 			FieldModulus_: *FIELD_MODULUS,
 		},
 		SealCfg_: sealCfg,
-		PostCfg_: postCfg,
+		PoStCfg_: postCfg,
 	}
 }
 
@@ -752,7 +753,21 @@ func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, 
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoSt(challengedSector []sector.SectorID, challenges []UInt, proofAuxs []sector.ProofAux) sector.PoStProof {
+func (sdr *StackedDRG_I) GeneratePoStWitness(challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectorStore sectorIndex.SectorStore) sector.PoStWitness {
+	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, faults)
+	var proofAuxs []sector.ProofAux
+
+	for _, sector := range challengedSectors {
+		proofAux := sectorStore.GetSectorProofAux(sector)
+		proofAuxs = append(proofAuxs, proofAux)
+	}
+
+	_ = challenges
+
+	panic("TODO")
+}
+
+func (sdr *StackedDRG_I) GeneratePoStProof(witness sector.PoStWitness) sector.PoStProof {
 	panic("TODO")
 }
 

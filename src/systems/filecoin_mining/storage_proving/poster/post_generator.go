@@ -6,10 +6,9 @@ import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/se
 
 // See "Proof-of-Spacetime Parameters" Section
 // TODO: Unify with orient model.
-const POST_PROVING_PERIOD = uint(5760)
 const POST_CHALLENGE_DEADLINE = uint(480)
 
-func GeneratePoSt(postCfg sector.PostCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore) sector.PoStProof {
+func GeneratePoStWitness(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore) sector.PoStWitness {
 	// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 	// Like this:
 	// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -25,13 +24,10 @@ func GeneratePoSt(postCfg sector.PostCfg, challengeSeed sector.PoStRandomness, f
 
 	sdr := filproofs.SDRParams(nil, postCfg)
 
-	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, faults)
-	var proofAuxs []sector.ProofAux
+	return sdr.GeneratePoStWitness(challengeSeed, faults, sectorStore)
+}
 
-	for _, sector := range challengedSectors {
-		proofAux := sectorStore.GetSectorProofAux(sector)
-		proofAuxs = append(proofAuxs, proofAux)
-	}
-
-	return sdr.GeneratePoSt(challengedSectors, challenges, proofAuxs)
+func GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
+	sdr := filproofs.SDRParams(nil, postCfg)
+	return sdr.GeneratePoStProof(witness)
 }

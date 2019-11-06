@@ -15,7 +15,7 @@ type PoStSubmission struct {
 
 type PostGenerator struct {
     GeneratePoSt(
-        postCfg        sector.PostCfg
+        postCfg        sector.PoStCfg
         challengeSeed  sector.PoStRandomness
         faults         sector.FaultSet
         sectors        [sector.SectorID]
