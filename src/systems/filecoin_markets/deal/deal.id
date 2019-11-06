@@ -51,6 +51,29 @@ type StorageDeal struct {
     CID()            DealCID
 }
 
+type DealExpirationQueueItem struct {
+    DealID
+    PayloadPower  block.StoragePower
+    Expiration    block.ChainEpoch
+}
+
+// PriorityQueue of Deals in a Sector
+// sorted by ascending order of EndEpoch (expiration)
+// first expiring deal is on top
+type DealExpirationQueue struct {
+    Add(i DealExpirationQueueItem)
+    Pop() DealExpirationQueueItem
+    Peek() DealExpirationQueueItem
+    Remove(d DealID)
+}
+
+type UtilizationInfo struct {
+    DealExpirationQueue
+    MaxUtilization       block.StoragePower
+    CurrUtilization      block.StoragePower
+    LastDealExpiration   block.ChainEpoch
+}
+
 type RetrievalDealProposal struct {}  // TODO
 type RetrievalDeal struct {
     Proposal          RetrievalDealProposal
