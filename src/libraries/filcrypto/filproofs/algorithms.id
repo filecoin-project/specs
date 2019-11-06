@@ -87,7 +87,7 @@ type StackedDRG struct {
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve             EllipticCurve
     SealCfg           sector.SealCfg
-    PostCfg           sector.PostCfg
+    PoStCfg           sector.PoStCfg
 }
 
 type DRGCfg struct {
