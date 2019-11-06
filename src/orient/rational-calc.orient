@@ -1,20 +1,62 @@
-Compute:
-  b_in_gb = (1024 * 1024 * 1024)
-  node_size_gb = node_size / b_in_gb 
+FastPorep:
+  Utils:
+    b_in_gb = (1024 * 1024 * 1024)
+    secs_in_month = (24 * 30 * 60 * 60)
 
-  // hash_gbs_fastest = hash_gbs * hash_time_amax
+  Graph:
+    nodes = (sector_size_gb * b_in_gb) / node_size 
+    node_size_gb = node_size / b_in_gb 
+    node_hash_size_gb = drg_parents * node_size_gb
+    node_hash_size = node_hash_size_gb * b_in_gb
+    challenge_periods_per_month = secs_in_month / polling_time
 
-  node_hash_size = parents * node_size_gb
-  cost_hash_gbs_cheapest = cost_hash_gbs / cost_amax
-  node_hash_cost = cost_hash_gbs_cheapest * (node_hash_size / polling_time)
-  cost_single_node_encoding = node_hash_cost
+  Honest:
+    Encoding:
+      encoding_hashes_single_layer = nodes * drg_parents
+      encoding_time = encoding_hashes_single_layer * hashing_time * drg_layers
+      encoding_time_asic = encoding_time / hash_time_amax
 
-Storage:
-  cost_storage_gbs = cost_gb_per_month / (24 * 30 * 60 * 60)
-  cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
+    Response:
+      response_honest = challenges * rig_storage_latency
 
-Attack:
-  nodes = (sector_size_gb*b_in_gb) / node_size 
-  // after hashes_threshold is more expensive to hash than to keep storage
-  hashes_threshold = cost_storage_sector_polling_time / cost_single_node_encoding
-  drg_depth = hashes_threshold / nodes
+    Throughput:
+      num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
+      rig_cores = num_parallel_encoding
+      seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
+
+    SNARK:
+      inclusion_proofs = merkle_tree_hash_circuit * log2(nodes)
+      sequential_proofs = cipher_circuit
+      porep_snark_constraints = (sequential_proofs + inclusion_proofs) * challenges
+      porep_snark_partitions = porep_snark_constraints / max_snark_constraints
+      porep_snark_size = porep_snark_partitions * snark_size
+      porep_snark_size_kb = porep_snark_size / 1024
+
+    Cost:
+      Compute:
+        nodes_per_second = hash_gb_per_second / node_hash_size_gb
+        nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
+        node_hash_cost = rig_cost_per_year / nodes_per_year 
+        cost_single_node_encoding = node_hash_cost
+
+      Storage:
+        cost_storage_gbs = cost_gb_per_month / secs_in_month 
+        cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
+
+
+  Adversary:
+    // hash_gbs_fastest = hash_gbs * hash_time_amax
+    // after hashes_threshold is more expensive to hash than to keep storage
+    Rationality:
+      describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to pay store the entire sector, than re-encode those")
+      breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_single_node_encoding * challenge_periods_per_month))
+
+      // hashes_threshold = cost_storage_sector_polling_time / cost_single_node_encoding
+      regeneration_percentage = breakeven_nodes / nodes
+
+    Sequentiality:
+      response_amax = response_malicious / polling_time
+      node_gen_path = drg_d * nodes
+      node_gen_time = (node_gen_path * drg_parents * hashing_time) / hashing_amax
+      response_malicious = node_gen_time * challenges
+
