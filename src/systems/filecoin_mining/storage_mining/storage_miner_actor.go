@@ -14,6 +14,7 @@ import (
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	util "github.com/filecoin-project/specs/util"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 )
 
 const (
@@ -122,7 +123,7 @@ func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
 	for sectorNo, sealOnChainInfo := range st.StagedCommittedSectors() {
 		st.Sectors()[sectorNo] = sealOnChainInfo
 		st.Impl().ProvingSet_.Add(sectorNo)
-		st.SectorTable().Impl().CommittedSectors_ += 1
+		st.SectorTable().Impl().CommittedSectors_.Add(sectorNo)
 	}
 
 	// empty StagedCommittedSectors
@@ -154,9 +155,13 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 // construct PowerReport from SectorTable
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	h, st := a.State(rt)
+	st._updateSectorUtilization(rt)
+	activePower := st._getActivePower(rt)
+	inactivePower := st._getInactivePower(rt)
+
 	powerReport := &power.PowerReport_I{
-		ActivePower_:   st.SectorTable().ActivePower(),
-		InactivePower_: st.SectorTable().InactivePower(),
+		ActivePower_:   activePower,
+		InactivePower_: inactivePower,
 	}
 	Release(rt, h, st)
 
@@ -175,7 +180,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	UpdateRelease(rt, h, st)
 
 	h, st = a.State(rt)
-	newDetectedFaults := st.SectorTable().FailingSectors()
+	newDetectedFaults := uint64(len(st.SectorTable().Impl().FailingSectors_.SectorsOn()))
 	newTerminatedFaults := st.SectorTable().TerminationFaultCount()
 	Release(rt, h, st)
 
@@ -255,6 +260,65 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 
 }
 
+func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) {
+	// TODO: verify if we should update Sector utilization for failing sectors
+	// depends on decision around collateral requirement for inactive power
+	// and what happens when a failing sector expires
+	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
+		utilizationInfo, found := st.SectorUtilization()[sectorNo]
+
+		if !found {
+			rt.Abort("sm._updateSectorUtilization: sector not found in SectorUtilization")
+		}
+
+		newUtilization := utilizationInfo.CurrUtilization()
+
+		currEpoch := rt.CurrEpoch()
+		firstExpirationEpoch := utilizationInfo.DealExpirationQueue().Peek().Expiration()
+
+		if firstExpirationEpoch < currEpoch {
+			// this deal has expired
+			newExpiredDeal := utilizationInfo.DealExpirationQueue().Pop()
+			newUtilization -= newExpiredDeal.PayloadPower()
+			firstExpirationEpoch = utilizationInfo.DealExpirationQueue().Peek().Expiration()
+		}
+
+		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
+	}
+
+}
+
+func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePower {
+	var activePower = block.StoragePower(0)
+
+	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
+		utilizationInfo, found := st.SectorUtilization()[sectorNo]
+		if !found {
+			rt.Abort("sm._getActivePower: sectorNo not found in SectorUtilization")
+		}
+		activePower += utilizationInfo.CurrUtilization()
+	}
+
+	return activePower
+}
+
+func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StoragePower {
+	var inactivePower = block.StoragePower(0)
+
+	inactiveProvingSet := st.SectorTable().Impl().CommittedSectors_.Extend(st.SectorTable().RecoveringSectors())
+	inactiveSectorSet := inactiveProvingSet.Extend(st.SectorTable().FailingSectors())
+
+	for _, sectorNo := range inactiveSectorSet.SectorsOn() {
+		utilizationInfo, found := st.SectorUtilization()[sectorNo]
+		if !found {
+			rt.Abort("sm._getInactivePower: sectorNo not found in SectorUtilization")
+		}
+		inactivePower += utilizationInfo.CurrUtilization()
+	}
+
+	return inactivePower
+}
+
 // move Sector from Active/Failing
 // into Cleared State which means deleting the Sector from state
 // remove SectorNumber from all states on chain
@@ -264,17 +328,17 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 	switch sectorState.StateNumber {
 	case SectorActiveSN:
 		// expiration case
-		st.SectorTable().Impl().ActiveSectors_ -= 1
+		st.SectorTable().Impl().ActiveSectors_.Remove(sectorNo)
 	case SectorFailingSN:
 		// expiration and termination cases
-		st.SectorTable().Impl().FailingSectors_ -= 1
+		st.SectorTable().Impl().FailingSectors_.Remove(sectorNo)
 	default:
 		// Committed and Recovering should not go to Cleared directly
 		rt.Abort("invalid state in clearSector")
-		// TODO: determine proper error here and error-handling machinery
 	}
 
 	delete(st.Sectors(), sectorNo)
+	delete(st.SectorUtilization(), sectorNo)
 	st.ProvingSet_.Remove(sectorNo)
 	st.SectorExpirationQueue().Remove(sectorNo)
 }
@@ -286,16 +350,16 @@ func (st *StorageMinerActorState_I) _updateActivateSector(rt Runtime, sectorNo s
 	sectorState := st.Sectors()[sectorNo].State()
 	switch sectorState.StateNumber {
 	case SectorCommittedSN:
-		st.SectorTable().Impl().CommittedSectors_ -= 1
+		st.SectorTable().Impl().CommittedSectors_.Remove(sectorNo)
 	case SectorRecoveringSN:
-		st.SectorTable().Impl().RecoveringSectors_ -= 1
+		st.SectorTable().Impl().RecoveringSectors_.Remove(sectorNo)
 	default:
 		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("invalid state in activateSector")
+		rt.Abort("sm._updateActivateSector: invalid state in activateSector")
 	}
 
 	st.Sectors()[sectorNo].Impl().State_ = SectorActive()
-	st.SectorTable().Impl().ActiveSectors_ += 1
+	st.SectorTable().Impl().ActiveSectors_.Add(sectorNo)
 }
 
 // failSector moves Sector from Active/Committed/Recovering into Failing State
@@ -314,18 +378,18 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 	switch state.StateNumber {
 	case SectorActiveSN:
 		// wont be terminated from Active
-		st.SectorTable().Impl().ActiveSectors_ -= 1
-		st.SectorTable().Impl().FailingSectors_ += 1
+		st.SectorTable().Impl().ActiveSectors_.Remove(sectorNo)
+		st.SectorTable().Impl().FailingSectors_.Add(sectorNo)
 		st.ProvingSet_.Remove(sectorNo)
 		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
 	case SectorCommittedSN:
-		st.SectorTable().Impl().CommittedSectors_ -= 1
-		st.SectorTable().Impl().FailingSectors_ += 1
+		st.SectorTable().Impl().CommittedSectors_.Remove(sectorNo)
+		st.SectorTable().Impl().FailingSectors_.Add(sectorNo)
 		st.ProvingSet_.Remove(sectorNo)
 		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
 	case SectorRecoveringSN:
-		st.SectorTable().Impl().RecoveringSectors_ -= 1
-		st.SectorTable().Impl().FailingSectors_ += 1
+		st.SectorTable().Impl().RecoveringSectors_.Remove(sectorNo)
+		st.SectorTable().Impl().FailingSectors_.Add(sectorNo)
 		st.ProvingSet_.Remove(sectorNo)
 		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
 	case SectorFailingSN:
@@ -561,8 +625,8 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 			st.Sectors()[sectorNo].Impl().State_ = SectorRecovering(sectorState.State().FaultCount)
 			st.Impl().ProvingSet_.Add(sectorNo)
 
-			st.SectorTable().Impl().FailingSectors_ -= 1
-			st.SectorTable().Impl().RecoveringSectors_ += 1
+			st.SectorTable().Impl().FailingSectors_.Remove(sectorNo)
+			st.SectorTable().Impl().RecoveringSectors_.Add(sectorNo)
 
 		default:
 			// TODO: determine proper error here and error-handling machinery
@@ -722,9 +786,9 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	h, st := a.State(rt)
 
-	preCommitSector, found := st.PreCommittedSectors()[info.SectorNumber()]
+	preCommitSector, precommitFound := st.PreCommittedSectors()[info.SectorNumber()]
 
-	if !found {
+	if !precommitFound {
 		rt.Abort("Sector not pre committed.")
 	}
 
@@ -765,13 +829,20 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// TODO: check EnsurePledgeCollateralSatisfied
 	// pledgeCollateralSatisfied
 
+	_, utilizationFound := st.SectorUtilization()[onChainInfo.SectorNumber()]
+	if utilizationFound {
+		rt.Abort("sm.ProveCommitSector: sector number found in SectorUtilization")
+	}
+
 	// determine lastDealExpiration from sma
 	// TODO: proper onchain transaction
-	// lastDealExpiration := SendMessage(sma, GetLastDealExpirationFromDealIDs(onChainInfo.DealIDs()))
-	var lastDealExpiration block.ChainEpoch
+	// expirationQueue := SendMessage(sma, GetInitialUtilizationInfo(onChainInfo.DealIDs()))
+	// lastDealExpiration := expirationQueue.Peek()
+	var initialUtilization deal.UtilizationInfo
+	st.SectorUtilization()[onChainInfo.SectorNumber()] = initialUtilization
 
-	// Note: in the current iteration, a Sector expires only when all storage deals in it have expired.
-	// This is likely to change but it aims to meet user requirement that users can enter into deals of any size.
+	lastDealExpiration := initialUtilization.LastDealExpiration()
+
 	// add sector expiration to SectorExpirationQueue
 	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
 		SectorNumber_: onChainInfo.SectorNumber(),
@@ -801,7 +872,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		// move PreCommittedSector to CommittedSectors if not in Challenged status
 		st.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 		st.Impl().ProvingSet_.Add(onChainInfo.SectorNumber())
-		st.SectorTable().Impl().CommittedSectors_ += 1
+		st.SectorTable().Impl().CommittedSectors_.Add(onChainInfo.SectorNumber())
 	}
 
 	// now remove SectorNumber from PreCommittedSectors (processed)

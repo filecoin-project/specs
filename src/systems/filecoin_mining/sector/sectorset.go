@@ -29,3 +29,9 @@ func (css *CompactSectorSet) DeepCopy() CompactSectorSet {
 	var newCompactSectorSet CompactSectorSet
 	return newCompactSectorSet
 }
+
+// TODO
+func (css *CompactSectorSet) Extend(css2 CompactSectorSet) CompactSectorSet {
+	var newCompactSectorSet CompactSectorSet
+	return newCompactSectorSet
+}
