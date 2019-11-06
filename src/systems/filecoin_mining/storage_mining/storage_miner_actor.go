@@ -70,12 +70,6 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO: placeholder epoch value -- this will be set later
-const MAX_PROVE_COMMIT_SECTOR_PERIOD = block.ChainEpoch(3)
-const MAX_SURPRISE_POST_RESPONSE_PERIOD = block.ChainEpoch(4)
-const TWO_DAYS = 2 * 24 * 60 * 4
-const MIN_CHALLENGE_PERIOD = block.ChainEpoch(TWO_DAYS)
-
 func (st *SectorTable_I) ActivePower() block.StoragePower {
 	return block.StoragePower(st.ActiveSectors_ * util.UVarint(st.SectorSize_))
 }
@@ -120,7 +114,7 @@ func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput 
 		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
 
-	if !a._shouldChallenge(rt) {
+	if !a._shouldChallenge(rt, networkPower) {
 		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
 
@@ -466,6 +460,14 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 // and verifying the PoSt proof within the block. (this happens outside the VM)
 // Assume ElectionPoSt has already been successfully verified when the function gets called.
 func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+
+	TODO() // TODO: validate caller
+
+	// we do not need to verify post submission here, as this should have already been done
+	// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
+	// significant resources, as proofs are expensive to verify.
+	//
+	// notneeded := a._verifyPoStSubmission(rt, postSubmission)
 
 	h, st := a.State(rt)
 	st.ChallengeStatus().Impl().OnNewChallenge(rt.CurrEpoch())

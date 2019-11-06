@@ -399,6 +399,7 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 	// now send the messages
 	for _, addr := range surprisedMiners {
 		// TODO: rt.SendMessage(addr, ...)
+		// should also send network power here
 		panic(addr)
 	}
 }

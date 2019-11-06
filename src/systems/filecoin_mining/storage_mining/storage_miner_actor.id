@@ -43,7 +43,10 @@ type ChallengeStatus struct {
     LastChallengeEndEpoch  block.ChainEpoch  // get updated upon _onSuccessfulPoSt and _onMissedPoSt
 
     IsChallenged()         bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
-    ShouldChallenge(currEpoch block.ChainEpoch) bool  // only True when CurrEpoch > LastChallengeEpoch + MIN_CHALLENGE_PERIOD
+    ShouldChallenge(
+        currEpoch           block.ChainEpoch
+        minChallengePeriod  block.ChainEpoch
+    ) bool  // only True when CurrEpoch > LastChallengeEpoch + MIN_CHALLENGE_PERIOD
 }
 
 type PreCommittedSector struct {
@@ -58,27 +61,27 @@ type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 type StorageMinerActorState struct {
     // CollateralVault CollateralVault
 
-    PreCommittedSectors           PreCommittedSectorsAMT
-    Sectors                       SectorsAMT
-    StagedCommittedSectors        StagedCommittedSectorAMT
+    PreCommittedSectors        PreCommittedSectorsAMT
+    Sectors                    SectorsAMT
+    StagedCommittedSectors     StagedCommittedSectorAMT
 
     // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckSurprisePoStSubmissionHappened
     // successful SubmitSurprisePoSt will perform changes to NextProvingSet
     // and update ProvingSet with NextProvingSet at the end
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-    ProvingSet                    sector.CompactSectorSet
+    ProvingSet                 sector.CompactSectorSet
 
     SectorTable
     SectorExpirationQueue
     ChallengeStatus
 
     // contains mostly static info about this miner
-    Info                          &MinerInfo
+    Info                       &MinerInfo
 
     // TODO ProvingPeriodEnd   Epoch
 
-    _isChallenged(rt Runtime)     bool
-    _shouldChallenge(rt Runtime)  bool
+    _isChallenged(rt Runtime)  bool
+    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _sectorExists(sectorNo sector.SectorNumber) bool
 
@@ -91,6 +94,7 @@ type StorageMinerActorState struct {
     _updateCommittedSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
+    _computeMinChallengePeriod(rt Runtime, networkPower block.StoragePower) block.ChainEpoch
 }
 
 type StorageMinerActorCode struct {
