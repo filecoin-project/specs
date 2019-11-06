@@ -16,6 +16,11 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
 
+    IsWinningElectionProof(
+        electionProof  block.ElectionProof
+        workerAddr     addr.Address
+    ) bool
+
     validateElectionProof(
         height         block.ChainEpoch
         electionProof  block.ElectionProof

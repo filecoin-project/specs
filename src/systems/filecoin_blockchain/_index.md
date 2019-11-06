@@ -33,7 +33,7 @@ Filecoin's blockchain runs on storage power. That is, its consensus algorithm by
 
 The leader election process is likewise handled by the {{<sref storage_power_consensus>}} subsystem (SPC). Using the _Power Table_ it maintains, this subsystem runs a Nakamoto-style leader election process called Expected Consensus at every round to elect miners who can extend the block chain by generating new blocks.
 
-Beyond participating in the Storage Market (see the sref storage_market_subsystem), participation in Filecoin's consensus is the other way storage miners can earn Filecoin tokens.
+Beyond participating in the Storage Market (see the {{<sref storage_market>}} spec), participation in Filecoin's consensus is the other way storage miners can earn Filecoin tokens.
 
 {{<sref expected_consensus>}} has two main components: a leader election process and a chain selection algorithm dependent on a weight function.
 
