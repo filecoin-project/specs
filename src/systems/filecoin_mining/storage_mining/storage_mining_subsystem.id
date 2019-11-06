@@ -20,7 +20,9 @@ type StorageMiningSubsystem struct {
     MinerActor         StorageMinerActorCode
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
-    BlockProducer      blockproducer.BlockProducer
+    
+    // Need access to block producer in order to publish blocks
+    blockProducer      blockproducer.BlockProducer
 
     // Need access to SPC in order to mine a block
     consensus          spc.StoragePowerConsensusSubsystem

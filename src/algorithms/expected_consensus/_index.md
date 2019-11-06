@@ -125,7 +125,7 @@ In short, the process of crafting a new ElectionProof in round N is as follows i
 
 It is important to note that every block contains two artifacts: one, a ticket derived from last block's ticket to extend the ticket-chain, and two, an election proof derived from the ticket `K` rounds back used to run leader election.
 
-Note: We draw the miner power from the prior round. This means that a miner can win a block in an epoch in which they were supposed to have proven storage again but did not. Put another way, `ElectionProof` validity is checked prior to executing transactions (including that which cuts miner power) at every epoch.
+Note: Miner power is drawn from the power table, accounting only for power that has been proven over time (see {{<sref power_table>}}).
 
 The miner can then check whether they drew a winning election proof by comparing their power fraction to the `ElectionProof`s value, as follows:
 

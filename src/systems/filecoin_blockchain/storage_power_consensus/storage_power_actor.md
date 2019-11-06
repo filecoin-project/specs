@@ -22,6 +22,21 @@ An invariant of the storage power consensus subsystem is that all storage in the
 
 In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector. (TODO: potential delay this further in order to ensure that any power cut goes undetected at most as long as the shortest power delay on new sector commitments).
 
+For instance, say a miner X does the following:
+- In epoch 100: commits 10 TB
+- In epoch 110: publishes a PoSt for their storage
+- In epoch 120: commits another 10TB
+- In epoch 135: publishes a new PoSt for their storage
+
+Querying the power table for this miner at different rounds should yield (using the following shorthand as an illustration only):
+- `Power(X, 90) == 0`
+- `Power(X, 100) == 0`
+- `Power(X, 110) == 0`
+- `Power(X, 111) == 10`
+- `Power(X, 120) == 10`
+- `Power(X, 135) == 10`
+- `Power(x, 136) == 20`
+
 Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.
 
 Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
