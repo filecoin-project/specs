@@ -102,14 +102,15 @@ func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput 
 }
 
 func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
-	for sectorNo, sealOnChainInfo := range st.StagedCommittedSectors() {
-		st.Sectors()[sectorNo] = sealOnChainInfo
+	for sectorNo, stagedInfo := range st.StagedCommittedSectors() {
+		st.Sectors()[sectorNo] = stagedInfo.Sector()
 		st.Impl().ProvingSet_.Add(sectorNo)
 		st.SectorTable().Impl().CommittedSectors_.Add(sectorNo)
+		st.SectorUtilization()[sectorNo] = stagedInfo.Utilization()
 	}
 
 	// empty StagedCommittedSectors
-	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]SectorOnChainInfo)
+	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]StagedCommittedSectorInfo)
 }
 
 // construct FaultReport
@@ -285,6 +286,7 @@ func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePow
 func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StoragePower {
 	var inactivePower = block.StoragePower(0)
 
+	// iterate over sectorNo in CommittedSectors, RecoveringSectors, and FailingSectors
 	inactiveProvingSet := st.SectorTable().Impl().CommittedSectors_.Extend(st.SectorTable().RecoveringSectors())
 	inactiveSectorSet := inactiveProvingSet.Extend(st.SectorTable().FailingSectors())
 
@@ -767,11 +769,9 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// determine lastDealExpiration from sma
 	// TODO: proper onchain transaction
-	// expirationQueue := SendMessage(sma, GetInitialUtilizationInfo(onChainInfo.DealIDs()))
-	// lastDealExpiration := expirationQueue.Peek()
+	// initialUtilization := SendMessage(sma, GetInitialUtilizationInfo(onChainInfo.DealIDs()))
+	// lastDealExpiration := initialUtilization.Peek()
 	var initialUtilization deal.UtilizationInfo
-	st.SectorUtilization()[onChainInfo.SectorNumber()] = initialUtilization
-
 	lastDealExpiration := initialUtilization.LastDealExpiration()
 
 	// add sector expiration to SectorExpirationQueue
@@ -798,12 +798,18 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	if st._isChallenged(rt) {
 		// move PreCommittedSector to StagedCommittedSectors if in Challenged status
-		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
+		stagedSectorInfo := &StagedCommittedSectorInfo_I{
+			Sector_:      sealOnChainInfo,
+			Utilization_: initialUtilization,
+		}
+
+		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = stagedSectorInfo
 	} else {
 		// move PreCommittedSector to CommittedSectors if not in Challenged status
 		st.Sectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 		st.Impl().ProvingSet_.Add(onChainInfo.SectorNumber())
 		st.SectorTable().Impl().CommittedSectors_.Add(onChainInfo.SectorNumber())
+		st.SectorUtilization()[onChainInfo.SectorNumber()] = initialUtilization
 	}
 
 	// now remove SectorNumber from PreCommittedSectors (processed)

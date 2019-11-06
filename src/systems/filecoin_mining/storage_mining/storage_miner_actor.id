@@ -28,6 +28,11 @@ type SectorTable struct {
     TerminationFaultCount  util.UVarint  // transient State that get reset on every constructPowerReport
 }
 
+type StagedCommittedSectorInfo struct {
+    Sector       SectorOnChainInfo
+    Utilization  deal.UtilizationInfo
+}
+
 type SectorOnChainInfo struct {
     SealCommitment  sector.SealCommitment
     State           SectorState
@@ -46,24 +51,16 @@ type PreCommittedSector struct {
 }
 
 type PreCommittedSectorsAMT {sector.SectorNumber: PreCommittedSector}
-type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
+type StagedCommittedSectorAMT {sector.SectorNumber: StagedCommittedSectorInfo}
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 // map from SectorNumber to amout of storage in active deals
 type SectorUtilizationAMT {sector.SectorNumber: deal.UtilizationInfo}
 
 type StorageMinerActorState struct {
-    // CollateralVault CollateralVault
-
     PreCommittedSectors        PreCommittedSectorsAMT
     StagedCommittedSectors     StagedCommittedSectorAMT
-
     Sectors                    SectorsAMT
     SectorUtilization          SectorUtilizationAMT
-
-    // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
-    // successful SubmitPoSt will perform changes to NextProvingSet
-    // and update ProvingSet with NextProvingSet at the end
-    // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     ProvingSet                 sector.CompactSectorSet
 
     SectorTable
@@ -73,8 +70,7 @@ type StorageMinerActorState struct {
     // contains mostly static info about this miner
     Info                       &MinerInfo
 
-    // TODO ProvingPeriodEnd   Epoch
-
+    // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     _isChallenged(rt Runtime)  bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _sectorExists(sectorNo sector.SectorNumber) bool
@@ -121,8 +117,6 @@ type StorageMinerActorCode struct {
     _submitPowerReport(rt Runtime)
 
     _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
-
-    // _computeProvingPeriodEndSectorState(rt Runtime)  // TODO
 
     _expirePreCommittedSectors(rt Runtime)
 }
