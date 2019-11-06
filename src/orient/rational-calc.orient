@@ -45,13 +45,9 @@ FastPorep:
 
 
   Adversary:
-    // hash_gbs_fastest = hash_gbs * hash_time_amax
-    // after hashes_threshold is more expensive to hash than to keep storage
     Rationality:
       describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to pay store the entire sector, than re-encode those")
       breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_single_node_encoding * challenge_periods_per_month))
-
-      // hashes_threshold = cost_storage_sector_polling_time / cost_single_node_encoding
       regeneration_percentage = breakeven_nodes / nodes
 
     Sequentiality:
