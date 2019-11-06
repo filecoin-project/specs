@@ -4,9 +4,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-
-type Seed struct {}
-type SectorCommitment struct {}
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type SectorExpirationQueueItem struct {
     SectorNumber  sector.SectorNumber
@@ -22,13 +20,10 @@ type SectorExpirationQueue struct {
 
 type SectorTable struct {
     SectorSize             sector.SectorSize
-    ActiveSectors          util.UVarint
-    CommittedSectors       util.UVarint
-    RecoveringSectors      util.UVarint
-    FailingSectors         util.UVarint
-
-    ActivePower()          block.StoragePower
-    InactivePower()        block.StoragePower
+    ActiveSectors          sector.CompactSectorSet
+    CommittedSectors       sector.CompactSectorSet
+    RecoveringSectors      sector.CompactSectorSet
+    FailingSectors         sector.CompactSectorSet
 
     TerminationFaultCount  util.UVarint  // transient State that get reset on every constructPowerReport
 }
@@ -51,15 +46,19 @@ type PreCommittedSector struct {
 }
 
 type PreCommittedSectorsAMT {sector.SectorNumber: PreCommittedSector}
-type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
+type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+// map from SectorNumber to amout of storage in active deals
+type SectorUtilizationAMT {sector.SectorNumber: deal.UtilizationInfo}
 
 type StorageMinerActorState struct {
     // CollateralVault CollateralVault
 
     PreCommittedSectors        PreCommittedSectorsAMT
-    Sectors                    SectorsAMT
     StagedCommittedSectors     StagedCommittedSectorAMT
+
+    Sectors                    SectorsAMT
+    SectorUtilization          SectorUtilizationAMT
 
     // ProvingSet get copied over to NextProvingSet on PoSt challenge and CheckPoStSubmissionHappened
     // successful SubmitPoSt will perform changes to NextProvingSet
@@ -89,6 +88,10 @@ type StorageMinerActorState struct {
     _updateCommittedSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
+    _updateSectorUtilization(rt Runtime)
+
+    _getActivePower(rt Runtime) block.StoragePower
+    _getInactivePower(rt Runtime) block.StoragePower
 }
 
 type StorageMinerActorCode struct {
