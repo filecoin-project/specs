@@ -13,7 +13,7 @@ func (miner *BlockProducer_I) MineBlock(messages []Message) Block {
 	var parentTipset    = chain.TipsetAtEpoch(T)
 	var lookbackTipset  = chain.TipsetAtEpoch(T - K)
 
-	var currSeed = lookbackTipset.ElectionSeed()
+	var currSeed = append([]byte("ELECTION"),lookbackTipset.ElectionSeed()...)
     var currTicket Ticket
     var tickets []Ticket
 
@@ -33,7 +33,8 @@ func (miner *BlockProducer_I) MineBlock(messages []Message) Block {
 				timestamp:    CurrentTime(),
 				blockSig:     nil,
 			};
-			ret.blockSig = miner.SigKeyPair().Sign(ret.ComputeUnsignedFingerprint())
+			msg := append([]byte("BLOCK"),ret.ComputeUnsignedFingerprint()...)
+			ret.blockSig = miner.SigKeyPair().Sign(msg)
 			return ret
         }
     }

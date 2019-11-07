@@ -112,6 +112,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	var input []byte
+	input = append(input, []byte("TICKET")...)
 	input = append(input, spc.VRFPersonalizationTicket)
 	input = append(input, randomness...)
 
