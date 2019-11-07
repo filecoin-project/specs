@@ -7,7 +7,11 @@ func (self *BlockchainSubsystem_I) validateBlockSemantics(block block.Block) {
 	panic("TODO")
 	// // 1. Verify Signature
 	// pubk := self.StateTree().GetMinerKey(block.MinerAddress())
+<<<<<<< HEAD
 	// msg := append(filcrypto.DomainSeparationTag.Block, block...)
+=======
+	// msg := append([]byte("BLOCK"), block...)
+>>>>>>> domain separation tag for ticket, election proof and block signing
 	// if block.BlockSig().Verify(pubk, msg) {
 	// 	return ErrInvalidBlock("invalid block signature")
 	// }

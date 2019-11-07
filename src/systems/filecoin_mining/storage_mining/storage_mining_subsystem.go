@@ -7,12 +7,7 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-<<<<<<< HEAD
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-=======
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
->>>>>>> On-chain message serialization APIs
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	util "github.com/filecoin-project/specs/util"

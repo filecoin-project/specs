@@ -11,7 +11,7 @@ func (tix *Ticket_I) ValidateSyntax() bool {
 }
 
 func (tix *Ticket_I) Verify(input util.Bytes, pk filcrypto.VRFPublicKey) bool {
-	return tix.VRFResult_.Verify(input, pk)
+	return tix.VRFResult_.Verify(append([]byte("TICKET"), input...), pk)
 }
 
 func (tix *Ticket_I) DrawRandomness(minerAddr addr.Address, epoch ChainEpoch) util.Bytes {
@@ -33,5 +33,9 @@ func (ep *ElectionProof_I) ValidateSyntax() bool {
 }
 
 func (ep *ElectionProof_I) Verify(input util.Bytes, pk filcrypto.VRFPublicKey) bool {
+<<<<<<< HEAD
 	return ep.VRFResult_.Verify(append([]byte(filcrypto.ElectionTag), input...), pk)
+=======
+	return ep.VRFResult_.Verify(append([]byte("ELECTION"), input...), pk)
+>>>>>>> domain separation tag for ticket, election proof and block signing
 }
