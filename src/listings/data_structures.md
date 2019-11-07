@@ -43,7 +43,7 @@ For more on Tipsets, see {{<sref expected_consensus "the Expected Consensus spec
 {{<goFile TipSet>}}
 
 
-# VRF Personalization
+# Domain Separation Tags
 
 We define VRF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. `Ticket` and
 `Post`).
