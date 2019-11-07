@@ -33,7 +33,9 @@ DST = "VRF" // encoded as an ASCII string
 
 **Note**: The message given to the BLS signature scheme for using it in the VRF
 context should also contain a domain separation tag. The relevant separation tag
-are mentionned in the relevant places throughout the specs.
+are mentionned in the relevant places throughout the specs. For example, in the
+context of using this scheme for the ticket generation, the message is the
+previous ticket prefixed by "TICKET".
 
 {{< readfile file="vrf.id" code="true" lang="go" >}}
 {{< readfile file="vrf.go" code="true" lang="go" >}}

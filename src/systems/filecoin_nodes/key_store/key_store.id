@@ -1,0 +1,15 @@
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+type KeyStore struct {
+    ownerAddress  address.Address
+    ownerKey      filcrypto.SigKeyPair
+    Workers       [Worker]
+
+    // SignWithKey(key, sigType, input)
+}
+
+type Worker struct {
+    Address     address.Address
+    VRFKeyPair  filcrypto.VRFKeyPair
+}

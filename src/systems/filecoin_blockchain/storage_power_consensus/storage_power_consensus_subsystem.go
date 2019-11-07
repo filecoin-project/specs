@@ -72,6 +72,11 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool {
+	panic("")
+	// return spc.ec().IsWinningElectionProof(electionProof, minerPower, totalPower)
+}
+
 func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, epoch block.ChainEpoch) base_mining.SealSeed {
 	panic("")
 

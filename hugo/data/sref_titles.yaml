@@ -42,6 +42,7 @@ storage_faults: "Storage Faults"
 
 ### Storage Mining
 storage_mining_subsystem: "Storage Mining Subsystem"
+storage_miner_actor: "Storage Miner Actor"
 sector_sealer: "Sector Sealer"
 post_generator: "PoSt Generator"
 post: "Proof of Spacetime"

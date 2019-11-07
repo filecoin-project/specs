@@ -20,7 +20,8 @@ SPC provides a power table abstraction which tracks miner power (i.e. miner stor
 
 An invariant of the storage power consensus subsystem is that all storage in the power table must be verified. That is, miners can only derive power from storage they have already proven to the network.
 
-In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector.
+In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector. (TODO: potential delay this further in order to ensure that any power cut goes undetected at most as long as the shortest power delay on new sector commitments).
+
 Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.
 
 Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
