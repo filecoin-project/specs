@@ -17,11 +17,6 @@ const (
 	SPC_LOOKBACK_SEAL       = FINALITY // should be set to finality
 )
 
-const (
-	VRFPersonalizationTicket = iota
-	VRFPersonalizationPoSt   = iota
-)
-
 // Storage Power Consensus Subsystem
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) error {

@@ -50,8 +50,14 @@ We define VRF personalizations as follow, to enable domain separation across ope
 
 | Type          | Prefix |
 | ------------- | ------ |
+<<<<<<< HEAD
 | Ticket        | `0x01` |
 | Post          | `0x02` |
+=======
+| Ticket        | `0x00` |
+| ElectionProof | `0x01` |
+| Block         | `0x02` |
+>>>>>>> fix some types and double tags. must work on compilation
 
 
 # Ticket

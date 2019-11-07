@@ -5,7 +5,6 @@ package storage_mining
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -112,9 +111,8 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	var input []byte
-	input = append(input, []byte(filcrypto.TicketTag)...)
-	input = append(input, spc.VRFPersonalizationTicket)
-	input = append(input, randomness...)
+	input := filcrypto.TicketTag
+	input = append(input, priorTicket.Output()...)
 
 	// run through VRF
 	vrfRes := vrfKP.Generate(input)
