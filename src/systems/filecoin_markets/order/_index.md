@@ -1,6 +1,6 @@
 ---
 menuTitle: Orders
-statusIcon: 🔁
+statusIcon: ⚠️
 title: Market Orders - Asks and Proposals
 ---
 
