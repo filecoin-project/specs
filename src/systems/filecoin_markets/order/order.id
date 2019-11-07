@@ -10,11 +10,16 @@ type StorageAsk struct {
 }
 
 type StorageDealProposal struct {
+	Data          cid.Cid
 
-    MinPieceSize  uint64
-    Miner         addr.Address
-    Timestamp     block.ChainEpoch
-    MaxDuration   block.ChainEpoch
-    MinDuration   block.ChainEpoch
-    SeqNo         uint64
+	PricePerEpoch      types.BigInt // attoFIL per GiB
+	ProposalExpiration uint64
+	Duration           uint64
+
+	ProviderAddress address.Address
+	Client          address.Address
+	MinerID         peer.ID
 }
+
+
+
