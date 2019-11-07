@@ -1,7 +1,14 @@
-type Ask struct {
-
+type StorageAsk struct {
+    Price         BigInt            // attoFIL per GiB per epoch
+    Collateral    BigInt            // TODO define units
+    
+    MinPieceSize  uint64
+    Miner         address.Address
+    Timestamp     uint64
+    Expiry        uint64
+    SeqNo         uint64
 }
 
-type Bid struct {
+type StorageDealProposal struct {
 
 }
