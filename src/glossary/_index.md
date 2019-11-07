@@ -25,8 +25,7 @@ Actors are very similar to smart contracts in Ethereum.
 An address is an identifier that refers to an actor in the Filecoin state.
 
 ## Ask
-
-## Bid
+An ask contain the terms on which a miner is willing to provide services. Storage asks, for example, contain price and other terms under which a given miner is willing to sell its storage. The word comes from stock market usage of ask, shortened from asking price.
 
 ## Block
 
