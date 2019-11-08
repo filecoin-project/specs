@@ -65,11 +65,15 @@ func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageD
 //   - verify client and provider has sufficient balance
 func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.StorageDeal) bool {
 	// TODO verify client and provider signature
-	// TODO verify minimum StoragePrice, ProviderCollateralPerEpoch, and ClientCollateralPerEpoch
 	// TODO: verify deal did not expire when it is signed
 
 	currEpoch := rt.CurrEpoch()
 	p := d.Proposal()
+
+	// deal ends before it starts
+	if p.EndEpoch() <= p.StartEpoch() {
+		return false
+	}
 
 	// deal has started before publish
 	if p.StartEpoch() < currEpoch {
@@ -77,6 +81,10 @@ func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.
 	}
 
 	// TODO: verify client and provider address and signature are correct (may not be needed)
+
+	if p.StoragePricePerEpoch() < 0 {
+		return false
+	}
 
 	// verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
 	if p.ProviderCollateralPerEpoch() < deal.MIN_PROVIDER_DEAL_COLLATERAL_PER_EPOCH ||
@@ -150,21 +158,6 @@ func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal d
 	st._lockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
 }
 
-func (st *StorageMarketActorState_I) _processStorageDealPayment(rt Runtime, deal deal.StorageDeal, duration block.ChainEpoch) {
-	p := deal.Proposal()
-
-	amount := actor.TokenAmount(uint64(p.StoragePricePerEpoch()) * uint64(duration))
-	st._transferBalance(rt, p.Client(), p.Provider(), amount)
-}
-
-func (st *StorageMarketActorState_I) _settleExpiredStorageDeal(rt Runtime, deal deal.StorageDeal) {
-	// TODO
-}
-
-func (st *StorageMarketActorState_I) _slashLockedFunds(rt Runtime, amount actor.TokenAmount) {
-	// TODO
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.TokenAmount) {
@@ -234,7 +227,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 		if st._validateNewStorageDeal(rt, newDeal) {
 			st._lockFundsForStorageDeal(rt, newDeal)
 			id := st._generateStorageDealID(rt, newDeal)
-			st.Deals()[id] = newDeal
+			st.PublishedDeals()[id] = newDeal
 			response[i] = PublishStorageDealSuccess(id)
 		} else {
 			response[i] = PublishStorageDealError()
@@ -247,49 +240,101 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 }
 
 func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []deal.DealID) bool {
-	return false
+	h, st := a.State(rt)
+
+	ret := true
+
+	// TODO: verify rt.Abort is sufficient and there is no need for return false
+	// might need to return false but that may not be correct either, need to unroll changes
+	for _, dealID := range dealIDs {
+		publishedDeal, publishedFound := st.PublishedDeals()[dealID]
+		if !publishedFound {
+			rt.Abort("sma.VerifyPublishedDealIDs: unpublished deal ID.")
+		}
+
+		currEpoch := rt.CurrEpoch()
+
+		if publishedDeal.Proposal().StartEpoch() < currEpoch {
+			delete(st.PublishedDeals(), dealID)
+			rt.Abort("sma.VerifyPublishedDealIDs: deal has already started.")
+		}
+
+		dealExpiration := publishedDeal.Proposal().EndEpoch()
+		if dealExpiration <= (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
+			delete(st.PublishedDeals(), dealID)
+			rt.Abort("sma.VerifyPublishedDealIDs: deal might expire before prove commit.")
+		}
+	}
+
+	UpdateRelease(rt, h, st)
+
+	return ret
 }
 
 func (a *StorageMarketActorCode_I) ActivateSectorDealIDs(rt Runtime, dealIDs []deal.DealID) bool {
-	return false
-}
+	h, st := a.State(rt)
 
-func (a *StorageMarketActorCode_I) ProcessSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber) {
-	panic("TODO")
-}
+	ret := true
 
-func (a *StorageMarketActorCode_I) ProcessSectorExpiration(rt Runtime, dealIDs []deal.DealID) {
-	panic("TODO")
-}
+	// TODO: verify rt.Abort is sufficient and no need for return false
+	// might need to return false but that may not be correct either, need to unroll changes
+	for _, dealID := range dealIDs {
+		publishedDeal, publishedFound := st.PublishedDeals()[dealID]
+		if !publishedFound {
+			delete(st.PublishedDeals(), dealID)
+			rt.Abort("sma.ActivateSectorDealIDs: unpublished deal ID.")
+		}
 
-func (a *StorageMarketActorCode_I) ProcessFaultReport(rt Runtime, report sector.FaultReport) {
-	panic("TODO")
+		if publishedDeal.Proposal().EndEpoch() <= rt.CurrEpoch() {
+			delete(st.PublishedDeals(), dealID)
+			rt.Abort("sma.ActivateSectorDealIDs: storage deal has expired.")
+		}
+
+		// should only go through if all deals satisfy the above invariant
+		activeDeal := &deal.ActiveStorageDeal_I{
+			Deal_:                        publishedDeal,
+			ProviderCollateralRemaining_: publishedDeal.Proposal().ProviderBalanceRequirement(),
+			LockedStorageFee_:            publishedDeal.Proposal().TotalStorageFee(),
+			UnlockedStorageFee_:          actor.TokenAmount(0),
+			LastPaymentEpoch_:            rt.CurrEpoch(),
+		}
+
+		delete(st.PublishedDeals(), dealID)
+		st.ActiveDeals()[dealID] = activeDeal
+	}
+
+	UpdateRelease(rt, h, st)
+
+	return ret
 }
 
 // Call by StorageMinerActor at CommitSector
-func (a *StorageMarketActorCode_I) GetInitialUtilizationInfo(rt Runtime, dealIDs []deal.DealID) deal.UtilizationInfo {
+func (a *StorageMarketActorCode_I) GetInitialUtilizationInfo(rt Runtime, dealIDs []deal.DealID) sector.SectorUtilizationInfo {
 	h, st := a.State(rt)
 
 	var dealExpirationQueue deal.DealExpirationQueue
 	var maxUtilization block.StoragePower
 	var lastExpiration block.ChainEpoch
+	activeDealIDs := sector.CompactDealSet(make([]byte, len(dealIDs)))
 
 	for _, dealID := range dealIDs {
-		d, found := st.Deals()[dealID]
+		d, found := st.ActiveDeals()[dealID]
 		if !found {
-			rt.Abort("dealID not found.")
+			rt.Abort("sm.GetInitialUtilizationInfo: dealID not found in ActiveDeals.")
 		}
 
 		// TODO: more checks or be convinced that it's enough to assume deals are still valid
 		// consider calling _validateNewStorageDeal
 
-		dealExpiration := d.Proposal().EndEpoch()
+		dealExpiration := d.Deal().Proposal().EndEpoch()
 
 		if dealExpiration > lastExpiration {
 			lastExpiration = dealExpiration
 		}
 
-		dealPayloadPower := block.StoragePower(d.Proposal().PieceSize().PayloadSize())
+		// TODO: verify what counts towards power here
+		// There is PayloadSize, OverheadSize, and Total, see piece.id
+		dealPayloadPower := block.StoragePower(d.Deal().Proposal().PieceSize().PayloadSize())
 
 		queueItem := &deal.DealExpirationQueueItem_I{
 			DealID_:       dealID,
@@ -297,15 +342,16 @@ func (a *StorageMarketActorCode_I) GetInitialUtilizationInfo(rt Runtime, dealIDs
 			Expiration_:   dealExpiration,
 		}
 		dealExpirationQueue.Add(queueItem)
-
+		activeDealIDs.Add(dealID)
 		maxUtilization += dealPayloadPower
 
 	}
 
-	initialUtilizationInfo := &deal.UtilizationInfo_I{
+	initialUtilizationInfo := &sector.SectorUtilizationInfo_I{
 		DealExpirationQueue_: dealExpirationQueue,
 		MaxUtilization_:      maxUtilization,
 		CurrUtilization_:     maxUtilization,
+		ActiveDealIDs_:       activeDealIDs,
 		LastDealExpiration_:  lastExpiration,
 	}
 
@@ -333,6 +379,180 @@ func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSiz
 	Release(rt, h, st)
 
 	return pieceInfos
+}
+
+// unlock remaining payments and return all UnlockedStorageFee to Provider
+// remove deals from ActiveDeals
+// return collaterals to both miner and client
+func (st *StorageMarketActorState_I) _expireStorageDeals(rt Runtime, dealIDs []deal.DealID, lastChallengeEndEpoch block.ChainEpoch) {
+	for _, dealID := range dealIDs {
+
+		newExpiredDeal, found := st.ActiveDeals()[dealID]
+
+		if !found {
+			// rt.Abort("sma._expireStorageDeals: dealID not found")
+			return
+		}
+
+		duration := lastChallengeEndEpoch - newExpiredDeal.LastPaymentEpoch()
+		if duration > 0 {
+			fee := actor.TokenAmount(uint64(duration) * uint64(newExpiredDeal.Deal().Proposal().StoragePricePerEpoch()))
+
+			if fee > newExpiredDeal.LockedStorageFee() {
+				// rt.Abort("sma._expireStorageDeals: cannot unlock more than already locked.")
+				return
+			}
+
+			newExpiredDeal.Impl().LastPaymentEpoch_ = lastChallengeEndEpoch
+			newExpiredDeal.Impl().UnlockStorageFee(fee)
+		}
+
+		delete(st.ActiveDeals(), dealID)
+
+		// should we check if LockedStorageFee is now 0?
+		// credit UnlockedStorageFee to miner
+		st._unlockBalance(rt, newExpiredDeal.Deal().Proposal().Provider(), newExpiredDeal.UnlockedStorageFee())
+
+		// return storage deal collaterals to both miners and client
+		st._unlockBalance(rt, newExpiredDeal.Deal().Proposal().Provider(), newExpiredDeal.ProviderCollateralRemaining())
+		st._unlockBalance(rt, newExpiredDeal.Deal().Proposal().Client(), newExpiredDeal.Deal().Proposal().TotalClientCollateral())
+
+	}
+}
+
+func (st *StorageMarketActorState_I) _creditStorageDeals(rt Runtime, dealIDs []deal.DealID, lastChallengeEndEpoch block.ChainEpoch) {
+
+	for _, dealID := range dealIDs {
+		activeDeal, found := st.ActiveDeals()[dealID]
+
+		if !found {
+			rt.Abort("sma._creditStorageDeals: dealID not found.")
+		}
+
+		duration := lastChallengeEndEpoch - activeDeal.LastPaymentEpoch()
+
+		if duration <= 0 {
+			// return for this particular deal instead of aborting the whole operation
+			// rt.Abort("sma._creditStorageDeals: no new payment to be credited.")
+			return
+		}
+
+		fee := actor.TokenAmount(uint64(duration) * uint64(activeDeal.Deal().Proposal().StoragePricePerEpoch()))
+
+		if fee > activeDeal.LockedStorageFee() {
+			// rt.Abort("sma._creditStorageDeals: cannot unlock more than already locked.")
+			return
+		}
+
+		activeDeal.Impl().LastPaymentEpoch_ = lastChallengeEndEpoch
+
+		// potentially unnecessary as we can unlock funds for provider directly
+		// unless the protocol plans on refunding client for MaxFaultCount consecutive fails
+		activeDeal.Impl().UnlockStorageFee(fee)
+
+		// TODO: align on provider storage fee withdrawal
+	}
+
+}
+
+func (st *StorageMarketActorState_I) _slashDeclaredFaults(rt Runtime, dealIDs []deal.DealID) {
+
+	for _, dealID := range dealIDs {
+
+		deal, found := st.ActiveDeals()[dealID]
+
+		if !found {
+			// move on to the next deal and keep slashing
+			return
+		}
+
+		// TODO: the exact slash amount is up for change
+		// TODO: check if provider runs out of collateral to slash here
+		deal.Impl().ProviderCollateralRemaining_ -= deal.Deal().Proposal().ProviderCollateralPerEpoch()
+
+	}
+}
+
+func (st *StorageMarketActorState_I) _slashDetectedFaults(rt Runtime, dealIDs []deal.DealID) {
+
+	for _, dealID := range dealIDs {
+
+		deal, found := st.ActiveDeals()[dealID]
+
+		if !found {
+			// move on to the next deal and keep slashing
+			return
+		}
+
+		// TODO: the exact slash amount is up for change
+		// TODO: check if provider runs out of collateral to slash here
+		// TODO: more sever slashing for detected faults vs declared faults
+		// maybe for the duration since the last Epoch that the sector was proven
+		deal.Impl().ProviderCollateralRemaining_ -= deal.Deal().Proposal().ProviderCollateralPerEpoch()
+
+	}
+}
+
+// delete deal from active deals
+// send deal collateral to TreasuryActor
+// return locked storage fee to client
+// return client collateral
+// TODO: decide what to do with unlocked storage fee here
+func (st *StorageMarketActorState_I) _slashTerminatedFaults(rt Runtime, dealIDs []deal.DealID) {
+
+	for _, dealID := range dealIDs {
+
+		deal, found := st.ActiveDeals()[dealID]
+
+		if !found {
+			// move on to the next deal and keep slashing
+			return
+		}
+
+		delete(st.ActiveDeals(), dealID)
+
+		// return client collateral and locked storage fee
+		clientAddr := deal.Deal().Proposal().Client()
+		clientCollateral := deal.Deal().Proposal().TotalClientCollateral()
+		st._unlockBalance(rt, clientAddr, clientCollateral+deal.LockedStorageFee())
+
+		// burn all deal.ProviderCollateralRemaining by sending them to TreasuryActor
+		// TODO: Send(deal.ProviderCollateralRemaining)
+	}
+}
+
+func (a *StorageMarketActorCode_I) ProcessSectorDealSlash(rt Runtime, info sector.BatchDealSlashInfo) {
+
+	h, st := a.State(rt)
+
+	switch info.Action() {
+	case sector.SlashDeclaredFaults:
+		st._slashDeclaredFaults(rt, info.DealIDs())
+	case sector.SlashDetectedFaults:
+		st._slashDetectedFaults(rt, info.DealIDs())
+	case sector.SlashTerminatedFaults:
+		st._slashTerminatedFaults(rt, info.DealIDs())
+	default:
+		rt.Abort("sma.ProcessSectorDealSlash: invalid action type")
+	}
+
+	UpdateRelease(rt, h, st)
+
+}
+
+func (a *StorageMarketActorCode_I) ProcessSectorDealPayment(rt Runtime, info sector.BatchDealPaymentInfo) {
+	h, st := a.State(rt)
+
+	switch info.Action() {
+	case sector.ExpireStorageDeals:
+		st._expireStorageDeals(rt, info.DealIDs(), info.LastChallengeEndEpoch())
+	case sector.CreditStorageDeals:
+		st._creditStorageDeals(rt, info.DealIDs(), info.LastChallengeEndEpoch())
+	default:
+		rt.Abort("sma.ProcessSectorDealPayment: invalid deal payment action.")
+	}
+
+	UpdateRelease(rt, h, st)
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {

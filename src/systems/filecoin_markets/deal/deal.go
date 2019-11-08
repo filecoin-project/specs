@@ -45,9 +45,16 @@ func (p *StorageDealProposal_I) CID() ProposalCID {
 }
 
 func (d *ActiveStorageDeal_I) UnlockStorageFee(fee actor.TokenAmount) bool {
-	if d.LockedStorageFee() < fee {
+	if d.Deal().Proposal().TotalStorageFee() < fee {
+		// cannot unlock more than total
 		return false
 	}
+
+	if d.LockedStorageFee() < fee {
+		// cannot unlock more than locked
+		return false
+	}
+
 	d.LockedStorageFee_ -= fee
 	d.UnlockedStorageFee_ += fee
 	return true

@@ -28,9 +28,21 @@ type StorageMarketActorState struct {
     _validateNewStorageDeal(rt Runtime, deal deal.StorageDeal) bool
 
     _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
-    _processStorageDealPayment(rt Runtime, deal deal.StorageDeal, duration block.ChainEpoch)
-    _settleExpiredStorageDeal(rt Runtime, deal deal.StorageDeal)
-    _slashLockedFunds(rt Runtime, amount actor.TokenAmount)
+
+    _expireStorageDeals(
+        rt                     Runtime
+        dealIDs                [deal.DealID]
+        lastChallengeEndEpoch  block.ChainEpoch
+    )
+    _creditStorageDeals(
+        rt                     Runtime
+        dealIDs                [deal.DealID]
+        lastChallengeEndEpoch  block.ChainEpoch
+    )
+
+    _slashDeclaredFaults(rt Runtime, dealIDs [deal.DealID])
+    _slashDetectedFaults(rt Runtime, dealIDs [deal.DealID])
+    _slashTerminatedFaults(rt Runtime, dealIDs [deal.DealID])
 
     _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
     _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
@@ -74,23 +86,21 @@ type StorageMarketActorCode struct {
     // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
     ActivateSectorDealIDs(rt Runtime, dealIDs [deal.DealID]) bool
 
-    // call by miners at any time
-    // make a call to StorageMinerActor to get the last Epoch that the sector is proven
-    // move funds from LockedStorageFee to UnlockedStorageFee
-    // remove deals from ActiveDeals when they have expired
-    // and return deal collaterals
+    // call by sm.ProveCommitSector
+    // get InitialUtilization for deals in a Sector
+    GetInitialUtilizationInfo(rt Runtime, dealIDs [deal.DealID]) sector.SectorUtilizationInfo
+
+    // batch process storage deal payment based on actions
+    //     - Credit: lazily evaulated when a StorageMiner calls ProcessSectorDealPayment
+    //     - Expire: call by sm._submitPowerReport when deals expire
     // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
     // client only stops paying when a sector gets cleared (expired or faulted)
     // Deal expiration is also handled here
-    ProcessSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber)
-
-    // call by StorageMinerActor
-    // remove deals from ActiveDeals
-    // return collaterals
-    ProcessSectorExpiration(rt Runtime, dealIDs [deal.DealID])
+    ProcessSectorDealPayment(rt Runtime, info sector.BatchDealPaymentInfo)
 
     // call by StorageMinerActor
     // slash deal collateral depending on the faults
+<<<<<<< HEAD
     ProcessFaultReport(rt Runtime, report sector.FaultReport)
 
     // call by sm.ProveCommitSector
@@ -102,4 +112,7 @@ type StorageMarketActorCode struct {
 
     GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
 
+=======
+    ProcessSectorDealSlash(rt Runtime, info sector.BatchDealSlashInfo)
+>>>>>>> add storage deal payment and slashing
 }
