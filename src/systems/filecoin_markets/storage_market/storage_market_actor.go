@@ -20,8 +20,6 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type State = StorageMarketActorState
 
-const MAX_ALLOWABLE_PADDING_DENOMINATOR = 64
-
 func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State) {
 	h := rt.AcquireState()
 	stateCID := h.Take()
@@ -333,13 +331,6 @@ func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSi
 	}
 
 	Release(rt, h, st)
-
-	maxAllowablePadding := sectorSize / MAX_ALLOWABLE_PADDING_DENOMINATOR
-	minTotalPiece := sectorSize - maxAllowablePadding
-
-	if totalPieceSize < minTotalPiece {
-		return rt.ErrorReturn(exitcode.InvalidSectorPacking)
-	}
 
 	SPS := new(proving.StorageProvingSubsystem_I)
 	ret := SPS.ComputeUnsealedSectorCID(sectorSize, pieceInfos)
