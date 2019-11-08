@@ -25,7 +25,8 @@ type SectorTable struct {
     RecoveringSectors      sector.CompactSectorSet
     FailingSectors         sector.CompactSectorSet
 
-    TerminationFaultCount  util.UVarint  // transient State that get reset on every constructPowerReport
+    // transient State that get reset on every constructPowerReport
+    TerminatedFaults       sector.CompactSectorSet
 }
 
 type StagedCommittedSectorInfo struct {
@@ -118,9 +119,9 @@ type StorageMinerActorCode struct {
 
     _submitFaultReport(
         rt          Runtime
-        declared    util.UVarint
-        detected    util.UVarint
-        terminated  util.UVarint
+        declared    sector.CompactSectorSet
+        detected    sector.CompactSectorSet
+        terminated  sector.CompactSectorSet
     )
     _submitPowerReport(rt Runtime)
 
