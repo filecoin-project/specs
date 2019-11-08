@@ -26,9 +26,12 @@ func (p *StorageDealProposal_I) TotalStorageFee() actor.TokenAmount {
 	return actor.TokenAmount(uint64(p.StoragePricePerEpoch()) * uint64(p.Duration()))
 }
 
+func (p *StorageDealProposal_I) TotalClientCollateral() actor.TokenAmount {
+	return actor.TokenAmount(uint64(p.ClientCollateralPerEpoch()) * uint64(p.Duration()))
+}
+
 func (p *StorageDealProposal_I) ClientBalanceRequirement() actor.TokenAmount {
-	balanceRequirementPerEpoch := p.ClientCollateralPerEpoch() + p.StoragePricePerEpoch()
-	return actor.TokenAmount(uint64(balanceRequirementPerEpoch) * uint64(p.Duration()))
+	return (p.TotalClientCollateral() + p.TotalClientCollateral())
 }
 
 func (p *StorageDealProposal_I) ProviderBalanceRequirement() actor.TokenAmount {
@@ -39,4 +42,13 @@ func (p *StorageDealProposal_I) CID() ProposalCID {
 	// TODO: should be generated in codegen
 	var cid ProposalCID
 	return cid
+}
+
+func (d *ActiveStorageDeal_I) UnlockStorageFee(fee actor.TokenAmount) bool {
+	if d.LockedStorageFee() < fee {
+		return false
+	}
+	d.LockedStorageFee_ -= fee
+	d.UnlockedStorageFee_ += fee
+	return true
 }

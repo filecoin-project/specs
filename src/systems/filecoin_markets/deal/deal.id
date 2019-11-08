@@ -35,6 +35,7 @@ type StorageDealProposal struct {
 
     ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * (EndEpoch - StartEpoch)
     TotalStorageFee()             actor.TokenAmount  // StoragePricePerEpoch * (EndEpoch - StartEpoch)
+    TotalClientCollateral()       actor.TokenAmount  // ClientCollateralPerEpoch * Duration
     ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateralPerEpoch * (EndEpoch - StartEpoch)
     Duration()                    block.ChainEpoch
 
@@ -53,11 +54,13 @@ type StorageDeal struct {
 }
 
 type ActiveStorageDeal struct {
-    Deal                         StorageDeal
-    ProviderCollateralRemaining  actor.TokenAmount
-    LockedStorageFee             actor.TokenAmount
-    UnlockedStorageFee           actor.TokenAmount
-    LastPaymentEpoch             block.ChainEpoch
+    Deal                                     StorageDeal
+    ProviderCollateralRemaining              actor.TokenAmount
+    LockedStorageFee                         actor.TokenAmount
+    UnlockedStorageFee                       actor.TokenAmount
+    LastPaymentEpoch                         block.ChainEpoch
+
+    UnlockStorageFee(fee actor.TokenAmount)  bool
 }
 
 type DealExpirationQueueItem struct {
@@ -74,13 +77,6 @@ type DealExpirationQueue struct {
     Pop() DealExpirationQueueItem
     Peek() DealExpirationQueueItem
     Remove(d DealID)
-}
-
-type UtilizationInfo struct {
-    DealExpirationQueue
-    MaxUtilization       block.StoragePower
-    CurrUtilization      block.StoragePower
-    LastDealExpiration   block.ChainEpoch
 }
 
 type RetrievalDealProposal struct {}  // TODO
