@@ -7,3 +7,6 @@ type SealedSectorSet SectorSet
 type Bitfield Bytes  // TODO: move to the right place -- a lib?
 type RLEpBitfield Bitfield  // TODO: move to the right place -- a lib?
 type CompactSectorSet RLEpBitfield
+
+// define this else where
+type CompactDealSet RLEpBitfield
