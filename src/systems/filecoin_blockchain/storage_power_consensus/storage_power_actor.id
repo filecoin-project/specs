@@ -2,6 +2,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type PowerTableEntry struct {
     ActivePower             block.StoragePower
@@ -13,16 +14,6 @@ type PowerTableEntry struct {
 type PowerReport struct {
     ActivePower    block.StoragePower  // set value
     InactivePower  block.StoragePower  // set value
-}
-
-type FaultReport struct {
-    NewDeclaredFaults          UVarint  // diff value
-    NewDetectedFaults          UVarint  // diff value
-    NewTerminatedFaults        UVarint  // diff value
-
-    GetDeclaredFaultSlash()    actor.TokenAmount
-    GetDetectedFaultSlash()    actor.TokenAmount
-    GetTerminatedFaultSlash()  actor.TokenAmount
 }
 
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
@@ -64,7 +55,7 @@ type StoragePowerActorCode struct {
     EnsurePledgeCollateralSatisfied(rt Runtime) bool
 
     ProcessPowerReport(rt Runtime, report PowerReport)
-    ProcessFaultReport(rt Runtime, report FaultReport)
+    ProcessFaultReport(rt Runtime, report sector.FaultReport)
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
         rt         Runtime

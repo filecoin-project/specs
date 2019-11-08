@@ -9,6 +9,7 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
@@ -51,20 +52,6 @@ func (st *StoragePowerActorState_I) CID() ipld.CID {
 }
 func DeserializeState(x Bytes) State {
 	panic("TODO")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func (r *FaultReport_I) GetDeclaredFaultSlash() actor.TokenAmount {
-	return actor.TokenAmount(0)
-}
-
-func (r *FaultReport_I) GetDetectedFaultSlash() actor.TokenAmount {
-	return actor.TokenAmount(0)
-}
-
-func (r *FaultReport_I) GetTerminatedFaultSlash() actor.TokenAmount {
-	return actor.TokenAmount(0)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +327,7 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bo
 	return ret
 }
 
-func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report FaultReport) {
+func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report sector.FaultReport) {
 
 	var msgSender addr.Address // TODO replace this
 

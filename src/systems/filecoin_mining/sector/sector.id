@@ -2,6 +2,7 @@ import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 type Bytes32 Bytes
 type MinerID addr.Address
@@ -14,6 +15,16 @@ type SealedSectorCID ipld.CID
 type SectorNumber UInt
 
 type FaultSet CompactSectorSet
+
+type FaultReport struct {
+    NewDeclaredFaults          CompactSectorSet  // diff value
+    NewDetectedFaults          CompactSectorSet  // diff value
+    NewTerminatedFaults        CompactSectorSet  // diff value
+
+    GetDeclaredFaultSlash()    actor.TokenAmount
+    GetDetectedFaultSlash()    actor.TokenAmount
+    GetTerminatedFaultSlash()  actor.TokenAmount
+}
 
 // SectorSize indicates one of a set of possible sizes in the network.
 type SectorSize UInt
