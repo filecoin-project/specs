@@ -11,7 +11,7 @@ import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
-type Blake2sHash Bytes32
+type SHA256Hash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 type UInt = util.UInt
@@ -52,8 +52,8 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 					PermutationAlgorithm_: ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&Feistel_I{
 						Keys_:   FEISTEL_KEYS[:],
 						Rounds_: FEISTEL_ROUNDS,
-						HashFunction_: ChungExpanderPermutationFeistelHashFunction_Make_Blake2S(
-							&ChungExpanderPermutationFeistelHashFunction_Blake2S_I{}),
+						HashFunction_: ChungExpanderPermutationFeistelHashFunction_Make_SHA256(
+							&ChungExpanderPermutationFeistelHashFunction_SHA256_I{}),
 					}),
 				}),
 			Degree_: 8,
@@ -167,7 +167,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 	var allKeyLayers [][]byte
 	var replicas [][]byte
 	var sealSeeds []sector.SealSeed
-	var subsectorCommDs []Blake2sHash
+	var subsectorCommDs []SHA256Hash
 	var subsectorCommDTreePaths []file.Path
 
 	for i, data := range subsectorData {
@@ -209,7 +209,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 	return &result
 }
 
-func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, Blake2sHash, file.Path) {
+func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, SHA256Hash, file.Path) {
 	commD, commDTreePath := ComputeDataCommitment(data)
 	sealSeed := computeSealSeed(sid, subsectorIndex, randomness, commD)
 	nodeSize := int(sdr.NodeSize())
@@ -316,7 +316,7 @@ func generateLabel(sealSeed sector.SealSeed, node int, dependencies []Label) []b
 }
 
 func deriveLabel(elements []byte) []byte {
-	return HashBytes_Blake2sHash(elements)
+	return HashBytes_SHA256Hash(elements)
 }
 
 func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
@@ -526,7 +526,7 @@ type OfflineSDRChallengeProof struct {
 	CommC     Commitment
 
 	// TODO: these proofs need to depend on hash function.
-	DataProofs   []InclusionProof // Blake2s
+	DataProofs   []InclusionProof // SHA256
 	ColumnProofs []SDRColumnProof
 	ReplicaProof SDRColumnProof // Pedersen
 
@@ -600,7 +600,7 @@ func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, 
 		bytes = append(bytes, randomness...)
 		bytes = append(bytes, littleEndianBytesFromInt(i, nodeSize)...)
 
-		hash := HashBytes_Blake2sHash(bytes)
+		hash := HashBytes_SHA256Hash(bytes)
 		bigChallenge := bigIntFromLittleEndianBytes(hash)
 		bigChallenge = bigChallenge.Mod(bigChallenge, challengeModulus)
 
@@ -737,7 +737,7 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
 	return &sector.PieceInfo_I{
 		Size_:  left.Size() + right.Size(),
-		CommP_: UnsealedSectorCID(BinaryHash_Blake2sHash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
+		CommP_: UnsealedSectorCID(BinaryHash_SHA256Hash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
 	}
 }
 
@@ -785,9 +785,9 @@ func BinaryHash_PedersenHash(left []byte, right []byte) PedersenHash {
 	return PedersenHash{}
 }
 
-// BinaryHash<Blake2sHash>
-func BinaryHash_Blake2sHash(left []byte, right []byte) Blake2sHash {
-	result := Blake2sHash{}
+// BinaryHash<SHA256Hash>
+func BinaryHash_SHA256Hash(left []byte, right []byte) SHA256Hash {
+	result := SHA256Hash{}
 	return trimToFr32(result)
 }
 
@@ -804,10 +804,10 @@ func HashBytes_PedersenHash(data []byte) PedersenHash {
 	return PedersenHash{}
 }
 
-// HashBytes<Blake2sHash.
-func HashBytes_Blake2sHash(data []byte) Blake2sHash {
+// HashBytes<SHA256Hash.
+func HashBytes_SHA256Hash(data []byte) SHA256Hash {
 	// Digest is truncated to 254 bits.
-	result := Blake2sHash{}
+	result := SHA256Hash{}
 	return trimToFr32(result)
 }
 
@@ -821,7 +821,7 @@ func DigestSize_PedersenHash() int {
 	return 32
 }
 
-func DigestSize_Blake2sHash() int {
+func DigestSize_SHA256Hash() int {
 	return 32
 }
 
@@ -870,8 +870,8 @@ func BuildTree_PedersenHash(data []byte) (PedersenHash, file.Path) {
 	return PedersenHash{}, file.Path("") // FIXME
 }
 
-//  BuildTree<Blake2sHash>
-func BuildTree_Blake2sHash(data []byte) (Blake2sHash, file.Path) {
+//  BuildTree<SHA256Hash>
+func BuildTree_SHA256Hash(data []byte) (SHA256Hash, file.Path) {
 	return []byte{}, file.Path("") // FIXME
 }
 
@@ -887,7 +887,7 @@ func trimToFr32(data []byte) []byte {
 	return data
 }
 
-func UnsealedSectorCID(h Blake2sHash) sector.UnsealedSectorCID {
+func UnsealedSectorCID(h SHA256Hash) sector.UnsealedSectorCID {
 	panic("not implemented -- re-arrange bits")
 }
 
@@ -905,13 +905,13 @@ func Commitment_SealedSectorCID(cid sector.SealedSectorCID) Commitment {
 
 func ComputeDataCommitment(data []byte) ([]byte, file.Path) {
 	// TODO: make hash parameterizable
-	return BuildTree_Blake2sHash(data)
+	return BuildTree_SHA256Hash(data)
 }
 
 // Compute CommP or CommD.
 func ComputeUnsealedSectorCID(data []byte) (sector.UnsealedSectorCID, file.Path) {
 	// TODO: check that len(data) > minimum piece size and is a power of 2.
-	hash, treePath := BuildTree_Blake2sHash(data)
+	hash, treePath := BuildTree_SHA256Hash(data)
 	return UnsealedSectorCID(hash), treePath
 }
 
