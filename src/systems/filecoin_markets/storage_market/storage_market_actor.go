@@ -225,12 +225,11 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	l := len(newStorageDeals)
 	response := make([]PublishStorageDealResponse, l)
 
-	// TODO: verify behavior here
 	// some StorageDeal will pass and some will fail
 	// if ealier StorageDeal consumes some balance such that
 	// funds are no longer sufficient for later storage deals
 	// all later storage deals will return error
-	// TODO: confirm st here will be changing
+	// miner should add more balance and try again
 	for i, newDeal := range newStorageDeals {
 		if st._validateNewStorageDeal(rt, newDeal) {
 			st._lockFundsForStorageDeal(rt, newDeal)
@@ -247,48 +246,23 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 	return response
 }
 
-func (a *StorageMarketActorCode_I) HandleCronAction(rt Runtime) {
+func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []deal.DealID) bool {
+	return false
+}
+
+func (a *StorageMarketActorCode_I) ActivateSectorDealIDs(rt Runtime, dealIDs []deal.DealID) bool {
+	return false
+}
+
+func (a *StorageMarketActorCode_I) ProcessSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber) {
 	panic("TODO")
 }
 
-func (a *StorageMarketActorCode_I) SettleExpiredDeals(rt Runtime, storageDealIDs []deal.DealID) {
-	// for dealID := range storageDealIDs {
-	// Return the storage collateral
-	// storageDeal := sma.Deals()[dealID]
-	// storageCollateral := storageDeal.StorageCollateral()
-	// provider := storageDeal.Provider()
-	// assert(sma.Balances()[provider].Locked() >= storageCollateral)
-
-	// // Move storageCollateral from locked to available
-	// balance := sma.Balances()[provider]
-
-	// sma.Balances()[provider] = &StorageParticipantBalance_I{
-	// 	Locked_:    balance.Locked() - storageCollateral,
-	// 	Available_: balance.Available() + storageCollateral,
-	// }
-
-	// // Delete reference to the deal
-	// delete(sma.Deals_, dealID)
-	// }
+func (a *StorageMarketActorCode_I) ProcessSectorExpiration(rt Runtime, dealIDs []deal.DealID) {
 	panic("TODO")
 }
 
-func (a *StorageMarketActorCode_I) ProcessStorageDealsPayment(rt Runtime, dealIDs []deal.DealID, duration block.ChainEpoch) {
-	h, st := a.State(rt)
-
-	for _, dealID := range dealIDs {
-		st._processStorageDealPayment(rt, st.Deals()[dealID], duration)
-	}
-
-	UpdateRelease(rt, h, st)
-}
-
-func (a *StorageMarketActorCode_I) SlashStorageDealsCollateral(rt Runtime, dealIDs []deal.DealID) {
-	// for _, dealID := range storageDealIDs {
-	// 	faultStorageDeal := sma.Deals()[dealID]
-	// TODO remove locked funds and send slashed fund to TreasuryActor
-	// TODO provider lose power for the FaultSet but not PledgeCollateral
-	// }
+func (a *StorageMarketActorCode_I) ProcessFaultReport(rt Runtime, report sector.FaultReport) {
 	panic("TODO")
 }
 

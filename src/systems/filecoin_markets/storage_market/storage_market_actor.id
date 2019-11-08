@@ -10,11 +10,13 @@ type StorageParticipantBalance struct {
 }
 
 type BalancesHAMT {addr.Address: StorageParticipantBalance}
-type DealsAMT {deal.DealID: deal.StorageDeal}
+type PublishedDealsAMT {deal.DealID: deal.StorageDeal}
+type ActiveDealsAMT {deal.DealID: deal.ActiveStorageDeal}
 
 type StorageMarketActorState struct {
-    Balances  BalancesHAMT
-    Deals     DealsAMT
+    Balances        BalancesHAMT
+    PublishedDeals  PublishedDealsAMT
+    ActiveDeals     ActiveDealsAMT
 
     // generate storage deal id
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
@@ -45,37 +47,59 @@ type StorageMarketActorCode struct {
     WithdrawBalance(rt Runtime, balance actor.TokenAmount)
     AddBalance(rt Runtime)  // amount is in the message
 
-    // call by CommitSector in StorageMiningSubsystem
-    // a StorageDeal is only published on chain when it passes verifyStorageDeal
+    // call by StorageMiningSubsystem before PreCommitSector
+    // a StorageDeal is only published on chain when it passes _validateNewStorageDeal
+    // _validateNewStorageDeal checks for the following:
+    //     - deal did not start/expire when it is signed
+    //     - deal hits the chain before its StartEpoch
+    //     - client and provider address and signature are correct (TODO may be unnecessary)
+    //     - client and provider have sufficient balances to lock up
     // a DealID will be assigned and stored in the mapping of DealID to StorageDeal
-    // PublishStorageDeal should be called before SecotrCommits
-    // an unregistered StorageDeal will not be processed
+    // _lockBalance is then called after each _validateNewStorageDeal to lock up balances
     PublishStorageDeals(rt Runtime, deals [deal.StorageDeal]) [PublishStorageDealResponse]
 
-    // call by CronActor when no PoSt is submitted within a ProvingPeriod
-    // trigger subsequent calls on different SectorSet
-    // pull SectorSet from the run time
-    HandleCronAction(rt Runtime)
+    // Call by sm.PreCommitSector
+    // Verify the following:
+    //     - dealIDs have been registered in PublishedDeals
+    //     - deals will not expire by the time ProveCommit hits
+    //     - deals have not started
+    // Fail PreCommit if any of the above is not true and abort
+    VerifyPublishedDealIDs(rt Runtime, dealIDs [deal.DealID]) bool
 
-    // call by CronActor / onPoStSubmission on ExpiredSet
-    // remove StorageDeal from StorageMarketActor
-    // if no more active deals contain in the sector
-    // return StorageCollateral to miners
-    SettleExpiredDeals(rt Runtime, dealIDs [deal.DealID])
+    // Call by sm.ProveCommitSector
+    // Verify the following:
+    //     - dealIDs are in PublishedDeals
+    //     - deals have not expired, OK if deals have started
+    // Fail ProveCommit if any of the above is not true and abort
+    // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
+    ActivateSectorDealIDs(rt Runtime, dealIDs [deal.DealID]) bool
 
-    // call by CronActor / onPoStSubmission on ActiveSet to process deal payment
-    // go through StorageDealIDs, if IDs are active in MarketActor
-    // payment will be processed
-    ProcessStorageDealsPayment(rt Runtime, dealIDs [deal.DealID], duration block.ChainEpoch)
+    // call by miners at any time
+    // make a call to StorageMinerActor to get the last Epoch that the sector is proven
+    // move funds from LockedStorageFee to UnlockedStorageFee
+    // remove deals from ActiveDeals when they have expired
+    // and return deal collaterals
+    // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
+    // client only stops paying when a sector gets cleared (expired or faulted)
+    // Deal expiration is also handled here
+    ProcessSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber)
 
-    // call by CronActor / on DeclareFault on FaultSet to slash deal collateral
-    // Deals should be slashed for a single proving period
-    SlashStorageDealsCollateral(rt Runtime, dealIDs [deal.DealID])
+    // call by StorageMinerActor
+    // remove deals from ActiveDeals
+    // return collaterals
+    ProcessSectorExpiration(rt Runtime, dealIDs [deal.DealID])
 
+    // call by StorageMinerActor
+    // slash deal collateral depending on the faults
+    ProcessFaultReport(rt Runtime, report sector.FaultReport)
+
+    // call by sm.ProveCommitSector
+    // get InitialUtilization for deals in a Sector
     GetInitialUtilizationInfo(rt Runtime, dealIDs [deal.DealID]) deal.UtilizationInfo
 
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
 
     GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
+
 }
