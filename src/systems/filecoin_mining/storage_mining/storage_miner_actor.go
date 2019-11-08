@@ -60,11 +60,14 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 // TODO: placeholder epoch value -- this will be set later
 // ProveCommitSector needs to be submitted within MAX_PROVE_COMMIT_SECTOR_EPOCH after PreCommit
 const MAX_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(3)
 
 
+=======
+>>>>>>> add CreditSectorDealPayment to StorageMiner
 func (cs *ChallengeStatus_I) OnNewChallenge(currEpoch block.ChainEpoch) ChallengeStatus {
 	cs.LastChallengeEpoch_ = currEpoch
 	return cs
@@ -145,6 +148,9 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 	rt.Abort("TODO") // TODO: Send(SPA, ProcessFaultReport(faultReport))
 	panic(faultReport)
 
+	// TODO: Send(SMA, ProcessSectorDealSlash)
+	// potentially expensive because of data structs
+
 	h, st := a.State(rt)
 	st.SectorTable().Impl().TerminatedFaults_ = sector.CompactSectorSet(make([]byte, 0))
 	UpdateRelease(rt, h, st)
@@ -153,7 +159,7 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 // construct PowerReport from SectorTable
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	h, st := a.State(rt)
-	st._updateSectorUtilization(rt)
+	newExpiredDealIDs := st._updateSectorUtilization(rt)
 	activePower := st._getActivePower(rt)
 	inactivePower := st._getInactivePower(rt)
 
@@ -161,10 +167,23 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 		ActivePower_:   activePower,
 		InactivePower_: inactivePower,
 	}
+
 	Release(rt, h, st)
 
 	rt.Abort("TODO") // TODO: Send(SPA, ProcessPowerReport(powerReport))
 	panic(powerReport)
+
+	if len(newExpiredDealIDs) > 0 {
+		batchDealPaymentInfo := &sector.BatchDealPaymentInfo_I{
+			DealIDs_:               newExpiredDealIDs,
+			Action_:                sector.ExpireStorageDeals,
+			LastChallengeEndEpoch_: st.ChallengeStatus().LastChallengeEndEpoch(),
+		}
+
+		rt.Abort("TODO")
+		panic(batchDealPaymentInfo)
+		// Send(StorageMarketActor, ProcessBatchPayments(batchDealPaymentInfo))
+	}
 }
 
 func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
@@ -249,7 +268,11 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 	for _, preCommitSector := range st.PreCommittedSectors() {
 
 		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
+<<<<<<< HEAD
 		if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_PERIOD {
+=======
+		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
+>>>>>>> add CreditSectorDealPayment to StorageMiner
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 			// TODO: potentially some slashing if ProveCommitSector comes late
 		}
@@ -258,10 +281,14 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 
 }
 
-func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) {
+func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) []deal.DealID {
 	// TODO: verify if we should update Sector utilization for failing sectors
 	// depends on decision around collateral requirement for inactive power
 	// and what happens when a failing sector expires
+
+	// this may not work
+	ret := sector.CompactDealSet(make([]byte, 0))
+
 	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
 		utilizationInfo, found := st.SectorUtilization()[sectorNo]
 
@@ -273,16 +300,23 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) {
 
 		currEpoch := rt.CurrEpoch()
 		firstExpirationEpoch := utilizationInfo.DealExpirationQueue().Peek().Expiration()
+		totalDealCount := len(st.Sectors()[sectorNo].SealCommitment().DealIDs())
+		newExpiredDealIDs := sector.CompactDealSet(make([]byte, totalDealCount))
 
 		if firstExpirationEpoch < currEpoch {
 			// this deal has expired
 			newExpiredDeal := utilizationInfo.DealExpirationQueue().Pop()
 			newUtilization -= newExpiredDeal.PayloadPower()
 			firstExpirationEpoch = utilizationInfo.DealExpirationQueue().Peek().Expiration()
+			st.SectorUtilization()[sectorNo].Impl().ActiveDealIDs_.Remove(newExpiredDeal.DealID())
+			newExpiredDealIDs.Add(newExpiredDeal.DealID())
 		}
 
 		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
+		ret = ret.Extend(newExpiredDealIDs)
 	}
+
+	return ret.DealsOn()
 
 }
 
@@ -340,6 +374,8 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 	delete(st.SectorUtilization(), sectorNo)
 	st.ProvingSet_.Remove(sectorNo)
 	st.SectorExpirationQueue().Remove(sectorNo)
+
+	// Send message to SMA
 }
 
 // move Sector from Committed/Recovering into Active State
@@ -665,14 +701,46 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 	a._submitFaultReport(
 		rt,
-		faultSet,                                  // DeclaredFaults
-		sector.CompactSectorSet(make([]byte, 0)),  // DetectedFaults
-		sector.CompactSectorSet(make([]byte, 0)),  // TerminatedFault
+		faultSet,                                 // DeclaredFaults
+		sector.CompactSectorSet(make([]byte, 0)), // DetectedFaults
+		sector.CompactSectorSet(make([]byte, 0)), // TerminatedFault
 	)
 
 	a._submitPowerReport(rt)
 
 	return rt.SuccessReturn()
+}
+
+func (a *StorageMinerActorCode_I) CreditSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber) {
+	TODO() // verify caller
+
+	h, st := a.State(rt)
+
+	utilization, found := st.SectorUtilization()[sectorNo]
+
+	if !found {
+		rt.Abort("sm.GetSectorPaymentInfo: sector number not found.")
+	}
+
+	isSectorActive := st.SectorTable().Impl().ActiveSectors_.Contain(sectorNo)
+
+	if !isSectorActive {
+		rt.Abort("sm.GetSectorPaymentInfo: sector not active")
+	}
+
+	dealIDs := utilization.Impl().ActiveDealIDs_.DealsOn()
+
+	batchDealPaymentInfo := &sector.BatchDealPaymentInfo_I{
+		DealIDs_:               dealIDs,
+		Action_:                sector.CreditStorageDeals,
+		LastChallengeEndEpoch_: st.ChallengeStatus().LastChallengeEndEpoch(),
+	}
+
+	Release(rt, h, st)
+
+	panic(batchDealPaymentInfo)
+	// Send(StorageMarketActor, ProcessBatchPayments(batchDealPaymentInfo))
+
 }
 
 func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
@@ -685,7 +753,6 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 	Release(rt, h, st) // if no modifications made; or
 
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
-
 	receipt := rt.SendCatchingErrors(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
 		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
@@ -770,21 +837,21 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 	// verify every DealID has been published and will not expire
 	// before the MAX_PROVE_COMMIT_SECTOR_EPOCH + CurrEpoch
-	// Send(SMA.VerifyPublishedDealIDs)
+	// Send(SMA.VerifyPublishedDealIDs(info.DealIDs()))
 	var isPublishedDealIDsVerified bool
 	if !isPublishedDealIDsVerified {
 		rt.Abort("sm.PreCommitSector: verify published DealIDs failed")
 	}
 
-	h2, st2 := a.State(rt)
+	h, st = a.State(rt)
 
 	precommittedSector := &PreCommittedSector_I{
 		Info_:          info,
 		ReceivedEpoch_: rt.CurrEpoch(),
 	}
-	st2.PreCommittedSectors()[info.SectorNumber()] = precommittedSector
+	st.PreCommittedSectors()[info.SectorNumber()] = precommittedSector
 
-	UpdateRelease(rt, h2, st2)
+	UpdateRelease(rt, h, st)
 	return rt.SuccessReturn()
 }
 
@@ -808,8 +875,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// check if ProveCommitSector comes too late after PreCommitSector
 	elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
 
-	// if more than MAX_PROVE_COMMIT_SECTOR_PERIOD has elapsed
-	if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_PERIOD {
+	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
+	if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 		// TODO: potentially some slashing if ProveCommitSector comes late
 
 		// TODO: remove dealIDs from PublishedDeals
@@ -819,7 +886,6 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		UpdateRelease(rt, h, st)
 		return rt.ErrorReturn(exitcode.UserDefinedError(0)) // TODO: user dfined error code?
 	}
-
 
 	onChainInfo := &sector.OnChainSealVerifyInfo_I{
 		SealedCID_:        preCommitSector.Info().SealedCID(),
@@ -846,7 +912,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// ActivateStorageDeals
 	// Ok if deal has started
-	// Send(SMA.ActivateSectorDealIDs)
+	// Send(SMA.ActivateSectorDealIDs(onChainInfo.DealIDs())
 	var isSectorDealActivationSuccess bool
 	if !isSectorDealActivationSuccess {
 		rt.Abort("sm.ProveCommitSector: activate sector DealIDs failed")
@@ -856,7 +922,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// TODO: proper onchain transaction
 	// initialUtilization := SendMessage(sma, GetInitialUtilizationInfo(onChainInfo.DealIDs()))
 	// lastDealExpiration := initialUtilization.Peek()
-	var initialUtilization deal.UtilizationInfo
+	var initialUtilization sector.SectorUtilizationInfo
 	lastDealExpiration := initialUtilization.LastDealExpiration()
 
 	// add sector expiration to SectorExpirationQueue
