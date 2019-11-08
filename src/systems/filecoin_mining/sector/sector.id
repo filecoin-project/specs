@@ -3,6 +3,7 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type Bytes32 Bytes
 type MinerID addr.Address
@@ -24,6 +25,25 @@ type FaultReport struct {
     GetDeclaredFaultSlash()    actor.TokenAmount
     GetDetectedFaultSlash()    actor.TokenAmount
     GetTerminatedFaultSlash()  actor.TokenAmount
+}
+
+type SectorUtilizationInfo struct {
+    DealExpirationQueue  deal.DealExpirationQueue
+    MaxUtilization       block.StoragePower
+    CurrUtilization      block.StoragePower
+    ActiveDealIDs        CompactDealSet
+    LastDealExpiration   block.ChainEpoch
+}
+
+type BatchDealPaymentInfo struct {
+    DealIDs                [deal.DealID]
+    Action                 StorageDealPaymentAction
+    LastChallengeEndEpoch  block.ChainEpoch
+}
+
+type BatchDealSlashInfo struct {
+    DealIDs  [deal.DealID]
+    Action   StorageDealSlashAction
 }
 
 // SectorSize indicates one of a set of possible sizes in the network.
