@@ -34,6 +34,7 @@ type StorageDealProposal struct {
     ClientCollateralPerEpoch      actor.TokenAmount  // potentially collapse into one with ProviderDealCollateral
 
     ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * (EndEpoch - StartEpoch)
+    TotalStorageFee()             actor.TokenAmount  // StoragePricePerEpoch * (EndEpoch - StartEpoch)
     ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateralPerEpoch * (EndEpoch - StartEpoch)
     Duration()                    block.ChainEpoch
 
@@ -49,6 +50,14 @@ type StorageDeal struct {
     ID               DealID
 
     CID()            DealCID
+}
+
+type ActiveStorageDeal struct {
+    Deal                         StorageDeal
+    ProviderCollateralRemaining  actor.TokenAmount
+    LockedStorageFee             actor.TokenAmount
+    UnlockedStorageFee           actor.TokenAmount
+    LastPaymentEpoch             block.ChainEpoch
 }
 
 type DealExpirationQueueItem struct {
