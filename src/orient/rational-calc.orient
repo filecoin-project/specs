@@ -26,10 +26,11 @@ FastPorep:
 
     SNARK:
       inclusion_proofs = merkle_tree_hash_circuit * log2(nodes)
-      sequential_proofs = cipher_circuit
-      porep_snark_constraints = (sequential_proofs + inclusion_proofs) * challenges
+      parallel_challenges = challenges / sequential_challenges
+      sequential_proofs = cipher_circuit * parallel_challenges
+      porep_snark_constraints = sequential_proofs * sequential_challenges + inclusion_proofs * challenges
       porep_snark_partitions = porep_snark_constraints / max_snark_constraints
-      porep_snark_size = porep_snark_partitions * snark_size
+      porep_snark_size = porep_snark_partitions * snark_size + sequential_challenges * node_size
       porep_snark_size_kb = porep_snark_size / 1024
 
     Cost:
@@ -53,5 +54,5 @@ FastPorep:
       response_amax = response_malicious / polling_time
       node_gen_path = drg_d * nodes
       node_gen_time = (node_gen_path * drg_parents * hashing_time) / hashing_amax
-      response_malicious = node_gen_time * challenges
+      response_malicious = node_gen_time * sequential_challenges
 
