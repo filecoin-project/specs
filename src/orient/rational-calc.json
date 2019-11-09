@@ -19,6 +19,7 @@
     "rig_storage_latency": 0.004,
     "snark_size": 192,
     "max_snark_constraints": 3000000,
-    "cipher_circuit": 25000,
-    "merkle_tree_hash_circuit": 1300
+    "cipher_circuit": 1,
+    "merkle_tree_hash_circuit": 1300,
+    "parallel_challenges": 5,
 }
