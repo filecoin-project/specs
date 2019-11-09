@@ -18,7 +18,7 @@
     "rig_ram_gb": 32,
     "rig_storage_latency": 0.004,
     "snark_size": 192,
-    "max_snark_constraints": 250000,
+    "max_snark_constraints": 3000000,
     "cipher_circuit": 25000,
     "merkle_tree_hash_circuit": 1300
 }
