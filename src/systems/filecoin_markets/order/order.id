@@ -7,7 +7,7 @@ type StorageAsk struct {
 
     MinPieceSize  uint64
     Miner         addr.Address
-    Timestamp     uint64
-    AskExpiry     uint64
+    Timestamp     uint64       // block.ChainEpoch
+    AskExpiry     uint64       // block.ChainEpoch
     SeqNo         uint64
 }
