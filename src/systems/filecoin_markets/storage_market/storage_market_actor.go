@@ -12,6 +12,10 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
+const (
+	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////

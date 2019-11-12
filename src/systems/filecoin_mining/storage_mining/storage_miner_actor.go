@@ -1,29 +1,18 @@
 package storage_mining
 
-import (
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
-
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-
-	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-
-	proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
-	util "github.com/filecoin-project/specs/util"
-
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-)
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+import util "github.com/filecoin-project/specs/util"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -593,7 +582,7 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 
 	receipt := rt.SendAllowingErrors(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: actor.MethodGetUnsealedCIDForDealIDs,
+		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
 		Params_: params,
 	})
 
