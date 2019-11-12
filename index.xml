@@ -328,8 +328,7 @@ The global state here consists of a set of actors, each with their own private s
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_files/file/filestore/</guid>
-      <description> // FileStore is an object that can store and retrieve files by path. type FileStore struct { Open(p Path) union {f File, e error} Create(p Path) union {f File, e error} Store(p Path, f File) error Delete(p Path) error // maybe add:  // Copy(SrcPath, DstPath) }  TODO:
- explain why this abstraction is needed explain OS filesystem as basic impl explain that users can replace w/ other systems give examples:  networked filesystems raw disk sectors - like haystack databases   </description>
+      <description>The FileStore is an abstraction used to refer to any underlying system or device that Filecoin will store its data to. It is based on Unix filesystem semantics, and includes the notion of Paths. This abstraction is here in order to make sure Filecoin implementations make it easy for end-users to replace the underlying storage system with whatever suits their needs. The simplest version of FileStore is just the host operating system&amp;rsquo;s file system.</description>
     </item>
     
     <item>

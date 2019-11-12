@@ -5,24 +5,27 @@ import (
 )
 
 func ReadAll(f File) ([]byte, error) {
-	f2 := FileReadWriter{f}
+	f2 := FileReadWriter{f, 0}
 	return ioutil.ReadAll(f2)
 }
 
 type FileReadWriter struct {
-	f File
+	f      File
+	offset int
 }
 
 func (f FileReadWriter) Read(buf []byte) (n int, err error) {
-	ret := f.f.Read(buf)
+	ret := f.f.Read(f.offset, len(buf), buf)
+	f.offset += ret.size()
 	return ret.size(), ret.e()
 }
 
 func (f FileReadWriter) Write(buf []byte) (n int, err error) {
-	ret := f.f.Write(buf)
+	ret := f.f.Write(f.offset, len(buf), buf)
+	f.offset += ret.size()
 	return ret.size(), ret.e()
 }
 
 func FromPath(path Path) *FileReadWriter {
-	return &FileReadWriter{} // TODO: Actually create file from path.
+	return &FileReadWriter{} // TODO: move to using Filestore
 }

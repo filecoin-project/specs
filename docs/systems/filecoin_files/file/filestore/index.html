@@ -4549,6 +4549,15 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   
 
+<p>The <code>FileStore</code> is an abstraction used to refer to any underlying system or device
+that Filecoin will store its data to. It is based on Unix filesystem semantics, and
+includes the notion of <code>Paths</code>. This abstraction is here in order to make sure Filecoin
+implementations make it easy for end-users to replace the underlying storage system with
+whatever suits their needs. The simplest version of <code>FileStore</code> is just the host operating
+system&rsquo;s file system.</p>
+
+
+
 
 
 
@@ -4583,20 +4592,33 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p>TODO:</p>
+<h1 id="varying-user-needs">Varying user needs</h1>
+
+<p>Filecoin user needs vary significantly, and many users &ndash; especially miners &ndash; will implement
+complex storage architectures underneath and around Filecoin. The <code>FileStore</code> abstraction is here
+to make it easy for these varying needs to be easy to satisfy. All file and sector local data
+storage in the Filecoin Protocol is defined in terms of this <code>FileStore</code> interface, which makes
+it easy for implementations to make swappable, and for end-users to swap out with their system
+of choice.</p>
+
+<h1 id="implementation-examples">Implementation examples</h1>
+
+<p>The <code>FileStore</code> interface may be implemented by many kinds of backing data storage systems. For example:</p>
 
 <ul>
-<li>explain why this abstraction is needed</li>
-<li>explain OS filesystem as basic impl</li>
-<li>explain that users can replace w/ other systems</li>
-<li>give examples:
-
-<ul>
-<li>networked filesystems</li>
-<li>raw disk sectors - like haystack</li>
-<li>databases</li>
-</ul></li>
+<li>The host Operating System file system</li>
+<li>Any Unix/Posix file system</li>
+<li>RAID-backed file systems</li>
+<li>Networked of distributed file systems (NFS, HDFS, etc)</li>
+<li>IPFS</li>
+<li>Databases</li>
+<li>NAS systems</li>
+<li>Raw serial or block devices</li>
+<li>Raw hard drives (hdd sectors, etc)</li>
 </ul>
+
+<p>Implementations SHOULD implement support for the host OS file system.
+Implementations MAY implement support for other storage systems.</p>
 
 </article>
 
@@ -4607,6 +4629,15 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#varying-user-needs">Varying user needs</a></li>
+<li><a href="#implementation-examples">Implementation examples</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 
