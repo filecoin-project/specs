@@ -580,7 +580,7 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 	params := make([]actor.MethodParam, 1+len(dealIDs))
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 
-	receipt := rt.SendAllowingErrors(&msg.InvocInput_I{
+	receipt := rt.SendCatchingErrors(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
 		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
 		Params_: params,
