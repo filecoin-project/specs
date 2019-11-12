@@ -109,7 +109,7 @@ func (rt *VMContext) CreateActor(stateCID actor.StateCID, address addr.Address, 
 	// TODO: call constructor
 	// TODO: can constructors fail?
 	// TODO: maybe do this directly form InitActor, and only do the StateTree.ActorStates() updating here?
-	rt.Send(&msg.InvocInput_I{
+	rt.SendPropagatingErrors(&msg.InvocInput_I{
 		To_:     address,
 		Method_: actor.MethodConstructor,
 		Params_: constructorParams,
@@ -275,11 +275,11 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
-func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput, ignoreErrors bool) (
+func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput, catchErrors bool) (
 	msg.MessageReceipt, st.StateTree) {
 
 	rt._running = true
-	ret := rt._sendInternal(input, ignoreErrors)
+	ret := rt._sendInternal(input, catchErrors)
 	rt._running = false
 	return ret, rt._globalStatePending
 }
@@ -327,7 +327,7 @@ func _invokeMethodInternal(
 	return
 }
 
-func (rtOuter *VMContext) _sendInternal(input InvocInput, ignoreErrors bool) msg.MessageReceipt {
+func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.MessageReceipt {
 	rtOuter._checkRunning()
 	rtOuter._checkStateLock(false)
 
@@ -366,7 +366,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, ignoreErrors bool) msg
 	rtOuter._refundGasRemaining(toActorMethodGasBound)
 	rtOuter._deductGasRemaining(gasUsed)
 
-	if !ignoreErrors && invocOutput.ExitCode().IsError() {
+	if !catchErrors && invocOutput.ExitCode().IsError() {
 		rtOuter._throwError(exitcode.SystemError(exitcode.MethodSubcallError))
 	}
 
@@ -377,12 +377,24 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, ignoreErrors bool) msg
 	return msg.MessageReceipt_Make(invocOutput, gasUsed)
 }
 
-func (rt *VMContext) Send(input InvocInput) msg.MessageReceipt {
-	return rt._sendInternal(input, false)
+func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, catchErrors bool) msg.InvocOutput {
+	ret := rtOuter._sendInternal(input, catchErrors)
+	return &msg.InvocOutput_I{
+		ExitCode_:    ret.ExitCode(),
+		ReturnValue_: ret.ReturnValue(),
+	}
 }
 
-func (rt *VMContext) SendAllowingErrors(input InvocInput) msg.MessageReceipt {
-	return rt._sendInternal(input, true)
+func (rt *VMContext) SendPropagatingErrors(input InvocInput) msg.InvocOutput {
+	return rt._sendInternalOutputOnly(input, false)
+}
+
+func (rt *VMContext) SendCatchingErrors(input InvocInput) msg.InvocOutput {
+	return rt._sendInternalOutputOnly(input, true)
+}
+
+func (rt *VMContext) CurrentBalance() actor.TokenAmount {
+	panic("TODO")
 }
 
 func (rt *VMContext) ValueSupplied() actor.TokenAmount {

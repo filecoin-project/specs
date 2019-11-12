@@ -39,12 +39,12 @@ type Runtime interface {
     // Check that the given condition is true (and call Abort if not).
     Assert(bool)
 
-    ValueSupplied()             actor.TokenAmount
+    CurrentBalance()  actor.TokenAmount
+    ValueSupplied()   actor.TokenAmount
 
     // Send allows the current execution context to invoke methods on other actors in the system.
-    // TODO: what are the return values here?
-    Send(input msg.InvocInput)  msg.MessageReceipt
-    SendAllowingErrors(input msg.InvocInput) msg.MessageReceipt
+    SendPropagatingErrors(input msg.InvocInput) msg.InvocOutput
+    SendCatchingErrors(input msg.InvocInput) msg.InvocOutput
 
     // Create an actor in the state tree. May only be called by InitActor.
     CreateActor(
