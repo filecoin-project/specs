@@ -1,5 +1,7 @@
 type PoStRandomness Bytes
 
+type ElectionTicket Bytes  // SHA256 hash
+
 // Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
     SectorSize      UInt
@@ -8,12 +10,22 @@ type PoStCfg struct {
 }
 
 type PoStWitness struct {
-    Config PoStProofConfig
+    Candidates [ElectionCandidate]
 }
+
+// TODO: For now assume one proof for ticket. This will likely be refactored to allow for multiple tickets per SNARK proof.
 type PoStProof struct {//<curve, system> {
-    Config      PoStProofConfig
+    Ticket      ElectionTicket
     ProofBytes  Bytes
 }
 
-type PoStProofConfig struct {// TODO
+type ElectionCandidate struct {
+    Ticket        ElectionTicket
+    PrivateProof  PrivatePoStProof
+}
+
+type PrivatePoStProof struct {}
+
+type PoStVerifyInfo struct {
+	PoStCfg
 }
