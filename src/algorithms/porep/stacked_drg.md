@@ -115,7 +115,7 @@ We have describe three hash functions:
 
 | name          | description                                                                                                                                                                | size of input              | size of output | construction          |
 | ------------- | ------------------------------------------------------------                                                                                                               | -------------              | -------------- | --------------------- |
-| `KDFHash`     | Hash function used as a KDF to derive the key used to label a single node.                                                                                                 | TODO                       | `32B`          | `Blake2s-256`         |
+| `KDFHash`     | Hash function used as a KDF to derive the key used to label a single node.                                                                                                 | TODO                       | `32B`          | `SHA256`         |
 | `ColumnHash`  | Hash function used to hash the labeled leaves of each layer (see SDR Column Commitments).                                                                                  | TODO                       | `32B`          | `JubjubPedersen`      |
 | `RepCompress` | Collision Resistant Hash function used for the Merkle tree.                                                                                                                | 2 x `32B` + integer height | `32B`          | `JubjubPedersen`      |
 | `RepHash`     | Balanced binary Merkle tree based used to generate commitments to sealed sectors, unsealed sectors, piece commitments, and intermediate parts of the Proof-of-Replication. | TODO                       | `32B`          | Uses `RepCompress`    |
@@ -216,7 +216,7 @@ TODO: inputs are missing
 
 The Replication Algorithm  proceeds as follows:
 
-- Calculate `ReplicaID` using `Hash` (Blake2s):
+- Calculate `ReplicaID` using `Hash` (SHA256):
 
 `ReplicaID` is a 32-byte array constructed by hashing the concatenation of the following values
 - `ProverId` is a 32-byte array uniquely identifying a prover.

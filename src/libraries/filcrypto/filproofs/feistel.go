@@ -1,7 +1,7 @@
 package filproofs
 
 import (
-	"golang.org/x/crypto/blake2s"
+	"crypto/sha256"
 )
 
 // TODO/FIXME: Update to use uint64, not uint32.
@@ -85,7 +85,7 @@ func feistel(right uint32, key uint32, rightMask uint32) uint32 {
 	data[6] = byte(key >> 8)
 	data[7] = byte(key)
 
-	hash := blake2s.Sum256(data[:])
+	hash := sha256.Sum256(data[:])
 
 	r := uint32(hash[0])<<24 | uint32(hash[1])<<16 | uint32(hash[2])<<8 | uint32(hash[3])
 	return r & rightMask
