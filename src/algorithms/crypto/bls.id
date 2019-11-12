@@ -5,6 +5,9 @@ type BLS struct {
     // casted to a BLS signature struct to get the additional functionalities.
     Signature
 
+    // This represents the largest potential value for a BLS signature in Bytes
+    MaxSigValue() Bytes
+
     // Aggregates this BLS signature and `sig` into one BLS signature that can
     // be verified against the aggregation of the two public key that signed
     // the aggregated signatures.

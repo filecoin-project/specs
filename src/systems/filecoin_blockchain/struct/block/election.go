@@ -6,7 +6,6 @@ import (
 )
 
 func (tix *Ticket_I) ValidateSyntax() bool {
-
 	return tix.VRFResult_.ValidateSyntax()
 }
 

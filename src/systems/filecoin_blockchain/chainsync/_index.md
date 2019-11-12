@@ -4,6 +4,7 @@ statusIcon: 🔁
 title: ChainSync - synchronizing the Blockchain
 ---
 
+{{<label chain_sync>}}
 # What is blockchain synchronization?
 
 Blockchain synchronization ("sync") is a key part of a blockchain system.
@@ -285,7 +286,7 @@ State Machine:
 
 ## ChainSync FSM: `CHAIN_FOLLOW`
 
-- While in theis state:
+- While in this state:
   - `ChainSync` is well-bootstrapped, and has an initial **trusted** `StateTree` to start from.
   - `ChainSync` fetches and validates blocks (see _Block Fetching and Validation_).
   - `ChainSync` is receiving and validating latest `Blocks` from `BlockPubsub`
@@ -337,6 +338,7 @@ State Machine:
 - `ChainSync` delays syncing `Messages` until they are needed. Much of the structure of the partial chains can
   be checked and used to make syncing decisions without fetching the `Messages`.
 
+{{<label block_validation>}}
 ## Progressive Block Validation
 
 - Blocks can be validated in progressive stages, in order to minimize resource expenditure.

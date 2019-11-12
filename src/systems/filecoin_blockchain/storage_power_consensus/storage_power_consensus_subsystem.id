@@ -16,6 +16,11 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
 
+    IsWinningElectionProof(
+        electionProof  block.ElectionProof
+        workerAddr     addr.Address
+    ) bool
+
     validateElectionProof(
         height         block.ChainEpoch
         electionProof  block.ElectionProof
@@ -24,9 +29,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey) bool
 
-    computeTipsetWeight(tipset block.Tipset) block.ChainWeight
-
-    IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool
+    computeChainWeight(tipset block.Tipset) block.ChainWeight
 
     StoragePowerConsensusError() StoragePowerConsensusError
 
@@ -44,12 +47,8 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by StorageMiningSubsystem after sealing
     GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) base_mining.PoStChallenge
 
-    GetFinality() block.ChainEpoch
-}
-
-type ExpectedConsensus struct {
-    ComputeWeight(chain block.Chain) block.ChainWeight
-    IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
+    GetFinality()     block.ChainEpoch
+    FinalizedEpoch()  block.ChainEpoch
 }
 
 type StoragePowerConsensusError struct {}

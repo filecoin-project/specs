@@ -55,7 +55,6 @@ type Block struct {
 type Chain struct {
     HeadEpoch()         ChainEpoch
     HeadTipset()        Tipset
-    FinalizedEpoch()    ChainEpoch
     LatestCheckpoint()  ChainEpoch
 
     TipsetAtEpoch(epoch ChainEpoch) Tipset

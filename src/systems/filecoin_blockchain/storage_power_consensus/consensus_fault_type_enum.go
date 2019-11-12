@@ -6,4 +6,5 @@ const (
 	UncommittedPowerFault ConsensusFaultType = 0
 	DoubleForkMiningFault ConsensusFaultType = 1
 	ParentGrindingFault   ConsensusFaultType = 2
+	TimeOffsetMiningFault ConsensusFaultType = 3
 )
