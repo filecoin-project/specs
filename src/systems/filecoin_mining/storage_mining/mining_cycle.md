@@ -9,7 +9,8 @@ Block miners should constantly be performing Proofs of SpaceTime, and also check
 
 After successfully calling `CreateStorageMiner`, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
 
-For details on the methods on the miner actor, see its entry in the [actors spec](actors.md#storage-miner-actor).
+{{< readfile file="storage_miner_actor.id" code="true" lang="go" >}}
+{{< readfile file="storage_miner_actor.go" code="true" lang="go" >}}
 
 ## Owner Worker distinction
 
@@ -21,17 +22,21 @@ Storage miners must continually produce Proofs of SpaceTime over their storage t
 
 ### Step 0: Registration
 
-To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage market actor's [`CreateStorageMiner`](actors.md#createstorageminer) method. The call will then create a new miner actor instance and return its address.
+To initially become a miner, a miner first register a new miner actor on-chain. This is done through the storage power actor's `CreateStorageMiner` method. The call will then create a new miner actor instance and return its address.
 
-The next step is to place one or more storage market asks on the market. This is done through the storage markets [`AddAsk`](actors.md#addask) method. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).
+The next step is to place one or more storage market asks on the market. This is done off-chain as part of storagee market functions. A miner may create a single ask for their entire storage, or partition their storage up in some way with multiple asks (at potentially different prices).
 
-After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the section on [deal](storage-market.md#deal).
+After that, they need to make deals with clients and begin filling up sectors with data. For more information on making deals, see the {{<sref storage_market>}}.
 
-When they have a full sector, they should seal it. This is done by invoking [`PoRep.Seal`](proofs.md#seal) on the sector.
+When they have a full sector, they should seal it. This is done by invoking the {{<sref sector_sealer>}}.
+
+#### Changing Worker Addresses
+
+Note that any change to worker keys after registration (TODO: spec how this works) must be appropriately delayed in relation to randomness lookback for SEALing data (see [this issue](https://github.com/filecoin-project/specs/issues/415)).
 
 ### Step 1: Commit
 
-When the miner has completed their first seal, they should post it on-chain using [CommitSector](actors.md#commitsector). If the miner had zero committed sectors prior to this call, this begins their proving period.
+When the miner has completed their first seal, they should post it on-chain using the {{<sref storage_miner_actor>}}'s `ProveCommitSector` function. If the miner had zero committed sectors prior to this call, this begins their proving period.
 
 The proving period is a fixed amount of time in which the miner must submit a Proof of Space Time to the network.
 

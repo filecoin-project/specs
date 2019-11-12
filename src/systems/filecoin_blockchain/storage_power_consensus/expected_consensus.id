@@ -1,0 +1,28 @@
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+type ExpectedConsensus struct {
+    expectedBlocksPerEpoch  UVarint
+    expectedRewardPerEpoch  UVarint
+
+    ComputeChainWeight(tipset block.Tipset) block.ChainWeight
+    IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
+    IsWinningElectionProof(
+        electionProof  block.ElectionProof
+        minerPower     block.StoragePower
+        totalPower     block.StoragePower
+    ) bool
+    GetBlockRewards(
+        electionProof  block.ElectionProof
+        minerPower     block.StoragePower
+        totalPower     block.StoragePower
+    ) UVarint
+
+    log2b(x UVarint) UVarint
+    wParams weightFunctionParameters
+}
+
+type weightFunctionParameters struct {
+    wRatio_num  UVarint
+    wRatio_den  UVarint
+    wPrecision  UVarint
+}

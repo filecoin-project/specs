@@ -2,6 +2,8 @@
 title: "Verifiable Random Function"
 ---
 
+{{<label vrf>}}
+
 Filecoin uses the notion of a [Verifiable Random
 Function](https://people.csail.mit.edu/silvio/Selected%20Scientific%20Papers/Pseudo%20Randomness/Verifiable_Random_Functions.pdf)
 (VRF). A VRF uses a private key to produce a digest of

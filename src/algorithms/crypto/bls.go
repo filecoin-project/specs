@@ -12,6 +12,10 @@ func (self *BLS_I) Verify(input util.Bytes, pk PublicKey, sig util.Bytes) bool {
 	return false
 }
 
+func (self *BLS_I) MaxSigValue() util.Bytes {
+	panic("TODO")
+}
+
 func (self *BLS_I) Sign(input util.Bytes, sk *SecretKey) bool {
 	panic("see 2.3 in https://tools.ietf.org/html/draft-boneh-bls-signature-00#page-8")
 	return false

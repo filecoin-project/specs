@@ -3,6 +3,7 @@ crypto_signatures: "Signatures"
 data_structures: "Data Structures"
 ds_address: "Address"
 app_address: "Address"
+vrf: "VRF"
 
 # blockchain
 sys_vm: "VM"
@@ -18,6 +19,11 @@ leader_election: "Secret Leader Election"
 chain_selection: "Chain Selection"
 finality: "EC Finality"
 consensus_faults: "Consensus Faults"
+ticket_generation: "Ticket Generation"
+
+### Chain Sync
+chain_sync: "Chain Sync"
+block_validation: "Block Validation"
 
 ### Message Pool
 message_pool: "Message Pool"
@@ -36,6 +42,7 @@ storage_faults: "Storage Faults"
 
 ### Storage Mining
 storage_mining_subsystem: "Storage Mining Subsystem"
+storage_miner_actor: "Storage Miner Actor"
 sector_sealer: "Sector Sealer"
 post_generator: "PoSt Generator"
 post: "Proof of Spacetime"

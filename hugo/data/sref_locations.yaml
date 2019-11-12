@@ -3,6 +3,7 @@ crypto_signatures: [algorithms, crypto, signatures]
 data_structures: [data_structures]
 ds_address: [data_structures, address]
 app_address: [appendix, address]
+vrf: [algorithms, crypto, vrf]
 
 # blockchain
 sys_vm: [systems, filecoin_vm]
@@ -27,6 +28,11 @@ leader_election: [algorithms, expected_consensus, leader_election]
 chain_selection: [algorithms, expected_consensus, chain_selection]
 finality: [algorithms, expected_consensus, finality]
 consensus_faults: [algorithms, expected_consensus, consensus_faults]
+ticket_generation: [algorithms, expected_consensus, ticket_generation]
+
+### Chain Sync
+chain_sync: [systems, filecoin_blockchain, chainsync]
+block_validation: [systems, filecoin_blockchain, chainsync, block_validation]
 
 ### Message Pool
 message_pool: [systems, filecoin_blockchain, message_pool]
@@ -45,6 +51,7 @@ storage_faults: [systems, filecoin_markets, storage_market, faults]
 
 ### Storage Mining
 storage_mining_subsystem: [systems, filecoin_mining, storage_mining]
+storage_miner_actor: [systems, filecoin_mining, storage_mining, storage_miner_actor]
 sector_sealer: [systems, filecoin_mining, storage_mining]
 post_generator: [systems, filecoin_mining, storage_mining]
 post: [algorithms, proof_of_spacetime]
