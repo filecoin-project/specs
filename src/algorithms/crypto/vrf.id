@@ -14,7 +14,7 @@ type VRFKeyPair struct {
 
 type VRFResult struct {
     Output            Bytes  @(internal)
-
+    MaxValue()        Bytes
     ValidateSyntax()  bool
 
     Verify(input Bytes, pk VRFPublicKey) bool

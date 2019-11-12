@@ -168,7 +168,7 @@ A miner's `Power Fraction` or `Power` is the ratio of their committed storage as
 
 ##  Power table
 
-The power table is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
+The {{<sref power_table>}} is an abstraction provided by the Filecoin storage market that lists the `power` of every miner in the system.
 
 ## Protocol
 
