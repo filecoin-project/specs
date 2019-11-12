@@ -96,23 +96,14 @@ type StorageMarketActorCode struct {
     // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
     // client only stops paying when a sector gets cleared (expired or faulted)
     // Deal expiration is also handled here
-    ProcessSectorDealPayment(rt Runtime, info sector.BatchDealPaymentInfo)
-
-    // call by StorageMinerActor
-    // slash deal collateral depending on the faults
-<<<<<<< HEAD
-    ProcessFaultReport(rt Runtime, report sector.FaultReport)
-
-    // call by sm.ProveCommitSector
-    // get InitialUtilization for deals in a Sector
-    GetInitialUtilizationInfo(rt Runtime, dealIDs [deal.DealID]) deal.UtilizationInfo
+    ProcessSectorDealPayment(rt Runtime, info deal.BatchDealPaymentInfo)
 
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
 
     GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
 
-=======
-    ProcessSectorDealSlash(rt Runtime, info sector.BatchDealSlashInfo)
->>>>>>> add storage deal payment and slashing
+    // call by StorageMinerActor
+    // slash deal collateral depending on the faults
+    ProcessSectorDealSlash(rt Runtime, info deal.BatchDealSlashInfo)
 }

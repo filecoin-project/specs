@@ -18,18 +18,3 @@ func (r *FaultReport_I) GetDetectedFaultSlash() actor.TokenAmount {
 func (r *FaultReport_I) GetTerminatedFaultSlash() actor.TokenAmount {
 	return actor.TokenAmount(0)
 }
-
-type StorageDealPaymentAction = int
-
-const (
-	ExpireStorageDeals StorageDealPaymentAction = 0
-	CreditStorageDeals StorageDealPaymentAction = 1
-)
-
-type StorageDealSlashAction = int
-
-const (
-	SlashDeclaredFaults   StorageDealSlashAction = 0
-	SlashDetectedFaults   StorageDealSlashAction = 1
-	SlashTerminatedFaults StorageDealSlashAction = 2
-)

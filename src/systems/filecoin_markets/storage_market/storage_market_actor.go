@@ -315,7 +315,7 @@ func (a *StorageMarketActorCode_I) GetInitialUtilizationInfo(rt Runtime, dealIDs
 	var dealExpirationQueue deal.DealExpirationQueue
 	var maxUtilization block.StoragePower
 	var lastExpiration block.ChainEpoch
-	activeDealIDs := sector.CompactDealSet(make([]byte, len(dealIDs)))
+	activeDealIDs := deal.CompactDealSet(make([]byte, len(dealIDs)))
 
 	for _, dealID := range dealIDs {
 		d, found := st.ActiveDeals()[dealID]
@@ -521,16 +521,16 @@ func (st *StorageMarketActorState_I) _slashTerminatedFaults(rt Runtime, dealIDs 
 	}
 }
 
-func (a *StorageMarketActorCode_I) ProcessSectorDealSlash(rt Runtime, info sector.BatchDealSlashInfo) {
+func (a *StorageMarketActorCode_I) ProcessSectorDealSlash(rt Runtime, info deal.BatchDealSlashInfo) {
 
 	h, st := a.State(rt)
 
 	switch info.Action() {
-	case sector.SlashDeclaredFaults:
+	case deal.SlashDeclaredFaults:
 		st._slashDeclaredFaults(rt, info.DealIDs())
-	case sector.SlashDetectedFaults:
+	case deal.SlashDetectedFaults:
 		st._slashDetectedFaults(rt, info.DealIDs())
-	case sector.SlashTerminatedFaults:
+	case deal.SlashTerminatedFaults:
 		st._slashTerminatedFaults(rt, info.DealIDs())
 	default:
 		rt.Abort("sma.ProcessSectorDealSlash: invalid action type")
@@ -540,13 +540,13 @@ func (a *StorageMarketActorCode_I) ProcessSectorDealSlash(rt Runtime, info secto
 
 }
 
-func (a *StorageMarketActorCode_I) ProcessSectorDealPayment(rt Runtime, info sector.BatchDealPaymentInfo) {
+func (a *StorageMarketActorCode_I) ProcessSectorDealPayment(rt Runtime, info deal.BatchDealPaymentInfo) {
 	h, st := a.State(rt)
 
 	switch info.Action() {
-	case sector.ExpireStorageDeals:
+	case deal.ExpireStorageDeals:
 		st._expireStorageDeals(rt, info.DealIDs(), info.LastChallengeEndEpoch())
-	case sector.CreditStorageDeals:
+	case deal.CreditStorageDeals:
 		st._creditStorageDeals(rt, info.DealIDs(), info.LastChallengeEndEpoch())
 	default:
 		rt.Abort("sma.ProcessSectorDealPayment: invalid deal payment action.")

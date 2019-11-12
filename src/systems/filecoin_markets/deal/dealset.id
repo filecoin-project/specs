@@ -1,0 +1,6 @@
+import util "github.com/filecoin-project/specs/util"
+
+// compact deal sets
+type Bitfield util.Bytes  // TODO: move to util
+type RLEpBitfield Bitfield  // TODO: move to util
+type CompactDealSet RLEpBitfield

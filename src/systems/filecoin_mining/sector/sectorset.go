@@ -1,7 +1,5 @@
 package sector
 
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-
 // TODO
 func (css *CompactSectorSet) SectorsOn() []SectorNumber {
 	var sectorNo []SectorNumber
@@ -41,36 +39,4 @@ func (css *CompactSectorSet) Extend(css2 CompactSectorSet) CompactSectorSet {
 // TODO
 func (css *CompactSectorSet) Contain(sectorNo SectorNumber) bool {
 	return false
-}
-
-/////////////////////////////////////////////////////////////////////////
-
-// TODO
-func (css *CompactDealSet) DealsOn() []deal.DealID {
-	var dealId []deal.DealID
-	return dealId
-}
-
-// TODO
-func (css *CompactDealSet) DealsOff() []deal.DealID {
-	var dealId []deal.DealID
-	return dealId
-}
-
-// TODO
-func (css *CompactDealSet) Add(dealId deal.DealID) CompactDealSet {
-	var newCompactDealSet CompactDealSet
-	return newCompactDealSet
-}
-
-// TODO
-func (css *CompactDealSet) Remove(dealId deal.DealID) CompactDealSet {
-	var newCompactDealSet CompactDealSet
-	return newCompactDealSet
-}
-
-// TODO
-func (css *CompactDealSet) Extend(css2 CompactDealSet) CompactDealSet {
-	var newCompactDealSet CompactDealSet
-	return newCompactDealSet
 }

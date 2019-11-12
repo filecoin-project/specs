@@ -1,0 +1,12 @@
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+type BatchDealPaymentInfo struct {
+    DealIDs                [DealID]
+    Action                 StorageDealPaymentAction
+    LastChallengeEndEpoch  block.ChainEpoch
+}
+
+type BatchDealSlashInfo struct {
+    DealIDs  [DealID]
+    Action   StorageDealSlashAction
+}
