@@ -1,11 +1,11 @@
 package storage_mining
 
 // import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-// import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
-	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -38,7 +38,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PubKey) addr.Address {
+func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PublicKey) addr.Address {
 	panic("TODO")
 }
 
@@ -48,46 +48,46 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 
 // triggered by new block reception and tipset assembly
 func (sms *StorageMiningSubsystem_I) OnNewBestChain() {
-	panic("")
-	// sms.tryLeaderElection()
+	sms.tryLeaderElection()
 }
 
 // triggered by wall clock
 func (sms *StorageMiningSubsystem_I) OnNewRound() {
-	panic("")
-	// sms.tryLeaderElection()
+	sms.tryLeaderElection()
 }
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
-	panic("")
-	// new election, increment height
-	// sms.miningHeight += 1
-	// T1 := sms.Consensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
-	// TK := sms.Consensus.GetElectionProofSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
+	// new election, incremented height
+	T1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	TK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
 
-	// for _, worker := range sms.workers {
-	// 	newTicket := PrepareNewTicket(worker.VRFKeyPair, T1)
-	// 	newEP := DrawElectionProof(TK, , worker.VRFKeyPair)
+	for _, worker := range sms.keyStore().Workers() {
+		newTicket := sms.PrepareNewTicket(T1, worker.VRFKeyPair())
+		newEP := sms.DrawElectionProof(TK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
 
-	// 	if sms.Consensus.IsWinningLeaderElection(newEP, worker.address) {
-	// 		BlockProducer.GenerateBlockHeader(newEP, newTicket, sms.CurrentTipset, worker.workerAddress)
-	// 	}
-	// }
+		if sms.consensus().IsWinningElectionProof(newEP, worker.Address()) {
+			sms.blockProducer().GenerateBlock(newEP, newTicket, sms.blockchain().BestChain().HeadTipset(), worker.Address())
+		}
+	}
 }
 
 func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, vrfKP filcrypto.VRFKeyPair) block.Ticket {
-	panic("")
-	// // 0. prepare new ticket
-	// var newTicket Ticket
+	// run it through the VRF and get deterministic output
 
-	// // 1. run it through the VRF and get deterministic output
-	// // 1.i. take the VRFResult of that ticket as input, specifying the personalization (see data structures)
-	// input := VRFPersonalization.Ticket
-	// input.append(priorTicket.Output)
-	// // 2.ii. run through VRF
-	// newTicket.VRFResult := vrfKP.Generate(input)
+	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
+	var input []byte
+	input = append(input, spc.VRFPersonalizationTicket)
+	input = append(input, priorTicket.Output()...)
 
-	// return newTicket
+	// run through VRF
+	// TODO: uncomment below
+	// vrfRes := vrfKP.Generate(input)
+	var newTicket block.Ticket
+
+	// return new ticket
+	// newTicket.VRFResult_ = vrfRes
+	// newTicket.Output_ = vrfRes.Output()
+	return newTicket
 }
 
 func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Ticket, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {

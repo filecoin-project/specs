@@ -98,7 +98,7 @@ type InitActorState struct { addressMap {Address:ID}&amp;lt;Hamt&amp;gt; nextId 
       
       <guid>/docs/systems/filecoin_vm/sysactors/account_actor/</guid>
       <description>(You can see the old AccountActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type AccountActorCode struct { VerifySignature(rt vmr.Runtime, sig filcrypto.Signature) InvocOutput } type AccountActorState struct { // normal keypair backed accounts  Address addr.Address }  package sysactors import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; //////////////////////////////////////////////////////////////////////////////// // Boilerplate ////////////////////////////////////////////////////////////////////////////////  func (a *AccountActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, AccountActorState) { h := rt.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import filcrypto &amp;#34;github.com/filecoin-project/specs/algorithms/crypto&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type AccountActorCode struct { VerifySignature(rt vmr.Runtime, sig filcrypto.Signature) InvocOutput } type AccountActorState struct { // normal keypair backed accounts  Address addr.Address }  package sysactors import filcrypto &amp;#34;github.com/filecoin-project/specs/algorithms/crypto&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; //////////////////////////////////////////////////////////////////////////////// // Boilerplate ////////////////////////////////////////////////////////////////////////////////  func (a *AccountActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, AccountActorState) { h := rt.</description>
     </item>
     
     <item>
@@ -244,15 +244,6 @@ Block A block header contains information relevant to a particular point in time
       <description>There are many kinds of Filecoin Nodes &amp;hellip;
 This section should contain:
  what all nodes must have, and why examples of using different systems  </description>
-    </item>
-    
-    <item>
-      <title>Expected Consensus</title>
-      <link>/docs/algorithms/expected_consensus/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/algorithms/expected_consensus/</guid>
-      <description>Algorithm Expected Consensus (EC) is a probabilistic Byzantine fault-tolerant consensus protocol. At a high level, it operates by running a leader election every round in which, on expectation, one participant may be eligible to submit a block. EC guarantees that this winner will be anonymous until they reveal themselves by submitting a proof of their election (we call this proof an Election Proof). All valid blocks submitted in a given round form a Tipset.</description>
     </item>
     
     <item>
@@ -484,17 +475,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/node/</guid>
-      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.WallClock }  </description>
-    </item>
-    
-    <item>
-      <title>Other Artifacts in Blocks</title>
-      <link>/docs/systems/filecoin_blockchain/struct/block/other/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/struct/block/other/</guid>
-      <description>TODO: - move this stuff elsewhere
-import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { VRFResult filcrypto.VRFResult Output Bytes @(cached) ValidateSyntax() bool Verify(input Bytes, pk filcrypto.VRFPublicKey) bool } type BytesAmount UVarint type StoragePower BytesAmount type ElectionProof struct { VRFResult filcrypto.VRFResult Verify(input Bytes, pk filcrypto.VRFPublicKey) bool ValidateSyntax() bool }  package block import ( filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; ) func (tix *Ticket_I) ValidateSyntax() bool { return tix.</description>
+      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.Clock }  </description>
     </item>
     
     <item>
@@ -534,16 +515,6 @@ The basic premise is this: User A wants to be able to send many small payments t
       <guid>/docs/systems/filecoin_files/piece/piece_store/</guid>
       <description>A PieceStore is an object that can store and retrieve pieces from some local storage. The PieceStore additionally keeps an index of pieces.
 import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; type PieceID UVarint // PieceStore is an object that stores pieces into some local storage. // it is internally backed by an IpldStore. type PieceStore struct { Store ipld.Store Index {PieceID: Piece} Get(i PieceID) struct {p Piece, e error} Put(p Piece) error Delete(i PieceID) error }  </description>
-    </item>
-    
-    <item>
-      <title>PoSt Generator</title>
-      <link>/docs/systems/filecoin_mining/storage_proving/post_generator/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_mining/storage_proving/post_generator/</guid>
-      <description>Block miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning ticket to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
-The Miner Actor After successfully calling CreateStorageMiner, a miner actor will be created on-chain, and registered in the storage market.</description>
     </item>
     
     <item>
@@ -702,8 +673,8 @@ type Node struct { height Int items [Item] } representation tuple  Item may be e
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/algorithms/crypto/signatures/</guid>
-      <description>Signatures are cryptographic functions that attest to the origin of a particular message. In the context of Filecoin, signatures are used to send and receive messages among with the assurance that each message was generated by specific individuals. In other words, it is infeasible for another individual i to generate a signed message that appears to have been generated by j.
-We use signatures in filecoin to verify something was done by someone.</description>
+      <description>Signatures are cryptographic functions that attest to the origin of a particular message. In the context of Filecoin, signatures are used to send and receive messages with the assurance that each message was generated by a specific entity. In other words, it is infeasible for an entity i to generate a signed message that appears to have been generated by j, with j != i.
+Filecoin uses signatures to associate an action to a given party.</description>
     </item>
     
     <item>
@@ -827,7 +798,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       
       <guid>/docs/systems/filecoin_blockchain/struct/block/tipset/</guid>
       <description>The Tipset is a group of blocks in the same exact round, that all share the exact same parents.
-import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) MinTicket() Ticket @(cached) }  package block import ( clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) MinTicket() Ticket { var ret Ticket // for _, currBlock := range ts.</description>
+import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) MinTicket() Ticket @(cached) }  package block import ( &amp;#34;bytes&amp;#34; clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) MinTicket() Ticket { var ret Ticket for _, currBlock := range ts.</description>
     </item>
     
     <item>
@@ -846,6 +817,15 @@ import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_t
       
       <guid>/docs/systems/filecoin_nodes/repository/usage/</guid>
       <description>TODO: - Explain how repo is used with systems and subsystems - compartmentalized local storage - store ipld datastructures of stateful objects</description>
+    </item>
+    
+    <item>
+      <title>Verifiable Random Function</title>
+      <link>/docs/algorithms/crypto/vrf/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/crypto/vrf/</guid>
+      <description>Filecoin uses the notion of a Verifiable Random Function (VRF). A VRF uses a private key to produce a digest of an arbitrary message such that the output is unique per signer and per message. Any third party in possession of the corresponding public key, the message and the VRF output can verify if the digest has been computed correctly and from the correct signer. Using a VRF in the ticket generation process allows anyone to verify if a block comes from an eligible block producer (see Ticket Generation for more details).</description>
     </item>
     
     <item>

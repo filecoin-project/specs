@@ -11,23 +11,13 @@
     
     
     <item>
-      <title>Other Artifacts in Blocks</title>
-      <link>/docs/systems/filecoin_blockchain/struct/block/other/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/struct/block/other/</guid>
-      <description>TODO: - move this stuff elsewhere
-import filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; // TODO: move all this stuff elsewhere. a consensus lib?  type Ticket struct { VRFResult filcrypto.VRFResult Output Bytes @(cached) ValidateSyntax() bool Verify(input Bytes, pk filcrypto.VRFPublicKey) bool } type BytesAmount UVarint type StoragePower BytesAmount type ElectionProof struct { VRFResult filcrypto.VRFResult Verify(input Bytes, pk filcrypto.VRFPublicKey) bool ValidateSyntax() bool }  package block import ( filcrypto &amp;#34;github.com/filecoin-project/specs/libraries/filcrypto&amp;#34; util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; ) func (tix *Ticket_I) ValidateSyntax() bool { return tix.</description>
-    </item>
-    
-    <item>
       <title>Tipset</title>
       <link>/docs/systems/filecoin_blockchain/struct/block/tipset/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/struct/block/tipset/</guid>
       <description>The Tipset is a group of blocks in the same exact round, that all share the exact same parents.
-import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) MinTicket() Ticket @(cached) }  package block import ( clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) MinTicket() Ticket { var ret Ticket // for _, currBlock := range ts.</description>
+import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) MinTicket() Ticket @(cached) }  package block import ( &amp;#34;bytes&amp;#34; clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) MinTicket() Ticket { var ret Ticket for _, currBlock := range ts.</description>
     </item>
     
   </channel>

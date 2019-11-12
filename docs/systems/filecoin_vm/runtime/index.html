@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4642,12 +4611,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Check that the given condition is true (and call Abort if not).
 </span><span class="c1"></span>    <span class="nf">Assert</span><span class="p">(</span><span class="kt">bool</span><span class="p">)</span>
 
-    <span class="nf">ValueSupplied</span><span class="p">()</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">CurrentBalance</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">ValueSupplied</span><span class="p">()</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
     <span class="c1">// Send allows the current execution context to invoke methods on other actors in the system.
-</span><span class="c1"></span>    <span class="c1">// TODO: what are the return values here?
-</span><span class="c1"></span>    <span class="nf">Send</span><span class="p">(</span><span class="nx">input</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
-    <span class="nf">SendAllowingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
+</span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
+    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
 
     <span class="c1">// Create an actor in the state tree. May only be called by InitActor.
 </span><span class="c1"></span>    <span class="nf">CreateActor</span><span class="p">(</span>
@@ -4798,7 +4767,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// TODO: call constructor
 </span><span class="c1"></span>	<span class="c1">// TODO: can constructors fail?
 </span><span class="c1"></span>	<span class="c1">// TODO: maybe do this directly form InitActor, and only do the StateTree.ActorStates() updating here?
-</span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">Send</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+</span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
 		<span class="nx">To_</span><span class="p">:</span>     <span class="nx">address</span><span class="p">,</span>
 		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodConstructor</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">constructorParams</span><span class="p">,</span>
@@ -4964,11 +4933,11 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// TODO: This function should be private (not intended to be exposed to actors).
 </span><span class="c1">// (merging runtime and interpreter packages should solve this)
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">ignoreErrors</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">(</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">catchErrors</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">(</span>
 	<span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">true</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">ignoreErrors</span><span class="p">)</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">catchErrors</span><span class="p">)</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">false</span>
 	<span class="k">return</span> <span class="nx">ret</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span>
 <span class="p">}</span>
@@ -5016,7 +4985,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">ignoreErrors</span> <span class="kt">bool</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">catchErrors</span> <span class="kt">bool</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkStateLock</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
 
@@ -5055,7 +5024,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_refundGasRemaining</span><span class="p">(</span><span class="nx">toActorMethodGasBound</span><span class="p">)</span>
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_deductGasRemaining</span><span class="p">(</span><span class="nx">gasUsed</span><span class="p">)</span>
 
-	<span class="k">if</span> <span class="p">!</span><span class="nx">ignoreErrors</span> <span class="o">&amp;&amp;</span> <span class="nx">invocOutput</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">().</span><span class="nf">IsError</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">catchErrors</span> <span class="o">&amp;&amp;</span> <span class="nx">invocOutput</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">().</span><span class="nf">IsError</span><span class="p">()</span> <span class="p">{</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">MethodSubcallError</span><span class="p">))</span>
 	<span class="p">}</span>
 
@@ -5066,12 +5035,24 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Send</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternalOutputOnly</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">catchErrors</span> <span class="kt">bool</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">catchErrors</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput_I</span><span class="p">{</span>
+		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">ret</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(),</span>
+		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">(),</span>
+	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendAllowingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternalOutputOnly</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternalOutputOnly</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrentBalance</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValueSupplied</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>

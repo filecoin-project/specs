@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4580,6 +4549,8 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
+<div id="systems__filecoin_blockchain__chainsync__chain_sync"></div>
+
 <h1 id="what-is-blockchain-synchronization">What is blockchain synchronization?</h1>
 
 <p>Blockchain synchronization (&ldquo;sync&rdquo;) is a key part of a blockchain system.
@@ -4992,7 +4963,7 @@ This means all blocks <em>before</em> the best heads.</li>
 <h2 id="chainsync-fsm-chain-follow">ChainSync FSM: <code>CHAIN_FOLLOW</code></h2>
 
 <ul>
-<li>While in theis state:
+<li>While in this state:
 
 <ul>
 <li><code>ChainSync</code> is well-bootstrapped, and has an initial <strong>trusted</strong> <code>StateTree</code> to start from.</li>
@@ -5066,6 +5037,8 @@ via <code>BlockPubsub</code>. As more blocks are received, the set of <code>Targ
 <li><code>ChainSync</code> delays syncing <code>Messages</code> until they are needed. Much of the structure of the partial chains can
 be checked and used to make syncing decisions without fetching the <code>Messages</code>.</li>
 </ul>
+
+<div id="systems__filecoin_blockchain__chainsync__block_validation"></div>
 
 <h2 id="progressive-block-validation">Progressive Block Validation</h2>
 

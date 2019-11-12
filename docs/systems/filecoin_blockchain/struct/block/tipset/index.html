@@ -1136,6 +1136,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3233,68 +3264,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4646,21 +4615,26 @@ The Tipset is a group of blocks in the same exact round, that all share the exac
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">block</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;bytes&#34;</span>
+
     <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">ts</span> <span class="o">*</span><span class="nx">Tipset_I</span><span class="p">)</span> <span class="nf">MinTicket</span><span class="p">()</span> <span class="nx">Ticket</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">ret</span> <span class="nx">Ticket</span>
 
-    <span class="c1">// for _, currBlock := range ts.Blocks() {
-</span><span class="c1"></span>    <span class="c1">//     tix := currBlock.Ticket()
-</span><span class="c1"></span>    <span class="c1">//     if ret == nil {
-</span><span class="c1"></span>    <span class="c1">//         ret = tix
-</span><span class="c1"></span>    <span class="c1">//     } else {
-</span><span class="c1"></span>    <span class="c1">//         ret = SmallerBytes(tix, ret)
-</span><span class="c1"></span>    <span class="c1">//     }
-</span><span class="c1"></span>    <span class="c1">// }
-</span><span class="c1"></span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">currBlock</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">tix</span> <span class="o">:=</span> <span class="nx">currBlock</span><span class="p">.</span><span class="nf">Ticket</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nx">ret</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+            <span class="nx">ret</span> <span class="p">=</span> <span class="nx">tix</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">smaller</span> <span class="o">:=</span> <span class="nf">SmallerBytes</span><span class="p">(</span><span class="nx">tix</span><span class="p">.</span><span class="nf">Output</span><span class="p">(),</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">Output</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nx">bytes</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="nx">smaller</span><span class="p">,</span> <span class="nx">tix</span><span class="p">.</span><span class="nf">Output</span><span class="p">())</span> <span class="p">{</span>
+                <span class="nx">ret</span> <span class="p">=</span> <span class="nx">tix</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
     <span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 

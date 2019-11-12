@@ -1136,6 +1136,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3233,68 +3264,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4790,7 +4759,7 @@ TODO: Just interpolate a table of the Orient parameters and reconcile naming.</p
 <td>Hash function used as a KDF to derive the key used to label a single node.</td>
 <td>TODO</td>
 <td><code>32B</code></td>
-<td><code>Blake2s-256</code></td>
+<td><code>SHA256</code></td>
 </tr>
 
 <tr>
@@ -4966,7 +4935,7 @@ algorithm. Note that the indexes returned refer to labels from the <em>previous<
 <p>The Replication Algorithm  proceeds as follows:</p>
 
 <ul>
-<li>Calculate <code>ReplicaID</code> using <code>Hash</code> (Blake2s):</li>
+<li>Calculate <code>ReplicaID</code> using <code>Hash</code> (SHA256):</li>
 </ul>
 
 <p><code>ReplicaID</code> is a 32-byte array constructed by hashing the concatenation of the following values

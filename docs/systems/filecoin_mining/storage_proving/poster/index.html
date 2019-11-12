@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4616,7 +4585,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">PostGenerator</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">GeneratePoSt</span><span class="p">(</span>
-        <span class="nx">postCfg</span>        <span class="nx">sector</span><span class="p">.</span><span class="nx">PostCfg</span>
+        <span class="nx">postCfg</span>        <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
         <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
         <span class="nx">faults</span>         <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span>
         <span class="nx">sectors</span>        <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
@@ -4657,10 +4626,9 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// See &#34;Proof-of-Spacetime Parameters&#34; Section
 </span><span class="c1">// TODO: Unify with orient model.
-</span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_PROVING_PERIOD</span> <span class="p">=</span> <span class="nb">uint</span><span class="p">(</span><span class="mi">5760</span><span class="p">)</span>
-<span class="kd">const</span> <span class="nx">POST_CHALLENGE_DEADLINE</span> <span class="p">=</span> <span class="nb">uint</span><span class="p">(</span><span class="mi">480</span><span class="p">)</span>
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_CHALLENGE_DEADLINE</span> <span class="p">=</span> <span class="nb">uint</span><span class="p">(</span><span class="mi">480</span><span class="p">)</span>
 
-<span class="kd">func</span> <span class="nf">GeneratePoSt</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PostCfg</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">GeneratePoStWitness</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span> <span class="p">{</span>
 	<span class="c1">// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 </span><span class="c1"></span>	<span class="c1">// Like this:
 </span><span class="c1"></span>	<span class="c1">// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -4676,15 +4644,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 	<span class="nx">sdr</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">SDRParams</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="nx">postCfg</span><span class="p">)</span>
 
-	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
-	<span class="kd">var</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
+	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GeneratePoStWitness</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">faults</span><span class="p">,</span> <span class="nx">sectorStore</span><span class="p">)</span>
+<span class="p">}</span>
 
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sector</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">challengedSectors</span> <span class="p">{</span>
-		<span class="nx">proofAux</span> <span class="o">:=</span> <span class="nx">sectorStore</span><span class="p">.</span><span class="nf">GetSectorProofAux</span><span class="p">(</span><span class="nx">sector</span><span class="p">)</span>
-		<span class="nx">proofAuxs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofAuxs</span><span class="p">,</span> <span class="nx">proofAux</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GeneratePoSt</span><span class="p">(</span><span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span><span class="p">,</span> <span class="nx">proofAuxs</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">,</span> <span class="nx">witness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="nx">sdr</span> <span class="o">:=</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">SDRParams</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="nx">postCfg</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">witness</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

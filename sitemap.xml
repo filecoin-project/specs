@@ -202,10 +202,6 @@
   </url>
   
   <url>
-    <loc>/docs/libraries/filcrypto/</loc>
-  </url>
-  
-  <url>
     <loc>/docs/systems/filecoin_files/file/</loc>
   </url>
   
@@ -318,6 +314,10 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_nodes/key_store/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_nodes/repository/key/</loc>
   </url>
   
@@ -394,10 +394,6 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/struct/block/other/</loc>
-  </url>
-  
-  <url>
     <loc>/docs/systems/filecoin_token/payment_channels/payment_channel_actor/</loc>
   </url>
   
@@ -423,10 +419,6 @@
   
   <url>
     <loc>/docs/algorithms/porep/porep_commitments/</loc>
-  </url>
-  
-  <url>
-    <loc>/docs/systems/filecoin_mining/storage_proving/post_generator/</loc>
   </url>
   
   <url>
@@ -631,6 +623,10 @@
   
   <url>
     <loc>/docs/systems/filecoin_nodes/repository/usage/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/algorithms/crypto/vrf/</loc>
   </url>
   
   <url>

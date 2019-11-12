@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4578,7 +4547,7 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown"><p><div id="systems__filecoin_markets__storage_market__storage_market_subsystem"></div>
+<article class="markdown"><p><div id="systems__filecoin_markets__storage_market__storage_market"></div>
 Storage Market subsystem is the data entry point into the network. Storage miners only earn power from data stored in a storage deal and all deals live on the Filecoin network. Specific deal negotiation process happens off chain, clients and miners enter a storage deal after an agreement has been reached and post storage deals on the Filecoin network to earn block rewards and get paid for storing the data in the storage deal. A deal is only valid when it is posted on chain with signatures from both parties and at the time of posting, there are sufficient balances for both parties in <code>StorageMarketActor</code> to honor the deal in terms of deal price and deal collateral.</p>
 
 <p>Both <code>StorageClient</code> and <code>StorageProvider</code> need to first deposit Filecoin token into <code>StorageMarketActor</code> before participating in the storage market. <code>StorageClient</code> can then send a <code>StorageDealProposal</code> to the <code>StorageProvider</code> along with the data. A partially signed <code>StorageDeal</code> is called a <code>StorageDealProposal</code>. <code>StorageProvider</code> can then put this storage deal in their <code>Sector</code>, countersign the <code>StorageDealProposal</code> and result in a <code>StorageDeal</code>. A <code>StorageDeal</code> is only in effect when it is submitted to and accepted by the <code>StorageMarketActor</code> on chain before the <code>ProposalExpiryEpoch</code>. <code>StorageDeal</code> does not include a <code>StartEpoch</code> as it will come into effect at the block when the deal gets accepted into the network. Hence, <code>StorageProvider</code> should publish the deal as soon as possible.</p>

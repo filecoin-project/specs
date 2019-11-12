@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4611,7 +4580,7 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sectoridx</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
@@ -4619,6 +4588,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">blockproducer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
+<span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// TODO: constructor
@@ -4630,14 +4600,18 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">MinerActor</span>         <span class="nx">StorageMinerActorCode</span>
     <span class="nx">SectorIndex</span>        <span class="nx">sectoridx</span><span class="p">.</span><span class="nx">SectorIndexerSubsystem</span>
     <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
-    <span class="nx">BlockProducer</span>      <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
-    <span class="nx">miningHeight</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+
+    <span class="c1">// Need access to block producer in order to publish blocks
+</span><span class="c1"></span>    <span class="nx">blockProducer</span>      <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
 
     <span class="c1">// Need access to SPC in order to mine a block
-</span><span class="c1"></span>    <span class="nx">Consensus</span>          <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">consensus</span>          <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
 
     <span class="c1">// Need access to the blockchain system in order to query for things in the chain
-</span><span class="c1"></span>    <span class="nx">Blockchain</span>         <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">blockchain</span>         <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
+
+    <span class="c1">// Need access to the key store in order to generate tickets and election proofs
+</span><span class="c1"></span>    <span class="nx">keyStore</span>           <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
 
     <span class="c1">// TODO: why are these here? remove?
 </span><span class="c1"></span>    <span class="nf">StartMining</span><span class="p">()</span>
@@ -4645,13 +4619,13 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// call by StorageMiningSubsystem itself to create miner
 </span><span class="c1"></span>    <span class="nf">createMiner</span><span class="p">(</span>
-        <span class="nx">ownerPubKey</span>   <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
-        <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
+        <span class="nx">ownerPubKey</span>   <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
+        <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
         <span class="nx">pledgeAmt</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span>
 
     <span class="c1">// get miner key by address
-</span><span class="c1"></span>    <span class="nf">GetMinerKeyByAddress</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PubKey</span>
+</span><span class="c1"></span>    <span class="nf">GetMinerKeyByAddress</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
 
     <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
 </span><span class="c1"></span>    <span class="c1">// Triggers AddNewDeal on SectorIndexer

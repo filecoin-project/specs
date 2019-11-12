@@ -1,12 +1,11 @@
 package block
 
 import (
-	filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	util "github.com/filecoin-project/specs/util"
 )
 
 func (tix *Ticket_I) ValidateSyntax() bool {
-
 	return tix.VRFResult_.ValidateSyntax()
 }
 

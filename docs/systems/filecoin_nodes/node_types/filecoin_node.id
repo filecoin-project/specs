@@ -8,5 +8,5 @@ type FilecoinNode struct {
 
     Repository  repo.Repository
     FileStore   filestore.FileStore
-    Clock       clock.WallClock
+    Clock       clock.Clock
 }

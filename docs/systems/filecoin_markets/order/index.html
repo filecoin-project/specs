@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market Orders - Asks and Bids | Filecoin Spec</title>
+<title>Market Orders - Asks | Filecoin Spec</title>
 
 
 
@@ -1124,6 +1124,37 @@ https://github.com/alex-shpak/hugo-book
     
     
         Clock
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
     
 </a>
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4574,18 +4543,20 @@ https://github.com/alex-shpak/hugo-book
   <label for="menu-control">
     <img src="../../../../svg/menu.svg" alt="Menu" />
   </label>
-  <strong>Market Orders - Asks and Bids</strong>
+  <strong>Market Orders - Asks</strong>
 </header>
 
       
 <article class="markdown">
 
+<p><em>Asks</em> contain the terms on which a miner is willing to provide its services. They are propogated via gossipsub.</p>
+
+<p>A <code>StorageAsk</code> contains basic storage deal terms of price, collateral, and minimum piece size (size of the smallest piece it is willing to store under these terms). It also contains a <code>Timestamp</code> for its creation in <code>ChainEpoch</code>, a <code>MaxDuration</code> for the max duration in <code>ChainEpoch</code> that a miner is willing to store under these terms, and a <code>MinDuration</code>. If a miner wishes to override an ask, it can issue a new ask with a higher sequence number (<code>SeqNo</code>). Clients look at all the <code>StorageAsks</code> in a gossip network and decide which miner to contact to enter into a deal. The deal negotiation process happens off chain and the client submits a <code>StorageDealProposal</code> to the miner, as detailed in Storage Deals, after an agreement is reached.</p>
+
 <p>TODO:</p>
 
 <ul>
-<li>Write asks</li>
-<li>Write bids</li>
-<li>Write how market orders propagate (gossipsub)</li>
+<li>Retrieval asks</li>
 </ul>
 
 
@@ -4607,12 +4578,20 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Ask</span> <span class="kd">struct</span> <span class="p">{</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">Bid</span> <span class="kd">struct</span> <span class="p">{</span>
-
+<span class="kd">type</span> <span class="nx">StorageAsk</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Price</span>         <span class="nx">util</span><span class="p">.</span><span class="nx">BigInt</span>  <span class="c1">// attoFIL per GiB per epoch
+</span><span class="c1"></span>    <span class="nx">Collateral</span>    <span class="nx">util</span><span class="p">.</span><span class="nx">BigInt</span>  <span class="c1">// attoFIL per GiB per epoch
+</span><span class="c1"></span>
+    <span class="nx">MinPieceSize</span>  <span class="kt">uint64</span>
+    <span class="nx">Miner</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">Timestamp</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">MaxDuration</span>   <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">MinDuration</span>   <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nx">SeqNo</span>         <span class="kt">uint64</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4629,7 +4608,7 @@ https://github.com/alex-shpak/hugo-book
 <li>write what parts of market orders are verifiable, and how
 
 <ul>
-<li>eg: miner storage ask could carry the amount of storage available (which should be at mot (pledge - sectors sealed))</li>
+<li>eg: miner storage ask could carry the amount of storage available (which should be at most (pledge - sectors sealed))</li>
 <li>eg: client storage bid price could be checked against available money in the StorageMarket</li>
 </ul></li>
 </ul>

@@ -17,6 +17,7 @@ type ChungExpanderPermutationFeistelKeys [UInt]
 type ChungExpanderPermutationFeistelRounds UInt
 type ChungExpanderPermutationFeistelHashFunction enum {
     Blake2S
+    SHA256
 }
 type ChungExpanderAlpha struct {}
 type ChungExpanderBeta struct {}
@@ -42,7 +43,7 @@ type SealAlgorithmArtifacts struct {
     }
 }
 
-// per-sector setup artifacts go here   
+// per-sector setup artifacts go here
 type SealSetupArtifacts struct {
     CommD              sector.Commitment
     CommR              sector.SealedSectorCID
@@ -87,7 +88,7 @@ type StackedDRG struct {
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve             EllipticCurve
     SealCfg           sector.SealCfg
-    PostCfg           sector.PostCfg
+    PoStCfg           sector.PoStCfg
 }
 
 type DRGCfg struct {

@@ -1,6 +1,4 @@
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
-
-// TODO: move all this stuff elsewhere. a consensus lib?
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
 type Ticket struct {
     VRFResult         filcrypto.VRFResult
@@ -10,12 +8,13 @@ type Ticket struct {
     Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
 }
 
-type BytesAmount UVarint
-type StoragePower BytesAmount
-
 type ElectionProof struct {
-    VRFResult filcrypto.VRFResult
+    VRFResult  filcrypto.VRFResult
+    Output     Bytes                @(cached)
     Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
 
     ValidateSyntax() bool
 }
+
+type BytesAmount UVarint
+type StoragePower BytesAmount

@@ -1,6 +1,6 @@
 package sysactors
 
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"

@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4601,7 +4570,7 @@ The Block is a unit of the Filecoin blockchain.</p>
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
@@ -4657,7 +4626,6 @@ The Block is a unit of the Filecoin blockchain.</p>
 <span class="kd">type</span> <span class="nx">Chain</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">HeadEpoch</span><span class="p">()</span>         <span class="nx">ChainEpoch</span>
     <span class="nf">HeadTipset</span><span class="p">()</span>        <span class="nx">Tipset</span>
-    <span class="nf">FinalizedEpoch</span><span class="p">()</span>    <span class="nx">ChainEpoch</span>
     <span class="nf">LatestCheckpoint</span><span class="p">()</span>  <span class="nx">ChainEpoch</span>
 
     <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span>
@@ -4731,29 +4699,22 @@ The Block is a unit of the Filecoin blockchain.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 
-	<span class="c1">// dist := chain.HeadEpoch() - epoch
-</span><span class="c1"></span>	<span class="c1">// current := chain.HeadTipset()
-</span><span class="c1"></span>	<span class="c1">// parents := current.Parents()
-</span><span class="c1"></span>	<span class="c1">// for i := 0; i &lt; dist; i++ {
-</span><span class="c1"></span>	<span class="c1">// 	current = parents
-</span><span class="c1"></span>	<span class="c1">// 	parents = current.Parents
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>
-	<span class="c1">// return current
-</span><span class="c1"></span><span class="p">}</span>
+	<span class="nx">dist</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">epoch</span>
+	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">()</span>
+	<span class="nx">parents</span> <span class="o">:=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
+	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="nx">dist</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="nx">current</span> <span class="p">=</span> <span class="nx">parents</span>
+		<span class="nx">parents</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">current</span>
+<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>
 	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">()</span>
 <span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">FinalizedEpoch</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-	<span class="c1">// ep := chain.HeadEpoch()
-</span><span class="c1"></span>	<span class="c1">// return ep - GetFinality()
-</span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">HeadEpoch</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
@@ -4765,18 +4726,16 @@ The Block is a unit of the Filecoin blockchain.</p>
 
 <span class="c1">// should return the tipset from the nearest epoch to epoch containing a Tipset
 </span><span class="c1">// that is from the closest epoch less than or equal to epoch
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset_I</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
 
-	<span class="c1">// dist := bl.Epoch - epoch - 1
-</span><span class="c1"></span>	<span class="c1">// current := bl.ParentTipset
-</span><span class="c1"></span>	<span class="c1">// parents := current.Parents
-</span><span class="c1"></span>	<span class="c1">// for current.Epoch &gt; epoch {
-</span><span class="c1"></span>	<span class="c1">// 	current = parents
-</span><span class="c1"></span>	<span class="c1">// 	parent = current.Parents
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>	<span class="c1">// return current
-</span><span class="c1"></span><span class="p">}</span>
+	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">bl</span><span class="p">.</span><span class="nx">Header_</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
+	<span class="nx">parents</span> <span class="o">:=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
+	<span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
+		<span class="nx">current</span> <span class="p">=</span> <span class="nx">parents</span>
+		<span class="nx">parents</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">current</span>
+<span class="p">}</span>
 
 <span class="c1">// should return the ticket from the Tipset generated at the nearest height leq to epoch
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>

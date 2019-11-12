@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4578,45 +4547,171 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown"><div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Time</span> <span class="kt">string</span> <span class="c1">// ISO nano timestamp
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnixTime</span> <span class="kt">int</span> <span class="c1">// unix timestamp
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Round</span> <span class="kt">int</span> <span class="c1">// Blockchain round
-</span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">Clock</span> <span class="kd">interface</span> <span class="p">{</span>
-  <span class="nf">UTCTime</span><span class="p">()</span> <span class="nx">Time</span>
-  <span class="nf">UnixNano</span><span class="p">()</span> <span class="nx">UnixTime</span>
+<article class="markdown">
 
-  <span class="nf">CurrentRound</span><span class="p">()</span> <span class="nx">Round</span>
-  <span class="nf">LastRoundObserved</span><span class="p">()</span> <span class="nx">Round</span>
-<span class="p">}</span></code></pre></div>
-<p>TODO:</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Time</span> <span class="kt">string</span>  <span class="c1">// ISO nano timestamp
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnixTime</span> <span class="kt">int</span>  <span class="c1">// unix timestamp
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Round</span> <span class="kt">int</span>  <span class="c1">// Blockchain round
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">ChainEpochState</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">InEpoch</span>     <span class="kt">int</span>
+    <span class="nx">PastCutoff</span>  <span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Clock</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">NowUTC</span><span class="p">()</span>       <span class="nx">Time</span>
+    <span class="nf">NowUTCNano</span><span class="p">()</span>   <span class="nx">UnixTime</span>
+
+    <span class="nx">genesisTime</span>    <span class="nx">UnixTime</span>
+    <span class="nx">epochDuration</span>  <span class="nx">UnixTime</span>  <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nx">cutoffAt</span>       <span class="nx">UnixTime</span>  <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">epochAfterTime</span><span class="p">(</span><span class="nx">start</span> <span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">t</span> <span class="nx">UnixTime</span><span class="p">)</span> <span class="nx">ChainEpoch</span>
+    <span class="nf">currentEpochStart</span><span class="p">()</span> <span class="nx">UnixTime</span>
+
+    <span class="nf">EpochAfterGenesis</span><span class="p">()</span>  <span class="nx">ChainEpochState</span>
+    <span class="nf">CurrentEpochState</span><span class="p">()</span>  <span class="nx">ChainEpochState</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">clock</span>
+
+<span class="kn">import</span> <span class="s">&#34;time&#34;</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">Clock_I</span><span class="p">)</span> <span class="nf">NowUTC</span><span class="p">()</span> <span class="nx">Time</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">Time</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">Unix</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">Clock_I</span><span class="p">)</span> <span class="nf">NowUTCNano</span><span class="p">()</span> <span class="nx">Time</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">Time</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="c1">// given some starting epoch and time since, what epoch should this be?
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">Clock_I</span><span class="p">)</span> <span class="nf">epochAfterTime</span><span class="p">(</span><span class="nx">start</span> <span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">t</span> <span class="nx">Time</span><span class="p">)</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="c1">// return start + t/epochDuration
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">Clock_I</span><span class="p">)</span> <span class="nf">EpochAfterGenesis</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="c1">// return self.epochAfterTime(0 + self.NowUTCNano() - self.genesisTime)
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">Clock_I</span><span class="p">)</span> <span class="nf">currentEpochStart</span><span class="p">()</span> <span class="nx">Time</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="c1">// return EpochAfterGenesis() * self.epochDuration + genesisTime
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">Clock_I</span><span class="p">)</span> <span class="nf">CurrentEpochState</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="c1">// if self.NowUTCNano()-self.currentEpochStart() &gt; self.cutoffAt_ {
+</span><span class="c1"></span>	<span class="c1">// 	return ChainEpochState.PastCutoff
+</span><span class="c1"></span>	<span class="c1">// }
+</span><span class="c1"></span>	<span class="c1">// return ChainEpochState.Active
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div>
+
+
+
+
+</p>
+
+<p>Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock, tolerating bounded delay in honest clock lower than epoch time (more on this in a forthcoming paper).</p>
+
+<p>Filecoin relies on this system clock in order to secure consensus, specifically ensuring that participants are only running leader elections once per epoch and enabling miners to catch such deviations from the protocol. Given a system start and epoch time by the genesis block, the system clock allows miners to associate epoch and wall clock time, thereby enabling them to reason about block validity and give the protocol liveness.</p>
+
+<h2 id="clock-uses">Clock uses</h2>
+
+<p>Specifically, the Filecoin system clock is used:</p>
 
 <ul>
-<li>explain why we need a system clock</li>
-<li>explain where it is used
-
-<ul>
-<li>for rejecting/accepting blocks</li>
-</ul></li>
-<li>explain synchrony requirements
-
-<ul>
-<li>small clock drift &ndash; &lt;2s</li>
-<li>very important to have accurate time</li>
-</ul></li>
-<li>explain how we can resync
-
-<ul>
-<li>Network</li>
-<li>recommend various NTP servers</li>
-<li>Cesium clocks</li>
-</ul></li>
-<li>Future work:
-
-<ul>
-<li>VDF Clocks</li>
-</ul></li>
+<li>to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block&rsquo;s <code>ElectionProof</code> (which contains the epoch number) (see <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> and <a href="../../../../#systems__filecoin_blockchain__chainsync__block_validation">Block Validation</a>).</li>
+<li>to help protocol convergence by giving miners a specific cutoff after which to reject incoming blocks in this round (see <a href="../../../../#systems__filecoin_blockchain__chainsync">ChainSync - synchronizing the Blockchain</a>).</li>
+<li>to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in this round (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a>).</li>
 </ul>
+
+<p>In order to allow miners to do the above, the system clock must:</p>
+
+<ol>
+<li>have low clock drift: at most on the order of 1s (i.e. markedly lower than epoch time) at any given time.</li>
+<li>maintain accurate network time over many epochs: resyncing and enforcing accurate network time.</li>
+<li>set epoch number on client initialization equal to <code>epoch ~= (current_time - genesis_time) / epoch_time</code></li>
+</ol>
+
+<p>It is expected that other subsystems will register to a NewRound() event from the clock subsystem.</p>
+
+<h2 id="clock-requirements">Clock Requirements</h2>
+
+<p>Computer-grade clock crystals can be expected to have drift rates on the order of <a href="https://www.hindawi.com/journals/jcnc/2008/583162/">1ppm</a> (i.e. 1 microsecond every second or .6 seconds a week), therefore, in order to respect the first above-requirement,</p>
+
+<ul>
+<li>clients SHOULD query an NTP server (<code>pool.ntp.org</code> is recommended) on an hourly basis to adjust clock skew.
+
+<ul>
+<li>We recommend one of the following:</li>
+<li><code>pool.ntp.org</code> (can be catered to a <a href="https://www.ntppool.org/zone">specific zone</a>)</li>
+<li><code>time.cloudflare.com:1234</code> (more on <a href="https://www.cloudflare.com/time/">Cloudflare time services</a>)</li>
+<li><code>time.google.com</code> (more on <a href="https://developers.google.com/time">Google Public NTP</a>)</li>
+<li><code>ntp-b.nist.gov</code> (<a href="https://tf.nist.gov/tf-cgi/servers.cgi">NIST</a> servers require registration)</li>
+<li>We further recommend making 3 measurements in order to drop by using the network to drop outliers</li>
+<li>See how <a href="https://github.com/ethereum/go-ethereum/blob/master/p2p/discv5/ntp.go">go-ethereum does this</a> for inspiration</li>
+</ul></li>
+<li>clients CAN consider using cesium clocks instead for accurate synchrony within larger mining operations</li>
+</ul>
+
+<p>Assuming a majority of rational participants, the above should lead to relatively low skew over time, with seldom more than 10-20% clock skew that should be rectified periodically by the network, as is the case in other networks. This assumption can be tested over time by ensuring that:</p>
+
+<ul>
+<li>(real-time) epoch time is as dictated by the protocol</li>
+<li>(historical) the current epoch number is as expected</li>
+</ul>
+
+<h2 id="future-work">Future work</h2>
+
+<p>If either of the above metrics show significant network skew over time, future versions of Filecoin may include potential timestamp/epoch correction periods at regular intervals.</p>
+
+<p>More generally, future versions of the Filecoin protocol will use Verifiable Delay Functions (VDFs) to strongly enforce block time and fulfill this leader election requirement; we choose to explicitly assume clock synchrony until hardware VDF security has been proven more extensively.</p>
 </article>
 
       
@@ -4626,6 +4721,19 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#clock-uses">Clock uses</a></li>
+<li><a href="#clock-requirements">Clock Requirements</a></li>
+<li><a href="#future-work">Future work</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 

@@ -1136,6 +1136,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3233,68 +3264,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -5132,11 +5101,26 @@ https://github.com/alex-shpak/hugo-book
 
 <p>An invariant of the storage power consensus subsystem is that all storage in the power table must be verified. That is, miners can only derive power from storage they have already proven to the network.</p>
 
-<p>In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector.
-Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.</p>
+<p>In order to achieve this, Filecoin delays updating power for new sector commitments until the first valid PoSt in the next proving period corresponding to that sector. (TODO: potential delay this further in order to ensure that any power cut goes undetected at most as long as the shortest power delay on new sector commitments).</p>
 
-<p>Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.
-Finally, we also account for &ldquo;suspended&rdquo; power in order to make accounting simple in the presence of faults (see <a href="../../../../../#algorithms__expected_consensus__consensus_faults">Consensus Faults</a>) and subsequent recovery.</p>
+<p>For instance, say a miner X does the following:
+- In epoch 100: commits 10 TB
+- In epoch 110: publishes a PoSt for their storage
+- In epoch 120: commits another 10TB
+- In epoch 135: publishes a new PoSt for their storage</p>
+
+<p>Querying the power table for this miner at different rounds should yield (using the following shorthand as an illustration only):
+- <code>Power(X, 90) == 0</code>
+- <code>Power(X, 100) == 0</code>
+- <code>Power(X, 110) == 0</code>
+- <code>Power(X, 111) == 10</code>
+- <code>Power(X, 120) == 10</code>
+- <code>Power(X, 135) == 10</code>
+- <code>Power(x, 136) == 20</code></p>
+
+<p>Conversely, storage faults only lead to power loss once they are detected (up to one proving period after the fault) so miners will mine with no more power than they have used to store data over time.</p>
+
+<p>Put another way, power accounting in the SPC is delayed between storage being proven or faulted, and power being updated in the power table (and so for leader election). This ensures fairness over time.</p>
 
 <p>The Miner lifecycle in the power table should be roughly as follows:
 - MinerRegistration: A new miner with an associated worker public key and address is registered on the power table by the storage mining subsystem, along with their associated sector size (there is only one per worker).

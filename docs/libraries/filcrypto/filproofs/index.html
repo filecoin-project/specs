@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4652,6 +4621,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelRounds</span> <span class="nx">UInt</span>
 <span class="kd">type</span> <span class="nx">ChungExpanderPermutationFeistelHashFunction</span> <span class="nx">enum</span> <span class="p">{</span>
     <span class="nx">Blake2S</span>
+    <span class="nx">SHA256</span>
 <span class="p">}</span>
 <span class="kd">type</span> <span class="nx">ChungExpanderAlpha</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">ChungExpanderBeta</span> <span class="kd">struct</span> <span class="p">{}</span>
@@ -4677,7 +4647,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="c1">// per-sector setup artifacts go here   
+<span class="c1">// per-sector setup artifacts go here
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSetupArtifacts</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">CommD</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
     <span class="nx">CommR</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span>
@@ -4722,7 +4692,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
 </span><span class="c1"></span>    <span class="nx">Curve</span>             <span class="nx">EllipticCurve</span>
     <span class="nx">SealCfg</span>           <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
-    <span class="nx">PostCfg</span>           <span class="nx">sector</span><span class="p">.</span><span class="nx">PostCfg</span>
+    <span class="nx">PoStCfg</span>           <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">DRGCfg</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4815,8 +4785,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 
-<span class="kd">type</span> <span class="nx">Blake2sHash</span> <span class="nx">Bytes32</span>
+<span class="kd">type</span> <span class="nx">SHA256Hash</span> <span class="nx">Bytes32</span>
 <span class="kd">type</span> <span class="nx">PedersenHash</span> <span class="nx">Bytes32</span>
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="kd">type</span> <span class="nx">UInt</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
@@ -4824,7 +4795,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">Label</span> <span class="nx">Bytes32</span>
 <span class="kd">type</span> <span class="nx">Commitment</span> <span class="p">=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
 
-<span class="kd">func</span> <span class="nf">SDRParams</span><span class="p">(</span><span class="nx">sealCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span><span class="p">,</span> <span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PostCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">StackedDRG_I</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">SDRParams</span><span class="p">(</span><span class="nx">sealCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span><span class="p">,</span> <span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">StackedDRG_I</span> <span class="p">{</span>
 	<span class="c1">// TODO: Bridge constants with orient model.
 </span><span class="c1"></span>	<span class="kd">const</span> <span class="nx">LAYERS</span> <span class="p">=</span> <span class="mi">10</span>
 	<span class="kd">const</span> <span class="nx">NODE_SIZE</span> <span class="p">=</span> <span class="mi">32</span>
@@ -4857,8 +4828,8 @@ https://github.com/alex-shpak/hugo-book
 					<span class="nx">PermutationAlgorithm_</span><span class="p">:</span> <span class="nf">ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">Feistel_I</span><span class="p">{</span>
 						<span class="nx">Keys_</span><span class="p">:</span>   <span class="nx">FEISTEL_KEYS</span><span class="p">[:],</span>
 						<span class="nx">Rounds_</span><span class="p">:</span> <span class="nx">FEISTEL_ROUNDS</span><span class="p">,</span>
-						<span class="nx">HashFunction_</span><span class="p">:</span> <span class="nf">ChungExpanderPermutationFeistelHashFunction_Make_Blake2S</span><span class="p">(</span>
-							<span class="o">&amp;</span><span class="nx">ChungExpanderPermutationFeistelHashFunction_Blake2S_I</span><span class="p">{}),</span>
+						<span class="nx">HashFunction_</span><span class="p">:</span> <span class="nf">ChungExpanderPermutationFeistelHashFunction_Make_SHA256</span><span class="p">(</span>
+							<span class="o">&amp;</span><span class="nx">ChungExpanderPermutationFeistelHashFunction_SHA256_I</span><span class="p">{}),</span>
 					<span class="p">}),</span>
 				<span class="p">}),</span>
 			<span class="nx">Degree_</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
@@ -4868,7 +4839,7 @@ https://github.com/alex-shpak/hugo-book
 			<span class="nx">FieldModulus_</span><span class="p">:</span> <span class="o">*</span><span class="nx">FIELD_MODULUS</span><span class="p">,</span>
 		<span class="p">},</span>
 		<span class="nx">SealCfg_</span><span class="p">:</span> <span class="nx">sealCfg</span><span class="p">,</span>
-		<span class="nx">PostCfg_</span><span class="p">:</span> <span class="nx">postCfg</span><span class="p">,</span>
+		<span class="nx">PoStCfg_</span><span class="p">:</span> <span class="nx">postCfg</span><span class="p">,</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -4972,7 +4943,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="kd">var</span> <span class="nx">allKeyLayers</span> <span class="p">[][]</span><span class="kt">byte</span>
 	<span class="kd">var</span> <span class="nx">replicas</span> <span class="p">[][]</span><span class="kt">byte</span>
 	<span class="kd">var</span> <span class="nx">sealSeeds</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span>
-	<span class="kd">var</span> <span class="nx">subsectorCommDs</span> <span class="p">[]</span><span class="nx">Blake2sHash</span>
+	<span class="kd">var</span> <span class="nx">subsectorCommDs</span> <span class="p">[]</span><span class="nx">SHA256Hash</span>
 	<span class="kd">var</span> <span class="nx">subsectorCommDTreePaths</span> <span class="p">[]</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
 
 	<span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">data</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">subsectorData</span> <span class="p">{</span>
@@ -5014,7 +4985,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">result</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">SealSubsector</span><span class="p">(</span><span class="nx">subsectorIndex</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">)</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span><span class="p">,</span> <span class="nx">Blake2sHash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">SealSubsector</span><span class="p">(</span><span class="nx">subsectorIndex</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">)</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span><span class="p">,</span> <span class="nx">SHA256Hash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">commD</span><span class="p">,</span> <span class="nx">commDTreePath</span> <span class="o">:=</span> <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
 	<span class="nx">sealSeed</span> <span class="o">:=</span> <span class="nf">computeSealSeed</span><span class="p">(</span><span class="nx">sid</span><span class="p">,</span> <span class="nx">subsectorIndex</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">commD</span><span class="p">)</span>
 	<span class="nx">nodeSize</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">sdr</span><span class="p">.</span><span class="nf">NodeSize</span><span class="p">())</span>
@@ -5121,7 +5092,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">deriveLabel</span><span class="p">(</span><span class="nx">elements</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">HashBytes_Blake2sHash</span><span class="p">(</span><span class="nx">elements</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">HashBytes_SHA256Hash</span><span class="p">(</span><span class="nx">elements</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">computeCommC</span><span class="p">(</span><span class="nx">keyLayers</span> <span class="p">[][]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">nodeSize</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">PedersenHash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
@@ -5331,7 +5302,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">CommC</span>     <span class="nx">Commitment</span>
 
 	<span class="c1">// TODO: these proofs need to depend on hash function.
-</span><span class="c1"></span>	<span class="nx">DataProofs</span>   <span class="p">[]</span><span class="nx">InclusionProof</span> <span class="c1">// Blake2s
+</span><span class="c1"></span>	<span class="nx">DataProofs</span>   <span class="p">[]</span><span class="nx">InclusionProof</span> <span class="c1">// SHA256
 </span><span class="c1"></span>	<span class="nx">ColumnProofs</span> <span class="p">[]</span><span class="nx">SDRColumnProof</span>
 	<span class="nx">ReplicaProof</span> <span class="nx">SDRColumnProof</span> <span class="c1">// Pedersen
 </span><span class="c1"></span>
@@ -5405,7 +5376,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">bytes</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">bytes</span><span class="p">,</span> <span class="nx">randomness</span><span class="o">...</span><span class="p">)</span>
 		<span class="nx">bytes</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">bytes</span><span class="p">,</span> <span class="nf">littleEndianBytesFromInt</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">nodeSize</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
 
-		<span class="nx">hash</span> <span class="o">:=</span> <span class="nf">HashBytes_Blake2sHash</span><span class="p">(</span><span class="nx">bytes</span><span class="p">)</span>
+		<span class="nx">hash</span> <span class="o">:=</span> <span class="nf">HashBytes_SHA256Hash</span><span class="p">(</span><span class="nx">bytes</span><span class="p">)</span>
 		<span class="nx">bigChallenge</span> <span class="o">:=</span> <span class="nf">bigIntFromLittleEndianBytes</span><span class="p">(</span><span class="nx">hash</span><span class="p">)</span>
 		<span class="nx">bigChallenge</span> <span class="p">=</span> <span class="nx">bigChallenge</span><span class="p">.</span><span class="nf">Mod</span><span class="p">(</span><span class="nx">bigChallenge</span><span class="p">,</span> <span class="nx">challengeModulus</span><span class="p">)</span>
 
@@ -5542,7 +5513,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">left</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">==</span> <span class="nx">right</span><span class="p">.</span><span class="nf">Size</span><span class="p">())</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo_I</span><span class="p">{</span>
 		<span class="nx">Size_</span><span class="p">:</span>  <span class="nx">left</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">+</span> <span class="nx">right</span><span class="p">.</span><span class="nf">Size</span><span class="p">(),</span>
-		<span class="nx">CommP_</span><span class="p">:</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nf">BinaryHash_Blake2sHash</span><span class="p">(</span><span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">left</span><span class="p">.</span><span class="nf">CommP</span><span class="p">()),</span> <span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">right</span><span class="p">.</span><span class="nf">CommP</span><span class="p">()))),</span> <span class="c1">// FIXME: make this whole function generic?
+		<span class="nx">CommP_</span><span class="p">:</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nf">BinaryHash_SHA256Hash</span><span class="p">(</span><span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">left</span><span class="p">.</span><span class="nf">CommP</span><span class="p">()),</span> <span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">right</span><span class="p">.</span><span class="nf">CommP</span><span class="p">()))),</span> <span class="c1">// FIXME: make this whole function generic?
 </span><span class="c1"></span>	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -5558,7 +5529,21 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoSt</span><span class="p">(</span><span class="nx">challengedSector</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">challenges</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">,</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStWitness</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span> <span class="p">{</span>
+	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
+	<span class="kd">var</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
+
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sector</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">challengedSectors</span> <span class="p">{</span>
+		<span class="nx">proofAux</span> <span class="o">:=</span> <span class="nx">sectorStore</span><span class="p">.</span><span class="nf">GetSectorProofAux</span><span class="p">(</span><span class="nx">sector</span><span class="p">)</span>
+		<span class="nx">proofAuxs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofAuxs</span><span class="p">,</span> <span class="nx">proofAux</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">_</span> <span class="p">=</span> <span class="nx">challenges</span>
+
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">witness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5576,9 +5561,9 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">PedersenHash</span><span class="p">{}</span>
 <span class="p">}</span>
 
-<span class="c1">// BinaryHash&lt;Blake2sHash&gt;
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BinaryHash_Blake2sHash</span><span class="p">(</span><span class="nx">left</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">right</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Blake2sHash</span> <span class="p">{</span>
-	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">Blake2sHash</span><span class="p">{}</span>
+<span class="c1">// BinaryHash&lt;SHA256Hash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BinaryHash_SHA256Hash</span><span class="p">(</span><span class="nx">left</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">right</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">SHA256Hash</span> <span class="p">{</span>
+	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">SHA256Hash</span><span class="p">{}</span>
 	<span class="k">return</span> <span class="nf">trimToFr32</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5595,10 +5580,10 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">PedersenHash</span><span class="p">{}</span>
 <span class="p">}</span>
 
-<span class="c1">// HashBytes&lt;Blake2sHash.
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">HashBytes_Blake2sHash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">Blake2sHash</span> <span class="p">{</span>
+<span class="c1">// HashBytes&lt;SHA256Hash.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">HashBytes_SHA256Hash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">SHA256Hash</span> <span class="p">{</span>
 	<span class="c1">// Digest is truncated to 254 bits.
-</span><span class="c1"></span>	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">Blake2sHash</span><span class="p">{}</span>
+</span><span class="c1"></span>	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">SHA256Hash</span><span class="p">{}</span>
 	<span class="k">return</span> <span class="nf">trimToFr32</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5612,7 +5597,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="mi">32</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">DigestSize_Blake2sHash</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">DigestSize_SHA256Hash</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="mi">32</span>
 <span class="p">}</span>
 
@@ -5661,8 +5646,8 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">PedersenHash</span><span class="p">{},</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Path</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// FIXME
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="c1">//  BuildTree&lt;Blake2sHash&gt;
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BuildTree_Blake2sHash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">Blake2sHash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+<span class="c1">//  BuildTree&lt;SHA256Hash&gt;
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">BuildTree_SHA256Hash</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">SHA256Hash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{},</span> <span class="nx">file</span><span class="p">.</span><span class="nf">Path</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// FIXME
 </span><span class="c1"></span><span class="p">}</span>
 
@@ -5678,7 +5663,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nx">data</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nx">h</span> <span class="nx">Blake2sHash</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nx">h</span> <span class="nx">SHA256Hash</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;not implemented -- re-arrange bits&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5696,13 +5681,13 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// TODO: make hash parameterizable
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">BuildTree_Blake2sHash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">BuildTree_SHA256Hash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// Compute CommP or CommD.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">ComputeUnsealedSectorCID</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// TODO: check that len(data) &gt; minimum piece size and is a power of 2.
-</span><span class="c1"></span>	<span class="nx">hash</span><span class="p">,</span> <span class="nx">treePath</span> <span class="o">:=</span> <span class="nf">BuildTree_Blake2sHash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">hash</span><span class="p">,</span> <span class="nx">treePath</span> <span class="o">:=</span> <span class="nf">BuildTree_SHA256Hash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nx">hash</span><span class="p">),</span> <span class="nx">treePath</span>
 <span class="p">}</span>
 

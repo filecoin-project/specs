@@ -2,7 +2,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
     // actor                StoragePowerActor
@@ -16,6 +16,11 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
 
+    IsWinningElectionProof(
+        electionProof  block.ElectionProof
+        workerAddr     addr.Address
+    ) bool
+
     validateElectionProof(
         height         block.ChainEpoch
         electionProof  block.ElectionProof
@@ -24,9 +29,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey) bool
 
-    computeTipsetWeight(tipset block.Tipset) block.ChainWeight
-
-    IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool
+    computeChainWeight(tipset block.Tipset) block.ChainWeight
 
     StoragePowerConsensusError() StoragePowerConsensusError
 
@@ -44,12 +47,8 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by StorageMiningSubsystem after sealing
     GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) base_mining.PoStChallenge
 
-    GetFinality() block.ChainEpoch
-}
-
-type ExpectedConsensus struct {
-    ComputeWeight(chain block.Chain) block.ChainWeight
-    IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
+    GetFinality()     block.ChainEpoch
+    FinalizedEpoch()  block.ChainEpoch
 }
 
 type StoragePowerConsensusError struct {}

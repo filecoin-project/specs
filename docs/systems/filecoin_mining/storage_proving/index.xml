@@ -11,16 +11,6 @@
     
     
     <item>
-      <title>PoSt Generator</title>
-      <link>/docs/systems/filecoin_mining/storage_proving/post_generator/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_mining/storage_proving/post_generator/</guid>
-      <description>Block miners should constantly be performing Proofs of SpaceTime, and also checking if they have a winning ticket to propose a block at each height/in each round. Rounds are currently set to take around 30 seconds, in order to account for network propagation around the world. The details of both processes are defined here.
-The Miner Actor After successfully calling CreateStorageMiner, a miner actor will be created on-chain, and registered in the storage market.</description>
-    </item>
-    
-    <item>
       <title>Sector Sealer</title>
       <link>/docs/systems/filecoin_mining/storage_proving/sector_sealer/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

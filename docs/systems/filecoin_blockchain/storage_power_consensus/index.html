@@ -1137,6 +1137,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3234,68 +3265,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4581,11 +4550,11 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
 
 <p><div id="systems__filecoin_blockchain__storage_power_consensus__storage_power_consensus"></div>
-The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners&rsquo; effective power over consensus in given chains in its <em>Power Table</em>. It also runs <a href="../../../../#algorithms__expected_consensus">Expected Consensus</a> (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.</p>
+The Storage Power Consensus subsystem is the main interface which enables Filecoin nodes to agree on the state of the system. SPC accounts for individual storage miners&rsquo; effective power over consensus in given chains in its <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__power_table">Power Table</a>. It also runs <a href="../../../../#algorithms__expected_consensus___index">Expected Consensus</a> (the underlying consensus algorithm in use by Filecoin), enabling storage miners to run leader election and generate new blocks updating the state of the Filecoin system.</p>
 
 <p>Succinctly, the SPC subsystem offers the following services:
-- Access to the <em>Power Table</em> for every subchain, accounting for individual storage miner power and total power on-chain.
-- Access to <a href="../../../../#algorithms__expected_consensus">Expected Consensus</a> for individual storage miners, enabling:
+- Access to the <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__power_table">Power Table</a> for every subchain, accounting for individual storage miner power and total power on-chain.
+- Access to <a href="../../../../#algorithms__expected_consensus___index">Expected Consensus</a> for individual storage miners, enabling:
     - Access to verifiable randomness <a href="../../../../#algorithms__expected_consenus__tickets">Tickets</a> as needed in the rest of the protocol.
     - Running  <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to produce new blocks.
     - Running <a href="../../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> across subchains using EC&rsquo;s weighting function.
@@ -4616,7 +4585,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">base_mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/filcrypto&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
 </span><span class="c1"></span>    <span class="c1">// actor                StoragePowerActor
@@ -4630,6 +4599,11 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
+    <span class="nf">IsWinningElectionProof</span><span class="p">(</span>
+        <span class="nx">electionProof</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
+        <span class="nx">workerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+
     <span class="nf">validateElectionProof</span><span class="p">(</span>
         <span class="nx">height</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">electionProof</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
@@ -4638,9 +4612,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
     <span class="nf">validateTicket</span><span class="p">(</span><span class="nx">tix</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">computeTipsetWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
-
-    <span class="nf">IsWinningElectionProof</span><span class="p">(</span><span class="nx">electionProof</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">computeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
 
     <span class="nf">StoragePowerConsensusError</span><span class="p">()</span> <span class="nx">StoragePowerConsensusError</span>
 
@@ -4658,12 +4630,8 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="c1">// call by StorageMiningSubsystem after sealing
 </span><span class="c1"></span>    <span class="nf">GetPoStChallenge</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">base_mining</span><span class="p">.</span><span class="nx">PoStChallenge</span>
 
-    <span class="nf">GetFinality</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">ExpectedConsensus</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">ComputeWeight</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
-    <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">])</span> <span class="kt">bool</span>
+    <span class="nf">GetFinality</span><span class="p">()</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nf">FinalizedEpoch</span><span class="p">()</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusError</span> <span class="kd">struct</span> <span class="p">{}</span>
@@ -4696,7 +4664,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 
 <p>Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
 - The <a href="../../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a> uses tickets as SealSeeds to bind sector commitments to a given subchain.
-- The <a href="../../../../#systems__filecoin_mining__storage_proving__post_generator">PoSt Generator</a> likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
+- The <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a> likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
 - They are drawn by the Storage Power subsystem as randomness in <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> to determine their eligibility to mine a block
 - They are drawn by the Storage Power subsystem in order to generate new tickets for future use.</p>
 

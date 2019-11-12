@@ -1136,6 +1136,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_nodes__key_store" class="menu-item depth-3">
+    
+    
+        Key Store
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-3">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -3233,68 +3264,6 @@ https://github.com/alex-shpak/hugo-book
 
     <li>
     
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto" class="menu-item depth-2">
-    
-    
-        filcrypto
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-2">
-
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<a href="../../../../../#libraries__filcrypto__filproofs" class="menu-item depth-3">
-    
-    
-        filproofs
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-3">
-
-</ul>
-
-
-    
-    </li>
-
-</ul>
-
-
-    
     </li>
 
     <li>
@@ -4659,7 +4628,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// a.actors is basically a static registry for now, loaded
 </span><span class="c1"></span>    <span class="c1">// in the interpreter static registry.
 </span><span class="c1"></span>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Actors</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">SendAllowingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
             <span class="nx">To_</span><span class="p">:</span>     <span class="nx">a</span><span class="p">,</span>
             <span class="nx">Method_</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodCron</span><span class="p">,</span>
             <span class="nx">Params_</span><span class="p">:</span> <span class="p">[]</span><span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParam</span><span class="p">{},</span>

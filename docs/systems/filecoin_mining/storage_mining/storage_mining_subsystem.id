@@ -1,6 +1,6 @@
 import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import filcrypto "github.com/filecoin-project/specs/libraries/filcrypto"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -8,6 +8,7 @@ import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
+import key_store "github.com/filecoin-project/specs/systems/filecoin_nodes/key_store"
 
 type StorageMiningSubsystem struct {
     // TODO: constructor
@@ -19,14 +20,18 @@ type StorageMiningSubsystem struct {
     MinerActor         StorageMinerActorCode
     SectorIndex        sectoridx.SectorIndexerSubsystem
     StorageProving     storage_proving.StorageProvingSubsystem
-    BlockProducer      blockproducer.BlockProducer
-    miningHeight       block.ChainEpoch
+
+    // Need access to block producer in order to publish blocks
+    blockProducer      blockproducer.BlockProducer
 
     // Need access to SPC in order to mine a block
-    Consensus          spc.StoragePowerConsensusSubsystem
+    consensus          spc.StoragePowerConsensusSubsystem
 
     // Need access to the blockchain system in order to query for things in the chain
-    Blockchain         blockchain.BlockchainSubsystem
+    blockchain         blockchain.BlockchainSubsystem
+
+    // Need access to the key store in order to generate tickets and election proofs
+    keyStore           key_store.KeyStore
 
     // TODO: why are these here? remove?
     StartMining()
@@ -34,13 +39,13 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself to create miner
     createMiner(
-        ownerPubKey   filcrypto.PubKey
-        workerPubKey  filcrypto.PubKey
+        ownerPubKey   filcrypto.PublicKey
+        workerPubKey  filcrypto.PublicKey
         pledgeAmt     actor.TokenAmount
     )
 
     // get miner key by address
-    GetMinerKeyByAddress(addr address.Address) filcrypto.PubKey
+    GetMinerKeyByAddress(addr address.Address) filcrypto.PublicKey
 
     // call by StorageMarket.StorageProvider at the start of a deal.
     // Triggers AddNewDeal on SectorIndexer
