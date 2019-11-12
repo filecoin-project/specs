@@ -10,5 +10,6 @@ type StorageAsk struct {
     Miner         addr.Address
     Timestamp     block.ChainEpoch
     MaxDuration   block.ChainEpoch
+    MinDuration   block.ChainEpoch
     SeqNo         uint64
 }
