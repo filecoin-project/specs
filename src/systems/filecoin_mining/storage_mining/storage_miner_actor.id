@@ -92,6 +92,11 @@ type StorageMinerActorState struct {
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateSectorUtilization(rt Runtime) [deal.DealID]
 
+    _getDealSlashInfoFromSectors(
+        rt             Runtime
+        sectorNumbers  [sector.SectorNumber]
+        action         deal.StorageDealSlashAction
+    ) deal.BatchDealSlashInfo
     _getActivePower(rt Runtime) block.StoragePower
     _getInactivePower(rt Runtime) block.StoragePower
 }
