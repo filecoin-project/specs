@@ -1,16 +1,15 @@
 package storage_market
 
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import util "github.com/filecoin-project/specs/util"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import util "github.com/filecoin-project/specs/util"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 const (
 	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
@@ -336,18 +335,8 @@ func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSi
 
 	Release(rt, h, st)
 
-	SPS := new(proving.StorageProvingSubsystem_I)
-	ret := SPS.ComputeUnsealedSectorCID(sectorSize, pieceInfos)
-
-	switch ret.Which() {
-	case proving.StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet_Case_unsealedSectorCID:
-		return rt.ValueReturn(util.Bytes(sector.UnsealedSectorCID(ret.As_unsealedSectorCID())))
-	case proving.StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet_Case_err:
-		return rt.ErrorReturn(exitcode.InvalidSectorPacking)
-	}
-
-	// Unreachable -- just make the compiler happy.
-	return rt.ErrorReturn(exitcode.SystemError(exitcode.MethodSubcallError))
+	cid, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
+	return rt.ValueReturn(util.Bytes(cid))
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {

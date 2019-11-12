@@ -3,16 +3,16 @@ package storage_mining
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-import proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -595,7 +595,12 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 	// This assumes the raw bytes have been passed unmodified through the VM.
 	var unsealedCID sector.UnsealedSectorCID = sector.UnsealedSectorCID(ret)
 
-	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
+	sealCfg := sector.SealCfg_I{
+		SectorSize_:     sectorSize,
+		SubsectorCount_: st.Info().SubsectorCount(),
+		Partitions_:     st.Info().Partitions(),
+	}
+	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
 			MinerID_: st.Info().Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
 			Number_:  onChainInfo.SectorNumber(),
@@ -603,17 +608,14 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 		OnChain_: onChainInfo,
 
 		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
-		SealCfg_: &sector.SealCfg_I{
-			SectorSize_:     sectorSize,
-			SubsectorCount_: st.Info().SubsectorCount(),
-			Partitions_:     st.Info().Partitions(),
-		},
+		SealCfg_: &sealCfg,
 
 		Randomness_:            sector.SealRandomness(rt.Randomness(onChainInfo.SealEpoch(), 0)),
 		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
 		UnsealedCID_:           unsealedCID,
-	})
-	return false // TODO: finish
+	}
+	sdr := filproofs.SDRParams(&sealCfg, nil)
+	return sdr.VerifySeal(&svInfo)
 }
 
 func (st *StorageMinerActorState_I) _sectorExists(sectorNo sector.SectorNumber) bool {
