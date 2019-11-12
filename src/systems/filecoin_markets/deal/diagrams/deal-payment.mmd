@@ -1,0 +1,22 @@
+sequenceDiagram
+participant StorageMiningSubsystem
+participant StorageMinerActor
+participant StorageMarketActor
+StorageMiningSubsystem -->+ StorageMarketActor: PublishStorageDeals
+StorageMarketActor -->> StorageMarketActor: _validateNewStorageDeal
+StorageMarketActor -->> StorageMarketActor: _lockBalance
+StorageMarketActor --> StorageMarketActor: _generateStorageDealID
+StorageMarketActor -->- StorageMiningSubsystem: DealIDs
+StorageMiningSubsystem --> StorageMinerActor: PreCommitSector
+StorageMinerActor -->+ StorageMarketActor: VerifyPublishedDealIDs(dealIDs)
+StorageMarketActor -->- StorageMinerActor: Success
+
+StorageMiningSubsystem -->> StorageMinerActor: ProveCommitSector
+StorageMinerActor -->> StorageMarketActor: ActivateSectorDealIDs(dealIDs)
+StorageMinerActor -->> StorageMarketActor: GetInitialUtilizationInfo(dealIDs)
+StorageMiningSubsystem -->> StorageMinerActor: CreditSectorDealPayment(sectorNo)
+StorageMinerActor -->> StorageMarketActor: ProcessSectorDealPayment(batchPayment)
+StorageMinerActor -->> StorageMinerActor: _submitPowerReport(if deal expires)
+StorageMinerActor -->> StorageMarketActor: ProcessSectorDealPayment(batchPayment)
+StorageMinerActor -->> StorageMinerActor: _submitFaultReport
+StorageMinerActor -->> StorageMarketActor: ProcessSectorDealSlash(batchSlash)
