@@ -45,7 +45,7 @@ This section should contain:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/node/</guid>
-      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.Clock }  </description>
+      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.UTCClock }  </description>
     </item>
     
     <item>
