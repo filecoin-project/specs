@@ -1,6 +1,6 @@
 ---
 title: Clock
-statusIcon: ⚠️
+statusIcon: ✅
 ---
 
 {{< readfile file="clock_subsystem.id" code="true" lang="go" >}}

@@ -14,7 +14,7 @@ type SyncState union {
 }
 
 type BlockchainSubsystem struct @(mutable) {
-    Clock              &clock.Clock
+    Clock              &clock.UTCClock
 
     LatestEpoch()      block.ChainEpoch
     BestChain()        block.Chain
