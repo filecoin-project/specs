@@ -14,7 +14,7 @@ type PoStCfg struct {
 
 type PoStType enum {
     ElectionPoSt
-    PeriodicPoSt
+    SurprisePoSt
 }
 
 type PoStVerifyInfo struct {

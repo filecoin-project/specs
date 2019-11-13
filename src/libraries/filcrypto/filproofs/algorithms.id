@@ -90,13 +90,13 @@ type StackedDRG struct {
     Cfg               SDRCfg
     SealCfg           sector.SealCfg
     ElectionPoStCfg   sector.PoStCfg
-    PeriodicPoStCfg   sector.PoStCfg
+    SurprisePoStCfg   sector.PoStCfg
 }
 
 type SDRCfg struct {
     SealCfg          sector.SealCfg
     ElectionPoStCfg  sector.PoStCfg
-    PeriodicPoStCfg  sector.PoStCfg
+    SurprisePoStCfg  sector.PoStCfg
 }
 
 type DRGCfg struct {

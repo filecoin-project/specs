@@ -39,13 +39,13 @@ func GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) secto
 }
 
 // This likely belongs elsewhere, but I'm not exactly sure where and wanted to encapsulate the proofs-related logic here. So this can be thought of as example usage.
-// ticketThreshold is lowest eligible winning ticket (endianness?) for this PoSt. (Maybe should be 1+ the lowest. Define.)
+// ticketThreshold is lowest non-winning ticket (endianness?) for this PoSt.
 func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore, ticketThreshold sector.ElectionTicket) sector.PoStProof {
 	candidates := GeneratePoStCandidates(postCfg, challengeSeed, faults, sectors, sectorStore)
 	var winners []sector.ElectionCandidate
 
 	for _, candidate := range candidates {
-		if candidate.Ticket().Meets(ticketThreshold) {
+		if candidate.Ticket().IsBelow(ticketThreshold) {
 			winners = append(winners, candidate)
 		}
 	}
@@ -65,9 +65,9 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I)
 		cfg = filproofs.SDRCfg_I{
 			ElectionPoStCfg_: postCfg,
 		}
-	case sector.PoStType_PeriodicPoSt:
+	case sector.PoStType_SurprisePoSt:
 		cfg = filproofs.SDRCfg_I{
-			PeriodicPoStCfg_: postCfg,
+			SurprisePoStCfg_: postCfg,
 		}
 	}
 

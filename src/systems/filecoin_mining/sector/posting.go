@@ -1,5 +1,5 @@
 package sector
 
-func (t ElectionTicket) Meets(threshold ElectionTicket) bool {
+func (t ElectionTicket) IsBelow(threshold ElectionTicket) bool {
 	panic("TODO")
 }
