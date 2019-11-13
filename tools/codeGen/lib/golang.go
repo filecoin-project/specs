@@ -319,7 +319,7 @@ func GenAST(x GoNode) ast.Node {
 			for _, ri := range rr.elementTypes {
 				goResultFields = append(goResultFields, &ast.Field{
 					Names: nil,
-					Type: GenAST(ri).(ast.Expr),
+					Type:  GenAST(ri).(ast.Expr),
 				})
 			}
 		default:
@@ -518,8 +518,8 @@ func GenGoPanicTodoBody() []GoNode {
 	ret := []GoNode{
 		GoStmtExpr{
 			expr: GoExprCall{
-				f: GoIdent{ name: "panic" },
-				args: []GoNode{ GoExprLitStr { str: "TODO" }, },
+				f:    GoIdent{name: "panic"},
+				args: []GoNode{GoExprLitStr{str: "TODO"}},
 			},
 		},
 	}

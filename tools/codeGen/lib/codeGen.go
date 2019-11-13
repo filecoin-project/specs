@@ -561,9 +561,9 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 		}
 
 		serializeDecl := GoFunDecl{
-			receiverVar: nil,
+			receiverVar:  nil,
 			receiverType: nil,
-			funName: "Serialize_" + name,
+			funName:      "Serialize_" + name,
 			funType: GoFunType{
 				args: []GoField{
 					GoField{
@@ -573,14 +573,14 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				},
 				retType: TranslateGoIdent("Serialization", ctx),
 			},
-			funArgs: []GoNode{ GoIdent{ name: "x" }, },
+			funArgs: []GoNode{GoIdent{name: "x"}},
 			funBody: GenGoPanicTodoBody(),
 		}
 
 		deserializeDecl := GoFunDecl{
-			receiverVar: nil,
+			receiverVar:  nil,
 			receiverType: nil,
-			funName: "Deserialize_" + name,
+			funName:      "Deserialize_" + name,
 			funType: GoFunType{
 				args: []GoField{
 					GoField{
@@ -588,14 +588,14 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 						fieldType: TranslateGoIdent("Serialization", ctx),
 					},
 				},
-				retType: GoTupleType {
-					elementTypes: []GoNode {
+				retType: GoTupleType{
+					elementTypes: []GoNode{
 						interfaceID,
-						GoIdent{ name: "error" },
+						GoIdent{name: "error"},
 					},
 				},
 			},
-			funArgs: []GoNode{ GoIdent{ name: "x" }, },
+			funArgs: []GoNode{GoIdent{name: "x"}},
 			funBody: GenGoPanicTodoBody(),
 		}
 

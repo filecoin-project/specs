@@ -8,7 +8,7 @@ const (
 	MethodCron        = MethodNum(2)
 
 	// TODO: remove this once canonical method numbers are finalized
-	MethodPlaceholder = MethodNum(-1)
+	MethodPlaceholder = MethodNum(-(1 << 30))
 )
 
 func (st *ActorState_I) CID() ipld.CID {

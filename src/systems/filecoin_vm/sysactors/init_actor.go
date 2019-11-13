@@ -8,12 +8,18 @@ import util "github.com/filecoin-project/specs/util"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
+const (
+	Method_InitActor_Exec = actor.MethodPlaceholder + iota
+	Method_InitActor_GetActorIDForAddress
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
 type InvocOutput = msg.InvocOutput
 type Runtime = vmr.Runtime
 type Bytes = util.Bytes
+type Serialization = util.Serialization
 
 func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
@@ -55,9 +61,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeCID actor.CodeCID, constructorPar
 		rt.Abort("cannot launch actor instance that is not a builtin actor")
 	}
 
-	// Ensure that singeltons can only be launched once.
-	// TODO: do we want to enforce this? yes
-	//       If so how should actors be marked as such? in the method below (statically)
+	// Ensure that singletons can only be launched once.
 	if a._isSingletonActor(codeCID) {
 		rt.Abort("cannot launch another actor of this type")
 	}
@@ -154,25 +158,52 @@ func (_ *InitActorCode_I) _isBuiltinActor(codeCID actor.CodeCID) bool {
 	// 	codeCID == PaymentChannelActor
 }
 
-// TODO
+func Deserialize_CodeCID(Serialization) (actor.CodeCID, error) {
+	panic("TODO")
+}
+
 func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	// TODO: load state
-	// var state InitActorState
-	// storage := input.Runtime().State().Storage()
-	// err := loadActorState(storage, input.ToActor().State(), &state)
+	argError := rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidArguments))
 
 	switch method {
-	// case 0: -- disable: value send
-	case 1:
+	// case actor.MethodSend:
+	//     disable
+
+	case actor.MethodConstructor:
+		if len(params) != 0 {
+			return argError
+		}
 		return a.Constructor(rt)
-	// case 2: -- disable: cron. init has no cron action
-	case 3:
-		var codeid actor.CodeCID // TODO: cast params[0]
+
+	// case actor.MethodCron:
+	//     disable. init has no cron action
+
+	case Method_InitActor_Exec:
+		if len(params) == 0 {
+			return argError
+		}
+		codeId, err := Deserialize_CodeCID(Serialization(params[0]))
+		if err != nil {
+			return argError
+		}
 		params = params[1:]
-		return a.Exec(rt, codeid, params)
-	case 4:
-		var address addr.Address // TODO: cast params[0]
+		return a.Exec(rt, codeId, params)
+
+	case Method_InitActor_GetActorIDForAddress:
+		if len(params) == 0 {
+			return argError
+		}
+		address, err := addr.Deserialize_Address(Serialization(params[0]))
+		if err != nil {
+			return argError
+		}
+		params = params[1:]
+
+		if len(params) != 0 {
+			return argError
+		}
 		return a.GetActorIDForAddress(rt, address)
+
 	default:
 		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
 	}

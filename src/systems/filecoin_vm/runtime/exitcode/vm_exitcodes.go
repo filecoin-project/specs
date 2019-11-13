@@ -6,47 +6,54 @@ import (
 	"fmt"
 )
 
-type SystemErrorCode util.UVarint
+type SystemErrorCode util.Int
+
+const (
+	// TODO: remove once canonical error codes are finalized
+	SystemErrorCode_Placeholder = SystemErrorCode(-(1 << 30))
+)
 
 // TODO: assign all of these.
-var (
-	// // OK is the success return value, similar to unix exit code 0.
-	// OK = SystemErrorCode(0)
-
+const (
 	// ActorNotFound represents a failure to find an actor.
-	ActorNotFound = SystemErrorCode(1)
+	ActorNotFound = SystemErrorCode_Placeholder + iota
 
 	// ActorCodeNotFound represents a failure to find the code for a
 	// particular actor in the VM registry.
-	ActorCodeNotFound = SystemErrorCode(2)
+	ActorCodeNotFound
 
 	// InvalidMethod represents a failure to find a method in
 	// an actor
-	InvalidMethod = SystemErrorCode(3)
+	InvalidMethod
+
+	// InvalidArguments indicates that a method was called with the incorrect
+	// number of arguments, or that its arguments did not satisfy its
+	// preconditions
+	InvalidArguments
 
 	// InsufficientFunds represents a failure to apply a message, as
 	// it did not carry sufficient funds for its application.
-	InsufficientFunds = SystemErrorCode(4)
+	InsufficientFunds
 
 	// InvalidCallSeqNum represents a message invocation out of sequence.
 	// This happens when message.CallSeqNum is not exactly actor.CallSeqNum + 1
-	InvalidCallSeqNum = SystemErrorCode(5)
+	InvalidCallSeqNum
 
 	// OutOfGasError is returned when the execution of an actor method
 	// (including its subcalls) uses more gas than initially allocated.
-	OutOfGas = SystemErrorCode(6)
+	OutOfGas
 
 	// RuntimeAPIError is returned when an actor method invocation makes a call
 	// to the runtime that does not satisfy its preconditions.
-	RuntimeAPIError = SystemErrorCode(7)
+	RuntimeAPIError
 
 	// MethodPanic is returned when an actor method invocation calls rt.Abort.
-	MethodAbort = SystemErrorCode(8)
+	MethodAbort
 
 	// MethodSubcallError is returned when an actor method's Send call has
 	// returned with a failure error code (and the Send call did not specify
 	// to ignore errors).
-	MethodSubcallError = SystemErrorCode(9)
+	MethodSubcallError
 )
 
 var (
