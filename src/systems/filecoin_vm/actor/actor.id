@@ -22,7 +22,7 @@ type TokenAmount UVarint  // TODO: bigint or varint?
 // still remain defined in the code to ensure the tag number is not
 // reused accidentally. The same should apply to the MethodNum
 // associated with methods in Filecoin VM Actors.
-type MethodNum UVarint
+type MethodNum Int
 
 // MethodParams is an array of objects to pass into a method. This
 // is the list of arguments/parameters.
