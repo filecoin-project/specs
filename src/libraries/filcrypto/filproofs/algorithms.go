@@ -21,6 +21,29 @@ type PieceInfo = *sector.PieceInfo_I
 type Label Bytes32
 type Commitment = sector.Commitment
 
+func WinSDRParams(cfg SDRCfg) *WindowedStackedDRG_I {
+	inner := SDRParams(cfg)
+	innerSealCfg := cfg.SealCfg()
+
+	outerSealCfg := sector.SealCfg_I{
+		SubsectorCount_: 1,
+		SectorSize_:     innerSealCfg.SectorSize(),
+		Partitions_:     innerSealCfg.Partitions(),
+	}
+
+	outerCfg := SDRCfg_I{
+		SealCfg_:         &outerSealCfg,
+		ElectionPoStCfg_: cfg.ElectionPoStCfg(),
+		SurprisePoStCfg_: cfg.SurprisePoStCfg(),
+	}
+
+	outer := SDRParams(&outerCfg)
+	return &WindowedStackedDRG_I{
+		Inner_: inner,
+		Outer_: outer,
+	}
+}
+
 func SDRParams(cfg SDRCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
