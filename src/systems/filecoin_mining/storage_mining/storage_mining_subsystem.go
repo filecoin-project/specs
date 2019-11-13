@@ -7,8 +7,14 @@ import (
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+<<<<<<< HEAD
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+=======
+	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+>>>>>>> On-chain message serialization APIs
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -123,4 +129,65 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	}
 
 	return newTicket
+}
+
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(randomness block.Randomness, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
+	panic("")
+	// // 0. Prepare new election proof
+	// var newEP ElectionProof
+
+	// // 1. Run it through VRF and get determinstic output
+	// // 1.i. # take the VRFOutput of that ticket as input, specified for the appropriate operation type
+	// var input []byte
+	// input = append (input, filcrypto.ElectionTag)
+	// input = append(input, lookbackTicket.Output)
+	// input = append(input, height)
+	// // ii. # run it through the VRF and store the VRFProof in the new ticket
+	// newEP.VRFResult := vrfKP.Generate(input)
+	// return newEP
+}
+
+func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {
+	var workerAddress addr.Address
+	var workerKeyPair filcrypto.SigKeyPair
+	panic("TODO") // TODO: get worker address and key pair
+
+	// TODO: is this just workerAddress, or is there a separation here
+	// (worker is AccountActor, workerMiner is StorageMinerActor)?
+	var workerMinerActorAddress addr.Address
+	panic("TODO")
+
+	var gasPrice msg.GasPrice
+	var gasLimit msg.GasAmount
+	panic("TODO") // TODO: determine gas price and limit
+
+	var callSeqNum actor.CallSeqNum
+	panic("TODO") // TODO: retrieve CallSeqNum from worker
+
+	messageParams := actor.MethodParams([]actor.MethodParam{
+		actor.MethodParam(poster.Serialize_PoStSubmission(postSubmission)),
+	})
+
+	unsignedMessage := msg.UnsignedMessage_Make(
+		workerAddress,
+		workerMinerActorAddress,
+		Method_StorageMinerActor_SubmitPoSt,
+		messageParams,
+		callSeqNum,
+		actor.TokenAmount(0),
+		gasPrice,
+		gasLimit,
+	)
+
+	signedMessage, err := msg.Sign(unsignedMessage, workerKeyPair)
+	if err != nil {
+		return err
+	}
+
+	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

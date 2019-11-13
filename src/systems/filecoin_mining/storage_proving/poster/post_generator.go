@@ -4,8 +4,6 @@ import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -64,4 +62,12 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG
 	}
 
 	return filproofs.WinSDRParams(&cfg)
+}
+
+func Serialize_PoStSubmission(x PoStSubmission) Serialization {
+	panic("TODO")
+}
+
+func Deserialize_PoStSubmission(x Serialization) (PoStSubmission, error) {
+	panic("TODO")
 }

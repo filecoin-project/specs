@@ -1,10 +1,15 @@
 package message
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import util "github.com/filecoin-project/specs/util"
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+
+	util "github.com/filecoin-project/specs/util"
+)
 
 type Serialization = util.Serialization
 
@@ -14,6 +19,14 @@ func MessageReceipt_Make(output InvocOutput, gasUsed GasAmount) MessageReceipt {
 		ReturnValue_: output.ReturnValue(),
 		GasUsed_:     gasUsed,
 	}
+}
+
+func Serialize_UnsignedMessage(x UnsignedMessage) Serialization {
+	panic("TODO")
+}
+
+func Deserialize_UnsignedMessage(x Serialization) (UnsignedMessage, error) {
+	panic("TODO")
 }
 
 func UnsignedMessage_Make(
