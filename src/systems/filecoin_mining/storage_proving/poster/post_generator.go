@@ -51,7 +51,7 @@ func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, f
 	}
 
 	witness := sector.PoStWitness_I{
-		Candidates_: candidates,
+		Candidates_: winners,
 	}
 
 	return GeneratePoStProof(postCfg, sector.PoStWitness(&witness))
