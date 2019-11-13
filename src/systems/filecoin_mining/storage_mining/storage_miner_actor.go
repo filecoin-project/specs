@@ -574,7 +574,8 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 	return rt.SuccessReturn()
 }
 
-func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
+func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
+	h, st := a.State(rt)
 	sectorSize := st.Info().SectorSize()
 	dealIDs := onChainInfo.DealIDs()
 	params := make([]actor.MethodParam, 1+len(dealIDs))
@@ -614,6 +615,9 @@ func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onCha
 		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
 		UnsealedCID_:           unsealedCID,
 	}
+
+	Release(rt, h, st) // if no modifications made; or
+
 	sdr := filproofs.SDRParams(&sealCfg, nil)
 	return sdr.VerifySeal(&svInfo)
 }
