@@ -23,15 +23,15 @@ type Runtime interface {
 
     // Note: This is the actor in the From field of the initial on-chain message.
     // Not necessarily the immediate caller.
-    OriginalSender()    addr.Address
+    OriginalSender()       addr.Address
 
     // The actor who mined the block in which the initial on-chain message appears.
-    OriginalBlockWinner() addr.Address
+    OriginalBlockWinner()  addr.Address
 
-    AcquireState()      ActorStateHandle
+    AcquireState()         ActorStateHandle
 
-    SuccessReturn()     msg.InvocOutput
-    ValueReturn(Bytes)  msg.InvocOutput
+    SuccessReturn()        msg.InvocOutput
+    ValueReturn(Bytes)     msg.InvocOutput
     ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
 
     // Throw an error indicating a failure condition has occurred, from which the given actor

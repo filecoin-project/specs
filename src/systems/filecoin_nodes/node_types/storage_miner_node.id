@@ -1,0 +1,14 @@
+import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
+import storage_mining "github.com/filecoin-project/specs/systems/filecoin_mining/storage_mining"
+
+type StorageMinerNode struct {
+    FilecoinNode  node_base.FilecoinNode
+
+    SMS           storage_mining.StorageMiningSubsystem
+
+    // TODO: finish
+    // systems.Blockchain
+    // markets.StorageMarketProvider
+    // markets.MarketOrderBook
+    // markets.DataTransfers
+}

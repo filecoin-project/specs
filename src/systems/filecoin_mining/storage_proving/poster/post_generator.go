@@ -3,6 +3,9 @@ package poster
 import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+import util "github.com/filecoin-project/specs/util"
+
+type Serialization = util.Serialization
 
 // See "Proof-of-Spacetime Parameters" Section
 // TODO: Unify with orient model.
@@ -72,4 +75,12 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I)
 	}
 
 	return filproofs.SDRParams(&cfg)
+}
+
+func Serialize_PoStSubmission(x PoStSubmission) Serialization {
+	panic("TODO")
+}
+
+func Deserialize_PoStSubmission(x Serialization) (PoStSubmission, error) {
+	panic("TODO")
 }

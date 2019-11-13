@@ -14,6 +14,10 @@ import storage_market "github.com/filecoin-project/specs/systems/filecoin_market
 import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
+const (
+	Method_StorageMinerActor_SubmitPoSt = actor.MethodPlaceholder
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////

@@ -8,9 +8,14 @@ import (
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	util "github.com/filecoin-project/specs/util"
 )
+
+type Serialization = util.Serialization
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(
 	ownerAddr addr.Address,
@@ -103,4 +108,49 @@ func (sms *StorageMiningSubsystem_I) DrawElectionProof(randomness block.Randomne
 	// // ii. # run it through the VRF and store the VRFProof in the new ticket
 	// newEP.VRFResult := vrfKP.Generate(input)
 	// return newEP
+}
+
+func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {
+	var workerAddress addr.Address
+	var workerKeyPair filcrypto.SigKeyPair
+	panic("TODO") // TODO: get worker address and key pair
+
+	// TODO: is this just workerAddress, or is there a separation here
+	// (worker is AccountActor, workerMiner is StorageMinerActor)?
+	var workerMinerActorAddress addr.Address
+	panic("TODO")
+
+	var gasPrice msg.GasPrice
+	var gasLimit msg.GasAmount
+	panic("TODO") // TODO: determine gas price and limit
+
+	var callSeqNum actor.CallSeqNum
+	panic("TODO") // TODO: retrieve CallSeqNum from worker
+
+	messageParams := actor.MethodParams([]actor.MethodParam{
+		actor.MethodParam(poster.Serialize_PoStSubmission(postSubmission)),
+	})
+
+	unsignedMessage := msg.UnsignedMessage_Make(
+		workerAddress,
+		workerMinerActorAddress,
+		Method_StorageMinerActor_SubmitPoSt,
+		messageParams,
+		callSeqNum,
+		actor.TokenAmount(0),
+		gasPrice,
+		gasLimit,
+	)
+
+	signedMessage, err := msg.Sign(unsignedMessage, workerKeyPair)
+	if err != nil {
+		return err
+	}
+
+	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

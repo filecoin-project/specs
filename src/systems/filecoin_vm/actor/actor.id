@@ -29,7 +29,7 @@ type MethodNum Int
 //
 // TODO: serialized or deserialized? (serialized for now)
 // TODO: force CIDs or by value is fine?
-type MethodParam Bytes
+type MethodParam Serialization
 type MethodParams [MethodParam]
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
