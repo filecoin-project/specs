@@ -662,7 +662,7 @@ func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize UInt, pieceInfos []PieceI
 	if rootSize != sectorSize {
 		return unsealedCID, errors.New("Wrong sector size.")
 	}
-	// TODO: Enforce maximum padding allowable padding.
+
 	return UnsealedSectorCID(AsBytes_PieceCID(rootPieceInfo.PieceCID())), nil
 }
 

@@ -597,8 +597,17 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 
 	ret := receipt.ReturnValue()
 
-	// This assumes the raw bytes have been passed unmodified through the VM.
-	var unsealedCID sector.UnsealedSectorCID = sector.UnsealedSectorCID(ret)
+	pieceInfos := sector.PieceInfosFromBytes(ret)
+
+	// Unless we enforce a minimum padding amount, this totalPieceSize calculation can be removed.
+	// Leaving for now until that decision is entirely finalized.
+	var totalPieceSize util.UInt
+	for _, pieceInfo := range pieceInfos {
+		pieceSize := (*pieceInfo).Size()
+		totalPieceSize += pieceSize
+	}
+
+	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
 
 	sealCfg := sector.SealCfg_I{
 		SectorSize_:     sectorSize,

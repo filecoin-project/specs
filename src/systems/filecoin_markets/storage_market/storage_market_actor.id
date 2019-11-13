@@ -77,5 +77,5 @@ type StorageMarketActorCode struct {
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
 
-    GetUnsealedCIDForDealIDs(rt Runtime, dealIDs [deal.DealID]) sector.UnsealedSectorCID
+    GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
 }

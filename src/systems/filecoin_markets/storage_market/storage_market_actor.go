@@ -4,7 +4,6 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -318,25 +317,25 @@ func (a *StorageMarketActorCode_I) GetLastDealExpirationFromDealIDs(rt Runtime, 
 	return lastDealExpiration
 }
 
-func (a *StorageMarketActorCode_I) GetUnsealedCIDForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) vmr.InvocOutput {
-	pieceInfos := make([]*sector.PieceInfo_I, len(dealIDs))
+func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) []sector.PieceInfo_I {
+	pieceInfos := make([]sector.PieceInfo_I, len(dealIDs))
 
 	h, st := a.State(rt)
-
-	var totalPieceSize util.UInt
 
 	for index, deal := range st.Deals() {
 		proposal := deal.Proposal()
 		pieceSize := util.UInt(proposal.PieceSize().Total())
-		totalPieceSize += pieceSize
-		pieceInfos[index].PieceCID_ = proposal.PieceCID()
-		pieceInfos[index].Size_ = pieceSize
+
+		var pieceInfo sector.PieceInfo_I
+		pieceInfo.PieceCID_ = proposal.PieceCID()
+		pieceInfo.Size_ = pieceSize
+
+		pieceInfos[index] = pieceInfo
 	}
 
 	Release(rt, h, st)
 
-	cid, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
-	return rt.ValueReturn(util.Bytes(cid))
+	return pieceInfos
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {

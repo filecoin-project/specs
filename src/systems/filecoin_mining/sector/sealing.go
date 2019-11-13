@@ -16,3 +16,7 @@ var SealSeedHash = SHA256
 // 	h := SealSeedHash(buf)
 // 	return SealSeed(h)
 // }
+
+func PieceInfosFromBytes([]byte) []*PieceInfo_I {
+	panic("TODO")
+}

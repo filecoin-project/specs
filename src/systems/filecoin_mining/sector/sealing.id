@@ -120,4 +120,7 @@ type SealOutputArtifacts struct {}
 type PieceInfo struct {
     Size      UVarint  // Size in nodes. For BLS12-381 (capacity 254 bits), must be >= 16. (16 * 8 = 128)
     PieceCID  piece.PieceCID
+
+    // Data returns the serialized representation of the PieceInfo.
+    Data()    Bytes
 }
