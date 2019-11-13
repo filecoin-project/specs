@@ -18,6 +18,7 @@ func (GoEnumDecl) implements_GoNode()        {}
 func (GoFunDecl) implements_GoNode()         {}
 func (GoFunType) implements_GoNode()         {}
 func (GoPtrType) implements_GoNode()         {}
+func (GoTupleType) implements_GoNode()       {}
 func (GoStmtReturn) implements_GoNode()      {}
 func (GoStmtExpr) implements_GoNode()        {}
 func (GoExprDot) implements_GoNode()         {}
@@ -27,6 +28,7 @@ func (GoExprCall) implements_GoNode()        {}
 func (GoExprStruct) implements_GoNode()      {}
 func (GoExprAddrOf) implements_GoNode()      {}
 func (GoExprLitNil) implements_GoNode()      {}
+func (GoExprLitStr) implements_GoNode()      {}
 func (GoField) implements_GoNode()           {}
 func (GoProdType) implements_GoNode()        {}
 func (GoArrayType) implements_GoNode()       {}
@@ -82,6 +84,10 @@ type GoPtrType struct {
 	targetType GoNode
 }
 
+type GoTupleType struct {
+	elementTypes []GoNode
+}
+
 type GoStmtReturn struct {
 	value GoNode
 }
@@ -120,6 +126,10 @@ type GoExprAddrOf struct {
 }
 
 type GoExprLitNil struct{}
+
+type GoExprLitStr struct {
+	str string
+}
 
 type GoField struct {
 	fieldName *string
@@ -302,17 +312,29 @@ func GenAST(x GoNode) ast.Node {
 			}))
 		}
 
+		goResultFields := []*ast.Field{}
+		switch xr.retType.(type) {
+		case GoTupleType:
+			rr := xr.retType.(GoTupleType)
+			for _, ri := range rr.elementTypes {
+				goResultFields = append(goResultFields, &ast.Field{
+					Names: nil,
+					Type: GenAST(ri).(ast.Expr),
+				})
+			}
+		default:
+			goResultFields = append(goResultFields, &ast.Field{
+				Names: nil,
+				Type:  GenAST(xr.retType).(ast.Expr),
+			})
+		}
+
 		return &ast.FuncType{
 			Params: &ast.FieldList{
 				List: goParamFields,
 			},
 			Results: &ast.FieldList{
-				List: []*ast.Field{
-					&ast.Field{
-						Names: nil,
-						Type:  GenAST(xr.retType).(ast.Expr),
-					},
-				},
+				List: goResultFields,
 			},
 		}
 
@@ -321,6 +343,9 @@ func GenAST(x GoNode) ast.Node {
 		return &ast.StarExpr{
 			X: GenAST(xr.targetType).(ast.Expr),
 		}
+
+	case GoTupleType:
+		panic("tuple type only permitted as function return")
 
 	case GoStmtReturn:
 		xr := x.(GoStmtReturn)
@@ -358,6 +383,13 @@ func GenAST(x GoNode) ast.Node {
 		return &ast.BasicLit{
 			Kind:  token.STRING,
 			Value: "nil",
+		}
+
+	case GoExprLitStr:
+		xr := x.(GoExprLitStr)
+		return &ast.BasicLit{
+			Kind:  token.STRING,
+			Value: fmt.Sprintf("\"%v\"", xr.str),
 		}
 
 	case GoExprStruct:
@@ -478,6 +510,18 @@ func GenGoMethodCall(obj GoNode, methodName string, args []GoNode) GoNode {
 			fieldName: methodName,
 		},
 		args: args,
+	}
+	return ret
+}
+
+func GenGoPanicTodoBody() []GoNode {
+	ret := []GoNode{
+		GoStmtExpr{
+			expr: GoExprCall{
+				f: GoIdent{ name: "panic" },
+				args: []GoNode{ GoExprLitStr { str: "TODO" }, },
+			},
+		},
 	}
 	return ret
 }

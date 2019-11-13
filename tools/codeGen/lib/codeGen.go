@@ -142,6 +142,7 @@ func TranslateGoIdent(name string, ctx GoGenContext) GoIdent {
 	ret := name
 	utilNames := []string{
 		"Assert",
+		"BigInt",
 		"Bytes",
 		"Float",
 		"Int",
@@ -558,6 +559,48 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 			*ctx.retDecls = append(*ctx.retDecls, implImplDecl)
 			*ctx.retDecls = append(*ctx.retDecls, implRefImplDecl)
 		}
+
+		serializeDecl := GoFunDecl{
+			receiverVar: nil,
+			receiverType: nil,
+			funName: "Serialize_" + name,
+			funType: GoFunType{
+				args: []GoField{
+					GoField{
+						fieldName: nil,
+						fieldType: interfaceID,
+					},
+				},
+				retType: TranslateGoIdent("Serialization", ctx),
+			},
+			funArgs: []GoNode{ GoIdent{ name: "x" }, },
+			funBody: GenGoPanicTodoBody(),
+		}
+
+		deserializeDecl := GoFunDecl{
+			receiverVar: nil,
+			receiverType: nil,
+			funName: "Deserialize_" + name,
+			funType: GoFunType{
+				args: []GoField{
+					GoField{
+						fieldName: nil,
+						fieldType: TranslateGoIdent("Serialization", ctx),
+					},
+				},
+				retType: GoTupleType {
+					elementTypes: []GoNode {
+						interfaceID,
+						GoIdent{ name: "error" },
+					},
+				},
+			},
+			funArgs: []GoNode{ GoIdent{ name: "x" }, },
+			funBody: GenGoPanicTodoBody(),
+		}
+
+		*ctx.retDecls = append(*ctx.retDecls, serializeDecl)
+		*ctx.retDecls = append(*ctx.retDecls, deserializeDecl)
 
 		ctx.declMap[name] = interfaceID
 

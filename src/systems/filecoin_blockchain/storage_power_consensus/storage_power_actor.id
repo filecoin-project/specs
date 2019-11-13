@@ -2,7 +2,6 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import util "github.com/filecoin-project/specs/util"
 
 type PowerTableEntry struct {
     ActivePower             block.StoragePower
@@ -17,9 +16,9 @@ type PowerReport struct {
 }
 
 type FaultReport struct {
-    NewDeclaredFaults          util.UVarint  // diff value
-    NewDetectedFaults          util.UVarint  // diff value
-    NewTerminatedFaults        util.UVarint  // diff value
+    NewDeclaredFaults          UVarint  // diff value
+    NewDetectedFaults          UVarint  // diff value
+    NewTerminatedFaults        UVarint  // diff value
 
     GetDeclaredFaultSlash()    actor.TokenAmount
     GetDetectedFaultSlash()    actor.TokenAmount

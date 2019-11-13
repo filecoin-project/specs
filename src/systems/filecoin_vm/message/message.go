@@ -16,14 +16,6 @@ func MessageReceipt_Make(output InvocOutput, gasUsed GasAmount) MessageReceipt {
 	}
 }
 
-func Serialize_UnsignedMessage(x UnsignedMessage) Serialization {
-	panic("TODO")
-}
-
-func Deserialize_UnsignedMessage(x Serialization) (UnsignedMessage, error) {
-	panic("TODO")
-}
-
 func UnsignedMessage_Make(
 	from addr.Address,
 	to addr.Address,
