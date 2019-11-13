@@ -55,9 +55,6 @@ func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, f
 	}
 
 	return GeneratePoStProof(postCfg, sector.PoStWitness(&witness))
-
-	panic("TODO")
-
 }
 
 func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
