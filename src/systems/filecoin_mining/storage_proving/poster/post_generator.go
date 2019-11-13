@@ -20,29 +20,27 @@ func GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRan
 	// seems cleaner.
 	// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetadata, trees);
 
-	// Poroposed answer: An alternative, which avoids the downsides of both of the above, by adding a new filproofs API call:
+	// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 
-	sdr := filproofs.SDRParams(nil, postCfg)
+	sdr := makeStackedDRGForPoSt(postCfg)
 
 	return sdr.GeneratePoStCandidates(challengeSeed, faults, sectorStore)
 }
 
-func GeneratePoStProofs(postCfg sector.PoStCfg, witness sector.PoStWitness) []sector.PoStProof {
-	sdr := filproofs.SDRParams(nil, postCfg)
-
-	var proofs []sector.PoStProof
+func GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
+	sdr := makeStackedDRGForPoSt(postCfg)
+	var privateProofs []sector.PrivatePoStProof
 
 	for _, candidate := range witness.Candidates() {
-		proof := sdr.GeneratePoStProof(candidate.PrivateProof())
-		proofs = append(proofs, proof)
+		privateProofs = append(privateProofs, candidate.PrivateProof())
 	}
 
-	return proofs
+	return sdr.GeneratePoStProof(privateProofs)
 }
 
 // This likely belongs elsewhere, but I'm not exactly sure where and wanted to encapsulate the proofs-related logic here. So this can be thought of as example usage.
 // ticketThreshold is lowest eligible winning ticket (endianness?) for this PoSt. (Maybe should be 1+ the lowest. Define.)
-func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore, ticketThreshold sector.ElectionTicket) []sector.PoStProof {
+func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore, ticketThreshold sector.ElectionTicket) sector.PoStProof {
 	candidates := GeneratePoStCandidates(postCfg, challengeSeed, faults, sectors, sectorStore)
 	var winners []sector.ElectionCandidate
 
@@ -56,8 +54,25 @@ func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, f
 		Candidates_: candidates,
 	}
 
-	return GeneratePoStProofs(postCfg, sector.PoStWitness(&witness))
+	return GeneratePoStProof(postCfg, sector.PoStWitness(&witness))
 
 	panic("TODO")
 
+}
+
+func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
+	var cfg filproofs.SDRCfg_I
+
+	switch postCfg.Type().(type) {
+	case sector.PoStType_ElectionPoSt:
+		cfg = filproofs.SDRCfg_I{
+			ElectionPoStCfg_: postCfg,
+		}
+	case sector.PoStType_PeriodicPoSt:
+		cfg = filproofs.SDRCfg_I{
+			PeriodicPoStCfg_: postCfg,
+		}
+	}
+
+	return filproofs.SDRParams(&cfg)
 }

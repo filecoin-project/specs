@@ -21,7 +21,7 @@ type PieceInfo = *sector.PieceInfo_I
 type Label Bytes32
 type Commitment = sector.Commitment
 
-func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
+func SDRParams(cfg SDRCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const NODE_SIZE = 32
@@ -32,7 +32,7 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 	// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
 	FIELD_MODULUS.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
 
-	nodes := UInt(sealCfg.SectorSize() / NODE_SIZE)
+	nodes := UInt(cfg.SealCfg().SectorSize() / NODE_SIZE)
 
 	return &StackedDRG_I{
 		Layers_:     StackedDRGLayers(LAYERS),
@@ -64,8 +64,7 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
 		},
-		SealCfg_: sealCfg,
-		PoStCfg_: postCfg,
+		Cfg_: cfg,
 	}
 }
 
@@ -774,7 +773,7 @@ func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomn
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStProof(witness sector.PrivatePoStProof) sector.PoStProof {
+func (sdr *StackedDRG_I) GeneratePoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
 }
 
