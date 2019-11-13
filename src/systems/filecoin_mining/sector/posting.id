@@ -1,3 +1,5 @@
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
 type PoStRandomness Bytes
 
 type ElectionTicket Bytes  // SHA256 hash
@@ -13,6 +15,19 @@ type PoStCfg struct {
 type PoStType enum {
     ElectionPoSt
     PeriodicPoSt
+}
+
+type PoStVerifyInfo struct {
+    Type        PoStType
+    Tickets     [ElectionTicket]
+    PoStCfg
+    Randomness  PoStRandomness
+}
+
+type OnChainPoStVerifyInfo struct {
+    Tickets    [ElectionTicket]
+    PoStEpoch  block.ChainEpoch
+    Proof      PoStProof
 }
 
 type PoStWitness struct {
