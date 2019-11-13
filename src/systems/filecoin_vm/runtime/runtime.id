@@ -25,6 +25,9 @@ type Runtime interface {
     // Not necessarily the immediate caller.
     OriginalSender()    addr.Address
 
+    // The actor who mined the block in which the initial on-chain message appears.
+    OriginalBlockWinner() addr.Address
+
     AcquireState()      ActorStateHandle
 
     SuccessReturn()     msg.InvocOutput
