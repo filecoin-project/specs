@@ -14,9 +14,16 @@ type Runtime interface {
     // Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
     Randomness(e block.ChainEpoch, offset UInt) block.Randomness
 
+    // Note: This is the _immediate_ caller.
+    // Not necessarily the actor in the From field of the initial on-chain Message.
     Caller() addr.Address
+
     ValidateCallerIs(caller addr.Address)
     ValidateCallerMatches(CallerPattern)
+
+    // Note: This is the actor in the From field of the initial on-chain message.
+    // Not necessarily the immediate caller.
+    OriginalSender()    addr.Address
 
     AcquireState()      ActorStateHandle
 

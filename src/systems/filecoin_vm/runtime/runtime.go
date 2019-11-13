@@ -178,6 +178,10 @@ func (rt *VMContext) Caller() addr.Address {
 	panic("TODO")
 }
 
+func (rt *VMContext) OriginalSender() addr.Address {
+	panic("TODO")
+}
+
 func (rt *VMContext) ValidateCallerMatches(callerExpectedPattern CallerPattern) Runtime_ValidateCallerMatches_FunRet {
 	rt._checkRunning()
 	rt._checkNumValidateCalls(0)
