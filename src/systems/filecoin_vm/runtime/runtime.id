@@ -37,7 +37,7 @@ type Runtime interface {
     Assert(bool)
 
     CurrentBalance()  actor.TokenAmount
-    ValueSupplied()   actor.TokenAmount
+    ValueReceived()   actor.TokenAmount
 
     // Send allows the current execution context to invoke methods on other actors in the system.
     SendPropagatingErrors(input msg.InvocInput) msg.InvocOutput

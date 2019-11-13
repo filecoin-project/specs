@@ -73,7 +73,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeCID actor.CodeCID, constructorPar
 	// addr := rt.ComputeActorAddress(rt.Invocation().FromActor(), rt.Invocation().CallSeqNum())
 	addr := a._computeNewAddress(rt, actorID)
 
-	initBalance := rt.ValueSupplied()
+	initBalance := rt.ValueReceived()
 
 	// Set up the actor itself
 	actorState := &actor.ActorState_I{

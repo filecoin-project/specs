@@ -70,7 +70,7 @@ type VMContext struct {
 	_actorStateAcquired     bool
 	_actorStateAcquiredInit actor.ActorSubstateCID
 
-	_valueSupplied    actor.TokenAmount
+	_valueReceived    actor.TokenAmount
 	_gasRemaining     msg.GasAmount
 	_numValidateCalls int
 	_output           msg.InvocOutput
@@ -79,7 +79,7 @@ type VMContext struct {
 func VMContext_Make(
 	globalState st.StateTree,
 	actorAddress addr.Address,
-	valueSupplied actor.TokenAmount,
+	valueReceived actor.TokenAmount,
 	gasRemaining msg.GasAmount) *VMContext {
 
 	actorStateInit := globalState.GetActor(actorAddress).State()
@@ -92,7 +92,7 @@ func VMContext_Make(
 		_actorStateAcquired:     false,
 		_actorStateAcquiredInit: actorStateInit.State(),
 
-		_valueSupplied:    valueSupplied,
+		_valueReceived:    valueReceived,
 		_gasRemaining:     gasRemaining,
 		_numValidateCalls: 0,
 		_output:           nil,
@@ -121,7 +121,7 @@ func (rt *VMContext) CreateActor(stateCID actor.StateCID, address addr.Address, 
 		To_:     address,
 		Method_: actor.MethodConstructor,
 		Params_: constructorParams,
-		Value_:  rt.ValueSupplied(),
+		Value_:  rt.ValueReceived(),
 	})
 
 	// TODO: finish
@@ -299,7 +299,7 @@ func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
 			case *RuntimeError:
 				output = msg.InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
 			default:
-				output = msg.InvocOutput_Make(SystemError(exitcode.MethodPanic), nil)
+				panic(r)
 			}
 		}
 	}()
@@ -405,8 +405,8 @@ func (rt *VMContext) CurrentBalance() actor.TokenAmount {
 	panic("TODO")
 }
 
-func (rt *VMContext) ValueSupplied() actor.TokenAmount {
-	return rt._valueSupplied
+func (rt *VMContext) ValueReceived() actor.TokenAmount {
+	return rt._valueReceived
 }
 
 func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) block.Randomness {

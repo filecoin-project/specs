@@ -43,14 +43,10 @@ var (
 	// MethodPanic is returned when an actor method invocation calls rt.Abort.
 	MethodAbort = SystemErrorCode(8)
 
-	// MethodPanic is returned when the runtime intercepts a panic within
-	// an actor method invocation (not via rt.Abort).
-	MethodPanic = SystemErrorCode(9)
-
 	// MethodSubcallError is returned when an actor method's Send call has
 	// returned with a failure error code (and the Send call did not specify
 	// to ignore errors).
-	MethodSubcallError = SystemErrorCode(10)
+	MethodSubcallError = SystemErrorCode(9)
 )
 
 var (
