@@ -87,16 +87,16 @@ type StorageMinerActorState struct {
         incrementFaultCount  bool
     )
     _updateExpireSectors(rt Runtime)
-    _updateCommittedSectors(rt Runtime)
+    _processStagedCommittedSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateSectorUtilization(rt Runtime) [deal.DealID]
 
-    _getDealSlashInfoFromSectors(
+    _slashDealsFromFaultReport(
         rt             Runtime
         sectorNumbers  [sector.SectorNumber]
         action         deal.StorageDealSlashAction
-    ) deal.BatchDealSlashInfo
+    )
     _getActivePower(rt Runtime) block.StoragePower
     _getInactivePower(rt Runtime) block.StoragePower
 }

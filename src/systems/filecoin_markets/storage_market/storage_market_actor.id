@@ -43,6 +43,7 @@ type StorageMarketActorState struct {
     _slashDeclaredFaults(rt Runtime, dealIDs [deal.DealID])
     _slashDetectedFaults(rt Runtime, dealIDs [deal.DealID])
     _slashTerminatedFaults(rt Runtime, dealIDs [deal.DealID])
+    _terminateDeal(rt Runtime, dealID deal.DealID)
 
     _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
     _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
@@ -75,7 +76,8 @@ type StorageMarketActorCode struct {
     //     - dealIDs have been registered in PublishedDeals
     //     - deals will not expire by the time ProveCommit hits
     //     - deals have not started
-    // Fail PreCommit if any of the above is not true and abort
+    // Remove storage deal from PublishedDeals if any of them is off and return false
+    // Fail PreCommit if VerfiyPublishedDealIDs returns false
     VerifyPublishedDealIDs(rt Runtime, dealIDs [deal.DealID]) bool
 
     // Call by sm.ProveCommitSector
@@ -84,7 +86,7 @@ type StorageMarketActorCode struct {
     //     - deals have not expired, OK if deals have started
     // Fail ProveCommit if any of the above is not true and abort
     // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
-    ActivateSectorDealIDs(rt Runtime, dealIDs [deal.DealID]) bool
+    ActivateDeals(rt Runtime, dealIDs [deal.DealID]) bool
 
     // call by sm.ProveCommitSector
     // get InitialUtilization for deals in a Sector
@@ -96,7 +98,7 @@ type StorageMarketActorCode struct {
     // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
     // client only stops paying when a sector gets cleared (expired or faulted)
     // Deal expiration is also handled here
-    ProcessSectorDealPayment(rt Runtime, info deal.BatchDealPaymentInfo)
+    ProcessDealPayment(rt Runtime, info deal.BatchDealPaymentInfo)
 
     // TODO: StorageDeals should be renewable
     // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
@@ -105,5 +107,5 @@ type StorageMarketActorCode struct {
 
     // call by StorageMinerActor
     // slash deal collateral depending on the faults
-    ProcessSectorDealSlash(rt Runtime, info deal.BatchDealSlashInfo)
+    ProcessDealSlash(rt Runtime, info deal.BatchDealSlashInfo)
 }

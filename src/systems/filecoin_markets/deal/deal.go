@@ -5,6 +5,8 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 
 const MIN_PROVIDER_DEAL_COLLATERAL_PER_EPOCH = actor.TokenAmount(1) // TODO: Placeholder
 const MIN_CLIENT_DEAL_COLLATERAL_PER_EPOCH = actor.TokenAmount(1)   // TODO: Placeholder
+const MIN_DEAL_DURATION = block.ChainEpoch(0)                       // TODO: Placeholder
+const MIN_DEAL_PRICE = actor.TokenAmount(0)                         // TODO: Placeholder
 
 func (d *StorageDeal_I) Proposal() StorageDealProposal {
 	// TODO: extract from d.ProposalMessage
@@ -44,6 +46,7 @@ func (p *StorageDealProposal_I) CID() ProposalCID {
 	return cid
 }
 
+// move storage fee from locked to unlocked
 func (d *ActiveStorageDeal_I) UnlockStorageFee(fee actor.TokenAmount) bool {
 	if d.Deal().Proposal().TotalStorageFee() < fee {
 		// cannot unlock more than total

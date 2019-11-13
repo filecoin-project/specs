@@ -60,14 +60,6 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
-// TODO: placeholder epoch value -- this will be set later
-// ProveCommitSector needs to be submitted within MAX_PROVE_COMMIT_SECTOR_EPOCH after PreCommit
-const MAX_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(3)
-
-
-=======
->>>>>>> add CreditSectorDealPayment to StorageMiner
 func (cs *ChallengeStatus_I) OnNewChallenge(currEpoch block.ChainEpoch) ChallengeStatus {
 	cs.LastChallengeEpoch_ = currEpoch
 	return cs
@@ -89,6 +81,10 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	ret := st._isChallenged(rt)
 	Release(rt, h, st)
 	return ret
+}
+
+func (st *StorageMinerActorState_I) _isChallenged(rt Runtime) bool {
+	return st.ChallengeStatus().IsChallenged()
 }
 
 func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch, minChallengePeriod block.ChainEpoch) bool {
@@ -115,11 +111,8 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-func (st *StorageMinerActorState_I) _isChallenged(rt Runtime) bool {
-	return st.ChallengeStatus().IsChallenged()
-}
 
-func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
+func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 	for sectorNo, stagedInfo := range st.StagedCommittedSectors() {
 		st.Sectors()[sectorNo] = stagedInfo.Sector()
 		st.Impl().ProvingSet_.Add(sectorNo)
@@ -131,7 +124,9 @@ func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
 	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]StagedCommittedSectorInfo)
 }
 
-func (st *StorageMinerActorState_I) _getDealSlashInfoFromSectors(rt Runtime, sectorNumbers []sector.SectorNumber, action deal.StorageDealSlashAction) deal.BatchDealSlashInfo {
+func (a *StorageMinerActorCode_I) _slashDealsFromFaultReport(rt Runtime, sectorNumbers []sector.SectorNumber, action deal.StorageDealSlashAction) {
+
+	h, st := a.State(rt)
 
 	// This is not right but doing this for specing`
 	dealIDs := deal.CompactDealSet(make([]byte, 0))
@@ -147,12 +142,16 @@ func (st *StorageMinerActorState_I) _getDealSlashInfoFromSectors(rt Runtime, sec
 
 	}
 
-	ret := &deal.BatchDealSlashInfo_I{
+	slashInfo := &deal.BatchDealSlashInfo_I{
 		DealIDs_: dealIDs.DealsOn(),
 		Action_:  action,
 	}
 
-	return ret
+	Release(rt, h, st)
+
+	// TODO: Send(StorageMarketActor, ProcessSectorDealSlash)
+	panic(slashInfo)
+
 }
 
 // construct FaultReport
@@ -173,30 +172,15 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 	panic(faultReport)
 
 	if len(newDeclaredFaults) > 0 {
-		h, st := a.State(rt)
-		slashInfo := st._getDealSlashInfoFromSectors(rt, newDeclaredFaults.SectorsOn(), deal.SlashDeclaredFaults)
-		Release(rt, h, st)
-
-		// TODO: Send(StorageMarketActor, ProcessSectorDealSlash)
-		panic(slashInfo)
+		a._slashDealsFromFaultReport(rt, newDeclaredFaults.SectorsOn(), deal.SlashDeclaredFaults)
 	}
 
 	if len(newDetectedFaults) > 0 {
-		h, st := a.State(rt)
-		slashInfo := st._getDealSlashInfoFromSectors(rt, newDetectedFaults.SectorsOn(), deal.SlashDetectedFaults)
-		Release(rt, h, st)
-
-		// TODO: Send(StorageMarketActor, ProcessSectorDealSlash)
-		panic(slashInfo)
+		a._slashDealsFromFaultReport(rt, newDetectedFaults.SectorsOn(), deal.SlashDetectedFaults)
 	}
 
 	if len(newTerminatedFaults) > 0 {
-		h, st := a.State(rt)
-		slashInfo := st._getDealSlashInfoFromSectors(rt, newTerminatedFaults.SectorsOn(), deal.SlashTerminatedFaults)
-		Release(rt, h, st)
-
-		// TODO: Send(StorageMarketActor, ProcessSectorDealSlash)
-		panic(slashInfo)
+		a._slashDealsFromFaultReport(rt, newTerminatedFaults.SectorsOn(), deal.SlashTerminatedFaults)
 	}
 
 	h, st := a.State(rt)
@@ -265,7 +249,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	// end of challenge
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
-	st._updateCommittedSectors(rt)
+	st._processStagedCommittedSectors(rt)
 	UpdateRelease(rt, h, st)
 }
 
@@ -316,11 +300,8 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 	for _, preCommitSector := range st.PreCommittedSectors() {
 
 		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
-<<<<<<< HEAD
-		if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_PERIOD {
-=======
+
 		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
->>>>>>> add CreditSectorDealPayment to StorageMiner
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 			// TODO: potentially some slashing if ProveCommitSector comes late
 		}
@@ -586,7 +567,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
-	st._updateCommittedSectors(rt)
+	st._processStagedCommittedSectors(rt)
 	UpdateRelease(rt, h, st)
 
 	return rt.SuccessReturn()
@@ -771,9 +752,9 @@ func (a *StorageMinerActorCode_I) CreditSectorDealPayment(rt Runtime, sectorNo s
 		rt.Abort("sm.GetSectorPaymentInfo: sector number not found.")
 	}
 
-	isSectorActive := st.SectorTable().Impl().ActiveSectors_.Contain(sectorNo)
+	sectorIsActive := st.SectorTable().Impl().ActiveSectors_.Contain(sectorNo)
 
-	if !isSectorActive {
+	if !sectorIsActive {
 		rt.Abort("sm.GetSectorPaymentInfo: sector not active")
 	}
 
@@ -961,7 +942,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// ActivateStorageDeals
 	// Ok if deal has started
-	// Send(SMA.ActivateSectorDealIDs(onChainInfo.DealIDs())
+	// Send(SMA.ActivateDeals(onChainInfo.DealIDs())
 	var isSectorDealActivationSuccess bool
 	if !isSectorDealActivationSuccess {
 		rt.Abort("sm.ProveCommitSector: activate sector DealIDs failed")
