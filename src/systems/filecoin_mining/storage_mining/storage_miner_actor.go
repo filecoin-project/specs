@@ -576,9 +576,13 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
 	h, st := a.State(rt)
-	sectorSize := st.Info().SectorSize()
+	info := st.Info()
+	sectorSize := info.SectorSize()
 	dealIDs := onChainInfo.DealIDs()
 	params := make([]actor.MethodParam, 1+len(dealIDs))
+
+	Release(rt, h, st) // if no modifications made; or
+
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 
 	receipt := rt.SendCatchingErrors(&msg.InvocInput_I{
@@ -598,12 +602,12 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 
 	sealCfg := sector.SealCfg_I{
 		SectorSize_:     sectorSize,
-		SubsectorCount_: st.Info().SubsectorCount(),
-		Partitions_:     st.Info().Partitions(),
+		SubsectorCount_: info.SubsectorCount(),
+		Partitions_:     info.Partitions(),
 	}
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
-			MinerID_: st.Info().Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
+			MinerID_: info.Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
 			Number_:  onChainInfo.SectorNumber(),
 		},
 		OnChain_: onChainInfo,
@@ -615,8 +619,6 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
 		UnsealedCID_:           unsealedCID,
 	}
-
-	Release(rt, h, st) // if no modifications made; or
 
 	sdr := filproofs.SDRParams(&sealCfg, nil)
 	return sdr.VerifySeal(&svInfo)
