@@ -836,6 +836,44 @@ func (st *StorageMinerActorState_I) _sectorExists(sectorNo sector.SectorNumber) 
 	return found
 }
 
+func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.StorageDeal) sector.SectorUtilizationInfo {
+
+	var dealExpirationQueue deal.DealExpirationQueue
+	var maxUtilization block.StoragePower
+	var lastExpiration block.ChainEpoch
+
+	for _, d := range deals {
+
+		dealExpiration := d.Proposal().EndEpoch()
+
+		if dealExpiration > lastExpiration {
+			lastExpiration = dealExpiration
+		}
+
+		// TODO: verify what counts towards power here
+		// There is PayloadSize, OverheadSize, and Total, see piece.id
+		dealPayloadPower := block.StoragePower(d.Proposal().PieceSize().PayloadSize())
+
+		queueItem := &deal.DealExpirationQueueItem_I{
+			DealID_:       d.ID(),
+			PayloadPower_: dealPayloadPower,
+			Expiration_:   dealExpiration,
+		}
+		dealExpirationQueue.Add(queueItem)
+		maxUtilization += dealPayloadPower
+
+	}
+
+	initialUtilizationInfo := &sector.SectorUtilizationInfo_I{
+		DealExpirationQueue_: dealExpirationQueue,
+		MaxUtilization_:      maxUtilization,
+		CurrUtilization_:     maxUtilization,
+	}
+
+	return initialUtilizationInfo
+
+}
+
 // Deals must be posted on chain via sma.PublishStorageDeals before PreCommitSector
 // TODO(optimization): PreCommitSector could contain a list of deals that are not published yet.
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) InvocOutput {

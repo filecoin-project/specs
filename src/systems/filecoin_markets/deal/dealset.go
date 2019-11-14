@@ -13,13 +13,13 @@ func (css *CompactDealSet) DealsOff() []DealID {
 }
 
 // TODO
-func (css *CompactDealSet) Add(dealId DealID) CompactDealSet {
+func (css *CompactDealSet) Add(dealID DealID) CompactDealSet {
 	var newCompactDealSet CompactDealSet
 	return newCompactDealSet
 }
 
 // TODO
-func (css *CompactDealSet) Remove(dealId DealID) CompactDealSet {
+func (css *CompactDealSet) Remove(dealID DealID) CompactDealSet {
 	var newCompactDealSet CompactDealSet
 	return newCompactDealSet
 }

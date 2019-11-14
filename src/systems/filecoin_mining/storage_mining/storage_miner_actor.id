@@ -91,6 +91,7 @@ type StorageMinerActorState struct {
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateSectorUtilization(rt Runtime) [deal.DealID]
+    _initializeUtilizationInfo(rt Runtime, dealIDs [deal.DealID]) sector.SectorUtilizationInfo
 
     _slashDealsFromFaultReport(
         rt             Runtime

@@ -319,54 +319,29 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 	return ret
 }
 
-// Call by StorageMinerActor at CommitSector
-func (a *StorageMarketActorCode_I) GetInitialUtilizationInfo(rt Runtime, dealIDs []deal.DealID) sector.SectorUtilizationInfo {
+func (a *StorageMarketActorCode_I) GetDeals(rt Runtime, dealIDs []deal.DealID) []deal.StorageDeal {
+
+	TODO() // verify StorageMinerActor
+
 	h, st := a.State(rt)
 
-	var dealExpirationQueue deal.DealExpirationQueue
-	var maxUtilization block.StoragePower
-	var lastExpiration block.ChainEpoch
-	activeDealIDs := deal.CompactDealSet(make([]byte, len(dealIDs)))
+	ret := make([]deal.StorageDeal, len(dealIDs))
 
 	for _, dealID := range dealIDs {
-		d, found := st.ActiveDeals()[dealID]
+
+		activeDeal, found := st.ActiveDeals()[dealID]
+
 		if !found {
-			rt.Abort("sm.GetInitialUtilizationInfo: dealID not found in ActiveDeals.")
+			rt.Abort("sm.GetDeals: dealID not found in ActiveDeals.")
 		}
 
-		// TODO: more checks or be convinced that it's enough to assume deals are still valid
-		// consider calling _validateNewStorageDeal
-
-		dealExpiration := d.Deal().Proposal().EndEpoch()
-
-		if dealExpiration > lastExpiration {
-			lastExpiration = dealExpiration
-		}
-
-		// TODO: verify what counts towards power here
-		// There is PayloadSize, OverheadSize, and Total, see piece.id
-		dealPayloadPower := block.StoragePower(d.Deal().Proposal().PieceSize().PayloadSize())
-
-		queueItem := &deal.DealExpirationQueueItem_I{
-			DealID_:       dealID,
-			PayloadPower_: dealPayloadPower,
-			Expiration_:   dealExpiration,
-		}
-		dealExpirationQueue.Add(queueItem)
-		activeDealIDs.Add(dealID)
-		maxUtilization += dealPayloadPower
-
-	}
-
-	initialUtilizationInfo := &sector.SectorUtilizationInfo_I{
-		DealExpirationQueue_: dealExpirationQueue,
-		MaxUtilization_:      maxUtilization,
-		CurrUtilization_:     maxUtilization,
+		ret = append(ret, activeDeal.Deal())
 	}
 
 	Release(rt, h, st)
 
-	return initialUtilizationInfo
+	return ret
+
 }
 
 func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) []sector.PieceInfo_I {

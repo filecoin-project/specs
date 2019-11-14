@@ -2,7 +2,6 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StorageParticipantBalance struct {
     Locked     actor.TokenAmount
@@ -88,9 +87,8 @@ type StorageMarketActorCode struct {
     // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
     ActivateDeals(rt Runtime, dealIDs [deal.DealID]) bool
 
-    // call by sm.ProveCommitSector
-    // get InitialUtilization for deals in a Sector
-    GetInitialUtilizationInfo(rt Runtime, dealIDs [deal.DealID]) sector.SectorUtilizationInfo
+    // call by sm.ProveCommitSector to get deals in a Sector
+    GetDeals(rt Runtime, dealIDs [deal.DealID]) [deal.StorageDeal]
 
     // batch process storage deal payment based on actions
     //     - Credit: lazily evaulated when a StorageMiner calls ProcessSectorDealPayment
