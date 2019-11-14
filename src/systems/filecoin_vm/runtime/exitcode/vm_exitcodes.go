@@ -53,6 +53,10 @@ var (
 	MethodSubcallError = SystemErrorCode(10)
 )
 
+var (
+	InvalidSectorPacking = UserDefinedError(1)
+)
+
 func OK() ExitCode {
 	return ExitCode_Make_Success(&ExitCode_Success_I{})
 }
