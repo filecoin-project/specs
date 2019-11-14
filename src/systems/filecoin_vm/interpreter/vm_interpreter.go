@@ -76,6 +76,10 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	compTree = _withTransferFundsAssert(compTree, message.From(), addr.BurntFundsActorAddr, maxGasCost)
 
 	rt := vmr.VMContext_Make(
+		message.From(),
+		minerAddr, // TODO: may not exist? (see below)
+		fromActor.State().CallSeqNum(),
+		actor.CallSeqNum(0),
 		compTree,
 		message.From(),
 		actor.TokenAmount(0),

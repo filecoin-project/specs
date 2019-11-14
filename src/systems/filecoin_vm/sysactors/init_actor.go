@@ -61,74 +61,61 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 		rt.Abort("cannot exec an actor of this type")
 	}
 
-	// Get the actor ID for this actor.
-	h, st := a.State(rt)
-	actorID := st._assignNextID()
-
-	// This generates a unique address for this actor that is stable across message
-	// reordering
-	// TODO: where do `creator` and `nonce` come from?
-	// TODO: CallSeqNum is not related to From -- it's related to Origin
-	// addr := rt.ComputeActorAddress(rt.Invocation().FromActor(), rt.Invocation().CallSeqNum())
-	addr := a._computeNewAddress(rt, actorID)
+	newAddr := _computeNewActorExecAddress(rt)
 
 	initBalance := rt.ValueReceived()
 
-	// Set up the actor itself
 	actorState := &actor.ActorState_I{
-		CodeID_: codeID,
-		// State_:   nil, // TODO: do we need to init the state? probably not
+		CodeID_:     codeID,
+		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
 		Balance_:    initBalance,
 		CallSeqNum_: 0,
 	}
 
-	stateCid := actor.StateCID(rt.IpldPut(actorState))
+	actorStateCID := actor.StateCID(rt.IpldPut(actorState))
 
-	// runtime.State().Storage().Set(actorID, actor)
+	// Get the actor ID for this actor.
+	h, st := a.State(rt)
+	actorID := st._assignNextID()
 
 	// Store the mappings of address to actor ID.
-	st.AddressMap()[addr] = actorID
-	st.IDMap()[actorID] = addr
+	st.AddressMap()[newAddr] = actorID
+	st.IDMap()[actorID] = newAddr
 
-	// TODO: adjust this to be proper state setting.
 	UpdateRelease(rt, h, st)
 
-	// TODO: can this fail?
-	rt.CreateActor(stateCid, addr, constructorParams)
+	// Note: the following call may fail (e.g., if the actor already exists, or the actor's own
+	// constructor call fails). In this case, an error should propagate up and cause Exec to fail
+	// as well.
+	rt.CreateActor(actorStateCID, newAddr, constructorParams)
 
-	return rt.ValueReturn([]byte(addr.String()))
+	return rt.ValueReturn(
+		Bytes(addr.Serialize_Address_Compact(newAddr)))
 }
 
-func (s *InitActorState_I) _assignNextID() actor.ActorID {
+func (s *InitActorState_I) _assignNextID() addr.ActorID {
 	actorID := s.NextID_
 	s.NextID_++
 	return actorID
 }
 
-func (_ *InitActorCode_I) _computeNewAddress(rt Runtime, id actor.ActorID) addr.Address {
-	// assign an address based on some randomness
-	// we use the current epoch, and the actor id. this should be a unique identifier,
-	// stable across reorgs.
-	//
-	// TODO: do we really need this? it's pretty confusing...
-	r := rt.Randomness(rt.CurrEpoch(), uint64(id))
+func _computeNewActorExecAddress(rt Runtime) addr.Address {
+	seed := &ActorExecAddressSeed_I{
+		creator_:            rt.ImmediateCaller(),
+		toplevelCallSeqNum_: rt.ToplevelSenderCallSeqNum(),
+		internalCallSeqNum_: rt.InternalCallSeqNum(),
+	}
+	hash := addr.ActorExecHash(Serialize_ActorExecAddressSeed(seed))
 
-	_ = r // TODO: use r in a
-	// a := &addr.Address_Type_Actor_I{}
-	// n := &addr.Address_NetworkID_Testnet_I{}
-	// return addr.MakeAddress(n, a)
-	panic("TODO")
-	return nil
+	// Intended to be a unique identifier, stable across reorgs
+	return addr.Address_Make_ActorExec(addr.Address_NetworkID_Testnet, hash)
 }
 
 func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
 	h, st := a.State(rt)
-	s := st.AddressMap()[address]
+	actorID := st.AddressMap()[address]
 	Release(rt, h, st)
-	// return rt.ValueReturn(s)
-	// TODO
-	_ = s
-	return rt.ValueReturn(nil)
+	return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
 }
 
 func _codeIDSupportsExec(codeID actor.CodeID) bool {

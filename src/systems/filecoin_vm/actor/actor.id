@@ -100,11 +100,6 @@ type ActorState struct {
     CallSeqNum  // FKA Nonce
 }
 
-// ActorID is a sequential number assigned to actors in a Filecoin Chain.
-// ActorIDs are assigned by the InitActor, when an Actor is introduced into
-// the Runtime.
-type ActorID UVarint
-
 type StateCID ipld.CID
 
 type ActorSubstateCID ipld.CID

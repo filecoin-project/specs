@@ -16,22 +16,30 @@ type Runtime interface {
 
     // Note: This is the _immediate_ caller.
     // Not necessarily the actor in the From field of the initial on-chain Message.
-    Caller() addr.Address
-
-    ValidateCallerIs(caller addr.Address)
-    ValidateCallerMatches(CallerPattern)
+    ImmediateCaller() addr.Address
+    ValidateImmediateCallerIs(caller addr.Address)
+    ValidateImmediateCallerAcceptAny()
+    ValidateImmediateCallerMatches(CallerPattern)
 
     // Note: This is the actor in the From field of the initial on-chain message.
     // Not necessarily the immediate caller.
-    OriginalSender()       addr.Address
+    ToplevelSender()            addr.Address
 
     // The actor who mined the block in which the initial on-chain message appears.
-    OriginalBlockWinner()  addr.Address
+    ToplevelBlockWinner()       addr.Address
 
-    AcquireState()         ActorStateHandle
+    // Top-level call sequence number of the "From" actor in the initial on-chain message.
+    ToplevelSenderCallSeqNum()  actor.CallSeqNum
 
-    SuccessReturn()        msg.InvocOutput
-    ValueReturn(Bytes)     msg.InvocOutput
+    // Sequence number representing the total number of calls (to any actor, any method)
+    // during the current top-level message execution.
+    // Note: resets with every top-level message, and therefore not necessarily monotonic.
+    InternalCallSeqNum()        actor.CallSeqNum
+
+    AcquireState()              ActorStateHandle
+
+    SuccessReturn()             msg.InvocOutput
+    ValueReturn(Bytes)          msg.InvocOutput
     ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
 
     // Throw an error indicating a failure condition has occurred, from which the given actor

@@ -4,15 +4,21 @@ import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 type InitActorState struct {
     // responsible for create new actors
-    AddressMap       {addr.Address: actor.ActorID}
-    IDMap            {actor.ActorID: addr.Address}
-    NextID           actor.ActorID
+    AddressMap       {addr.Address: addr.ActorID}
+    IDMap            {addr.ActorID: addr.Address}
+    NextID           addr.ActorID
 
-    _assignNextID()  actor.ActorID
+    _assignNextID()  addr.ActorID
 }
 
 type InitActorCode struct {
     Constructor(r vmr.Runtime)
     Exec(r vmr.Runtime, code actor.CodeID, params actor.MethodParams) addr.Address
-    GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID
+    GetActorIDForAddress(r vmr.Runtime, address addr.Address) addr.ActorID
+}
+
+type ActorExecAddressSeed struct {
+    creator             addr.Address
+    toplevelCallSeqNum  actor.CallSeqNum
+    internalCallSeqNum  actor.CallSeqNum
 }

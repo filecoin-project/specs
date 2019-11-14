@@ -9,16 +9,25 @@ type Address struct {
         Mainnet
     }
 
-    Type enum {
-        ID
-        Secp256k1
-        Actor
-        BLS
+    Data union {
+        ID                   ActorID
+        PublicKey_Secp256k1  KeyHash  // TODO: reorder
+        ActorExec            ActorExecHash
+        PublicKey_BLS        KeyHash
     }
 
-    VerifySyntax(addrType Address_Type) bool
-    String() AddressString
-    IsKeyType() bool
+    VerifySyntax()   bool
+    String()         AddressString
+    IsKeyType()      bool
+    Equals(Address)  bool
 }
+
+// ActorID is a sequential number assigned to actors in a Filecoin Chain.
+// ActorIDs are assigned by the InitActor, when an Actor is introduced into
+// the Runtime.
+type ActorID Int
+
+type KeyHash Bytes
+type ActorExecHash Bytes
 
 type AddressString string

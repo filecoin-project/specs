@@ -70,13 +70,22 @@ type VMContext struct {
 	_actorStateAcquired     bool
 	_actorStateAcquiredInit actor.ActorSubstateCID
 
-	_valueReceived    actor.TokenAmount
-	_gasRemaining     msg.GasAmount
-	_numValidateCalls int
-	_output           msg.InvocOutput
+	_immediateCaller          addr.Address
+	_toplevelSender           addr.Address
+	_toplevelBlockWinner      addr.Address
+	_toplevelSenderCallSeqNum actor.CallSeqNum
+	_internalCallSeqNum       actor.CallSeqNum
+	_valueReceived            actor.TokenAmount
+	_gasRemaining             msg.GasAmount
+	_numValidateCalls         int
+	_output                   msg.InvocOutput
 }
 
 func VMContext_Make(
+	toplevelSender addr.Address,
+	toplevelBlockWinner addr.Address,
+	toplevelSenderCallSeqNum actor.CallSeqNum,
+	internalCallSeqNum actor.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
 	valueReceived actor.TokenAmount,
@@ -92,10 +101,14 @@ func VMContext_Make(
 		_actorStateAcquired:     false,
 		_actorStateAcquiredInit: actorStateInit.State(),
 
-		_valueReceived:    valueReceived,
-		_gasRemaining:     gasRemaining,
-		_numValidateCalls: 0,
-		_output:           nil,
+		_toplevelSender:           toplevelSender,
+		_toplevelBlockWinner:      toplevelBlockWinner,
+		_toplevelSenderCallSeqNum: toplevelSenderCallSeqNum,
+		_internalCallSeqNum:       internalCallSeqNum,
+		_valueReceived:            valueReceived,
+		_gasRemaining:             gasRemaining,
+		_numValidateCalls:         0,
+		_output:                   nil,
 	}
 }
 
@@ -108,8 +121,12 @@ func _generateActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Ad
 	panic("TODO")
 }
 
-func (rt *VMContext) CreateActor(stateCID actor.StateCID, address addr.Address, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
-	rt.ValidateCallerIs(addr.InitActorAddr)
+func (rt *VMContext) CreateActor(
+	stateCID actor.StateCID, address addr.Address, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
+
+	if !rt._actorAddress.Equals(addr.InitActorAddr) {
+		rt.Abort("Only InitActor may call rt.CreateActor")
+	}
 
 	// TODO: set actor state in global states
 	// rt._globalStatePending.ActorStates()[address] = stateCID
@@ -174,27 +191,37 @@ func (rt *VMContext) Abort(errMsg string) Runtime_Abort_FunRet {
 	return &Runtime_Abort_FunRet_I{}
 }
 
-func (rt *VMContext) Caller() addr.Address {
-	panic("TODO")
+func (rt *VMContext) ImmediateCaller() addr.Address {
+	return rt._immediateCaller
 }
 
-func (rt *VMContext) OriginalSender() addr.Address {
-	panic("TODO")
+func (rt *VMContext) ToplevelSender() addr.Address {
+	return rt._toplevelSender
 }
 
-func (rt *VMContext) OriginalBlockWinner() addr.Address {
-	panic("TODO")
+func (rt *VMContext) ToplevelBlockWinner() addr.Address {
+	return rt._toplevelBlockWinner
 }
 
-func (rt *VMContext) ValidateCallerMatches(callerExpectedPattern CallerPattern) Runtime_ValidateCallerMatches_FunRet {
+func (rt *VMContext) InternalCallSeqNum() actor.CallSeqNum {
+	return rt._internalCallSeqNum
+}
+
+func (rt *VMContext) ToplevelSenderCallSeqNum() actor.CallSeqNum {
+	return rt._toplevelSenderCallSeqNum
+}
+
+func (rt *VMContext) ValidateImmediateCallerMatches(
+	callerExpectedPattern CallerPattern) Runtime_ValidateImmediateCallerMatches_FunRet {
+
 	rt._checkRunning()
 	rt._checkNumValidateCalls(0)
-	caller := rt.Caller()
+	caller := rt.ImmediateCaller()
 	if !callerExpectedPattern.Matches(caller) {
 		rt.Abort("Method invoked by incorrect caller")
 	}
 	rt._numValidateCalls += 1
-	return &Runtime_ValidateCallerMatches_FunRet_I{}
+	return &Runtime_ValidateImmediateCallerMatches_FunRet_I{}
 }
 
 type CallerPattern struct {
@@ -203,15 +230,24 @@ type CallerPattern struct {
 
 func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
 	return CallerPattern{
-		Matches: func(y addr.Address) bool {
-			return x == y
-		},
+		Matches: func(y addr.Address) bool { return x == y },
 	}
 }
 
-func (rt *VMContext) ValidateCallerIs(callerExpected addr.Address) Runtime_ValidateCallerIs_FunRet {
-	rt.ValidateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
-	return &Runtime_ValidateCallerIs_FunRet_I{}
+func CallerPattern_MakeAcceptAny() CallerPattern {
+	return CallerPattern{
+		Matches: func(addr.Address) bool { return true },
+	}
+}
+
+func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) Runtime_ValidateImmediateCallerIs_FunRet {
+	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
+	return &Runtime_ValidateImmediateCallerIs_FunRet_I{}
+}
+
+func (rt *VMContext) ValidateImmediateCallerAcceptAny() Runtime_ValidateImmediateCallerAcceptAny_FunRet {
+	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAny())
+	return &Runtime_ValidateImmediateCallerAcceptAny_FunRet_I{}
 }
 
 func (rt *VMContext) _checkNumValidateCalls(x int) {
@@ -320,7 +356,8 @@ func _invokeMethodInternal(
 	rt *VMContext,
 	actorCode ActorCode,
 	method actor.MethodNum,
-	params actor.MethodParams) (ret InvocOutput, gasUsed msg.GasAmount) {
+	params actor.MethodParams) (
+	ret InvocOutput, gasUsed msg.GasAmount, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
 		ret = msg.InvocOutput_Make(exitcode.OK(), nil)
@@ -339,6 +376,8 @@ func _invokeMethodInternal(
 
 	// TODO: Update gasUsed
 	TODO()
+
+	internalCallSeqNumFinal = rt._internalCallSeqNum
 
 	return
 }
@@ -366,18 +405,24 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.
 	}
 
 	rtInner := VMContext_Make(
+		rtOuter._toplevelSender,
+		rtOuter._toplevelBlockWinner,
+		rtOuter._toplevelSenderCallSeqNum,
+		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
 		input.To(),
 		input.Value(),
 		rtOuter._gasRemaining,
 	)
 
-	invocOutput, gasUsed := _invokeMethodInternal(
+	invocOutput, gasUsed, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
 		toActorCode,
 		input.Method(),
 		input.Params(),
 	)
+
+	rtOuter._internalCallSeqNum = internalCallSeqNumFinal
 
 	rtOuter._refundGasRemaining(toActorMethodGasBound)
 	rtOuter._deductGasRemaining(gasUsed)
