@@ -24,9 +24,9 @@ StorageMarketActor -->- StorageMinerActor: Success
 StorageMinerActor -->+ StorageMarketActor: GetDeals(dealIDs)
 StorageMarketActor -->- StorageMinerActor: Deals
 StorageMinerActor -->> StorageMinerActor: _initializeUtilizationInfo
-StorageMiningSubsystem -->> StorageMinerActor: CreditSectorDealPayment(sectorNo)
+StorageMiningSubsystem -->> StorageMinerActor: TallySectorDealPayment(sectorNo)
 StorageMinerActor -->> StorageMarketActor: ProcessDealPayment(batchPayment)
-StorageMarketActor -->> StorageMarketActor: _creditStorageDeals
+StorageMarketActor -->> StorageMarketActor: _tallyStorageDeals
 StorageMinerActor -->> StorageMinerActor: _submitPowerReport(if deal expires)
 StorageMinerActor -->> StorageMarketActor: ProcessDealPayment(batchPayment)
 StorageMarketActor -->> StorageMarketActor: _expireStorageDeals
