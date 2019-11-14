@@ -90,7 +90,8 @@ func GenGoDecls(topLevelEntries []Entry) []GoNode {
 			switch decl.Case() {
 			case Decl_Case_Type:
 				xr := decl.(*TypeDecl)
-				GenGoTypeDeclAcc(xr.name, xr.type_, ctx.Extend(xr.name), false)
+				ret := GenGoTypeDeclAcc(xr.name, xr.type_, ctx.Extend(xr.name), false)
+				GenGoTypeSerializers(ctx, xr.name, ret)
 			case Decl_Case_Import:
 				xr := decl.(*ImportDecl)
 				GenGoImportDeclAcc(*xr, ctx)
@@ -207,7 +208,7 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext, declAlias bool) (re
 	return
 }
 
-func GenGoAlgTypeSerializers(x Type, ctx GoGenContext, name string, interfaceID GoNode) {
+func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 	serializeDecl := GoFunDecl{
 		receiverVar:  nil,
 		receiverType: nil,
@@ -216,7 +217,7 @@ func GenGoAlgTypeSerializers(x Type, ctx GoGenContext, name string, interfaceID 
 			args: []GoField{
 				GoField{
 					fieldName: nil,
-					fieldType: interfaceID,
+					fieldType: GoIdent{name: name},
 				},
 			},
 			retType: TranslateGoIdent("Serialization", ctx),
@@ -298,8 +299,6 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 
 			*ctx.retDecls = append(*ctx.retDecls, caseTypeDecl)
 		}
-
-		GenGoAlgTypeSerializers(x, ctx, name, interfaceID)
 
 		if xr.isEnum {
 			Assert(xr.sort == AlgSort_Sum)
