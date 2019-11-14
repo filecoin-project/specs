@@ -9,22 +9,29 @@ type StorageParticipantBalance struct {
 }
 
 type BalancesHAMT {addr.Address: StorageParticipantBalance}
-type PublishedDealsAMT {deal.DealID: deal.StorageDeal}
-type ActiveDealsAMT {deal.DealID: deal.ActiveStorageDeal}
+type DealTallyAMT {deal.DealID: deal.StorageDealTally}
+type DealAMT {deal.DealID: deal.StorageDeal}
 
 type StorageMarketActorState struct {
-    Balances        BalancesHAMT
-    PublishedDeals  PublishedDealsAMT
-    ActiveDeals     ActiveDealsAMT
+    Balances    BalancesHAMT
+    DealStates  deal.DealStateSet
+    Deals       DealAMT
+    DealTally   DealTallyAMT
 
     // generate storage deal id
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
+
+    _getDeal(rt Runtime, dealID deal.DealID) deal.StorageDeal
+    _getDealTally(rt Runtime, dealID deal.DealID) deal.StorageDealTally
 
     // check if StorageDeal is signed before expiry
     // check if StorageDeal has the right signatures
     // check if minimum StoragePrice and StorageCollateral are met
     // check if provider and client have sufficient balances
     _validateNewStorageDeal(rt Runtime, deal deal.StorageDeal) bool
+
+    _assertPublishedDealState(rt Runtime, dealID deal.DealID)
+    _assertActiveDealState(rt Runtime, dealID deal.DealID)
 
     _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
 

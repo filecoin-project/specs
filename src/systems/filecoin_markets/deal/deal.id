@@ -53,8 +53,7 @@ type StorageDeal struct {
     CID()            DealCID
 }
 
-type ActiveStorageDeal struct {
-    Deal                                     StorageDeal
+type StorageDealTally struct {
     ProviderCollateralRemaining              actor.TokenAmount
     LockedStorageFee                         actor.TokenAmount
     UnlockedStorageFee                       actor.TokenAmount
