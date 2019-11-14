@@ -14,16 +14,18 @@ type DealAMT {deal.DealID: deal.StorageDeal}
 
 type StorageMarketActorState struct {
     Balances               BalancesHAMT
-    DealStates             deal.DealStateSet
     Deals                  DealAMT
     DealTally              DealTallyAMT
+    DealStates             deal.DealStateSet
     DealCollateralSlashed  actor.TokenAmount
 
-    // generate storage deal id
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
-
-    _getDeal(rt Runtime, dealID deal.DealID) deal.StorageDeal
-    _getDealTally(rt Runtime, dealID deal.DealID) deal.StorageDealTally
+    _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool
+    _assertDealStartAfterCurrEpoch(rt Runtime, p deal.StorageDealProposal)
+    _assertDealNotYetExpired(rt Runtime, p deal.StorageDealProposal)
+    _assertValidDealTimingAtPublish(rt Runtime, p deal.StorageDealProposal)
+    _assertValidDealMinimum(rt Runtime, p deal.StorageDealProposal)
+    _assertSufficientBalanceAvailForDeal(rt Runtime, p deal.StorageDealProposal)
 
     // check if StorageDeal is signed before expiry
     // check if StorageDeal has the right signatures
@@ -31,10 +33,20 @@ type StorageMarketActorState struct {
     // check if provider and client have sufficient balances
     _validateNewStorageDeal(rt Runtime, deal deal.StorageDeal) bool
 
+    _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
+    _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
+    _transferBalance(
+        rt           Runtime
+        fromLocked   addr.Address
+        toAvailable  addr.Address
+        amount       actor.TokenAmount
+    )
+    _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
+
+    _getDeal(rt Runtime, dealID deal.DealID) deal.StorageDeal
+    _getDealTally(rt Runtime, dealID deal.DealID) deal.StorageDealTally
     _assertPublishedDealState(rt Runtime, dealID deal.DealID)
     _assertActiveDealState(rt Runtime, dealID deal.DealID)
-
-    _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
 
     _expireStorageDeals(
         rt                     Runtime
@@ -54,16 +66,6 @@ type StorageMarketActorState struct {
         dealTally  deal.StorageDealTally
         amount     actor.TokenAmount
     )
-
-    _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
-    _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
-    _transferBalance(
-        rt           Runtime
-        fromLocked   addr.Address
-        toAvailable  addr.Address
-        amount       actor.TokenAmount
-    )
-    _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool
 }
 
 type StorageMarketActorCode struct {
@@ -86,9 +88,8 @@ type StorageMarketActorCode struct {
     //     - dealIDs have been registered in PublishedDeals
     //     - deals will not expire by the time ProveCommit hits
     //     - deals have not started
-    // Remove storage deal from PublishedDeals if any of them is off and return false
-    // Fail PreCommit if VerfiyPublishedDealIDs returns false
-    VerifyPublishedDealIDs(rt Runtime, dealIDs [deal.DealID]) bool
+    // Fail PreCommit if any of above is not true and abort
+    VerifyPublishedDealIDs(rt Runtime, dealIDs [deal.DealID])
 
     // Call by sm.ProveCommitSector
     // Verify the following:
@@ -96,25 +97,27 @@ type StorageMarketActorCode struct {
     //     - deals have not expired, OK if deals have started
     // Fail ProveCommit if any of the above is not true and abort
     // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
-    ActivateDeals(rt Runtime, dealIDs [deal.DealID]) bool
+    ActivateDeals(rt Runtime, dealIDs [deal.DealID])
 
     // call by sm.ProveCommitSector to get deals in a Sector
     GetDeals(rt Runtime, dealIDs [deal.DealID]) [deal.StorageDeal]
 
+    // call by StorageMinerActor
+    // slash deal collateral depending on the faults (only TerminatedFault)
+    ProcessDealSlash(rt Runtime, info deal.BatchDealSlashInfo)
+
+    // call by StorageMinerActor
+    // unlock balances in UnlockedFees in dealTally
+    // CreditUnlockedFees(rt Runtime, dealIDs [deal.DealID])
+
     // batch process storage deal payment based on actions
-    //     - Credit: lazily evaulated when a StorageMiner calls ProcessSectorDealPayment
+    //     - Credit: lazily evaulated when a StorageMiner calls CreditDealPayment
     //     - Expire: call by sm._submitPowerReport when deals expire
     // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
     // client only stops paying when a sector gets cleared (expired or faulted)
     // Deal expiration is also handled here
     ProcessDealPayment(rt Runtime, info deal.BatchDealPaymentInfo)
 
-    // TODO: StorageDeals should be renewable
-    // UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
-
     GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
 
-    // call by StorageMinerActor
-    // slash deal collateral depending on the faults
-    ProcessDealSlash(rt Runtime, info deal.BatchDealSlashInfo)
 }
