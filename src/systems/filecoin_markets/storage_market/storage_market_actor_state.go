@@ -4,6 +4,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID {
 	// TODO
@@ -75,6 +76,17 @@ func (st *StorageMarketActorState_I) _assertSufficientBalanceAvailForDeal(rt Run
 
 	if !isClientBalAvailable || !isProviderBalAvailable {
 		rt.Abort("sma._validateNewStorageDeal: client or provider insufficient balance.")
+	}
+
+}
+
+func (st *StorageMarketActorState_I) _assertDealExpireAfterMaxProveCommitWindow(rt Runtime, dealP deal.StorageDealProposal) {
+
+	currEpoch := rt.CurrEpoch()
+	dealExpiration := dealP.EndEpoch()
+
+	if dealExpiration <= (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
+		rt.Abort("sma._assertDealExpireAfterMaxProveCommitWindow: deal might expire before prove commit.")
 	}
 
 }
@@ -246,7 +258,9 @@ func (st *StorageMarketActorState_I) _creditUnlockedFeeForProvider(rt Runtime, d
 	st._unlockBalance(rt, dealP.Provider(), unlockedFee)
 }
 
-func (st *StorageMarketActorState_I) _creditStorageDeals(rt Runtime, dealIDs []deal.DealID, lastChallengeEndEpoch block.ChainEpoch) {
+// tally storage deal payment within DealTally but not unlocking any balance
+// balance unlocking is done through _creditUnlockedFeeForProvider called by CreditUnlockedFees or through _expireStorageDeals
+func (st *StorageMarketActorState_I) _tallyStorageDeals(rt Runtime, dealIDs []deal.DealID, lastChallengeEndEpoch block.ChainEpoch) {
 
 	for _, dealID := range dealIDs {
 
@@ -261,7 +275,6 @@ func (st *StorageMarketActorState_I) _creditStorageDeals(rt Runtime, dealIDs []d
 		// move fee from locked to unlocked in tally
 		dealTally.Impl().UnlockStorageFee(fee)
 
-		st._creditUnlockedFeeForProvider(rt, dealP, dealTally)
 	}
 
 }

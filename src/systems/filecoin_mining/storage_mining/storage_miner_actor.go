@@ -719,7 +719,7 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 	return rt.SuccessReturn()
 }
 
-func (a *StorageMinerActorCode_I) CreditSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber) {
+func (a *StorageMinerActorCode_I) TallySectorDealPayment(rt Runtime, sectorNo sector.SectorNumber) {
 	TODO() // verify caller
 
 	h, st := a.State(rt)
@@ -734,7 +734,7 @@ func (a *StorageMinerActorCode_I) CreditSectorDealPayment(rt Runtime, sectorNo s
 	activeDealSet := utilizationInfo.DealExpirationQueue().ActiveDealIDs()
 	batchDealPaymentInfo := &deal.BatchDealPaymentInfo_I{
 		DealIDs_:               activeDealSet.DealsOn(),
-		Action_:                deal.CreditStorageDeals,
+		Action_:                deal.TallyStorageDeals,
 		LastChallengeEndEpoch_: st.ChallengeStatus().LastChallengeEndEpoch(),
 	}
 

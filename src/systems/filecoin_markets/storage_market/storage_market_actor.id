@@ -2,6 +2,7 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StorageParticipantBalance struct {
     Locked     actor.TokenAmount
@@ -26,6 +27,7 @@ type StorageMarketActorState struct {
     _assertValidDealTimingAtPublish(rt Runtime, p deal.StorageDealProposal)
     _assertValidDealMinimum(rt Runtime, p deal.StorageDealProposal)
     _assertSufficientBalanceAvailForDeal(rt Runtime, p deal.StorageDealProposal)
+    _assertDealExpireAfterMaxProveCommitWindow(rt Runtime, p deal.StorageDealProposal)
 
     // check if StorageDeal is signed before expiry
     // check if StorageDeal has the right signatures
@@ -58,7 +60,7 @@ type StorageMarketActorState struct {
         dealP      deal.StorageDealProposal
         dealTally  deal.StorageDealTally
     )
-    _creditStorageDeals(
+    _tallyStorageDeals(
         rt                     Runtime
         dealIDs                [deal.DealID]
         lastChallengeEndEpoch  block.ChainEpoch
@@ -124,5 +126,4 @@ type StorageMarketActorCode struct {
     ProcessDealPayment(rt Runtime, info deal.BatchDealPaymentInfo)
 
     GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
-
 }

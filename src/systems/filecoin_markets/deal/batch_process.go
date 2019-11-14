@@ -4,7 +4,7 @@ type StorageDealPaymentAction = int
 
 const (
 	ExpireStorageDeals StorageDealPaymentAction = 0
-	CreditStorageDeals StorageDealPaymentAction = 1
+	TallyStorageDeals  StorageDealPaymentAction = 1
 )
 
 type StorageDealSlashAction = int

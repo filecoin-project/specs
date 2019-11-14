@@ -1,13 +1,13 @@
 package storage_market
 
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import util "github.com/filecoin-project/specs/util"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import util "github.com/filecoin-project/specs/util"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 const (
 	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
@@ -141,8 +141,6 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 
 	h, st := a.State(rt)
 
-	currEpoch := rt.CurrEpoch()
-
 	for _, dealID := range dealIDs {
 
 		publishedDeal := st._getDeal(rt, dealID)
@@ -151,14 +149,11 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 		dealP := publishedDeal.Proposal()
 		st._assertDealStartAfterCurrEpoch(rt, dealP)
 
-		dealExpiration := dealP.EndEpoch()
-
 		// deal must not expire before the maximum allowable epoch between pre and prove commits
 		// we do not have to check if the deal has expired at ProveCommit
 		// if the MAX_PROVE_COMMIT_SECTOR_EPOCH constraint is not violated
-		if dealExpiration <= (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
-			rt.Abort("sma.VerifyPublishedDealIDs: deal might expire before prove commit.")
-		}
+		st._assertDealExpireAfterMaxProveCommitWindow(rt, dealP)
+
 	}
 
 	Release(rt, h, st)
@@ -256,16 +251,14 @@ func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, info deal.Batc
 	switch info.Action() {
 	case deal.ExpireStorageDeals:
 		st._expireStorageDeals(rt, info.DealIDs(), info.LastChallengeEndEpoch())
-	case deal.CreditStorageDeals:
-		st._creditStorageDeals(rt, info.DealIDs(), info.LastChallengeEndEpoch())
+	case deal.TallyStorageDeals:
+		st._tallyStorageDeals(rt, info.DealIDs(), info.LastChallengeEndEpoch())
 	default:
 		rt.Abort("sma.ProcessDealPayment: invalid deal payment action.")
 	}
 
 	UpdateRelease(rt, h, st)
 }
-
-
 
 func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSize util.UVarint, dealIDs []deal.DealID) []sector.PieceInfo_I {
 	pieceInfos := make([]sector.PieceInfo_I, len(dealIDs))
@@ -287,7 +280,6 @@ func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSiz
 
 	return pieceInfos
 }
-
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	panic("TODO")
