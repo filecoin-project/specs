@@ -33,7 +33,11 @@ func (st *StateTree_I) Balance(a addr.Address) actor.TokenAmount {
 	panic("TODO")
 }
 
-func (st *StateTree_I) WithActorState(a addr.Address, actorState actor.ActorSubstateCID) (StateTree, error) {
+func (st *StateTree_I) WithActorSubstate(a addr.Address, actorState actor.ActorSubstateCID) (StateTree, error) {
+	panic("TODO")
+}
+
+func (st *StateTree_I) WithActorSystemState(a addr.Address, actorState actor.ActorSystemStateCID) (StateTree, error) {
 	panic("TODO")
 }
 

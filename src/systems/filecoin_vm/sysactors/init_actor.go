@@ -53,26 +53,20 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 }
 
 func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {
-	if !codeID.IsBuiltin() {
-		rt.Abort("cannot launch actor instance that is not a builtin actor")
-	}
-
 	if !_codeIDSupportsExec(codeID) {
 		rt.Abort("cannot exec an actor of this type")
 	}
 
 	newAddr := _computeNewActorExecAddress(rt)
 
-	initBalance := rt.ValueReceived()
-
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
 		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
-		Balance_:    initBalance,
+		Balance_:    actor.TokenAmount(0),
 		CallSeqNum_: 0,
 	}
 
-	actorStateCID := actor.StateCID(rt.IpldPut(actorState))
+	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
 
 	// Get the actor ID for this actor.
 	h, st := a.State(rt)
@@ -87,7 +81,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 	// Note: the following call may fail (e.g., if the actor already exists, or the actor's own
 	// constructor call fails). In this case, an error should propagate up and cause Exec to fail
 	// as well.
-	rt.CreateActor(actorStateCID, newAddr, constructorParams)
+	rt.CreateActor(actorStateCID, newAddr, rt.ValueReceived(), constructorParams)
 
 	return rt.ValueReturn(
 		Bytes(addr.Serialize_Address_Compact(newAddr)))

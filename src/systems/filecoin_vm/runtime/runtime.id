@@ -63,8 +63,9 @@ type Runtime interface {
 
     // Create an actor in the state tree. May only be called by InitActor.
     CreateActor(
-        cid                actor.StateCID
+        stateCID           actor.ActorSystemStateCID
         a                  addr.Address
+        initBalance        actor.TokenAmount
         constructorParams  actor.MethodParams
     )
 

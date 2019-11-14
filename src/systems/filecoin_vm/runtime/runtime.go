@@ -43,11 +43,11 @@ type ActorStateHandle struct {
 }
 
 func (h *ActorStateHandle) UpdateRelease(newStateCID ActorSubstateCID) {
-	h._rt._updateReleaseActorState(newStateCID)
+	h._rt._updateReleaseActorSubstate(newStateCID)
 }
 
 func (h *ActorStateHandle) Release(checkStateCID ActorSubstateCID) {
-	h._rt._releaseActorState(checkStateCID)
+	h._rt._releaseActorSubstate(checkStateCID)
 }
 
 func (h *ActorStateHandle) Take() ActorSubstateCID {
@@ -112,51 +112,52 @@ func VMContext_Make(
 	}
 }
 
-func _generateActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Address {
-	// _generateActorAddress computes the address of the contract,
-	// based on the creator (invoking address) and nonce given.
-	// TODO: why is this needed? -- InitActor
-	// TODO: this has to be the origin call. and it's broken: could yield the same address
-	//       need a truly unique way to assign an address.
-	panic("TODO")
-}
-
 func (rt *VMContext) CreateActor(
-	stateCID actor.StateCID, address addr.Address, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
+	stateCID actor.ActorSystemStateCID,
+	address addr.Address,
+	initBalance actor.TokenAmount,
+	constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
 
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.Abort("Only InitActor may call rt.CreateActor")
 	}
 
-	// TODO: set actor state in global states
-	// rt._globalStatePending.ActorStates()[address] = stateCID
+	rt._updateActorSystemStateInternal(address, stateCID)
 
-	// TODO: call constructor
-	// TODO: can constructors fail?
-	// TODO: maybe do this directly form InitActor, and only do the StateTree.ActorStates() updating here?
 	rt.SendPropagatingErrors(&msg.InvocInput_I{
 		To_:     address,
 		Method_: actor.MethodConstructor,
 		Params_: constructorParams,
-		Value_:  rt.ValueReceived(),
+		Value_:  initBalance,
 	})
 
-	// TODO: finish
-	panic("TODO")
+	return &Runtime_CreateActor_FunRet_I{}
 }
 
-func (rt *VMContext) _updateReleaseActorState(newStateCID ActorSubstateCID) {
-	rt._checkRunning()
-	rt._checkActorStateAcquired()
-	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorState(rt._actorAddress, newStateCID)
+func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
+	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSystemState(rt._actorAddress, newStateCID)
 	if err != nil {
-		panic("Error in runtime implementation: failed to update actor state")
+		panic("Error in runtime implementation: failed to update actor system state")
 	}
 	rt._globalStatePending = newGlobalStatePending
+}
+
+func (rt *VMContext) _updateActorSubstateInternal(actorAddress addr.Address, newStateCID actor.ActorSubstateCID) {
+	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSubstate(rt._actorAddress, newStateCID)
+	if err != nil {
+		panic("Error in runtime implementation: failed to update actor substate")
+	}
+	rt._globalStatePending = newGlobalStatePending
+}
+
+func (rt *VMContext) _updateReleaseActorSubstate(newStateCID ActorSubstateCID) {
+	rt._checkRunning()
+	rt._checkActorStateAcquired()
+	rt._updateActorSubstateInternal(rt._actorAddress, newStateCID)
 	rt._actorStateAcquired = false
 }
 
-func (rt *VMContext) _releaseActorState(checkStateCID ActorSubstateCID) {
+func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
 

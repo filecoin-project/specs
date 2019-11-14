@@ -100,8 +100,7 @@ type ActorState struct {
     CallSeqNum  // FKA Nonce
 }
 
-type StateCID ipld.CID
-
+type ActorSystemStateCID ipld.CID
 type ActorSubstateCID ipld.CID
 
 // ActorState represents the on-chain storage actors keep. This type is a
