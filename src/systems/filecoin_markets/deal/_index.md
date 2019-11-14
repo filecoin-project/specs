@@ -93,6 +93,6 @@ Given deal states and their transitions, the following is the relationship betwe
 
 - `Power`: only payload data in an Active storage deal counts towards power.
 - `Deal Payment`: lazily evaluated when a miner calls `StorageMinerActor.CreditDealPayment` and automatically settles when a deal or a sector has expired.
-- `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired.
+- `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from Failing within MaxFaultCount threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to `RecoverFaults`.
 
 {{< diagram src="diagrams/deal-payment.mmd.svg" title="Deal States Sequence Diagram" >}}

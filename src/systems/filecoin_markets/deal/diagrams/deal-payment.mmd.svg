@@ -1,49 +1,49 @@
-<svg id="mermaid-1573534892598" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:680px;" viewBox="-50 -10 680 906"><style>
+<svg id="mermaid-1573723398632" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:730.703125px;" viewBox="-50 -10 730.703125 1856"><style>
 
 
 
-#mermaid-1573534892598 .label {
+#mermaid-1573723398632 .label {
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   color: #333; }
 
-#mermaid-1573534892598 .label text {
+#mermaid-1573723398632 .label text {
   fill: #333; }
 
-#mermaid-1573534892598 .node rect,
-#mermaid-1573534892598 .node circle,
-#mermaid-1573534892598 .node ellipse,
-#mermaid-1573534892598 .node polygon {
+#mermaid-1573723398632 .node rect,
+#mermaid-1573723398632 .node circle,
+#mermaid-1573723398632 .node ellipse,
+#mermaid-1573723398632 .node polygon {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1px; }
 
-#mermaid-1573534892598 .node .label {
+#mermaid-1573723398632 .node .label {
   text-align: center; }
 
-#mermaid-1573534892598 .node.clickable {
+#mermaid-1573723398632 .node.clickable {
   cursor: pointer; }
 
-#mermaid-1573534892598 .arrowheadPath {
+#mermaid-1573723398632 .arrowheadPath {
   fill: #333333; }
 
-#mermaid-1573534892598 .edgePath .path {
+#mermaid-1573723398632 .edgePath .path {
   stroke: #333333;
   stroke-width: 1.5px; }
 
-#mermaid-1573534892598 .edgeLabel {
+#mermaid-1573723398632 .edgeLabel {
   background-color: #e8e8e8;
   text-align: center; }
 
-#mermaid-1573534892598 .cluster rect {
+#mermaid-1573723398632 .cluster rect {
   fill: #ffffde;
   stroke: #aaaa33;
   stroke-width: 1px; }
 
-#mermaid-1573534892598 .cluster text {
+#mermaid-1573723398632 .cluster text {
   fill: #333; }
 
-#mermaid-1573534892598 div.mermaidTooltip {
+#mermaid-1573723398632 div.mermaidTooltip {
   position: absolute;
   text-align: center;
   max-width: 200px;
@@ -57,117 +57,117 @@
   pointer-events: none;
   z-index: 100; }
 
-#mermaid-1573534892598 .actor {
+#mermaid-1573723398632 .actor {
   stroke: #CCCCFF;
   fill: #ECECFF; }
 
-#mermaid-1573534892598 text.actor {
+#mermaid-1573723398632 text.actor {
   fill: black;
   stroke: none; }
 
-#mermaid-1573534892598 .actor-line {
+#mermaid-1573723398632 .actor-line {
   stroke: grey; }
 
-#mermaid-1573534892598 .messageLine0 {
+#mermaid-1573723398632 .messageLine0 {
   stroke-width: 1.5;
   stroke-dasharray: '2 2';
   stroke: #333; }
 
-#mermaid-1573534892598 .messageLine1 {
+#mermaid-1573723398632 .messageLine1 {
   stroke-width: 1.5;
   stroke-dasharray: '2 2';
   stroke: #333; }
 
-#mermaid-1573534892598 #arrowhead {
+#mermaid-1573723398632 #arrowhead {
   fill: #333; }
 
-#mermaid-1573534892598 .sequenceNumber {
+#mermaid-1573723398632 .sequenceNumber {
   fill: white; }
 
-#mermaid-1573534892598 #sequencenumber {
+#mermaid-1573723398632 #sequencenumber {
   fill: #333; }
 
-#mermaid-1573534892598 #crosshead path {
+#mermaid-1573723398632 #crosshead path {
   fill: #333 !important;
   stroke: #333 !important; }
 
-#mermaid-1573534892598 .messageText {
+#mermaid-1573723398632 .messageText {
   fill: #333;
   stroke: none; }
 
-#mermaid-1573534892598 .labelBox {
+#mermaid-1573723398632 .labelBox {
   stroke: #CCCCFF;
   fill: #ECECFF; }
 
-#mermaid-1573534892598 .labelText {
+#mermaid-1573723398632 .labelText {
   fill: black;
   stroke: none; }
 
-#mermaid-1573534892598 .loopText {
+#mermaid-1573723398632 .loopText {
   fill: black;
   stroke: none; }
 
-#mermaid-1573534892598 .loopLine {
+#mermaid-1573723398632 .loopLine {
   stroke-width: 2;
   stroke-dasharray: '2 2';
   stroke: #CCCCFF; }
 
-#mermaid-1573534892598 .note {
+#mermaid-1573723398632 .note {
   stroke: #aaaa33;
   fill: #fff5ad; }
 
-#mermaid-1573534892598 .noteText {
+#mermaid-1573723398632 .noteText {
   fill: black;
   stroke: none;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   font-size: 14px; }
 
-#mermaid-1573534892598 .activation0 {
+#mermaid-1573723398632 .activation0 {
   fill: #f4f4f4;
   stroke: #666; }
 
-#mermaid-1573534892598 .activation1 {
+#mermaid-1573723398632 .activation1 {
   fill: #f4f4f4;
   stroke: #666; }
 
-#mermaid-1573534892598 .activation2 {
+#mermaid-1573723398632 .activation2 {
   fill: #f4f4f4;
   stroke: #666; }
 
 
-#mermaid-1573534892598 .mermaid-main-font {
+#mermaid-1573723398632 .mermaid-main-font {
   font-family: "trebuchet ms", verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 .section {
+#mermaid-1573723398632 .section {
   stroke: none;
   opacity: 0.2; }
 
-#mermaid-1573534892598 .section0 {
+#mermaid-1573723398632 .section0 {
   fill: rgba(102, 102, 255, 0.49); }
 
-#mermaid-1573534892598 .section2 {
+#mermaid-1573723398632 .section2 {
   fill: #fff400; }
 
-#mermaid-1573534892598 .section1,
-#mermaid-1573534892598 .section3 {
+#mermaid-1573723398632 .section1,
+#mermaid-1573723398632 .section3 {
   fill: white;
   opacity: 0.2; }
 
-#mermaid-1573534892598 .sectionTitle0 {
+#mermaid-1573723398632 .sectionTitle0 {
   fill: #333; }
 
-#mermaid-1573534892598 .sectionTitle1 {
+#mermaid-1573723398632 .sectionTitle1 {
   fill: #333; }
 
-#mermaid-1573534892598 .sectionTitle2 {
+#mermaid-1573723398632 .sectionTitle2 {
   fill: #333; }
 
-#mermaid-1573534892598 .sectionTitle3 {
+#mermaid-1573723398632 .sectionTitle3 {
   fill: #333; }
 
-#mermaid-1573534892598 .sectionTitle {
+#mermaid-1573723398632 .sectionTitle {
   text-anchor: start;
   font-size: 11px;
   text-height: 14px;
@@ -175,309 +175,309 @@
   font-family: var(--mermaid-font-family); }
 
 
-#mermaid-1573534892598 .grid .tick {
+#mermaid-1573723398632 .grid .tick {
   stroke: lightgrey;
   opacity: 0.3;
   shape-rendering: crispEdges; }
-#mermaid-1573534892598   .grid .tick text {
+#mermaid-1573723398632   .grid .tick text {
     font-family: 'trebuchet ms', verdana, arial;
     font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 .grid path {
+#mermaid-1573723398632 .grid path {
   stroke-width: 0; }
 
 
-#mermaid-1573534892598 .today {
+#mermaid-1573723398632 .today {
   fill: none;
   stroke: red;
   stroke-width: 2px; }
 
 
 
-#mermaid-1573534892598 .task {
+#mermaid-1573723398632 .task {
   stroke-width: 2; }
 
-#mermaid-1573534892598 .taskText {
+#mermaid-1573723398632 .taskText {
   text-anchor: middle;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 .taskText:not([font-size]) {
+#mermaid-1573723398632 .taskText:not([font-size]) {
   font-size: 11px; }
 
-#mermaid-1573534892598 .taskTextOutsideRight {
+#mermaid-1573723398632 .taskTextOutsideRight {
   fill: black;
   text-anchor: start;
   font-size: 11px;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 .taskTextOutsideLeft {
+#mermaid-1573723398632 .taskTextOutsideLeft {
   fill: black;
   text-anchor: end;
   font-size: 11px; }
 
 
-#mermaid-1573534892598 .task.clickable {
+#mermaid-1573723398632 .task.clickable {
   cursor: pointer; }
 
-#mermaid-1573534892598 .taskText.clickable {
+#mermaid-1573723398632 .taskText.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
-#mermaid-1573534892598 .taskTextOutsideLeft.clickable {
+#mermaid-1573723398632 .taskTextOutsideLeft.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
-#mermaid-1573534892598 .taskTextOutsideRight.clickable {
+#mermaid-1573723398632 .taskTextOutsideRight.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
 
-#mermaid-1573534892598 .taskText0,
-#mermaid-1573534892598 .taskText1,
-#mermaid-1573534892598 .taskText2,
-#mermaid-1573534892598 .taskText3 {
+#mermaid-1573723398632 .taskText0,
+#mermaid-1573723398632 .taskText1,
+#mermaid-1573723398632 .taskText2,
+#mermaid-1573723398632 .taskText3 {
   fill: white; }
 
-#mermaid-1573534892598 .task0,
-#mermaid-1573534892598 .task1,
-#mermaid-1573534892598 .task2,
-#mermaid-1573534892598 .task3 {
+#mermaid-1573723398632 .task0,
+#mermaid-1573723398632 .task1,
+#mermaid-1573723398632 .task2,
+#mermaid-1573723398632 .task3 {
   fill: #8a90dd;
   stroke: #534fbc; }
 
-#mermaid-1573534892598 .taskTextOutside0,
-#mermaid-1573534892598 .taskTextOutside2 {
+#mermaid-1573723398632 .taskTextOutside0,
+#mermaid-1573723398632 .taskTextOutside2 {
   fill: black; }
 
-#mermaid-1573534892598 .taskTextOutside1,
-#mermaid-1573534892598 .taskTextOutside3 {
+#mermaid-1573723398632 .taskTextOutside1,
+#mermaid-1573723398632 .taskTextOutside3 {
   fill: black; }
 
 
-#mermaid-1573534892598 .active0,
-#mermaid-1573534892598 .active1,
-#mermaid-1573534892598 .active2,
-#mermaid-1573534892598 .active3 {
+#mermaid-1573723398632 .active0,
+#mermaid-1573723398632 .active1,
+#mermaid-1573723398632 .active2,
+#mermaid-1573723398632 .active3 {
   fill: #bfc7ff;
   stroke: #534fbc; }
 
-#mermaid-1573534892598 .activeText0,
-#mermaid-1573534892598 .activeText1,
-#mermaid-1573534892598 .activeText2,
-#mermaid-1573534892598 .activeText3 {
+#mermaid-1573723398632 .activeText0,
+#mermaid-1573723398632 .activeText1,
+#mermaid-1573723398632 .activeText2,
+#mermaid-1573723398632 .activeText3 {
   fill: black !important; }
 
 
-#mermaid-1573534892598 .done0,
-#mermaid-1573534892598 .done1,
-#mermaid-1573534892598 .done2,
-#mermaid-1573534892598 .done3 {
+#mermaid-1573723398632 .done0,
+#mermaid-1573723398632 .done1,
+#mermaid-1573723398632 .done2,
+#mermaid-1573723398632 .done3 {
   stroke: grey;
   fill: lightgrey;
   stroke-width: 2; }
 
-#mermaid-1573534892598 .doneText0,
-#mermaid-1573534892598 .doneText1,
-#mermaid-1573534892598 .doneText2,
-#mermaid-1573534892598 .doneText3 {
+#mermaid-1573723398632 .doneText0,
+#mermaid-1573723398632 .doneText1,
+#mermaid-1573723398632 .doneText2,
+#mermaid-1573723398632 .doneText3 {
   fill: black !important; }
 
 
-#mermaid-1573534892598 .crit0,
-#mermaid-1573534892598 .crit1,
-#mermaid-1573534892598 .crit2,
-#mermaid-1573534892598 .crit3 {
+#mermaid-1573723398632 .crit0,
+#mermaid-1573723398632 .crit1,
+#mermaid-1573723398632 .crit2,
+#mermaid-1573723398632 .crit3 {
   stroke: #ff8888;
   fill: red;
   stroke-width: 2; }
 
-#mermaid-1573534892598 .activeCrit0,
-#mermaid-1573534892598 .activeCrit1,
-#mermaid-1573534892598 .activeCrit2,
-#mermaid-1573534892598 .activeCrit3 {
+#mermaid-1573723398632 .activeCrit0,
+#mermaid-1573723398632 .activeCrit1,
+#mermaid-1573723398632 .activeCrit2,
+#mermaid-1573723398632 .activeCrit3 {
   stroke: #ff8888;
   fill: #bfc7ff;
   stroke-width: 2; }
 
-#mermaid-1573534892598 .doneCrit0,
-#mermaid-1573534892598 .doneCrit1,
-#mermaid-1573534892598 .doneCrit2,
-#mermaid-1573534892598 .doneCrit3 {
+#mermaid-1573723398632 .doneCrit0,
+#mermaid-1573723398632 .doneCrit1,
+#mermaid-1573723398632 .doneCrit2,
+#mermaid-1573723398632 .doneCrit3 {
   stroke: #ff8888;
   fill: lightgrey;
   stroke-width: 2;
   cursor: pointer;
   shape-rendering: crispEdges; }
 
-#mermaid-1573534892598 .milestone {
+#mermaid-1573723398632 .milestone {
   transform: rotate(45deg) scale(0.8, 0.8); }
 
-#mermaid-1573534892598 .milestoneText {
+#mermaid-1573723398632 .milestoneText {
   font-style: italic; }
 
-#mermaid-1573534892598 .doneCritText0,
-#mermaid-1573534892598 .doneCritText1,
-#mermaid-1573534892598 .doneCritText2,
-#mermaid-1573534892598 .doneCritText3 {
+#mermaid-1573723398632 .doneCritText0,
+#mermaid-1573723398632 .doneCritText1,
+#mermaid-1573723398632 .doneCritText2,
+#mermaid-1573723398632 .doneCritText3 {
   fill: black !important; }
 
-#mermaid-1573534892598 .activeCritText0,
-#mermaid-1573534892598 .activeCritText1,
-#mermaid-1573534892598 .activeCritText2,
-#mermaid-1573534892598 .activeCritText3 {
+#mermaid-1573723398632 .activeCritText0,
+#mermaid-1573723398632 .activeCritText1,
+#mermaid-1573723398632 .activeCritText2,
+#mermaid-1573723398632 .activeCritText3 {
   fill: black !important; }
 
-#mermaid-1573534892598 .titleText {
+#mermaid-1573723398632 .titleText {
   text-anchor: middle;
   font-size: 18px;
   fill: black;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 g.classGroup text {
+#mermaid-1573723398632 g.classGroup text {
   fill: #9370DB;
   stroke: none;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   font-size: 10px; }
-#mermaid-1573534892598   g.classGroup text .title {
+#mermaid-1573723398632   g.classGroup text .title {
     font-weight: bolder; }
 
-#mermaid-1573534892598 g.classGroup rect {
+#mermaid-1573723398632 g.classGroup rect {
   fill: #ECECFF;
   stroke: #9370DB; }
 
-#mermaid-1573534892598 g.classGroup line {
+#mermaid-1573723398632 g.classGroup line {
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 .classLabel .box {
+#mermaid-1573723398632 .classLabel .box {
   stroke: none;
   stroke-width: 0;
   fill: #ECECFF;
   opacity: 0.5; }
 
-#mermaid-1573534892598 .classLabel .label {
+#mermaid-1573723398632 .classLabel .label {
   fill: #9370DB;
   font-size: 10px; }
 
-#mermaid-1573534892598 .relation {
+#mermaid-1573723398632 .relation {
   stroke: #9370DB;
   stroke-width: 1;
   fill: none; }
 
-#mermaid-1573534892598 #compositionStart {
+#mermaid-1573723398632 #compositionStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 #compositionEnd {
+#mermaid-1573723398632 #compositionEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 #aggregationStart {
+#mermaid-1573723398632 #aggregationStart {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 #aggregationEnd {
+#mermaid-1573723398632 #aggregationEnd {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 #dependencyStart {
+#mermaid-1573723398632 #dependencyStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 #dependencyEnd {
+#mermaid-1573723398632 #dependencyEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 #extensionStart {
+#mermaid-1573723398632 #extensionStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 #extensionEnd {
+#mermaid-1573723398632 #extensionEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 .commit-id,
-#mermaid-1573534892598 .commit-msg,
-#mermaid-1573534892598 .branch-label {
+#mermaid-1573723398632 .commit-id,
+#mermaid-1573723398632 .commit-msg,
+#mermaid-1573723398632 .branch-label {
   fill: lightgrey;
   color: lightgrey;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 .pieTitleText {
+#mermaid-1573723398632 .pieTitleText {
   text-anchor: middle;
   font-size: 25px;
   fill: black;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 .slice {
+#mermaid-1573723398632 .slice {
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 g.stateGroup text {
+#mermaid-1573723398632 g.stateGroup text {
   fill: #9370DB;
   stroke: none;
   font-size: 10px;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1573534892598 g.stateGroup text {
+#mermaid-1573723398632 g.stateGroup text {
   fill: #9370DB;
   stroke: none;
   font-size: 10px; }
 
-#mermaid-1573534892598 g.stateGroup .state-title {
+#mermaid-1573723398632 g.stateGroup .state-title {
   font-weight: bolder;
   fill: black; }
 
-#mermaid-1573534892598 g.stateGroup rect {
+#mermaid-1573723398632 g.stateGroup rect {
   fill: #ECECFF;
   stroke: #9370DB; }
 
-#mermaid-1573534892598 g.stateGroup line {
+#mermaid-1573723398632 g.stateGroup line {
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1573534892598 .transition {
+#mermaid-1573723398632 .transition {
   stroke: #9370DB;
   stroke-width: 1;
   fill: none; }
 
-#mermaid-1573534892598 .stateGroup .composit {
+#mermaid-1573723398632 .stateGroup .composit {
   fill: white;
   border-bottom: 1px; }
 
-#mermaid-1573534892598 .state-note {
+#mermaid-1573723398632 .state-note {
   stroke: #aaaa33;
   fill: #fff5ad; }
-#mermaid-1573534892598   .state-note text {
+#mermaid-1573723398632   .state-note text {
     fill: black;
     stroke: none;
     font-size: 10px; }
 
-#mermaid-1573534892598 .stateLabel .box {
+#mermaid-1573723398632 .stateLabel .box {
   stroke: none;
   stroke-width: 0;
   fill: #ECECFF;
   opacity: 0.5; }
 
-#mermaid-1573534892598 .stateLabel text {
+#mermaid-1573723398632 .stateLabel text {
   fill: black;
   font-size: 10px;
   font-weight: bold;
@@ -488,7 +488,7 @@
   --mermaid-font-family: '"trebuchet ms", verdana, arial';
   --mermaid-font-family: "Comic Sans MS", "Comic Sans", cursive; }
 
-:root { --mermaid-font-family: "trebuchet ms", verdana, arial;}</style><style>#mermaid-1573534892598 {
+:root { --mermaid-font-family: "trebuchet ms", verdana, arial;}</style><style>#mermaid-1573723398632 {
     color: rgba(0, 0, 0, 0.65);
     font: ;
-  }</style><g></g><g><line id="actor346" x1="75" y1="5" x2="75" y2="895" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="75" dy="0">StorageMiningSubsystem</tspan></text></g><g><line id="actor347" x1="275" y1="5" x2="275" y2="895" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="275" dy="0">StorageMinerActor</tspan></text></g><g><line id="actor348" x1="475" y1="5" x2="475" y2="895" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="475" dy="0">StorageMarketActor</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" stroke-width="1px" d="M 9,2 V 6 L16,4 Z" style="stroke-dasharray: 0, 0;"></path><path fill="none" stroke="#000000" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7" style="stroke-dasharray: 0, 0;"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><text x="275" y="93" class="messageText" style="text-anchor: middle;">PublishStorageDeals</text><line x1="75" y1="100" x2="475" y2="100" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="470" y="102" fill="#EDF2AE" stroke="#666" width="10" height="228" rx="0" ry="0" class="activation0"></rect></g><g><text x="480" y="128" class="messageText" style="text-anchor: middle;">_validateNewStorageDeal</text><path d="M 480,135 C 540,125 540,165 480,155" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="193" class="messageText" style="text-anchor: middle;">_lockBalance</text><path d="M 480,200 C 540,190 540,230 480,220" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="258" class="messageText" style="text-anchor: middle;">_generateStorageDealID</text><path d="M 480,265 C 540,255 540,295 480,285" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="272.5" y="323" class="messageText" style="text-anchor: middle;">DealIDs</text><line x1="470" y1="330" x2="75" y2="330" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="358" class="messageText" style="text-anchor: middle;">PreCommitSector</text><line x1="75" y1="365" x2="275" y2="365" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="393" class="messageText" style="text-anchor: middle;">VerifyPublishedDealIDs(dealIDs)</text><line x1="275" y1="400" x2="475" y2="400" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="470" y="402" fill="#EDF2AE" stroke="#666" width="10" height="33" rx="0" ry="0" class="activation0"></rect></g><g><text x="372.5" y="428" class="messageText" style="text-anchor: middle;">Success</text><line x1="470" y1="435" x2="275" y2="435" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="463" class="messageText" style="text-anchor: middle;">ProveCommitSector</text><line x1="75" y1="470" x2="275" y2="470" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="498" class="messageText" style="text-anchor: middle;">ActivateSectorDealIDs(dealIDs)</text><line x1="275" y1="505" x2="475" y2="505" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="533" class="messageText" style="text-anchor: middle;">GetInitialUtilizationInfo(dealIDs)</text><line x1="275" y1="540" x2="475" y2="540" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="568" class="messageText" style="text-anchor: middle;">CreditSectorDealPayment(sectorNo)</text><line x1="75" y1="575" x2="275" y2="575" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="603" class="messageText" style="text-anchor: middle;">ProcessSectorDealPayment(batchPayment)</text><line x1="275" y1="610" x2="475" y2="610" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="275" y="638" class="messageText" style="text-anchor: middle;">_submitPowerReport(if deal expires)</text><path d="M 275,645 C 335,635 335,675 275,665" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="375" y="703" class="messageText" style="text-anchor: middle;">ProcessSectorDealPayment(batchPayment)</text><line x1="275" y1="710" x2="475" y2="710" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="275" y="738" class="messageText" style="text-anchor: middle;">_submitFaultReport</text><path d="M 275,745 C 335,735 335,775 275,765" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="375" y="803" class="messageText" style="text-anchor: middle;">ProcessSectorDealSlash(batchSlash)</text><line x1="275" y1="810" x2="475" y2="810" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="0" y="830" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="862.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="75" dy="0">StorageMiningSubsystem</tspan></text></g><g><rect x="200" y="830" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="862.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="275" dy="0">StorageMinerActor</tspan></text></g><g><rect x="400" y="830" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="862.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="475" dy="0">StorageMarketActor</tspan></text></g></svg>
+  }</style><g></g><g><line id="actor1190" x1="75" y1="5" x2="75" y2="1845" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="75" dy="0">StorageMiningSubsystem</tspan></text></g><g><line id="actor1191" x1="275" y1="5" x2="275" y2="1845" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="275" dy="0">StorageMinerActor</tspan></text></g><g><line id="actor1192" x1="475" y1="5" x2="475" y2="1845" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="475" dy="0">StorageMarketActor</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" stroke-width="1px" d="M 9,2 V 6 L16,4 Z" style="stroke-dasharray: 0, 0;"></path><path fill="none" stroke="#000000" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7" style="stroke-dasharray: 0, 0;"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><text x="275" y="93" class="messageText" style="text-anchor: middle;">PublishStorageDeals</text><line x1="75" y1="100" x2="475" y2="100" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="470" y="102" fill="#EDF2AE" stroke="#666" width="10" height="423" rx="0" ry="0" class="activation0"></rect></g><g><text x="480" y="128" class="messageText" style="text-anchor: middle;">_validateNewStorageDeal</text><path d="M 480,135 C 540,125 540,165 480,155" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="193" class="messageText" style="text-anchor: middle;">_assertValidDealTimingAtPublish</text><path d="M 480,200 C 540,190 540,230 480,220" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="258" class="messageText" style="text-anchor: middle;">_assertValidDealMinimum</text><path d="M 480,265 C 540,255 540,295 480,285" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="323" class="messageText" style="text-anchor: middle;">_assertSufficientBalanceAvailableForDeal</text><path d="M 480,330 C 540,320 540,360 480,350" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="388" class="messageText" style="text-anchor: middle;">_lockFundsForStorageDeal</text><path d="M 480,395 C 540,385 540,425 480,415" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="453" class="messageText" style="text-anchor: middle;">_generateStorageDealID</text><path d="M 480,460 C 540,450 540,490 480,480" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="272.5" y="518" class="messageText" style="text-anchor: middle;">DealIDs</text><line x1="470" y1="525" x2="75" y2="525" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="553" class="messageText" style="text-anchor: middle;">PreCommitSector</text><line x1="75" y1="560" x2="275" y2="560" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="588" class="messageText" style="text-anchor: middle;">VerifyPublishedDealIDs(dealIDs)</text><line x1="275" y1="595" x2="475" y2="595" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="470" y="597" fill="#EDF2AE" stroke="#666" width="10" height="228" rx="0" ry="0" class="activation0"></rect></g><g><text x="480" y="623" class="messageText" style="text-anchor: middle;">_assertPublishedDealState</text><path d="M 480,630 C 540,620 540,660 480,650" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="688" class="messageText" style="text-anchor: middle;">_assertDealStartAfterCurrEpoch</text><path d="M 480,695 C 540,685 540,725 480,715" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="753" class="messageText" style="text-anchor: middle;">_assertDealExpireAfterMaxProveCommitWindow</text><path d="M 480,760 C 540,750 540,790 480,780" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="372.5" y="818" class="messageText" style="text-anchor: middle;">Success</text><line x1="470" y1="825" x2="275" y2="825" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="175" y="853" class="messageText" style="text-anchor: middle;">ProveCommitSector</text><line x1="75" y1="860" x2="275" y2="860" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="888" class="messageText" style="text-anchor: middle;">ActivateDeals(dealIDs)</text><line x1="275" y1="895" x2="475" y2="895" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="470" y="897" fill="#EDF2AE" stroke="#666" width="10" height="163" rx="0" ry="0" class="activation0"></rect></g><g><text x="480" y="923" class="messageText" style="text-anchor: middle;">_assertPublishedDealState</text><path d="M 480,930 C 540,920 540,960 480,950" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="480" y="988" class="messageText" style="text-anchor: middle;">_assertDealNotYetExpired</text><path d="M 480,995 C 540,985 540,1025 480,1015" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="372.5" y="1053" class="messageText" style="text-anchor: middle;">Success</text><line x1="470" y1="1060" x2="275" y2="1060" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="1088" class="messageText" style="text-anchor: middle;">GetDeals(dealIDs)</text><line x1="275" y1="1095" x2="475" y2="1095" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><rect x="470" y="1097" fill="#EDF2AE" stroke="#666" width="10" height="33" rx="0" ry="0" class="activation0"></rect></g><g><text x="372.5" y="1123" class="messageText" style="text-anchor: middle;">Deals</text><line x1="470" y1="1130" x2="275" y2="1130" class="messageLine1" stroke-width="2" stroke="black" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="275" y="1158" class="messageText" style="text-anchor: middle;">_initializeUtilizationInfo</text><path d="M 275,1165 C 335,1155 335,1195 275,1185" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="175" y="1223" class="messageText" style="text-anchor: middle;">CreditSectorDealPayment(sectorNo)</text><line x1="75" y1="1230" x2="275" y2="1230" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="375" y="1258" class="messageText" style="text-anchor: middle;">ProcessDealPayment(batchPayment)</text><line x1="275" y1="1265" x2="475" y2="1265" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="475" y="1293" class="messageText" style="text-anchor: middle;">_creditStorageDeals</text><path d="M 475,1300 C 535,1290 535,1330 475,1320" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="275" y="1358" class="messageText" style="text-anchor: middle;">_submitPowerReport(if deal expires)</text><path d="M 275,1365 C 335,1355 335,1395 275,1385" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="375" y="1423" class="messageText" style="text-anchor: middle;">ProcessDealPayment(batchPayment)</text><line x1="275" y1="1430" x2="475" y2="1430" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="475" y="1458" class="messageText" style="text-anchor: middle;">_expireStorageDeals</text><path d="M 475,1465 C 535,1455 535,1495 475,1485" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="275" y="1523" class="messageText" style="text-anchor: middle;">_submitFaultReport(if TerminatedFautl)</text><path d="M 275,1530 C 335,1520 335,1560 275,1550" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="375" y="1588" class="messageText" style="text-anchor: middle;">ProcessDealSlash(batchSlash)</text><line x1="275" y1="1595" x2="475" y2="1595" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="475" y="1623" class="messageText" style="text-anchor: middle;">_slashTerminatedFaults</text><path d="M 475,1630 C 535,1620 535,1660 475,1650" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><text x="375" y="1688" class="messageText" style="text-anchor: middle;">CreditUnlockedFees</text><line x1="275" y1="1695" x2="475" y2="1695" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></line></g><g><text x="475" y="1723" class="messageText" style="text-anchor: middle;">_creditUnlockedFeeForProvider</text><path d="M 475,1730 C 535,1720 535,1760 475,1750" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"></path></g><g><rect x="0" y="1780" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="1812.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="75" dy="0">StorageMiningSubsystem</tspan></text></g><g><rect x="200" y="1780" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="1812.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="275" dy="0">StorageMinerActor</tspan></text></g><g><rect x="400" y="1780" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="1812.5" dominant-baseline="central" alignment-baseline="central" class="actor" style="text-anchor: middle; font-size: 14px;"><tspan x="475" dy="0">StorageMarketActor</tspan></text></g></svg>
