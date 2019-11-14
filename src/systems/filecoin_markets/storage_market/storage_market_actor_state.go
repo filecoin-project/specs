@@ -239,6 +239,13 @@ func (st *StorageMarketActorState_I) _expireStorageDeals(rt Runtime, dealIDs []d
 	}
 }
 
+func (st *StorageMarketActorState_I) _creditUnlockedFeeForProvider(rt Runtime, dealP deal.StorageDealProposal, dealTally deal.StorageDealTally) {
+	// credit fund for provider
+	unlockedFee := dealTally.UnlockedStorageFee()
+	dealTally.Impl().UnlockedStorageFee_ = actor.TokenAmount(0)
+	st._unlockBalance(rt, dealP.Provider(), unlockedFee)
+}
+
 func (st *StorageMarketActorState_I) _creditStorageDeals(rt Runtime, dealIDs []deal.DealID, lastChallengeEndEpoch block.ChainEpoch) {
 
 	for _, dealID := range dealIDs {
@@ -254,10 +261,7 @@ func (st *StorageMarketActorState_I) _creditStorageDeals(rt Runtime, dealIDs []d
 		// move fee from locked to unlocked in tally
 		dealTally.Impl().UnlockStorageFee(fee)
 
-		// credit fund for provider
-		unlockedFee := dealTally.UnlockedStorageFee()
-		dealTally.Impl().UnlockedStorageFee_ = actor.TokenAmount(0)
-		st._unlockBalance(rt, dealP.Provider(), unlockedFee)
+		st._creditUnlockedFeeForProvider(rt, dealP, dealTally)
 	}
 
 }

@@ -233,9 +233,22 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, info deal.BatchD
 
 }
 
-// func (a *StorageMarketActorCode_I) CreditUnlockedFees(rt Runtime, dealIDs []deal.DealID) {
-// 	TODO() //
-// }
+func (a *StorageMarketActorCode_I) CreditUnlockedFees(rt Runtime, dealIDs []deal.DealID) {
+	TODO() // verify StorageMinerActor
+
+	h, st := a.State(rt)
+
+	for _, dealID := range dealIDs {
+		activeDeal := st._getDeal(rt, dealID)
+		st._assertActiveDealState(rt, dealID)
+		dealTally := st._getDealTally(rt, dealID)
+		dealP := activeDeal.Proposal()
+
+		st._creditUnlockedFeeForProvider(rt, dealP, dealTally)
+	}
+
+	UpdateRelease(rt, h, st)
+}
 
 func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, info deal.BatchDealPaymentInfo) {
 	h, st := a.State(rt)

@@ -53,6 +53,11 @@ type StorageMarketActorState struct {
         dealIDs                [deal.DealID]
         lastChallengeEndEpoch  block.ChainEpoch
     )
+    _creditUnlockedFeeForProvider(
+        rt         Runtime
+        dealP      deal.StorageDealProposal
+        dealTally  deal.StorageDealTally
+    )
     _creditStorageDeals(
         rt                     Runtime
         dealIDs                [deal.DealID]
@@ -108,7 +113,7 @@ type StorageMarketActorCode struct {
 
     // call by StorageMinerActor
     // unlock balances in UnlockedFees in dealTally
-    // CreditUnlockedFees(rt Runtime, dealIDs [deal.DealID])
+    CreditUnlockedFees(rt Runtime, dealIDs [deal.DealID])
 
     // batch process storage deal payment based on actions
     //     - Credit: lazily evaulated when a StorageMiner calls CreditDealPayment
