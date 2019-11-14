@@ -137,6 +137,7 @@ func DSLTrivialStruct() Type {
 		attributeList: []string{},
 		parseFmtInfo:  nil,
 		isInterface:   false,
+		isEnum:        false,
 	})
 }
 
@@ -261,6 +262,7 @@ type AlgType struct {
 	attributeList  []string
 	parseFmtInfo   *ParseFmtInfo
 	isInterface    bool
+	isEnum         bool
 }
 
 func (x *AlgType) Methods() []Method {

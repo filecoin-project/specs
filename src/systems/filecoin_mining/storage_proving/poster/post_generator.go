@@ -63,7 +63,7 @@ func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, f
 func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
 	var cfg filproofs.SDRCfg_I
 
-	switch postCfg.Type().(type) {
+	switch postCfg.Type() {
 	case sector.PoStType_ElectionPoSt:
 		cfg = filproofs.SDRCfg_I{
 			ElectionPoStCfg_: postCfg,

@@ -36,8 +36,9 @@ func (GoMapType) implements_GoNode()         {}
 func (GoIdent) implements_GoNode()           {}
 
 type GoTypeDecl struct {
-	name  string
-	type_ GoNode
+	name      string
+	type_     GoNode
+	declAlias bool
 }
 
 type GoPackageDecl struct {
@@ -158,12 +159,17 @@ func GenAST(x GoNode) ast.Node {
 	switch x.(type) {
 	case GoTypeDecl:
 		xr := x.(GoTypeDecl)
+		var assignPos token.Pos
+		if xr.declAlias {
+			assignPos = 1 // TODO: cleanup
+		}
 		return &ast.GenDecl{
 			Tok: token.TYPE,
 			Specs: []ast.Spec{
 				&ast.TypeSpec{
-					Name: ast.NewIdent(xr.name),
-					Type: GenAST(xr.type_).(ast.Expr),
+					Name:   ast.NewIdent(xr.name),
+					Assign: assignPos,
+					Type:   GenAST(xr.type_).(ast.Expr),
 				},
 			},
 		}

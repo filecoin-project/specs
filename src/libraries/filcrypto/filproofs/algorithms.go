@@ -2,6 +2,7 @@ package filproofs
 
 import "bytes"
 import "errors"
+import "fmt"
 import "math"
 import "math/rand"
 import big "math/big"
@@ -65,8 +66,8 @@ func SDRParams(cfg SDRCfg) *StackedDRG_I {
 		Algorithm_:  &StackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
-				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample(&DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{}),
-				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20(&DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I{}),
+				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
+				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_ChaCha20,
 			},
 			Degree_: 6,
 			Nodes_:  DRGNodeCount(nodes),
@@ -75,10 +76,9 @@ func SDRParams(cfg SDRCfg) *StackedDRG_I {
 			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
 				&ChungExpanderAlgorithm_I{
 					PermutationAlgorithm_: ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&Feistel_I{
-						Keys_:   FEISTEL_KEYS[:],
-						Rounds_: FEISTEL_ROUNDS,
-						HashFunction_: ChungExpanderPermutationFeistelHashFunction_Make_SHA256(
-							&ChungExpanderPermutationFeistelHashFunction_SHA256_I{}),
+						Keys_:         FEISTEL_KEYS[:],
+						Rounds_:       FEISTEL_ROUNDS,
+						HashFunction_: ChungExpanderPermutationFeistelHashFunction_SHA256,
 					}),
 				}),
 			Degree_: 8,
@@ -106,29 +106,35 @@ func (sdr *StackedDRG_I) expander() *ExpanderGraph_I {
 func (drg *DRG_I) Parents(node UInt) []UInt {
 	config := drg.Config()
 	degree := UInt(config.Degree())
-	return config.Algorithm().ParentsAlgorithm().As_DRSample().Impl().Parents(degree, node)
+	return DRGAlgorithmComputeParents(config.Algorithm().ParentsAlgorithm(), degree, node)
 }
 
 // TODO: Verify this. Both the port from impl and the algorithm.
-func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node UInt) (parents []UInt) {
-	util.Assert(node > 0)
-	parents = append(parents, node-1)
+func DRGAlgorithmComputeParents(alg DRGCfg_Algorithm_ParentsAlgorithm, degree UInt, node UInt) (parents []UInt) {
+	switch alg {
+	case DRGCfg_Algorithm_ParentsAlgorithm_DRSample:
+		util.Assert(node > 0)
+		parents = append(parents, node-1)
 
-	m := degree - 1
+		m := degree - 1
 
-	var k UInt
-	for k = 0; k < m; k++ {
-		logi := int(math.Floor(math.Log2(float64(node * m))))
-		// FIXME: Make RNG parameterizable and specify it.
-		j := rand.Intn(logi)
-		jj := math.Min(float64(node*m+k), float64(UInt(1)<<uint(j+1)))
-		backDist := randInRange(int(math.Max(float64(UInt(jj)>>1), 2)), int(jj+1))
-		out := (node*m + k - backDist) / m
+		var k UInt
+		for k = 0; k < m; k++ {
+			logi := int(math.Floor(math.Log2(float64(node * m))))
+			// FIXME: Make RNG parameterizable and specify it.
+			j := rand.Intn(logi)
+			jj := math.Min(float64(node*m+k), float64(UInt(1)<<uint(j+1)))
+			backDist := randInRange(int(math.Max(float64(UInt(jj)>>1), 2)), int(jj+1))
+			out := (node*m + k - backDist) / m
 
-		parents = append(parents, out)
+			parents = append(parents, out)
+		}
+
+		return parents
+
+	default:
+		panic(fmt.Sprintf("DRG algorithm not supported: %v", alg))
 	}
-
-	return parents
 }
 
 func randInRange(lowInclusive int, highExclusive int) UInt {

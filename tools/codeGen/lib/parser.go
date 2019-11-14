@@ -1194,6 +1194,7 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 			attributeList:  attributeList,
 			parseFmtInfo:   RefParseFmtInfo(info),
 			isInterface:    tok == "interface",
+			isEnum:         tok == "enum",
 		})
 
 	case tok == "[":

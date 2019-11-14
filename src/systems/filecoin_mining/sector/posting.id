@@ -46,8 +46,3 @@ type ElectionCandidate struct {
 }
 
 type PrivatePoStProof struct {}
-
-type PoStVerifyInfo struct {
-    PoStCfg
-    Tickets [ElectionTicket]
-}
