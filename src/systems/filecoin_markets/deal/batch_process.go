@@ -10,7 +10,5 @@ const (
 type StorageDealSlashAction = int
 
 const (
-	SlashDeclaredFaults   StorageDealSlashAction = 0
-	SlashDetectedFaults   StorageDealSlashAction = 1
-	SlashTerminatedFaults StorageDealSlashAction = 2
+	SlashTerminatedFaults StorageDealSlashAction = 0
 )

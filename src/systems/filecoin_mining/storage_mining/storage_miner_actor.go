@@ -172,14 +172,7 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 	rt.Abort("TODO") // TODO: Send(SPA, ProcessFaultReport(faultReport))
 	panic(faultReport)
 
-	if len(newDeclaredFaults) > 0 {
-		a._slashDealsFromFaultReport(rt, newDeclaredFaults.SectorsOn(), deal.SlashDeclaredFaults)
-	}
-
-	if len(newDetectedFaults) > 0 {
-		a._slashDealsFromFaultReport(rt, newDetectedFaults.SectorsOn(), deal.SlashDetectedFaults)
-	}
-
+	// only terminatedFault will be slashed
 	if len(newTerminatedFaults) > 0 {
 		a._slashDealsFromFaultReport(rt, newTerminatedFaults.SectorsOn(), deal.SlashTerminatedFaults)
 	}

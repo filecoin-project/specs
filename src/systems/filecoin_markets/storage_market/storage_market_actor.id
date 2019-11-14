@@ -13,10 +13,11 @@ type DealTallyAMT {deal.DealID: deal.StorageDealTally}
 type DealAMT {deal.DealID: deal.StorageDeal}
 
 type StorageMarketActorState struct {
-    Balances    BalancesHAMT
-    DealStates  deal.DealStateSet
-    Deals       DealAMT
-    DealTally   DealTallyAMT
+    Balances               BalancesHAMT
+    DealStates             deal.DealStateSet
+    Deals                  DealAMT
+    DealTally              DealTallyAMT
+    DealCollateralSlashed  actor.TokenAmount
 
     // generate storage deal id
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
@@ -46,10 +47,13 @@ type StorageMarketActorState struct {
         lastChallengeEndEpoch  block.ChainEpoch
     )
 
-    _slashDeclaredFaults(rt Runtime, dealIDs [deal.DealID])
-    _slashDetectedFaults(rt Runtime, dealIDs [deal.DealID])
     _slashTerminatedFaults(rt Runtime, dealIDs [deal.DealID])
     _terminateDeal(rt Runtime, dealID deal.DealID)
+    _slashDealCollateral(
+        rt         Runtime
+        dealTally  deal.StorageDealTally
+        amount     actor.TokenAmount
+    )
 
     _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)
     _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount)

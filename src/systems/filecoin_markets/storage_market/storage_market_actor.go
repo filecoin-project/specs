@@ -462,38 +462,6 @@ func (st *StorageMarketActorState_I) _creditStorageDeals(rt Runtime, dealIDs []d
 
 }
 
-func (st *StorageMarketActorState_I) _slashDeclaredFaults(rt Runtime, dealIDs []deal.DealID) {
-
-	for _, dealID := range dealIDs {
-
-		deal := st._getDeal(rt, dealID)
-		st._assertActiveDealState(rt, dealID)
-		dealTally := st._getDealTally(rt, dealID)
-
-		// TODO: the exact slash amount is up for change
-		// TODO: check if provider runs out of collateral to slash here
-		dealTally.Impl().ProviderCollateralRemaining_ -= deal.Proposal().ProviderCollateralPerEpoch()
-
-	}
-}
-
-func (st *StorageMarketActorState_I) _slashDetectedFaults(rt Runtime, dealIDs []deal.DealID) {
-
-	for _, dealID := range dealIDs {
-
-		deal := st._getDeal(rt, dealID)
-		st._assertActiveDealState(rt, dealID)
-		dealTally := st._getDealTally(rt, dealID)
-
-		// TODO: the exact slash amount is up for change
-		// TODO: check if provider runs out of collateral to slash here
-		// TODO: more sever slashing for detected faults vs declared faults
-		// maybe for the duration since the last Epoch that the sector was proven
-		dealTally.Impl().ProviderCollateralRemaining_ -= deal.Proposal().ProviderCollateralPerEpoch()
-
-	}
-}
-
 func (st *StorageMarketActorState_I) _getDeal(rt Runtime, dealID deal.DealID) deal.StorageDeal {
 	deal, found := st.Deals()[dealID]
 	if !found {
@@ -512,6 +480,16 @@ func (st *StorageMarketActorState_I) _getDealTally(rt Runtime, dealID deal.DealI
 	return dealTally
 }
 
+func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealTally deal.StorageDealTally, amount actor.TokenAmount) {
+	amountToSlash := amount
+	if amount > dealTally.ProviderCollateralRemaining() {
+		amountToSlash = dealTally.ProviderCollateralRemaining()
+	}
+
+	st.DealCollateralSlashed_ += amountToSlash
+	dealTally.Impl().ProviderCollateralRemaining_ -= amountToSlash
+}
+
 func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) {
 
 	deal := st._getDeal(rt, dealID)
@@ -526,8 +504,8 @@ func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.Deal
 	clientCollateral := deal.Proposal().TotalClientCollateral()
 	st._unlockBalance(rt, clientAddr, clientCollateral+dealTally.LockedStorageFee())
 
-	// burn all deal.ProviderCollateralRemaining by sending them to TreasuryActor
-	// TODO: Send(deal.ProviderCollateralRemaining)
+	collateralToSlash := dealTally.ProviderCollateralRemaining()
+	st._slashDealCollateral(rt, dealTally, collateralToSlash)
 }
 
 // delete deal from active deals
@@ -548,11 +526,8 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, info deal.BatchD
 
 	h, st := a.State(rt)
 
+	// only terminated fault will result in slashing of deal collateral
 	switch info.Action() {
-	case deal.SlashDeclaredFaults:
-		st._slashDeclaredFaults(rt, info.DealIDs())
-	case deal.SlashDetectedFaults:
-		st._slashDetectedFaults(rt, info.DealIDs())
 	case deal.SlashTerminatedFaults:
 		st._slashTerminatedFaults(rt, info.DealIDs())
 	default:
