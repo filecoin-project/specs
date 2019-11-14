@@ -132,12 +132,8 @@ func (a *StorageMinerActorCode_I) _slashDealsFromFaultReport(rt Runtime, sectorN
 	dealIDs := deal.CompactDealSet(make([]byte, 0))
 
 	for _, sectorNo := range sectorNumbers {
-		utilizationInfo, found := st.SectorUtilization()[sectorNo]
 
-		if !found {
-			rt.Abort("sm._getDealSlashInfoFromSectors: utilization info not found.")
-		}
-
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
 		activeDealIDs := utilizationInfo.DealExpirationQueue().ActiveDealIDs()
 		dealIDs = dealIDs.Extend(activeDealIDs)
 
@@ -313,12 +309,8 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) []deal.
 	ret := deal.CompactDealSet(make([]byte, 0))
 
 	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
-		utilizationInfo, found := st.SectorUtilization()[sectorNo]
 
-		if !found {
-			rt.Abort("sm._updateSectorUtilization: sector not found in SectorUtilization")
-		}
-
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
 		newUtilization := utilizationInfo.CurrUtilization()
 
 		currEpoch := rt.CurrEpoch()
@@ -363,10 +355,7 @@ func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StorageP
 	inactiveSectorSet := inactiveProvingSet.Extend(st.SectorTable().FailingSectors())
 
 	for _, sectorNo := range inactiveSectorSet.SectorsOn() {
-		utilizationInfo, found := st.SectorUtilization()[sectorNo]
-		if !found {
-			rt.Abort("sm._getInactivePower: sectorNo not found in SectorUtilization")
-		}
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
 		inactivePower += utilizationInfo.CurrUtilization()
 	}
 
@@ -615,7 +604,7 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 		expiredSectorNo := queue.Pop().SectorNumber()
 
 		state := st.Sectors()[expiredSectorNo].State()
-		// sc := sm.Sectors()[expiredSectorNo]
+
 		switch state.StateNumber {
 		case SectorActiveSN:
 			// Note: in order to verify if something was stored in the past, one must
@@ -735,20 +724,14 @@ func (a *StorageMinerActorCode_I) CreditSectorDealPayment(rt Runtime, sectorNo s
 
 	h, st := a.State(rt)
 
-	utilization, found := st.SectorUtilization()[sectorNo]
-
-	if !found {
-		rt.Abort("sm.GetSectorPaymentInfo: sector number not found.")
-	}
-
+	utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
 	sectorIsActive := st.SectorTable().Impl().ActiveSectors_.Contain(sectorNo)
 
 	if !sectorIsActive {
 		rt.Abort("sm.GetSectorPaymentInfo: sector not active")
 	}
 
-	activeDealSet := utilization.DealExpirationQueue().ActiveDealIDs()
-
+	activeDealSet := utilizationInfo.DealExpirationQueue().ActiveDealIDs()
 	batchDealPaymentInfo := &deal.BatchDealPaymentInfo_I{
 		DealIDs_:               activeDealSet.DealsOn(),
 		Action_:                deal.CreditStorageDeals,
@@ -820,9 +803,21 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 	return sdr.VerifySeal(&svInfo)
 }
 
-func (st *StorageMinerActorState_I) _sectorExists(sectorNo sector.SectorNumber) bool {
+func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber) {
 	_, found := st.Sectors()[sectorNo]
-	return found
+	if found {
+		rt.Abort("sm._assertSectorDidNotExist: sector already exists.")
+	}
+}
+
+func (st *StorageMinerActorState_I) _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo {
+	utilizationInfo, found := st.SectorUtilization()[sectorNo]
+
+	if !found {
+		rt.Abort("sm._getUtilizationInfo: utilization info not found.")
+	}
+
+	return utilizationInfo
 }
 
 func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.StorageDeal) sector.SectorUtilizationInfo {
@@ -870,8 +865,6 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 	// can be called regardless of Challenged status
 
-	// TODO: might record CurrEpoch for PreCommitSector expiration
-	// in other words, a ProveCommitSector must be on chain X Epoch after a PreCommitSector goes on chain
 	// TODO: might take collateral in case no ProveCommit follows within sometime
 	// TODO: collateral also penalizes repeated precommit to get randomness that one likes
 	// TODO: might be a good place for Treasury
@@ -885,20 +878,14 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 		rt.Abort("Sector already pre committed.")
 	}
 
-	sectorExists := st._sectorExists(info.SectorNumber())
-	if sectorExists {
-		rt.Abort("Sector already exists.")
-	}
+	st._assertSectorDidNotExist(rt, info.SectorNumber())
 
 	Release(rt, h, st)
 
 	// verify every DealID has been published and will not expire
 	// before the MAX_PROVE_COMMIT_SECTOR_EPOCH + CurrEpoch
+	// abort otherwise
 	// Send(SMA.VerifyPublishedDealIDs(info.DealIDs()))
-	var isPublishedDealIDsVerified bool
-	if !isPublishedDealIDsVerified {
-		rt.Abort("sm.PreCommitSector: verify published DealIDs failed")
-	}
 
 	h, st = a.State(rt)
 
@@ -923,11 +910,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		rt.Abort("Sector not pre committed.")
 	}
 
-	sectorExists := st._sectorExists(info.SectorNumber())
-
-	if sectorExists {
-		rt.Abort("Sector already exists.")
-	}
+	st._assertSectorDidNotExist(rt, info.SectorNumber())
 
 	// check if ProveCommitSector comes too late after PreCommitSector
 	elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
@@ -970,16 +953,12 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// ActivateStorageDeals
 	// Ok if deal has started
 	// Send(SMA.ActivateDeals(onChainInfo.DealIDs())
-	var isSectorDealActivationSuccess bool
-	if !isSectorDealActivationSuccess {
-		rt.Abort("sm.ProveCommitSector: activate sector DealIDs failed")
-	}
+	// abort if activation failed
 
-	// determine lastDealExpiration from sma
 	// TODO: proper onchain transaction
-	// initialUtilization := SendMessage(sma, GetInitialUtilizationInfo(onChainInfo.DealIDs()))
-	// lastDealExpiration := initialUtilization.Peek()
-	var initialUtilization sector.SectorUtilizationInfo
+	// deals := SendMessage(sma, GetDeals(onChainInfo.DealIDs()))
+	var deals []deal.StorageDeal
+	initialUtilization := st._initializeUtilizationInfo(rt, deals)
 	lastDealExpiration := initialUtilization.DealExpirationQueue().LastDealExpiration()
 
 	// add sector expiration to SectorExpirationQueue

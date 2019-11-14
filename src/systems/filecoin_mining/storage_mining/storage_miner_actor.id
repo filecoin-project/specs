@@ -79,27 +79,23 @@ type StorageMinerActorState struct {
     _isChallenged(rt Runtime)  bool
     _shouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
-    _sectorExists(sectorNo sector.SectorNumber) bool
+    _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
 
+    _processStagedCommittedSectors(rt Runtime)
     _updateFailSector(
         rt                   Runtime
         sectorNo             sector.SectorNumber
         incrementFaultCount  bool
     )
     _updateExpireSectors(rt Runtime)
-    _processStagedCommittedSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateSectorUtilization(rt Runtime) [deal.DealID]
-    _initializeUtilizationInfo(rt Runtime, dealIDs [deal.DealID]) sector.SectorUtilizationInfo
+    _initializeUtilizationInfo(rt Runtime, deals [deal.StorageDeal]) sector.SectorUtilizationInfo
 
-    _slashDealsFromFaultReport(
-        rt             Runtime
-        sectorNumbers  [sector.SectorNumber]
-        action         deal.StorageDealSlashAction
-    )
     _getActivePower(rt Runtime) block.StoragePower
     _getInactivePower(rt Runtime) block.StoragePower
+    _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
 }
 
 type StorageMinerActorCode struct {
@@ -116,7 +112,6 @@ type StorageMinerActorCode struct {
     // TODO: should depledge be in here or in storage market actor?
 
     DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
-
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
 
     // get active deals and last challenge end epoch
@@ -132,6 +127,11 @@ type StorageMinerActorCode struct {
         declared    sector.CompactSectorSet
         detected    sector.CompactSectorSet
         terminated  sector.CompactSectorSet
+    )
+    _slashDealsFromFaultReport(
+        rt             Runtime
+        sectorNumbers  [sector.SectorNumber]
+        action         deal.StorageDealSlashAction
     )
     _submitPowerReport(rt Runtime)
 
