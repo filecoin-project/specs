@@ -12,41 +12,41 @@ var (
 	ErrActorNotFound = errors.New("Actor Not Found")
 )
 
-// CodeCIDs for system actors
+// CodeIDs for system actors
 var (
-	InitActorCodeCID           = actor.CodeCID("filecoin/1.0/InitActor")
-	CronActorCodeCID           = actor.CodeCID("filecoin/1.0/CronActor")
-	AccountActorCodeCID        = actor.CodeCID("filecoin/1.0/AccountActor")
-	StoragePowerActorCodeCID   = actor.CodeCID("filecoin/1.0/StoragePowerActor")
-	StorageMinerActorCodeCID   = actor.CodeCID("filecoin/1.0/StorageMinerActor")
-	StorageMarketActorCodeCID  = actor.CodeCID("filecoin/1.0/StorageMarketActor")
-	PaymentChannelActorCodeCID = actor.CodeCID("filecoin/1.0/PaymentChannelActor")
+	InitActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Init)
+	CronActorCodeID           = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Cron)
+	AccountActorCodeID        = actor.CodeID_Make_Builtin(actor.BuiltinActorID_Account)
+	StoragePowerActorCodeID   = actor.CodeID_Make_Builtin(actor.BuiltinActorID_StoragePower)
+	StorageMinerActorCodeID   = actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMiner)
+	StorageMarketActorCodeID  = actor.CodeID_Make_Builtin(actor.BuiltinActorID_StorageMarket)
+	PaymentChannelActorCodeID = actor.CodeID_Make_Builtin(actor.BuiltinActorID_PaymentChannel)
 )
 
 var staticActorCodeRegistry = &actorCodeRegistry{}
 
 type actorCodeRegistry struct {
-	code map[actor.CodeCID]vmr.ActorCode
+	code map[actor.CodeID]vmr.ActorCode
 }
 
-func (r *actorCodeRegistry) _registerActor(cid actor.CodeCID, actor vmr.ActorCode) {
-	r.code[cid] = actor
+func (r *actorCodeRegistry) _registerActor(id actor.CodeID, actor vmr.ActorCode) {
+	r.code[id] = actor
 }
 
-func (r *actorCodeRegistry) _loadActor(cid actor.CodeCID) (vmr.ActorCode, error) {
-	a, ok := r.code[cid]
+func (r *actorCodeRegistry) _loadActor(id actor.CodeID) (vmr.ActorCode, error) {
+	a, ok := r.code[id]
 	if !ok {
 		return nil, ErrActorNotFound
 	}
 	return a, nil
 }
 
-func RegisterActor(cid actor.CodeCID, actor vmr.ActorCode) {
-	staticActorCodeRegistry._registerActor(cid, actor)
+func RegisterActor(id actor.CodeID, actor vmr.ActorCode) {
+	staticActorCodeRegistry._registerActor(id, actor)
 }
 
-func LoadActor(cid actor.CodeCID) (vmr.ActorCode, error) {
-	return staticActorCodeRegistry._loadActor(cid)
+func LoadActor(id actor.CodeID) (vmr.ActorCode, error) {
+	return staticActorCodeRegistry._loadActor(id)
 }
 
 // init is called in Go during initialization of a program.
@@ -63,11 +63,11 @@ func _registerBuiltinActors() {
 
 	cron := &sysactors.CronActorCode_I{}
 
-	RegisterActor(InitActorCodeCID, &sysactors.InitActorCode_I{})
-	RegisterActor(CronActorCodeCID, cron)
-	RegisterActor(AccountActorCodeCID, &sysactors.AccountActorCode_I{})
-	RegisterActor(StoragePowerActorCodeCID, &spc.StoragePowerActorCode_I{})
-	RegisterActor(StorageMarketActorCodeCID, &market.StorageMarketActorCode_I{})
+	RegisterActor(InitActorCodeID, &sysactors.InitActorCode_I{})
+	RegisterActor(CronActorCodeID, cron)
+	RegisterActor(AccountActorCodeID, &sysactors.AccountActorCode_I{})
+	RegisterActor(StoragePowerActorCodeID, &spc.StoragePowerActorCode_I{})
+	RegisterActor(StorageMarketActorCodeID, &market.StorageMarketActorCode_I{})
 
 	// wire in CRON actions.
 	// TODO: there's probably a better place to put this, but for now, do it here.

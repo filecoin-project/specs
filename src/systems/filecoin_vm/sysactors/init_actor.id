@@ -13,6 +13,6 @@ type InitActorState struct {
 
 type InitActorCode struct {
     Constructor(r vmr.Runtime)
-    Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address
+    Exec(r vmr.Runtime, code actor.CodeID, params actor.MethodParams) addr.Address
     GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID
 }

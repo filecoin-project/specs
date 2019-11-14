@@ -52,18 +52,13 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	panic("TODO")
 }
 
-func (a *InitActorCode_I) Exec(rt Runtime, codeCID actor.CodeCID, constructorParams actor.MethodParams) InvocOutput {
-
-	// TODO: update
-
-	// Make sure that only the actors defined in the spec can be launched.
-	if !a._isBuiltinActor(codeCID) {
+func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {
+	if !codeID.IsBuiltin() {
 		rt.Abort("cannot launch actor instance that is not a builtin actor")
 	}
 
-	// Ensure that singletons can only be launched once.
-	if a._isSingletonActor(codeCID) {
-		rt.Abort("cannot launch another actor of this type")
+	if !_codeIDSupportsExec(codeID) {
+		rt.Abort("cannot exec an actor of this type")
 	}
 
 	// Get the actor ID for this actor.
@@ -81,7 +76,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeCID actor.CodeCID, constructorPar
 
 	// Set up the actor itself
 	actorState := &actor.ActorState_I{
-		CodeCID_: codeCID,
+		CodeID_: codeID,
 		// State_:   nil, // TODO: do we need to init the state? probably not
 		Balance_:    initBalance,
 		CallSeqNum_: 0,
@@ -136,30 +131,24 @@ func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address)
 	return rt.ValueReturn(nil)
 }
 
-// TODO: derive this OR from a union type
-func (_ *InitActorCode_I) _isSingletonActor(codeCID actor.CodeCID) bool {
-	return true
-	// TODO: uncomment this
-	// return codeCID == StorageMarketActor ||
-	// 	codeCID == StoragePowerActor ||
-	// 	codeCID == CronActor ||
-	// 	codeCID == InitActor
-}
+func _codeIDSupportsExec(codeID actor.CodeID) bool {
+	if !codeID.IsBuiltin() || codeID.IsSingleton() {
+		return false
+	}
 
-// TODO: derive this OR from a union type
-func (_ *InitActorCode_I) _isBuiltinActor(codeCID actor.CodeCID) bool {
-	return true
-	// TODO: uncomment this
-	// return codeCID == StorageMarketActor ||
-	// 	codeCID == StoragePowerActor ||
-	// 	codeCID == CronActor ||
-	// 	codeCID == InitActor ||
-	// 	codeCID == StorageMinerActor ||
-	// 	codeCID == PaymentChannelActor
-}
+	which := codeID.As_Builtin()
 
-func Deserialize_CodeCID(Serialization) (actor.CodeCID, error) {
-	panic("TODO")
+	if which == actor.BuiltinActorID_Account {
+		// Special case: account actors must be created implicitly by sending value;
+		// cannot be created via exec.
+		return false
+	}
+
+	util.Assert(
+		which == actor.BuiltinActorID_PaymentChannel ||
+			which == actor.BuiltinActorID_StorageMiner)
+
+	return true
 }
 
 func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
@@ -182,7 +171,7 @@ func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 		if len(params) == 0 {
 			return argError
 		}
-		codeId, err := Deserialize_CodeCID(Serialization(params[0]))
+		codeId, err := actor.Deserialize_CodeID(Serialization(params[0]))
 		if err != nil {
 			return argError
 		}

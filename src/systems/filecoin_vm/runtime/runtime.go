@@ -349,7 +349,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.
 
 	toActor := rtOuter._globalStatePending.GetActor(input.To()).State()
 
-	toActorCode, err := loadActorCode(toActor.CodeCID())
+	toActorCode, err := loadActorCode(toActor.CodeID())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
 	}

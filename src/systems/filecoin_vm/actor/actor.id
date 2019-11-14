@@ -53,8 +53,25 @@ type CallSeqNum UVarint
 // serialized code for the actor in the Filecoin Specification.
 type Code Bytes
 
-// CodeCID represents a CID for a Code object.
-type CodeCID ipld.CID
+// CodeID identifies an actor's code (either one of the builtin actors,
+// or, in the future, potentially a CID of VM code for a custom actor.)
+type CodeID union {
+    Builtin        BuiltinActorID
+    UserDefined    ipld.CID
+
+    IsBuiltin()    bool
+    IsSingleton()  bool
+}
+
+type BuiltinActorID enum {
+    Init
+    Cron
+    Account
+    PaymentChannel
+    StoragePower
+    StorageMiner
+    StorageMarket
+}
 
 // Actor is a base computation object in the Filecoin VM. Similar
 // to Actors in the Actor Model (programming), or Objects in Object-
@@ -74,7 +91,7 @@ type Actor struct {
 type ActorState struct {
     // common fields for all actors
 
-    CodeCID
+    CodeID
     // use a CID here, load it in interpreter.
     // Alternative is to use ActorState here but tricky w/ the type system
     State       ActorSubstateCID
