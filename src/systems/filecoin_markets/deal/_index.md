@@ -68,28 +68,31 @@ On every PoSt Submission, the following steps happen.
 
 # Deal States
 
-All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other  concepts in the protocol such as Power, Payment, and Collaterals.
+All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.
 
 A deal has the following states:
 
-- `Cleared`: the deal has yet to be created, or the sector containing the deal has been cleared, or when the deal has expired.
+- `Unpublished`: the deal has yet to be posted on chain.
 - `Published`: the deal has been published and accepted by the chain but is not yet active as the sector containing the deal has not been proven.
-- `Active`: the deal has been proven and not yet expired. Note that if a miner's sector enters into a Failing state and later successfully recovers. Some deal collateral will be slashed but the deal is still treated as active if the miner successfully recovers its sector. However, miner needs to top up deal collateral if for its Failing sector to enter Recovering state.
+- `Active`: the deal has been proven and not yet expired.
+- `Cleared`: the deal or the sector containing the deal has expired or the sector containing the deal has been terminated because of faults.
+
+Note that `Unpublished` and `Cleared` states not tracked on chain.
 
 This is how a deal transitions between its different states.
 
-- `Cleared -> Published`: this is triggered by `StorageMarketActor.PublishStorageDeals` which validates new storage deals, lock necessary funds, generate deal IDs, and register the storage deals in `StorageMarketActor`.
-- `Published -> Cleared`: this is triggered by `StorageMinerActor.ProveCommitSector` during InteractivePoRep if the elapsed Epoch between PreCommit and ProveCommit messages exceeds `MAX_PROVE_COMMIT_SECTOR_EPOCH`. ProveCommitSector will also trigger garbage collection in the list of Published storage deals.
+- `Unpublished -> Published`: this is triggered by `StorageMarketActor.PublishStorageDeals` which validates new storage deals, lock necessary funds, generate deal IDs, and register the storage deals in `StorageMarketActor`.
+- `Published -> Cleared`: this is triggered by `StorageMinerActor.ProveCommitSector` during InteractivePoRep if the elapsed Epoch between PreCommit and ProveCommit messages exceeds `MAX_PROVE_COMMIT_SECTOR_EPOCH`. ProveCommitSector will also trigger garbage collection on the list of Published storage deals.
 - `Published -> Active`: this is triggered by `ActivatateStorageDeals` after successful `StorageMinerActor.ProveCommitSector`. It is okay for the StorageDeal to have already started at this point but it must not have expired.
 - `Active -> Cleared`: this can happen in the following conditions:
-  - The deal itself has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenver a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked.
-  - The sector containing the deal has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenver a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked.
+  - The deal itself has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenever a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked.
+  - The sector containing the deal has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.
   - The sector containing the active deal has been terminated. This is triggered by `StorageMinerActor._submitFaultReport` for TerminatedFaults. 
 
 Given deal states and their transitions, the following is the relationship between deal states and other economic states and activities.
 
 - `Power`: only payload data in an Active storage deal counts towards power.
 - `Deal Payment`: lazily evaluated when a miner calls `StorageMinerActor.CreditDealPayment` and automatically settles when a deal or a sector has expired.
-- `Deal Collateral`: a small fraction is slashed for `NewDeclaredFaults` and `NewDetectedFaults`. All provider deal collateral is slashed for `NewTerminatedFaults`. Provider and client collaterals will be returned when a deal has expired.
+- `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired.
 
 {{< diagram src="diagrams/deal-payment.mmd.svg" title="Deal States Sequence Diagram" >}}
