@@ -31,8 +31,6 @@ type SectorUtilizationInfo struct {
     DealExpirationQueue  deal.DealExpirationQueue
     MaxUtilization       block.StoragePower
     CurrUtilization      block.StoragePower
-    ActiveDealIDs        deal.CompactDealSet
-    LastDealExpiration   block.ChainEpoch
 }
 
 // SectorSize indicates one of a set of possible sizes in the network.

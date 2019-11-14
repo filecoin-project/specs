@@ -138,7 +138,8 @@ func (a *StorageMinerActorCode_I) _slashDealsFromFaultReport(rt Runtime, sectorN
 			rt.Abort("sm._getDealSlashInfoFromSectors: utilization info not found.")
 		}
 
-		dealIDs = dealIDs.Extend(utilizationInfo.ActiveDealIDs())
+		activeDealIDs := utilizationInfo.DealExpirationQueue().ActiveDealIDs()
+		dealIDs = dealIDs.Extend(activeDealIDs)
 
 	}
 
@@ -336,7 +337,6 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) []deal.
 			// this deal has expired
 			newExpiredDeal := utilizationInfo.DealExpirationQueue().Pop()
 			newUtilization -= newExpiredDeal.PayloadPower()
-			st.SectorUtilization()[sectorNo].Impl().ActiveDealIDs_.Remove(newExpiredDeal.DealID())
 			newExpiredDealIDs.Add(newExpiredDeal.DealID())
 
 			// this is a go while loop
@@ -758,10 +758,10 @@ func (a *StorageMinerActorCode_I) CreditSectorDealPayment(rt Runtime, sectorNo s
 		rt.Abort("sm.GetSectorPaymentInfo: sector not active")
 	}
 
-	dealIDs := utilization.Impl().ActiveDealIDs_.DealsOn()
+	activeDealSet := utilization.DealExpirationQueue().ActiveDealIDs()
 
 	batchDealPaymentInfo := &deal.BatchDealPaymentInfo_I{
-		DealIDs_:               dealIDs,
+		DealIDs_:               activeDealSet.DealsOn(),
 		Action_:                deal.CreditStorageDeals,
 		LastChallengeEndEpoch_: st.ChallengeStatus().LastChallengeEndEpoch(),
 	}
@@ -953,7 +953,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// initialUtilization := SendMessage(sma, GetInitialUtilizationInfo(onChainInfo.DealIDs()))
 	// lastDealExpiration := initialUtilization.Peek()
 	var initialUtilization sector.SectorUtilizationInfo
-	lastDealExpiration := initialUtilization.LastDealExpiration()
+	lastDealExpiration := initialUtilization.DealExpirationQueue().LastDealExpiration()
 
 	// add sector expiration to SectorExpirationQueue
 	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{

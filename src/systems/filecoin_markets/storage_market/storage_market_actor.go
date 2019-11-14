@@ -362,8 +362,6 @@ func (a *StorageMarketActorCode_I) GetInitialUtilizationInfo(rt Runtime, dealIDs
 		DealExpirationQueue_: dealExpirationQueue,
 		MaxUtilization_:      maxUtilization,
 		CurrUtilization_:     maxUtilization,
-		ActiveDealIDs_:       activeDealIDs,
-		LastDealExpiration_:  lastExpiration,
 	}
 
 	Release(rt, h, st)

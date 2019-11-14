@@ -62,3 +62,22 @@ func (d *ActiveStorageDeal_I) UnlockStorageFee(fee actor.TokenAmount) bool {
 	d.UnlockedStorageFee_ += fee
 	return true
 }
+
+func (q *DealExpirationQueue_I) Size() int {
+	// TODO
+	return 0
+}
+
+// return all dealIds in the expiration queue
+func (q *DealExpirationQueue_I) ActiveDealIDs() CompactDealSet {
+	// TODO
+	ret := CompactDealSet(make([]byte, q.Size()))
+	return ret
+}
+
+// return last item in the expiration queue
+func (q *DealExpirationQueue_I) LastDealExpiration() block.ChainEpoch {
+	// TODO
+	ret := block.ChainEpoch(0)
+	return ret
+}

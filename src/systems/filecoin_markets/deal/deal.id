@@ -77,6 +77,10 @@ type DealExpirationQueue struct {
     Pop() DealExpirationQueueItem
     Peek() DealExpirationQueueItem
     Remove(d DealID)
+
+    ActiveDealIDs()       CompactDealSet
+    LastDealExpiration()  block.ChainEpoch
+    Size()                int
 }
 
 type RetrievalDealProposal struct {}  // TODO
