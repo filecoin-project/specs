@@ -329,19 +329,15 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) []deal.
 		newUtilization := utilizationInfo.CurrUtilization()
 
 		currEpoch := rt.CurrEpoch()
-		firstExpirationEpoch := utilizationInfo.DealExpirationQueue().Peek().Expiration()
 		totalDealCount := len(st.Sectors()[sectorNo].SealCommitment().DealIDs())
 		newExpiredDealIDs := deal.CompactDealSet(make([]byte, totalDealCount))
 
-		if firstExpirationEpoch < currEpoch {
-			// this deal has expired
-			newExpiredDeal := utilizationInfo.DealExpirationQueue().Pop()
-			newUtilization -= newExpiredDeal.PayloadPower()
-			newExpiredDealIDs.Add(newExpiredDeal.DealID())
+		queue := utilizationInfo.DealExpirationQueue()
+		for queue.Peek().Expiration() <= currEpoch {
+			expiredDeal := queue.Pop()
+			newUtilization -= expiredDeal.PayloadPower()
 
-			// this is a go while loop
-			firstExpirationEpoch = utilizationInfo.DealExpirationQueue().Peek().Expiration()
-
+			newExpiredDealIDs.Add(expiredDeal.DealID())
 		}
 
 		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
