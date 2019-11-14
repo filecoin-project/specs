@@ -57,25 +57,17 @@ type SealSetupArtifacts struct {
     Replicas           [Bytes]
 }
 
-type PoRep union {
-    ZigZagPoRep
-}
-
-type PoSpace union {
-    PoRep
-}
-
-type ZigZagPoRep StackedDRG
-
-type SDRPoSpace StackedDRG
-
 type EllipticCurve struct {
     FieldModulus &util.BigInt
 }
 
-//type StackedDRG_Algorithm struct {}
+type WindowedStackedDRG struct {
+    Inner  StackedDRG
+    Outer  StackedDRG
+}
 
 type StackedDRG struct {
+    Mode              StackedDRGMode
     Layers            StackedDRGLayers
     NodeSize          StackedDRGNodeSize
     Nodes             StackedDRGNodes
@@ -87,8 +79,22 @@ type StackedDRG struct {
     ExpanderGraphCfg
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve             EllipticCurve
+    Cfg               SDRCfg
     SealCfg           sector.SealCfg
-    PoStCfg           sector.PoStCfg
+    ElectionPoStCfg   sector.PoStCfg
+    SurprisePoStCfg   sector.PoStCfg
+}
+
+type StackedDRGMode enum {
+    Inner
+    Outer
+    Both
+}
+
+type SDRCfg struct {
+    SealCfg          sector.SealCfg
+    ElectionPoStCfg  sector.PoStCfg
+    SurprisePoStCfg  sector.PoStCfg
 }
 
 type DRGCfg struct {
