@@ -7,19 +7,18 @@
     "node_size": 32,
     "cost_amax": 1,
     "extra_storage_time": 0,
-    "drg_parents": 10,
+    "drg_parents": 16,
     "hashing_time": 0.0000000128,
     "drg_layers": 1,
     "drg_d": 0.003,
     "spacegap": 0.4,
     "hashing_amax": 2,
-    "challenges": 3200,
+    "challenges": 300,
     "rig_size": 1,
     "rig_ram_gb": 32,
     "rig_storage_latency": 0.004,
     "snark_size": 192,
     "max_snark_constraints": 3000000,
-    "cipher_circuit": 1,
-    "merkle_tree_hash_circuit": 1300,
-    "parallel_challenges": 5
+    "ticket_circuit": 1300,
+    "merkle_tree_hash_circuit": 1300
 }

@@ -12,8 +12,11 @@ FastPorep:
 
   Honest:
     Encoding:
+      window_size = window_size_mb * 1024 * 1024
+      windows = sector_size / window_size
       encoding_hashes_single_layer = nodes * drg_parents
       encoding_time = encoding_hashes_single_layer * hashing_time * drg_layers
+      encoding_window_time = encoding_time / windows
       encoding_time_asic = encoding_time / hash_time_amax
 
     Response:
@@ -25,19 +28,19 @@ FastPorep:
       seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
 
     SNARK:
-      inclusion_proofs = merkle_tree_hash_circuit * log2(nodes)
-      parallel_challenges = challenges / sequential_challenges
-      sequential_proofs = cipher_circuit * parallel_challenges
-      porep_snark_constraints = sequential_proofs * sequential_challenges + inclusion_proofs * challenges
+      inclusion_proof = merkle_tree_hash_circuit * log2(nodes)
+      inclusion_proofs = inclusion_proof * challenges
+      ticket_proofs = ticket_circuit * challenges
+      porep_snark_constraints = ticket_proofs + inclusion_proofs
       porep_snark_partitions = porep_snark_constraints / max_snark_constraints
-      porep_snark_size = porep_snark_partitions * snark_size + sequential_challenges * node_size
+      porep_snark_size = porep_snark_partitions * snark_size
       porep_snark_size_kb = porep_snark_size / 1024
 
     Cost:
       Compute:
         nodes_per_second = hash_gb_per_second / node_hash_size_gb
         nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
-        node_hash_cost = rig_cost_per_year / nodes_per_year 
+        cost_hash_node = rig_cost_per_year / nodes_per_year 
 
       Storage:
         cost_storage_gbs = cost_gb_per_month / secs_in_month 
@@ -47,12 +50,5 @@ FastPorep:
   Adversary:
     Rationality:
       describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to pay store the entire sector, than re-encode those")
-      breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (node_hash_cost * challenge_periods_per_month))
+      breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_hash_node * challenge_periods_per_month))
       regeneration_percentage = breakeven_nodes / nodes
-
-    Sequentiality:
-      response_amax = response_malicious / polling_time
-      node_gen_path = drg_d * nodes
-      node_gen_time = (node_gen_path * drg_parents * hashing_time) / hashing_amax
-      response_malicious = node_gen_time * sequential_challenges
-
