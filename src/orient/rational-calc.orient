@@ -5,28 +5,44 @@ FastPorep:
 
   Graph:
     sector_size = sector_size_gb * b_in_gb
+
     nodes = sector_size / node_size 
     node_size_gb = node_size / b_in_gb 
     node_hash_size_gb = drg_parents * node_size_gb
     node_hash_size = node_hash_size_gb * b_in_gb
+
     challenge_periods_per_month = secs_in_month / polling_time
+
+    window_size = window_size_mb * 1024 * 1024
+    windows = sector_size / window_size
+    window_nodes = nodes / windows
+
+  Rig:
+    rig_storage_min = rig_storage_min_tb * 1024 * 1024 * 1024 * 1024
+    rig_sectors_min = rig_storage_min / sector_size
 
   Honest:
     Encoding:
-      window_size = window_size_mb * 1024 * 1024
-      windows = sector_size / window_size
-      encoding_hashes_single_layer = nodes * drg_parents
-      encoding_time = encoding_hashes_single_layer * hashing_time * drg_layers
-      encoding_window_time = encoding_time / windows
-      encoding_time_asic = encoding_time / hash_time_amax
+      encoding_window_time = (window_nodes * drg_parents) * hashing_time * drg_layers
+      encoding_time = encoding_window_time * windows
+      decoding_time = encoding_window_time
+      
+      encoding_time_parallel = encoding_time / rig_cores
+      window_time_parallel = encoding_window_time / rig_cores
+
+      Asic:
+        encoding_time_parallel_asic = encoding_time_parallel / hashing_amax
+        encoding_time_asic = encoding_time / hashing_amax
+        encoding_window_time_asic = encoding_window_time / hashing_amax
+        encoding_window_time_parallel_asic = encoding_window_time_parallel / hashing_amax
 
     Response:
-      response_honest = challenges * rig_storage_latency
+      response_honest_min = challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
 
     Throughput:
-      num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
-      rig_cores = num_parallel_encoding
-      seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
+      // num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
+      // rig_cores = num_parallel_encoding
+      // seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
 
     Vanilla:
       post_vanilla_size = node_size * (log2(nodes) + 1) * challenges
