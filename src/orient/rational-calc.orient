@@ -4,7 +4,8 @@ FastPorep:
     secs_in_month = (24 * 30 * 60 * 60)
 
   Graph:
-    nodes = (sector_size_gb * b_in_gb) / node_size 
+    sector_size = sector_size_gb * b_in_gb
+    nodes = sector_size / node_size 
     node_size_gb = node_size / b_in_gb 
     node_hash_size_gb = drg_parents * node_size_gb
     node_hash_size = node_hash_size_gb * b_in_gb
@@ -27,14 +28,17 @@ FastPorep:
       rig_cores = num_parallel_encoding
       seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
 
+    Vanilla:
+      post_vanilla_size = node_size * (log2(nodes) + 1) * challenges
+
     SNARK:
       inclusion_proof = merkle_tree_hash_circuit * log2(nodes)
       inclusion_proofs = inclusion_proof * challenges
       ticket_proofs = ticket_circuit * challenges
-      porep_snark_constraints = ticket_proofs + inclusion_proofs
-      porep_snark_partitions = porep_snark_constraints / max_snark_constraints
-      porep_snark_size = porep_snark_partitions * snark_size
-      porep_snark_size_kb = porep_snark_size / 1024
+      post_snark_constraints = ticket_proofs + inclusion_proofs
+      post_snark_partitions = post_snark_constraints / max_snark_constraints
+      post_snark_size = post_snark_partitions * snark_size
+      post_snark_size_kb = post_snark_size / 1024
 
     Cost:
       Compute:
