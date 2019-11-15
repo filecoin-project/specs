@@ -2,7 +2,7 @@
     "hash_gb_per_second": 5,
     "rig_cost_per_year": 2.5,
     "cost_gb_per_month": 0.005,
-    "polling_time": 15,
+    "polling_time": 30,
     "sector_size_gb": 32,
     "node_size": 32,
     "cost_amax": 1,
@@ -20,5 +20,6 @@
     "snark_size": 192,
     "max_snark_constraints": 3000000,
     "ticket_circuit": 1300,
-    "merkle_tree_hash_circuit": 1300
+    "merkle_tree_hash_circuit": 1300,
+    "window_size_mb": 4
 }
