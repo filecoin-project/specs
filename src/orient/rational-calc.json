@@ -1,4 +1,5 @@
 {
+    "challenged_sectors_percentage": 0.04,
     "hash_gb_per_second": 5,
     "rig_cost_per_year": 2.5,
     "cost_gb_per_month": 0.005,
@@ -19,7 +20,9 @@
     "rig_storage_latency": 0.004,
     "snark_size": 192,
     "max_snark_constraints": 3000000,
-    "ticket_circuit": 1300,
-    "merkle_tree_hash_circuit": 1300,
-    "window_size_mb": 4
+    "ticket_circuit": 1376,
+    "merkle_tree_hash_circuit": 1376,
+    "window_size_mb": 4,
+    "rig_cores": 16,
+    "rig_storage_min_tb": 100
 }
