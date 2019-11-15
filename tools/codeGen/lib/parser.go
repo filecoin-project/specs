@@ -883,7 +883,8 @@ func ParseEntry(
 			if omitType {
 				entryRetType = DSLTrivialStruct()
 			} else {
-				entryRetType, infoSub = ParseType(r)
+				allowTuple := (spec == EntryParseSpec_Method)
+				entryRetType, infoSub = ParseType(r, allowTuple)
 				info = info.UnifyFmtInfoRejectComments(r, infoSub)
 
 				if infoSub.hitNewlineTop && !omitName {
@@ -1132,7 +1133,7 @@ func ParseEntryList(
 	return
 }
 
-func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
+func ParseType(r *ParseStream, allowTuple bool) (ret Type, info ParseFmtInfo) {
 	var tok string
 	var infoSub ParseFmtInfo
 	var attributeList []string
@@ -1143,6 +1144,28 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 	// defer func() {
 	// 	fmt.Printf(" >>>>> ParseType end  %#v\n%v\n%v\n", ret, r.state.pos, r.GenExcerpt())
 	// }()
+
+	if tok, ok := PeekToken(r, false); ok && (tok == "(") && allowTuple {
+		specsSub := []EntryParseSpec{EntryParseSpec_ArgField}
+		entriesSub, infoSub = ParseEntryList(r, "(", []string{",", "\n"}, ")", false, specsSub)
+		info = info.UnifyFmtInfoRejectCommentsExt(r, infoSub, true)
+		if info.err != nil {
+			ret = nil
+			return
+		}
+
+		ret = RefAlgType(AlgType{
+			sort:           AlgSort_Prod,
+			entries:        entriesSub,
+			entriesFmtInfo: RefParseFmtInfo(infoSub),
+			attributeList:  []string{},
+			parseFmtInfo:   RefParseFmtInfo(info),
+			isInterface:    false,
+			isEnum:         false,
+			isTuple:        true,
+		})
+		return
+	}
 
 	tok, infoSub = ReadToken(r)
 	info = info.UnifyFmtInfoRejectComments(r, infoSub)
@@ -1195,10 +1218,11 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 			parseFmtInfo:   RefParseFmtInfo(info),
 			isInterface:    tok == "interface",
 			isEnum:         tok == "enum",
+			isTuple:        false,
 		})
 
 	case tok == "[":
-		elementType, infoSub = ParseType(r)
+		elementType, infoSub = ParseType(r, false)
 		info = info.UnifyFmtInfo(r, infoSub)
 		if info.err != nil {
 			ret = nil
@@ -1217,7 +1241,7 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 		})
 
 	case tok == "&":
-		targetType, infoSub = ParseType(r)
+		targetType, infoSub = ParseType(r, false)
 		info = info.UnifyFmtInfo(r, infoSub)
 		if info.err != nil {
 			ret = nil
@@ -1229,7 +1253,7 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 		})
 
 	case tok == "{":
-		keyType, infoSub = ParseType(r)
+		keyType, infoSub = ParseType(r, false)
 		info = info.UnifyFmtInfo(r, infoSub)
 		if info.err != nil {
 			ret = nil
@@ -1241,7 +1265,7 @@ func ParseType(r *ParseStream) (ret Type, info ParseFmtInfo) {
 			ret = nil
 			return
 		}
-		valueType, infoSub = ParseType(r)
+		valueType, infoSub = ParseType(r, false)
 		info = info.UnifyFmtInfo(r, infoSub)
 		if info.err != nil {
 			ret = nil
@@ -1304,7 +1328,7 @@ func ParseTypeDecl(r *ParseStream) (ret *TypeDecl, info ParseFmtInfo) {
 		return
 	}
 
-	declType, infoSub = ParseType(r)
+	declType, infoSub = ParseType(r, false)
 	info = info.UnifyFmtInfo(r, infoSub)
 	if info.err != nil {
 		ret = nil
