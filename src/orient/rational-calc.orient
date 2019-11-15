@@ -20,6 +20,9 @@ FastPorep:
   Rig:
     rig_storage_min = rig_storage_min_tb * 1024 * 1024 * 1024 * 1024
     rig_sectors_min = rig_storage_min / sector_size
+    rig_storage_parallelization_min = response_honest_min / polling_time
+    rig_storage_unit_min = rig_storage_min / rig_storage_parallelization_min
+    rig_storage_unit_min_tb = rig_storage_unit_min / (1024 * 1024 * 1024 * 1024)
 
   Honest:
     Encoding:
