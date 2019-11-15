@@ -23,12 +23,21 @@ type Serialization = util.Serialization
 
 func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
-	stateCID := h.Take()
+	stateCID := ipld.CID(h.Take())
+	if ipld.CID_Equals(stateCID, ipld.EmptyCID()) {
+		if rt.CurrMethodNum() != actor.MethodConstructor {
+			rt.Abort("Actor state not initialized")
+		}
+		return h, nil
+	}
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
 		rt.Abort("IPLD lookup error")
 	}
-	state := DeserializeState(stateBytes.As_Bytes())
+	state, err := Deserialize_InitActorState(Serialization(stateBytes.As_Bytes()))
+	if err != nil {
+		rt.Abort("State deserialization error")
+	}
 	return h, state
 }
 func Release(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
@@ -42,14 +51,18 @@ func UpdateRelease(rt Runtime, h vmr.ActorStateHandle, st InitActorState) {
 func (st *InitActorState_I) CID() ipld.CID {
 	panic("TODO")
 }
-func DeserializeState(x Bytes) InitActorState {
-	panic("TODO")
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
-	panic("TODO")
+	h, st := a.State(rt)
+	st = &InitActorState_I{
+		AddressMap_: map[addr.Address]addr.ActorID{}, // TODO: HAMT
+		IDMap_:      map[addr.ActorID]addr.Address{}, // TODO: HAMT
+		NextID_:     addr.ActorID(0),
+	}
+	UpdateRelease(rt, h, st)
+	return rt.ValueReturn(nil)
 }
 
 func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {

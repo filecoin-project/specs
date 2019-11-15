@@ -21,6 +21,8 @@ type Runtime interface {
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
+    CurrMethodNum()             actor.MethodNum
+
     // Note: This is the actor in the From field of the initial on-chain message.
     // Not necessarily the immediate caller.
     ToplevelSender()            addr.Address
