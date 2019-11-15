@@ -149,9 +149,6 @@ func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 	argError := rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidArguments))
 
 	switch method {
-	// case actor.MethodSend:
-	//     disable
-
 	case actor.MethodConstructor:
 		if len(params) != 0 {
 			return argError
