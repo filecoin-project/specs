@@ -1,6 +1,7 @@
 // This contains actor things that are _outside_ of VM exection.
 // The VM uses this to execute actors.
 
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 // TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -81,12 +82,6 @@ type BuiltinActorID enum {
 // - we should not do inheritance, we should do composition.
 //   but we should make including actor state nicer.
 //
-// TODO: do we need this type? what is the difference between this and
-// ActorState
-type Actor struct {
-    State ActorState
-}
-
 // ActorState represents the on-chain storage actors keep.
 type ActorState struct {
     // common fields for all actors
@@ -94,10 +89,13 @@ type ActorState struct {
     CodeID
     // use a CID here, load it in interpreter.
     // Alternative is to use ActorState here but tricky w/ the type system
-    State       ActorSubstateCID
+    State                    ActorSubstateCID
 
-    Balance     TokenAmount
+    Balance                  TokenAmount
     CallSeqNum  // FKA Nonce
+
+    // Note: may be nil if actor has no public key
+    GetSignaturePublicKey()  filcrypto.PublicKey
 }
 
 type ActorSystemStateCID ipld.CID

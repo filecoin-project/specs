@@ -44,10 +44,10 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 
 	compTree := inTree
 	var outTree st.StateTree
-	var toActor actor.Actor
+	var toActor actor.ActorState
 	var err error
 
-	fromActor := compTree.GetActor(message.From())
+	fromActor := compTree.GetActorState(message.From())
 	if fromActor == nil {
 		// TODO: This was originally exitcode.InvalidMethod; which is correct?
 		return inTree, _applyError(exitcode.ActorNotFound)
@@ -56,13 +56,13 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	// make sure fromActor has enough money to run the max invocation
 	maxGasCost := gasToFIL(message.GasLimit(), message.GasPrice())
 	totalCost := message.Value() + actor.TokenAmount(maxGasCost)
-	if fromActor.State().Balance() < totalCost {
+	if fromActor.Balance() < totalCost {
 		return inTree, _applyError(exitcode.InsufficientFunds)
 	}
 
 	// make sure this is the right message order for fromActor
 	// (this is protection against replay attacks, and useful sequencing)
-	if message.CallSeqNum() != fromActor.State().CallSeqNum()+1 {
+	if message.CallSeqNum() != fromActor.CallSeqNum()+1 {
 		return inTree, _applyError(exitcode.InvalidCallSeqNum)
 	}
 
@@ -78,7 +78,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	rt := vmr.VMContext_Make(
 		message.From(),
 		minerAddr, // TODO: may not exist? (see below)
-		fromActor.State().CallSeqNum(),
+		fromActor.CallSeqNum(),
 		actor.CallSeqNum(0),
 		compTree,
 		message.From(),

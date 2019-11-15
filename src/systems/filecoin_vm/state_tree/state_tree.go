@@ -3,29 +3,30 @@ package state_tree
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
-func (inTree *StateTree_I) WithActorForAddress(a addr.Address) (StateTree, actor.Actor) {
+func (inTree *StateTree_I) WithActorForAddress(a addr.Address) (StateTree, actor.ActorState) {
 	var err error
-	var actor actor.Actor
+	var actorState actor.ActorState
 	var compTree StateTree
 
-	actor = inTree.GetActor(a)
-	if actor != nil {
-		return inTree, actor // done
+	actorState = inTree.GetActorState(a)
+	if actorState != nil {
+		return inTree, actorState // done
 	}
 
 	if !a.IsKeyType() { // BLS or Secp
 		return inTree, nil // not a key type, done.
 	}
 
-	compTree, actor, err = inTree.Impl().WithNewAccountActor(a)
+	compTree, actorState, err = inTree.Impl().WithNewAccountActor(a)
 	if err != nil {
 		return inTree, nil
 	}
 
-	return compTree, actor
+	return compTree, actorState
 }
 
-func (st *StateTree_I) GetActor(a addr.Address) actor.Actor {
+// Note: may be nil if not found
+func (st *StateTree_I) GetActorState(a addr.Address) actor.ActorState {
 	panic("TODO")
 }
 
@@ -45,7 +46,7 @@ func (st *StateTree_I) WithFundsTransfer(from addr.Address, to addr.Address, amo
 	panic("TODO")
 }
 
-func (st *StateTree_I) WithNewAccountActor(a addr.Address) (StateTree, actor.Actor, error) {
+func (st *StateTree_I) WithNewAccountActor(a addr.Address) (StateTree, actor.ActorState, error) {
 	panic("TODO")
 }
 
