@@ -34,9 +34,9 @@ func WinSDRParams(cfg SDRCfg) *WindowedStackedDRG_I {
 	innerSealCfg := cfg.SealCfg()
 
 	outerSealCfg := sector.SealCfg_I{
-		SubsectorCount_: 1,
-		SectorSize_:     innerSealCfg.SectorSize(),
-		Partitions_:     innerSealCfg.Partitions(),
+		WindowCount_: 1,
+		SectorSize_:  innerSealCfg.SectorSize(),
+		Partitions_:  innerSealCfg.Partitions(),
 	}
 
 	outerCfg := SDRCfg_I{
@@ -204,34 +204,34 @@ func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, randomness sector.SealRandomness) SealSetupArtifacts {
-	subsectorCount := int(sdr.SubsectorCount())
+func (sdr *StackedDRG_I) Seal(sid sector.SectorID, windowData [][]byte, randomness sector.SealRandomness) SealSetupArtifacts {
+	windowCount := int(sdr.WindowCount())
 	nodeSize := int(sdr.NodeSize())
 	nodes := int(sdr.Nodes())
-	subsectorSize := nodes * nodeSize
+	windowSize := nodes * nodeSize
 
-	util.Assert(len(subsectorData) == subsectorCount)
+	util.Assert(len(windowData) == windowCount)
 
 	var allKeyLayers [][]byte
 	var replicas [][]byte
 	var sealSeeds []sector.SealSeed
-	var subsectorCommDs []sector.UnsealedSectorCID
-	var subsectorCommDTreePaths []file.Path
+	var windowCommDs []sector.UnsealedSectorCID
+	var windowCommDTreePaths []file.Path
 
-	for i, data := range subsectorData {
+	for i, data := range windowData {
 		_ = data
-		keyLayers, replica, sealSeed, subsectorCommD, subsectorCommDTreePath := sdr.SealSubsector(i, sid, data, randomness)
+		keyLayers, replica, sealSeed, windowCommD, windowCommDTreePath := sdr.SealWindow(i, sid, data, randomness)
 
 		allKeyLayers = append(allKeyLayers, keyLayers...)
 		replicas = append(replicas, replica)
 		sealSeeds = append(sealSeeds, sealSeed)
-		subsectorCommDs = append(subsectorCommDs, subsectorCommD)
-		subsectorCommDTreePaths = append(subsectorCommDTreePaths, subsectorCommDTreePath)
+		windowCommDs = append(windowCommDs, windowCommD)
+		windowCommDTreePaths = append(windowCommDTreePaths, windowCommDTreePath)
 	}
 
 	var replicaColumns [][]Label
 	for _, replica := range replicas {
-		for i := 0; i < subsectorSize; i += nodeSize {
+		for i := 0; i < windowSize; i += nodeSize {
 			replicaColumns[i] = append(replicaColumns[i], Label(replica[i:i+nodeSize]))
 		}
 	}
@@ -247,7 +247,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 		CommR_:             SealedSectorCID(commR),
 		CommC_:             Commitment(commC),
 		CommRLast_:         Commitment(commRLast),
-		CommDTreePaths_:    subsectorCommDTreePaths,
+		CommDTreePaths_:    windowCommDTreePaths,
 		CommCTreePath_:     commCTreePath,
 		CommRLastTreePath_: commRLastTreePath,
 		Seeds_:             sealSeeds,
@@ -257,9 +257,9 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 	return &result
 }
 
-func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, sector.UnsealedSectorCID, file.Path) {
+func (sdr *StackedDRG_I) SealWindow(windowIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, sector.UnsealedSectorCID, file.Path) {
 	commD, commDTreePath := ComputeDataCommitment(data)
-	sealSeed := computeSealSeed(sid, subsectorIndex, randomness, commD)
+	sealSeed := computeSealSeed(sid, windowIndex, randomness, commD)
 	nodeSize := int(sdr.NodeSize())
 	nodes := len(data) / nodeSize
 	curveModulus := sdr.Curve().FieldModulus()
@@ -280,14 +280,14 @@ func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte)
 	return commC, commRLast, commR, commCTreePath, commRLastTreePath
 }
 
-func computeSealSeed(sid sector.SectorID, subsectorIndex int, randomness sector.SealRandomness, commD sector.UnsealedSectorCID) sector.SealSeed {
+func computeSealSeed(sid sector.SectorID, windowIndex int, randomness sector.SealRandomness, commD sector.UnsealedSectorCID) sector.SealSeed {
 	var proverId []byte // TODO: Derive this from sid.MinerID()
 	sectorNumber := sid.Number()
 
 	var preimage []byte
 	preimage = append(preimage, proverId...)
 	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorNumber), 8)...)
-	preimage = append(preimage, littleEndianBytesFromInt(subsectorIndex, 8)...)
+	preimage = append(preimage, littleEndianBytesFromInt(windowIndex, 8)...)
 	preimage = append(preimage, randomness...)
 	preimage = append(preimage, Commitment_UnsealedSectorCID(commD)...)
 
@@ -430,7 +430,7 @@ func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSea
 // If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
 // Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
 func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
-	subsectorCount := int(sdr.SubsectorCount())
+	windowCount := int(sdr.WindowCount())
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
 	challenges := sdr.GenerateOfflineChallenges(sealSeeds, randomness, sdr.Challenges())
@@ -482,7 +482,7 @@ func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengePr
 			dataNode := dataProof.leaf()
 			dataColumn := columnProofs[0]
 
-			keyNode := dataColumn.Column[i*subsectorCount+layers-1]
+			keyNode := dataColumn.Column[i*windowCount+layers-1]
 
 			replicaNode := replicaProof.Column[i]
 
@@ -686,13 +686,13 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	commD := sector.UnsealedSectorCID(sv.UnsealedCID())
 	sealCfg := sv.SealCfg()
 
-	// A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
-	util.Assert(sealCfg.SubsectorCount() == 1)
+	// FIXME: Deal with the non-1 case, which will mean constructing CommD correctly.
+	util.Assert(sealCfg.WindowCount() == 1)
 
-	subsectorCount := int(sealCfg.SubsectorCount())
+	windowCount := int(sealCfg.WindowCount())
 
 	var sealSeeds []sector.SealSeed
-	for i := 0; i < subsectorCount; i++ {
+	for i := 0; i < windowCount; i++ {
 		sealSeed := computeSealSeed(sv.SectorID(), i, sv.Randomness(), commD)
 		sealSeeds = append(sealSeeds, sealSeed)
 	}

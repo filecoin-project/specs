@@ -14,17 +14,17 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	sdr := filproofs.SDRParams(cfg)
 
 	sid := si.SectorID()
-	subsectorCount := int(si.SealCfg().SubsectorCount())
+	windowCount := int(si.SealCfg().WindowCount())
 	sectorSize := int(si.SealCfg().SectorSize())
-	subsectorSize := sectorSize / subsectorCount
+	windowSize := sectorSize / windowCount
 
-	if len(si.UnsealedPaths()) != subsectorCount {
+	if len(si.UnsealedPaths()) != windowCount {
 		return SectorSealer_SealSector_FunRet_Make_err(
-			errors.New("Wrong number of subsector files."),
+			errors.New("Wrong number of window files."),
 		).Impl()
 	}
 
-	var subsectorData [][]byte
+	var windowData [][]byte
 	for _, unsealedPath := range si.UnsealedPaths() {
 		data := make(util.Bytes, si.SealCfg().SectorSize())
 		in := file.FromPath(unsealedPath)
@@ -34,19 +34,19 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
 		}
 
-		subsectorData = append(subsectorData, data)
+		windowData = append(windowData, data)
 
-		if length != subsectorSize {
+		if length != windowSize {
 			return SectorSealer_SealSector_FunRet_Make_err(
-				errors.New("Subsector file is wrong size"),
+				errors.New("Window file is wrong size"),
 			).Impl()
 		}
 	}
 
-	sealArtifacts := sdr.Seal(sid, subsectorData, si.RandomSeed())
+	sealArtifacts := sdr.Seal(sid, windowData, si.RandomSeed())
 	sealedPaths := si.SealedPaths()
 
-	for i, data := range subsectorData {
+	for i, data := range windowData {
 		out := file.FromPath(sealedPaths[i])
 		length, err := out.Write(data)
 
@@ -54,9 +54,9 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
 		}
 
-		if length != subsectorSize {
+		if length != windowSize {
 			return SectorSealer_SealSector_FunRet_Make_err(
-				errors.New("Wrote wrong sealed subsector size"),
+				errors.New("Wrote wrong sealed window size"),
 			).Impl()
 		}
 
@@ -76,7 +76,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CommDTreePaths_: sealArtifacts.CommDTreePaths(),
 					CommCTreePath_:  sealArtifacts.CommCTreePath(),
 					Seeds_:          sealArtifacts.Seeds(),
-					SubsectorData_:  subsectorData,
+					WindowData_:     windowData,
 					KeyLayers_:      sealArtifacts.KeyLayers(),
 					Replicas_:       sealArtifacts.Replicas(),
 				}})).Impl()
