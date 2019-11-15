@@ -11,55 +11,40 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	cfg := &filproofs.SDRCfg_I{
 		SealCfg_: si.SealCfg(),
 	}
-	sdr := filproofs.SDRParams(cfg)
+	sdr := filproofs.WinSDRParams(cfg)
 
 	sid := si.SectorID()
-	subsectorCount := int(si.SealCfg().SubsectorCount())
 	sectorSize := int(si.SealCfg().SectorSize())
-	subsectorSize := sectorSize / subsectorCount
 
-	if len(si.UnsealedPaths()) != subsectorCount {
+	unsealedPath := si.UnsealedPath()
+
+	data := make(util.Bytes, si.SealCfg().SectorSize())
+	in := file.FromPath(unsealedPath)
+	inLength, err := in.Read(data)
+
+	if err != nil {
+		return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
+	}
+	if inLength != sectorSize {
 		return SectorSealer_SealSector_FunRet_Make_err(
-			errors.New("Wrong number of subsector files."),
+			errors.New("Sector file is wrong size"),
 		).Impl()
 	}
 
-	var subsectorData [][]byte
-	for _, unsealedPath := range si.UnsealedPaths() {
-		data := make(util.Bytes, si.SealCfg().SectorSize())
-		in := file.FromPath(unsealedPath)
-		length, err := in.Read(data)
+	sealArtifacts := sdr.Seal(sid, data, si.RandomSeed())
+	sealedPath := si.SealedPath()
 
-		if err != nil {
-			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
-		}
+	out := file.FromPath(sealedPath)
+	outLength, err := out.Write(data)
 
-		subsectorData = append(subsectorData, data)
-
-		if length != subsectorSize {
-			return SectorSealer_SealSector_FunRet_Make_err(
-				errors.New("Subsector file is wrong size"),
-			).Impl()
-		}
+	if err != nil {
+		return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
 	}
 
-	sealArtifacts := sdr.Seal(sid, subsectorData, si.RandomSeed())
-	sealedPaths := si.SealedPaths()
-
-	for i, data := range subsectorData {
-		out := file.FromPath(sealedPaths[i])
-		length, err := out.Write(data)
-
-		if err != nil {
-			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
-		}
-
-		if length != subsectorSize {
-			return SectorSealer_SealSector_FunRet_Make_err(
-				errors.New("Wrote wrong sealed subsector size"),
-			).Impl()
-		}
-
+	if outLength != sectorSize {
+		return SectorSealer_SealSector_FunRet_Make_err(
+			errors.New("Wrote wrong sealed sector size"),
+		).Impl()
 	}
 
 	return SectorSealer_SealSector_FunRet_Make_so(
@@ -76,9 +61,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CommDTreePaths_: sealArtifacts.CommDTreePaths(),
 					CommCTreePath_:  sealArtifacts.CommCTreePath(),
 					Seeds_:          sealArtifacts.Seeds(),
-					SubsectorData_:  subsectorData,
 					KeyLayers_:      sealArtifacts.KeyLayers(),
-					Replicas_:       sealArtifacts.Replicas(),
 				}})).Impl()
 }
 
@@ -92,7 +75,7 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 		SealCfg_: si.SealCfg(),
 	}
 
-	sdr := filproofs.SDRParams(cfg)
+	sdr := filproofs.WinSDRParams(cfg)
 	proof := sdr.CreateSealProof(randomSeed, auxTmp)
 
 	onChain := sector.OnChainSealVerifyInfo_I{

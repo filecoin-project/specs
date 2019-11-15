@@ -49,7 +49,26 @@ func (pg *PoStGenerator_I) GeneratePoStProof(postCfg sector.PoStCfg, witness sec
 	return sdr.GeneratePoStProof(privateProofs)
 }
 
-func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
+// This likely belongs elsewhere, but I'm not exactly sure where and wanted to encapsulate the proofs-related logic here. So this can be thought of as example usage.
+// ticketThreshold is lowest non-winning ticket (endianness?) for this PoSt.
+func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sector_index.SectorStore, ticketThreshold sector.ElectionTicket) sector.PoStProof {
+	candidates := GeneratePoStCandidates(postCfg, challengeSeed, faults, sectors, sectorStore)
+	var winners []sector.ElectionCandidate
+
+	for _, candidate := range candidates {
+		if candidate.Ticket().IsBelow(ticketThreshold) {
+			winners = append(winners, candidate)
+		}
+	}
+
+	witness := sector.PoStWitness_I{
+		Candidates_: winners,
+	}
+
+	return GeneratePoStProof(postCfg, sector.PoStWitness(&witness))
+}
+
+func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG_I) {
 	var cfg filproofs.SDRCfg_I
 
 	switch postCfg.Type() {
@@ -63,5 +82,5 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I)
 		}
 	}
 
-	return filproofs.SDRParams(&cfg)
+	return filproofs.WinSDRParams(&cfg)
 }

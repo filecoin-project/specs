@@ -14,9 +14,9 @@ type InteractiveSealRandomness Bytes
 type SealSeed Bytes
 
 type SealCfg struct {
-    SectorSize      UInt
-    SubsectorCount  UInt
-    Partitions      UInt
+    SectorSize   UInt
+    WindowCount  UInt
+    Partitions   UInt
 }
 
 // SealVerifyInfo is the structure of all thte information a verifier
@@ -86,8 +86,6 @@ type ProofAuxTmp struct {
     CommCTreePath   file.Path
 
     Seeds           [SealSeed]
-    SubsectorData   [Bytes]
-    Replicas        [Bytes]
     KeyLayers       [Bytes]
 }
 
@@ -108,7 +106,6 @@ type SealProofConfig struct {// TODO
 type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
 
 type SealAlgorithm enum {
-    // ZigZagPoRep
     StackedDRG
 }
 
