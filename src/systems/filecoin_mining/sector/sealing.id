@@ -86,8 +86,6 @@ type ProofAuxTmp struct {
     CommCTreePath   file.Path
 
     Seeds           [SealSeed]
-    WindowData      [Bytes]
-    Replicas        [Bytes]
     KeyLayers       [Bytes]
 }
 
@@ -108,7 +106,6 @@ type SealProofConfig struct {// TODO
 type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
 
 type SealAlgorithm enum {
-    // ZigZagPoRep
     StackedDRG
 }
 

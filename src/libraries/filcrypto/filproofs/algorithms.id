@@ -1,12 +1,12 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-type StackedDRGLayers UInt
-type StackedDRGNodeSize UInt
-type StackedDRGNodes UInt
-type StackedDRGWindowCount UInt
-type StackedDRGPartitions UInt
-type StackedDRGChallenges UInt
+type WinStackedDRGLayers UInt
+type WinStackedDRGNodeSize UInt
+type WinStackedDRGNodes UInt
+type WinStackedDRGWindowCount UInt
+type WinStackedDRGPartitions UInt
+type WinStackedDRGChallenges UInt
 type DRGDepth struct {}
 type DRGFraction struct {}
 type DRGDegree UInt
@@ -61,34 +61,21 @@ type EllipticCurve struct {
     FieldModulus &util.BigInt
 }
 
-type WindowedStackedDRG struct {
-    Inner  StackedDRG
-    Outer  StackedDRG
-}
-
-type StackedDRG struct {
-    Mode              StackedDRGMode
-    Layers            StackedDRGLayers
-    NodeSize          StackedDRGNodeSize
-    Nodes             StackedDRGNodes
-    WindowCount       StackedDRGWindowCount
-    Partitions        StackedDRGPartitions
-    Challenges        StackedDRGChallenges
-    Algorithm         struct {}
+type WinStackedDRG struct {
+    Layers                  WinStackedDRGLayers
+    NodeSize                WinStackedDRGNodeSize
+    Nodes                   WinStackedDRGNodes
+    WindowCount             WinStackedDRGWindowCount
+    Partitions              WinStackedDRGPartitions
+    Challenges              WinStackedDRGChallenges
+    Algorithm               struct {}
     DRGCfg
     ExpanderGraphCfg
+    WindowDRGCfg            DRGCfg
+    WindowExpanderGraphCfg  ExpanderGraphCfg
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
-    Curve             EllipticCurve
-    Cfg               SDRCfg
-    SealCfg           sector.SealCfg
-    ElectionPoStCfg   sector.PoStCfg
-    SurprisePoStCfg   sector.PoStCfg
-}
-
-type StackedDRGMode enum {
-    Inner
-    Outer
-    Both
+    Curve                   EllipticCurve
+    Cfg                     SDRCfg
 }
 
 type SDRCfg struct {

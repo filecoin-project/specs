@@ -14,52 +14,37 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	sdr := filproofs.SDRParams(cfg)
 
 	sid := si.SectorID()
-	windowCount := int(si.SealCfg().WindowCount())
 	sectorSize := int(si.SealCfg().SectorSize())
-	windowSize := sectorSize / windowCount
 
-	if len(si.UnsealedPaths()) != windowCount {
+	unsealedPath := si.UnsealedPath()
+
+	data := make(util.Bytes, si.SealCfg().SectorSize())
+	in := file.FromPath(unsealedPath)
+	inLength, err := in.Read(data)
+
+	if err != nil {
+		return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
+	}
+	if inLength != sectorSize {
 		return SectorSealer_SealSector_FunRet_Make_err(
-			errors.New("Wrong number of window files."),
+			errors.New("Sector file is wrong size"),
 		).Impl()
 	}
 
-	var windowData [][]byte
-	for _, unsealedPath := range si.UnsealedPaths() {
-		data := make(util.Bytes, si.SealCfg().SectorSize())
-		in := file.FromPath(unsealedPath)
-		length, err := in.Read(data)
+	sealArtifacts := sdr.Seal(sid, data, si.RandomSeed())
+	sealedPath := si.SealedPath()
 
-		if err != nil {
-			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
-		}
+	out := file.FromPath(sealedPath)
+	outLength, err := out.Write(data)
 
-		windowData = append(windowData, data)
-
-		if length != windowSize {
-			return SectorSealer_SealSector_FunRet_Make_err(
-				errors.New("Window file is wrong size"),
-			).Impl()
-		}
+	if err != nil {
+		return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
 	}
 
-	sealArtifacts := sdr.Seal(sid, windowData, si.RandomSeed())
-	sealedPaths := si.SealedPaths()
-
-	for i, data := range windowData {
-		out := file.FromPath(sealedPaths[i])
-		length, err := out.Write(data)
-
-		if err != nil {
-			return SectorSealer_SealSector_FunRet_Make_err(err).Impl()
-		}
-
-		if length != windowSize {
-			return SectorSealer_SealSector_FunRet_Make_err(
-				errors.New("Wrote wrong sealed window size"),
-			).Impl()
-		}
-
+	if outLength != sectorSize {
+		return SectorSealer_SealSector_FunRet_Make_err(
+			errors.New("Wrote wrong sealed sector size"),
+		).Impl()
 	}
 
 	return SectorSealer_SealSector_FunRet_Make_so(
@@ -76,9 +61,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CommDTreePaths_: sealArtifacts.CommDTreePaths(),
 					CommCTreePath_:  sealArtifacts.CommCTreePath(),
 					Seeds_:          sealArtifacts.Seeds(),
-					WindowData_:     windowData,
 					KeyLayers_:      sealArtifacts.KeyLayers(),
-					Replicas_:       sealArtifacts.Replicas(),
 				}})).Impl()
 }
 

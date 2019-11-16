@@ -29,30 +29,7 @@ type PieceInfo = *sector.PieceInfo_I
 type Label Bytes32
 type Commitment = sector.Commitment
 
-func WinSDRParams(cfg SDRCfg) *WindowedStackedDRG_I {
-	inner := SDRParams(cfg)
-	innerSealCfg := cfg.SealCfg()
-
-	outerSealCfg := sector.SealCfg_I{
-		WindowCount_: 1,
-		SectorSize_:  innerSealCfg.SectorSize(),
-		Partitions_:  innerSealCfg.Partitions(),
-	}
-
-	outerCfg := SDRCfg_I{
-		SealCfg_:         &outerSealCfg,
-		ElectionPoStCfg_: cfg.ElectionPoStCfg(),
-		SurprisePoStCfg_: cfg.SurprisePoStCfg(),
-	}
-
-	outer := SDRParams(&outerCfg)
-	return &WindowedStackedDRG_I{
-		Inner_: inner,
-		Outer_: outer,
-	}
-}
-
-func SDRParams(cfg SDRCfg) *StackedDRG_I {
+func SDRParams(cfg SDRCfg) *WinStackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const NODE_SIZE = 32
@@ -65,12 +42,12 @@ func SDRParams(cfg SDRCfg) *StackedDRG_I {
 
 	nodes := UInt(cfg.SealCfg().SectorSize() / NODE_SIZE)
 
-	return &StackedDRG_I{
-		Layers_:     StackedDRGLayers(LAYERS),
-		Challenges_: StackedDRGChallenges(OFFLINE_CHALLENGES),
-		NodeSize_:   StackedDRGNodeSize(NODE_SIZE),
-		Nodes_:      StackedDRGNodes(nodes),
-		Algorithm_:  &StackedDRG_Algorithm_I{},
+	return &WinStackedDRG_I{
+		Layers_:     WinStackedDRGLayers(LAYERS),
+		Challenges_: WinStackedDRGChallenges(OFFLINE_CHALLENGES),
+		NodeSize_:   WinStackedDRGNodeSize(NODE_SIZE),
+		Nodes_:      WinStackedDRGNodes(nodes),
+		Algorithm_:  &WinStackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
 				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
@@ -91,6 +68,27 @@ func SDRParams(cfg SDRCfg) *StackedDRG_I {
 			Degree_: 8,
 			Nodes_:  ExpanderGraphNodeCount(nodes),
 		},
+		WindowDRGCfg_: &DRGCfg_I{
+			Algorithm_: &DRGCfg_Algorithm_I{
+				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
+				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_ChaCha20,
+			},
+			Degree_: 6,
+			Nodes_:  DRGNodeCount(nodes),
+		},
+		WindowExpanderGraphCfg_: &ExpanderGraphCfg_I{
+			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
+				&ChungExpanderAlgorithm_I{
+					PermutationAlgorithm_: ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&Feistel_I{
+						Keys_:   FEISTEL_KEYS[:],
+						Rounds_: FEISTEL_ROUNDS,
+						HashFunction_: ChungExpanderPermutationFeistelHashFunction_SHA256,
+					}),
+				}),
+			Degree_: 8,
+			Nodes_:  ExpanderGraphNodeCount(nodes),
+		},
+
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
 		},
@@ -98,13 +96,13 @@ func SDRParams(cfg SDRCfg) *StackedDRG_I {
 	}
 }
 
-func (sdr *StackedDRG_I) drg() *DRG_I {
+func (sdr *WinStackedDRG_I) drg() *DRG_I {
 	return &DRG_I{
 		Config_: sdr.DRGCfg(),
 	}
 }
 
-func (sdr *StackedDRG_I) expander() *ExpanderGraph_I {
+func (sdr *WinStackedDRG_I) expander() *ExpanderGraph_I {
 	return &ExpanderGraph_I{
 		Config_: sdr.ExpanderGraphCfg(),
 	}
@@ -204,7 +202,19 @@ func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) Seal(sid sector.SectorID, windowData [][]byte, randomness sector.SealRandomness) SealSetupArtifacts {
+func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness sector.SealRandomness) SealSetupArtifacts {
+	nodeSize := int(sdr.NodeSize())
+
+	var windowData [][]byte
+
+	for i := 0; i < len(data); i += nodeSize {
+		windowData = append(windowData, data[i*nodeSize:(i+1)*nodeSize])
+	}
+
+	return sdr.SealWindows(sid, windowData, randomness)
+
+}
+func (sdr *WinStackedDRG_I) SealWindows(sid sector.SectorID, windowData [][]byte, randomness sector.SealRandomness) SealSetupArtifacts {
 	windowCount := int(sdr.WindowCount())
 	nodeSize := int(sdr.NodeSize())
 	nodes := int(sdr.Nodes())
@@ -219,11 +229,11 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, windowData [][]byte, randomne
 	var windowCommDTreePaths []file.Path
 
 	for i, data := range windowData {
-		_ = data
-		keyLayers, replica, sealSeed, windowCommD, windowCommDTreePath := sdr.SealWindow(i, sid, data, randomness)
+		windowCommD, windowCommDTreePath := ComputeDataCommitment(data)
+
+		keyLayers, sealSeed := sdr.GenerateWindowKey(i, sid, windowCommD, nodes, randomness)
 
 		allKeyLayers = append(allKeyLayers, keyLayers...)
-		replicas = append(replicas, replica)
 		sealSeeds = append(sealSeeds, sealSeed)
 		windowCommDs = append(windowCommDs, windowCommD)
 		windowCommDTreePaths = append(windowCommDTreePaths, windowCommDTreePath)
@@ -240,10 +250,18 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, windowData [][]byte, randomne
 		copy(columnReplica[i*nodeSize:(i+1)*nodeSize], []byte(hashColumn(column)))
 	}
 
+	var windowRootLeafRow []byte
+	for _, comm := range windowCommDs {
+		rootLeaf := AsBytes_UnsealedSectorCID(comm)
+		windowRootLeafRow = append(windowRootLeafRow, rootLeaf...)
+	}
+
+	commD, _ := ComputeDataCommitment(windowRootLeafRow)
+
 	commC, commRLast, commR, commCTreePath, commRLastTreePath := sdr.GenerateCommitments(columnReplica, allKeyLayers)
 
 	result := SealSetupArtifacts_I{
-		CommD_:             Commitment(commC),
+		CommD_:             Commitment(commD),
 		CommR_:             SealedSectorCID(commR),
 		CommC_:             Commitment(commC),
 		CommRLast_:         Commitment(commRLast),
@@ -257,22 +275,18 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, windowData [][]byte, randomne
 	return &result
 }
 
-func (sdr *StackedDRG_I) SealWindow(windowIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, sector.UnsealedSectorCID, file.Path) {
-	commD, commDTreePath := ComputeDataCommitment(data)
+func (sdr *WinStackedDRG_I) GenerateWindowKey(windowIndex int, sid sector.SectorID, commD sector.UnsealedSectorCID, nodes int, randomness sector.SealRandomness) ([][]byte, sector.SealSeed) {
 	sealSeed := computeSealSeed(sid, windowIndex, randomness, commD)
 	nodeSize := int(sdr.NodeSize())
-	nodes := len(data) / nodeSize
 	curveModulus := sdr.Curve().FieldModulus()
 	layers := int(sdr.Layers())
 
 	keyLayers := generateSDRKeyLayers(sdr.drg(), sdr.expander(), sealSeed, nodes, layers, nodeSize, curveModulus)
-	key := keyLayers[len(keyLayers)-1]
-	replica := encodeData(data, key, nodeSize, &curveModulus)
 
-	return keyLayers, replica, sealSeed, commD, commDTreePath
+	return keyLayers, sealSeed
 }
 
-func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte) (commC PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commRLastTreePath file.Path) {
+func (sdr *WinStackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte) (commC PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commRLastTreePath file.Path) {
 	commRLast, commRLastTreePath = BuildTree_PedersenHash(replica)
 	commC, commCTreePath = computeCommC(keyLayers, int(sdr.NodeSize()))
 	commR = BinaryHash_PedersenHash(commC, commRLast)
@@ -400,7 +414,7 @@ func hashColumn(column []Label) PedersenHash {
 
 type PrivateOfflineSDRProof []OfflineSDRChallengeProof
 
-func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *WinStackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
 	privateProof := sdr.CreatePrivateSealProof(challengeSeed, aux)
 
 	// Sanity check: newly-created proofs must pass verification.
@@ -409,14 +423,20 @@ func (sdr *StackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSealRan
 	return sdr.CreateOfflineCircuitProof(privateProof, aux)
 }
 
-func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
+func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) (challengeProofs PrivateOfflineSDRProof) {
 	sealSeeds := aux.Seeds()
 	nodeSize := UInt(sdr.NodeSize())
 	challenges := sdr.GenerateOfflineChallenges(sealSeeds, randomness, sdr.Challenges())
 
 	columnTree := LoadMerkleTree(aux.CommCTreePath())
+	replicaTree := LoadMerkleTree(aux.PersistentAux().CommRLastTreePath())
+	_ = replicaTree // FIXME: Use it.
+
+	windows := int(sdr.WindowCount())
+	windowSize := int(sdr.Cfg().SealCfg().SectorSize() / UInt(sdr.WindowCount()))
+
 	for c := range challenges {
-		challengeProof := CreateChallengeProof(sdr.drg(), sdr.expander(), sealSeeds, UInt(c), nodeSize, columnTree, aux)
+		challengeProof := CreateChallengeProof(sdr.drg(), sdr.expander(), sealSeeds, UInt(c), nodeSize, columnTree, replicaTree, aux, windows, windowSize)
 		challengeProofs = append(challengeProofs, challengeProof)
 	}
 
@@ -429,7 +449,7 @@ func (sdr *StackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSea
 // NOTE: Verification of a private proof is exactly the computation we will prove we have performed in a zk-SNARK.
 // If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
 // Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
-func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
+func (sdr *WinStackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengeProof, sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
 	windowCount := int(sdr.WindowCount())
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
@@ -437,7 +457,7 @@ func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengePr
 
 	// commC and commRLast must be the same for all challenge proofs, so we can arbitrarily verify against the first.
 	firstChallengeProof := privateProof[0]
-	commRLast := firstChallengeProof.ReplicaProof.InclusionProof.root()
+	commRLast := firstChallengeProof.ReplicaProofs[0].root()
 	commC := firstChallengeProof.ColumnProofs[0].InclusionProof.root()
 
 	for i, challenge := range challenges {
@@ -445,7 +465,7 @@ func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengePr
 		challengeProof := privateProof[i]
 		dataProofs := challengeProof.DataProofs
 		columnProofs := challengeProof.ColumnProofs
-		replicaProof := challengeProof.ReplicaProof
+		replicaProofs := challengeProof.ReplicaProofs
 
 		// Verify column proofs and that they represent the right columns.
 		columnElements := getColumnElements(sdr.drg(), sdr.expander(), challenge)
@@ -484,7 +504,12 @@ func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengePr
 
 			keyNode := dataColumn.Column[i*windowCount+layers-1]
 
-			replicaNode := replicaProof.Column[i]
+			replicaProof := replicaProofs[i]
+			replicaNode := replicaProof.leaf()
+
+			if !replicaProof.verify(commRLast, challenge) {
+				return false
+			}
 
 			encodedNode := encodeData(dataNode, keyNode, int(sdr.NodeSize()), &curveModulus)
 			if !bytes.Equal(encodedNode, replicaNode) {
@@ -493,8 +518,10 @@ func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengePr
 
 		}
 
-		if !replicaProof.verify(commRLast, challenge) {
-			return false
+		for _, replicaProof := range replicaProofs {
+			if !replicaProof.verify(commRLast, challenge) {
+				return false
+			}
 		}
 	}
 
@@ -507,8 +534,9 @@ func (sdr *StackedDRG_I) VerifyPrivateProof(privateProof []OfflineSDRChallengePr
 	return true
 }
 
-func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds []sector.SealSeed, challenge UInt, nodeSize UInt, columnTree *MerkleTree, aux sector.ProofAuxTmp) (proof OfflineSDRChallengeProof) {
+func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds []sector.SealSeed, challenge UInt, nodeSize UInt, columnTree *MerkleTree, replicaTree *MerkleTree, aux sector.ProofAuxTmp, windows int, windowSize int) (proof OfflineSDRChallengeProof) {
 	columnElements := getColumnElements(drg, expander, challenge)
+	commDTreePaths := aux.CommDTreePaths()
 
 	var columnProofs []SDRColumnProof
 	for c := range columnElements {
@@ -518,28 +546,25 @@ func CreateChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds []sec
 
 	var dataProofs []InclusionProof
 
-	for _, treePath := range aux.CommDTreePaths() {
+	for _, treePath := range commDTreePaths {
 		dataTree := LoadMerkleTree(treePath)
 		dataProof := dataTree.proveInclusion(challenge)
 		dataProofs = append(dataProofs, dataProof)
 	}
 
-	replicas := aux.Replicas()
-	var replicaColumn []Label
-	for _, replica := range replicas {
-		replicaColumn = append(replicaColumn, replica[challenge*nodeSize:(challenge+1)*nodeSize])
-	}
+	var replicaProofs []InclusionProof
 
-	replicaTree := LoadMerkleTree(aux.PersistentAux().CommRLastTreePath())
-	replicaProof := SDRColumnProof{
-		Column:         replicaColumn,
-		InclusionProof: replicaTree.proveInclusion(challenge),
+	for i := 0; i < windows; i++ {
+		c := challenge + UInt(i*windowSize)
+		replicaProof := replicaTree.proveInclusion(c)
+		replicaProofs = append(replicaProofs, replicaProof)
 	}
 
 	proof = OfflineSDRChallengeProof{
-		DataProofs:   dataProofs,
-		ColumnProofs: columnProofs,
-		ReplicaProof: replicaProof,
+		DataProofs:    dataProofs,
+		ColumnProofs:  columnProofs,
+		ReplicaProofs: replicaProofs,
+		// FIXME: Need proof of replica layer.
 	}
 
 	return proof
@@ -574,9 +599,9 @@ type OfflineSDRChallengeProof struct {
 	CommC     Commitment
 
 	// TODO: these proofs need to depend on hash function.
-	DataProofs   []InclusionProof // SHA256
-	ColumnProofs []SDRColumnProof
-	ReplicaProof SDRColumnProof // Pedersen
+	DataProofs    []InclusionProof // SHA256
+	ColumnProofs  []SDRColumnProof
+	ReplicaProofs []InclusionProof // Pedersen
 
 }
 
@@ -625,13 +650,13 @@ func (proof *SDRColumnProof) verify(root []byte, challenge UInt) bool {
 	return proof.InclusionProof.verify(root, challenge)
 }
 
-func (sdr *StackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineSDRChallengeProof, aux sector.ProofAuxTmp) sector.SealProof {
 	// partitions := sdr.Partitions()
 	// publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, challengeCount StackedDRGChallenges) (challenges []UInt) {
+func (sdr *WinStackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, randomness sector.InteractiveSealRandomness, challengeCount WinStackedDRGChallenges) (challenges []UInt) {
 	nodeSize := int(sdr.NodeSize())
 	nodes := sdr.Nodes()
 
@@ -661,7 +686,7 @@ func (sdr *StackedDRG_I) GenerateOfflineChallenges(sealSeeds []sector.SealSeed, 
 }
 
 func encodeNode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
-	// TODO: Make this a method of StackedDRG.
+	// TODO: Make this a method of WinStackedDRG.
 	return addEncode(data, key, modulus, nodeSize)
 }
 
@@ -679,7 +704,7 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 ////////////////////////////////////////////////////////////////////////////////
 // Seal Verification
 
-func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
+func (sdr *WinStackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	onChain := sv.OnChain()
 	sealProof := onChain.Proof()
 	commR := sector.SealedSectorCID(onChain.SealedCID())
@@ -794,7 +819,7 @@ func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	}
 }
 
-func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.SealedSectorCID, sealSeeds []sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
+func (sdr *WinStackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.SealedSectorCID, sealSeeds []sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
 	//publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
@@ -802,11 +827,11 @@ func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCI
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int) (sectors []sector.SectorID, challenges []UInt) {
+func (sdr *WinStackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int) (sectors []sector.SectorID, challenges []UInt) {
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
+func (sdr *WinStackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
 	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
 	var proofAuxs []sector.ProofAux
 
@@ -820,14 +845,14 @@ func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomn
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
+func (sdr *WinStackedDRG_I) GeneratePoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt Verification
 
-func (sdr *StackedDRG_I) VerifyPoSt(sv sector.PoStVerifyInfo) bool {
+func (sdr *WinStackedDRG_I) VerifyPoSt(sv sector.PoStVerifyInfo) bool {
 	panic("TODO")
 }
 
