@@ -11,7 +11,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 	cfg := &filproofs.SDRCfg_I{
 		SealCfg_: si.SealCfg(),
 	}
-	sdr := filproofs.SDRParams(cfg)
+	sdr := filproofs.WinSDRParams(cfg)
 
 	sid := si.SectorID()
 	sectorSize := int(si.SealCfg().SectorSize())
@@ -75,7 +75,7 @@ func (s *SectorSealer_I) CreateSealProof(si CreateSealProofInputs) *SectorSealer
 		SealCfg_: si.SealCfg(),
 	}
 
-	sdr := filproofs.SDRParams(cfg)
+	sdr := filproofs.WinSDRParams(cfg)
 	proof := sdr.CreateSealProof(randomSeed, auxTmp)
 
 	onChain := sector.OnChainSealVerifyInfo_I{

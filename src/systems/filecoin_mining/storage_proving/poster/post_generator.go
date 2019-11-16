@@ -82,5 +82,5 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG
 		}
 	}
 
-	return filproofs.SDRParams(&cfg)
+	return filproofs.WinSDRParams(&cfg)
 }

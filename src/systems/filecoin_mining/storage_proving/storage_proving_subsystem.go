@@ -15,7 +15,7 @@ func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) Stora
 	cfg := filproofs.SDRCfg_I{
 		SealCfg_: sv.SealCfg(),
 	}
-	sdr := filproofs.SDRParams(&cfg)
+	sdr := filproofs.WinSDRParams(&cfg)
 
 	result := sdr.VerifySeal(sv)
 

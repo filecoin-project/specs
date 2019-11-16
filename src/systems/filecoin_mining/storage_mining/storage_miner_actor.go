@@ -762,7 +762,7 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.SDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
 	return sdr.VerifySeal(&svInfo)
 }
 
