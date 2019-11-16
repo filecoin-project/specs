@@ -57,7 +57,7 @@ func GeneratePoSt(sectorSize BytesAmount, sectors SectorSet, seed Seed, faults F
             return Fatal("Detected late fault")
         }
 
-        inclusionProofs[n] = inclusionProof
+        inclusionProofs[i] = inclusionProof
         challengedSectors[i] = sectors[challenge.Sector]
     }
 
@@ -111,9 +111,11 @@ func DerivePoStChallenges(seed Seed, faults FaultSet, sectorSize Uint, sortedSec
 
     for n := 0; n < POST_CHALLENGES_COUNT; n++ {
         attemptedSectors := {SectorID:bool}
+        attempt := 0
         while challenges[n] == nil {
             challenge := DerivePoStChallenge(seed, n, attempt, sectorSize, sortedSectors)
-
+            attempt ++
+            
             // check if we landed in a faulty sector
             if !faults.Contains(challenge.Sector) {
                 // Valid challenge
@@ -141,7 +143,7 @@ func DerivePoStChallenge(seed Seed, n Uint, attempt Uint, sectorSize Uint, sorte
     sectorChallenge := ReadUintLittleEndian(challengeBytes[0..8])
     leafChallenge := ReadUintLittleEndian(challengeBytes[8..16])
 
-    sectorIdx := sectorChallenge % sectorCount
+    sectorIdx := sectorChallenge % len(sortedSector
 
     return Challenge {
         Sector: sortedSectors[sectorIdx],
