@@ -1,0 +1,71 @@
+digraph FilecoinNode {
+    StorageProvider
+    
+    
+    subgraph cluster_MinerNode {
+    
+    FilecoinNode
+    StorageProvider
+    Clock
+    
+    subgraph cluster_SPC {
+      SPC
+      BlockProducer
+    }
+    
+    
+    subgraph cluster_SPC {
+        SPC
+        BlockProducer
+    }
+    
+    subgraph cluster_SMS {
+      SMS
+      MiningScheduler
+      
+
+      subgraph cluster_proving {
+        StorageProving
+      
+        SectorSealer
+        PoStGenerator
+      }
+      
+      subgraph cluster_indexer {
+        SectorIndexer
+        SectorIndex
+        SectorStore
+        SectorBuilder
+      }
+    }
+    
+    }
+
+    SectorIndexer -> SectorIndex
+    SectorIndexer -> SectorStore
+
+    // Adding StorageDeals to a Sector and commit to chain
+    StorageProvider -> SMS [label="1.1 HandleStorageDeal"]
+    SMS -> SectorIndexer [label="1.2 AddNewDeal"]
+    SectorIndexer -> SectorBuilder [label="1.3 StageDeal"]
+    FilecoinNode -> Blockchain [label="1.4 PublishStorageDeals"]
+    SectorIndexer -> StorageProving [label="1.5 SealSector"]
+    StorageProving -> SectorSealer [label="1.6 SealSector"]
+    FilecoinNode -> Blockchain [label="1.7 PreCommitSector"]
+    FilecoinNode -> Blockchain [label="1.8 GetRandomness"]
+    StorageProving -> SectorSealer [label="1.9 CreateSealProof"]
+    FilecoinNode -> Blockchain [label="1.10 ProveCommitSector"]
+    
+    // Generate ElectionPoSt and mine a block
+    Clock -> SMS [label="2.1 OnNewRound"]
+    SMS -> StorageProving [label="2.2 GeneratePoStCandidates"]
+    StorageProving -> PoStGenerator [label="2.3 GeneratePoStCandidates"]
+    SMS -> SPC [label="2.4 TryElectionPoSt"]
+    SPC -> SMS [label="2.5 Elected"]
+    SMS -> StorageProving [label="2.6 GeneratePoStProof"]
+    StorageProving -> PoStGenerator [label="2.7 GeneratePoStProof"]
+    SPC -> BlockProducer [label="2.8 GenerateBlock"]
+    FilecoinNode -> Blockchain [label="2.9 PublishBlock"]
+    
+    
+}
