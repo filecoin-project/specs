@@ -93,7 +93,6 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 			message.Params(),
 			message.Value(),
 		),
-		false,
 	)
 
 	if !sendRet.ExitCode().AllowsStateUpdate() {

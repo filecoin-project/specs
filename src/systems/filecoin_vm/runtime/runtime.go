@@ -319,13 +319,20 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 	return nil
 }
 
+type ErrorHandlingSpec int
+
+const (
+	PropagateErrors ErrorHandlingSpec = 1 + iota
+	CatchErrors
+)
+
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
-func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput, catchErrors bool) (
+func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
 	msg.MessageReceipt, st.StateTree) {
 
 	rt._running = true
-	ret := rt._sendInternal(input, catchErrors)
+	ret := rt._sendInternal(input, CatchErrors)
 	rt._running = false
 	return ret, rt._globalStatePending
 }
@@ -376,7 +383,7 @@ func _invokeMethodInternal(
 	return
 }
 
-func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.MessageReceipt {
+func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingSpec) msg.MessageReceipt {
 	rtOuter._checkRunning()
 	rtOuter._checkStateLock(false)
 
@@ -421,7 +428,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.
 	rtOuter._refundGasRemaining(toActorMethodGasBound)
 	rtOuter._deductGasRemaining(gasUsed)
 
-	if !catchErrors && invocOutput.ExitCode().IsError() {
+	if errSpec == PropagateErrors && invocOutput.ExitCode().IsError() {
 		rtOuter._throwError(exitcode.SystemError(exitcode.MethodSubcallError))
 	}
 
@@ -432,8 +439,8 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.
 	return msg.MessageReceipt_Make(invocOutput, gasUsed)
 }
 
-func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, catchErrors bool) msg.InvocOutput {
-	ret := rtOuter._sendInternal(input, catchErrors)
+func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, errSpec ErrorHandlingSpec) msg.InvocOutput {
+	ret := rtOuter._sendInternal(input, errSpec)
 	return &msg.InvocOutput_I{
 		ExitCode_:    ret.ExitCode(),
 		ReturnValue_: ret.ReturnValue(),
@@ -441,11 +448,11 @@ func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, catchErrors 
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) msg.InvocOutput {
-	return rt._sendInternalOutputOnly(input, false)
+	return rt._sendInternalOutputOnly(input, PropagateErrors)
 }
 
 func (rt *VMContext) SendCatchingErrors(input InvocInput) msg.InvocOutput {
-	return rt._sendInternalOutputOnly(input, true)
+	return rt._sendInternalOutputOnly(input, CatchErrors)
 }
 
 func (rt *VMContext) CurrentBalance() actor.TokenAmount {
