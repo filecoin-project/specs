@@ -58,11 +58,11 @@ Due to the nature of Filecoin's Tipsets and the possibility of using tickets fro
 To sample a ticket for a given epoch n:
 - Set referenceTipsetOffset = 0
 - While true:
-    - Set referenceTipset = n - referenceTipsetOffset
-    - If blocks were mined at referenceTipset:
-        - Take the heaviest tipset at referenceTipset
-        - Return the smallest ticket from that tipset's blocks
-    - If no blocks were mined at n:
+    - Set referenceTipsetHeight = n - referenceTipsetOffset
+    - If blocks were mined at referenceTipsetHeight:
+        - ReferenceTipset = TipsetAtHeight(referenceTipsetHeight)
+        - Select the block in ReferenceTipset with the smallest final ticket, return its ticket.
+    - If no blocks were mined at referenceTipsetHeight:
         - Increment referenceTipsetOffset
         - (Repeat)
 - If referenceTipsetOffset == 0
@@ -102,3 +102,8 @@ Each Ticket should be generated from the prior one in the ticket-chain and verif
 
 {{< readfile file="storage_power_consensus_subsystem.id" code="true" lang="go" >}}
 {{< readfile file="storage_power_consensus_subsystem.go" code="true" lang="go" >}}
+
+### Repeated Leader Election attempts
+
+ In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid `ElectionProof` and trying again. 
+ Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch's appropriate time.
