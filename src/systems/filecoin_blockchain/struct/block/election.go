@@ -9,12 +9,29 @@ func (tix *Ticket_I) ValidateSyntax() bool {
 	return tix.VRFResult_.ValidateSyntax()
 }
 
-func (tix *Ticket_I) Output() util.Bytes {
-	return SHA256(tix.VRFResult().Output())
+// TODO: add SHA256 to filcrypto
+// TODO: import SHA256 from filcrypto
+var SHA256 = func([]byte) []byte { return nil }
+
+func (tix *Ticket_I) ValidateSyntax() bool {
+	return tix.VRFResult_.ValidateSyntax()
 }
 
-func (tix *Ticket_I) Verify(input util.Bytes, pk filcrypto.VRFPublicKey) bool {
-	return tix.VRFResult_.Verify(input, pk) && sliceEqual(tix.Output(), SHA256(tix.VRFResult().Output()))
+func (tix *Ticket_I) Verify(input Bytes, pk filcrypto.VRFPublicKey) bool {
+	return tix.VRFResult_.Verify(input, pk)
+}
+
+func (tix *Ticket_I) DrawRandomness(minerAddr addr.Address, round ChainEpoch) Bytes {
+	input := tix.Output_
+	input = append(input, toBytes(minerAddr)...)
+	input = append(input, toBytes(epoch)...)
+	// for _, b := range toBytes(minerAddr) {
+	// 	input = append(input, b)
+	// }
+	// for _, b := range toBytes(epoch) {
+	// 	input = append(input, b)
+	// }
+	return input
 }
 
 func (ep *ElectionProof_I) ValidateSyntax() bool {

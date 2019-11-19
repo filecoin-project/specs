@@ -58,12 +58,12 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	// new election, incremented height
-	T1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
-	TK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	Randomness1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	RandomnessK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
 
 	for _, worker := range sms.keyStore().Workers() {
-		newTicket := sms.PrepareNewTicket(T1, worker.VRFKeyPair())
-		newEP := sms.DrawElectionProof(TK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
+		newTicket := sms.PrepareNewTicket(Randomness1, worker.VRFKeyPair())
+		newEP := sms.DrawElectionProof(RandomnessK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
 
 		if sms.consensus().IsWinningElectionProof(newEP, worker.Address()) {
 			sms.blockProducer().GenerateBlock(newEP, newTicket, sms.blockchain().BestChain().HeadTipset(), worker.Address())
@@ -80,13 +80,12 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, 
 	input = append(input, priorTicket.Output()...)
 
 	// run through VRF
-	// TODO: uncomment below
-	// vrfRes := vrfKP.Generate(input)
+	vrfRes := vrfKP.Generate(input)
 	var newTicket block.Ticket
 
 	// return new ticket
-	// newTicket.VRFResult_ = vrfRes
-	// newTicket.Output_ = SHA256(vrfRes.Output_)
+	newTicket.VRFResult_ = vrfRes
+	newTicket.Output_ = vrfRes.Output_
 	return newTicket
 }
 
