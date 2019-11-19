@@ -114,7 +114,7 @@ func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput 
 		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
 
-	if !a._shouldChallenge(rt, networkPower) {
+	if !a._shouldChallenge(rt) {
 		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
 
@@ -173,7 +173,7 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	panic(powerReport)
 }
 
-func (a *StorageMinerActorCode_I) _onMissedPoSt(rt Runtime) {
+func (a *StorageMinerActorCode_I) _onMissedCleanUpPoSt(rt Runtime) {
 	h, st := a.State(rt)
 
 	failingSectorNumbers := getSectorNums(st.Sectors())
@@ -208,12 +208,11 @@ func (a *StorageMinerActorCode_I) _onMissedPoSt(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-// If a SurprisePoSt is missed (either due to faults being not declared on time or
-// because the miner run out of time, every sector is reported as failing
-// for the current proving period.
-// TODO: verify that it is okay for an ElectionPoSt submission to be used as a SurprisePoSt submission
+// If a CleanUpPoSt is missed because the miner run out of time,
+// every sector is reported as failing for the current proving period.
+// TODO: verify that it is okay for an ElectionPoSt submission to be used as a CleanUpPoSt submission
 // because an ElectionPoSt will also get a miner out of Challenged status and update LastChallengeEpoch
-func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) CheckCleanUpPoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
 	if !a._isChallenged(rt) {
@@ -225,7 +224,7 @@ func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime
 	a._expirePreCommittedSectors(rt)
 
 	// oh no -- we missed it. rekt
-	a._onMissedPoSt(rt)
+	a._onMissedCleanUpPoSt(rt)
 
 	return rt.SuccessReturn()
 }
@@ -362,7 +361,7 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 // TODO: decide whether declared faults sectors should be
 // penalized in the same way as undeclared sectors and how
 
-// this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
+// this method is called by both SubmitElectionPoSt and SubmitCleanUpPoSt
 // - Process ProvingSet.SectorsOn()
 //   - State Transitions
 //     - Committed -> Active and credit power
@@ -477,21 +476,21 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 
 }
 
-// SubmitSurprisePoSt Workflow:
+// SubmitCleanUpPoSt Workflow:
 // - Verify PoSt Submission
 // - Process successful PoSt
-func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitCleanUpPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
 	TODO() // TODO: validate caller
 
 	if !a._isChallenged(rt) {
 		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("cannot SubmitSurprisePoSt when not challenged")
+		rt.Abort("cannot SubmitCleanUpPoSt when not challenged")
 	}
 
 	// Verify correct PoSt Submission
 	isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
 	if !isPoStVerified {
-		// no state transition, just error out and miner should submitSurprisePoSt again
+		// no state transition, just error out and miner should submitCleanUpPoSt again
 		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("TODO")
 	}
