@@ -13,35 +13,6 @@ func SmallerBytes(a, b util.Bytes) util.Bytes {
 	return a
 }
 
-// TODO: add SHA256 to filcrypto
-// TODO: import SHA256 from filcrypto
-func SHA256(input util.Bytes) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
-}
-
-func sliceEqual(a util.Bytes, b util.Bytes) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func epochToLittleEndianBytes(e ChainEpoch) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
-}
-
-func addrToLittleEndianBytes(addr addr.Address) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
-}
-
 // will return tipset from closest prior (or equal) epoch with a tipset
 // return epoch should be checked accordingly
 func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
