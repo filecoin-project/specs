@@ -86,7 +86,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, 
 
 	// return new ticket
 	// newTicket.VRFResult_ = vrfRes
-	// newTicket.Output_ = vrfRes.Output()
+	// newTicket.Output_ = SHA256(vrfRes.Output_)
 	return newTicket
 }
 

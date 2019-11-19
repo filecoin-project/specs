@@ -11,6 +11,8 @@ func SmallerBytes(a, b util.Bytes) util.Bytes {
 	return a
 }
 
+// will return tipset from closest prior (or equal) epoch with a tipset
+// return epoch should be checked accordingly
 func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 
 	dist := chain.HeadEpoch() - epoch
@@ -24,9 +26,18 @@ func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 	return current
 }
 
-func (chain *Chain_I) TicketAtEpoch(epoch ChainEpoch) Ticket {
+// TODO: add SHA256 to filcrypto
+// TODO: import SHA256 from filcrypto
+var SHA256 = func([]byte) []byte { return nil }
+
+func (chain *Chain_I) TicketOutputAtEpoch(epoch ChainEpoch) Bytes {
 	ts := chain.TipsetAtEpoch(epoch)
-	return ts.MinTicket()
+	if ts.Epoch() != epoch {
+		// there was no tipset at wanted epoch
+		// craft ticket from prior valid ticket
+		return SHA256(append(ts.MinTicket(), epoch))
+	}
+	return ts.MinTicket().Output()
 }
 
 func (chain *Chain_I) HeadEpoch() ChainEpoch {

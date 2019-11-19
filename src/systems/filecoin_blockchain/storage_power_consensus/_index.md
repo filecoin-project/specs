@@ -30,54 +30,75 @@ We must distinguish between both types of "miners" (storage and block miners). {
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
 
-# Repeated leader election attempts
+{{<label tickets>}}
+## Tickets
 
-In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid `ElectionProof` and trying again.
-
-{{<label ticket_chain>}}
-## The Ticket chain and randomness on-chain
-
-While each Filecoin block header contains a ticket field (see {{<sref tickets>}}), it is useful to provide nodes with a ticket chain abstraction.
-
-Namely, tickets are used throughout the Filecoin system as sources of on-chain randomness. For instance,
+Tickets are used across the Filecoin protocol as sources of randomness:
 - The {{<sref sector_sealer>}} uses tickets as SealSeeds to bind sector commitments to a given subchain.
 - The {{<sref post_generator>}} likewise uses tickets as PoStChallenges to prove sectors remain committed as of a given block.
 - They are drawn by the Storage Power subsystem as randomness in {{<sref leader_election>}} to determine their eligibility to mine a block
 - They are drawn by the Storage Power subsystem in order to generate new tickets for future use.
 
-Each of these ticket uses may require drawing tickets at different chain heights, according to the security requirements of the particular protocol making use of tickets. Due to the nature of Filecoin's Tipsets and the possibility of using losing tickets (that did not yield leaders in leader election) for randomness at a given height, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.
+Each of these ticket uses may require drawing tickets at different chain epochs, according to the security requirements of the particular protocol making use of tickets. Specifically, the ticket output (which is a SHA256 output) is used for randomness.
 
-This ticket chain will track one-to-one with a block at each height in a given subchain, but omits certain details including other blocks mined at that height.
+In Filecoin, every block header contains a single ticket.
 
-It is composed inductively as follows. For a given chain:
+You can find the Ticket data structure {{<sref data_structures "here">}}.
 
-- At height 0, take the genesis block, return its ticket
-- At height n+1, take the heaviest tipset in our chain at height n.
-    - select the block in that tipset with the smallest final ticket, return its ticket
+### Comparing Tickets in a Tipset
 
-Because a Tipset can contain multiple blocks, the smallest ticket in the Tipset must be drawn otherwise the block will be invalid.
+Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the "min ticket" in a Tipset, the comparison is that of the little endian representation of the ticket's VFOutput bytes.
 
-```
-   ┌──────────────────────┐
-   │                      │
-   │                      │
-   │┌────┐                │
-   ││ TA │              A │
-   └┴────┴────────────────┘
+{{<label ticket_chain>}}
+## The Ticket chain and drawing randomness
 
-   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-                          │
-   │
-    ┌────┐                │       TA < TB < TC
-   ││ TB │              B
-    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘
+While each Filecoin block header contains a ticket field (see {{<sref tickets>}}), it is useful to think of a ticket chain abstraction.
+Due to the nature of Filecoin's Tipsets and the possibility of using tickets from epochs that did not yield leaders for randomness at a given epoch, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness at a given height.
 
-   ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-                          │
-   │
-    ┌────┐                │
-   ││ TC │              C
-    ┴────┘─ ─ ─ ─ ─ ─ ─ ─ ┘
-```
+To sample a ticket for a given epoch n:
+- Set referenceTipsetOffset = 0
+- While true:
+    - Set referenceTipset = n - referenceTipsetOffset
+    - If blocks were mined at referenceTipset:
+        - Take the heaviest tipset at referenceTipset
+        - Return the smallest ticket from that tipset's blocks
+    - If no blocks were mined at n:
+        - Increment referenceTipsetOffset
+        - (Repeat)
+- If referenceTipsetOffset == 0
+    - newTicket = pastTicket
+- else
+    - newTicket = H(pastTicket || n)
 
-In the above diagram, a miner will use block A's Ticket to generate a new ticket (or an election proof farther in the future) since it is the smallest in the Tipset.
+In english, this means two things:
+- When sampling a ticket from an epoch with no blocks, draw the ticket from the prior epoch with blocks and concatenate it with the wanted epoch number. Hash this concatenation for a usable ticket value.
+- Choose the smallest ticket in the Tipset if it contains multiple blocks.
+
+See the `TicketAtEpoch` method below:
+{{< readfile file="block.go" code="true" lang="go" >}}
+
+The above means that ticket randomness is reseeded at every block, but can indeed be derived by any miner for an arbitrary epoch number using a past epoch. However, this does not affect protocol security under Filecoin's clock synchrony assumption.
+
+{{<label ticket_generation>}}
+### Ticket generation
+
+This section discusses how tickets are generated by EC for the `Ticket` field in every block header.
+
+At round `N`, a new ticket is generated using tickets drawn from the Tipset at round `N-1` (as shown above).
+
+The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique ticket. The SHA256 hash of the VRF output will be used for randomness.
+
+The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
+
+We use the VRF from {{<sref vrf>}} for ticket generation in EC (see the `PrepareNewTicket` method below).
+
+{{< readfile file="storage_mining_subsystem.id" code="true" lang="go" >}}
+{{< readfile file="storage_mining_subsystem.go" code="true" lang="go" >}}
+
+
+### Ticket Validation
+
+Each Ticket should be generated from the prior one in the ticket-chain and verified accordingly as shown in `validateTicket` below.
+
+{{< readfile file="storage_power_consensus_subsystem.id" code="true" lang="go" >}}
+{{< readfile file="storage_power_consensus_subsystem.go" code="true" lang="go" >}}
