@@ -28,14 +28,39 @@ func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 
 // TODO: add SHA256 to filcrypto
 // TODO: import SHA256 from filcrypto
-var SHA256 = func([]byte) []byte { return nil }
+func SHA256(input util.Bytes) util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
 
-func (chain *Chain_I) TicketOutputAtEpoch(epoch ChainEpoch) Bytes {
+func sliceEqual(a util.Bytes, b util.Bytes) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func toBytes(e ChainEpoch) util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
+
+func (chain *Chain_I) TicketOutputAtEpoch(epoch ChainEpoch) util.Bytes {
 	ts := chain.TipsetAtEpoch(epoch)
 	if ts.Epoch() != epoch {
 		// there was no tipset at wanted epoch
 		// craft ticket from prior valid ticket
-		return SHA256(append(ts.MinTicket(), epoch))
+		shaInput := ts.MinTicket().Output()
+		for _, b := range toBytes(epoch) {
+			shaInput = append(shaInput, b)
+		}
+
+		return SHA256(shaInput)
 	}
 	return ts.MinTicket().Output()
 }

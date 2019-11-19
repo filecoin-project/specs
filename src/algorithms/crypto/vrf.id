@@ -13,7 +13,7 @@ type VRFKeyPair struct {
 }
 
 type VRFResult struct {
-    Output            Bytes  @(internal)
+    Output            Bytes  // @(internal)
     MaxValue()        Bytes
     ValidateSyntax()  bool
 
