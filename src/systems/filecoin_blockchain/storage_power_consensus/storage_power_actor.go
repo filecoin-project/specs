@@ -152,37 +152,6 @@ func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power bl
 	return pcRequired
 }
 
-func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int) []addr.Address {
-	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
-	// support enumerating by int index. maybe we need that as an interface too,
-	// or something similar to an iterator (or iterator over the keys)
-	// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int)
-
-	allMiners := make([]addr.Address, len(st.PowerTable()))
-	index := 0
-
-	for address, _ := range st.PowerTable() {
-		allMiners[index] = address
-		index++
-	}
-
-	return postSurpriseSample(rt, allMiners, challengeCount)
-}
-
-// postSurpriseSample implements the PoSt-Surprise sampling algorithm
-func postSurpriseSample(rt Runtime, allMiners []addr.Address, challengeCount int) []addr.Address {
-
-	sm := make([]addr.Address, challengeCount)
-	for i := 0; i < challengeCount; i++ {
-		// rInt := rt.NextRandomInt() // we need something like this in the runtime
-		rInt := 4 // xkcd prng for now.
-		miner := allMiners[rInt%len(allMiners)]
-		sm = append(sm, miner)
-	}
-
-	return sm
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
@@ -379,27 +348,25 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 }
 
-// TODO: add Surprise to the cron actor
-func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
+// TODO: add Cleanup to the cron actor
+func (a *StoragePowerActorCode_I) CleanUp(rt Runtime, ticket block.Ticket) {
 
-	// The number of blocks that a challenged miner has to respond
-	// TODO: this should be set in.. spa?
-	// var postChallengeTime util.UInt
-
-	var provingPeriod uint // TODO
-
-	// sample the actor addresses
 	h, st := a.State(rt)
 
-	challengeCount := len(st.PowerTable()) / int(provingPeriod)
-	surprisedMiners := st._sampleMinersToSurprise(rt, challengeCount)
+	// TODO: store LastChallengeEndEpoch in a PQueue
+	staleMiners := make([]addr.Address, len(st.PowerTable()))
+	index := 0
 
-	UpdateRelease(rt, h, st)
+	for address, _ := range st.PowerTable() {
+		staleMiners[index] = address
+		index++
+	}
+
+	Release(rt, h, st)
 
 	// now send the messages
-	for _, addr := range surprisedMiners {
+	for _, addr := range staleMiners {
 		// TODO: rt.SendMessage(addr, ...)
-		// should also send network power here
 		panic(addr)
 	}
 }
