@@ -5,7 +5,6 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	util "github.com/filecoin-project/specs/util"
 )
 
 const FINALITY = 500
@@ -81,19 +80,19 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeT
 	return spc.ec().IsWinningElectionProof(electionProof, activePowerInSector, totalPower)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
 	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_TICKET)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
 	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_RANDOMNESS)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
 	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_SEAL)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
 	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_POST)
 }
 

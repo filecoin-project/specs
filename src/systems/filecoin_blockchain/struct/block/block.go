@@ -32,7 +32,12 @@ func sliceEqual(a util.Bytes, b util.Bytes) bool {
 	return true
 }
 
-func toBytes(e ChainEpoch) util.Bytes {
+func epochToLittleEndianBytes(e ChainEpoch) util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
+
+func addrToLittleEndianBytes(addr addr.Address) util.Bytes {
 	ret := make([]byte, 0)
 	return ret
 }

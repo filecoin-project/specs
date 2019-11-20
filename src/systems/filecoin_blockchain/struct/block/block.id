@@ -12,6 +12,9 @@ type ReceiptRoot ipld.CID
 type ChainWeight UVarint
 type ChainEpoch UVarint
 
+// Randomness is a string of random bytes
+type Randomness Bytes
+
 type BlockHeader struct {
     // Chain linking
     Parents          Tipset

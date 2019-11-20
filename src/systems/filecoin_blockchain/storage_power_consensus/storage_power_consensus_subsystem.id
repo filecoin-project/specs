@@ -35,32 +35,16 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // Randomness methods
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionSeed(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetTicketProductionSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness
 
     // call by StorageMiningSubsystem during block production
-    GetElectionProofSeed(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetElectionProofSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetSealSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) block.Randomness
 
     GetFinality()     block.ChainEpoch
     FinalizedEpoch()  block.ChainEpoch
