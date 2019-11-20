@@ -3,6 +3,9 @@ package poster
 import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+import util "github.com/filecoin-project/specs/util"
+
+type Serialization = util.Serialization
 
 // See "Proof-of-Spacetime Parameters" Section
 // TODO: Unify with orient model.
@@ -60,7 +63,7 @@ func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, f
 func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
 	var cfg filproofs.SDRCfg_I
 
-	switch postCfg.Type().(type) {
+	switch postCfg.Type() {
 	case sector.PoStType_ElectionPoSt:
 		cfg = filproofs.SDRCfg_I{
 			ElectionPoStCfg_: postCfg,

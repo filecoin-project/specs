@@ -16,6 +16,8 @@ type Bool bool
 type Int int
 type Any = interface{}
 type String string
+type Bytes = []byte
+type Serialization Bytes
 
 func (x Bool) Native() bool {
 	return bool(x)
@@ -51,9 +53,10 @@ type Varint = int64
 type UInt = uint64
 type Float = float64
 type BigInt = big.Int
-type Bytes = []byte
 type BytesKey = string // to use Bytes in map keys.
 type BytesAmount = UVarint
+type Bitfield Bytes
+type RLEpBitfield Bitfield
 type T = struct{} // For use in generic definitions.
 
 func Assert(b bool) {

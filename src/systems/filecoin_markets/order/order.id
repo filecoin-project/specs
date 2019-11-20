@@ -1,10 +1,9 @@
-import util "github.com/filecoin-project/specs/util"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type StorageAsk struct {
-    Price         util.BigInt  // attoFIL per GiB per epoch
-    Collateral    util.BigInt  // attoFIL per GiB per epoch
+    Price         BigInt  // attoFIL per GiB per epoch
+    Collateral    BigInt  // attoFIL per GiB per epoch
 
     MinPieceSize  uint64
     Miner         addr.Address

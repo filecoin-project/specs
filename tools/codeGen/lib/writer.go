@@ -631,6 +631,20 @@ func WriteDSLType(dst io.Writer, type_ Type, ctx WriteDSLContext) {
 
 	case Type_Case_AlgType:
 		xr := type_.(*AlgType)
+		if xr.isTuple {
+			Assert(xr.sort == AlgSort_Prod)
+			Assert(len(xr.attributeList) == 0)
+			ctxSub := WriteDSLContext{
+				indent:            ctx.indent,
+				useNewlines:       EntriesReqNewlines(xr.entriesFmtInfo, xr.entries, ctx),
+				useFieldAlignment: true,
+				alignment:         WriteDSLAlignmentNone(),
+				isEnum:            false,
+			}
+			WriteDSLBlock(dst, xr.entries, ctxSub, "(", ")")
+			break
+		}
+
 		isEnum := false
 		if xr.sort == AlgSort_Prod {
 			if xr.isInterface {

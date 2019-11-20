@@ -2,6 +2,7 @@ import repo "github.com/filecoin-project/specs/systems/filecoin_nodes/repository
 import filestore "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type FilecoinNode struct {
     Node        libp2p.Node
@@ -9,4 +10,6 @@ type FilecoinNode struct {
     Repository  repo.Repository
     FileStore   filestore.FileStore
     Clock       clock.UTCClock
+
+    SubmitMessage(m msg.SignedMessage) error
 }

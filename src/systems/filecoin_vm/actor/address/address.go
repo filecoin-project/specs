@@ -1,8 +1,10 @@
 package address
 
-// import (
-// 	util "github.com/filecoin-project/specs/util"
-// )
+import (
+	util "github.com/filecoin-project/specs/util"
+)
+
+type Int = util.Int
 
 // Addresses for singleton system actors
 var (
@@ -14,7 +16,7 @@ var (
 	BurntFundsActorAddr     = &Address_I{} // TODO
 )
 
-func (a *Address_I) VerifySyntax(addrType Address_Type) bool {
+func (a *Address_I) VerifySyntax() bool {
 	panic("TODO")
 	// switch aType := addrType; aType {
 	// case Address_Protocol.Secp256k1():
@@ -29,17 +31,40 @@ func (a *Address_I) VerifySyntax(addrType Address_Type) bool {
 	// }
 }
 
+func (a *Address_I) Equals(Address) bool {
+	panic("TODO")
+}
+
 func (a *Address_I) String() AddressString {
-	return AddressString("") // TODo
+	return Serialize_Address_Compact(a)
+}
+
+func Serialize_Address_Compact(Address) AddressString {
+	// TODO: custom encoding as in
+	// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
+	panic("TODO")
+}
+
+func Deserialize_Address_Compact(AddressString) (Address, error) {
+	// TODO: custom encoding as in
+	// https://github.com/filecoin-project/lotus/blob/master/chain/address/address.go
+	panic("TODO")
 }
 
 func (a *Address_I) IsKeyType() bool {
 	panic("TODO")
 }
 
-func MakeAddress(net Address_NetworkID, t Address_Type) Address {
+func Address_Make_ID(net Address_NetworkID, x ActorID) Address {
 	return &Address_I{
 		NetworkID_: net,
-		Type_:      t,
+		Data_:      Address_Data_Make_ID(x),
+	}
+}
+
+func Address_Make_ActorExec(net Address_NetworkID, hash ActorExecHash) Address {
+	return &Address_I{
+		NetworkID_: net,
+		Data_:      Address_Data_Make_ActorExec(hash),
 	}
 }

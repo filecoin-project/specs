@@ -14,6 +14,10 @@ import storage_market "github.com/filecoin-project/specs/systems/filecoin_market
 import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
+const (
+	Method_StorageMinerActor_SubmitPoSt = actor.MethodPlaceholder
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +98,7 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 
 // called by CronActor to notify StorageMiner of PoSt Challenge
 func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
-	rt.ValidateCallerIs(addr.CronActorAddr)
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
 
 	if a._isChallenged(rt) {
 		return rt.SuccessReturn() // silent return, dont re-challenge
