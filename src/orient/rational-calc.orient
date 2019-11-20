@@ -38,9 +38,9 @@ FastPorep:
         encoding_time_asic = encoding_time / hashing_amax
         encoding_window_time_asic = encoding_window_time / hashing_amax
         encoding_window_time_parallel_asic = encoding_window_time_parallel / hashing_amax
-
+        
     Response:
-      response_honest_min = challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
+      response_honest_min = post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
 
     Throughput:
       // num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
@@ -48,16 +48,29 @@ FastPorep:
       // seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
 
     Vanilla:
-      post_vanilla_size = node_size * (log2(nodes) + 1) * challenges
+      post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
 
     SNARK:
-      inclusion_proof = merkle_tree_hash_circuit * log2(nodes)
-      inclusion_proofs = inclusion_proof * challenges
-      ticket_proofs = ticket_circuit * challenges
-      post_snark_constraints = ticket_proofs + inclusion_proofs
-      post_snark_partitions = post_snark_constraints / max_snark_constraints
-      post_snark_size = post_snark_partitions * snark_size
-      post_snark_size_kb = post_snark_size / 1024
+      PoSt:
+        inclusion_proof = merkle_tree_hash_circuit * log2(nodes)
+        inclusion_proofs = inclusion_proof * post_challenges
+        ticket_proofs = ticket_circuit * post_challenges
+        post_snark_constraints = ticket_proofs + inclusion_proofs
+        post_snark_partitions = post_snark_constraints / max_snark_constraints
+        post_snark_size = post_snark_partitions * snark_size
+        post_snark_size_kb = post_snark_size / 1024
+      PoRep:
+        window_inclusion = merkle_tree_hash_circuit * log2(window_nodes)
+        window_inclusions =  window_inclusion * porep_challenges * (drg_parents + 1)
+
+        column_leaf = leaf_hash_circuit * drg_layers
+        column_leaves = column_leaf * porep_challenges * (drg_parents + 1)
+        window_column_leaves = column_leaves * windows
+
+        encoding_proof = kdf_circuit * drg_parents
+        window_encoding_proof = encoding_proof * windows
+
+        porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof
 
     Cost:
       Compute:
@@ -68,7 +81,6 @@ FastPorep:
       Storage:
         cost_storage_gbs = cost_gb_per_month / secs_in_month 
         cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
-
 
   Adversary:
     Rationality:
