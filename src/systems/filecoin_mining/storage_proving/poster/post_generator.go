@@ -11,7 +11,7 @@ type Serialization = util.Serialization
 // TODO: Unify with orient model.
 const POST_CHALLENGE_DEADLINE = uint(480)
 
-func GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore) []sector.ElectionCandidate {
+func GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
 	// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 	// Like this:
 	// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -39,25 +39,6 @@ func GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) secto
 	}
 
 	return sdr.GeneratePoStProof(privateProofs)
-}
-
-// This likely belongs elsewhere, but I'm not exactly sure where and wanted to encapsulate the proofs-related logic here. So this can be thought of as example usage.
-// ticketThreshold is lowest non-winning ticket (endianness?) for this PoSt.
-func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore, ticketThreshold sector.ElectionTicket) sector.PoStProof {
-	candidates := GeneratePoStCandidates(postCfg, challengeSeed, faults, sectors, sectorStore)
-	var winners []sector.ElectionCandidate
-
-	for _, candidate := range candidates {
-		if candidate.Ticket().IsBelow(ticketThreshold) {
-			winners = append(winners, candidate)
-		}
-	}
-
-	witness := sector.PoStWitness_I{
-		Candidates_: winners,
-	}
-
-	return GeneratePoStProof(postCfg, sector.PoStWitness(&witness))
 }
 
 func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {

@@ -788,7 +788,7 @@ func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, 
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectorStore sectorIndex.SectorStore) []sector.ElectionCandidate {
+func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
 	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, faults)
 	var proofAuxs []sector.ProofAux
 

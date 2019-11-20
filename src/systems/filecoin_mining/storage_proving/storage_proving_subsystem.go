@@ -25,3 +25,21 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize util.U
 			StorageProvingSubsystem_ComputeUnsealedSectorCID_FunRet_unsealedSectorCID(unsealedCID))
 	}
 }
+
+// TODO also return error
+func (sps *StorageProvingSubsystem_I) GeneratePoStCandidates(challengeSeed util.Randomness, sectorIDs []sector.SectorID) []sector.ChallengeTicket {
+	todo := make([]sector.ChallengeTicket, 0)
+	return todo
+}
+
+func (sps *StorageProvingSubsystem_I) GeneratePoSt(challengeSeed sector.PoStRandomness, challengeTickets []sector.ChallengeTicket) sector.PoStProof {
+	witness := &sector.PoStWitness_I{
+		Candidates_: challengeTickets,
+	}
+
+	panic(witness)
+
+	// return sps.PoStGenerator().Impl().GeneratePoStProof()
+	var todo sector.PoStProof
+	return todo
+}

@@ -2,6 +2,8 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import util "github.com/filecoin-project/specs/util"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
     // actor                StoragePowerActor
@@ -15,9 +17,8 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
 
-    IsWinningElectionProof(
-        electionProof  block.ElectionProof
-        workerAddr     addr.Address
+    IsWinningChallengeTicket(
+        challengeTicket sector.ChallengeTicket
     ) bool
 
     validateElectionProof(
@@ -35,16 +36,32 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // Randomness methods
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness
+    GetTicketProductionSeed(
+        chain      block.Chain
+        minerAddr  addr.Address
+        epoch      block.ChainEpoch
+    ) util.Randomness
 
     // call by StorageMiningSubsystem during block production
-    GetElectionProofSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness
+    GetElectionProofSeed(
+        chain      block.Chain
+        minerAddr  addr.Address
+        epoch      block.ChainEpoch
+    ) util.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness
+    GetSealSeed(
+        chain      block.Chain
+        minerAddr  addr.Address
+        epoch      block.ChainEpoch
+    ) util.Randomness
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) block.Randomness
+    GetPoStChallenge(
+        chain      block.Chain
+        minerAddr  addr.Address
+        epoch      block.ChainEpoch
+    ) util.Randomness
 
     GetFinality()     block.ChainEpoch
     FinalizedEpoch()  block.ChainEpoch

@@ -55,9 +55,8 @@ type Float = float64
 type BigInt = big.Int
 type BytesKey = string // to use Bytes in map keys.
 type BytesAmount = UVarint
-type Bitfield Bytes
-type RLEpBitfield Bitfield
-type T = struct{} // For use in generic definitions.
+type T = struct{}     // For use in generic definitions.
+type Randomness Bytes // Randomness is a string of random bytes
 
 func Assert(b bool) {
 	if !b {
