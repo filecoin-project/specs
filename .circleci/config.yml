@@ -10,7 +10,7 @@ jobs:
           command: |
             make test
             make fmt-code
-            make build
+            make website
             git diff --exit-code
             
 workflows:
