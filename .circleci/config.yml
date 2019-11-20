@@ -10,8 +10,9 @@ jobs:
           command: |
             make test
             make fmt-code
+            make build
             git diff --exit-code
-
+            
 workflows:
   version: 2.1
   test_all:
