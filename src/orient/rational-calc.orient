@@ -5,10 +5,10 @@ FastPorep:
 
   Graph:
     sector_size = sector_size_gb * b_in_gb
-
+    graph_parents = drg_parents + expander_parents
     nodes = sector_size / node_size 
     node_size_gb = node_size / b_in_gb 
-    node_hash_size_gb = drg_parents * node_size_gb
+    node_hash_size_gb = graph_parents * node_size_gb
     node_hash_size = node_hash_size_gb * b_in_gb
 
     challenge_periods_per_month = secs_in_month / polling_time
@@ -26,7 +26,7 @@ FastPorep:
 
   Honest:
     Encoding:
-      encoding_window_time = (window_nodes * drg_parents) * hashing_time * drg_layers
+      encoding_window_time = (window_nodes * graph_parents) * hashing_time * drg_layers
       encoding_time = encoding_window_time * windows
       decoding_time = encoding_window_time
       
@@ -61,13 +61,13 @@ FastPorep:
         post_snark_size_kb = post_snark_size / 1024
       PoRep:
         window_inclusion = merkle_tree_hash_circuit * log2(window_nodes)
-        window_inclusions =  window_inclusion * porep_challenges * (drg_parents + 1)
+        window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
 
         column_leaf = leaf_hash_circuit * drg_layers
-        column_leaves = column_leaf * porep_challenges * (drg_parents + 1)
+        column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
         window_column_leaves = column_leaves * windows
 
-        encoding_proof = kdf_circuit * drg_parents
+        encoding_proof = kdf_circuit * graph_parents
         window_encoding_proof = encoding_proof * windows
 
         porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof
