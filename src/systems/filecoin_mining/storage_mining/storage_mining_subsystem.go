@@ -65,12 +65,6 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 	sms.tryLeaderElection()
 }
 
-// TODO
-func (sms *StorageMiningSubsystem_I) _sampleSectors(workerKey filcrypto.VRFKeyPair) []sector.SectorID {
-	todo := make([]sector.SectorID, 0)
-	return todo
-}
-
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 
 	// Draw randomness from chain for ElectionPoSt and Ticket Generation
@@ -88,9 +82,10 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 		input = append(input, randomnessK...)
 
 		postRandomness := worker.VRFKeyPair().Impl().Generate(input).Output()
-		eligibleSectors := sms._sampleSectors(worker.VRFKeyPair())
+		// TODO: add how sectors are actually stored in the SMS
+		allSectors := make([]sector.SectorID, 0)
 
-		challengeTickets := sms.StorageProving().Impl().GeneratePoStCandidates(postRandomness, eligibleSectors)
+		challengeTickets := sms.StorageProving().Impl().GeneratePoStCandidates(postRandomness, allSectors)
 
 		if len(challengeTickets) <= 0 {
 			return // fail to generate post candidates
