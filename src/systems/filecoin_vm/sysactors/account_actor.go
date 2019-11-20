@@ -1,6 +1,5 @@
 package sysactors
 
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
@@ -43,16 +42,8 @@ func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	return rt.SuccessReturn()
 }
 
-func (a *AccountActorCode_I) VerifySignature(rt vmr.Runtime, sig filcrypto.Signature) InvocOutput {
-	panic("TODO")
-}
-
 func (a *AccountActorCode_I) InvokeMethod(rt vmr.Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	switch method {
-	case actor.MethodConstructor:
-		rt.Assert(len(params) == 0)
-		return a.Constructor(rt)
-
 	default:
 		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
 	}
