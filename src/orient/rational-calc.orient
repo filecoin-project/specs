@@ -52,25 +52,29 @@ FastPorep:
 
     SNARK:
       PoSt:
-        inclusion_proof = merkle_tree_hash_circuit * log2(nodes)
+        inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
         inclusion_proofs = inclusion_proof * post_challenges
-        ticket_proofs = ticket_circuit * post_challenges
+        ticket_proofs = ticket_constraints * post_challenges
         post_snark_constraints = ticket_proofs + inclusion_proofs
-        post_snark_partitions = post_snark_constraints / max_snark_constraints
+        post_snark_partitions = post_snark_constraints / post_max_snark_constraints
         post_snark_size = post_snark_partitions * snark_size
         post_snark_size_kb = post_snark_size / 1024
       PoRep:
-        window_inclusion = merkle_tree_hash_circuit * log2(window_nodes)
+        window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
         window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
 
-        column_leaf = leaf_hash_circuit * drg_layers
+        column_leaf = leaf_hash_constraints * drg_layers
         column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
         window_column_leaves = column_leaves * windows
 
-        encoding_proof = kdf_circuit * graph_parents
+        encoding_proof = kdf_constraints * graph_parents
         window_encoding_proof = encoding_proof * windows
 
         porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof
+
+        porep_snark_partitions = porep_snark_constraints / porep_max_snark_constraints
+        porep_snark_size = porep_snark_partitions * snark_size
+        porep_snark_size_kb = porep_snark_size / 1024
 
     Cost:
       Compute:

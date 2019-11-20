@@ -20,13 +20,15 @@
     "rig_ram_gb": 32,
     "rig_storage_latency": 0.003,
     "snark_size": 192,
-    "max_snark_constraints": 3000000,
-    "ticket_circuit": 1376,
-    "merkle_tree_hash_circuit": 1376,
+    "post_max_snark_constraints": 3000000,
+    "porep_max_snark_constraints": 100000000,
+    "ticket_constraints": 1376,
+    "merkle_tree_hash_constraints": 1376,
     "window_size_mb": 4,
     "rig_cores": 16,
     "rig_storage_min_tb": 100,
-    "kdf_circuit": 20000,
-    "leaf_hash_circuit": 5,
-    "porep_challenges": 300
+    "kdf_constraints": 20000,
+    "leaf_hash_constraints": 2,
+    "porep_challenges": 300,
+    "post_challenges": 300
 }
