@@ -4558,34 +4558,53 @@ https://github.com/alex-shpak/hugo-book
 <p>At a very high level, with every new block generated, a miner will craft a new ticket from the prior one in the chain appended with the current epoch number (i.e. parentTipset.epoch + 1 to start). While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner will increment the round number and attempt a new leader election (using the new input) thereby ensuring liveness in the protocol.</p>
 
 <p>The <a href="../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a> subsystem uses access to EC to use the following facilities:
-- Access to verifiable randomness for the protocol, derived from <a href="../../../#algorithms__expected_consenus__tickets">Tickets</a>.
+- Access to verifiable randomness for the protocol, derived from <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>.
 - Running and verifying <a href="../../../#algorithms__expected_consensus__leader_election">leader election</a> for block generation.
 - Access to a weighting function enabling <a href="../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> by the chain manager.
 - Access to the most recently <a href="../../../#algorithms__expected_consensus__finality">finalized tipset</a> available to all protocol participants.</p>
 
-<div id="algorithms__expected_consensus__tickets"></div>
+<p>
 
-<h2 id="tickets">Tickets</h2>
 
-<p>For leader election in EC, participants win in proportion to the power they have within the network.</p>
 
-<p>A ticket is drawn from the past at the beginning of each new round to perform leader election. EC also generates a new ticket in every round for future use. Tickets are chained independently of the main blockchain. A ticket only depends on the ticket before it, and not any other data in the block.
-On expectation, in Filecoin, every block header contains one ticket, though it could contain more if that block was generated over multiple rounds.</p>
 
-<p>Tickets are used across the protocol as sources of randomness:
-- The <a href="../../../#systems__filecoin_mining__storage_proving__sector_sealer">Sector Sealer</a> uses tickets to bind sector commitments to a given subchain.
-- The <a href="../../../#systems__filecoin_mining__storage_mining">Storage Miner</a> likewise uses tickets to prove sectors remain committed as of a given block.
-- EC uses them to run leader election and generates new ones for use by the protocol, as detailed below.</p>
 
-<p>You can find the Ticket data structure <a href="../../../#listings__data_structures">here</a>.</p>
 
-<h3 id="comparing-tickets-in-a-tipset">Comparing Tickets in a Tipset</h3>
 
-<p>Whenever comparing tickets is evoked in Filecoin, for instance when discussing selecting the &ldquo;min ticket&rdquo; in a Tipset, the comparison is that of the little endian representation of the ticket&rsquo;s VFOutput bytes.</p>
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>expected_consensus.id</code> file was not found.</i></b></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>expected_consensus.go</code> file was not found.</i></b></p>
+
+</p>
 
 <h2 id="tickets-in-ec">Tickets in EC</h2>
 
-<p>Within EC, a miner generates a new ticket in their block for every ticket they use running leader election, thereby ensuring the ticket chain is always as long as the block chain.</p>
+<p>Within SPC, a miner generates a new ticket in their block for every ticket they use running leader election, thereby ensuring the ticket chain is always as long as the block chain.</p>
 
 <p>Tickets are used to achieve the following:
 - Ensure leader secrecy &ndash; meaning a block producer will not be known until they release their block to the network.
@@ -4594,7 +4613,7 @@ On expectation, in Filecoin, every block header contains one ticket, though it c
 <p>In practice, EC defines two different fields within a block:</p>
 
 <ul>
-<li>A <code>Ticket</code> field — this stores the new ticket generated during this block generation attempt. It is from this ticket that miners will sample randomness to run leader election in <code>K</code> rounds.</li>
+<li>A <code>Ticket</code> field — this stores the new ticket generated during this block generation attempt. It is from this ticket that miners will sample randomness to run leader election in <code>K</code> rounds (see <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>).</li>
 <li>An <code>ElectionProof</code> — this stores a proof that a given miner has won a leader election using the appropriate ticket <code>K</code> rounds back appended with the current epoch number. It proves that the leader was validly elected in this epoch.</li>
 </ul>
 
@@ -4656,141 +4675,6 @@ How is K selected?
 - On the one end, there is no advantage to picking K larger than finality.
 - On the other, making K smaller reduces adversarial power to grind.
 </code></pre>
-
-<div id="algorithms__expected_consensus__ticket_generation"></div>
-
-<h3 id="ticket-generation">Ticket generation</h3>
-
-<p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>expected_consensus.id</code> file was not found.</i></b></p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>expected_consensus.go</code> file was not found.</i></b></p>
-
-</p>
-
-<p>This section discusses how tickets are generated by EC for the <code>Ticket</code> field.</p>
-
-<p>At round <code>N</code>, a new ticket is generated using tickets drawn from the Tipset at round <code>N-1</code> (for more on how tickets are drawn see <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Ticket Chain</a>).</p>
-
-<p>The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique output.</p>
-
-<p>The VRF&rsquo;s deterministic output adds entropy to the ticket chain, limiting a miner&rsquo;s ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).</p>
-
-<p>We use the VRF from <a href="../../../#algorithms__crypto__vrf">Verifiable Random Function</a> for ticket generation in EC (see the <code>PrepareNewTicket</code> method below).</p>
-
-<p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>storage_mining_subsystem.id</code> file was not found.</i></b></p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>storage_mining_subsystem.go</code> file was not found.</i></b></p>
-
-</p>
-
-<h3 id="ticket-validation">Ticket Validation</h3>
-
-<p>Each Ticket should be generated from the prior one in the ticket-chain and verified accordingly as shown in <code>validateTicket</code> below.</p>
-
-<p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>storage_power_consensus_subsystem.id</code> file was not found.</i></b></p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<p style="color: #D74848"><b><i>Something's not right. The <code>storage_power_consensus_subsystem.go</code> file was not found.</i></b></p>
-
-</p>
 
 <div id="algorithms__expected_consensus__leader_election"></div>
 
@@ -5062,15 +4946,7 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 <li>
 <ul>
 <li><a href="#algorithm">Algorithm</a></li>
-<li><a href="#tickets">Tickets</a>
-<ul>
-<li><a href="#comparing-tickets-in-a-tipset">Comparing Tickets in a Tipset</a></li>
-</ul></li>
-<li><a href="#tickets-in-ec">Tickets in EC</a>
-<ul>
-<li><a href="#ticket-generation">Ticket generation</a></li>
-<li><a href="#ticket-validation">Ticket Validation</a></li>
-</ul></li>
+<li><a href="#tickets-in-ec">Tickets in EC</a></li>
 <li><a href="#secret-leader-election">Secret Leader Election</a>
 <ul>
 <li><a href="#running-a-leader-election">Running a leader election</a></li>

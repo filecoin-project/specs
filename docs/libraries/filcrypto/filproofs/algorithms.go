@@ -1,6 +1,8 @@
 package filproofs
 
 import "bytes"
+import "errors"
+import "fmt"
 import "math"
 import "math/rand"
 import big "math/big"
@@ -8,6 +10,7 @@ import "encoding/binary"
 
 import util "github.com/filecoin-project/specs/util"
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
@@ -15,11 +18,34 @@ type SHA256Hash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
 type UInt = util.UInt
-type PieceInfo = sector.PieceInfo
+type PieceInfo = *sector.PieceInfo_I
 type Label Bytes32
 type Commitment = sector.Commitment
 
-func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
+func WinSDRParams(cfg SDRCfg) *WindowedStackedDRG_I {
+	inner := SDRParams(cfg)
+	innerSealCfg := cfg.SealCfg()
+
+	outerSealCfg := sector.SealCfg_I{
+		SubsectorCount_: 1,
+		SectorSize_:     innerSealCfg.SectorSize(),
+		Partitions_:     innerSealCfg.Partitions(),
+	}
+
+	outerCfg := SDRCfg_I{
+		SealCfg_:         &outerSealCfg,
+		ElectionPoStCfg_: cfg.ElectionPoStCfg(),
+		SurprisePoStCfg_: cfg.SurprisePoStCfg(),
+	}
+
+	outer := SDRParams(&outerCfg)
+	return &WindowedStackedDRG_I{
+		Inner_: inner,
+		Outer_: outer,
+	}
+}
+
+func SDRParams(cfg SDRCfg) *StackedDRG_I {
 	// TODO: Bridge constants with orient model.
 	const LAYERS = 10
 	const NODE_SIZE = 32
@@ -30,7 +56,7 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 	// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
 	FIELD_MODULUS.SetString("52435875175126190479447740508185965837690552500527637822603658699938581184513", 10)
 
-	nodes := UInt(sealCfg.SectorSize() / NODE_SIZE)
+	nodes := UInt(cfg.SealCfg().SectorSize() / NODE_SIZE)
 
 	return &StackedDRG_I{
 		Layers_:     StackedDRGLayers(LAYERS),
@@ -40,8 +66,8 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 		Algorithm_:  &StackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
-				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample(&DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{}),
-				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20(&DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I{}),
+				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
+				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_ChaCha20,
 			},
 			Degree_: 6,
 			Nodes_:  DRGNodeCount(nodes),
@@ -50,10 +76,9 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
 				&ChungExpanderAlgorithm_I{
 					PermutationAlgorithm_: ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&Feistel_I{
-						Keys_:   FEISTEL_KEYS[:],
-						Rounds_: FEISTEL_ROUNDS,
-						HashFunction_: ChungExpanderPermutationFeistelHashFunction_Make_SHA256(
-							&ChungExpanderPermutationFeistelHashFunction_SHA256_I{}),
+						Keys_:         FEISTEL_KEYS[:],
+						Rounds_:       FEISTEL_ROUNDS,
+						HashFunction_: ChungExpanderPermutationFeistelHashFunction_SHA256,
 					}),
 				}),
 			Degree_: 8,
@@ -62,8 +87,7 @@ func SDRParams(sealCfg sector.SealCfg, postCfg sector.PoStCfg) *StackedDRG_I {
 		Curve_: &EllipticCurve_I{
 			FieldModulus_: *FIELD_MODULUS,
 		},
-		SealCfg_: sealCfg,
-		PoStCfg_: postCfg,
+		Cfg_: cfg,
 	}
 }
 
@@ -82,29 +106,35 @@ func (sdr *StackedDRG_I) expander() *ExpanderGraph_I {
 func (drg *DRG_I) Parents(node UInt) []UInt {
 	config := drg.Config()
 	degree := UInt(config.Degree())
-	return config.Algorithm().ParentsAlgorithm().As_DRSample().Impl().Parents(degree, node)
+	return DRGAlgorithmComputeParents(config.Algorithm().ParentsAlgorithm(), degree, node)
 }
 
 // TODO: Verify this. Both the port from impl and the algorithm.
-func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node UInt) (parents []UInt) {
-	util.Assert(node > 0)
-	parents = append(parents, node-1)
+func DRGAlgorithmComputeParents(alg DRGCfg_Algorithm_ParentsAlgorithm, degree UInt, node UInt) (parents []UInt) {
+	switch alg {
+	case DRGCfg_Algorithm_ParentsAlgorithm_DRSample:
+		util.Assert(node > 0)
+		parents = append(parents, node-1)
 
-	m := degree - 1
+		m := degree - 1
 
-	var k UInt
-	for k = 0; k < m; k++ {
-		logi := int(math.Floor(math.Log2(float64(node * m))))
-		// FIXME: Make RNG parameterizable and specify it.
-		j := rand.Intn(logi)
-		jj := math.Min(float64(node*m+k), float64(UInt(1)<<uint(j+1)))
-		backDist := randInRange(int(math.Max(float64(UInt(jj)>>1), 2)), int(jj+1))
-		out := (node*m + k - backDist) / m
+		var k UInt
+		for k = 0; k < m; k++ {
+			logi := int(math.Floor(math.Log2(float64(node * m))))
+			// FIXME: Make RNG parameterizable and specify it.
+			j := rand.Intn(logi)
+			jj := math.Min(float64(node*m+k), float64(UInt(1)<<uint(j+1)))
+			backDist := randInRange(int(math.Max(float64(UInt(jj)>>1), 2)), int(jj+1))
+			out := (node*m + k - backDist) / m
 
-		parents = append(parents, out)
+			parents = append(parents, out)
+		}
+
+		return parents
+
+	default:
+		panic(fmt.Sprintf("DRG algorithm not supported: %v", alg))
 	}
-
-	return parents
 }
 
 func randInRange(lowInclusive int, highExclusive int) UInt {
@@ -167,7 +197,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 	var allKeyLayers [][]byte
 	var replicas [][]byte
 	var sealSeeds []sector.SealSeed
-	var subsectorCommDs []SHA256Hash
+	var subsectorCommDs []sector.UnsealedSectorCID
 	var subsectorCommDTreePaths []file.Path
 
 	for i, data := range subsectorData {
@@ -209,7 +239,7 @@ func (sdr *StackedDRG_I) Seal(sid sector.SectorID, subsectorData [][]byte, rando
 	return &result
 }
 
-func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, SHA256Hash, file.Path) {
+func (sdr *StackedDRG_I) SealSubsector(subsectorIndex int, sid sector.SectorID, data []byte, randomness sector.SealRandomness) ([][]byte, []byte, sector.SealSeed, sector.UnsealedSectorCID, file.Path) {
 	commD, commDTreePath := ComputeDataCommitment(data)
 	sealSeed := computeSealSeed(sid, subsectorIndex, randomness, commD)
 	nodeSize := int(sdr.NodeSize())
@@ -232,7 +262,7 @@ func (sdr *StackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte)
 	return commC, commRLast, commR, commCTreePath, commRLastTreePath
 }
 
-func computeSealSeed(sid sector.SectorID, subsectorIndex int, randomness sector.SealRandomness, commD Commitment) sector.SealSeed {
+func computeSealSeed(sid sector.SectorID, subsectorIndex int, randomness sector.SealRandomness, commD sector.UnsealedSectorCID) sector.SealSeed {
 	var proverId []byte // TODO: Derive this from sid.MinerID()
 	sectorNumber := sid.Number()
 
@@ -241,7 +271,7 @@ func computeSealSeed(sid sector.SectorID, subsectorIndex int, randomness sector.
 	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorNumber), 8)...)
 	preimage = append(preimage, littleEndianBytesFromInt(subsectorIndex, 8)...)
 	preimage = append(preimage, randomness...)
-	preimage = append(preimage, commD...)
+	preimage = append(preimage, Commitment_UnsealedSectorCID(commD)...)
 
 	// FIXME: Implement
 	return sector.SealSeed{}
@@ -629,31 +659,23 @@ func addEncode(data []byte, key []byte, modulus *big.Int, nodeSize int) []byte {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Verification
+// Seal Verification
 
 func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	onChain := sv.OnChain()
 	sealProof := onChain.Proof()
-	pieceInfos := sv.PieceInfos()
-	commR := Commitment_SealedSectorCID(sector.SealedSectorCID(onChain.SealedCID()))
+	commR := sector.SealedSectorCID(onChain.SealedCID())
+	commD := sector.UnsealedSectorCID(sv.UnsealedCID())
 	sealCfg := sv.SealCfg()
 
 	// A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
 	util.Assert(sealCfg.SubsectorCount() == 1)
 
-	sectorSize := sealCfg.SectorSize()
 	subsectorCount := int(sealCfg.SubsectorCount())
-	rootPieceInfo := sdr.ComputeRootPieceInfo(pieceInfos)
-	rootSize := rootPieceInfo.Size()
-	if rootSize != sectorSize {
-		return false
-	}
-
-	commD := rootPieceInfo.CommP()
 
 	var sealSeeds []sector.SealSeed
 	for i := 0; i < subsectorCount; i++ {
-		sealSeed := computeSealSeed(sv.SectorID(), i, sv.Randomness(), AsBytes_UnsealedSectorCID(commD))
+		sealSeed := computeSealSeed(sv.SectorID(), i, sv.Randomness(), commD)
 		sealSeeds = append(sealSeeds, sealSeed)
 	}
 	challenges := sdr.GenerateOfflineChallenges(sealSeeds, sv.InteractiveRandomness(), sdr.Challenges())
@@ -661,7 +683,20 @@ func (sdr *StackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	return sdr.VerifyOfflineCircuitProof(commD, commR, sealSeeds, challenges, sealProof)
 }
 
-func (sdr *StackedDRG_I) ComputeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
+func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize UInt, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
+	rootPieceInfo := computeRootPieceInfo(pieceInfos)
+	rootSize := rootPieceInfo.Size()
+
+	if rootSize != sectorSize {
+		return unsealedCID, errors.New("Wrong sector size.")
+	}
+
+	return UnsealedSectorCID(AsBytes_PieceCID(rootPieceInfo.PieceCID())), nil
+}
+
+// commD := rootPieceInfo.CommP()
+
+func computeRootPieceInfo(pieceInfos []PieceInfo) PieceInfo {
 	// Construct root PieceInfo by (shift-reduce) parsing the constituent PieceInfo array.
 	// Later pieces must always be joined with equal-sized predecessors to create a new root twice their size.
 	// So if a piece is larger than the current root (top of stack), add padding until it is not.
@@ -736,12 +771,12 @@ func zeroPadding(size UInt) PieceInfo {
 func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
 	return &sector.PieceInfo_I{
-		Size_:  left.Size() + right.Size(),
-		CommP_: UnsealedSectorCID(BinaryHash_SHA256Hash(AsBytes_UnsealedSectorCID(left.CommP()), AsBytes_UnsealedSectorCID(right.CommP()))), // FIXME: make this whole function generic?
+		Size_:     left.Size() + right.Size(),
+		PieceCID_: piece.PieceCID(BinaryHash_SHA256Hash(AsBytes_PieceCID(left.PieceCID()), AsBytes_PieceCID(right.PieceCID()))), // FIXME: make this whole function generic?
 	}
 }
 
-func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR Commitment, sealSeeds []sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
+func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCID, commR sector.SealedSectorCID, sealSeeds []sector.SealSeed, challenges []UInt, sv sector.SealProof) bool {
 	//publicInputs := GeneratePublicInputs()
 	panic("TODO")
 }
@@ -753,7 +788,7 @@ func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, 
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStWitness(challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectorStore sectorIndex.SectorStore) sector.PoStWitness {
+func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectorStore sectorIndex.SectorStore) []sector.ElectionCandidate {
 	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, faults)
 	var proofAuxs []sector.ProofAux
 
@@ -767,7 +802,14 @@ func (sdr *StackedDRG_I) GeneratePoStWitness(challengeSeed sector.PoStRandomness
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStProof(witness sector.PoStWitness) sector.PoStProof {
+func (sdr *StackedDRG_I) GeneratePoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
+	panic("TODO")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PoSt Verification
+
+func (sdr *StackedDRG_I) VerifyPoSt(sv sector.PoStVerifyInfo) bool {
 	panic("TODO")
 }
 
@@ -903,9 +945,10 @@ func Commitment_SealedSectorCID(cid sector.SealedSectorCID) Commitment {
 	panic("not implemented -- re-arrange bits")
 }
 
-func ComputeDataCommitment(data []byte) ([]byte, file.Path) {
+func ComputeDataCommitment(data []byte) (sector.UnsealedSectorCID, file.Path) {
 	// TODO: make hash parameterizable
-	return BuildTree_SHA256Hash(data)
+	hash, path := BuildTree_SHA256Hash(data)
+	return UnsealedSectorCID(hash), path
 }
 
 // Compute CommP or CommD.
@@ -955,13 +998,19 @@ func AsBytes_T(t util.T) []byte {
 }
 
 func AsBytes_UnsealedSectorCID(cid sector.UnsealedSectorCID) []byte {
-	panic("Unimplemented for T")
+	panic("Unimplemented for UnsealedSectorCID")
 
 	return []byte{}
 }
 
 func AsBytes_SealedSectorCID(CID sector.SealedSectorCID) []byte {
-	panic("Unimplemented for T")
+	panic("Unimplemented for SealedSectorCID")
+
+	return []byte{}
+}
+
+func AsBytes_PieceCID(CID piece.PieceCID) []byte {
+	panic("Unimplemented for PieceCID")
 
 	return []byte{}
 }

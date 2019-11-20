@@ -4574,17 +4574,23 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">InitActorState</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// responsible for create new actors
-</span><span class="c1"></span>    <span class="nx">AddressMap</span>       <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
-    <span class="nx">IDMap</span>            <span class="p">{</span><span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
-    <span class="nx">NextID</span>           <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span>
+</span><span class="c1"></span>    <span class="nx">AddressMap</span>       <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">}</span>
+    <span class="nx">IDMap</span>            <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
+    <span class="nx">NextID</span>           <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
 
-    <span class="nf">_assignNextID</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="nf">_assignNextID</span><span class="p">()</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">InitActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">Constructor</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span>
-    <span class="nf">Exec</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">code</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span>
+    <span class="nf">Exec</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">code</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ActorExecAddressSeed</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">creator</span>             <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">toplevelCallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
+    <span class="nx">internalCallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4622,21 +4628,36 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
+<span class="kd">const</span> <span class="p">(</span>
+    <span class="nx">Method_InitActor_Exec</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
+    <span class="nx">Method_InitActor_GetActorIDForAddress</span>
+<span class="p">)</span>
+
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Boilerplate
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
 <span class="kd">type</span> <span class="nx">Runtime</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span>
 <span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">()</span>
+    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">CID_Equals</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">,</span> <span class="nx">ipld</span><span class="p">.</span><span class="nf">EmptyCID</span><span class="p">())</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrMethodNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodConstructor</span> <span class="p">{</span>
+            <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;Actor state not initialized&#34;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="kc">nil</span>
+    <span class="p">}</span>
     <span class="nx">stateBytes</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">))</span>
     <span class="k">if</span> <span class="nx">stateBytes</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime_IpldGet_FunRet_Case_Bytes</span> <span class="p">{</span>
         <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;IPLD lookup error&#34;</span><span class="p">)</span>
     <span class="p">}</span>
-    <span class="nx">state</span> <span class="o">:=</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">stateBytes</span><span class="p">.</span><span class="nf">As_Bytes</span><span class="p">())</span>
+    <span class="nx">state</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">Deserialize_InitActorState</span><span class="p">(</span><span class="nf">Serialization</span><span class="p">(</span><span class="nx">stateBytes</span><span class="p">.</span><span class="nf">As_Bytes</span><span class="p">()))</span>
+    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;State deserialization error&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
     <span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">state</span>
 <span class="p">}</span>
 <span class="kd">func</span> <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">InitActorState</span><span class="p">)</span> <span class="p">{</span>
@@ -4650,143 +4671,139 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
     <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
-<span class="kd">func</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">x</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">InitActorState</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+    <span class="nx">st</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">InitActorState_I</span><span class="p">{</span>
+        <span class="nx">AddressMap_</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
+</span><span class="c1"></span>        <span class="nx">IDMap_</span><span class="p">:</span>      <span class="kd">map</span><span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">]</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">{},</span> <span class="c1">// TODO: HAMT
+</span><span class="c1"></span>        <span class="nx">NextID_</span><span class="p">:</span>     <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorID</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">constructorParams</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-
-    <span class="c1">// TODO: update
-</span><span class="c1"></span>
-    <span class="c1">// Make sure that only the actors defined in the spec can be launched.
-</span><span class="c1"></span>    <span class="k">if</span> <span class="p">!</span><span class="nx">a</span><span class="p">.</span><span class="nf">_isBuiltinActor</span><span class="p">(</span><span class="nx">codeCID</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;cannot launch actor instance that is not a builtin actor&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">codeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">constructorParams</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">codeID</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;cannot exec an actor of this type&#34;</span><span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="c1">// Ensure that singeltons can only be launched once.
-</span><span class="c1"></span>    <span class="c1">// TODO: do we want to enforce this? yes
-</span><span class="c1"></span>    <span class="c1">//       If so how should actors be marked as such? in the method below (statically)
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_isSingletonActor</span><span class="p">(</span><span class="nx">codeCID</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;cannot launch another actor of this type&#34;</span><span class="p">)</span>
+    <span class="nx">newAddr</span> <span class="o">:=</span> <span class="nf">_computeNewActorExecAddress</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="nx">actorState</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState_I</span><span class="p">{</span>
+        <span class="nx">CodeID_</span><span class="p">:</span>     <span class="nx">codeID</span><span class="p">,</span>
+        <span class="nx">State_</span><span class="p">:</span>      <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">EmptyCID</span><span class="p">()),</span>
+        <span class="nx">Balance_</span><span class="p">:</span>    <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">}</span>
+
+    <span class="nx">actorStateCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSystemStateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">actorState</span><span class="p">))</span>
 
     <span class="c1">// Get the actor ID for this actor.
 </span><span class="c1"></span>    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
     <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_assignNextID</span><span class="p">()</span>
 
-    <span class="c1">// This generates a unique address for this actor that is stable across message
-</span><span class="c1"></span>    <span class="c1">// reordering
-</span><span class="c1"></span>    <span class="c1">// TODO: where do `creator` and `nonce` come from?
-</span><span class="c1"></span>    <span class="c1">// TODO: CallSeqNum is not related to From -- it&#39;s related to Origin
-</span><span class="c1"></span>    <span class="c1">// addr := rt.ComputeActorAddress(rt.Invocation().FromActor(), rt.Invocation().CallSeqNum())
-</span><span class="c1"></span>    <span class="nx">addr</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">_computeNewAddress</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">actorID</span><span class="p">)</span>
-
-    <span class="nx">initBalance</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueSupplied</span><span class="p">()</span>
-
-    <span class="c1">// Set up the actor itself
-</span><span class="c1"></span>    <span class="nx">actorState</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState_I</span><span class="p">{</span>
-        <span class="nx">CodeCID_</span><span class="p">:</span> <span class="nx">codeCID</span><span class="p">,</span>
-        <span class="c1">// State_:   nil, // TODO: do we need to init the state? probably not
-</span><span class="c1"></span>        <span class="nx">Balance_</span><span class="p">:</span>    <span class="nx">initBalance</span><span class="p">,</span>
-        <span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="p">}</span>
-
-    <span class="nx">stateCid</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">StateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">actorState</span><span class="p">))</span>
-
-    <span class="c1">// runtime.State().Storage().Set(actorID, actor)
-</span><span class="c1"></span>
     <span class="c1">// Store the mappings of address to actor ID.
-</span><span class="c1"></span>    <span class="nx">st</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">addr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">IDMap</span><span class="p">()[</span><span class="nx">actorID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">addr</span>
+</span><span class="c1"></span>    <span class="nx">st</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">newAddr</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actorID</span>
+    <span class="nx">st</span><span class="p">.</span><span class="nf">IDMap</span><span class="p">()[</span><span class="nx">actorID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">newAddr</span>
 
-    <span class="c1">// TODO: adjust this to be proper state setting.
-</span><span class="c1"></span>    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
-    <span class="c1">// TODO: can this fail?
-</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">CreateActor</span><span class="p">(</span><span class="nx">stateCid</span><span class="p">,</span> <span class="nx">addr</span><span class="p">,</span> <span class="nx">constructorParams</span><span class="p">)</span>
+    <span class="c1">// Note: the following call may fail (e.g., if the actor already exists, or the actor&#39;s own
+</span><span class="c1"></span>    <span class="c1">// constructor call fails). In this case, an error should propagate up and cause Exec to fail
+</span><span class="c1"></span>    <span class="c1">// as well.
+</span><span class="c1"></span>    <span class="nx">rt</span><span class="p">.</span><span class="nf">CreateActor</span><span class="p">(</span><span class="nx">actorStateCID</span><span class="p">,</span> <span class="nx">newAddr</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReceived</span><span class="p">(),</span> <span class="nx">constructorParams</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nf">String</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span>
+        <span class="nf">Bytes</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_Address_Compact</span><span class="p">(</span><span class="nx">newAddr</span><span class="p">)))</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">_assignNextID</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">InitActorState_I</span><span class="p">)</span> <span class="nf">_assignNextID</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span> <span class="p">{</span>
     <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span>
     <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span><span class="o">++</span>
     <span class="k">return</span> <span class="nx">actorID</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">_computeNewAddress</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorID</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
-    <span class="c1">// assign an address based on some randomness
-</span><span class="c1"></span>    <span class="c1">// we use the current epoch, and the actor id. this should be a unique identifier,
-</span><span class="c1"></span>    <span class="c1">// stable across reorgs.
-</span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">// TODO: do we really need this? it&#39;s pretty confusing...
-</span><span class="c1"></span>    <span class="nx">r</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">(),</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">id</span><span class="p">))</span>
+<span class="kd">func</span> <span class="nf">_computeNewActorExecAddress</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+    <span class="nx">seed</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">ActorExecAddressSeed_I</span><span class="p">{</span>
+        <span class="nx">creator_</span><span class="p">:</span>            <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span>
+        <span class="nx">toplevelCallSeqNum_</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ToplevelSenderCallSeqNum</span><span class="p">(),</span>
+        <span class="nx">internalCallSeqNum_</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">InternalCallSeqNum</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="nx">hash</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorExecHash</span><span class="p">(</span><span class="nf">Serialize_ActorExecAddressSeed</span><span class="p">(</span><span class="nx">seed</span><span class="p">))</span>
 
-    <span class="nx">_</span> <span class="p">=</span> <span class="nx">r</span> <span class="c1">// TODO: use r in a
-</span><span class="c1"></span>    <span class="c1">// a := &amp;addr.Address_Type_Actor_I{}
-</span><span class="c1"></span>    <span class="c1">// n := &amp;addr.Address_NetworkID_Testnet_I{}
-</span><span class="c1"></span>    <span class="c1">// return addr.MakeAddress(n, a)
-</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="kc">nil</span>
+    <span class="c1">// Intended to be a unique identifier, stable across reorgs
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ActorExec</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">hash</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
     <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="nx">s</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span>
+    <span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">AddressMap</span><span class="p">()[</span><span class="nx">address</span><span class="p">]</span>
     <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-    <span class="c1">// return rt.ValueReturn(s)
-</span><span class="c1"></span>    <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="nx">_</span> <span class="p">=</span> <span class="nx">s</span>
-    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ValueReturn</span><span class="p">(</span><span class="nf">Bytes</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nf">Serialize_ActorID</span><span class="p">(</span><span class="nx">actorID</span><span class="p">)))</span>
 <span class="p">}</span>
 
-<span class="c1">// TODO: derive this OR from a union type
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">_isSingletonActor</span><span class="p">(</span><span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kc">true</span>
-    <span class="c1">// TODO: uncomment this
-</span><span class="c1"></span>    <span class="c1">// return codeCID == StorageMarketActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == StoragePowerActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == CronActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == InitActor
-</span><span class="c1"></span><span class="p">}</span>
+<span class="kd">func</span> <span class="nf">_codeIDSupportsExec</span><span class="p">(</span><span class="nx">codeID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">!</span><span class="nx">codeID</span><span class="p">.</span><span class="nf">IsBuiltin</span><span class="p">()</span> <span class="o">||</span> <span class="nx">codeID</span><span class="p">.</span><span class="nf">IsSingleton</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
 
-<span class="c1">// TODO: derive this OR from a union type
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">_isBuiltinActor</span><span class="p">(</span><span class="nx">codeCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kc">true</span>
-    <span class="c1">// TODO: uncomment this
-</span><span class="c1"></span>    <span class="c1">// return codeCID == StorageMarketActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == StoragePowerActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == CronActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == InitActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == StorageMinerActor ||
-</span><span class="c1"></span>    <span class="c1">//     codeCID == PaymentChannelActor
-</span><span class="c1"></span><span class="p">}</span>
+    <span class="nx">which</span> <span class="o">:=</span> <span class="nx">codeID</span><span class="p">.</span><span class="nf">As_Builtin</span><span class="p">()</span>
 
-<span class="c1">// TODO
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="c1">// TODO: load state
-</span><span class="c1"></span>    <span class="c1">// var state InitActorState
-</span><span class="c1"></span>    <span class="c1">// storage := input.Runtime().State().Storage()
-</span><span class="c1"></span>    <span class="c1">// err := loadActorState(storage, input.ToActor().State(), &amp;state)
-</span><span class="c1"></span>
+    <span class="k">if</span> <span class="nx">which</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span> <span class="p">{</span>
+        <span class="c1">// Special case: account actors must be created implicitly by sending value;
+</span><span class="c1"></span>        <span class="c1">// cannot be created via exec.
+</span><span class="c1"></span>        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+
+    <span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span>
+        <span class="nx">which</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_PaymentChannel</span> <span class="o">||</span>
+            <span class="nx">which</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">true</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+    <span class="nx">argError</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ErrorReturn</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidArguments</span><span class="p">))</span>
+
     <span class="k">switch</span> <span class="nx">method</span> <span class="p">{</span>
-    <span class="c1">// case 0: -- disable: value send
-</span><span class="c1"></span>    <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">case</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodConstructor</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">argError</span>
+        <span class="p">}</span>
         <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-    <span class="c1">// case 2: -- disable: cron. init has no cron action
-</span><span class="c1"></span>    <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="kd">var</span> <span class="nx">codeid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span> <span class="c1">// TODO: cast params[0]
-</span><span class="c1"></span>        <span class="nx">params</span> <span class="p">=</span> <span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">codeid</span><span class="p">,</span> <span class="nx">params</span><span class="p">)</span>
-    <span class="k">case</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="kd">var</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="c1">// TODO: cast params[0]
-</span><span class="c1"></span>        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">address</span><span class="p">)</span>
+
+    <span class="c1">// case actor.MethodCron:
+</span><span class="c1"></span>    <span class="c1">//     disable. init has no cron action
+</span><span class="c1"></span>
+    <span class="k">case</span> <span class="nx">Method_InitActor_Exec</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">argError</span>
+        <span class="p">}</span>
+        <span class="nx">codeId</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">Deserialize_CodeID</span><span class="p">(</span><span class="nf">Serialization</span><span class="p">(</span><span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">argError</span>
+        <span class="p">}</span>
+        <span class="nx">params</span> <span class="p">=</span> <span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">codeId</span><span class="p">,</span> <span class="nx">params</span><span class="p">)</span>
+
+    <span class="k">case</span> <span class="nx">Method_InitActor_GetActorIDForAddress</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">argError</span>
+        <span class="p">}</span>
+        <span class="nx">address</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Deserialize_Address</span><span class="p">(</span><span class="nf">Serialization</span><span class="p">(</span><span class="nx">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">argError</span>
+        <span class="p">}</span>
+        <span class="nx">params</span> <span class="p">=</span> <span class="nx">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">argError</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">address</span><span class="p">)</span>
+
     <span class="k">default</span><span class="p">:</span>
         <span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ErrorReturn</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidMethod</span><span class="p">))</span>
     <span class="p">}</span>

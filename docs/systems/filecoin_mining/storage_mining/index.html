@@ -4589,10 +4589,14 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
 <span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
+<span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
+<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">FilecoinNode</span>       <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
+
     <span class="c1">// TODO: constructor
-</span><span class="c1"></span>    <span class="c1">// InitStorageMiningSubsystem() struct{}
+</span><span class="c1"></span>    <span class="c1">// InitStorageMiningSubsystem(node node_base.FilecoinNode) struct{}
 </span><span class="c1"></span>
     <span class="c1">// Component subsystems
 </span><span class="c1"></span>    <span class="c1">// StorageProvider    storage_provider.StorageProvider
@@ -4637,13 +4641,16 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
 </span><span class="c1"></span>    <span class="nf">DrawElectionProof</span><span class="p">(</span>
-        <span class="nx">lookbackTicket</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
-        <span class="nx">height</span>          <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">vrfKP</span>           <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
+        <span class="nx">randomness</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">Randomness</span>
+        <span class="nx">height</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">vrfKP</span>       <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
     <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
-</span><span class="c1"></span>    <span class="nf">PrepareNewTicket</span><span class="p">(</span><span class="nx">priorTicket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">workerKeyPair</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+</span><span class="c1"></span>    <span class="nf">PrepareNewTicket</span><span class="p">(</span>
+        <span class="nx">randomness</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">Randomness</span>
+        <span class="nx">workerKeyPair</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
+    <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
 
     <span class="c1">// call by BlockChain when a new block is produced
 </span><span class="c1"></span>    <span class="nf">OnNewBestChain</span><span class="p">()</span>
@@ -4653,6 +4660,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
 
     <span class="nf">tryLeaderElection</span><span class="p">()</span>
+
+    <span class="nf">submitPoStMessage</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">error</span>
 <span class="p">}</span>
 </code></pre></div>
 

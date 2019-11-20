@@ -1,6 +1,7 @@
 package runtime
 
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -35,11 +36,11 @@ type ActorStateHandle struct {
 }
 
 func (h *ActorStateHandle) UpdateRelease(newStateCID ActorSubstateCID) {
-	h._rt._updateReleaseActorState(newStateCID)
+	h._rt._updateReleaseActorSubstate(newStateCID)
 }
 
 func (h *ActorStateHandle) Release(checkStateCID ActorSubstateCID) {
-	h._rt._releaseActorState(checkStateCID)
+	h._rt._releaseActorSubstate(checkStateCID)
 }
 
 func (h *ActorStateHandle) Take() ActorSubstateCID {
@@ -62,19 +63,28 @@ type VMContext struct {
 	_actorStateAcquired     bool
 	_actorStateAcquiredInit actor.ActorSubstateCID
 
-	_valueSupplied    actor.TokenAmount
-	_gasRemaining     msg.GasAmount
-	_numValidateCalls int
-	_output           msg.InvocOutput
+	_immediateCaller          addr.Address
+	_toplevelSender           addr.Address
+	_toplevelBlockWinner      addr.Address
+	_toplevelSenderCallSeqNum actor.CallSeqNum
+	_internalCallSeqNum       actor.CallSeqNum
+	_valueReceived            actor.TokenAmount
+	_gasRemaining             msg.GasAmount
+	_numValidateCalls         int
+	_output                   msg.InvocOutput
 }
 
 func VMContext_Make(
+	toplevelSender addr.Address,
+	toplevelBlockWinner addr.Address,
+	toplevelSenderCallSeqNum actor.CallSeqNum,
+	internalCallSeqNum actor.CallSeqNum,
 	globalState st.StateTree,
 	actorAddress addr.Address,
-	valueSupplied actor.TokenAmount,
+	valueReceived actor.TokenAmount,
 	gasRemaining msg.GasAmount) *VMContext {
 
-	actorStateInit := globalState.GetActor(actorAddress).State()
+	actorStateInit := globalState.GetActorState(actorAddress)
 
 	return &VMContext{
 		_globalStateInit:        globalState,
@@ -84,58 +94,67 @@ func VMContext_Make(
 		_actorStateAcquired:     false,
 		_actorStateAcquiredInit: actorStateInit.State(),
 
-		_valueSupplied:    valueSupplied,
-		_gasRemaining:     gasRemaining,
-		_numValidateCalls: 0,
-		_output:           nil,
+		_toplevelSender:           toplevelSender,
+		_toplevelBlockWinner:      toplevelBlockWinner,
+		_toplevelSenderCallSeqNum: toplevelSenderCallSeqNum,
+		_internalCallSeqNum:       internalCallSeqNum,
+		_valueReceived:            valueReceived,
+		_gasRemaining:             gasRemaining,
+		_numValidateCalls:         0,
+		_output:                   nil,
 	}
 }
 
-func _generateActorAddress(creator addr.Address, nonce actor.CallSeqNum) addr.Address {
-	// _generateActorAddress computes the address of the contract,
-	// based on the creator (invoking address) and nonce given.
-	// TODO: why is this needed? -- InitActor
-	// TODO: this has to be the origin call. and it's broken: could yield the same address
-	//       need a truly unique way to assign an address.
-	panic("TODO")
-}
+func (rt *VMContext) CreateActor(
+	stateCID actor.ActorSystemStateCID,
+	address addr.Address,
+	initBalance actor.TokenAmount,
+	constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
 
-func (rt *VMContext) CreateActor(stateCID actor.StateCID, address addr.Address, constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
-	rt.ValidateCallerIs(addr.InitActorAddr)
+	if !rt._actorAddress.Equals(addr.InitActorAddr) {
+		rt.Abort("Only InitActor may call rt.CreateActor")
+	}
 
-	// TODO: set actor state in global states
-	// rt._globalStatePending.ActorStates()[address] = stateCID
+	rt._updateActorSystemStateInternal(address, stateCID)
 
-	// TODO: call constructor
-	// TODO: can constructors fail?
-	// TODO: maybe do this directly form InitActor, and only do the StateTree.ActorStates() updating here?
 	rt.SendPropagatingErrors(&msg.InvocInput_I{
 		To_:     address,
 		Method_: actor.MethodConstructor,
 		Params_: constructorParams,
-		Value_:  rt.ValueSupplied(),
+		Value_:  initBalance,
 	})
 
-	// TODO: finish
-	panic("TODO")
+	return &Runtime_CreateActor_FunRet_I{}
 }
 
-func (rt *VMContext) _updateReleaseActorState(newStateCID ActorSubstateCID) {
-	rt._checkRunning()
-	rt._checkActorStateAcquired()
-	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorState(rt._actorAddress, newStateCID)
+func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
+	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSystemState(rt._actorAddress, newStateCID)
 	if err != nil {
-		panic("Error in runtime implementation: failed to update actor state")
+		panic("Error in runtime implementation: failed to update actor system state")
 	}
 	rt._globalStatePending = newGlobalStatePending
+}
+
+func (rt *VMContext) _updateActorSubstateInternal(actorAddress addr.Address, newStateCID actor.ActorSubstateCID) {
+	newGlobalStatePending, err := rt._globalStatePending.Impl().WithActorSubstate(rt._actorAddress, newStateCID)
+	if err != nil {
+		panic("Error in runtime implementation: failed to update actor substate")
+	}
+	rt._globalStatePending = newGlobalStatePending
+}
+
+func (rt *VMContext) _updateReleaseActorSubstate(newStateCID ActorSubstateCID) {
+	rt._checkRunning()
+	rt._checkActorStateAcquired()
+	rt._updateActorSubstateInternal(rt._actorAddress, newStateCID)
 	rt._actorStateAcquired = false
 }
 
-func (rt *VMContext) _releaseActorState(checkStateCID ActorSubstateCID) {
+func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
 
-	prevState := rt._globalStatePending.GetActor(rt._actorAddress).State()
+	prevState := rt._globalStatePending.GetActorState(rt._actorAddress)
 	prevStateCID := prevState.State()
 	if !ActorSubstateCID_Equals(prevStateCID, checkStateCID) {
 		rt.Abort("State CID differs upon release call")
@@ -166,19 +185,37 @@ func (rt *VMContext) Abort(errMsg string) Runtime_Abort_FunRet {
 	return &Runtime_Abort_FunRet_I{}
 }
 
-func (rt *VMContext) Caller() addr.Address {
-	panic("TODO")
+func (rt *VMContext) ImmediateCaller() addr.Address {
+	return rt._immediateCaller
 }
 
-func (rt *VMContext) ValidateCallerMatches(callerExpectedPattern CallerPattern) Runtime_ValidateCallerMatches_FunRet {
+func (rt *VMContext) ToplevelSender() addr.Address {
+	return rt._toplevelSender
+}
+
+func (rt *VMContext) ToplevelBlockWinner() addr.Address {
+	return rt._toplevelBlockWinner
+}
+
+func (rt *VMContext) InternalCallSeqNum() actor.CallSeqNum {
+	return rt._internalCallSeqNum
+}
+
+func (rt *VMContext) ToplevelSenderCallSeqNum() actor.CallSeqNum {
+	return rt._toplevelSenderCallSeqNum
+}
+
+func (rt *VMContext) ValidateImmediateCallerMatches(
+	callerExpectedPattern CallerPattern) Runtime_ValidateImmediateCallerMatches_FunRet {
+
 	rt._checkRunning()
 	rt._checkNumValidateCalls(0)
-	caller := rt.Caller()
+	caller := rt.ImmediateCaller()
 	if !callerExpectedPattern.Matches(caller) {
 		rt.Abort("Method invoked by incorrect caller")
 	}
 	rt._numValidateCalls += 1
-	return &Runtime_ValidateCallerMatches_FunRet_I{}
+	return &Runtime_ValidateImmediateCallerMatches_FunRet_I{}
 }
 
 type CallerPattern struct {
@@ -187,15 +224,24 @@ type CallerPattern struct {
 
 func CallerPattern_MakeSingleton(x addr.Address) CallerPattern {
 	return CallerPattern{
-		Matches: func(y addr.Address) bool {
-			return x == y
-		},
+		Matches: func(y addr.Address) bool { return x == y },
 	}
 }
 
-func (rt *VMContext) ValidateCallerIs(callerExpected addr.Address) Runtime_ValidateCallerIs_FunRet {
-	rt.ValidateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
-	return &Runtime_ValidateCallerIs_FunRet_I{}
+func CallerPattern_MakeAcceptAny() CallerPattern {
+	return CallerPattern{
+		Matches: func(addr.Address) bool { return true },
+	}
+}
+
+func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) Runtime_ValidateImmediateCallerIs_FunRet {
+	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
+	return &Runtime_ValidateImmediateCallerIs_FunRet_I{}
+}
+
+func (rt *VMContext) ValidateImmediateCallerAcceptAny() Runtime_ValidateImmediateCallerAcceptAny_FunRet {
+	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAny())
+	return &Runtime_ValidateImmediateCallerAcceptAny_FunRet_I{}
 }
 
 func (rt *VMContext) _checkNumValidateCalls(x int) {
@@ -273,13 +319,20 @@ func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount a
 	return nil
 }
 
+type ErrorHandlingSpec int
+
+const (
+	PropagateErrors ErrorHandlingSpec = 1 + iota
+	CatchErrors
+)
+
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
-func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput, catchErrors bool) (
+func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
 	msg.MessageReceipt, st.StateTree) {
 
 	rt._running = true
-	ret := rt._sendInternal(input, catchErrors)
+	ret := rt._sendInternal(input, CatchErrors)
 	rt._running = false
 	return ret, rt._globalStatePending
 }
@@ -291,7 +344,7 @@ func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
 			case *RuntimeError:
 				output = msg.InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
 			default:
-				output = msg.InvocOutput_Make(SystemError(exitcode.MethodPanic), nil)
+				panic(r)
 			}
 		}
 	}()
@@ -304,7 +357,8 @@ func _invokeMethodInternal(
 	rt *VMContext,
 	actorCode ActorCode,
 	method actor.MethodNum,
-	params actor.MethodParams) (ret InvocOutput, gasUsed msg.GasAmount) {
+	params actor.MethodParams) (
+	ret InvocOutput, gasUsed msg.GasAmount, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
 		ret = msg.InvocOutput_Make(exitcode.OK(), nil)
@@ -324,16 +378,18 @@ func _invokeMethodInternal(
 	// TODO: Update gasUsed
 	TODO()
 
+	internalCallSeqNumFinal = rt._internalCallSeqNum
+
 	return
 }
 
-func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.MessageReceipt {
+func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingSpec) msg.MessageReceipt {
 	rtOuter._checkRunning()
 	rtOuter._checkStateLock(false)
 
-	toActor := rtOuter._globalStatePending.GetActor(input.To()).State()
+	toActor := rtOuter._globalStatePending.GetActorState(input.To())
 
-	toActorCode, err := loadActorCode(toActor.CodeCID())
+	toActorCode, err := loadActorCode(toActor.CodeID())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
 	}
@@ -350,23 +406,29 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.
 	}
 
 	rtInner := VMContext_Make(
+		rtOuter._toplevelSender,
+		rtOuter._toplevelBlockWinner,
+		rtOuter._toplevelSenderCallSeqNum,
+		rtOuter._internalCallSeqNum+1,
 		rtOuter._globalStatePending,
 		input.To(),
 		input.Value(),
 		rtOuter._gasRemaining,
 	)
 
-	invocOutput, gasUsed := _invokeMethodInternal(
+	invocOutput, gasUsed, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
 		toActorCode,
 		input.Method(),
 		input.Params(),
 	)
 
+	rtOuter._internalCallSeqNum = internalCallSeqNumFinal
+
 	rtOuter._refundGasRemaining(toActorMethodGasBound)
 	rtOuter._deductGasRemaining(gasUsed)
 
-	if !catchErrors && invocOutput.ExitCode().IsError() {
+	if errSpec == PropagateErrors && invocOutput.ExitCode().IsError() {
 		rtOuter._throwError(exitcode.SystemError(exitcode.MethodSubcallError))
 	}
 
@@ -377,8 +439,8 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, catchErrors bool) msg.
 	return msg.MessageReceipt_Make(invocOutput, gasUsed)
 }
 
-func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, catchErrors bool) msg.InvocOutput {
-	ret := rtOuter._sendInternal(input, catchErrors)
+func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, errSpec ErrorHandlingSpec) msg.InvocOutput {
+	ret := rtOuter._sendInternal(input, errSpec)
 	return &msg.InvocOutput_I{
 		ExitCode_:    ret.ExitCode(),
 		ReturnValue_: ret.ReturnValue(),
@@ -386,22 +448,22 @@ func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, catchErrors 
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) msg.InvocOutput {
-	return rt._sendInternalOutputOnly(input, false)
+	return rt._sendInternalOutputOnly(input, PropagateErrors)
 }
 
 func (rt *VMContext) SendCatchingErrors(input InvocInput) msg.InvocOutput {
-	return rt._sendInternalOutputOnly(input, true)
+	return rt._sendInternalOutputOnly(input, CatchErrors)
 }
 
 func (rt *VMContext) CurrentBalance() actor.TokenAmount {
 	panic("TODO")
 }
 
-func (rt *VMContext) ValueSupplied() actor.TokenAmount {
-	return rt._valueSupplied
+func (rt *VMContext) ValueReceived() actor.TokenAmount {
+	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) Randomness {
+func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) block.Randomness {
 	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
 	// TODO: finish
 	panic("TODO")
@@ -421,4 +483,31 @@ func (rt *VMContext) CurrEpoch() block.ChainEpoch {
 
 func (rt *VMContext) AcquireState() ActorStateHandle {
 	panic("TODO")
+}
+
+func (rt *VMContext) CurrMethodNum() actor.MethodNum {
+	panic("TODO")
+}
+
+func (rt *VMContext) VerifySignature(signerActor addr.Address, sig filcrypto.Signature, m filcrypto.Message) bool {
+	st := rt._globalStatePending.Impl().GetActorState(signerActor)
+	if st == nil {
+		rt.Abort("VerifySignature: signer actor not found")
+	}
+	pk := st.GetSignaturePublicKey()
+	if pk == nil {
+		rt.Abort("VerifySignature: signer actor has no public key")
+	}
+	ret := rt.Compute(ComputeFunctionID_VerifySignature, []Any{pk, sig, m})
+	return ret.(bool)
+}
+
+func (rt *VMContext) Compute(f ComputeFunctionID, args []Any) Any {
+	def, found := _computeFunctionDefs[f]
+	if !found {
+		rt.Abort("Function definition in rt.Compute() not found")
+	}
+	gasCost := def.GasCostFn(args)
+	rt._deductGasRemaining(gasCost)
+	return def.Body(args)
 }

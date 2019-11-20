@@ -4651,7 +4651,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
+<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+<span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="kd">func</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">MessageReceipt_I</span><span class="p">{</span>
@@ -4659,6 +4662,59 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">output</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">(),</span>
 		<span class="nx">GasUsed_</span><span class="p">:</span>     <span class="nx">gasUsed</span><span class="p">,</span>
 	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">UnsignedMessage_Make</span><span class="p">(</span>
+	<span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
+	<span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
+	<span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
+	<span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span>
+	<span class="nx">callSeqNum</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">,</span>
+	<span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">,</span>
+	<span class="nx">gasPrice</span> <span class="nx">GasPrice</span><span class="p">,</span>
+	<span class="nx">gasLimit</span> <span class="nx">GasAmount</span><span class="p">,</span>
+<span class="p">)</span> <span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">UnsignedMessage_I</span><span class="p">{</span>
+		<span class="nx">From_</span><span class="p">:</span>       <span class="nx">from</span><span class="p">,</span>
+		<span class="nx">To_</span><span class="p">:</span>         <span class="nx">to</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span>     <span class="nx">method</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span>     <span class="nx">params</span><span class="p">,</span>
+		<span class="nx">CallSeqNum_</span><span class="p">:</span> <span class="nx">callSeqNum</span><span class="p">,</span>
+		<span class="nx">Value_</span><span class="p">:</span>      <span class="nx">value</span><span class="p">,</span>
+		<span class="nx">GasPrice_</span><span class="p">:</span>   <span class="nx">gasPrice</span><span class="p">,</span>
+		<span class="nx">GasLimit_</span><span class="p">:</span>   <span class="nx">gasLimit</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">SignedMessage_Make</span><span class="p">(</span><span class="nx">message</span> <span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">signature</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span><span class="p">)</span> <span class="nx">SignedMessage</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">SignedMessage_I</span><span class="p">{</span>
+		<span class="nx">Message_</span><span class="p">:</span>   <span class="nx">message</span><span class="p">,</span>
+		<span class="nx">Signature_</span><span class="p">:</span> <span class="nx">signature</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">Sign</span><span class="p">(</span><span class="nx">message</span> <span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">keyPair</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">SigKeyPair</span><span class="p">)</span> <span class="p">(</span><span class="nx">SignedMessage</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">sig</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">Sign</span><span class="p">(</span><span class="nx">keyPair</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">)))</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nf">SignedMessage_Make</span><span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="nx">sig</span><span class="p">),</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">SignatureVerificationError</span><span class="p">()</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">message</span> <span class="nx">SignedMessage</span><span class="p">,</span> <span class="nx">publicKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span><span class="p">)</span> <span class="p">(</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">m</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">Bytes</span><span class="p">(</span><span class="nf">Serialize_UnsignedMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">Message</span><span class="p">()))</span>
+	<span class="nx">sigValid</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">publicKey</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Signature</span><span class="p">(),</span> <span class="nx">m</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">sigValid</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nf">SignatureVerificationError</span><span class="p">()</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Message</span><span class="p">(),</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>

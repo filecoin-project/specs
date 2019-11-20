@@ -4661,25 +4661,17 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">Replicas</span>           <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">PoRep</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">ZigZagPoRep</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoSpace</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">PoRep</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">ZigZagPoRep</span> <span class="nx">StackedDRG</span>
-
-<span class="kd">type</span> <span class="nx">SDRPoSpace</span> <span class="nx">StackedDRG</span>
-
 <span class="kd">type</span> <span class="nx">EllipticCurve</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">FieldModulus</span> <span class="o">&amp;</span><span class="nx">util</span><span class="p">.</span><span class="nx">BigInt</span>
 <span class="p">}</span>
 
-<span class="c1">//type StackedDRG_Algorithm struct {}
-</span><span class="c1"></span>
+<span class="kd">type</span> <span class="nx">WindowedStackedDRG</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Inner</span>  <span class="nx">StackedDRG</span>
+    <span class="nx">Outer</span>  <span class="nx">StackedDRG</span>
+<span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">StackedDRG</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Mode</span>              <span class="nx">StackedDRGMode</span>
     <span class="nx">Layers</span>            <span class="nx">StackedDRGLayers</span>
     <span class="nx">NodeSize</span>          <span class="nx">StackedDRGNodeSize</span>
     <span class="nx">Nodes</span>             <span class="nx">StackedDRGNodes</span>
@@ -4691,8 +4683,22 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">ExpanderGraphCfg</span>
     <span class="c1">// invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
 </span><span class="c1"></span>    <span class="nx">Curve</span>             <span class="nx">EllipticCurve</span>
+    <span class="nx">Cfg</span>               <span class="nx">SDRCfg</span>
     <span class="nx">SealCfg</span>           <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
-    <span class="nx">PoStCfg</span>           <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
+    <span class="nx">ElectionPoStCfg</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
+    <span class="nx">SurprisePoStCfg</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">StackedDRGMode</span> <span class="nx">enum</span> <span class="p">{</span>
+    <span class="nx">Inner</span>
+    <span class="nx">Outer</span>
+    <span class="nx">Both</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SDRCfg</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">SealCfg</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
+    <span class="nx">ElectionPoStCfg</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
+    <span class="nx">SurprisePoStCfg</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">DRGCfg</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4777,6 +4783,8 @@ https://github.com/alex-shpak/hugo-book
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">filproofs</span>
 
 <span class="kn">import</span> <span class="s">&#34;bytes&#34;</span>
+<span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
+<span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
 <span class="kn">import</span> <span class="s">&#34;math&#34;</span>
 <span class="kn">import</span> <span class="s">&#34;math/rand&#34;</span>
 <span class="kn">import</span> <span class="nx">big</span> <span class="s">&#34;math/big&#34;</span>
@@ -4784,6 +4792,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
 
@@ -4791,11 +4800,34 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">type</span> <span class="nx">PedersenHash</span> <span class="nx">Bytes32</span>
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="p">[]</span><span class="kt">byte</span>
 <span class="kd">type</span> <span class="nx">UInt</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UInt</span>
-<span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="p">=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo</span>
+<span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="p">=</span> <span class="o">*</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo_I</span>
 <span class="kd">type</span> <span class="nx">Label</span> <span class="nx">Bytes32</span>
 <span class="kd">type</span> <span class="nx">Commitment</span> <span class="p">=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">Commitment</span>
 
-<span class="kd">func</span> <span class="nf">SDRParams</span><span class="p">(</span><span class="nx">sealCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span><span class="p">,</span> <span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">StackedDRG_I</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">WinSDRParams</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">SDRCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">WindowedStackedDRG_I</span> <span class="p">{</span>
+	<span class="nx">inner</span> <span class="o">:=</span> <span class="nf">SDRParams</span><span class="p">(</span><span class="nx">cfg</span><span class="p">)</span>
+	<span class="nx">innerSealCfg</span> <span class="o">:=</span> <span class="nx">cfg</span><span class="p">.</span><span class="nf">SealCfg</span><span class="p">()</span>
+
+	<span class="nx">outerSealCfg</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg_I</span><span class="p">{</span>
+		<span class="nx">SubsectorCount_</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+		<span class="nx">SectorSize_</span><span class="p">:</span>     <span class="nx">innerSealCfg</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">(),</span>
+		<span class="nx">Partitions_</span><span class="p">:</span>     <span class="nx">innerSealCfg</span><span class="p">.</span><span class="nf">Partitions</span><span class="p">(),</span>
+	<span class="p">}</span>
+
+	<span class="nx">outerCfg</span> <span class="o">:=</span> <span class="nx">SDRCfg_I</span><span class="p">{</span>
+		<span class="nx">SealCfg_</span><span class="p">:</span>         <span class="o">&amp;</span><span class="nx">outerSealCfg</span><span class="p">,</span>
+		<span class="nx">ElectionPoStCfg_</span><span class="p">:</span> <span class="nx">cfg</span><span class="p">.</span><span class="nf">ElectionPoStCfg</span><span class="p">(),</span>
+		<span class="nx">SurprisePoStCfg_</span><span class="p">:</span> <span class="nx">cfg</span><span class="p">.</span><span class="nf">SurprisePoStCfg</span><span class="p">(),</span>
+	<span class="p">}</span>
+
+	<span class="nx">outer</span> <span class="o">:=</span> <span class="nf">SDRParams</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">outerCfg</span><span class="p">)</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">WindowedStackedDRG_I</span><span class="p">{</span>
+		<span class="nx">Inner_</span><span class="p">:</span> <span class="nx">inner</span><span class="p">,</span>
+		<span class="nx">Outer_</span><span class="p">:</span> <span class="nx">outer</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">SDRParams</span><span class="p">(</span><span class="nx">cfg</span> <span class="nx">SDRCfg</span><span class="p">)</span> <span class="o">*</span><span class="nx">StackedDRG_I</span> <span class="p">{</span>
 	<span class="c1">// TODO: Bridge constants with orient model.
 </span><span class="c1"></span>	<span class="kd">const</span> <span class="nx">LAYERS</span> <span class="p">=</span> <span class="mi">10</span>
 	<span class="kd">const</span> <span class="nx">NODE_SIZE</span> <span class="p">=</span> <span class="mi">32</span>
@@ -4806,7 +4838,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/fr.rs#L4
 </span><span class="c1"></span>	<span class="nx">FIELD_MODULUS</span><span class="p">.</span><span class="nf">SetString</span><span class="p">(</span><span class="s">&#34;52435875175126190479447740508185965837690552500527637822603658699938581184513&#34;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 
-	<span class="nx">nodes</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">sealCfg</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span> <span class="o">/</span> <span class="nx">NODE_SIZE</span><span class="p">)</span>
+	<span class="nx">nodes</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">cfg</span><span class="p">.</span><span class="nf">SealCfg</span><span class="p">().</span><span class="nf">SectorSize</span><span class="p">()</span> <span class="o">/</span> <span class="nx">NODE_SIZE</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">StackedDRG_I</span><span class="p">{</span>
 		<span class="nx">Layers_</span><span class="p">:</span>     <span class="nf">StackedDRGLayers</span><span class="p">(</span><span class="nx">LAYERS</span><span class="p">),</span>
@@ -4816,8 +4848,8 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">Algorithm_</span><span class="p">:</span>  <span class="o">&amp;</span><span class="nx">StackedDRG_Algorithm_I</span><span class="p">{},</span>
 		<span class="nx">DRGCfg_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">DRGCfg_I</span><span class="p">{</span>
 			<span class="nx">Algorithm_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">DRGCfg_Algorithm_I</span><span class="p">{</span>
-				<span class="nx">ParentsAlgorithm_</span><span class="p">:</span> <span class="nf">DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I</span><span class="p">{}),</span>
-				<span class="nx">RNGAlgorithm_</span><span class="p">:</span>     <span class="nf">DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I</span><span class="p">{}),</span>
+				<span class="nx">ParentsAlgorithm_</span><span class="p">:</span> <span class="nx">DRGCfg_Algorithm_ParentsAlgorithm_DRSample</span><span class="p">,</span>
+				<span class="nx">RNGAlgorithm_</span><span class="p">:</span>     <span class="nx">DRGCfg_Algorithm_RNGAlgorithm_ChaCha20</span><span class="p">,</span>
 			<span class="p">},</span>
 			<span class="nx">Degree_</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
 			<span class="nx">Nodes_</span><span class="p">:</span>  <span class="nf">DRGNodeCount</span><span class="p">(</span><span class="nx">nodes</span><span class="p">),</span>
@@ -4826,10 +4858,9 @@ https://github.com/alex-shpak/hugo-book
 			<span class="nx">Algorithm_</span><span class="p">:</span> <span class="nf">ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm</span><span class="p">(</span>
 				<span class="o">&amp;</span><span class="nx">ChungExpanderAlgorithm_I</span><span class="p">{</span>
 					<span class="nx">PermutationAlgorithm_</span><span class="p">:</span> <span class="nf">ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">Feistel_I</span><span class="p">{</span>
-						<span class="nx">Keys_</span><span class="p">:</span>   <span class="nx">FEISTEL_KEYS</span><span class="p">[:],</span>
-						<span class="nx">Rounds_</span><span class="p">:</span> <span class="nx">FEISTEL_ROUNDS</span><span class="p">,</span>
-						<span class="nx">HashFunction_</span><span class="p">:</span> <span class="nf">ChungExpanderPermutationFeistelHashFunction_Make_SHA256</span><span class="p">(</span>
-							<span class="o">&amp;</span><span class="nx">ChungExpanderPermutationFeistelHashFunction_SHA256_I</span><span class="p">{}),</span>
+						<span class="nx">Keys_</span><span class="p">:</span>         <span class="nx">FEISTEL_KEYS</span><span class="p">[:],</span>
+						<span class="nx">Rounds_</span><span class="p">:</span>       <span class="nx">FEISTEL_ROUNDS</span><span class="p">,</span>
+						<span class="nx">HashFunction_</span><span class="p">:</span> <span class="nx">ChungExpanderPermutationFeistelHashFunction_SHA256</span><span class="p">,</span>
 					<span class="p">}),</span>
 				<span class="p">}),</span>
 			<span class="nx">Degree_</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
@@ -4838,8 +4869,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">Curve_</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">EllipticCurve_I</span><span class="p">{</span>
 			<span class="nx">FieldModulus_</span><span class="p">:</span> <span class="o">*</span><span class="nx">FIELD_MODULUS</span><span class="p">,</span>
 		<span class="p">},</span>
-		<span class="nx">SealCfg_</span><span class="p">:</span> <span class="nx">sealCfg</span><span class="p">,</span>
-		<span class="nx">PoStCfg_</span><span class="p">:</span> <span class="nx">postCfg</span><span class="p">,</span>
+		<span class="nx">Cfg_</span><span class="p">:</span> <span class="nx">cfg</span><span class="p">,</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
@@ -4858,29 +4888,35 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="p">(</span><span class="nx">drg</span> <span class="o">*</span><span class="nx">DRG_I</span><span class="p">)</span> <span class="nf">Parents</span><span class="p">(</span><span class="nx">node</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">[]</span><span class="nx">UInt</span> <span class="p">{</span>
 	<span class="nx">config</span> <span class="o">:=</span> <span class="nx">drg</span><span class="p">.</span><span class="nf">Config</span><span class="p">()</span>
 	<span class="nx">degree</span> <span class="o">:=</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nf">Degree</span><span class="p">())</span>
-	<span class="k">return</span> <span class="nx">config</span><span class="p">.</span><span class="nf">Algorithm</span><span class="p">().</span><span class="nf">ParentsAlgorithm</span><span class="p">().</span><span class="nf">As_DRSample</span><span class="p">().</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">Parents</span><span class="p">(</span><span class="nx">degree</span><span class="p">,</span> <span class="nx">node</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">DRGAlgorithmComputeParents</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nf">Algorithm</span><span class="p">().</span><span class="nf">ParentsAlgorithm</span><span class="p">(),</span> <span class="nx">degree</span><span class="p">,</span> <span class="nx">node</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// TODO: Verify this. Both the port from impl and the algorithm.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">drs</span> <span class="o">*</span><span class="nx">DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I</span><span class="p">)</span> <span class="nf">Parents</span><span class="p">(</span><span class="nx">degree</span><span class="p">,</span> <span class="nx">node</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">(</span><span class="nx">parents</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">node</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-	<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">node</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">DRGAlgorithmComputeParents</span><span class="p">(</span><span class="nx">alg</span> <span class="nx">DRGCfg_Algorithm_ParentsAlgorithm</span><span class="p">,</span> <span class="nx">degree</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">node</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">(</span><span class="nx">parents</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">switch</span> <span class="nx">alg</span> <span class="p">{</span>
+	<span class="k">case</span> <span class="nx">DRGCfg_Algorithm_ParentsAlgorithm_DRSample</span><span class="p">:</span>
+		<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">node</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">node</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-	<span class="nx">m</span> <span class="o">:=</span> <span class="nx">degree</span> <span class="o">-</span> <span class="mi">1</span>
+		<span class="nx">m</span> <span class="o">:=</span> <span class="nx">degree</span> <span class="o">-</span> <span class="mi">1</span>
 
-	<span class="kd">var</span> <span class="nx">k</span> <span class="nx">UInt</span>
-	<span class="k">for</span> <span class="nx">k</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">k</span> <span class="p">&lt;</span> <span class="nx">m</span><span class="p">;</span> <span class="nx">k</span><span class="o">++</span> <span class="p">{</span>
-		<span class="nx">logi</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Floor</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Log2</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">node</span> <span class="o">*</span> <span class="nx">m</span><span class="p">))))</span>
-		<span class="c1">// FIXME: Make RNG parameterizable and specify it.
-</span><span class="c1"></span>		<span class="nx">j</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">logi</span><span class="p">)</span>
-		<span class="nx">jj</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">node</span><span class="o">*</span><span class="nx">m</span><span class="o">+</span><span class="nx">k</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="nb">uint</span><span class="p">(</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
-		<span class="nx">backDist</span> <span class="o">:=</span> <span class="nf">randInRange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">jj</span><span class="p">)</span><span class="o">&gt;&gt;</span><span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="nx">jj</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-		<span class="nx">out</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">node</span><span class="o">*</span><span class="nx">m</span> <span class="o">+</span> <span class="nx">k</span> <span class="o">-</span> <span class="nx">backDist</span><span class="p">)</span> <span class="o">/</span> <span class="nx">m</span>
+		<span class="kd">var</span> <span class="nx">k</span> <span class="nx">UInt</span>
+		<span class="k">for</span> <span class="nx">k</span> <span class="p">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">k</span> <span class="p">&lt;</span> <span class="nx">m</span><span class="p">;</span> <span class="nx">k</span><span class="o">++</span> <span class="p">{</span>
+			<span class="nx">logi</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Floor</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Log2</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">node</span> <span class="o">*</span> <span class="nx">m</span><span class="p">))))</span>
+			<span class="c1">// FIXME: Make RNG parameterizable and specify it.
+</span><span class="c1"></span>			<span class="nx">j</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">logi</span><span class="p">)</span>
+			<span class="nx">jj</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nf">Min</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nx">node</span><span class="o">*</span><span class="nx">m</span><span class="o">+</span><span class="nx">k</span><span class="p">),</span> <span class="nb">float64</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="nb">uint</span><span class="p">(</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+			<span class="nx">backDist</span> <span class="o">:=</span> <span class="nf">randInRange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">math</span><span class="p">.</span><span class="nf">Max</span><span class="p">(</span><span class="nb">float64</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">jj</span><span class="p">)</span><span class="o">&gt;&gt;</span><span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="nx">jj</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+			<span class="nx">out</span> <span class="o">:=</span> <span class="p">(</span><span class="nx">node</span><span class="o">*</span><span class="nx">m</span> <span class="o">+</span> <span class="nx">k</span> <span class="o">-</span> <span class="nx">backDist</span><span class="p">)</span> <span class="o">/</span> <span class="nx">m</span>
 
-		<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">out</span><span class="p">)</span>
+			<span class="nx">parents</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">parents</span><span class="p">,</span> <span class="nx">out</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="k">return</span> <span class="nx">parents</span>
+
+	<span class="k">default</span><span class="p">:</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;DRG algorithm not supported: %v&#34;</span><span class="p">,</span> <span class="nx">alg</span><span class="p">))</span>
 	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">parents</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">randInRange</span><span class="p">(</span><span class="nx">lowInclusive</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">highExclusive</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">UInt</span> <span class="p">{</span>
@@ -4943,7 +4979,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="kd">var</span> <span class="nx">allKeyLayers</span> <span class="p">[][]</span><span class="kt">byte</span>
 	<span class="kd">var</span> <span class="nx">replicas</span> <span class="p">[][]</span><span class="kt">byte</span>
 	<span class="kd">var</span> <span class="nx">sealSeeds</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span>
-	<span class="kd">var</span> <span class="nx">subsectorCommDs</span> <span class="p">[]</span><span class="nx">SHA256Hash</span>
+	<span class="kd">var</span> <span class="nx">subsectorCommDs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span>
 	<span class="kd">var</span> <span class="nx">subsectorCommDTreePaths</span> <span class="p">[]</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
 
 	<span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">data</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">subsectorData</span> <span class="p">{</span>
@@ -4985,7 +5021,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">result</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">SealSubsector</span><span class="p">(</span><span class="nx">subsectorIndex</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">)</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span><span class="p">,</span> <span class="nx">SHA256Hash</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">SealSubsector</span><span class="p">(</span><span class="nx">subsectorIndex</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">)</span> <span class="p">([][]</span><span class="kt">byte</span><span class="p">,</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span><span class="p">,</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">commD</span><span class="p">,</span> <span class="nx">commDTreePath</span> <span class="o">:=</span> <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
 	<span class="nx">sealSeed</span> <span class="o">:=</span> <span class="nf">computeSealSeed</span><span class="p">(</span><span class="nx">sid</span><span class="p">,</span> <span class="nx">subsectorIndex</span><span class="p">,</span> <span class="nx">randomness</span><span class="p">,</span> <span class="nx">commD</span><span class="p">)</span>
 	<span class="nx">nodeSize</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">sdr</span><span class="p">.</span><span class="nf">NodeSize</span><span class="p">())</span>
@@ -5008,7 +5044,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">commC</span><span class="p">,</span> <span class="nx">commRLast</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">commCTreePath</span><span class="p">,</span> <span class="nx">commRLastTreePath</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">computeSealSeed</span><span class="p">(</span><span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">subsectorIndex</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">,</span> <span class="nx">commD</span> <span class="nx">Commitment</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">computeSealSeed</span><span class="p">(</span><span class="nx">sid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">subsectorIndex</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span><span class="p">,</span> <span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span> <span class="p">{</span>
 	<span class="kd">var</span> <span class="nx">proverId</span> <span class="p">[]</span><span class="kt">byte</span> <span class="c1">// TODO: Derive this from sid.MinerID()
 </span><span class="c1"></span>	<span class="nx">sectorNumber</span> <span class="o">:=</span> <span class="nx">sid</span><span class="p">.</span><span class="nf">Number</span><span class="p">()</span>
 
@@ -5017,7 +5053,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">preimage</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">preimage</span><span class="p">,</span> <span class="nf">littleEndianBytesFromUInt</span><span class="p">(</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">sectorNumber</span><span class="p">),</span> <span class="mi">8</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
 	<span class="nx">preimage</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">preimage</span><span class="p">,</span> <span class="nf">littleEndianBytesFromInt</span><span class="p">(</span><span class="nx">subsectorIndex</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
 	<span class="nx">preimage</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">preimage</span><span class="p">,</span> <span class="nx">randomness</span><span class="o">...</span><span class="p">)</span>
-	<span class="nx">preimage</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">preimage</span><span class="p">,</span> <span class="nx">commD</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">preimage</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">preimage</span><span class="p">,</span> <span class="nf">Commitment_UnsealedSectorCID</span><span class="p">(</span><span class="nx">commD</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
 
 	<span class="c1">// FIXME: Implement
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span><span class="p">{}</span>
@@ -5405,31 +5441,23 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1">// Verification
+</span><span class="c1">// Seal Verification
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">onChain</span> <span class="o">:=</span> <span class="nx">sv</span><span class="p">.</span><span class="nf">OnChain</span><span class="p">()</span>
 	<span class="nx">sealProof</span> <span class="o">:=</span> <span class="nx">onChain</span><span class="p">.</span><span class="nf">Proof</span><span class="p">()</span>
-	<span class="nx">pieceInfos</span> <span class="o">:=</span> <span class="nx">sv</span><span class="p">.</span><span class="nf">PieceInfos</span><span class="p">()</span>
-	<span class="nx">commR</span> <span class="o">:=</span> <span class="nf">Commitment_SealedSectorCID</span><span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nf">SealedSectorCID</span><span class="p">(</span><span class="nx">onChain</span><span class="p">.</span><span class="nf">SealedCID</span><span class="p">()))</span>
+	<span class="nx">commR</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nf">SealedSectorCID</span><span class="p">(</span><span class="nx">onChain</span><span class="p">.</span><span class="nf">SealedCID</span><span class="p">())</span>
+	<span class="nx">commD</span> <span class="o">:=</span> <span class="nx">sector</span><span class="p">.</span><span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nx">sv</span><span class="p">.</span><span class="nf">UnsealedCID</span><span class="p">())</span>
 	<span class="nx">sealCfg</span> <span class="o">:=</span> <span class="nx">sv</span><span class="p">.</span><span class="nf">SealCfg</span><span class="p">()</span>
 
 	<span class="c1">// A more sophisticated accounting of CommD for verification purposes will be required when supersectors are considered.
 </span><span class="c1"></span>	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">sealCfg</span><span class="p">.</span><span class="nf">SubsectorCount</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
 
-	<span class="nx">sectorSize</span> <span class="o">:=</span> <span class="nx">sealCfg</span><span class="p">.</span><span class="nf">SectorSize</span><span class="p">()</span>
 	<span class="nx">subsectorCount</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">sealCfg</span><span class="p">.</span><span class="nf">SubsectorCount</span><span class="p">())</span>
-	<span class="nx">rootPieceInfo</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">ComputeRootPieceInfo</span><span class="p">(</span><span class="nx">pieceInfos</span><span class="p">)</span>
-	<span class="nx">rootSize</span> <span class="o">:=</span> <span class="nx">rootPieceInfo</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span>
-	<span class="k">if</span> <span class="nx">rootSize</span> <span class="o">!=</span> <span class="nx">sectorSize</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span>
-
-	<span class="nx">commD</span> <span class="o">:=</span> <span class="nx">rootPieceInfo</span><span class="p">.</span><span class="nf">CommP</span><span class="p">()</span>
 
 	<span class="kd">var</span> <span class="nx">sealSeeds</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span>
 	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">subsectorCount</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-		<span class="nx">sealSeed</span> <span class="o">:=</span> <span class="nf">computeSealSeed</span><span class="p">(</span><span class="nx">sv</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">(),</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">sv</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span> <span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">commD</span><span class="p">))</span>
+		<span class="nx">sealSeed</span> <span class="o">:=</span> <span class="nf">computeSealSeed</span><span class="p">(</span><span class="nx">sv</span><span class="p">.</span><span class="nf">SectorID</span><span class="p">(),</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">sv</span><span class="p">.</span><span class="nf">Randomness</span><span class="p">(),</span> <span class="nx">commD</span><span class="p">)</span>
 		<span class="nx">sealSeeds</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sealSeeds</span><span class="p">,</span> <span class="nx">sealSeed</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GenerateOfflineChallenges</span><span class="p">(</span><span class="nx">sealSeeds</span><span class="p">,</span> <span class="nx">sv</span><span class="p">.</span><span class="nf">InteractiveRandomness</span><span class="p">(),</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">Challenges</span><span class="p">())</span>
@@ -5437,7 +5465,20 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">VerifyOfflineCircuitProof</span><span class="p">(</span><span class="nx">commD</span><span class="p">,</span> <span class="nx">commR</span><span class="p">,</span> <span class="nx">sealSeeds</span><span class="p">,</span> <span class="nx">challenges</span><span class="p">,</span> <span class="nx">sealProof</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">ComputeRootPieceInfo</span><span class="p">(</span><span class="nx">pieceInfos</span> <span class="p">[]</span><span class="nx">PieceInfo</span><span class="p">)</span> <span class="nx">PieceInfo</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">ComputeUnsealedSectorCIDFromPieceInfos</span><span class="p">(</span><span class="nx">sectorSize</span> <span class="nx">UInt</span><span class="p">,</span> <span class="nx">pieceInfos</span> <span class="p">[]</span><span class="nx">PieceInfo</span><span class="p">)</span> <span class="p">(</span><span class="nx">unsealedCID</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">rootPieceInfo</span> <span class="o">:=</span> <span class="nf">computeRootPieceInfo</span><span class="p">(</span><span class="nx">pieceInfos</span><span class="p">)</span>
+	<span class="nx">rootSize</span> <span class="o">:=</span> <span class="nx">rootPieceInfo</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span>
+
+	<span class="k">if</span> <span class="nx">rootSize</span> <span class="o">!=</span> <span class="nx">sectorSize</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">unsealedCID</span><span class="p">,</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Wrong sector size.&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nf">AsBytes_PieceCID</span><span class="p">(</span><span class="nx">rootPieceInfo</span><span class="p">.</span><span class="nf">PieceCID</span><span class="p">())),</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="c1">// commD := rootPieceInfo.CommP()
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="nf">computeRootPieceInfo</span><span class="p">(</span><span class="nx">pieceInfos</span> <span class="p">[]</span><span class="nx">PieceInfo</span><span class="p">)</span> <span class="nx">PieceInfo</span> <span class="p">{</span>
 	<span class="c1">// Construct root PieceInfo by (shift-reduce) parsing the constituent PieceInfo array.
 </span><span class="c1"></span>	<span class="c1">// Later pieces must always be joined with equal-sized predecessors to create a new root twice their size.
 </span><span class="c1"></span>	<span class="c1">// So if a piece is larger than the current root (top of stack), add padding until it is not.
@@ -5512,12 +5553,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="kd">func</span> <span class="nf">joinPieceInfos</span><span class="p">(</span><span class="nx">left</span> <span class="nx">PieceInfo</span><span class="p">,</span> <span class="nx">right</span> <span class="nx">PieceInfo</span><span class="p">)</span> <span class="nx">PieceInfo</span> <span class="p">{</span>
 	<span class="nx">util</span><span class="p">.</span><span class="nf">Assert</span><span class="p">(</span><span class="nx">left</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">==</span> <span class="nx">right</span><span class="p">.</span><span class="nf">Size</span><span class="p">())</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo_I</span><span class="p">{</span>
-		<span class="nx">Size_</span><span class="p">:</span>  <span class="nx">left</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">+</span> <span class="nx">right</span><span class="p">.</span><span class="nf">Size</span><span class="p">(),</span>
-		<span class="nx">CommP_</span><span class="p">:</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nf">BinaryHash_SHA256Hash</span><span class="p">(</span><span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">left</span><span class="p">.</span><span class="nf">CommP</span><span class="p">()),</span> <span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">right</span><span class="p">.</span><span class="nf">CommP</span><span class="p">()))),</span> <span class="c1">// FIXME: make this whole function generic?
+		<span class="nx">Size_</span><span class="p">:</span>     <span class="nx">left</span><span class="p">.</span><span class="nf">Size</span><span class="p">()</span> <span class="o">+</span> <span class="nx">right</span><span class="p">.</span><span class="nf">Size</span><span class="p">(),</span>
+		<span class="nx">PieceCID_</span><span class="p">:</span> <span class="nx">piece</span><span class="p">.</span><span class="nf">PieceCID</span><span class="p">(</span><span class="nf">BinaryHash_SHA256Hash</span><span class="p">(</span><span class="nf">AsBytes_PieceCID</span><span class="p">(</span><span class="nx">left</span><span class="p">.</span><span class="nf">PieceCID</span><span class="p">()),</span> <span class="nf">AsBytes_PieceCID</span><span class="p">(</span><span class="nx">right</span><span class="p">.</span><span class="nf">PieceCID</span><span class="p">()))),</span> <span class="c1">// FIXME: make this whole function generic?
 </span><span class="c1"></span>	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">VerifyOfflineCircuitProof</span><span class="p">(</span><span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">commR</span> <span class="nx">Commitment</span><span class="p">,</span> <span class="nx">sealSeeds</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span><span class="p">,</span> <span class="nx">challenges</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">,</span> <span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealProof</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">VerifyOfflineCircuitProof</span><span class="p">(</span><span class="nx">commD</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">commR</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span><span class="p">,</span> <span class="nx">sealSeeds</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SealSeed</span><span class="p">,</span> <span class="nx">challenges</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">,</span> <span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealProof</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="c1">//publicInputs := GeneratePublicInputs()
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
@@ -5529,7 +5570,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStWitness</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ElectionCandidate</span> <span class="p">{</span>
 	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
 	<span class="kd">var</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
 
@@ -5543,7 +5584,14 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">witness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">// PoSt Verification
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">VerifyPoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -5679,9 +5727,10 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;not implemented -- re-arrange bits&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">ComputeDataCommitment</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">,</span> <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span> <span class="p">{</span>
 	<span class="c1">// TODO: make hash parameterizable
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">BuildTree_SHA256Hash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">hash</span><span class="p">,</span> <span class="nx">path</span> <span class="o">:=</span> <span class="nf">BuildTree_SHA256Hash</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">UnsealedSectorCID</span><span class="p">(</span><span class="nx">hash</span><span class="p">),</span> <span class="nx">path</span>
 <span class="p">}</span>
 
 <span class="c1">// Compute CommP or CommD.
@@ -5731,13 +5780,19 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">AsBytes_UnsealedSectorCID</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">UnsealedSectorCID</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unimplemented for T&#34;</span><span class="p">)</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unimplemented for UnsealedSectorCID&#34;</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">AsBytes_SealedSectorCID</span><span class="p">(</span><span class="nx">CID</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorCID</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unimplemented for T&#34;</span><span class="p">)</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unimplemented for SealedSectorCID&#34;</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">AsBytes_PieceCID</span><span class="p">(</span><span class="nx">CID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">)</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Unimplemented for PieceCID&#34;</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
 <span class="p">}</span>

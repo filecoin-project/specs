@@ -5,8 +5,9 @@ import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/e
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
-func (a *CronActorCode_I) Constructor(rt vmr.Runtime) {
+func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
+	return rt.SuccessReturn()
 }
 
 func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
@@ -28,9 +29,14 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 
 func (a *CronActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	switch method {
+	case actor.MethodConstructor:
+		rt.Assert(len(params) == 0)
+		return a.Constructor(rt)
+
 	case actor.MethodCron:
 		rt.Assert(len(params) == 0)
 		return a.EpochTick(rt)
+
 	default:
 		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
 	}

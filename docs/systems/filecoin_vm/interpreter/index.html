@@ -4659,10 +4659,10 @@ https://github.com/alex-shpak/hugo-book
 
 	<span class="nx">compTree</span> <span class="o">:=</span> <span class="nx">inTree</span>
 	<span class="kd">var</span> <span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
-	<span class="kd">var</span> <span class="nx">toActor</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
+	<span class="kd">var</span> <span class="nx">toActor</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
 	<span class="kd">var</span> <span class="nx">err</span> <span class="kt">error</span>
 
-	<span class="nx">fromActor</span> <span class="o">:=</span> <span class="nx">compTree</span><span class="p">.</span><span class="nf">GetActor</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
+	<span class="nx">fromActor</span> <span class="o">:=</span> <span class="nx">compTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">fromActor</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="c1">// TODO: This was originally exitcode.InvalidMethod; which is correct?
 </span><span class="c1"></span>		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorNotFound</span><span class="p">)</span>
@@ -4671,13 +4671,13 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// make sure fromActor has enough money to run the max invocation
 </span><span class="c1"></span>	<span class="nx">maxGasCost</span> <span class="o">:=</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
 	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span> <span class="o">+</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">maxGasCost</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// make sure this is the right message order for fromActor
 </span><span class="c1"></span>	<span class="c1">// (this is protection against replay attacks, and useful sequencing)
-</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">State</span><span class="p">().</span><span class="nf">CallSeqNum</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span> <span class="p">{</span>
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">message</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InvalidCallSeqNum</span><span class="p">)</span>
 	<span class="p">}</span>
 
@@ -4691,6 +4691,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="nx">compTree</span> <span class="p">=</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span> <span class="nx">maxGasCost</span><span class="p">)</span>
 
 	<span class="nx">rt</span> <span class="o">:=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">VMContext_Make</span><span class="p">(</span>
+		<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
+		<span class="nx">minerAddr</span><span class="p">,</span> <span class="c1">// TODO: may not exist? (see below)
+</span><span class="c1"></span>		<span class="nx">fromActor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(),</span>
+		<span class="nx">actor</span><span class="p">.</span><span class="nf">CallSeqNum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
 		<span class="nx">compTree</span><span class="p">,</span>
 		<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
 		<span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
@@ -4704,7 +4708,6 @@ https://github.com/alex-shpak/hugo-book
 			<span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">(),</span>
 		<span class="p">),</span>
-		<span class="kc">false</span><span class="p">,</span>
 	<span class="p">)</span>
 
 	<span class="k">if</span> <span class="p">!</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">().</span><span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="p">{</span>
@@ -4791,41 +4794,41 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">ErrActorNotFound</span> <span class="p">=</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="s">&#34;Actor Not Found&#34;</span><span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c1">// CodeCIDs for system actors
+<span class="c1">// CodeIDs for system actors
 </span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-	<span class="nx">InitActorCodeCID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/InitActor&#34;</span><span class="p">)</span>
-	<span class="nx">CronActorCodeCID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/CronActor&#34;</span><span class="p">)</span>
-	<span class="nx">AccountActorCodeCID</span>        <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/AccountActor&#34;</span><span class="p">)</span>
-	<span class="nx">StoragePowerActorCodeCID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StoragePowerActor&#34;</span><span class="p">)</span>
-	<span class="nx">StorageMinerActorCodeCID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StorageMinerActor&#34;</span><span class="p">)</span>
-	<span class="nx">StorageMarketActorCodeCID</span>  <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/StorageMarketActor&#34;</span><span class="p">)</span>
-	<span class="nx">PaymentChannelActorCodeCID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeCID</span><span class="p">(</span><span class="s">&#34;filecoin/1.0/PaymentChannelActor&#34;</span><span class="p">)</span>
+	<span class="nx">InitActorCodeID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Init</span><span class="p">)</span>
+	<span class="nx">CronActorCodeID</span>           <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Cron</span><span class="p">)</span>
+	<span class="nx">AccountActorCodeID</span>        <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_Account</span><span class="p">)</span>
+	<span class="nx">StoragePowerActorCodeID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StoragePower</span><span class="p">)</span>
+	<span class="nx">StorageMinerActorCodeID</span>   <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMiner</span><span class="p">)</span>
+	<span class="nx">StorageMarketActorCodeID</span>  <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_StorageMarket</span><span class="p">)</span>
+	<span class="nx">PaymentChannelActorCodeID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">CodeID_Make_Builtin</span><span class="p">(</span><span class="nx">actor</span><span class="p">.</span><span class="nx">BuiltinActorID_PaymentChannel</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">staticActorCodeRegistry</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">actorCodeRegistry</span><span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">actorCodeRegistry</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">code</span> <span class="kd">map</span><span class="p">[</span><span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span>
+	<span class="nx">code</span> <span class="kd">map</span><span class="p">[</span><span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_registerActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">cid</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_registerActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span> <span class="p">=</span> <span class="nx">actor</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_loadActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">a</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">cid</span><span class="p">]</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">actorCodeRegistry</span><span class="p">)</span> <span class="nf">_loadActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">a</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">code</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span>
 	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">ErrActorNotFound</span>
 	<span class="p">}</span>
 	<span class="k">return</span> <span class="nx">a</span><span class="p">,</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_registerActor</span><span class="p">(</span><span class="nx">cid</span><span class="p">,</span> <span class="nx">actor</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">actor</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_registerActor</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">actor</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">LoadActor</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeCID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_loadActor</span><span class="p">(</span><span class="nx">cid</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">LoadActor</span><span class="p">(</span><span class="nx">id</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorCode</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">staticActorCodeRegistry</span><span class="p">.</span><span class="nf">_loadActor</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// init is called in Go during initialization of a program.
@@ -4842,11 +4845,11 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>
 	<span class="nx">cron</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">CronActorCode_I</span><span class="p">{}</span>
 
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">CronActorCodeCID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">AccountActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">AccountActorCode_I</span><span class="p">{})</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StoragePowerActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActorCode_I</span><span class="p">{})</span>
-	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StorageMarketActorCodeCID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">market</span><span class="p">.</span><span class="nx">StorageMarketActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">InitActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">InitActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">CronActorCodeID</span><span class="p">,</span> <span class="nx">cron</span><span class="p">)</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">AccountActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">AccountActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StoragePowerActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActorCode_I</span><span class="p">{})</span>
+	<span class="nf">RegisterActor</span><span class="p">(</span><span class="nx">StorageMarketActorCodeID</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">market</span><span class="p">.</span><span class="nx">StorageMarketActorCode_I</span><span class="p">{})</span>
 
 	<span class="c1">// wire in CRON actions.
 </span><span class="c1"></span>	<span class="c1">// TODO: there&#39;s probably a better place to put this, but for now, do it here.

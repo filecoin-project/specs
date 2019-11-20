@@ -365,7 +365,7 @@ Further more, every full node must implement and offer the bitswap protocol and 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/libraries/ipld/graphstore/</guid>
-      <description> // imported as ipld.Store type GraphStore struct { Get(cid CID) union {o Object, err error} Put(o Object) union {cid CID, err error} }  </description>
+      <description> // imported as ipld.Store type GraphStore struct { Get(cid CID) (Object, error) Put(o Object) (CID, error) }  </description>
     </item>
     
     <item>
@@ -395,7 +395,7 @@ All Systems, as defined in this document, require the following:
       
       <guid>/docs/systems/filecoin_vm/sysactors/init_actor/</guid>
       <description>(You can see the old InitActor here )
-import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: actor.ActorID} IDMap {actor.ActorID: addr.Address} NextID actor.ActorID _assignNextID() actor.ActorID } type InitActorCode struct { Constructor(r vmr.Runtime) Exec(r vmr.Runtime, code actor.CodeCID, params actor.MethodParams) addr.Address GetActorIDForAddress(r vmr.Runtime, address addr.Address) actor.ActorID }  package sysactors import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; import exitcode &amp;#34;github.</description>
+import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} IDMap {addr.ActorID: addr.Address} NextID addr.ActorID _assignNextID() addr.ActorID } type InitActorCode struct { Constructor(r vmr.Runtime) Exec(r vmr.Runtime, code actor.CodeID, params actor.MethodParams) addr.Address GetActorIDForAddress(r vmr.Runtime, address addr.Address) addr.ActorID } type ActorExecAddressSeed struct { creator addr.Address toplevelCallSeqNum actor.CallSeqNum internalCallSeqNum actor.CallSeqNum }  package sysactors import addr &amp;#34;github.</description>
     </item>
     
     <item>
@@ -474,7 +474,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/node/</guid>
-      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.UTCClock }  </description>
+      <description>Something&#39;s not right. The filecoin_node.id file was not found.</description>
     </item>
     
     <item>
@@ -625,7 +625,7 @@ Something&#39;s not right. The sector_sealer.id file was not found.</description
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/sealing/</guid>
-      <description>import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; type Path struct {} // TODO  type SealRandomness Bytes type InteractiveSealRandomness Bytes // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID) type SealSeed Bytes type SealCfg struct { SectorSize UInt SubsectorCount UInt Partitions UInt } // SealVerifyInfo is the structure of all thte information a verifier // needs to verify a Seal. type SealVerifyInfo struct { SectorID OnChain OnChainSealVerifyInfo SealCfg Randomness SealRandomness InteractiveRandomness InteractiveSealRandomness PieceInfos [PieceInfo] } // OnChainSealVerifyInfo is the structure of information that must be sent with // a message to commit a sector.</description>
+      <description>import file &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import piece &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; type Path struct {} // TODO  type SealRandomness Bytes type InteractiveSealRandomness Bytes // SealSeed is unique to each Sector // SealSeed is: // SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID) type SealSeed Bytes type SealCfg struct { SectorSize UInt SubsectorCount UInt Partitions UInt } // SealVerifyInfo is the structure of all thte information a verifier // needs to verify a Seal.</description>
     </item>
     
     <item>
@@ -769,7 +769,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/storage_power_consensus/storage_power_actor/</guid>
-      <description>StoragePowerActor interface import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import util &amp;#34;github.com/filecoin-project/specs/util&amp;#34; type PowerTableEntry struct { ActivePower block.StoragePower InactivePower block.StoragePower AvailableBalance actor.TokenAmount LockedPledgeCollateral actor.TokenAmount } type PowerReport struct { ActivePower block.StoragePower // set value  InactivePower block.StoragePower // set value } type FaultReport struct { NewDeclaredFaults util.UVarint // diff value  NewDetectedFaults util.UVarint // diff value  NewTerminatedFaults util.UVarint // diff value  GetDeclaredFaultSlash() actor.</description>
+      <description>StoragePowerActor interface import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type PowerTableEntry struct { ActivePower block.StoragePower InactivePower block.StoragePower AvailableBalance actor.TokenAmount LockedPledgeCollateral actor.TokenAmount } type PowerReport struct { ActivePower block.StoragePower // set value  InactivePower block.StoragePower // set value } type FaultReport struct { NewDeclaredFaults UVarint // diff value  NewDetectedFaults UVarint // diff value  NewTerminatedFaults UVarint // diff value  GetDeclaredFaultSlash() actor.TokenAmount GetDetectedFaultSlash() actor.TokenAmount GetTerminatedFaultSlash() actor.</description>
     </item>
     
     <item>
@@ -796,8 +796,7 @@ The Miner Actor After successfully calling CreateStorageMiner, a miner actor wil
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_blockchain/struct/block/tipset/</guid>
-      <description>The Tipset is a group of blocks in the same exact round, that all share the exact same parents.
-import st &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; type Tipset struct { BlockCIDs [BlockCID] Blocks [BlockHeader] Has(block Block) bool @(cached) Parents Tipset @(cached) StateTree st.StateTree @(cached) Weight ChainWeight @(cached) Epoch ChainEpoch @(cached) ValidateSyntax() bool @(cached) LatestTimestamp() clock.Time @(cached) MinTicket() Ticket @(cached) }  package block import ( &amp;#34;bytes&amp;#34; clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; ) func (ts *Tipset_I) MinTicket() Ticket { var ret Ticket for _, currBlock := range ts.</description>
+      <description>EC can elect multiple leaders in a given epoch meaning Filecoin chains can contain multiple blocks at each height (one per winning miner). This greatly increases chain throughput by allowing blocks to propagate through the network of nodes more efficiently but also means miners should coordinate how they select messages for inclusion in their blocks in order to avoid duplicates and maximize their earnings from transaction fees (see Message Pool).</description>
     </item>
     
     <item>

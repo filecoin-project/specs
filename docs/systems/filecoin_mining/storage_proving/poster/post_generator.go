@@ -3,12 +3,15 @@ package poster
 import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+import util "github.com/filecoin-project/specs/util"
+
+type Serialization = util.Serialization
 
 // See "Proof-of-Spacetime Parameters" Section
 // TODO: Unify with orient model.
 const POST_CHALLENGE_DEADLINE = uint(480)
 
-func GeneratePoStWitness(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore) sector.PoStWitness {
+func GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore) []sector.ElectionCandidate {
 	// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 	// Like this:
 	// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -20,14 +23,56 @@ func GeneratePoStWitness(postCfg sector.PoStCfg, challengeSeed sector.PoStRandom
 	// seems cleaner.
 	// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetadata, trees);
 
-	// Poroposed answer: An alternative, which avoids the downsides of both of the above, by adding a new filproofs API call:
+	// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 
-	sdr := filproofs.SDRParams(nil, postCfg)
+	sdr := makeStackedDRGForPoSt(postCfg)
 
-	return sdr.GeneratePoStWitness(challengeSeed, faults, sectorStore)
+	return sdr.GeneratePoStCandidates(challengeSeed, faults, sectorStore)
 }
 
 func GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
-	sdr := filproofs.SDRParams(nil, postCfg)
-	return sdr.GeneratePoStProof(witness)
+	sdr := makeStackedDRGForPoSt(postCfg)
+	var privateProofs []sector.PrivatePoStProof
+
+	for _, candidate := range witness.Candidates() {
+		privateProofs = append(privateProofs, candidate.PrivateProof())
+	}
+
+	return sdr.GeneratePoStProof(privateProofs)
+}
+
+// This likely belongs elsewhere, but I'm not exactly sure where and wanted to encapsulate the proofs-related logic here. So this can be thought of as example usage.
+// ticketThreshold is lowest non-winning ticket (endianness?) for this PoSt.
+func GeneratePoSt(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore, ticketThreshold sector.ElectionTicket) sector.PoStProof {
+	candidates := GeneratePoStCandidates(postCfg, challengeSeed, faults, sectors, sectorStore)
+	var winners []sector.ElectionCandidate
+
+	for _, candidate := range candidates {
+		if candidate.Ticket().IsBelow(ticketThreshold) {
+			winners = append(winners, candidate)
+		}
+	}
+
+	witness := sector.PoStWitness_I{
+		Candidates_: winners,
+	}
+
+	return GeneratePoStProof(postCfg, sector.PoStWitness(&witness))
+}
+
+func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
+	var cfg filproofs.SDRCfg_I
+
+	switch postCfg.Type() {
+	case sector.PoStType_ElectionPoSt:
+		cfg = filproofs.SDRCfg_I{
+			ElectionPoStCfg_: postCfg,
+		}
+	case sector.PoStType_SurprisePoSt:
+		cfg = filproofs.SDRCfg_I{
+			SurprisePoStCfg_: postCfg,
+		}
+	}
+
+	return filproofs.SDRParams(&cfg)
 }

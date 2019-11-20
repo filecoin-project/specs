@@ -4583,6 +4583,9 @@ The Block is a unit of the Filecoin blockchain.</p>
 <span class="kd">type</span> <span class="nx">ChainWeight</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
 
+<span class="c1">// Randomness is a string of random bytes
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Randomness</span> <span class="nx">Bytes</span>
+
 <span class="kd">type</span> <span class="nx">BlockHeader</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Chain linking
 </span><span class="c1"></span>    <span class="nx">Parents</span>          <span class="nx">Tipset</span>
@@ -4629,7 +4632,7 @@ The Block is a unit of the Filecoin blockchain.</p>
     <span class="nf">LatestCheckpoint</span><span class="p">()</span>  <span class="nx">ChainEpoch</span>
 
     <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span>
-    <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span>
+    <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Bytes</span>
 <span class="p">}</span>
 
 <span class="c1">// Checkpoint represents a particular block to use as a trust anchor
@@ -4688,6 +4691,8 @@ The Block is a unit of the Filecoin blockchain.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">block</span>
 
 <span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4698,7 +4703,38 @@ The Block is a unit of the Filecoin blockchain.</p>
 	<span class="k">return</span> <span class="nx">a</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
+<span class="c1">// TODO: add SHA256 to filcrypto
+</span><span class="c1">// TODO: import SHA256 from filcrypto
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">input</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">sliceEqual</span><span class="p">(</span><span class="nx">a</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">b</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">false</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">v</span> <span class="o">!=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="kc">false</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="kc">true</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">epochToLittleEndianBytes</span><span class="p">(</span><span class="nx">e</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">addrToLittleEndianBytes</span><span class="p">(</span><span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="c1">// will return tipset from closest prior (or equal) epoch with a tipset
+</span><span class="c1">// return epoch should be checked accordingly
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
 
 	<span class="nx">dist</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">epoch</span>
 	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">()</span>
@@ -4711,9 +4747,13 @@ The Block is a unit of the Filecoin blockchain.</p>
 	<span class="k">return</span> <span class="nx">current</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
 	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">()</span>
+
+	<span class="c1">// doesn&#39;t matter if ts.Epoch() != epoch
+</span><span class="c1"></span>	<span class="c1">// since we generate new ticket from prior one in any case
+</span><span class="c1"></span>	<span class="c1">// else we use ticket from that epoch and derive new randomness from it
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">().</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">epoch</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">HeadEpoch</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
@@ -4722,25 +4762,6 @@ The Block is a unit of the Filecoin blockchain.</p>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">HeadTipset</span><span class="p">()</span> <span class="nx">Tipset</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// should return the tipset from the nearest epoch to epoch containing a Tipset
-</span><span class="c1">// that is from the closest epoch less than or equal to epoch
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
-
-	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">bl</span><span class="p">.</span><span class="nx">Header_</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
-	<span class="nx">parents</span> <span class="o">:=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
-	<span class="k">for</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">epoch</span> <span class="p">{</span>
-		<span class="nx">current</span> <span class="p">=</span> <span class="nx">parents</span>
-		<span class="nx">parents</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">current</span>
-<span class="p">}</span>
-
-<span class="c1">// should return the ticket from the Tipset generated at the nearest height leq to epoch
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">bl</span> <span class="o">*</span><span class="nx">Block_I</span><span class="p">)</span> <span class="nf">TicketAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Ticket</span> <span class="p">{</span>
-	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">bl</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">()</span>
 <span class="p">}</span>
 </code></pre></div>
 

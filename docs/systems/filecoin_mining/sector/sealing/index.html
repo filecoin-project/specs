@@ -4569,6 +4569,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
@@ -4596,8 +4597,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">SealCfg</span>
     <span class="nx">Randomness</span>             <span class="nx">SealRandomness</span>
     <span class="nx">InteractiveRandomness</span>  <span class="nx">InteractiveSealRandomness</span>
-    <span class="nx">PieceInfos</span>             <span class="p">[</span><span class="nx">PieceInfo</span><span class="p">]</span>
-<span class="p">}</span>
+    <span class="nx">UnsealedCID</span>            <span class="nx">UnsealedSectorCID</span>  <span class="c1">// CommD
+</span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// OnChainSealVerifyInfo is the structure of information that must be sent with
 </span><span class="c1">// a message to commit a sector. Most of this information is not needed in the
@@ -4684,9 +4685,14 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// TODO
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealOutputArtifacts</span> <span class="kd">struct</span> <span class="p">{}</span>
 
-<span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Size</span>   <span class="nx">UInt</span>  <span class="c1">// Size in nodes. For BLS12-381 (capacity 254 bits), must be &gt;= 16. (16 * 8 = 128)
-</span><span class="c1"></span>    <span class="nx">CommP</span>  <span class="nx">UnsealedSectorCID</span>
+<span class="c1">// TODO: PieceInfo is the name used by proofs for this struct, but there also exists a piece.PieceInfo type, which is different.
+</span><span class="c1">// We should probably rename one of them, since this is quite confusing. Or, if we can put `PieceCID` into pieces.PieceInfo, we can just use that.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PieceInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Size</span>      <span class="nx">UVarint</span>  <span class="c1">// Size in nodes. For BLS12-381 (capacity 254 bits), must be &gt;= 16. (16 * 8 = 128)
+</span><span class="c1"></span>    <span class="nx">PieceCID</span>  <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+
+    <span class="c1">// Data returns the serialized representation of the PieceInfo.
+</span><span class="c1"></span>    <span class="nf">Data</span><span class="p">()</span>    <span class="nx">Bytes</span>
 <span class="p">}</span>
 </code></pre></div>
 

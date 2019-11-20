@@ -4588,16 +4588,15 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SystemActors</span>              <span class="p">{</span><span class="nx">ActorName</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
-    <span class="nx">ActorStates</span>               <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>
+    <span class="nx">SystemActors</span>  <span class="p">{</span><span class="nx">ActorName</span><span class="p">:</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">}</span>
+    <span class="nx">ActorStates</span>   <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span><span class="p">}</span>
 
     <span class="c1">// TODO: API ConvenienceAPI
 </span><span class="c1"></span>
-    <span class="c1">// TODO: rename to GetActorState and change return type?
-</span><span class="c1"></span>    <span class="nf">GetActor</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">Actor</span>
+    <span class="nf">GetActorState</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState</span>
 
     <span class="c1">// Balance returns the balance of a given actor
-</span><span class="c1"></span>    <span class="nf">Balance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+</span><span class="c1"></span>    <span class="nf">Balance</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 <span class="p">}</span>
 </code></pre></div>
 

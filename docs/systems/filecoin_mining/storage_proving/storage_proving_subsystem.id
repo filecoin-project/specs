@@ -8,6 +8,7 @@ type StorageProvingSubsystem struct {
     PostGenerator  poster.PostGenerator
 
     VerifySeal(sv sector.SealVerifyInfo, pieceInfos [sector.PieceInfo]) union {ok bool, err error}
+    ComputeUnsealedSectorCID(sectorSize UInt, pieceInfos [sector.PieceInfo]) union {unsealedSectorCID sector.UnsealedSectorCID, err error}
 
     ValidateBlock(block block.Block)
 

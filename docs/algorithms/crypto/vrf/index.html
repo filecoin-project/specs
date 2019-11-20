@@ -4556,7 +4556,7 @@ an arbitrary message such that the output is unique per signer and per message.
 Any third party in possession of the corresponding public key, the message and
 the VRF output can verify if the digest has been computed correctly and from the
 correct signer. Using a VRF in the ticket generation process allows anyone to
-verify if a block comes from an eligible block producer (see <a href="../../../../#algorithms__expected_consenus__tickets">Ticket Generation</a> for more details).</p>
+verify if a block comes from an eligible block producer (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Ticket Generation</a> for more details).</p>
 
 <p>BLS signature can be used as the basis to construct a VRF. Filecoin transforms
 the BLS signature scheme it uses (see <a href="../../../../#algorithms__crypto__signatures">Signatures</a> into a
@@ -4613,8 +4613,8 @@ are mentionned in the relevant places throughout the specs.</p>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">VRFResult</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Output</span>            <span class="nx">Bytes</span>  <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
-    <span class="nf">MaxValue</span><span class="p">()</span>        <span class="nx">Bytes</span>
+    <span class="nx">Output</span>            <span class="nx">Bytes</span>  <span class="c1">// @(internal)
+</span><span class="c1"></span>    <span class="nf">MaxValue</span><span class="p">()</span>        <span class="nx">Bytes</span>
     <span class="nf">ValidateSyntax</span><span class="p">()</span>  <span class="kt">bool</span>
 
     <span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span> <span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>

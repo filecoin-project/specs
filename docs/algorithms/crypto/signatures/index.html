@@ -4610,34 +4610,11 @@ and each type have additional functionality as explained below.</p>
 <span class="kd">type</span> <span class="nx">SigKeyPair</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">PublicKey</span>
     <span class="nx">SecretKey</span>
-
-    <span class="c1">// Sign generates a proof that miner `M` generate message `m`
-</span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">// Out:
-</span><span class="c1"></span>    <span class="c1">//    sig - a signature 
-</span><span class="c1"></span>    <span class="c1">//    err - a standard error message indicating any process issues
-</span><span class="c1"></span>    <span class="c1">// In:
-</span><span class="c1"></span>    <span class="c1">//    m - a series of bytes representing a message to be signed
-</span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="nf">Sign</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Message</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">sig</span> <span class="nx">Signature</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Signature</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Sig</span>   <span class="nx">SignatureBytes</span>  <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
     <span class="nx">Type</span>  <span class="nx">SigType</span>         <span class="err">@</span><span class="p">(</span><span class="nx">internal</span><span class="p">)</span>
-
-    <span class="c1">// Verify validates the statement: only `M` could have generated `sig`
-</span><span class="c1"></span>    <span class="c1">// given the validator has a message `m`, a signature `sig`, and a
-</span><span class="c1"></span>    <span class="c1">// public key `pk`.
-</span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="c1">// Out:
-</span><span class="c1"></span>    <span class="c1">//    valid - a boolean value indicating the signature is valid
-</span><span class="c1"></span>    <span class="c1">//    err - a standard error message indicating any process issues
-</span><span class="c1"></span>    <span class="c1">// In:
-</span><span class="c1"></span>    <span class="c1">//    m - a series of bytes representing the signed message
-</span><span class="c1"></span>    <span class="c1">//    pk - the public key belonging to the signer `M`
-</span><span class="c1"></span>    <span class="c1">//
-</span><span class="c1"></span>    <span class="nf">Verify</span><span class="p">(</span><span class="nx">m</span> <span class="nx">Message</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">PublicKey</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">valid</span> <span class="kt">bool</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SigType</span> <span class="nx">enum</span> <span class="p">{</span>

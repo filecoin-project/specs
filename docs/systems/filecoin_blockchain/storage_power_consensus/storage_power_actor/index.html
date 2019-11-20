@@ -4574,7 +4574,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
 <span class="kd">type</span> <span class="nx">PowerTableEntry</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">ActivePower</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
@@ -4589,9 +4588,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">FaultReport</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">NewDeclaredFaults</span>          <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
-</span><span class="c1"></span>    <span class="nx">NewDetectedFaults</span>          <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
-</span><span class="c1"></span>    <span class="nx">NewTerminatedFaults</span>        <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>  <span class="c1">// diff value
+    <span class="nx">NewDeclaredFaults</span>          <span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span>    <span class="nx">NewDetectedFaults</span>          <span class="nx">UVarint</span>  <span class="c1">// diff value
+</span><span class="c1"></span>    <span class="nx">NewTerminatedFaults</span>        <span class="nx">UVarint</span>  <span class="c1">// diff value
 </span><span class="c1"></span>
     <span class="nf">GetDeclaredFaultSlash</span><span class="p">()</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nf">GetDetectedFaultSlash</span><span class="p">()</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
@@ -4690,8 +4689,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">StoragePowerActor_ProcessPowerReport</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span> <span class="p">=</span> <span class="mi">1</span>
-    <span class="nx">StoragePowerActor_ProcessFaultReport</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span> <span class="p">=</span> <span class="mi">2</span>
+    <span class="nx">Method_StoragePowerActor_ProcessPowerReport</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span>
+    <span class="nx">Method_StoragePowerActor_ProcessFaultReport</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span>
 <span class="p">)</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
@@ -5124,7 +5123,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>The Miner lifecycle in the power table should be roughly as follows:
 - MinerRegistration: A new miner with an associated worker public key and address is registered on the power table by the storage mining subsystem, along with their associated sector size (there is only one per worker).
-- UpdatePower: These power increments and decrements (in multiples of the associated sector size) are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
+- UpdatePower: These power increments and decrements are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
     - Power is incremented to account for a new SectorCommitment at the first PoSt past the first ProvingPeriod.
     - All Power is decremented immediately after a missed PoSt.
     - Power is decremented immediately after faults are declared, proportional to the faulty sector size.

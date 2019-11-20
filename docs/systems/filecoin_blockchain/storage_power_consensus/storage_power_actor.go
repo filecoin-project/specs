@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	StoragePowerActor_ProcessPowerReport actor.MethodNum = 1
-	StoragePowerActor_ProcessFaultReport actor.MethodNum = 2
+	Method_StoragePowerActor_ProcessPowerReport = actor.MethodPlaceholder
+	Method_StoragePowerActor_ProcessFaultReport = actor.MethodPlaceholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////

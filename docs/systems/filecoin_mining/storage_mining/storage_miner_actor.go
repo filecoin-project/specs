@@ -1,28 +1,21 @@
 package storage_mining
 
-import (
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+import util "github.com/filecoin-project/specs/util"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
-
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-
-	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-
-	proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
-
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
-	util "github.com/filecoin-project/specs/util"
-
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+const (
+	Method_StorageMinerActor_SubmitPoSt = actor.MethodPlaceholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +98,7 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 
 // called by CronActor to notify StorageMiner of PoSt Challenge
 func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
-	rt.ValidateCallerIs(addr.CronActorAddr)
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
 
 	if a._isChallenged(rt) {
 		return rt.SuccessReturn() // silent return, dont re-challenge
@@ -585,42 +578,63 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 	return rt.SuccessReturn()
 }
 
-func (st *StorageMinerActorState_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
-	// TODO: verify seal @nicola
-	// TODO: st.verifySeal(sectorID SectorID, comm sector.OnChainSealVerifyInfo, proof SealProof)
+func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
+	h, st := a.State(rt)
+	info := st.Info()
+	sectorSize := info.SectorSize()
+	dealIDs := onChainInfo.DealIDs()
+	params := make([]actor.MethodParam, 1+len(dealIDs))
 
-	// verifySeal will also generate CommD on the fly from CommP and PieceSize
+	Release(rt, h, st) // if no modifications made; or
 
-	var pieceInfos []sector.PieceInfo // = make([]sector.PieceInfo, 0)
+	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 
-	for dealId := range onChainInfo.DealIDs() {
-		// FIXME: Actually get the deal info from the storage market actor and use it to create a sector.PieceInfo.
-		_ = dealId
+	receipt := rt.SendCatchingErrors(&msg.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
+		Params_: params,
+	})
 
-		pieceInfos = append(pieceInfos, nil)
+	if receipt.ExitCode() == exitcode.InvalidSectorPacking {
+		return false
 	}
 
-	new(proving.StorageProvingSubsystem_I).VerifySeal(&sector.SealVerifyInfo_I{
+	ret := receipt.ReturnValue()
+
+	pieceInfos := sector.PieceInfosFromBytes(ret)
+
+	// Unless we enforce a minimum padding amount, this totalPieceSize calculation can be removed.
+	// Leaving for now until that decision is entirely finalized.
+	var totalPieceSize util.UInt
+	for _, pieceInfo := range pieceInfos {
+		pieceSize := (*pieceInfo).Size()
+		totalPieceSize += pieceSize
+	}
+
+	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
+
+	sealCfg := sector.SealCfg_I{
+		SectorSize_:     sectorSize,
+		SubsectorCount_: info.SubsectorCount(),
+		Partitions_:     info.Partitions(),
+	}
+	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
-			MinerID_: st.Info().Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
+			MinerID_: info.Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
 			Number_:  onChainInfo.SectorNumber(),
 		},
 		OnChain_: onChainInfo,
 
 		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
-		SealCfg_: &sector.SealCfg_I{
-			SectorSize_:     st.Info().SectorSize(),
-			SubsectorCount_: st.Info().SubsectorCount(),
-			Partitions_:     st.Info().Partitions(),
-		},
+		SealCfg_: &sealCfg,
 
-		// TODO: get Randomness sector.SealRandomness using onChainInfo.Epoch
-		//Randomness_:
-		// TODO: get InteractiveRandomness sector.SealRandomness using onChainInfo.InteractiveEpoch
-		//InteractiveRandomness_:
-		PieceInfos_: pieceInfos,
-	})
-	return false // TODO: finish
+		Randomness_:            sector.SealRandomness(rt.Randomness(onChainInfo.SealEpoch(), 0)),
+		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
+		UnsealedCID_:           unsealedCID,
+	}
+
+	sdr := filproofs.SDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
+	return sdr.VerifySeal(&svInfo)
 }
 
 func (st *StorageMinerActorState_I) _sectorExists(sectorNo sector.SectorNumber) bool {

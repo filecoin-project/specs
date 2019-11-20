@@ -4577,17 +4577,26 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">Mainnet</span>
     <span class="p">}</span>
 
-    <span class="nx">Type</span> <span class="nx">enum</span> <span class="p">{</span>
-        <span class="nx">ID</span>
-        <span class="nx">Secp256k1</span>
-        <span class="nx">Actor</span>
-        <span class="nx">BLS</span>
+    <span class="nx">Data</span> <span class="nx">union</span> <span class="p">{</span>
+        <span class="nx">ID</span>                   <span class="nx">ActorID</span>
+        <span class="nx">PublicKey_Secp256k1</span>  <span class="nx">KeyHash</span>  <span class="c1">// TODO: reorder
+</span><span class="c1"></span>        <span class="nx">ActorExec</span>            <span class="nx">ActorExecHash</span>
+        <span class="nx">PublicKey_BLS</span>        <span class="nx">KeyHash</span>
     <span class="p">}</span>
 
-    <span class="nf">VerifySyntax</span><span class="p">(</span><span class="nx">addrType</span> <span class="nx">Address_Type</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">String</span><span class="p">()</span> <span class="nx">AddressString</span>
-    <span class="nf">IsKeyType</span><span class="p">()</span> <span class="kt">bool</span>
+    <span class="nf">VerifySyntax</span><span class="p">()</span>   <span class="kt">bool</span>
+    <span class="nf">String</span><span class="p">()</span>         <span class="nx">AddressString</span>
+    <span class="nf">IsKeyType</span><span class="p">()</span>      <span class="kt">bool</span>
+    <span class="nf">Equals</span><span class="p">(</span><span class="nx">Address</span><span class="p">)</span>  <span class="kt">bool</span>
 <span class="p">}</span>
+
+<span class="c1">// ActorID is a sequential number assigned to actors in a Filecoin Chain.
+</span><span class="c1">// ActorIDs are assigned by the InitActor, when an Actor is introduced into
+</span><span class="c1">// the Runtime.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ActorID</span> <span class="nx">Int</span>
+
+<span class="kd">type</span> <span class="nx">KeyHash</span> <span class="nx">Bytes</span>
+<span class="kd">type</span> <span class="nx">ActorExecHash</span> <span class="nx">Bytes</span>
 
 <span class="kd">type</span> <span class="nx">AddressString</span> <span class="kt">string</span>
 </code></pre></div>

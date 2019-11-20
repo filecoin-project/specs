@@ -4609,51 +4609,58 @@ https://github.com/alex-shpak/hugo-book
 	<span class="s">&#34;fmt&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">type</span> <span class="nx">SystemErrorCode</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">SystemErrorCode</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Int</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="c1">// TODO: remove once canonical error codes are finalized
+</span><span class="c1"></span>	<span class="nx">SystemErrorCode_Placeholder</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
+<span class="p">)</span>
 
 <span class="c1">// TODO: assign all of these.
-</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-	<span class="c1">// // OK is the success return value, similar to unix exit code 0.
-</span><span class="c1"></span>	<span class="c1">// OK = SystemErrorCode(0)
-</span><span class="c1"></span>
+</span><span class="c1"></span><span class="kd">const</span> <span class="p">(</span>
 	<span class="c1">// ActorNotFound represents a failure to find an actor.
-</span><span class="c1"></span>	<span class="nx">ActorNotFound</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">ActorNotFound</span> <span class="p">=</span> <span class="nx">SystemErrorCode_Placeholder</span> <span class="o">+</span> <span class="kc">iota</span>
 
 	<span class="c1">// ActorCodeNotFound represents a failure to find the code for a
 </span><span class="c1"></span>	<span class="c1">// particular actor in the VM registry.
-</span><span class="c1"></span>	<span class="nx">ActorCodeNotFound</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">ActorCodeNotFound</span>
 
 	<span class="c1">// InvalidMethod represents a failure to find a method in
 </span><span class="c1"></span>	<span class="c1">// an actor
-</span><span class="c1"></span>	<span class="nx">InvalidMethod</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">InvalidMethod</span>
+
+	<span class="c1">// InvalidArguments indicates that a method was called with the incorrect
+</span><span class="c1"></span>	<span class="c1">// number of arguments, or that its arguments did not satisfy its
+</span><span class="c1"></span>	<span class="c1">// preconditions
+</span><span class="c1"></span>	<span class="nx">InvalidArguments</span>
 
 	<span class="c1">// InsufficientFunds represents a failure to apply a message, as
 </span><span class="c1"></span>	<span class="c1">// it did not carry sufficient funds for its application.
-</span><span class="c1"></span>	<span class="nx">InsufficientFunds</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">InsufficientFunds</span>
 
 	<span class="c1">// InvalidCallSeqNum represents a message invocation out of sequence.
 </span><span class="c1"></span>	<span class="c1">// This happens when message.CallSeqNum is not exactly actor.CallSeqNum + 1
-</span><span class="c1"></span>	<span class="nx">InvalidCallSeqNum</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">InvalidCallSeqNum</span>
 
 	<span class="c1">// OutOfGasError is returned when the execution of an actor method
 </span><span class="c1"></span>	<span class="c1">// (including its subcalls) uses more gas than initially allocated.
-</span><span class="c1"></span>	<span class="nx">OutOfGas</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">OutOfGas</span>
 
 	<span class="c1">// RuntimeAPIError is returned when an actor method invocation makes a call
 </span><span class="c1"></span>	<span class="c1">// to the runtime that does not satisfy its preconditions.
-</span><span class="c1"></span>	<span class="nx">RuntimeAPIError</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">RuntimeAPIError</span>
 
 	<span class="c1">// MethodPanic is returned when an actor method invocation calls rt.Abort.
-</span><span class="c1"></span>	<span class="nx">MethodAbort</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-
-	<span class="c1">// MethodPanic is returned when the runtime intercepts a panic within
-</span><span class="c1"></span>	<span class="c1">// an actor method invocation (not via rt.Abort).
-</span><span class="c1"></span>	<span class="nx">MethodPanic</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">MethodAbort</span>
 
 	<span class="c1">// MethodSubcallError is returned when an actor method&#39;s Send call has
 </span><span class="c1"></span>	<span class="c1">// returned with a failure error code (and the Send call did not specify
 </span><span class="c1"></span>	<span class="c1">// to ignore errors).
-</span><span class="c1"></span>	<span class="nx">MethodSubcallError</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">MethodSubcallError</span>
+<span class="p">)</span>
+
+<span class="kd">var</span> <span class="p">(</span>
+	<span class="nx">InvalidSectorPacking</span> <span class="p">=</span> <span class="nf">UserDefinedError</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nf">OK</span><span class="p">()</span> <span class="nx">ExitCode</span> <span class="p">{</span>

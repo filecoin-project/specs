@@ -4568,8 +4568,8 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// imported as ipld.Store
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">GraphStore</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">Get</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">CID</span><span class="p">)</span>   <span class="nx">union</span> <span class="p">{</span><span class="nx">o</span> <span class="nx">Object</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
-    <span class="nf">Put</span><span class="p">(</span><span class="nx">o</span> <span class="nx">Object</span><span class="p">)</span>  <span class="nx">union</span> <span class="p">{</span><span class="nx">cid</span> <span class="nx">CID</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+    <span class="nf">Get</span><span class="p">(</span><span class="nx">cid</span> <span class="nx">CID</span><span class="p">)</span>   <span class="p">(</span><span class="nx">Object</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+    <span class="nf">Put</span><span class="p">(</span><span class="nx">o</span> <span class="nx">Object</span><span class="p">)</span>  <span class="p">(</span><span class="nx">CID</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

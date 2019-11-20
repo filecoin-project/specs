@@ -8,9 +8,14 @@ import (
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	util "github.com/filecoin-project/specs/util"
 )
+
+type Serialization = util.Serialization
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(
 	ownerAddr addr.Address,
@@ -58,12 +63,12 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	// new election, incremented height
-	T1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
-	TK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	Randomness1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	RandomnessK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
 
 	for _, worker := range sms.keyStore().Workers() {
-		newTicket := sms.PrepareNewTicket(T1, worker.VRFKeyPair())
-		newEP := sms.DrawElectionProof(TK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
+		newTicket := sms.PrepareNewTicket(Randomness1, worker.VRFKeyPair())
+		newEP := sms.DrawElectionProof(RandomnessK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
 
 		if sms.consensus().IsWinningElectionProof(newEP, worker.Address()) {
 			sms.blockProducer().GenerateBlock(newEP, newTicket, sms.blockchain().BestChain().HeadTipset(), worker.Address())
@@ -71,26 +76,26 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	}
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, vrfKP filcrypto.VRFKeyPair) block.Ticket {
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness block.Randomness, vrfKP filcrypto.VRFKeyPair) block.Ticket {
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	var input []byte
 	input = append(input, spc.VRFPersonalizationTicket)
-	input = append(input, priorTicket.Output()...)
+	input = append(input, randomness...)
 
 	// run through VRF
-	// TODO: uncomment below
-	// vrfRes := vrfKP.Generate(input)
-	var newTicket block.Ticket
+	vrfRes := vrfKP.Generate(input)
 
-	// return new ticket
-	// newTicket.VRFResult_ = vrfRes
-	// newTicket.Output_ = vrfRes.Output()
+	newTicket := &block.Ticket_I{
+		VRFResult_: vrfRes,
+		Output_:    vrfRes.Output(),
+	}
+
 	return newTicket
 }
 
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Ticket, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(randomness block.Randomness, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
 	panic("")
 	// // 0. Prepare new election proof
 	// var newEP ElectionProof
@@ -103,4 +108,49 @@ func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Tick
 	// // ii. # run it through the VRF and store the VRFProof in the new ticket
 	// newEP.VRFResult := vrfKP.Generate(input)
 	// return newEP
+}
+
+func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {
+	var workerAddress addr.Address
+	var workerKeyPair filcrypto.SigKeyPair
+	panic("TODO") // TODO: get worker address and key pair
+
+	// TODO: is this just workerAddress, or is there a separation here
+	// (worker is AccountActor, workerMiner is StorageMinerActor)?
+	var workerMinerActorAddress addr.Address
+	panic("TODO")
+
+	var gasPrice msg.GasPrice
+	var gasLimit msg.GasAmount
+	panic("TODO") // TODO: determine gas price and limit
+
+	var callSeqNum actor.CallSeqNum
+	panic("TODO") // TODO: retrieve CallSeqNum from worker
+
+	messageParams := actor.MethodParams([]actor.MethodParam{
+		actor.MethodParam(poster.Serialize_PoStSubmission(postSubmission)),
+	})
+
+	unsignedMessage := msg.UnsignedMessage_Make(
+		workerAddress,
+		workerMinerActorAddress,
+		Method_StorageMinerActor_SubmitPoSt,
+		messageParams,
+		callSeqNum,
+		actor.TokenAmount(0),
+		gasPrice,
+		gasLimit,
+	)
+
+	signedMessage, err := msg.Sign(unsignedMessage, workerKeyPair)
+	if err != nil {
+		return err
+	}
+
+	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -18,14 +18,13 @@ type ActorName enum {
 }
 
 type StateTree struct {
-    SystemActors              {ActorName: addr.Address}
-    ActorStates               {addr.Address: actor.ActorState}
+    SystemActors  {ActorName: addr.Address}
+    ActorStates   {addr.Address: actor.ActorState}
 
     // TODO: API ConvenienceAPI
 
-    // TODO: rename to GetActorState and change return type?
-    GetActor(a addr.Address)  actor.Actor
+    GetActorState(a addr.Address) actor.ActorState
 
     // Balance returns the balance of a given actor
-    Balance(a addr.Address)   actor.TokenAmount
+    Balance(a addr.Address) actor.TokenAmount
 }
