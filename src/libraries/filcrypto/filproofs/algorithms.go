@@ -409,7 +409,7 @@ func hashColumn(column []Label) PedersenHash {
 
 type PrivateOfflineProof struct {
 	WindowChallengeProofs []OfflineWindowChallengeProof
-	ChallengeProofs []OfflineChallengeProof
+	ChallengeProofs       []OfflineChallengeProof
 }
 
 func (sdr *WinStackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) sector.SealProof {
@@ -443,14 +443,13 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 		challengeProofs.ChallengeProofs = append(challengeProofs.ChallengeProofs, challengeProof)
 	}
 
-
 	privateProof := challengeProofs
 
 	return privateProof
 }
 
 // FIXME: Should be VerifyPrivateSealProof
-// Verify a private proof. 
+// Verify a private proof.
 // NOTE: Verification of a private proof is exactly the computation we will prove we have performed in a zk-SNARK.
 // If we can verifiably prove that we have performed the verification of a private proof, then we need not reveal the proof itself.
 // Since the zk-SNARK circuit proof is much smaller than the private proof, this allows us to save space on the chain (at the cost of increased computation to generate the zk-SNARK proof).
@@ -459,6 +458,8 @@ func (sdr *WinStackedDRG_I) VerifyPrivateProof(privateProof []OfflineWindowChall
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
 	challenges, windowChallenges := sdr.GenerateOfflineChallenges(sealSeeds, randomness, sdr.Challenges(), sdr.WindowChallenges())
+
+	_ = challenges
 
 	// commC and commRLast must be the same for all challenge proofs, so we can arbitrarily verify against the first.
 	firstChallengeProof := privateProof[0]
@@ -539,7 +540,7 @@ func (sdr *WinStackedDRG_I) VerifyPrivateProof(privateProof []OfflineWindowChall
 	return true
 }
 
-func CreateWindowChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds []sector.SealSeed, challenge UInt, nodeSize UInt, columnTree *MerkleTree,  aux sector.ProofAuxTmp, windows int, windowSize int) (proof OfflineWindowChallengeProof) {
+func CreateWindowChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds []sector.SealSeed, challenge UInt, nodeSize UInt, columnTree *MerkleTree, aux sector.ProofAuxTmp, windows int, windowSize int) (proof OfflineWindowChallengeProof) {
 	columnElements := getColumnElements(drg, expander, challenge)
 	commDTreePaths := aux.CommDTreePaths()
 
@@ -566,8 +567,8 @@ func CreateWindowChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds
 	// }
 
 	proof = OfflineWindowChallengeProof{
-		DataProofs:    dataProofs,
-		ColumnProofs:  columnProofs,
+		DataProofs:   dataProofs,
+		ColumnProofs: columnProofs,
 		//ReplicaProofs: replicaProofs,
 	}
 
@@ -601,6 +602,7 @@ func createColumnProof(c UInt, nodeSize UInt, columnTree *MerkleTree, aux sector
 
 	return columnProof
 }
+
 type OfflineChallengeProof struct {
 	// FIXME
 }
@@ -735,7 +737,7 @@ func (sdr *WinStackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 		sealSeeds = append(sealSeeds, sealSeed)
 	}
 	challenges, windowChallenges := sdr.GenerateOfflineChallenges(sealSeeds, sv.InteractiveRandomness(), sdr.Challenges(), sdr.WindowChallenges())
-
+	_ = challenges
 	return sdr.VerifyOfflineCircuitProof(commD, commR, sealSeeds, windowChallenges, sealProof)
 }
 
