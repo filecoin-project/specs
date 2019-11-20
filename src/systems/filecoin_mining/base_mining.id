@@ -1,3 +1,0 @@
-type SealSeed struct {}
-type PoStChallenge struct {}
-type SealedSector struct {}

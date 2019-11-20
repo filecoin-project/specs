@@ -1,6 +1,8 @@
 package block
 
 import (
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -30,7 +32,12 @@ func sliceEqual(a util.Bytes, b util.Bytes) bool {
 	return true
 }
 
-func toBytes(e ChainEpoch) util.Bytes {
+func epochToLittleEndianBytes(e ChainEpoch) util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
+
+func addrToLittleEndianBytes(addr addr.Address) util.Bytes {
 	ret := make([]byte, 0)
 	return ret
 }

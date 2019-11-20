@@ -1,13 +1,21 @@
 package runtime
 
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-import util "github.com/filecoin-project/specs/util"
+import (
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+
+	util "github.com/filecoin-project/specs/util"
+)
 
 type ActorSubstateCID = actor.ActorSubstateCID
 type InvocInput = msg.InvocInput
@@ -401,7 +409,7 @@ func (rt *VMContext) ValueSupplied() actor.TokenAmount {
 	return rt._valueSupplied
 }
 
-func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) Randomness {
+func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) block.Randomness {
 	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
 	// TODO: finish
 	panic("TODO")

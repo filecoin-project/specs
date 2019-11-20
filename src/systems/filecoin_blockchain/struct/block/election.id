@@ -1,12 +1,13 @@
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type Ticket struct {
-    VRFResult         filcrypto.VRFResult
+    VRFResult  filcrypto.VRFResult
 
-    Output                                                      Bytes         @(cached)
-    DrawRandomness(minerAddr addr.Address, round ChainEpoch)    Bytes  
-    ValidateSyntax()                                            bool
-    Verify(input Bytes, pk filcrypto.VRFPublicKey)              bool
+    Output     Bytes                @(cached)
+    DrawRandomness(minerAddr addr.Address, round ChainEpoch) Bytes
+    ValidateSyntax() bool
+    Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
 }
 
 type ElectionProof struct {

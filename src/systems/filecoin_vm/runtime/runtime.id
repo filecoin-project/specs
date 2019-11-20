@@ -12,7 +12,7 @@ type Runtime interface {
     CurrEpoch() block.ChainEpoch
 
     // Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
-    Randomness(e block.ChainEpoch, offset UInt) Randomness
+    Randomness(e block.ChainEpoch, offset UInt) block.Randomness
 
     Caller() addr.Address
     ValidateCallerIs(caller addr.Address)
