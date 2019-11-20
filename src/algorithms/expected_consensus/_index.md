@@ -28,7 +28,7 @@ Tickets are used to achieve the following:
 
 In practice, EC defines two different fields within a block:
 
-- A `Ticket` field — this stores the new ticket generated during this block generation attempt. It is from this ticket that miners will sample randomness to run leader election in `K` rounds (see {{<sref Tickets>}}).
+- A `Ticket` field — this stores the new ticket generated during this block generation attempt. It is from this ticket that miners will sample randomness to run leader election in `K` rounds (see {{<sref tickets>}}).
 - An `ElectionProof` — this stores a proof that a given miner has won a leader election using the appropriate ticket `K` rounds back appended with the current epoch number. It proves that the leader was validly elected in this epoch.
 
 {{< readfile file="election.id" code="true" lang="go" >}}
@@ -64,7 +64,7 @@ Leader Election in Expected Consensus must be Secret, Fair and Verifiable. This 
 
 ### Running a leader election
 
-Now, a miner must also check whether they are eligible to mine a block in this round. 
+Now, a miner must also check whether they are eligible to mine a block in this round.
 
 Design goals here include:
 - There should be one block per miner per epoch at most (for simplicity)
