@@ -1,6 +1,8 @@
 package block
 
 import (
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -11,6 +13,37 @@ func SmallerBytes(a, b util.Bytes) util.Bytes {
 	return a
 }
 
+// TODO: add SHA256 to filcrypto
+// TODO: import SHA256 from filcrypto
+func SHA256(input util.Bytes) util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
+
+func sliceEqual(a util.Bytes, b util.Bytes) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func epochToLittleEndianBytes(e ChainEpoch) util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
+
+func addrToLittleEndianBytes(addr addr.Address) util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
+
+// will return tipset from closest prior (or equal) epoch with a tipset
+// return epoch should be checked accordingly
 func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 
 	dist := chain.HeadEpoch() - epoch
@@ -24,9 +57,13 @@ func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 	return current
 }
 
-func (chain *Chain_I) TicketAtEpoch(epoch ChainEpoch) Ticket {
+func (chain *Chain_I) RandomnessAtEpoch(minerAddr addr.Address, epoch ChainEpoch) util.Bytes {
 	ts := chain.TipsetAtEpoch(epoch)
-	return ts.MinTicket()
+
+	// doesn't matter if ts.Epoch() != epoch
+	// since we generate new ticket from prior one in any case
+	// else we use ticket from that epoch and derive new randomness from it
+	return SHA256(ts.MinTicket().DrawRandomness(minerAddr, epoch))
 }
 
 func (chain *Chain_I) HeadEpoch() ChainEpoch {
@@ -35,23 +72,4 @@ func (chain *Chain_I) HeadEpoch() ChainEpoch {
 
 func (chain *Chain_I) HeadTipset() Tipset {
 	panic("")
-}
-
-// should return the tipset from the nearest epoch to epoch containing a Tipset
-// that is from the closest epoch less than or equal to epoch
-func (bl *Block_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
-
-	current := bl.Header_.Parents()
-	parents := current.Parents()
-	for current.Epoch() > epoch {
-		current = parents
-		parents = current.Parents()
-	}
-	return current
-}
-
-// should return the ticket from the Tipset generated at the nearest height leq to epoch
-func (bl *Block_I) TicketAtEpoch(epoch ChainEpoch) Ticket {
-	ts := bl.TipsetAtEpoch(epoch)
-	return ts.MinTicket()
 }

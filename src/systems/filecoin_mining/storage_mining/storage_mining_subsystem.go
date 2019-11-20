@@ -58,12 +58,12 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	// new election, incremented height
-	T1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
-	TK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	Randomness1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
+	RandomnessK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
 
 	for _, worker := range sms.keyStore().Workers() {
-		newTicket := sms.PrepareNewTicket(T1, worker.VRFKeyPair())
-		newEP := sms.DrawElectionProof(TK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
+		newTicket := sms.PrepareNewTicket(Randomness1, worker.VRFKeyPair())
+		newEP := sms.DrawElectionProof(RandomnessK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
 
 		if sms.consensus().IsWinningElectionProof(newEP, worker.Address()) {
 			sms.blockProducer().GenerateBlock(newEP, newTicket, sms.blockchain().BestChain().HeadTipset(), worker.Address())
@@ -71,26 +71,26 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 	}
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, vrfKP filcrypto.VRFKeyPair) block.Ticket {
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness block.Randomness, vrfKP filcrypto.VRFKeyPair) block.Ticket {
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	var input []byte
 	input = append(input, spc.VRFPersonalizationTicket)
-	input = append(input, priorTicket.Output()...)
+	input = append(input, randomness...)
 
 	// run through VRF
-	// TODO: uncomment below
-	// vrfRes := vrfKP.Generate(input)
-	var newTicket block.Ticket
+	vrfRes := vrfKP.Generate(input)
 
-	// return new ticket
-	// newTicket.VRFResult_ = vrfRes
-	// newTicket.Output_ = vrfRes.Output()
+	newTicket := &block.Ticket_I{
+		VRFResult_: vrfRes,
+		Output_:    vrfRes.Output(),
+	}
+
 	return newTicket
 }
 
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Ticket, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
+func (sms *StorageMiningSubsystem_I) DrawElectionProof(randomness block.Randomness, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
 	panic("")
 	// // 0. Prepare new election proof
 	// var newEP ElectionProof

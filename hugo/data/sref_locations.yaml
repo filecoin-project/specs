@@ -15,20 +15,20 @@ chainsync: [systems, filecoin_blockchain, chainsync]
 
 ### SPC
 storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
+tickets: [systems, filecoin_blockchain, storage_power_consensus, tickets]
 ticket_chain: [systems, filecoin_blockchain, storage_power_consensus, ticket_chain]
+ticket_generation: [systems, filecoin_blockchain, storage_power_consensus, ticket_generation]
 
 ### Storage Market Actor
 power_table: [systems, filecoin_blockchain, storage_power_consensus, storage_power_actor, power_table]
 pledge_collateral: [systems, filecoin_blockchain, storage_power_consensus, storage_power_actor, pledge_collateral]
 
 ### EC
-tickets: [algorithms, expected_consenus, tickets]
 expected_consensus: [algorithms, expected_consensus]
 leader_election: [algorithms, expected_consensus, leader_election]
 chain_selection: [algorithms, expected_consensus, chain_selection]
 finality: [algorithms, expected_consensus, finality]
 consensus_faults: [algorithms, expected_consensus, consensus_faults]
-ticket_generation: [algorithms, expected_consensus, ticket_generation]
 
 ### Chain Sync
 chain_sync: [systems, filecoin_blockchain, chainsync]

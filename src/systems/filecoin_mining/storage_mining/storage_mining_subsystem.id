@@ -57,13 +57,16 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself in BlockProduction
     DrawElectionProof(
-        lookbackTicket  block.Ticket
-        height          block.ChainEpoch
-        vrfKP           filcrypto.VRFKeyPair
+        randomness  block.Randomness
+        height      block.ChainEpoch
+        vrfKP       filcrypto.VRFKeyPair
     ) block.ElectionProof
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    PrepareNewTicket(priorTicket block.Ticket, workerKeyPair filcrypto.VRFKeyPair) block.Ticket
+    PrepareNewTicket(
+        randomness     block.Randomness
+        workerKeyPair  filcrypto.VRFKeyPair
+    ) block.Ticket
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()
