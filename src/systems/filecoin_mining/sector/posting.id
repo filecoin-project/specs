@@ -45,8 +45,3 @@ type ChallengeTicket struct {
 }
 
 type PrivatePoStProof struct {}
-
-type PoStVerifyInfo struct {
-    PoStCfg
-    Tickets [ChallengeTicket]
-}

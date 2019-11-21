@@ -8,14 +8,8 @@ import (
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-<<<<<<< HEAD
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-=======
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
->>>>>>> wire ePoSt with proof, election and randomness
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	util "github.com/filecoin-project/specs/util"
 )
 

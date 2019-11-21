@@ -3,7 +3,6 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import util "github.com/filecoin-project/specs/util"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
     // actor                StoragePowerActor
