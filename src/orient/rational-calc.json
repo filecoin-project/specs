@@ -27,8 +27,10 @@
     "window_size_mb": 4,
     "rig_cores": 16,
     "rig_storage_min_tb": 100,
-    "kdf_constraints": 20000,
+    "kdf_constraints": 25000,
     "leaf_hash_constraints": 2,
     "porep_challenges": 300,
-    "post_challenges": 300
+    "post_challenges": 300,
+    "rig_storage_latency_throughput_kb": 128,
+    "merkle_tree_datahash_constraints": 56000
 }

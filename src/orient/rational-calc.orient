@@ -42,6 +42,10 @@ FastPorep:
     Response:
       response_honest_min = post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
 
+    Response (NoWrapper):
+      //rig_storage_latency_throughput_kb = rig_storage_latency_throughput / 1024
+      //response_honest_min = (post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency * windows) / rig_storage_latency_throughput
+
     Throughput:
       // num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
       // rig_cores = num_parallel_encoding
@@ -59,7 +63,11 @@ FastPorep:
         post_snark_partitions = post_snark_constraints / post_max_snark_constraints
         post_snark_size = post_snark_partitions * snark_size
         post_snark_size_kb = post_snark_size / 1024
+
       PoRep:
+        data_inclusion = merkle_tree_datahash_constraints * log2(nodes)
+        data_inclusions = data_inclusion * porep_challenges * windows
+
         window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
         window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
 
@@ -70,7 +78,7 @@ FastPorep:
         encoding_proof = kdf_constraints * graph_parents
         window_encoding_proof = encoding_proof * windows
 
-        porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof
+        porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof + data_inclusions
 
         porep_snark_partitions = porep_snark_constraints / porep_max_snark_constraints
         porep_snark_size = porep_snark_partitions * snark_size
