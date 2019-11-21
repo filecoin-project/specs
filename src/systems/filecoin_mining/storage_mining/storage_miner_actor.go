@@ -551,7 +551,7 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	// but miner can RecoverFaults in recovery before cleanup
 	if !a._isInCleanup(rt) {
 		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("sm.RecoverFaults: cannot RecoverFaults when sm _hasPassedFirstCleanupChallenge")
+		rt.Abort("sm.RecoverFaults: cannot RecoverFaults when sm _isInCleanup")
 	}
 
 	h, st := a.State(rt)
