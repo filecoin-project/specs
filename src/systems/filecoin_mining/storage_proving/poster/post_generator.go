@@ -15,7 +15,7 @@ type Serialization = util.Serialization
 // TODO: Unify with orient model.
 const POST_CHALLENGE_DEADLINE = uint(480)
 
-func (pg *PoStGenerator_I) GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, candidateCount int, sectors []sector.SectorID, sectorStore sector_index.SectorStore) []sector.ChallengeTicket {
+func GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, candidateCount int, sectorIDs []sector.SectorID, sectorStore sector_index.SectorStore) []sector.ChallengeTicket {
 	// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 	// Like this:
 	// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -31,7 +31,7 @@ func (pg *PoStGenerator_I) GeneratePoStCandidates(postCfg sector.PoStCfg, challe
 
 	sdr := makeStackedDRGForPoSt(postCfg)
 	var sectorNumbers []sector.SectorNumber
-	for _, s := range sectors {
+	for _, s := range sectorIDs {
 		sectorNumbers = append(sectorNumbers, s.Number())
 	}
 
