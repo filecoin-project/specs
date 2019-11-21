@@ -4,7 +4,7 @@ import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+	//	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -35,11 +35,13 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize util.U
 
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.ChallengeTicket {
-	numChallengeTickets := len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN
+	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
 
 	// TODO: Get these correctly.
 	var cfg sector.PoStCfg
 	var sectorStore sector_index.SectorStore
+
+	var poster = sps.PoStGenerator()
 
 	poster.GeneratePoStCandidates(cfg, challengeSeed, numChallengeTickets, sectorIDs, sectorStore)
 
