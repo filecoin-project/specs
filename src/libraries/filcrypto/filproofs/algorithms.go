@@ -247,8 +247,9 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 	commD, _ := ComputeDataCommitment(windowDataRootLeafRow)
 
 	// Final sealSeed uses index following last window's sealseed.
-	sealSeed := computeSealSeed(sid, windowCount, randomness, commD)
-	key := labelLayer(sdr.drg(), sdr.expander(), sealSeed, nodes, nodeSize, finalWindowKeyLayer)
+	wrapperWindowIndex := windowCount
+	sealSeed := computeSealSeed(sid, wrapperWindowIndex, randomness, commD)
+	key := labelLayer(sdr.drg(), sdr.expander(), sealSeed, wrapperWindowIndex, nodes, nodeSize, finalWindowKeyLayer)
 
 	replica := encodeData(data, key, nodeSize, &curveModulus)
 
@@ -304,20 +305,21 @@ func computeSealSeed(sid sector.SectorID, windowIndex int, randomness sector.Sea
 	return sector.SealSeed{}
 }
 
-func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, nodes int, layers int, nodeSize int, modulus big.Int) [][]byte {
+func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, windows int, nodes int, layers int, nodeSize int, modulus big.Int) [][]byte {
 	var keyLayers [][]byte
 	var prevLayer []byte
 
-	for i := 0; i <= layers; i++ {
-		currentLayer := labelLayer(drg, expander, sealSeed, nodes, nodeSize, prevLayer)
-		keyLayers = append(keyLayers, currentLayer)
-		prevLayer = currentLayer
+	for w := 0; i < windows; w++ {
+		for i := 0; i < layers; i++ { 
+			currentLayer := labelLayer(drg, expander, sealSeed, nodes, nodeSize, prevLayer)
+			keyLayers = append(keyLayers, currentLayer) 
+			prevLayer = currentLayer }
 	}
 
 	return keyLayers
 }
 
-func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, nodeSize int, nodes int, prevLayer []byte) []byte {
+func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, window int, nodeSize int, nodes int, prevLayer []byte) []byte {
 	size := nodes * nodeSize
 	labels := make([]byte, size)
 
@@ -340,7 +342,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed,
 			}
 		}
 
-		label := generateLabel(sealSeed, i, parents)
+		label := generateLabel(sealSeed, i, window, parents)
 		labels = append(labels, label...)
 	}
 
@@ -360,11 +362,14 @@ func encodeData(data []byte, key []byte, nodeSize int, modulus *big.Int) []byte 
 	return encoded
 }
 
-func generateLabel(sealSeed sector.SealSeed, node int, dependencies []Label) []byte {
+func generateLabel(sealSeed sector.SealSeed, node int, window int, dependencies []Label) []byte {
+	windowBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(windowBytes, uint64(window))
 	nodeBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(nodeBytes, uint64(node))
 
-	preimage := append(sealSeed, nodeBytes...)
+	preimage := append(sealSeed, windowBytes...)
+	preimage = append(preimage, nodeBytes...)
 	for _, dependency := range dependencies {
 		preimage = append(preimage, dependency...)
 	}
