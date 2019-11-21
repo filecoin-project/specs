@@ -78,53 +78,65 @@ func (st *SectorTable_I) InactivePower() block.StoragePower {
 	return block.StoragePower((st.CommittedSectors_ + st.RecoveringSectors_ + st.FailingSectors_) * util.UVarint(st.SectorSize_))
 }
 
-func (cs *ChallengeStatus_I) OnNewChallenge(currEpoch block.ChainEpoch) ChallengeStatus {
-	cs.LastChallengeEpoch_ = currEpoch
-	return cs
+func (ps *PoStStatus_I) IsInCleanup(currEpoch block.ChainEpoch) bool {
+	cleanupPeriodEnd := ps.CleanupPeriodStart() + CLEANUP_PERIOD_DURATION
+	return currEpoch > ps.CleanupPeriodStart() && currEpoch < cleanupPeriodEnd
 }
 
-// Call by _onSuccessfulPoSt / _onMissedPoSt
-// TODO: verify this is correct and if we need to distinguish _onSuccessfulPoSt vs _onMissedPoSt
-func (cs *ChallengeStatus_I) OnChallengeResponse(currEpoch block.ChainEpoch) ChallengeStatus {
-	cs.LastChallengeEndEpoch_ = currEpoch
-	return cs
+func (ps *PoStStatus_I) HasFailedCleanup(currEpoch block.ChainEpoch) bool {
+	cleanupPeriodEnd := ps.CleanupPeriodStart() + CLEANUP_PERIOD_DURATION
+	if currEpoch > cleanupPeriodEnd {
+		ps.Impl().CleanupPeriodStart_ = ps.CleanupPeriodStart() + ELECTION_PERIOD_DURATION
+		return true
+	}
+	return false
 }
 
-func (cs *ChallengeStatus_I) IsChallenged() bool {
-	// true (isChallenged) when LastChallengeEpoch is later than LastChallengeEndEpoch
-	return cs.LastChallengeEpoch() > cs.LastChallengeEndEpoch()
+func (ps *PoStStatus_I) IsInElection(currEpoch block.ChainEpoch) bool {
+	return currEpoch <= (ps.electionPeriodStart() + ELECTION_PERIOD_DURATION)
 }
 
-func (st *StorageMinerActorState_I) _isChallenged(rt Runtime) bool {
-	return st.ChallengeStatus().IsChallenged()
+func (ps *PoStStatus_I) HasPassedFirstCleanupChallenge(currEpoch block.ChainEpoch) bool {
+	return !ps.IsInElection(currEpoch) || ps.IsInCleanup()
 }
 
-func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
+func (ps *PoStStatus_I) ResetPoStStatus(currEpoch block.ChainEpoch) {
+	ps.Impl().ElectionPeriodStart_ = currEpoch
+	ps.Impl().CleanupPeriodStart_ = currEpoch + ELECTION_PERIOD_DURATION - CLEANUP_PERIOD_DURATION
+}
+
+func (a *StorageMinerActorCode_I) _isInCleanup(rt Runtime) bool {
 	h, st := a.State(rt)
-	ret := st._isChallenged(rt)
+	ret := st.PoStStatus().Impl().IsInCleanup(rt.CurrEpoch())
 	Release(rt, h, st)
 	return ret
 }
 
-// called by CronActor to notify StorageMiner of PoSt Challenge
-func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
-	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
-
-	if a._isChallenged(rt) {
-		return rt.SuccessReturn() // silent return, dont re-challenge
-	}
-
-	if !a._shouldChallenge(rt) {
-		return rt.SuccessReturn() // silent return, dont re-challenge
-	}
-
-	a._expirePreCommittedSectors(rt)
-
+func (a *StorageMinerActorCode_I) _hasFailedCleanup(rt Runtime) bool {
 	h, st := a.State(rt)
-	st.ChallengeStatus().Impl().OnNewChallenge(rt.CurrEpoch())
-	UpdateRelease(rt, h, st)
+	ret := st.PoStStatus().Impl().HasFailedCleanup(rt.CurrEpoch())
+	Release(rt, h, st)
+	return ret
+}
 
-	return rt.SuccessReturn()
+func (a *StorageMinerActorCode_I) _isInElection(rt Runtime) bool {
+	h, st := a.State(rt)
+	ret := st.PoStStatus().Impl().IsInElection(rt.CurrEpoch())
+	Release(rt, h, st)
+	return ret
+}
+
+func (a *StorageMinerActorCode_I) _resetPoStStatus(rt Runtime) {
+	h, st := a.State(rt)
+	st.PoStStatus().Impl().ResetPoStStatus(rt.CurrEpoch())
+	UpdateRelease(rt, h, st)
+}
+
+func (a *StorageMinerActorCode_I) _hasPassedFirstCleanupChallenge(rt Runtime) bool {
+	h, st := a.State(rt)
+	ret := st.PoStStatus().Impl().HasPassedFirstCleanupChallenge(rt.CurrEpoch())
+	Release(rt, h, st)
+	return ret
 }
 
 func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
@@ -201,9 +213,7 @@ func (a *StorageMinerActorCode_I) _onMissedCleanUpPoSt(rt Runtime) {
 
 	a._submitPowerReport(rt)
 
-	// end of challenge
 	h, st = a.State(rt)
-	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
 	st._updateCommittedSectors(rt)
 	UpdateRelease(rt, h, st)
 }
@@ -215,16 +225,25 @@ func (a *StorageMinerActorCode_I) _onMissedCleanUpPoSt(rt Runtime) {
 func (a *StorageMinerActorCode_I) CheckCleanUpPoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
-	if !a._isChallenged(rt) {
+	// we can return if miner has not yet gotten the chance to submit a cleanup post
+	if !a._hasPassedFirstCleanupChallenge {
 		// Miner gets out of a challenge when submit a successful PoSt
-		// or when detected by CronActor. Hence, not being in isChallenged means that we are good here
+		// or when detected by CronActor. Hence, not being in _isInCleanup means that we are good here
 		return rt.SuccessReturn()
 	}
 
+	// garbage collection - need to be called by cron once in a while
 	a._expirePreCommittedSectors(rt)
 
 	// oh no -- we missed it. rekt
-	a._onMissedCleanUpPoSt(rt)
+	if a._hasFailedCleanup(rt) {
+		a._onMissedCleanUpPoSt(rt)
+
+		h, st := a.State(rt)
+		newCleanupPeriodStart := st.PoStStatus().CleanupPeriodStart() + CLEANUP_PERIOD_DURATION
+		st.PoStStatus().Impl().CleanupPeriodStart_ = newCleanupPeriodStart
+		UpdateRelease(rt, h, st)
+	}
 
 	return rt.SuccessReturn()
 }
@@ -447,9 +466,12 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
 
 	h, st = a.State(rt)
-	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
+
 	st._updateCommittedSectors(rt)
+
 	UpdateRelease(rt, h, st)
+
+	a._resetPoStStatus(rt)
 
 	return rt.SuccessReturn()
 
@@ -462,15 +484,15 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 
 	TODO() // TODO: validate caller
 
+	if !a._isInElection() {
+		rt.Abort("cannot SubmitElectionPoSt when not in election period")
+	}
+
 	// we do not need to verify post submission here, as this should have already been done
 	// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
 	// significant resources, as proofs are expensive to verify.
 	//
 	// notneeded := a._verifyPoStSubmission(rt, postSubmission)
-
-	h, st := a.State(rt)
-	st.ChallengeStatus().Impl().OnNewChallenge(rt.CurrEpoch())
-	UpdateRelease(rt, h, st)
 
 	return a._onSuccessfulPoSt(rt, postSubmission)
 
@@ -482,17 +504,15 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 func (a *StorageMinerActorCode_I) SubmitCleanUpPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
 	TODO() // TODO: validate caller
 
-	if !a._isChallenged(rt) {
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("cannot SubmitCleanUpPoSt when not challenged")
+	if !a._isInCleanup(rt) {
+		rt.Abort("cannot SubmitCleanUpPoSt when not in cleanup period")
 	}
 
 	// Verify correct PoSt Submission
 	isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
 	if !isPoStVerified {
 		// no state transition, just error out and miner should submitCleanUpPoSt again
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("TODO")
+		rt.Abort("sm.SubmitCleanUpPoSt: cleanup post is not verified")
 	}
 
 	return a._onSuccessfulPoSt(rt, postSubmission)
@@ -543,9 +563,10 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) InvocOutput {
 	TODO() // TODO: validate caller
 
-	if a._isChallenged(rt) {
+	// but miner can RecoverFaults in recovery before cleanup
+	if a._hasPassedFirstCleanupChallenge(rt) {
 		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("cannot RecoverFaults when sm isChallenged")
+		rt.Abort("sm.RecoverFaults: cannot RecoverFaults when sm _hasPassedFirstCleanupChallenge")
 	}
 
 	h, st := a.State(rt)
@@ -595,9 +616,8 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.CompactSectorSet) InvocOutput {
 	TODO() // TODO: validate caller
 
-	if a._isChallenged(rt) {
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("cannot DeclareFaults when challenged")
+	if a._hasPassedFirstCleanupChallenge(rt) {
+		rt.Abort("cannot DeclareFaults when in _isPastFirstCleanup")
 	}
 
 	h, st := a.State(rt)

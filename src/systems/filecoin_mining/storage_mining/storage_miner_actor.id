@@ -38,14 +38,16 @@ type SectorOnChainInfo struct {
     State           SectorState
 }
 
-type ChallengeStatus struct {
-    LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStCleanUpChallenge and SubmitElectionPoSt
-    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon _onSuccessfulPoSt and _onMissedPoSt
+type PoStStatus struct {
+    ElectionPeriodStart    block.ChainEpoch  // get updated by _onSuccessfulPoSt
+    CleanupPeriodStart     block.ChainEpoch
 
-    IsChallenged()         bool  // only True when proving CleanUpPoSt (implicit because ElectionPoSt completes within a block)
-    ShouldChallenge(
-        currEpoch block.ChainEpoch
-    ) bool  // only True when CurrEpoch > LastChallengeEpoch + MIN_CHALLENGE_PERIOD
+    HasFailedCleanup(currEpoch block.ChainEpoch)     bool
+    IsInCleanup(currEpoch block.ChainEpoch)          bool
+    IsInElection(currEpoch block.ChainEpoch)         bool
+    HasPassedFirstCleanupChallenge(currEpoch block.ChainEpoch)   bool
+
+    ResetPoStStatus(currEpoch block.ChainEpoch)
 }
 
 type PreCommittedSector struct {
@@ -68,13 +70,17 @@ type StorageMinerActorState struct {
 
     SectorTable
     SectorExpirationQueue
-    ChallengeStatus
+    PoStStatus
 
     // contains mostly static info about this miner
     Info                          &MinerInfo
 
-    _isChallenged(rt Runtime)     bool
-    _shouldChallenge(rt Runtime)  bool
+    _isInCleanup(rt Runtime)     bool
+    _isInElection(rt Runtime)    bool
+    _hasFailedCleanup(rt Runtime) bool
+    _hasPassedFirstCleanupChallenge(rt Runtime) bool
+    _resetPoStStatus(rt Runtime)
+
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _sectorExists(sectorNo sector.SectorNumber) bool
 
