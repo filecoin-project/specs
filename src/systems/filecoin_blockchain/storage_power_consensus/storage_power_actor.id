@@ -70,7 +70,7 @@ type StoragePowerActorCode struct {
         proof      [block.Block]
     )
 
-    CleanUp(rt Runtime)
+    Cleanup(rt Runtime)
     // this should be part of ReportConsensusFault, numSectors should be all sectors
     // ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
 }

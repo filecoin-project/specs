@@ -39,13 +39,13 @@ type SectorOnChainInfo struct {
 }
 
 type PoStStatus struct {
-    ElectionPeriodStart    block.ChainEpoch  // get updated by _onSuccessfulPoSt
-    CleanupPeriodStart     block.ChainEpoch
+    ElectionPeriodStart  block.ChainEpoch  // get updated by _onSuccessfulPoSt
+    CleanupPeriodStart   block.ChainEpoch
 
-    HasFailedCleanup(currEpoch block.ChainEpoch)     bool
-    IsInCleanup(currEpoch block.ChainEpoch)          bool
-    IsInElection(currEpoch block.ChainEpoch)         bool
-    HasPassedFirstCleanupChallenge(currEpoch block.ChainEpoch)   bool
+    HasFailedCleanup(currEpoch block.ChainEpoch) bool
+    IsInCleanup(currEpoch block.ChainEpoch) bool
+    IsInElection(currEpoch block.ChainEpoch) bool
+    HasPassedFirstCleanupChallenge(currEpoch block.ChainEpoch) bool
 
     ResetPoStStatus(currEpoch block.ChainEpoch)
 }
@@ -60,24 +60,24 @@ type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type StagedCommittedSectorAMT {sector.SectorNumber: SectorOnChainInfo}
 
 type StorageMinerActorState struct {
-    PreCommittedSectors           PreCommittedSectorsAMT
-    Sectors                       SectorsAMT
-    StagedCommittedSectors        StagedCommittedSectorAMT
+    PreCommittedSectors            PreCommittedSectorsAMT
+    Sectors                        SectorsAMT
+    StagedCommittedSectors         StagedCommittedSectorAMT
 
     // ProvingSet gets updated _onSuccessfulPoSt and _onMissedCleanUpPoSt
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-    ProvingSet                    sector.CompactSectorSet
+    ProvingSet                     sector.CompactSectorSet
 
     SectorTable
     SectorExpirationQueue
     PoStStatus
 
     // contains mostly static info about this miner
-    Info                          &MinerInfo
+    Info                           &MinerInfo
 
-    _isInCleanup(rt Runtime)     bool
-    _isInElection(rt Runtime)    bool
-    _hasFailedCleanup(rt Runtime) bool
+    _isInCleanup(rt Runtime)       bool
+    _isInElection(rt Runtime)      bool
+    _hasFailedCleanup(rt Runtime)  bool
     _hasPassedFirstCleanupChallenge(rt Runtime) bool
     _resetPoStStatus(rt Runtime)
 

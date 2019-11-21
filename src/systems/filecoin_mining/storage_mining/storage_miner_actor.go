@@ -1,30 +1,19 @@
 package storage_mining
 
 import (
+	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
-
-	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-
-	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
-	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-
-	util "github.com/filecoin-project/specs/util"
-
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+	util "github.com/filecoin-project/specs/util"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,11 +203,11 @@ func (a *StorageMinerActorCode_I) _onMissedCleanUpPoSt(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-// If a CleanUpPoSt is missed because the miner run out of time,
+// If a CleanupPoSt is missed because the miner run out of time,
 // every sector is reported as failing for the current proving period.
 // TODO: verify that it is okay for an ElectionPoSt submission to be used as a CleanUpPoSt submission
 // because an ElectionPoSt will also get a miner out of Challenged status and update LastChallengeEpoch
-func (a *StorageMinerActorCode_I) CheckCleanUpPoStSubmissionHappened(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) CheckCleanupPoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
 	// we can return if miner has not yet gotten the chance to submit a cleanup post
@@ -494,10 +483,10 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 
 }
 
-// SubmitCleanUpPoSt Workflow:
+// SubmitCleanupPoSt Workflow:
 // - Verify PoSt Submission
 // - Process successful PoSt
-func (a *StorageMinerActorCode_I) SubmitCleanUpPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitCleanupPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
 	TODO() // TODO: validate caller
 
 	if !a._isInCleanup(rt) {
@@ -560,7 +549,7 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	TODO() // TODO: validate caller
 
 	// but miner can RecoverFaults in recovery before cleanup
-	if a._hasPassedFirstCleanupChallenge(rt) {
+	if !a._isInCleanup(rt) {
 		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("sm.RecoverFaults: cannot RecoverFaults when sm _hasPassedFirstCleanupChallenge")
 	}
