@@ -27,10 +27,6 @@ import (
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 )
 
-const (
-	Method_StorageMinerActor_SubmitPoSt = actor.MethodPlaceholder
-)
-
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,11 +89,11 @@ func (ps *PoStStatus_I) HasFailedCleanup(currEpoch block.ChainEpoch) bool {
 }
 
 func (ps *PoStStatus_I) IsInElection(currEpoch block.ChainEpoch) bool {
-	return currEpoch <= (ps.electionPeriodStart() + ELECTION_PERIOD_DURATION)
+	return currEpoch <= (ps.ElectionPeriodStart() + ELECTION_PERIOD_DURATION)
 }
 
 func (ps *PoStStatus_I) HasPassedFirstCleanupChallenge(currEpoch block.ChainEpoch) bool {
-	return !ps.IsInElection(currEpoch) || ps.IsInCleanup()
+	return !ps.IsInElection(currEpoch) || ps.IsInCleanup(currEpoch)
 }
 
 func (ps *PoStStatus_I) ResetPoStStatus(currEpoch block.ChainEpoch) {
@@ -226,7 +222,7 @@ func (a *StorageMinerActorCode_I) CheckCleanUpPoStSubmissionHappened(rt Runtime)
 	TODO() // TODO: validate caller
 
 	// we can return if miner has not yet gotten the chance to submit a cleanup post
-	if !a._hasPassedFirstCleanupChallenge {
+	if !a._hasPassedFirstCleanupChallenge(rt) {
 		// Miner gets out of a challenge when submit a successful PoSt
 		// or when detected by CronActor. Hence, not being in _isInCleanup means that we are good here
 		return rt.SuccessReturn()
@@ -484,7 +480,7 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 
 	TODO() // TODO: validate caller
 
-	if !a._isInElection() {
+	if !a._isInElection(rt) {
 		rt.Abort("cannot SubmitElectionPoSt when not in election period")
 	}
 
@@ -822,7 +818,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		State_:          SectorCommitted(),
 	}
 
-	if st._isChallenged(rt) {
+	if st._isInCleanup(rt) {
 		// move PreCommittedSector to StagedCommittedSectors if in Challenged status
 		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 	} else {
