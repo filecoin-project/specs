@@ -66,30 +66,41 @@ FastPorep:
         post_snark_size_kb = post_snark_size / 1024
 
       PoRep:
+        // D
         // Data layer committed with merkle tree
         data_inclusion = merkle_tree_datahash_constraints * log2(nodes)
         data_inclusions = data_inclusion * porep_challenges
         window_data_inclusions = data_inclusion * porep_challenges * windows
 
+        // C
         window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
         window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
-
         column_leaf = leaf_hash_constraints * drg_layers
         column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
         window_column_leaves = column_leaves * windows
+        labeling_proof = kdf_constraints * graph_parents
+        labeling_proofs = labeling_proof * drg_layers * porep_challenges
+        window_labeling_proof = labeling_proofs * windows
 
-        encoding_proof = kdf_constraints * graph_parents
-        window_encoding_proof = encoding_proof * windows
+        // Q and R
+        replica_inclusion = merkle_tree_hash_constraints * log2(nodes)
+        replica_inclusions = replica_inclusion * porep_challenges
+        window_replica_inclusions = replica_inclusions * windows
 
         porep_snark_partitions = porep_snark_constraints / porep_max_snark_constraints
         porep_snark_size = porep_snark_partitions * snark_size
         porep_snark_size_kb = porep_snark_size / 1024
 
         Constraints (WindowEncoding):
-          porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof + window_data_inclusions
+          porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
 
         Constraints (SectorEncoding):
-          porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof + data_inclusions
+          porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+
+        Constraints (Wrapping):
+          porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+
+        // Column comitting data or replica. 
 
     Cost:
       Compute:
