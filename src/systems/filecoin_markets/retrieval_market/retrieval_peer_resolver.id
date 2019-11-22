@@ -1,0 +1,5 @@
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+
+type RetrievalPeerResolver struct {
+    GetPeers(PieceCid ipld.CID) [RetrievalPeer]
+}

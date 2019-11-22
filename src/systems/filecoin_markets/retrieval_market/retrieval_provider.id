@@ -1,48 +1,36 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 
-type PaymentChannel struct {}
-type CID struct {}
-
-// File Retrieval Query
-type FileRetrievalAvailable struct {
-    MinPrice  actor.TokenAmount
-    Miner     addr.Address
-}
-type FileRetrievalUnavailable struct {}
-type RetrievalQueryResponse union {
-    FileRetrievalAvailable
-    FileRetrievalUnavailable
+type RetrievalProviderDealState struct {
+    RetrievalDealProposal
+    Status                 DealStatus
+    Receiver               libp2p.PeerID
+    TotalSent              UInt
+    FundsReceived          actor.TokenAmount
 }
 
-type RetrievalQuery struct {
-    File CID
+type RetrievalProviderEvent struct {
+    Open
+    Progress
+    Error
+    Complete
 }
 
-// File Retrieval Deal Proposal and Deal
-type RetrievalDealProposalError struct {}
-type RetrievalDealProposalRejected struct {}
-type RetrievalDealProposalAccepted struct {
-    CounterParty  addr.Address
-    Payment       PaymentChannel
+type RetrievalProviderDealID struct {
+    From  libp2p.PeerID
+    ID    RetrievalDealID
 }
-type RetrievalDealProposalResponse union {
-    RetrievalDealProposalAccepted
-    RetrievalDealProposalRejected
-    RetrievalDealProposalError
-}
-type RetrievalDealProposal struct {
-    File      CID
-    Payment   PaymentChannel
-    MinPrice  actor.TokenAmount
+
+type RetrievalProviderSubscriber struct {
+    OnEvent(event RetrievalProviderEvent, RetrievalProviderDealState)
 }
 
 type RetrievalProvider struct {
-    NewRetrievalQuery(query RetrievalQuery) RetrievalQueryResponse
+    // V0
+    SetPricePerByte(price actor.TokenAmount)
+    SubscribeToEvents(subscriber RetrievalProviderSubscriber)
 
-    // NewRetrievalDealProposal is called to propose a retrieval
-    NewRetrievalDealProposal(proposal RetrievalDealProposal) RetrievalDealProposalResponse
-
-    // AcceptRetrievalDeal is called to accept a retrieval deal
-    AcceptRetrievalDealProposal(deal RetrievalDealProposal) RetrievalDealProposalResponse
+    // V1
+    SetPricePerUnseal(price actor.TokenAmount)
+    ListDeals() {RetrievalProviderDealID: RetrievalProviderDealState}
 }

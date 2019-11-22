@@ -1,0 +1,70 @@
+sequenceDiagram
+
+  participant Client as RetrievalClient
+  participant DTC as Data Transfer (Client)
+  participant DTP as Data Transfer (Provider)
+  participant Provider as RetrievalProvider
+  participant Node
+  participant BSP as BlockStore (Provider)
+  participant StorageMiner as Storage Miner
+
+  opt Discovery
+    Client ->> Node : Query Chain For Providers w/ PieceID
+    activate Node
+    Node -->> Client : Providers With PieceID
+    deactivate Node
+  end
+
+  Client ->> Provider : Send Query for Piece
+  activate Provider
+  Provider -->> Client : Send information about Piece (price, size, etc)
+  deactivate Provider
+  Client ->> Node : Create/Activate Payment Channel
+  activate Node
+  Node -->> Client : Message For Channel Gets On Chain
+  deactivate Node
+  Client ->> DTC : Open Pull Data Transfer w/ RetrievalDealProposal voucher
+  activate DTC
+  DTC ->> DTP : Send date transfer pull Request
+  activate DTP
+  DTP ->> Provider : Validate RetrievalDealProposal
+  activate Provider
+  DTP -->> DTC : Data Transfer Accepted
+  opt Unsealing
+  Provider ->> DTP : Pause
+  Provider ->> StorageMiner : Unseal Sector
+  activate StorageMiner
+  StorageMiner -->> Provider : Unsealed Piece Data
+  deactivate StorageMiner
+  Provider ->> BSP: Write Piece Blocks to BlockStore
+  activate BSP
+  BSP -->> Provider : Blocks written
+  deactivate BSP
+  Provider ->> DTP : Unpause
+  end
+  loop Retreive In Pieces
+    Provider ->> DTP : Pause
+    Provider ->> DTP : Send Request Payment Intermediate Voucher
+    DTP ->> DTC : Send Intermediate Voucher
+    DTC ->> Client : Validate Request Payment Voucher
+    activate Client
+    Client ->> Node : Create Voucher On Payment Channel
+    activate Node
+    Node -->> Client : Message For Voucher Gets On Chain
+    deactivate Node
+    Client ->> DTC : Send Payment Intermediate Voucher
+    deactivate Client
+    DTC ->> DTP : Send Intermediate Voucher
+    DTP ->> Provider : Validate Payment Voucher
+    Provider ->> Node : Redeem Voucher On Payment Channel
+    activate Node
+    Node -->> Provider : Message For Voucher Redeemed On Chain
+    deactivate Node
+    Provider ->> DTP : Unpause
+    loop Sending Data Till Payment Required
+        DTP ->> DTC : Send Blocks
+    end
+  end
+  deactivate Provider
+  deactivate DTP
+  deactivate DTC

@@ -1,0 +1,67 @@
+sequenceDiagram
+
+  participant Client as RetrievalClient
+  participant Provider as RetrievalProvider
+  participant Node
+  participant BSC as BlockStore (Client)
+  participant BSP as BlockStore (Provider)
+  participant StorageMiner as Storage Miner
+
+  opt Discovery
+    Client ->> Node : Query Chain For Providers w/ PieceID
+    activate Node
+    Node -->> Client : Providers With PieceID
+    deactivate Node
+  end
+
+  Client ->> Provider : Send Query for Piece
+  activate Provider
+  Provider -->> Client : Send information about Piece (price, size, etc)
+  deactivate Provider
+  Client ->> Node : Create/Activate Payment Channel
+  activate Node
+  Node -->> Client : Message For Channel Gets On Chain
+  deactivate Node
+  Client ->> Provider : Send RetrievalDealProposal
+  activate Provider
+  Provider -->> Client : Send RetrievalDealResponse, accepting
+  activate Client
+  opt Unsealing
+  Provider ->> StorageMiner : Unseal Sector
+  activate StorageMiner
+  StorageMiner -->> Provider : Unsealed Piece Data
+  deactivate StorageMiner
+  Provider ->> BSP: Write Piece Blocks to BlockStore
+  activate BSP
+  BSP -->> Provider : Blocks written
+  deactivate BSP
+  end
+  loop Retreive In Pieces
+    Provider ->> Client : Request Payment
+    activate Client
+    Client ->> Node : Create Voucher On Payment Channel
+    activate Node
+    Node -->> Client : Message For Voucher Gets On Chain
+    deactivate Node
+    Client -->> Provider : Send Payment
+    deactivate Client
+    Provider ->> Node : Redeem Voucher On Payment Channel
+    activate Node
+    Node -->> Provider : Message For Voucher Redeemed On Chain
+    deactivate Node
+    loop Sending Data Till Payment Required
+        Provider ->> BSP: Read Blocks fro  BlockStore
+        activate BSP
+        BSP -->> Provider : Blocks
+        deactivate BSP
+        Provider ->> Client : Send Blocks
+        activate Client
+        Client ->> Client : Verify Blocks
+        Client ->> BSC : Write Blocks
+        activate BSC
+        BSC --> Client: Blocks written
+        deactivate BSC
+        deactivate Client
+    end
+  end
+  deactivate Provider

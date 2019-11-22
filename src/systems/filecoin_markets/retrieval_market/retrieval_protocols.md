@@ -1,0 +1,26 @@
+---
+title: "Retrieval Peer Resolver"
+---
+
+# Retrieval Protocals
+
+The `retrieval market` will initially be implemented as two `libp2p` services.
+
+- **Name**: Query Protocol
+- **Protocol ID V0**: `/fil/retrieval/qry/0.0.1`
+- **Protocol ID V1**: `/fil/retrieval/qry/1.0.0`
+
+Request: CBOR Encoded RetrievalQuery Data Structure
+Response: CBOR Encoded RetrievalQueryResponse Data Structure
+
+- **Name**: Retrieval Protocol
+- **Protocol ID V0**: `/fil/retrieval/0.0.1` 
+
+V0:
+Request: CBOR Encoded RetrievalDealProposal Data Structure
+Response: CBOR Encoded RetrievalDealResponse Data Structure
+-- Following
+Request: CBOR Encoded RetrievalPayment Data Structure
+Response: CBOR Encoded RetrievalDealResponse Data Structure w/ Blocks
+
+V1: Protocol does not exist in this version

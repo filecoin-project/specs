@@ -23,12 +23,14 @@ type RetrievalDealVoucher struct {
 }
 
 type Ongoing struct {}
+type Paused struct {}
 type Completed struct {}
 type Failed struct {}
 type ChannelNotFoundError struct {}
 
 type DataTransferStatus union {
     Ongoing
+    Paused
     Completed
     Failed
     ChannelNotFoundError
@@ -68,14 +70,33 @@ type DataTransferState struct @(mutable) {
     received             UVarint
 }
 
-type Open struct {}
-type Progress struct {}
-type Error struct {}
+type Open struct {
+    Initiator libp2p.PeerID
+}
+
+type SendData struct {
+    BytesToSend UInt
+}
+
+type Progress struct {
+    BytesSent UInt
+}
+
+type Pause struct {
+    Initiator libp2p.PeerID
+}
+
+type Error struct {
+    ErrorMsg string
+}
+
 type Complete struct {}
 
 type DataTransferEvent union {
     Open
+    SendData
     Progress
+    Pause
     Error
     Complete
 }
@@ -97,6 +118,12 @@ type RequestValidator struct {
         voucher   DataTransferVoucher
         PieceRef  ipld.CID
         Selector  ipld.Selector
+    )
+    ValidateIntermediate(
+        otherPeer  libp2p.PeerID
+        voucher    DataTransferVoucher
+        PieceRef   ipld.CID
+        Selector   ipld.Selector
     )
 }
 
@@ -130,6 +157,15 @@ type DataTransferSubsystem struct @(mutable) {
 
     // get status of a transfer
     TransferChannelStatus(x ChannelID) DataTransferStatus
+
+    // pause an ongoing channel
+    PauseChannel(x ChannelID)
+
+    // resume an ongoing channel
+    ResumeChannel(x ChannelID)
+
+    // send an additional voucher for an in progress request
+    SendIntermediateVoucher(x ChannelID, voucher DataTransferVoucher)
 
     // get notified when certain types of events happen
     SubscribeToEvents(subscriber DataTransferSubscriber)
