@@ -60,13 +60,16 @@ FastPorep:
         inclusion_proofs = inclusion_proof * post_challenges
         ticket_proofs = ticket_constraints * post_challenges
         post_snark_constraints = ticket_proofs + inclusion_proofs
+
         post_snark_partitions = post_snark_constraints / post_max_snark_constraints
         post_snark_size = post_snark_partitions * snark_size
         post_snark_size_kb = post_snark_size / 1024
 
       PoRep:
+        // Data layer committed with merkle tree
         data_inclusion = merkle_tree_datahash_constraints * log2(nodes)
-        data_inclusions = data_inclusion * porep_challenges * windows
+        data_inclusions = data_inclusion * porep_challenges
+        window_data_inclusions = data_inclusion * porep_challenges * windows
 
         window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
         window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
@@ -78,11 +81,15 @@ FastPorep:
         encoding_proof = kdf_constraints * graph_parents
         window_encoding_proof = encoding_proof * windows
 
-        porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof + data_inclusions
-
         porep_snark_partitions = porep_snark_constraints / porep_max_snark_constraints
         porep_snark_size = porep_snark_partitions * snark_size
         porep_snark_size_kb = porep_snark_size / 1024
+
+        Constraints (WindowEncoding):
+          porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof + window_data_inclusions
+
+        Constraints (SectorEncoding):
+          porep_snark_constraints = window_inclusions + window_column_leaves + window_encoding_proof + data_inclusions
 
     Cost:
       Compute:
