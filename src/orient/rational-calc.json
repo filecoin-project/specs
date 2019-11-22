@@ -12,9 +12,8 @@
         "expander_parents": 16,
         "drg_parents": 0,
         "hashing_time": 0.0000000128,
-        "drg_layers": 5,
+        "drg_layers": 3,
         "drg_d": 0.003,
-        "spacegap": 0.4,
         "hashing_amax": 2,
         "rig_size": 1,
         "rig_ram_gb": 32,
@@ -24,15 +23,17 @@
         "porep_max_snark_constraints": 100000000,
         "ticket_constraints": 1376,
         "merkle_tree_hash_constraints": 1376,
-        "window_size_mb": 1024,
+        "window_size_mb": 32768,
         "rig_cores": 16,
         "rig_storage_min_tb": 100,
         "kdf_constraints": 25000,
         "leaf_hash_constraints": 2,
-        "porep_challenges": 300,
         "post_challenges": 300,
         "rig_storage_latency_throughput_kb": 128,
         "merkle_tree_datahash_constraints": 56000,
-        "!SectorEncoding": true
+        "lambda": 10,
+        "porep_challenges": 200,
+        "!SectorEncoding": true,
+        "rig_storage_read_mbs": 80
     }
 ]
