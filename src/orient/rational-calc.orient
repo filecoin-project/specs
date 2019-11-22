@@ -1,4 +1,6 @@
 FastPorep:
+  Security:
+    porep_challenges = -lambda / (log2(1-spacegap/4))
   Utils:
     b_in_gb = (1024 * 1024 * 1024)
     secs_in_month = (24 * 30 * 60 * 60)
@@ -25,6 +27,8 @@ FastPorep:
     rig_storage_unit_min_tb = rig_storage_unit_min / (1024 * 1024 * 1024 * 1024)
 
   Honest:
+    Retrieval:
+      // window_read = rig_storage_read_mbs 
     Encoding:
       encoding_window_time = (window_nodes * graph_parents) * hashing_time * drg_layers
       encoding_time = encoding_window_time * windows
