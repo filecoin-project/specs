@@ -356,17 +356,17 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed,
 	return labels
 }
 
+// Encodes data in-place, mutating it.
 func encodeData(data []byte, key []byte, nodeSize int, modulus *big.Int) []byte {
 	if len(data) != len(key) {
 		panic("Key and data must be same length.")
 	}
 
-	encoded := make([]byte, len(data))
 	for i := 0; i < len(data); i += nodeSize {
-		copy(encoded[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], modulus, nodeSize))
+		copy(data[i:i+nodeSize], encodeNode(data[i:i+nodeSize], key[i:i+nodeSize], modulus, nodeSize))
 	}
 
-	return encoded
+	return data
 }
 
 func generateLabel(sealSeed sector.SealSeed, node int, window int, dependencies []Label) []byte {
@@ -870,10 +870,10 @@ func (sdr *WinStackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomnes
 
 func (sdr *WinStackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
 	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
-	var proofAuxs []sector.ProofAux
+	var proofAuxs []sector.PersistentProofAux
 
 	for _, sector := range challengedSectors {
-		proofAux := sectorStore.GetSectorProofAux(sector)
+		proofAux := sectorStore.GetSectorPersistentProofAux(sector)
 		proofAuxs = append(proofAuxs, proofAux)
 	}
 

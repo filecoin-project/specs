@@ -79,11 +79,11 @@ type SectorInDetail struct {
 // SectorInfo is an object that gathers all the information miners know about their
 // sectors. This is meant to be used for a local index.
 type SectorInfo struct {
-    ID              SectorID
-    UnsealedInfo    UnsealedSectorInfo
-    SealedInfo      SealedSectorInfo
+    ID                  SectorID
+    UnsealedInfo        UnsealedSectorInfo
+    SealedInfo          SealedSectorInfo
     SealVerifyInfo
-    ProofAux
+    PersistentProofAux
 }
 
 // UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector

@@ -51,8 +51,9 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 		SectorSealer_SealSector_FunRet_so(
 			&SealOutputs_I{
 				ProofAuxTmp_: &sector.ProofAuxTmp_I{
-					PersistentAux_: &sector.ProofAux_I{
+					PersistentAux_: &sector.PersistentProofAux_I{
 						CommC_:             sealArtifacts.CommC(),
+						CommQ_:             sealArtifacts.CommQ(),
 						CommRLast_:         sealArtifacts.CommRLast(),
 						CommRLastTreePath_: sealArtifacts.CommRLastTreePath(),
 					},
@@ -60,6 +61,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CommR_:          sealArtifacts.CommR(),
 					CommDTreePaths_: sealArtifacts.CommDTreePaths(),
 					CommCTreePath_:  sealArtifacts.CommCTreePath(),
+					CommQTreePath_:  sealArtifacts.CommQTreePath(),
 					Seeds_:          sealArtifacts.Seeds(),
 					KeyLayers_:      sealArtifacts.KeyLayers(),
 				}})).Impl()
