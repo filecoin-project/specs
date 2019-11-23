@@ -32,7 +32,7 @@ func (p *StorageDealProposal_I) TotalClientCollateral() actor.TokenAmount {
 }
 
 func (p *StorageDealProposal_I) ClientBalanceRequirement() actor.TokenAmount {
-	return (p.TotalClientCollateral() + p.TotalClientCollateral())
+	return (p.TotalClientCollateral() + p.TotalStorageFee())
 }
 
 func (p *StorageDealProposal_I) ProviderBalanceRequirement() actor.TokenAmount {

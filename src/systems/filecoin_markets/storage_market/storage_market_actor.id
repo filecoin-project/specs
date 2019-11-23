@@ -10,11 +10,11 @@ type StorageParticipantBalance struct {
 }
 
 type BalancesHAMT {addr.Address: StorageParticipantBalance}
-type DealAMT {deal.DealID: deal.OnchainDeal}
+type DealsAMT {deal.DealID: deal.OnchainDeal}
 
 type StorageMarketActorState struct {
     Balances               BalancesHAMT
-    Deals                  DealAMT
+    Deals                  DealsAMT
     DealCollateralSlashed  actor.TokenAmount
 
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
@@ -46,7 +46,7 @@ type StorageMarketActorState struct {
     _getOnchainDeal(rt Runtime, dealID deal.DealID) deal.OnchainDeal
     _assertPublishedDealState(rt Runtime, dealID deal.DealID)
     _assertActiveDealState(rt Runtime, dealID deal.DealID)
-    _activateDeal(rt Runtime, dealID deal.DealID)
+    _activateDeal(rt Runtime, deal deal.OnchainDeal) deal.OnchainDeal
 
     _getStorageFeeSinceLastPayment(
         rt               Runtime
@@ -91,10 +91,7 @@ type StorageMarketActorCode struct {
     //     - deals have not expired, OK if deals have started
     // Fail ProveCommit if any of the above is not true and abort
     // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
-    ActivateDeals(rt Runtime, dealIDs [deal.DealID])
-
-    // call by sm.ProveCommitSector to get deals in a Sector
-    GetActiveDeals(rt Runtime, dealIDs [deal.DealID]) [deal.OnchainDeal]
+    ActivateDeals(rt Runtime, dealIDs [deal.DealID]) [deal.OnchainDeal]
 
     // call by StorageMinerActor
     // slash deal collateral depending on the faults (only TerminatedFault)
@@ -107,7 +104,11 @@ type StorageMarketActorCode struct {
     // batch process storage deal payment
     // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
     // client only stops paying when a sector gets cleared (expired or faulted)
-    ProcessDealPayment(rt Runtime, dealIDs [deal.DealID], lastPoSt block.ChainEpoch)
+    ProcessDealPayment(
+        rt               Runtime
+        dealIDs          [deal.DealID]
+        newPaymentEpoch  block.ChainEpoch
+    )
 
     // batch process storage deal expiration
     ProcessDealExpiration(rt Runtime, dealIDs [deal.DealID])

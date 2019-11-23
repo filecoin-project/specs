@@ -5,6 +5,7 @@ import (
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
@@ -14,7 +15,6 @@ import (
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	util "github.com/filecoin-project/specs/util"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 )
 
 const (
@@ -111,7 +111,6 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-
 func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 	for sectorNo, stagedInfo := range st.StagedCommittedSectors() {
 		st.Sectors()[sectorNo] = stagedInfo.Sector()
@@ -171,6 +170,8 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 }
 
 // construct PowerReport from SectorTable
+// need lastPoSt to search for new expired deals in _updateSectorUtilization
+// where DealExpirationAMT takes in a range of Epoch and return a list of values that expire in that range
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch) {
 	h, st := a.State(rt)
 	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoSt)
@@ -191,7 +192,6 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoSt block.
 		// Send(StorageMarketActor, ProcessDealExpiration)
 	}
 
-	// Send(StorageMarketActor, ProcessDealPayment)
 }
 
 func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
@@ -480,8 +480,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 			st._updateActivateSector(rt, sectorNo)
 		case SectorActiveSN:
 			// do nothing
-			// deal payment is lazily evaluated when deals are expired during _updateSectorUtilization
-			// or when miner calls CreditSectorDealPayment
+			// deal payment is made at _onSuccessfulPoSt
 		default:
 			// TODO: determine proper error here and error-handling machinery
 			rt.Abort("Invalid sector state in ProvingSet.SectorsOn()")

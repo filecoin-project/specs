@@ -123,8 +123,9 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 			id := st._generateStorageDealID(rt, newDeal)
 
 			onchainDeal := &deal.OnchainDeal_I{
+				ID_:               id,
 				Deal_:             newDeal,
-				LastPaymentEpoch_: block.ChainEpoch(0),
+				LastPaymentEpoch_: block.ChainEpoch(0), // 0 = inactive
 			}
 			st.Deals()[id] = onchainDeal
 			response[i] = PublishStorageDealSuccess(id)
@@ -162,11 +163,12 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 	Release(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.DealID) {
+func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.DealID) []deal.OnchainDeal {
 
 	TODO() // verify StorageMinerActor
 
 	h, st := a.State(rt)
+	ret := make([]deal.OnchainDeal, len(dealIDs))
 
 	for _, dealID := range dealIDs {
 		publishedDeal := st._getOnchainDeal(rt, dealID)
@@ -175,34 +177,11 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 		dealP := publishedDeal.Deal().Proposal()
 		st._assertDealNotYetExpired(rt, dealP)
 
-		st._activateDeal(rt, dealID)
-
-		publishedDeal.Impl().LastPaymentEpoch_ = dealP.StartEpoch()
-		st.Deals()[dealID] = publishedDeal
-
+		onchainDeal := st._activateDeal(rt, publishedDeal)
+		ret = append(ret, onchainDeal)
 	}
 
 	UpdateRelease(rt, h, st)
-
-}
-
-func (a *StorageMarketActorCode_I) GetActiveDeals(rt Runtime, dealIDs []deal.DealID) []deal.OnchainDeal {
-
-	TODO() // verify StorageMinerActor
-
-	h, st := a.State(rt)
-
-	ret := make([]deal.OnchainDeal, len(dealIDs))
-
-	for _, dealID := range dealIDs {
-
-		activeDeal := st._getOnchainDeal(rt, dealID)
-		st._assertActiveDealState(rt, dealID)
-
-		ret = append(ret, activeDeal)
-	}
-
-	Release(rt, h, st)
 
 	return ret
 
@@ -227,20 +206,20 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.D
 
 }
 
-func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal.DealID, lastPoSt block.ChainEpoch) {
+func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal.DealID, newPaymentEpoch block.ChainEpoch) {
 	h, st := a.State(rt)
 
 	for _, dealID := range dealIDs {
 		deal := st._getOnchainDeal(rt, dealID)
 		st._assertActiveDealState(rt, dealID)
 
-		fee := st._getStorageFeeSinceLastPayment(rt, deal, lastPoSt)
+		fee := st._getStorageFeeSinceLastPayment(rt, deal, newPaymentEpoch)
 
 		dealP := deal.Deal().Proposal()
 		st._transferBalance(rt, dealP.Client(), dealP.Provider(), fee)
 
 		// update LastPaymentEpoch in deal
-		deal.Impl().LastPaymentEpoch_ = lastPoSt
+		deal.Impl().LastPaymentEpoch_ = newPaymentEpoch
 		st.Deals()[dealID] = deal
 	}
 

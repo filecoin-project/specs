@@ -119,16 +119,13 @@ func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.
 	return true
 }
 
-func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, dealID deal.DealID) {
+func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, deal deal.OnchainDeal) deal.OnchainDeal {
 
-	deal := st._getOnchainDeal(rt, dealID)
+	dealP := deal.Deal().Proposal()
+	deal.Impl().LastPaymentEpoch_ = dealP.StartEpoch()
+	st.Deals()[deal.ID()] = deal
 
-	if rt.CurrEpoch() <= deal.LastPaymentEpoch() {
-		rt.Abort("sma._activeDeal: currenet epoch is behind or the same as last payment epoch.")
-	}
-
-	deal.Impl().LastPaymentEpoch_ = rt.CurrEpoch()
-
+	return deal
 }
 
 // TODO: consider returning a boolean
@@ -184,7 +181,7 @@ func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal d
 func (st *StorageMarketActorState_I) _getOnchainDeal(rt Runtime, dealID deal.DealID) deal.OnchainDeal {
 	deal, found := st.Deals()[dealID]
 	if !found {
-		rt.Abort("sm._getDeal: dealID not found in Deals.")
+		rt.Abort("sm._getOnchainDeal: dealID not found in Deals.")
 	}
 
 	return deal
