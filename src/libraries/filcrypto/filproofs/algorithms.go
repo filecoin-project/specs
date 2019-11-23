@@ -246,7 +246,7 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 
 	commD, _ := ComputeDataCommitment(windowDataRootLeafRow)
 
-	qLayer := encodeData(data, finalWindowKeyLayer, nodeSize, &curveModulus)
+	qLayer := encodeDataInPlace(data, finalWindowKeyLayer, nodeSize, &curveModulus)
 
 	// Final sealSeed uses index following last window's sealseed.
 	wrapperWindowIndex := windowCount
@@ -357,7 +357,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed,
 }
 
 // Encodes data in-place, mutating it.
-func encodeData(data []byte, key []byte, nodeSize int, modulus *big.Int) []byte {
+func encodeDataInPlace(data []byte, key []byte, nodeSize int, modulus *big.Int) []byte {
 	if len(data) != len(key) {
 		panic("Key and data must be same length.")
 	}
@@ -539,7 +539,7 @@ func (sdr *WinStackedDRG_I) VerifyPrivateProof(privateProof []OfflineWindowChall
 				return false
 			}
 
-			encodedNode := encodeData(dataNode, keyNode, int(sdr.NodeSize()), &curveModulus)
+			encodedNode := encodeNode(dataNode, keyNode, &curveModulus, int(sdr.NodeSize()))
 			if !bytes.Equal(encodedNode, replicaNode) {
 				return false
 			}
