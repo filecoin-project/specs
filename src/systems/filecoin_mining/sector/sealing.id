@@ -67,9 +67,10 @@ type SectorProveCommitInfo struct {
 // ProofAux is meta data required to generate certain proofs
 // for a sector, for example PoSt.
 // These should be stored and indexed somewhere by CommR.
-type ProofAux struct {
-    CommRLast          Commitment
+type PersistentProofAux struct {
     CommC              Commitment
+    CommQ              Commitment
+    CommRLast          Commitment
 
     // TODO: This may be a partially-cached tree.
     // this may be empty
@@ -77,13 +78,14 @@ type ProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    PersistentAux   ProofAux
+    PersistentAux   PersistentProofAux  // TODO: Move this to sealer.SealOutputs.
 
     SectorID
     CommD           Commitment
     CommR           SealedSectorCID
     CommDTreePaths  [file.Path]
     CommCTreePath   file.Path
+    CommQTreePath   file.Path
 
     Seeds           [SealSeed]
     KeyLayers       [Bytes]

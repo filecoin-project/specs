@@ -57,8 +57,8 @@ type SealSetupArtifacts struct {
     CommRLastTreePath  file.Path
     Seeds              [sector.SealSeed]
     KeyLayers          [Bytes]
-    QLayer             Bytes
-    Replica            Bytes
+    QLayer             Bytes  // This is what is stored on disk and allows fast/cheap retrieval. TODO: Maybe a better name, ideally still allowing CommQ.
+    Replica            Bytes  // This is what we challenge in PoSt. It will be regenerated just in time. Should probably be removed from here.
 }
 
 type EllipticCurve struct {

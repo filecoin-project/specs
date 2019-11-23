@@ -27,7 +27,7 @@ type SealOutputs struct {
 
 type CreateSealProofOutputs struct {
     SealInfo  sector.SealVerifyInfo
-    ProofAux  sector.ProofAux
+    ProofAux  sector.PersistentProofAux
 }
 
 type SectorSealer struct {
