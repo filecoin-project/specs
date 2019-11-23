@@ -17,6 +17,14 @@ func (st *StorageMarketActorState_I) _isBalanceAvailable(a addr.Address, amount 
 	return bal.Available() >= amount
 }
 
+func (st *StorageMarketActorState_I) _assertValidClienSignature(rt Runtime, dealP deal.StorageDealProposal) {
+	// TODO: verify if we need to check provider signature
+	// or it is implicit in the message
+
+	// Optimization: make this a batch verification
+	panic("TODO")
+}
+
 func (st *StorageMarketActorState_I) _assertDealStartAfterCurrEpoch(rt Runtime, p deal.StorageDealProposal) {
 
 	currEpoch := rt.CurrEpoch()
@@ -100,14 +108,27 @@ func (st *StorageMarketActorState_I) _assertDealExpireAfterMaxProveCommitWindow(
 //   - verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
 //   - verify client and provider has sufficient balance
 func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.StorageDeal) bool {
-	// TODO verify client and provider signature
+
 	p := d.Proposal()
 
+	st._assertValidClienSignature(rt, p)
 	st._assertValidDealTimingAtPublish(rt, p)
 	st._assertValidDealMinimum(rt, p)
 	st._assertSufficientBalanceAvailForDeal(rt, p)
 
 	return true
+}
+
+func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, dealID deal.DealID) {
+
+	deal := st._getOnchainDeal(rt, dealID)
+
+	if rt.CurrEpoch() <= deal.LastPaymentEpoch() {
+		rt.Abort("sma._activeDeal: currenet epoch is behind or the same as last payment epoch.")
+	}
+
+	deal.Impl().LastPaymentEpoch_ = rt.CurrEpoch()
+
 }
 
 // TODO: consider returning a boolean
@@ -145,7 +166,7 @@ func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked add
 	toB := st.Balances()[toAvailable]
 
 	if fromB.Locked() < amount {
-		rt.Abort("sma._transferBalance: attempt to lock funds greater than actor has")
+		rt.Abort("sma._transferBalance: attempt to unlock funds greater than actor has")
 		return
 	}
 
@@ -160,7 +181,7 @@ func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal d
 	st._lockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
 }
 
-func (st *StorageMarketActorState_I) _getDeal(rt Runtime, dealID deal.DealID) deal.StorageDeal {
+func (st *StorageMarketActorState_I) _getOnchainDeal(rt Runtime, dealID deal.DealID) deal.OnchainDeal {
 	deal, found := st.Deals()[dealID]
 	if !found {
 		rt.Abort("sm._getDeal: dealID not found in Deals.")
@@ -169,40 +190,49 @@ func (st *StorageMarketActorState_I) _getDeal(rt Runtime, dealID deal.DealID) de
 	return deal
 }
 
-func (st *StorageMarketActorState_I) _getDealTally(rt Runtime, dealID deal.DealID) deal.StorageDealTally {
-	dealTally, tallyFound := st.DealTally()[dealID]
-	if !tallyFound {
-		rt.Abort("sma._getDealTally: dealID not found in DealTally.")
-	}
-
-	return dealTally
-}
-
 func (st *StorageMarketActorState_I) _assertPublishedDealState(rt Runtime, dealID deal.DealID) {
-	dealState := st.Impl().DealStates_.GetDealState(dealID)
-	if dealState != deal.PublishedDealState {
+
+	deal := st._getOnchainDeal(rt, dealID)
+
+	if deal.LastPaymentEpoch() != block.ChainEpoch(0) {
 		rt.Abort("sma._assertPublishedDealState: deal is not in PublishedDealState.")
 	}
+
 }
 
 func (st *StorageMarketActorState_I) _assertActiveDealState(rt Runtime, dealID deal.DealID) {
-	dealState := st.Impl().DealStates_.GetDealState(dealID)
-	if dealState != deal.ActiveDealState {
+
+	deal := st._getOnchainDeal(rt, dealID)
+
+	if deal.LastPaymentEpoch() <= block.ChainEpoch(0) {
 		rt.Abort("sma._assertActiveDealState: deal is not in ActiveDealState.")
 	}
 }
 
-func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, tally deal.StorageDealTally, p deal.StorageDealProposal, lastChallenge block.ChainEpoch) actor.TokenAmount {
+func (st *StorageMarketActorState_I) _getParticipantBalance(rt Runtime, participant addr.Address) StorageParticipantBalance {
+	balance, found := st.Balances()[participant]
 
-	duration := lastChallenge - tally.LastPaymentEpoch()
+	if !found {
+		rt.Abort("sma._getParticipantBalance: participant balance not found.")
+	}
+
+	return balance
+}
+
+func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, deal deal.OnchainDeal, newPaymentEpoch block.ChainEpoch) actor.TokenAmount {
+
+	duration := newPaymentEpoch - deal.LastPaymentEpoch()
+	dealP := deal.Deal().Proposal()
 	fee := actor.TokenAmount(0)
 
 	if duration > 0 {
-		unitPrice := p.StoragePricePerEpoch()
+		unitPrice := dealP.StoragePricePerEpoch()
 		fee := actor.TokenAmount(uint64(duration) * uint64(unitPrice))
 
-		if fee > tally.LockedStorageFee() {
-			rt.Abort("sma._getStorageFeeSinceLastPayment: fee cannot exceed LockedStorageFee.")
+		clientBalance := st._getParticipantBalance(rt, dealP.Client())
+
+		if fee > clientBalance.Locked() {
+			rt.Abort("sma._getStorageFeeSinceLastPayment: fee cannot exceed client LockedBalance.")
 		}
 
 	} else {
@@ -213,112 +243,45 @@ func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, 
 
 }
 
-// unlock remaining payments and return all UnlockedStorageFee to Provider
-// remove deals from ActiveDeals
-// return collaterals to both miner and client
-func (st *StorageMarketActorState_I) _expireStorageDeals(rt Runtime, dealIDs []deal.DealID, lastChallengeEndEpoch block.ChainEpoch) {
+func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal.StorageDealProposal) {
+	amountToSlash := dealP.ProviderBalanceRequirement()
 
-	for _, dealID := range dealIDs {
-
-		expiredDeal := st._getDeal(rt, dealID)
-		st._assertActiveDealState(rt, dealID)
-		dealTally := st._getDealTally(rt, dealID)
-		dealP := expiredDeal.Proposal()
-
-		fee := st._getStorageFeeSinceLastPayment(rt, dealTally, dealP, lastChallengeEndEpoch)
-		dealTally.Impl().LastPaymentEpoch_ = lastChallengeEndEpoch
-
-		// move fee from locked to unlocked in tally
-		dealTally.Impl().UnlockStorageFee(fee)
-
-		unlockedFee := dealTally.UnlockedStorageFee()
-		lockedFee := dealTally.LockedStorageFee() // extra storage fee remaining
-
-		delete(st.Deals(), dealID)
-		delete(st.DealTally(), dealID)
-		st.Impl().DealStates_.Clear(dealID)
-
-		// credit UnlockedStorageFee to miner
-		st._unlockBalance(rt, dealP.Provider(), unlockedFee)
-
-		// return extra storage fee to client
-		st._unlockBalance(rt, dealP.Client(), lockedFee)
-
-		// return storage deal collaterals to both miners and client
-		st._unlockBalance(rt, dealP.Provider(), dealTally.ProviderCollateralRemaining())
-		st._unlockBalance(rt, dealP.Client(), dealP.TotalClientCollateral())
-
-	}
-}
-
-func (st *StorageMarketActorState_I) _creditUnlockedFeeForProvider(rt Runtime, dealP deal.StorageDealProposal, dealTally deal.StorageDealTally) {
-	// credit fund for provider
-	unlockedFee := dealTally.UnlockedStorageFee()
-	dealTally.Impl().UnlockedStorageFee_ = actor.TokenAmount(0)
-	st._unlockBalance(rt, dealP.Provider(), unlockedFee)
-}
-
-// tally storage deal payment within DealTally but not unlocking any balance
-// balance unlocking is done through _creditUnlockedFeeForProvider called by CreditUnlockedFees or through _expireStorageDeals
-func (st *StorageMarketActorState_I) _tallyStorageDeals(rt Runtime, dealIDs []deal.DealID, lastChallengeEndEpoch block.ChainEpoch) {
-
-	for _, dealID := range dealIDs {
-
-		activeDeal := st._getDeal(rt, dealID)
-		st._assertActiveDealState(rt, dealID)
-		dealTally := st._getDealTally(rt, dealID)
-		dealP := activeDeal.Proposal()
-
-		fee := st._getStorageFeeSinceLastPayment(rt, dealTally, dealP, lastChallengeEndEpoch)
-		dealTally.Impl().LastPaymentEpoch_ = lastChallengeEndEpoch
-
-		// move fee from locked to unlocked in tally
-		dealTally.Impl().UnlockStorageFee(fee)
-
+	providerBal, found := st.Balances()[dealP.Provider()]
+	if !found {
+		rt.Abort("sma._slashDealCollateral: provider not found in balances.")
 	}
 
-}
-
-func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealTally deal.StorageDealTally, amount actor.TokenAmount) {
-	amountToSlash := amount
-	if amount > dealTally.ProviderCollateralRemaining() {
-		amountToSlash = dealTally.ProviderCollateralRemaining()
+	if providerBal.Locked() < amountToSlash {
+		amountToSlash = providerBal.Locked()
+		// TODO: decide on error handling here
+		panic("TODO")
 	}
 
+	st.Balances()[dealP.Provider()].Impl().Locked_ -= amountToSlash
 	st.DealCollateralSlashed_ += amountToSlash
-	dealTally.Impl().ProviderCollateralRemaining_ -= amountToSlash
+
 }
 
 func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) {
 
-	deal := st._getDeal(rt, dealID)
+	deal := st._getOnchainDeal(rt, dealID)
 	st._assertActiveDealState(rt, dealID)
-	dealTally := st._getDealTally(rt, dealID)
-	dealP := deal.Proposal()
 
+	dealP := deal.Deal().Proposal()
 	delete(st.Deals(), dealID)
-	delete(st.DealTally(), dealID)
-	st.Impl().DealStates_.Clear(dealID)
 
 	// return client collateral and locked storage fee
 	clientCollateral := dealP.TotalClientCollateral()
-	lockedFee := dealTally.LockedStorageFee()
+	lockedFee := st._getStorageFeeSinceLastPayment(rt, deal, dealP.EndEpoch())
 	st._unlockBalance(rt, dealP.Client(), clientCollateral+lockedFee)
 
-	// return unlocked storage fee to provider
-	unlockedFee := dealTally.UnlockedStorageFee()
-	st._unlockBalance(rt, dealP.Provider(), unlockedFee)
-
-	// slash all deal collateral
-	collateralToSlash := dealTally.ProviderCollateralRemaining()
-	st._slashDealCollateral(rt, dealTally, collateralToSlash)
+	st._slashDealCollateral(rt, dealP)
 }
 
 // delete deal from active deals
 // send deal collateral to TreasuryActor
 // return locked storage fee to client
 // return client collateral
-// TODO: decide what to do with unlocked storage fee here
 func (st *StorageMarketActorState_I) _slashTerminatedFaults(rt Runtime, dealIDs []deal.DealID) {
 
 	for _, dealID := range dealIDs {

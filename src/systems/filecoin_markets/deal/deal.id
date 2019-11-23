@@ -17,8 +17,7 @@ type Signature struct {}  // TODO
 // even though some storage deals can expire earlier than the sector does.
 // Collaterals are denominated in PerEpoch to incur a cost for self dealing or
 // minimal deals that last for a long time.
-// TODO: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
-// TODO: StoragePrice is paid out by Epoch duration but the exact mechanics still lacks some details.
+// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
 // There will be a Minimum value for both client and provider deal collateral.
 type StorageDealProposal struct {
     PieceCID                      piece.PieceCID  // 35 bytes CommP
@@ -46,20 +45,16 @@ type StorageDealProposal struct {
 // We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
 // Provider's signature is implicit in the onchain call
 type StorageDeal struct {
-    Proposal()       StorageDealProposal  // can extract proposal from the message
-    ProposalMessage  msg.Message  // counter signature is implicit in the message
-    ID               DealID
+    Proposal()      StorageDealProposal  // can extract proposal from the message
+    PublishMessage  msg.Message  // counter signature is implicit in the message
 
-    CID()            DealCID
+    CID()           DealCID
 }
 
-type StorageDealTally struct {
-    ProviderCollateralRemaining              actor.TokenAmount
-    LockedStorageFee                         actor.TokenAmount
-    UnlockedStorageFee                       actor.TokenAmount
-    LastPaymentEpoch                         block.ChainEpoch
-
-    UnlockStorageFee(fee actor.TokenAmount)  bool
+type OnchainDeal struct {
+    Deal              StorageDeal
+    LastPaymentEpoch  block.ChainEpoch  // 0 = published
+    ID                DealID
 }
 
 type DealExpirationQueueItem struct {

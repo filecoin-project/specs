@@ -10,18 +10,16 @@ type StorageParticipantBalance struct {
 }
 
 type BalancesHAMT {addr.Address: StorageParticipantBalance}
-type DealTallyAMT {deal.DealID: deal.StorageDealTally}
-type DealAMT {deal.DealID: deal.StorageDeal}
+type DealAMT {deal.DealID: deal.OnchainDeal}
 
 type StorageMarketActorState struct {
     Balances               BalancesHAMT
     Deals                  DealAMT
-    DealTally              DealTallyAMT
-    DealStates             deal.DealStateSet
     DealCollateralSlashed  actor.TokenAmount
 
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
     _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool
+    _assertValidClienSignature(rt Runtime, dealP deal.StorageDealProposal)
     _assertDealStartAfterCurrEpoch(rt Runtime, p deal.StorageDealProposal)
     _assertDealNotYetExpired(rt Runtime, p deal.StorageDealProposal)
     _assertValidDealTimingAtPublish(rt Runtime, p deal.StorageDealProposal)
@@ -45,33 +43,22 @@ type StorageMarketActorState struct {
     )
     _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
 
-    _getDeal(rt Runtime, dealID deal.DealID) deal.StorageDeal
-    _getDealTally(rt Runtime, dealID deal.DealID) deal.StorageDealTally
+    _getOnchainDeal(rt Runtime, dealID deal.DealID) deal.OnchainDeal
     _assertPublishedDealState(rt Runtime, dealID deal.DealID)
     _assertActiveDealState(rt Runtime, dealID deal.DealID)
+    _activateDeal(rt Runtime, dealID deal.DealID)
 
-    _expireStorageDeals(
-        rt                     Runtime
-        dealIDs                [deal.DealID]
-        lastChallengeEndEpoch  block.ChainEpoch
-    )
-    _creditUnlockedFeeForProvider(
-        rt         Runtime
-        dealP      deal.StorageDealProposal
-        dealTally  deal.StorageDealTally
-    )
-    _tallyStorageDeals(
-        rt                     Runtime
-        dealIDs                [deal.DealID]
-        lastChallengeEndEpoch  block.ChainEpoch
-    )
+    _getStorageFeeSinceLastPayment(
+        rt               Runtime
+        deal             deal.OnchainDeal
+        newPaymentEpoch  block.ChainEpoch
+    ) actor.TokenAmount
 
     _slashTerminatedFaults(rt Runtime, dealIDs [deal.DealID])
     _terminateDeal(rt Runtime, dealID deal.DealID)
     _slashDealCollateral(
-        rt         Runtime
-        dealTally  deal.StorageDealTally
-        amount     actor.TokenAmount
+        rt      Runtime
+        amount  actor.TokenAmount
     )
 }
 
@@ -107,23 +94,23 @@ type StorageMarketActorCode struct {
     ActivateDeals(rt Runtime, dealIDs [deal.DealID])
 
     // call by sm.ProveCommitSector to get deals in a Sector
-    GetDeals(rt Runtime, dealIDs [deal.DealID]) [deal.StorageDeal]
+    GetActiveDeals(rt Runtime, dealIDs [deal.DealID]) [deal.OnchainDeal]
 
     // call by StorageMinerActor
     // slash deal collateral depending on the faults (only TerminatedFault)
-    ProcessDealSlash(rt Runtime, info deal.BatchDealSlashInfo)
+    ProcessDealSlash(
+        rt           Runtime
+        dealIDs      [deal.DealID]
+        slashAction  deal.StorageDealSlashAction
+    )
 
-    // call by StorageMinerActor
-    // unlock balances in UnlockedFees in dealTally
-    CreditUnlockedFees(rt Runtime, dealIDs [deal.DealID])
-
-    // batch process storage deal payment based on actions
-    //     - Credit: lazily evaulated when a StorageMiner calls CreditDealPayment
-    //     - Expire: call by sm._submitPowerReport when deals expire
+    // batch process storage deal payment
     // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
     // client only stops paying when a sector gets cleared (expired or faulted)
-    // Deal expiration is also handled here
-    ProcessDealPayment(rt Runtime, info deal.BatchDealPaymentInfo)
+    ProcessDealPayment(rt Runtime, dealIDs [deal.DealID], lastPoSt block.ChainEpoch)
+
+    // batch process storage deal expiration
+    ProcessDealExpiration(rt Runtime, dealIDs [deal.DealID])
 
     GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
 }

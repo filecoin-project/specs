@@ -58,6 +58,7 @@ type PreCommittedSector struct {
 type PreCommittedSectorsAMT {sector.SectorNumber: PreCommittedSector}
 type StagedCommittedSectorAMT {sector.SectorNumber: StagedCommittedSectorInfo}
 type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+
 // map from SectorNumber to amout of storage in active deals
 type SectorUtilizationAMT {sector.SectorNumber: sector.SectorUtilizationInfo}
 
@@ -91,7 +92,7 @@ type StorageMinerActorState struct {
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateSectorUtilization(rt Runtime) [deal.DealID]
-    _initializeUtilizationInfo(rt Runtime, deals [deal.StorageDeal]) sector.SectorUtilizationInfo
+    _initializeUtilizationInfo(rt Runtime, deals [deal.OnchainDeal]) sector.SectorUtilizationInfo
 
     _getActivePower(rt Runtime) block.StoragePower
     _getInactivePower(rt Runtime) block.StoragePower

@@ -139,16 +139,9 @@ func (a *StorageMinerActorCode_I) _slashDealsFromFaultReport(rt Runtime, sectorN
 
 	}
 
-	slashInfo := &deal.BatchDealSlashInfo_I{
-		DealIDs_: dealIDs.DealsOn(),
-		Action_:  action,
-	}
-
 	Release(rt, h, st)
 
-	// TODO: Send(StorageMarketActor, ProcessSectorDealSlash)
-	panic(slashInfo)
-
+	// TODO: Send(StorageMarketActor, ProcessDealSlash)
 }
 
 // construct FaultReport
@@ -196,16 +189,10 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	panic(powerReport)
 
 	if len(newExpiredDealIDs) > 0 {
-		batchDealPaymentInfo := &deal.BatchDealPaymentInfo_I{
-			DealIDs_:               newExpiredDealIDs,
-			Action_:                deal.ExpireStorageDeals,
-			LastChallengeEndEpoch_: st.ChallengeStatus().LastChallengeEndEpoch(),
-		}
-
-		rt.Abort("TODO")
-		panic(batchDealPaymentInfo)
-		// Send(StorageMarketActor, ProcessSectorDealPayment(batchDealPaymentInfo))
+		// Send(StorageMarketActor, ProcessDealExpiration)
 	}
+
+	// Send(StorageMarketActor, ProcessDealPayment)
 }
 
 func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
@@ -719,32 +706,6 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 	return rt.SuccessReturn()
 }
 
-func (a *StorageMinerActorCode_I) TallySectorDealPayment(rt Runtime, sectorNo sector.SectorNumber) {
-	TODO() // verify caller
-
-	h, st := a.State(rt)
-
-	utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
-	sectorIsActive := st.SectorTable().Impl().ActiveSectors_.Contain(sectorNo)
-
-	if !sectorIsActive {
-		rt.Abort("sm.GetSectorPaymentInfo: sector not active")
-	}
-
-	activeDealSet := utilizationInfo.DealExpirationQueue().ActiveDealIDs()
-	batchDealPaymentInfo := &deal.BatchDealPaymentInfo_I{
-		DealIDs_:               activeDealSet.DealsOn(),
-		Action_:                deal.TallyStorageDeals,
-		LastChallengeEndEpoch_: st.ChallengeStatus().LastChallengeEndEpoch(),
-	}
-
-	Release(rt, h, st)
-
-	panic(batchDealPaymentInfo)
-	// Send(StorageMarketActor, ProcessSectorDealPayment(batchDealPaymentInfo))
-
-}
-
 func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
 	h, st := a.State(rt)
 	info := st.Info()
@@ -820,7 +781,7 @@ func (st *StorageMinerActorState_I) _getUtilizationInfo(rt Runtime, sectorNo sec
 	return utilizationInfo
 }
 
-func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.StorageDeal) sector.SectorUtilizationInfo {
+func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.OnchainDeal) sector.SectorUtilizationInfo {
 
 	var dealExpirationQueue deal.DealExpirationQueue
 	var maxUtilization block.StoragePower
@@ -828,7 +789,7 @@ func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals
 
 	for _, d := range deals {
 
-		dealExpiration := d.Proposal().EndEpoch()
+		dealExpiration := d.Deal().Proposal().EndEpoch()
 
 		if dealExpiration > lastExpiration {
 			lastExpiration = dealExpiration
@@ -836,7 +797,7 @@ func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals
 
 		// TODO: verify what counts towards power here
 		// There is PayloadSize, OverheadSize, and Total, see piece.id
-		dealPayloadPower := block.StoragePower(d.Proposal().PieceSize().PayloadSize())
+		dealPayloadPower := block.StoragePower(d.Deal().Proposal().PieceSize().PayloadSize())
 
 		queueItem := &deal.DealExpirationQueueItem_I{
 			DealID_:       d.ID(),
@@ -956,8 +917,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// abort if activation failed
 
 	// TODO: proper onchain transaction
-	// deals := SendMessage(sma, GetDeals(onChainInfo.DealIDs()))
-	var deals []deal.StorageDeal
+	// deals := SendMessage(sma, GetActiveDeals(onChainInfo.DealIDs()))
+	var deals []deal.OnchainDeal
 	initialUtilization := st._initializeUtilizationInfo(rt, deals)
 	lastDealExpiration := initialUtilization.DealExpirationQueue().LastDealExpiration()
 

@@ -1,11 +1,9 @@
-import util "github.com/filecoin-project/specs/util"
-
 // sector sets
 type SectorSet [SectorID]
 type UnsealedSectorSet SectorSet
 type SealedSectorSet SectorSet
 
 // compact sector sets
-type Bitfield util.Bytes  // TODO: move to util
-type RLEpBitfield Bitfield  // TODO: move to util
+type Bitfield Bytes
+type RLEpBitfield Bitfield
 type CompactSectorSet RLEpBitfield

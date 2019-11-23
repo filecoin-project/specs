@@ -46,18 +46,11 @@ func (p *StorageDealProposal_I) CID() ProposalCID {
 	return cid
 }
 
-// move storage fee from locked to unlocked
-func (d *StorageDealTally_I) UnlockStorageFee(fee actor.TokenAmount) bool {
+type StorageDealSlashAction = int
 
-	if d.LockedStorageFee() < fee {
-		// cannot unlock more than locked
-		return false
-	}
-
-	d.LockedStorageFee_ -= fee
-	d.UnlockedStorageFee_ += fee
-	return true
-}
+const (
+	SlashTerminatedFaults StorageDealSlashAction = 0
+)
 
 func (q *DealExpirationQueue_I) Size() int {
 	// TODO
@@ -65,11 +58,11 @@ func (q *DealExpirationQueue_I) Size() int {
 }
 
 // return all dealIds in the expiration queue
-func (q *DealExpirationQueue_I) ActiveDealIDs() CompactDealSet {
-	// TODO
-	ret := CompactDealSet(make([]byte, q.Size()))
-	return ret
-}
+// func (q *DealExpirationQueue_I) ActiveDealIDs() CompactDealSet {
+// 	// TODO
+// 	ret := CompactDealSet(make([]byte, q.Size()))
+// 	return ret
+// }
 
 // return last item in the expiration queue
 func (q *DealExpirationQueue_I) LastDealExpiration() block.ChainEpoch {

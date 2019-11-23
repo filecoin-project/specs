@@ -40,12 +40,12 @@ func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.Storage
 
 func (provider *StorageProvider_I) publishStorageDealMessage(message msg.Message) deal.StorageDeal {
 	// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
-	var dealID deal.DealID
+	// var dealID deal.DealID
 	var dealCID deal.DealCID
 
 	storageDeal := &deal.StorageDeal_I{
-		ProposalMessage_: message,
-		ID_:              dealID,
+		PublishMessage_: message,
+		// ID_:              dealID,
 	}
 
 	provider.DealStatus()[dealCID] = StorageDealPublished
