@@ -802,12 +802,12 @@ func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCI
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, faults sector.FaultSet) (sectors []sector.SectorID, challenges []UInt) {
+func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int) (sectors []sector.SectorID, challenges []UInt) {
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
-	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, faults)
+func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
+	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
 	var proofAuxs []sector.ProofAux
 
 	for _, sector := range challengedSectors {

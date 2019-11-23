@@ -3,7 +3,9 @@ package storage_proving
 import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
+	//	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -33,22 +35,29 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize util.U
 }
 
 // TODO also return error
-func (sps *StorageProvingSubsystem_I) GeneratePoStCandidates(challengeSeed util.Randomness, sectorIDs []sector.SectorID) []sector.ChallengeTicket {
-	numChallengeTickets := len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN
-	panic(numChallengeTickets)
-	// Call proofs library
+func (sps *StorageProvingSubsystem_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.ChallengeTicket {
+	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
+
+	// TODO: Get these correctly.
+	var cfg sector.PoStCfg
+	var sectorStore sector_index.SectorStore
+
+	var poster = sps.PoStGenerator()
+
+	poster.GeneratePoStCandidates(cfg, challengeSeed, numChallengeTickets, sectorIDs, sectorStore)
+
 	todo := make([]sector.ChallengeTicket, 0)
 	return todo
 }
 
-func (sps *StorageProvingSubsystem_I) GeneratePoSt(challengeSeed sector.PoStRandomness, challengeTickets []sector.ChallengeTicket) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) GeneratePoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.ChallengeTicket) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: challengeTickets,
 	}
 
-	panic(witness)
+	// TODO: Get this correctly. Maybe move into PoStGenerator struct.
+	var cfg sector.PoStCfg
 
-	// return sps.PoStGenerator().Impl().GeneratePoStProof()
-	var todo sector.PoStProof
-	return todo
+	var poster = sps.PoStGenerator()
+	return poster.GeneratePoStProof(cfg, witness)
 }

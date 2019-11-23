@@ -1,9 +1,13 @@
 package poster
 
-import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-import util "github.com/filecoin-project/specs/util"
+import (
+	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+
+	util "github.com/filecoin-project/specs/util"
+)
 
 type Serialization = util.Serialization
 
@@ -11,7 +15,7 @@ type Serialization = util.Serialization
 // TODO: Unify with orient model.
 const POST_CHALLENGE_DEADLINE = uint(480)
 
-func GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectors []sector.SectorID, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
+func (pg *PoStGenerator_I) GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRandomness, candidateCount int, sectors []sector.SectorID, sectorStore sector_index.SectorStore) []sector.ChallengeTicket {
 	// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 	// Like this:
 	// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -26,11 +30,15 @@ func GeneratePoStCandidates(postCfg sector.PoStCfg, challengeSeed sector.PoStRan
 	// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 
 	sdr := makeStackedDRGForPoSt(postCfg)
+	var sectorNumbers []sector.SectorNumber
+	for _, s := range sectors {
+		sectorNumbers = append(sectorNumbers, s.Number())
+	}
 
-	return sdr.GeneratePoStCandidates(challengeSeed, faults, sectorStore)
+	return sdr.GeneratePoStCandidates(challengeSeed, sectorNumbers, candidateCount, sectorStore)
 }
 
-func GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
+func (pg *PoStGenerator_I) GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
 	sdr := makeStackedDRGForPoSt(postCfg)
 	var privateProofs []sector.PrivatePoStProof
 
