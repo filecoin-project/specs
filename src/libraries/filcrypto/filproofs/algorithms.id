@@ -49,13 +49,15 @@ type SealSetupArtifacts struct {
     CommD              sector.Commitment
     CommR              sector.SealedSectorCID
     CommC              sector.Commitment
+    CommQ              sector.Commitment
     CommRLast          sector.Commitment
     CommDTreePaths     [file.Path]
     CommCTreePath      file.Path
+    CommQTreePath      file.Path
     CommRLastTreePath  file.Path
     Seeds              [sector.SealSeed]
     KeyLayers          [Bytes]
-    Key                Bytes
+    QLayer             Bytes
     Replica            Bytes
 }
 

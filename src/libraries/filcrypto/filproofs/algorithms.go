@@ -246,26 +246,29 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 
 	commD, _ := ComputeDataCommitment(windowDataRootLeafRow)
 
+	qLayer := encodeData(data, finalWindowKeyLayer, nodeSize, &curveModulus)
+
 	// Final sealSeed uses index following last window's sealseed.
 	wrapperWindowIndex := windowCount
 	sealSeed := computeSealSeed(sid, wrapperWindowIndex, randomness, commD)
-	key := labelLayer(sdr.drg(), sdr.expander(), sealSeed, wrapperWindowIndex, nodes, nodeSize, finalWindowKeyLayer)
 
-	replica := encodeData(data, key, nodeSize, &curveModulus)
+	replica := labelLayer(sdr.drg(), sdr.expander(), sealSeed, wrapperWindowIndex, nodes, nodeSize, qLayer)
 
-	commC, commRLast, commR, commCTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, windowKeyLayers)
+	commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, windowKeyLayers, qLayer)
 
 	result := SealSetupArtifacts_I{
 		CommD_:             Commitment(commD),
 		CommR_:             SealedSectorCID(commR),
 		CommC_:             Commitment(commC),
+		CommQ_:             Commitment(commQ),
 		CommRLast_:         Commitment(commRLast),
 		CommDTreePaths_:    windowCommDTreePaths,
 		CommCTreePath_:     commCTreePath,
+		CommQTreePath_:     commQTreePath,
 		CommRLastTreePath_: commRLastTreePath,
 		Seeds_:             sealSeeds,
 		KeyLayers_:         windowKeyLayers,
-		Key_:               key,
+		QLayer_:            qLayer,
 		Replica_:           replica,
 	}
 	return &result
@@ -277,17 +280,20 @@ func (sdr *WinStackedDRG_I) GenerateWindowKey(windowIndex int, sid sector.Sector
 	curveModulus := sdr.Curve().FieldModulus()
 	layers := int(sdr.Layers())
 
-	keyLayers := generateSDRKeyLayers(sdr.drg(), sdr.expander(), sealSeed, nodes, layers, nodeSize, curveModulus)
+	keyLayers := generateSDRKeyLayers(sdr.drg(), sdr.expander(), sealSeed, windowIndex, nodes, layers, nodeSize, curveModulus)
 
 	return keyLayers, sealSeed
 }
 
-func (sdr *WinStackedDRG_I) GenerateCommitments(replica []byte, keyLayers [][]byte) (commC PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commRLastTreePath file.Path) {
+func (sdr *WinStackedDRG_I) GenerateCommitments(replica []byte, windowKeyLayers [][]byte, qLayer []byte) (commC PedersenHash, commQ PedersenHash, commRLast PedersenHash, commR PedersenHash, commCTreePath file.Path, commQTreePath file.Path, commRLastTreePath file.Path) {
+	commC, commCTreePath = computeCommC(windowKeyLayers, int(sdr.NodeSize()))
+	commQ, commQTreePath = computeCommQ(qLayer, int(sdr.NodeSize()))
 	commRLast, commRLastTreePath = BuildTree_PedersenHash(replica)
-	commC, commCTreePath = computeCommC(keyLayers, int(sdr.NodeSize()))
-	commR = BinaryHash_PedersenHash(commC, commRLast)
 
-	return commC, commRLast, commR, commCTreePath, commRLastTreePath
+	commR = TernaryHash_PedersenHash(commC, commQ, commRLast)
+
+	// FIXME: need to compute commQ.
+	return commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath
 }
 
 func computeSealSeed(sid sector.SectorID, windowIndex int, randomness sector.SealRandomness, commD sector.UnsealedSectorCID) sector.SealSeed {
@@ -305,16 +311,17 @@ func computeSealSeed(sid sector.SectorID, windowIndex int, randomness sector.Sea
 	return sector.SealSeed{}
 }
 
-func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, windows int, nodes int, layers int, nodeSize int, modulus big.Int) [][]byte {
+func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, window int, nodes int, layers int, nodeSize int, modulus big.Int) [][]byte {
 	var keyLayers [][]byte
 	var prevLayer []byte
 
-	for w := 0; i < windows; w++ {
-		for i := 0; i < layers; i++ { 
-			currentLayer := labelLayer(drg, expander, sealSeed, nodes, nodeSize, prevLayer)
-			keyLayers = append(keyLayers, currentLayer) 
-			prevLayer = currentLayer }
+	//	for w := 0; i < windows; w++ {
+	for i := 0; i < layers; i++ {
+		currentLayer := labelLayer(drg, expander, sealSeed, window, nodeSize, nodes, prevLayer)
+		keyLayers = append(keyLayers, currentLayer)
+		prevLayer = currentLayer
 	}
+	//	}
 
 	return keyLayers
 }
@@ -404,6 +411,15 @@ func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
 	return BuildTree_PedersenHash(leaves)
 }
 
+func computeCommQ(layerBytes []byte, nodeSize int) (PedersenHash, file.Path) {
+	leaves := make([]byte, len(layerBytes)/nodeSize)
+	for i := 0; i < len(leaves); i++ {
+		leaves = append(leaves, layerBytes[i*nodeSize:(i+1)*nodeSize]...)
+	}
+
+	return BuildTree_PedersenHash(leaves)
+}
+
 func hashColumn(column []Label) PedersenHash {
 	var preimage []byte
 	for _, label := range column {
@@ -490,22 +506,23 @@ func (sdr *WinStackedDRG_I) VerifyPrivateProof(privateProof []OfflineWindowChall
 			}
 		}
 
-		for layer := 0; layer < int(sdr.Layers()); layer++ {
-			var sealSeed sector.SealSeed // FIXME: Get the right seed
-			var parents []Label
+		for w := 0; w < windowCount; w++ {
+			for layer := 0; layer < int(sdr.Layers()); layer++ {
+				var sealSeed sector.SealSeed // FIXME: Get the right seed
+				var parents []Label
 
-			for _, parentProof := range columnProofs[1:] {
-				parent := parentProof.Column[layer]
-				parents = append(parents, parent)
-			}
-			providedLabel := columnProofs[columnElements[0]].Column[layer]
-			calculatedLabel := generateLabel(sealSeed, i, parents)
+				for _, parentProof := range columnProofs[1:] {
+					parent := parentProof.Column[layer]
+					parents = append(parents, parent)
+				}
+				providedLabel := columnProofs[columnElements[0]].Column[layer]
+				calculatedLabel := generateLabel(sealSeed, i, w, parents)
 
-			if !bytes.Equal(calculatedLabel, providedLabel) {
-				return false
+				if !bytes.Equal(calculatedLabel, providedLabel) {
+					return false
+				}
 			}
 		}
-
 		for i, dataProof := range dataProofs {
 			if !dataProof.verify(commD, challenge) {
 				return false
@@ -882,7 +899,13 @@ func (sdr *WinStackedDRG_I) VerifyPoSt(sv sector.PoStVerifyInfo) bool {
 /// Binary hash compression.
 // BinaryHash<T>
 func BinaryHash_T(left []byte, right []byte) util.T {
-	return util.T{}
+	var preimage = append(left, right...)
+	return HashBytes_T(preimage)
+}
+
+func TernaryHash_T(a []byte, b []byte, c []byte) util.T {
+	var preimage = append(a, append(b, c...)...)
+	return HashBytes_T(preimage)
 }
 
 // BinaryHash<PedersenHash>
@@ -890,10 +913,18 @@ func BinaryHash_PedersenHash(left []byte, right []byte) PedersenHash {
 	return PedersenHash{}
 }
 
+func TernaryHash_PedersenHash(a []byte, b []byte, c []byte) PedersenHash {
+	return PedersenHash{}
+}
+
 // BinaryHash<SHA256Hash>
 func BinaryHash_SHA256Hash(left []byte, right []byte) SHA256Hash {
 	result := SHA256Hash{}
 	return trimToFr32(result)
+}
+
+func TernaryHash_SHA256Hash(a []byte, b []byte, c []byte) SHA256Hash {
+	return SHA256Hash{}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
