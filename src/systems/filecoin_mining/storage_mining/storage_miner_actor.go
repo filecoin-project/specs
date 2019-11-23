@@ -171,9 +171,9 @@ func (a *StorageMinerActorCode_I) _submitFaultReport(
 }
 
 // construct PowerReport from SectorTable
-func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
+func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch) {
 	h, st := a.State(rt)
-	newExpiredDealIDs := st._updateSectorUtilization(rt)
+	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoSt)
 	activePower := st._getActivePower(rt)
 	inactivePower := st._getInactivePower(rt)
 
@@ -205,8 +205,11 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	UpdateRelease(rt, h, st)
 
 	h, st = a.State(rt)
+
 	newDetectedFaults := st.SectorTable().FailingSectors()
 	newTerminatedFaults := st.SectorTable().TerminatedFaults()
+	lastPoSt := st.ChallengeStatus().LastChallengeEndEpoch()
+
 	Release(rt, h, st)
 
 	// Note: NewDetectedFaults is now the sum of all
@@ -220,7 +223,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 		newTerminatedFaults,
 	)
 
-	a._submitPowerReport(rt)
+	a._submitPowerReport(rt, lastPoSt)
 
 	// end of challenge
 	h, st = a.State(rt)
@@ -513,6 +516,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 
 	h, st = a.State(rt)
 	newTerminatedFaults := st.SectorTable().TerminatedFaults()
+	lastPoSt := st.ChallengeStatus().LastChallengeEndEpoch()
 	Release(rt, h, st)
 
 	a._submitFaultReport(
@@ -522,7 +526,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 		newTerminatedFaults,
 	)
 
-	a._submitPowerReport(rt)
+	a._submitPowerReport(rt, lastPoSt)
 
 	// TODO: check EnsurePledgeCollateralSatisfied
 	// pledgeCollateralSatisfied
@@ -689,6 +693,8 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 		st._updateFailSector(rt, sectorNo, false)
 	}
 
+	lastPoSt := st.ChallengeStatus().LastChallengeEndEpoch()
+
 	UpdateRelease(rt, h, st)
 
 	a._submitFaultReport(
@@ -698,7 +704,7 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 		sector.CompactSectorSet(make([]byte, 0)), // TerminatedFault
 	)
 
-	a._submitPowerReport(rt)
+	a._submitPowerReport(rt, lastPoSt)
 
 	return rt.SuccessReturn()
 }
@@ -906,9 +912,6 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// Ok if deal has started
 	// Send(SMA.ActivateDeals(onChainInfo.DealIDs())
 	// abort if activation failed
-
-	// TODO: proper onchain transaction
-	// deals := SendMessage(sma, GetActiveDeals(onChainInfo.DealIDs()))
 	var deals []deal.OnchainDeal
 	initialUtilization := st._initializeUtilizationInfo(rt, deals)
 	lastDealExpiration := initialUtilization.DealExpirationAMT().Impl().LastDealExpiration()

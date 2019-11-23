@@ -91,7 +91,7 @@ type StorageMinerActorState struct {
     _updateExpireSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
-    _updateSectorUtilization(rt Runtime) [deal.DealID]
+    _updateSectorUtilization(rt Runtime, lastPoSt block.ChainEpoch) [deal.DealID]
     _initializeUtilizationInfo(rt Runtime, deals [deal.OnchainDeal]) sector.SectorUtilizationInfo
 
     _getActivePower(rt Runtime) block.StoragePower
@@ -134,7 +134,7 @@ type StorageMinerActorCode struct {
         sectorNumbers  [sector.SectorNumber]
         action         deal.StorageDealSlashAction
     )
-    _submitPowerReport(rt Runtime)
+    _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
 
     _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
 
