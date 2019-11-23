@@ -9,13 +9,12 @@ const MIN_DEAL_DURATION = block.ChainEpoch(0)                       // TODO: Pla
 const MIN_DEAL_PRICE = actor.TokenAmount(0)                         // TODO: Placeholder
 
 func (d *StorageDeal_I) Proposal() StorageDealProposal {
-	// TODO: extract from d.ProposalMessage
+	// extract from d.ProposalMessage
 	var proposal StorageDealProposal
 	return proposal
 }
 
 func (d *StorageDeal_I) CID() DealCID {
-	// TODO: should be generated in codegen
 	var cid DealCID
 	return cid
 }
@@ -41,7 +40,6 @@ func (p *StorageDealProposal_I) ProviderBalanceRequirement() actor.TokenAmount {
 }
 
 func (p *StorageDealProposal_I) CID() ProposalCID {
-	// TODO: should be generated in codegen
 	var cid ProposalCID
 	return cid
 }
@@ -52,21 +50,27 @@ const (
 	SlashTerminatedFaults StorageDealSlashAction = 0
 )
 
-func (q *DealExpirationQueue_I) Size() int {
-	// TODO
+func (amt *DealExpirationAMT_I) Size() int {
 	return 0
 }
 
-// return all dealIds in the expiration queue
-// func (q *DealExpirationQueue_I) ActiveDealIDs() CompactDealSet {
-// 	// TODO
-// 	ret := CompactDealSet(make([]byte, q.Size()))
-// 	return ret
-// }
+func (amt *DealExpirationAMT_I) Add(key block.ChainEpoch, value DealExpirationValue) {
+	// helper function to add entry into the AMT
+}
 
-// return last item in the expiration queue
-func (q *DealExpirationQueue_I) LastDealExpiration() block.ChainEpoch {
-	// TODO
+func (amt *DealExpirationAMT_I) ActiveDealIDs() CompactDealSet {
+	var ret CompactDealSet
+	return ret
+}
+
+// return last item in the expiration amt
+func (q *DealExpirationAMT_I) LastDealExpiration() block.ChainEpoch {
 	ret := block.ChainEpoch(0)
+	return ret
+}
+
+// return deal IDs expiring in epoch range
+func (q *DealExpirationAMT_I) ExpiredDealsInRange(start block.ChainEpoch, end block.ChainEpoch) []DealExpirationValue {
+	ret := make([]DealExpirationValue, 0)
 	return ret
 }

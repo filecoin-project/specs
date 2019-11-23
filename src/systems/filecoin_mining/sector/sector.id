@@ -28,9 +28,9 @@ type FaultReport struct {
 }
 
 type SectorUtilizationInfo struct {
-    DealExpirationQueue  deal.DealExpirationQueue
-    MaxUtilization       block.StoragePower
-    CurrUtilization      block.StoragePower
+    DealExpirationAMT  deal.DealExpirationAMT
+    MaxUtilization     block.StoragePower
+    CurrUtilization    block.StoragePower
 }
 
 // SectorSize indicates one of a set of possible sizes in the network.

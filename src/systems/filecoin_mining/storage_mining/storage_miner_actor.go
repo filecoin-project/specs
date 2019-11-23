@@ -134,7 +134,7 @@ func (a *StorageMinerActorCode_I) _slashDealsFromFaultReport(rt Runtime, sectorN
 	for _, sectorNo := range sectorNumbers {
 
 		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
-		activeDealIDs := utilizationInfo.DealExpirationQueue().ActiveDealIDs()
+		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
 		dealIDs = dealIDs.Extend(activeDealIDs)
 
 	}
@@ -287,7 +287,7 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 
 }
 
-func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) []deal.DealID {
+func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoSt block.ChainEpoch) []deal.DealID {
 	// TODO: verify if we should update Sector utilization for failing sectors
 	// depends on decision around collateral requirement for inactive power
 	// and what happens when a failing sector expires
@@ -304,12 +304,13 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime) []deal.
 		totalDealCount := len(st.Sectors()[sectorNo].SealCommitment().DealIDs())
 		newExpiredDealIDs := deal.CompactDealSet(make([]byte, totalDealCount))
 
-		queue := utilizationInfo.DealExpirationQueue()
-		for queue.Peek().Expiration() <= currEpoch {
-			expiredDeal := queue.Pop()
-			newUtilization -= expiredDeal.PayloadPower()
+		newExpiredDeals := utilizationInfo.DealExpirationAMT().Impl().ExpiredDealsInRange(lastPoSt, currEpoch)
 
-			newExpiredDealIDs.Add(expiredDeal.DealID())
+		for _, expiredDeal := range newExpiredDeals {
+			expiredPower := expiredDeal.Power()
+			newUtilization -= expiredPower
+			newExpiredDealIDs.Add(expiredDeal.ID())
+
 		}
 
 		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
@@ -783,36 +784,30 @@ func (st *StorageMinerActorState_I) _getUtilizationInfo(rt Runtime, sectorNo sec
 
 func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.OnchainDeal) sector.SectorUtilizationInfo {
 
-	var dealExpirationQueue deal.DealExpirationQueue
 	var maxUtilization block.StoragePower
-	var lastExpiration block.ChainEpoch
+	var dealExpirationAMT deal.DealExpirationAMT
 
 	for _, d := range deals {
-
+		dealID := d.ID()
 		dealExpiration := d.Deal().Proposal().EndEpoch()
-
-		if dealExpiration > lastExpiration {
-			lastExpiration = dealExpiration
-		}
-
 		// TODO: verify what counts towards power here
 		// There is PayloadSize, OverheadSize, and Total, see piece.id
 		dealPayloadPower := block.StoragePower(d.Deal().Proposal().PieceSize().PayloadSize())
 
-		queueItem := &deal.DealExpirationQueueItem_I{
-			DealID_:       d.ID(),
-			PayloadPower_: dealPayloadPower,
-			Expiration_:   dealExpiration,
+		expirationValue := &deal.DealExpirationValue_I{
+			ID_:    dealID,
+			Power_: dealPayloadPower,
 		}
-		dealExpirationQueue.Add(queueItem)
+		dealExpirationAMT.Impl().Add(dealExpiration, expirationValue)
+
 		maxUtilization += dealPayloadPower
 
 	}
 
 	initialUtilizationInfo := &sector.SectorUtilizationInfo_I{
-		DealExpirationQueue_: dealExpirationQueue,
-		MaxUtilization_:      maxUtilization,
-		CurrUtilization_:     maxUtilization,
+		DealExpirationAMT_: dealExpirationAMT,
+		MaxUtilization_:    maxUtilization,
+		CurrUtilization_:   maxUtilization,
 	}
 
 	return initialUtilizationInfo
@@ -920,7 +915,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// deals := SendMessage(sma, GetActiveDeals(onChainInfo.DealIDs()))
 	var deals []deal.OnchainDeal
 	initialUtilization := st._initializeUtilizationInfo(rt, deals)
-	lastDealExpiration := initialUtilization.DealExpirationQueue().LastDealExpiration()
+	lastDealExpiration := initialUtilization.DealExpirationAMT().Impl().LastDealExpiration()
 
 	// add sector expiration to SectorExpirationQueue
 	st.SectorExpirationQueue().Add(&SectorExpirationQueueItem_I{
