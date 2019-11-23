@@ -4,6 +4,7 @@ participant StorageMinerActor
 participant StorageMarketActor
 StorageMiningSubsystem -->+ StorageMarketActor: PublishStorageDeals
 StorageMarketActor -->> StorageMarketActor: _validateNewStorageDeal
+StorageMarketActor -->> StorageMarketActor: _assertValidClienSignature
 StorageMarketActor -->> StorageMarketActor: _assertValidDealTimingAtPublish
 StorageMarketActor -->> StorageMarketActor: _assertValidDealMinimum
 StorageMarketActor -->> StorageMarketActor: _assertSufficientBalanceAvailableForDeal
@@ -20,18 +21,29 @@ StorageMiningSubsystem -->> StorageMinerActor: ProveCommitSector
 StorageMinerActor -->+ StorageMarketActor: ActivateDeals(dealIDs)
 StorageMarketActor -->> StorageMarketActor: _assertPublishedDealState
 StorageMarketActor -->> StorageMarketActor: _assertDealNotYetExpired
-StorageMarketActor -->- StorageMinerActor: Success
-StorageMinerActor -->+ StorageMarketActor: GetDeals(dealIDs)
+StorageMarketActor -->> StorageMarketActor: _activateDeal(publishedDeal)
 StorageMarketActor -->- StorageMinerActor: Deals
 StorageMinerActor -->> StorageMinerActor: _initializeUtilizationInfo
-StorageMiningSubsystem -->> StorageMinerActor: TallySectorDealPayment(sectorNo)
-StorageMinerActor -->> StorageMarketActor: ProcessDealPayment(batchPayment)
-StorageMarketActor -->> StorageMarketActor: _tallyStorageDeals
-StorageMinerActor -->> StorageMinerActor: _submitPowerReport(if deal expires)
-StorageMinerActor -->> StorageMarketActor: ProcessDealPayment(batchPayment)
-StorageMarketActor -->> StorageMarketActor: _expireStorageDeals
-StorageMinerActor -->> StorageMinerActor: _submitFaultReport(if TerminatedFautl)
-StorageMinerActor -->> StorageMarketActor: ProcessDealSlash(batchSlash)
+
+
+StorageMinerActor -->> StorageMinerActor: _onSuccessfulPoSt
+StorageMinerActor -->> StorageMarketActor: ProcessDealPayment
+StorageMarketActor -->> StorageMarketActor: _assertActiveDealState
+StorageMarketActor -->> StorageMarketActor: _getStorageFeeSinceLastPayment
+StorageMarketActor -->> StorageMarketActor: _transferBalance
+
+StorageMinerActor -->> StorageMinerActor: _submitPowerReport (if any deal expires)
+StorageMinerActor -->> StorageMarketActor: ProcessDealExpiration
+StorageMarketActor -->> StorageMarketActor: _assertActiveDealState
+StorageMarketActor -->> StorageMarketActor: _getStorageFeeSinceLastPayment
+StorageMarketActor -->> StorageMarketActor: _transferBalance
+StorageMarketActor -->> StorageMarketActor: _unlockCollateral
+
+StorageMinerActor -->> StorageMinerActor: _submitFaultReport(if TerminatedFault)
+StorageMinerActor -->> StorageMarketActor: ProcessDealSlash
 StorageMarketActor -->> StorageMarketActor: _slashTerminatedFaults
-StorageMinerActor -->> StorageMarketActor: CreditUnlockedFees
-StorageMarketActor -->> StorageMarketActor: _creditUnlockedFeeForProvider
+StorageMarketActor -->> StorageMarketActor: _assertActiveDealState
+StorageMarketActor -->> StorageMarketActor: _terminateDeal
+
+StorageMinerActor -->+ StorageMarketActor: WithdrawBalance
+StorageMarketActor -->- StorageMinerActor: fund
