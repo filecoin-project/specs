@@ -1,6 +1,9 @@
 package storage_power_consensus
 
 import (
+	"math/big"
+
+	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -150,6 +153,34 @@ func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power bl
 	pcRequired := actor.TokenAmount(0)
 
 	return pcRequired
+}
+
+// _sampleMinersToSurprise implements the PoSt-Surprise sampling algorithm
+func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int, ticket block.Ticket) []addr.Address {
+	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
+	// support enumerating by int index. maybe we need that as an interface too,
+	// or something similar to an iterator (or iterator over the keys)
+	// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int) using the ticket as a seed
+
+	ptSize := big.NewInt(int64(len(st.PowerTable())))
+	allMiners := make([]addr.Address, len(st.PowerTable()))
+	index := 0
+
+	for address, _ := range st.PowerTable() {
+		allMiners[index] = address
+		index++
+	}
+
+	sampledMiners := make([]addr.Address, challengeCount)
+	for chall := 0; chall < challengeCount; chall++ {
+		minerIndex := filproofs.TicketToRandomInt(ticket.Output(), chall, ptSize)
+		panic(minerIndex)
+		// hack
+		minerIndexInt := 0
+		sampledMiners = append(sampledMiners, allMiners[minerIndexInt])
+	}
+
+	return sampledMiners
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -348,24 +379,21 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 }
 
-// TODO: add Cleanup to the cron actor
-func (a *StoragePowerActorCode_I) CleanUp(rt Runtime, ticket block.Ticket) {
+// TODO: add Surprise to the cron actor
+func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 
+	var PROVING_PERIOD int // defined in storage_mining
+
+	// sample the actor addresses
 	h, st := a.State(rt)
 
-	// TODO: store LastChallengeEndEpoch in a PQueue
-	staleMiners := make([]addr.Address, len(st.PowerTable()))
-	index := 0
+	challengeCount := len(st.PowerTable()) / int(PROVING_PERIOD)
+	surprisedMiners := st._sampleMinersToSurprise(rt, challengeCount, ticket)
 
-	for address, _ := range st.PowerTable() {
-		staleMiners[index] = address
-		index++
-	}
-
-	Release(rt, h, st)
+	UpdateRelease(rt, h, st)
 
 	// now send the messages
-	for _, addr := range staleMiners {
+	for _, addr := range surprisedMiners {
 		// TODO: rt.SendMessage(addr, ...)
 		panic(addr)
 	}

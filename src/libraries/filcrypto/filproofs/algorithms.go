@@ -1,18 +1,25 @@
 package filproofs
 
-import "bytes"
-import "errors"
-import "fmt"
-import "math"
-import "math/rand"
-import big "math/big"
-import "encoding/binary"
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"math"
+	"math/rand"
 
-import util "github.com/filecoin-project/specs/util"
-import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+	"encoding/binary"
+	big "math/big"
+
+	util "github.com/filecoin-project/specs/util"
+
+	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+
+	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+	sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+)
 
 type SHA256Hash Bytes32
 type PedersenHash Bytes32
@@ -141,6 +148,17 @@ func randInRange(lowInclusive int, highExclusive int) UInt {
 	// NOTE: current implementation uses a more sophisticated method for repeated sampling within a range.
 	// We need to converge on and fully specify the actual method, since this must be deterministic.
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
+}
+
+func TicketToRandomInt(ticket []byte, nonce int, limit *big.Int) *big.Int {
+	nonceBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
+	input := ticket
+	input = append(input, nonceBytes...)
+	ranHash := HashBytes_SHA256Hash(input[:])
+	hashInt := bigIntFromLittleEndianBytes(ranHash)
+	num := hashInt.Mod(hashInt, limit)
+	return num
 }
 
 func (exp *ExpanderGraph_I) Parents(node UInt) []UInt {

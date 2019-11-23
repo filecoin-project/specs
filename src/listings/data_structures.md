@@ -71,11 +71,11 @@ what is meant is that the bytes of the `VRFResult` field in the `Ticket` struct 
 Specifically, tickets are compared lexicographically,
 interpreting the bytes of the `VRFResult.Output` as an unsigned integer value (little-endian).
 
-# ElectionProof
+# ChallengeTicket
 
-An election proof is generated from a given ChallengeTicket by Hashing it, and using that hash to generate a value in [0,1]. Specifically `ElectionProof = H(ChallengeTicket)/2^len(H)`. 
+An election proof is generated from a given PartialTicket by Hashing it, and using that hash to generate a value in [0,1]. Specifically `ChallengeTicket = H(PartialTicket)/2^len(H)`. 
 Its output value is compared to a target to determine whether the miner is elected as one of the leaders and hence is eligible to produce a block for the current epoch.
-The inclusion of the `ChallengeTicket` in the block allows other network participants to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket, (in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
+The inclusion of the `PartialTicket` in the block allows other network participants to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket, (in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
 block height with every leader election attempt.
 
 The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.

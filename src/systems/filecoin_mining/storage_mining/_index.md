@@ -32,7 +32,10 @@ Filecoin Storage Mining Subsystem
 
 To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that along with the ElectionProof. Both the ElectionProof and PoStProof are checked at Block Validation by `StoragePowerConsenusSubsystem`. When a block is included, a special message is added that calls `SubmitElectionPoSt` which will process sector updates in the same way as successful `SubmitSurprisePoSt` do. Note that it will be a single PoStProof in a single `SubmitElectionPoSt` message instead of a Commit-then-Prove scheme.
 
-TODO: ZX/Henri Verify ahead of merge
 # SurprisePoSt
 
-The chain keeps track of the last time that a miner received and submitted a Challenge (Election or Surprise). It randomly samples X miners to surprise at every Epoch. For every miner sampled, a `NotifyOfPoStSurpriseChallenge` is issued and sent as an on-chain message to surprised `StorageMinerActor`. However, if the `StorageMinerActor` is already proving a SurprisePoStChallenge (`IsChallenged` is True) or the `StorageMinerActor` has received a challenge (by Election or Surprise) within the `MIN_CHALLENGE_PERIOD` (`ShouldChallenge` is False), then the PoSt surprise notification will be ignored and return success.
+The chain keeps track of the last time that a miner received and submitted a Challenge (Election or Surprise). It randomly challenges a miner to submit a surprisePoSt once per `ProvingPeriod`. For every miner challenged, a `NotifyOfPoStSurpriseChallenge` is issued and sent as an on-chain message to surprised `StorageMinerActor`. However, if the `StorageMinerActor` is already proving a SurprisePoStChallenge (`IsChallenged` is True) or the `StorageMinerActor` has received a challenge (by Election or Surprise) within the `MIN_CHALLENGE_PERIOD` (`ShouldChallenge` is False), then the PoSt surprise notification will be ignored and return success.
+
+For more on these components, see {{<sref election-post>}}. At a high-level though both are needed for different reasons:
+- By coupling leader election and PoSt, `ElectionPoSt` ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
+- Small miners may not win on a regular basis however, `SurprisePoSt` thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.

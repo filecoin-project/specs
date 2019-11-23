@@ -16,6 +16,10 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
+const (
+	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,65 +67,48 @@ func (st *SectorTable_I) InactivePower() block.StoragePower {
 	return block.StoragePower((st.CommittedSectors_ + st.RecoveringSectors_ + st.FailingSectors_) * util.UVarint(st.SectorSize_))
 }
 
-func (ps *PoStStatus_I) IsInCleanup(currEpoch block.ChainEpoch) bool {
-	cleanupPeriodEnd := ps.CleanupPeriodStart() + CLEANUP_PERIOD_DURATION
-	return currEpoch > ps.CleanupPeriodStart() && currEpoch < cleanupPeriodEnd
+func (cs *ChallengeStatus_I) OnNewChallenge(currEpoch block.ChainEpoch) ChallengeStatus {
+	cs.LastChallengeEpoch_ = currEpoch
+	return cs
 }
 
-func (ps *PoStStatus_I) HasFailedCleanup(currEpoch block.ChainEpoch) bool {
-	cleanupPeriodEnd := ps.CleanupPeriodStart() + CLEANUP_PERIOD_DURATION
-	if currEpoch > cleanupPeriodEnd {
-		ps.Impl().CleanupPeriodStart_ = ps.CleanupPeriodStart() + ELECTION_PERIOD_DURATION
-		return true
+// Call by _onSuccessfulPoSt or _onMissedSurprisePoSt
+// TODO: verify this is correct and if we need to distinguish _onSuccessfulPoSt vs _onMissedSurprisePoSt
+func (cs *ChallengeStatus_I) OnChallengeResponse(currEpoch block.ChainEpoch) ChallengeStatus {
+	cs.LastChallengeEndEpoch_ = currEpoch
+	return cs
+}
+
+func (cs *ChallengeStatus_I) IsChallenged() bool {
+	// true (isChallenged) when LastChallengeEpoch is later than LastChallengeEndEpoch
+	return cs.LastChallengeEpoch() > cs.LastChallengeEndEpoch()
+}
+
+func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
+	h, st := a.State(rt)
+	ret := st._isChallenged(rt)
+	Release(rt, h, st)
+	return ret
+}
+
+// called by CronActor to notify StorageMiner of PoSt Challenge
+func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+
+	if a._isChallenged(rt) {
+		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
-	return false
-}
 
-func (ps *PoStStatus_I) IsInElection(currEpoch block.ChainEpoch) bool {
-	return currEpoch <= (ps.ElectionPeriodStart() + ELECTION_PERIOD_DURATION)
-}
+	a._expirePreCommittedSectors(rt)
 
-func (ps *PoStStatus_I) HasPassedFirstCleanupChallenge(currEpoch block.ChainEpoch) bool {
-	return !ps.IsInElection(currEpoch) || ps.IsInCleanup(currEpoch)
-}
-
-func (ps *PoStStatus_I) ResetPoStStatus(currEpoch block.ChainEpoch) {
-	ps.Impl().ElectionPeriodStart_ = currEpoch
-	ps.Impl().CleanupPeriodStart_ = currEpoch + ELECTION_PERIOD_DURATION - CLEANUP_PERIOD_DURATION
-}
-
-func (a *StorageMinerActorCode_I) _isInCleanup(rt Runtime) bool {
 	h, st := a.State(rt)
-	ret := st.PoStStatus().Impl().IsInCleanup(rt.CurrEpoch())
-	Release(rt, h, st)
-	return ret
-}
-
-func (a *StorageMinerActorCode_I) _hasFailedCleanup(rt Runtime) bool {
-	h, st := a.State(rt)
-	ret := st.PoStStatus().Impl().HasFailedCleanup(rt.CurrEpoch())
-	Release(rt, h, st)
-	return ret
-}
-
-func (a *StorageMinerActorCode_I) _isInElection(rt Runtime) bool {
-	h, st := a.State(rt)
-	ret := st.PoStStatus().Impl().IsInElection(rt.CurrEpoch())
-	Release(rt, h, st)
-	return ret
-}
-
-func (a *StorageMinerActorCode_I) _resetPoStStatus(rt Runtime) {
-	h, st := a.State(rt)
-	st.PoStStatus().Impl().ResetPoStStatus(rt.CurrEpoch())
+	st.ChallengeStatus().Impl().LastChallengeEpoch_ = rt.CurrEpoch()
 	UpdateRelease(rt, h, st)
+	return rt.SuccessReturn()
 }
 
-func (a *StorageMinerActorCode_I) _hasPassedFirstCleanupChallenge(rt Runtime) bool {
-	h, st := a.State(rt)
-	ret := st.PoStStatus().Impl().HasPassedFirstCleanupChallenge(rt.CurrEpoch())
-	Release(rt, h, st)
-	return ret
+func (st *StorageMinerActorState_I) _isChallenged(rt Runtime) bool {
+	return st.ChallengeStatus().IsChallenged()
 }
 
 func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
@@ -170,7 +157,7 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	panic(powerReport)
 }
 
-func (a *StorageMinerActorCode_I) _onMissedCleanUpPoSt(rt Runtime) {
+func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	h, st := a.State(rt)
 
 	failingSectorNumbers := getSectorNums(st.Sectors())
@@ -198,22 +185,23 @@ func (a *StorageMinerActorCode_I) _onMissedCleanUpPoSt(rt Runtime) {
 
 	a._submitPowerReport(rt)
 
+	// end of challenge
 	h, st = a.State(rt)
+	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
 	st._updateCommittedSectors(rt)
 	UpdateRelease(rt, h, st)
 }
 
-// If a CleanupPoSt is missed because the miner run out of time,
-// every sector is reported as failing for the current proving period.
-// TODO: verify that it is okay for an ElectionPoSt submission to be used as a CleanUpPoSt submission
-// because an ElectionPoSt will also get a miner out of Challenged status and update LastChallengeEpoch
-func (a *StorageMinerActorCode_I) CheckCleanupPoStSubmissionHappened(rt Runtime) InvocOutput {
+// If a Post is missed (either due to faults being not declared on time or
+// because the miner run out of time, every sector is reported as failing
+// for the current proving period.
+func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// we can return if miner has not yet gotten the chance to submit a cleanup post
-	if !a._hasPassedFirstCleanupChallenge(rt) {
+	// we can return if miner has not yet gotten the chance to submit a surprise post
+	if !a._isChallenged(rt) {
 		// Miner gets out of a challenge when submit a successful PoSt
-		// or when detected by CronActor. Hence, not being in _isInCleanup means that we are good here
+		// or when detected by CronActor. Hence, not being in isChallenged means that we are good here
 		return rt.SuccessReturn()
 	}
 
@@ -221,14 +209,7 @@ func (a *StorageMinerActorCode_I) CheckCleanupPoStSubmissionHappened(rt Runtime)
 	a._expirePreCommittedSectors(rt)
 
 	// oh no -- we missed it. rekt
-	if a._hasFailedCleanup(rt) {
-		a._onMissedCleanUpPoSt(rt)
-
-		h, st := a.State(rt)
-		newCleanupPeriodStart := st.PoStStatus().CleanupPeriodStart() + CLEANUP_PERIOD_DURATION
-		st.PoStStatus().Impl().CleanupPeriodStart_ = newCleanupPeriodStart
-		UpdateRelease(rt, h, st)
-	}
+	a._onMissedSurprisePoSt(rt)
 
 	return rt.SuccessReturn()
 }
@@ -365,7 +346,7 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 // TODO: decide whether declared faults sectors should be
 // penalized in the same way as undeclared sectors and how
 
-// this method is called by both SubmitElectionPoSt and SubmitCleanUpPoSt
+// this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
 // - Process ProvingSet.SectorsOn()
 //   - State Transitions
 //     - Committed -> Active and credit power
@@ -451,12 +432,106 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
 
 	h, st = a.State(rt)
+	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
+	st._updateCommittedSectors(rt)
+	UpdateRelease(rt, h, st)
+
+	return rt.SuccessReturn()
+
+}
+
+func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+	TODO() // TODO: validate caller
+
+	if !a._isChallenged(rt) {
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("cannot SubmitSurprisePoSt when not challenged")
+	}
+
+	// Verify correct PoSt Submission
+	isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
+	if !isPoStVerified {
+		// no state transition, just error out and miner should submitSurprisePoSt again
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("TODO")
+	}
+
+	h, st := a.State(rt)
+
+	// The proof is verified, process ProvingSet.SectorsOn():
+	// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
+	// ProvingSet itself does not store states, states are all stored in Sectors.State
+	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
+		sectorState, found := st.Sectors()[sectorNo]
+		if !found {
+			// TODO: determine proper error here and error-handling machinery
+			rt.Abort("Sector state not found in map")
+		}
+		switch sectorState.State().StateNumber {
+		case SectorCommittedSN, SectorRecoveringSN:
+			st._updateActivateSector(rt, sectorNo)
+		case SectorActiveSN:
+			// Process payment in all active deals
+			// Note: this must happen before marking sectors as expired.
+			// TODO: Pay miner in a single batch message
+			// SendMessage(sma.ProcessStorageDealsPayment(sm.Sectors()[sectorNumber].DealIDs()))
+		default:
+			// TODO: determine proper error here and error-handling machinery
+			rt.Abort("Invalid sector state in ProvingSet.SectorsOn()")
+		}
+	}
+
+	// commit state change so that committed and recovering are now active
+
+	// Process ProvingSet.SectorsOff()
+	// ProvingSet.SectorsOff() contains SectorFailing
+	// SectorRecovering is Proving and hence will not be in GetZeros()
+	// heavy penalty if Failing for more than or equal to MAX_CONSECUTIVE_FAULTS
+	// otherwise increment FaultCount in Sectors().State
+	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOff() {
+		sectorState, found := st.Sectors()[sectorNo]
+		if !found {
+			continue
+		}
+		switch sectorState.State().StateNumber {
+		case SectorFailingSN:
+			st._updateFailSector(rt, sectorNo, true)
+		default:
+			// TODO: determine proper error here and error-handling machinery
+			rt.Abort("Invalid sector state in ProvingSet.SectorsOff")
+		}
+	}
+
+	// Process Expiration.
+	st._updateExpireSectors(rt)
+
+	UpdateRelease(rt, h, st)
+
+	h, st = a.State(rt)
+	terminationFaultCount := st.SectorTable().Impl().TerminationFaultCount_
+	Release(rt, h, st)
+
+	a._submitFaultReport(
+		rt,
+		util.UVarint(0), // NewDeclaredFaults
+		util.UVarint(0), // NewDetectedFaults
+		util.UVarint(terminationFaultCount),
+	)
+
+	a._submitPowerReport(rt)
+
+	// TODO: check EnsurePledgeCollateralSatisfied
+	// pledgeCollateralSatisfied
+
+	// Reset Proving Period and report power updates
+	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
+
+	h, st = a.State(rt)
+	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
 
 	st._updateCommittedSectors(rt)
 
 	UpdateRelease(rt, h, st)
-
-	a._resetPoStStatus(rt)
 
 	return rt.SuccessReturn()
 
@@ -467,9 +542,12 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 // Assume ElectionPoSt has already been successfully verified when the function gets called.
 func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
 
-	TODO() // TODO: validate caller
+	// TODO: validate caller
+	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
+	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
+	TODO()
 
-	if !a._isInElection(rt) {
+	if !a._isChallenged(rt) {
 		rt.Abort("cannot SubmitElectionPoSt when not in election period")
 	}
 
@@ -481,26 +559,6 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 
 	return a._onSuccessfulPoSt(rt, postSubmission)
 
-}
-
-// SubmitCleanupPoSt Workflow:
-// - Verify PoSt Submission
-// - Process successful PoSt
-func (a *StorageMinerActorCode_I) SubmitCleanupPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
-	TODO() // TODO: validate caller
-
-	if !a._isInCleanup(rt) {
-		rt.Abort("cannot SubmitCleanUpPoSt when not in cleanup period")
-	}
-
-	// Verify correct PoSt Submission
-	isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
-	if !isPoStVerified {
-		// no state transition, just error out and miner should submitCleanUpPoSt again
-		rt.Abort("sm.SubmitCleanUpPoSt: cleanup post is not verified")
-	}
-
-	return a._onSuccessfulPoSt(rt, postSubmission)
 }
 
 func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
@@ -548,10 +606,10 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// but miner can RecoverFaults in recovery before cleanup
-	if !a._isInCleanup(rt) {
+	// but miner can RecoverFaults in recovery before challenge
+	if a._isChallenged(rt) {
 		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("sm.RecoverFaults: cannot RecoverFaults when sm _isInCleanup")
+		rt.Abort("cannot RecoverFaults when sm isChallenged")
 	}
 
 	h, st := a.State(rt)
@@ -601,8 +659,9 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.CompactSectorSet) InvocOutput {
 	TODO() // TODO: validate caller
 
-	if a._hasPassedFirstCleanupChallenge(rt) {
-		rt.Abort("cannot DeclareFaults when in _isPastFirstCleanup")
+	if a._isChallenged(rt) {
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("cannot DeclareFaults when challenged")
 	}
 
 	h, st := a.State(rt)
@@ -696,6 +755,7 @@ func (st *StorageMinerActorState_I) _sectorExists(sectorNo sector.SectorNumber) 
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) InvocOutput {
 	TODO() // TODO: validate caller
 
+	// no checks needed
 	// can be called regardless of Challenged status
 
 	// TODO: might record CurrEpoch for PreCommitSector expiration
@@ -807,7 +867,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		State_:          SectorCommitted(),
 	}
 
-	if st._isInCleanup(rt) {
+	if st._isChallenged(rt) {
 		// move PreCommittedSector to StagedCommittedSectors if in Challenged status
 		st.StagedCommittedSectors()[onChainInfo.SectorNumber()] = sealOnChainInfo
 	} else {
