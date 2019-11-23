@@ -58,8 +58,8 @@ func (amt *DealExpirationAMT_I) Add(key block.ChainEpoch, value DealExpirationVa
 	// helper function to add entry into the AMT
 }
 
-func (amt *DealExpirationAMT_I) ActiveDealIDs() CompactDealSet {
-	var ret CompactDealSet
+func (amt *DealExpirationAMT_I) ActiveDealIDs() []DealID {
+	ret := make([]DealID, 0)
 	return ret
 }
 

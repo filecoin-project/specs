@@ -128,14 +128,13 @@ func (a *StorageMinerActorCode_I) _slashDealsFromFaultReport(rt Runtime, sectorN
 
 	h, st := a.State(rt)
 
-	// This is not right but doing this for specing`
-	dealIDs := deal.CompactDealSet(make([]byte, 0))
+	dealIDs := make([]deal.DealID, 0)
 
 	for _, sectorNo := range sectorNumbers {
 
 		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
 		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
-		dealIDs = dealIDs.Extend(activeDealIDs)
+		dealIDs = append(dealIDs, activeDealIDs...)
 
 	}
 
@@ -292,8 +291,7 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 	// depends on decision around collateral requirement for inactive power
 	// and what happens when a failing sector expires
 
-	// this may not work
-	ret := deal.CompactDealSet(make([]byte, 0))
+	ret := make([]deal.DealID, 0)
 
 	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
 
@@ -301,23 +299,21 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 		newUtilization := utilizationInfo.CurrUtilization()
 
 		currEpoch := rt.CurrEpoch()
-		totalDealCount := len(st.Sectors()[sectorNo].SealCommitment().DealIDs())
-		newExpiredDealIDs := deal.CompactDealSet(make([]byte, totalDealCount))
-
+		newExpiredDealIDs := make([]deal.DealID, 0)
 		newExpiredDeals := utilizationInfo.DealExpirationAMT().Impl().ExpiredDealsInRange(lastPoSt, currEpoch)
 
 		for _, expiredDeal := range newExpiredDeals {
 			expiredPower := expiredDeal.Power()
 			newUtilization -= expiredPower
-			newExpiredDealIDs.Add(expiredDeal.ID())
+			newExpiredDealIDs = append(newExpiredDealIDs, expiredDeal.ID())
 
 		}
 
 		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
-		ret = ret.Extend(newExpiredDealIDs)
+		ret = append(ret, newExpiredDealIDs...)
 	}
 
-	return ret.DealsOn()
+	return ret
 
 }
 
