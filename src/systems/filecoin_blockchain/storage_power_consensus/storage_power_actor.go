@@ -394,7 +394,10 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 
 	// now send the messages
 	for _, addr := range surprisedMiners {
-		// TODO: rt.SendMessage(addr, ...)
+		// For each miner here check if they should be challenged and send message
+		// if should_challenge{
+		//   rt.SendMessage(addr, ...)
+		// }
 		panic(addr)
 	}
 }

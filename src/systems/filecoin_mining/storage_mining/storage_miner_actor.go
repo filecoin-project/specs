@@ -91,6 +91,17 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	return ret
 }
 
+func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch, minChallengePeriod block.ChainEpoch) bool {
+	// true when currEpoch > LastChallengeEpoch + minChallengePeriod
+	return currEpoch > (cs.LastChallengeEpoch() + minChallengePeriod)
+}
+
+func (st *StorageMinerActorState_I) _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool {
+	// pulled in from constants
+	PROVING_PERIOD := block.ChainEpoch(3)
+	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), PROVING_PERIOD)
+}
+
 // called by CronActor to notify StorageMiner of PoSt Challenge
 func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
