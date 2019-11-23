@@ -82,8 +82,8 @@ func WinSDRParams(cfg SDRCfg) *WinStackedDRG_I {
 			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
 				&ChungExpanderAlgorithm_I{
 					PermutationAlgorithm_: ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&Feistel_I{
-						Keys_:   FEISTEL_KEYS[:],
-						Rounds_: FEISTEL_ROUNDS,
+						Keys_:         FEISTEL_KEYS[:],
+						Rounds_:       FEISTEL_ROUNDS,
 						HashFunction_: ChungExpanderPermutationFeistelHashFunction_SHA256,
 					}),
 				}),
