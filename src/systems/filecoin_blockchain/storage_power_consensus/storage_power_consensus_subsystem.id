@@ -18,12 +18,13 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     IsWinningChallengeTicket(
         challengeTicket sector.ChallengeTicket
+        minerAddr     addr.Address
     ) bool
 
     validateElectionProof(
         height         block.ChainEpoch
         electionProof  block.ElectionProof
-        workerAddr     addr.Address
+        minerAddr     addr.Address
     ) bool
 
     validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey) bool

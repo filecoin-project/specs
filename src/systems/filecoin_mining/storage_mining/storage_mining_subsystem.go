@@ -111,9 +111,13 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
+	// append the miner actor address for the miner generifying this in order to prevent miners with the same
+	// worker keys from generating the same randomness (given the VRF)
 	var input []byte
-	input := filcrypto.TicketTag
-	input = append(input, priorTicket.Output()...)
+	input = append(filcrypto.DomainSeparationTag_Case_Ticket)
+	input = append(input, randomness...)
+	input = append(input, filcrypto.InputDelimeter)
+	input = append(input, minerAddr...)
 
 	// run through VRF
 	vrfRes := vrfKP.Generate(input)
@@ -133,33 +137,10 @@ func (sms *StorageMiningSubsystem_I) DrawElectionProof(randomness block.Randomne
 
 	// // 1. Run it through VRF and get determinstic output
 	// // 1.i. # take the VRFOutput of that ticket as input, specified for the appropriate operation type
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> made changes to define domain sep tag
-=======
->>>>>>> fix some types and double tags. must work on compilation
 	// var input []byte
 	// input = append (input, filcrypto.ElectionTag)
 	// input = append(input, lookbackTicket.Output)
 	// input = append(input, height)
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
-	// input := []byte("ELECTION")
-=======
-	// input := []byte(filcrypto.ElectionTag)
->>>>>>> made changes to define domain sep tag
-	// input := VRFPersonalization.ElectionProof
-	// input.append(lookbackTicket.Output)
-	// input.append(height)
->>>>>>> domain separation tag for ticket, election proof and block signing
->>>>>>> made changes to define domain sep tag
-=======
->>>>>>> fix some types and double tags. must work on compilation
 	// // ii. # run it through the VRF and store the VRFProof in the new ticket
 	// newEP.VRFResult := vrfKP.Generate(input)
 	// return newEP

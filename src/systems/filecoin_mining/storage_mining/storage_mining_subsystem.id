@@ -2,7 +2,7 @@ import sectoridx "github.com/filecoin-project/specs/systems/filecoin_mining/sect
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer"
@@ -70,6 +70,7 @@ type StorageMiningSubsystem struct {
     PrepareNewTicket(
         randomness     block.Randomness
         workerKeyPair  filcrypto.VRFKeyPair
+        minerAddr      addr.Address
     ) block.Ticket
 
     // call by BlockChain when a new block is produced

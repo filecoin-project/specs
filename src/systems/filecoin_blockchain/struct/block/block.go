@@ -59,11 +59,16 @@ func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 
 func (chain *Chain_I) RandomnessAtEpoch(minerAddr addr.Address, epoch ChainEpoch) util.Bytes {
 	ts := chain.TipsetAtEpoch(epoch)
+	priorRand := ts.MinTicket().DrawRandomness(minerAddr, epoch)
 
 	// doesn't matter if ts.Epoch() != epoch
 	// since we generate new ticket from prior one in any case
 	// else we use ticket from that epoch and derive new randomness from it
-	return SHA256(ts.MinTicket().DrawRandomness(minerAddr, epoch))
+	var input []byte
+	input = append(input, priorRand...)
+	input = append(input filcrypto.inputDelimeter...)
+	input = append(input, epoch...)
+	return SHA256(input)
 }
 
 func (chain *Chain_I) HeadEpoch() ChainEpoch {

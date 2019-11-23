@@ -1,6 +1,7 @@
 package storage_power_consensus
 
 import (
+	"github.com/filecoin-project/go-filecoin/address"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -51,12 +52,15 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) 
 	// return nil
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.PublicKey) bool {
-	panic("")
-	// Randomness1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
-	// input := VRFPersonalizationTicket
-	// input.append(Randomness1)
-	// return ticket.Verify(input, pk)
+func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.PublicKey, minerAddr address.Address) bool {
+	randomness1 := spc.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
+
+	var input []byte
+	input = append(filcrypto.DomainSeparationTag_Case_Ticket...)
+	input = append(input, randomness1...)
+	input = append(input, filcrypto.InputDelimeter...)
+	input = append(input, minerAddr...)
+	return ticket.Verify(input, pk)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset block.Tipset) block.ChainWeight {
@@ -67,7 +71,7 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeTicket sector.ChallengeTicket) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeTicket sector.ChallengeTicket, minerAddr addr.Address) bool {
 
 	// TODO: Send message to SPA to get ActivePowerInSector associated with sector
 	activePowerInSector := uint64(block.StoragePower(0))
@@ -96,7 +100,7 @@ func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain,
 	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_POST)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.ChainEpoch, electionProof block.ElectionProof, workerAddr addr.Address) bool {
+func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.ChainEpoch, electionProof block.ElectionProof, minerAddr addr.Address) bool {
 	panic("")
 	// // 1. Check that ElectionProof was validated in appropriate time
 	// if height > clock.roundTime {
