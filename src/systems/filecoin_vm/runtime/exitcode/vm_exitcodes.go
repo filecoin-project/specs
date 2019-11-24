@@ -39,7 +39,7 @@ const (
 	// This happens when message.CallSeqNum is not exactly actor.CallSeqNum + 1
 	InvalidCallSeqNum
 
-	// OutOfGasError is returned when the execution of an actor method
+	// OutOfGas is returned when the execution of an actor method
 	// (including its subcalls) uses more gas than initially allocated.
 	OutOfGas
 
@@ -77,9 +77,6 @@ func (x *ExitCode_I) IsError() bool {
 }
 
 func (x *ExitCode_I) AllowsStateUpdate() bool {
-	// TODO: Confirm whether this is the desired behavior
-
-	// return x.IsSuccess() || x.Which() == ExitCode_Case_UserDefinedError
 	return x.IsSuccess()
 }
 

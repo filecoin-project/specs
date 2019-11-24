@@ -14,19 +14,11 @@ var TODO = util.TODO
 func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree st.StateTree, msgs []MessageRef) (outTree st.StateTree, ret []msg.MessageReceipt) {
 	compTree := inTree
 	for _, m := range msgs {
-		oT, r := vmi.ApplyMessage(compTree, m.Message(), m.Miner())
+		oT, r := vmi.ApplyMessage(compTree, m.Message(), m.MessageSizeOrig(), m.Miner())
 		compTree = oT        // assign the current tree. (this call always succeeds)
 		ret = append(ret, r) // add message receipt
 	}
 	return compTree, ret
-}
-
-func _applyError(errCode exitcode.SystemErrorCode) msg.MessageReceipt {
-	// TODO: should this gasUsed value be zero?
-	// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
-	gasUsed := gascost.ApplyMessageFail
-	TODO()
-	return msg.MessageReceipt_MakeSystemError(errCode, gasUsed)
 }
 
 func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {
@@ -39,8 +31,22 @@ func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Addr
 	}
 }
 
-func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.UnsignedMessage, minerAddr addr.Address) (
+func (vmi *VMInterpreter_I) ApplyMessage(
+	inTree st.StateTree, message msg.UnsignedMessage, messageSizeOrig int, minerAddr addr.Address) (
 	st.StateTree, msg.MessageReceipt) {
+
+	gasUsed := msg.GasAmount_Zero()
+
+	_applyError := func(errCode exitcode.SystemErrorCode) (st.StateTree, msg.MessageReceipt) {
+		// TODO: If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
+		return inTree, msg.MessageReceipt_MakeSystemError(errCode, gasUsed)
+	}
+
+	_useGas := func(x msg.GasAmount) {
+		gasUsed = gasUsed.Add(x)
+	}
+
+	_useGas(gascost.OnChainMessage(messageSizeOrig))
 
 	compTree := inTree
 	var outTree st.StateTree
@@ -50,26 +56,26 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	fromActor := compTree.GetActorState(message.From())
 	if fromActor == nil {
 		// TODO: This was originally exitcode.InvalidMethod; which is correct?
-		return inTree, _applyError(exitcode.ActorNotFound)
+		return _applyError(exitcode.ActorNotFound)
 	}
 
 	// make sure fromActor has enough money to run the max invocation
 	maxGasCost := gasToFIL(message.GasLimit(), message.GasPrice())
 	totalCost := message.Value() + actor.TokenAmount(maxGasCost)
 	if fromActor.Balance() < totalCost {
-		return inTree, _applyError(exitcode.InsufficientFunds)
+		return _applyError(exitcode.InsufficientFunds)
 	}
 
 	// make sure this is the right message order for fromActor
 	// (this is protection against replay attacks, and useful sequencing)
 	if message.CallSeqNum() != fromActor.CallSeqNum()+1 {
-		return inTree, _applyError(exitcode.InvalidCallSeqNum)
+		return _applyError(exitcode.InvalidCallSeqNum)
 	}
 
 	// WithActorForAddress may create new account actors
 	compTree, toActor = compTree.Impl().WithActorForAddress(message.To())
 	if toActor == nil {
-		return inTree, _applyError(exitcode.ActorNotFound)
+		return _applyError(exitcode.ActorNotFound)
 	}
 
 	// deduct maximum expenditure gas funds first
@@ -107,7 +113,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	} else {
 		// success -- refund unused gas
 		outTree = sendRetStateTree
-		refundGas := message.GasLimit() - sendRet.GasUsed()
+		refundGas := message.GasLimit().Subtract(sendRet.GasUsed())
 		TODO() // TODO: assert refundGas is nonnegative
 		outTree = _withTransferFundsAssert(
 			outTree,
@@ -135,5 +141,6 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 }
 
 func gasToFIL(gas msg.GasAmount, price msg.GasPrice) actor.TokenAmount {
-	return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
+	panic("TODO")  // BigInt arithmetic
+	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 }

@@ -69,19 +69,31 @@ func Verify(message SignedMessage, publicKey filcrypto.PublicKey) (UnsignedMessa
 	return message.Message(), nil
 }
 
-func (x GasAmount) Add(y GasAmount) GasAmount {
+func (x *GasAmount_I) Add(y GasAmount) GasAmount {
 	panic("TODO")
 }
 
-func (x GasAmount) Subtract(y GasAmount) GasAmount {
+func (x *GasAmount_I) Subtract(y GasAmount) GasAmount {
 	panic("TODO")
 }
 
-func (x GasAmount) LessThan(y GasAmount) bool {
+func (x *GasAmount_I) LessThan(y GasAmount) bool {
 	panic("TODO")
+}
+
+func (x *GasAmount_I) Scale(count int) GasAmount {
+	panic("TODO")
+}
+
+func GasAmount_Affine(b GasAmount, x int, m GasAmount) GasAmount {
+	return b.Add(m.Scale(x))
 }
 
 func GasAmount_Zero() GasAmount {
+	return GasAmount_FromInt(0)
+}
+
+func GasAmount_FromInt(x int) GasAmount {
 	panic("TODO")
 }
 
