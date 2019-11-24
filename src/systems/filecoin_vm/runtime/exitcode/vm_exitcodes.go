@@ -1,16 +1,16 @@
 package exitcode
 
-import util "github.com/filecoin-project/specs/util"
-
 import (
 	"fmt"
 )
 
-type SystemErrorCode util.Int
+type SystemErrorCode int
+type UserDefinedErrorCode int
 
 const (
 	// TODO: remove once canonical error codes are finalized
-	SystemErrorCode_Placeholder = SystemErrorCode(-(1 << 30))
+	SystemErrorCode_Placeholder      = SystemErrorCode(-(1 << 30))
+	UserDefinedErrorCode_Placeholder = UserDefinedErrorCode(-(1 << 30))
 )
 
 // TODO: assign all of these.
@@ -26,14 +26,14 @@ const (
 	// an actor
 	InvalidMethod
 
-	// InvalidArguments indicates that a method was called with the incorrect
+	// InvalidArgumentsSystem indicates that a method was called with the incorrect
 	// number of arguments, or that its arguments did not satisfy its
 	// preconditions
-	InvalidArguments
+	InvalidArguments_System
 
 	// InsufficientFunds represents a failure to apply a message, as
 	// it did not carry sufficient funds for its application.
-	InsufficientFunds
+	InsufficientFunds_System
 
 	// InvalidCallSeqNum represents a message invocation out of sequence.
 	// This happens when message.CallSeqNum is not exactly actor.CallSeqNum + 1
@@ -47,8 +47,9 @@ const (
 	// to the runtime that does not satisfy its preconditions.
 	RuntimeAPIError
 
-	// MethodPanic is returned when an actor method invocation calls rt.Abort.
-	MethodAbort
+	// RuntimeAssertFailure is returned when an actor method invocation calls
+	// rt.Assert with a false condition.
+	RuntimeAssertFailure
 
 	// MethodSubcallError is returned when an actor method's Send call has
 	// returned with a failure error code (and the Send call did not specify
@@ -56,8 +57,14 @@ const (
 	MethodSubcallError
 )
 
-var (
-	InvalidSectorPacking = UserDefinedError(1)
+const (
+	InsufficientFunds_User = UserDefinedErrorCode_Placeholder + iota
+	InvalidArguments_User
+	InconsistentState_User
+
+	InvalidSectorPacking
+	SealVerificationFailed
+	DeadlineExceeded
 )
 
 func OK() ExitCode {
@@ -78,6 +85,10 @@ func (x *ExitCode_I) IsError() bool {
 
 func (x *ExitCode_I) AllowsStateUpdate() bool {
 	return x.IsSuccess()
+}
+
+func (x *ExitCode_I) Equals(ExitCode) bool {
+	panic("TODO")
 }
 
 func EnsureErrorCode(x ExitCode) ExitCode {
@@ -109,6 +120,6 @@ func RuntimeError_Make(exitCode ExitCode, errMsg string) *RuntimeError {
 	}
 }
 
-func UserDefinedError(e util.UVarint) ExitCode {
+func UserDefinedError(e UserDefinedErrorCode) ExitCode {
 	return ExitCode_Make_UserDefinedError(ExitCode_UserDefinedError(e))
 }

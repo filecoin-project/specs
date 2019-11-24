@@ -26,17 +26,17 @@ func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, InitActorStat
 	stateCID := ipld.CID(h.Take())
 	if ipld.CID_Equals(stateCID, ipld.EmptyCID()) {
 		if rt.CurrMethodNum() != actor.MethodConstructor {
-			rt.Abort("Actor state not initialized")
+			rt.AbortAPI("Actor state not initialized")
 		}
 		return h, nil
 	}
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state, err := Deserialize_InitActorState(Serialization(stateBytes.As_Bytes()))
 	if err != nil {
-		rt.Abort("State deserialization error")
+		rt.AbortAPI("State deserialization error")
 	}
 	return h, state
 }
@@ -66,7 +66,7 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 
 func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {
 	if !_codeIDSupportsExec(codeID) {
-		rt.Abort("cannot exec an actor of this type")
+		rt.AbortArgMsg("cannot exec an actor of this type")
 	}
 
 	newAddr := _computeNewActorExecAddress(rt)
@@ -144,45 +144,38 @@ func _codeIDSupportsExec(codeID actor.CodeID) bool {
 }
 
 func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	argError := rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidArguments))
+	_checkArgs := func(cond bool) {
+		if !cond {
+			rt.AbortArg()
+		}
+	}
 
 	switch method {
 	case actor.MethodConstructor:
-		if len(params) != 0 {
-			return argError
-		}
+		_checkArgs(len(params) == 0)
 		return a.Constructor(rt)
 
-	// case actor.MethodCron:
-	//     disable. init has no cron action
-
 	case Method_InitActor_Exec:
-		if len(params) == 0 {
-			return argError
-		}
+		_checkArgs(len(params) != 0)
+
 		codeId, err := actor.Deserialize_CodeID(Serialization(params[0]))
-		if err != nil {
-			return argError
-		}
+		_checkArgs(err == nil)
 		params = params[1:]
+
 		return a.Exec(rt, codeId, params)
 
 	case Method_InitActor_GetActorIDForAddress:
-		if len(params) == 0 {
-			return argError
-		}
+		_checkArgs(len(params) != 0)
+
 		address, err := addr.Deserialize_Address(Serialization(params[0]))
-		if err != nil {
-			return argError
-		}
+		_checkArgs(err == nil)
 		params = params[1:]
 
-		if len(params) != 0 {
-			return argError
-		}
+		_checkArgs(len(params) == 0)
 		return a.GetActorIDForAddress(rt, address)
 
 	default:
-		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
+		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
+		panic("")
 	}
 }

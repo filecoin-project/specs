@@ -8,6 +8,7 @@ import (
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -30,7 +31,7 @@ func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -68,7 +69,7 @@ func (r *FaultReport_I) GetTerminatedFaultSlash() actor.TokenAmount {
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert address to MinerActorID
@@ -76,7 +77,7 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address a
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	amountToSlash := amount
@@ -101,7 +102,7 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 	// AvailableBalance -> LockedPledgeCollateral
 	// TODO: potentially unnecessary check
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert address to MinerActorID
@@ -109,11 +110,13 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	if currEntry.Impl().AvailableBalance() < amount {
-		rt.Abort("insufficient available balance.")
+		rt.Abort(
+			exitcode.UserDefinedError(exitcode.InsufficientFunds_User),
+			"insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -124,7 +127,7 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	// lockedPledgeCollateral -> AvailableBalance
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert address to MinerActorID
@@ -132,11 +135,13 @@ func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address 
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
-		rt.Abort("insufficient locked balance.")
+		rt.Abort(
+			exitcode.UserDefinedError(exitcode.InsufficientFunds_User),
+			"insufficient locked balance.")
 	}
 
 	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
@@ -192,7 +197,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	// TODO: this should be enforced somewhere else
 	if msgValue < 0 {
-		rt.Abort("negative message value.")
+		rt.AbortArgMsg("negative message value.")
 	}
 
 	// TODO: convert msgSender to MinerActorID
@@ -204,7 +209,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	if !found {
 		// AddBalance will just fail if miner is not created before hand
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
 	st.Impl().PowerTable_[minerID] = currEntry
@@ -215,7 +220,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert msgSender to MinerActorID
@@ -225,11 +230,13 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	if currEntry.AvailableBalance() < amount {
-		rt.Abort("insufficient balance.")
+		rt.Abort(
+			exitcode.UserDefinedError(exitcode.InsufficientFunds_User),
+			"insufficient balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -281,7 +288,7 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Ad
 	h, st := a.State(rt)
 
 	if (st.PowerTable()[minerID].ActivePower() + st.PowerTable()[minerID].InactivePower()) > 0 {
-		rt.Abort("power still remains.")
+		rt.AbortArgMsg("power still remains.")
 	}
 
 	delete(st.PowerTable(), minerID)
@@ -316,7 +323,7 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bo
 	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
-		rt.Abort("miner not found.")
+		rt.AbortArgMsg("miner not found.")
 	}
 
 	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
@@ -358,7 +365,7 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
-		rt.Abort("miner not found.")
+		rt.AbortArgMsg("miner not found.")
 	}
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()

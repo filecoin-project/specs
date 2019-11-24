@@ -8,9 +8,9 @@ import util "github.com/filecoin-project/specs/util"
 
 type Serialization = util.Serialization
 
-func MessageReceipt_Make(output InvocOutput, gasUsed GasAmount) MessageReceipt {
+func MessageReceipt_Make(output InvocOutput, exitCode exitcode.ExitCode, gasUsed GasAmount) MessageReceipt {
 	return &MessageReceipt_I{
-		ExitCode_:    output.ExitCode(),
+		ExitCode_:    exitCode,
 		ReturnValue_: output.ReturnValue(),
 		GasUsed_:     gasUsed,
 	}
@@ -106,16 +106,16 @@ func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.Metho
 	}
 }
 
-func InvocOutput_Make(exitCode exitcode.ExitCode, returnValue util.Bytes) InvocOutput {
+func InvocOutput_Make(returnValue util.Bytes) InvocOutput {
 	return &InvocOutput_I{
-		ExitCode_:    exitCode,
 		ReturnValue_: returnValue,
 	}
 }
 
 func MessageReceipt_MakeSystemError(errCode exitcode.SystemErrorCode, gasUsed GasAmount) MessageReceipt {
 	return MessageReceipt_Make(
-		InvocOutput_Make(exitcode.SystemError(errCode), nil),
+		InvocOutput_Make(nil),
+		exitcode.SystemError(errCode),
 		gasUsed,
 	)
 }

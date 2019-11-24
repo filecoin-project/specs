@@ -63,7 +63,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	maxGasCost := gasToFIL(message.GasLimit(), message.GasPrice())
 	totalCost := message.Value() + actor.TokenAmount(maxGasCost)
 	if fromActor.Balance() < totalCost {
-		return _applyError(exitcode.InsufficientFunds)
+		return _applyError(exitcode.InsufficientFunds_System)
 	}
 
 	// make sure this is the right message order for fromActor
@@ -141,6 +141,6 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 }
 
 func gasToFIL(gas msg.GasAmount, price msg.GasPrice) actor.TokenAmount {
-	panic("TODO")  // BigInt arithmetic
+	panic("TODO") // BigInt arithmetic
 	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 }

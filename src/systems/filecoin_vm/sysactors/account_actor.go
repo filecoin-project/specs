@@ -14,7 +14,7 @@ func (a *AccountActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, AccountAct
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := AccDeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -45,6 +45,7 @@ func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 func (a *AccountActorCode_I) InvokeMethod(rt vmr.Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	switch method {
 	default:
-		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
+		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
+		panic("")
 	}
 }

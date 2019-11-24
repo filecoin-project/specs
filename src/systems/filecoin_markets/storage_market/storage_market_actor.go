@@ -4,6 +4,7 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -28,7 +29,7 @@ func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, Stat
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -99,12 +100,12 @@ func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.
 // TODO: consider returning a boolean
 func (st *StorageMarketActorState_I) _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	currBalance, found := st.Balances()[addr]
 	if !found {
-		rt.Abort("addr not found.")
+		rt.AbortArgMsg("addr not found.")
 	}
 
 	currBalance.Impl().Available_ -= amount
@@ -113,12 +114,12 @@ func (st *StorageMarketActorState_I) _lockBalance(rt Runtime, addr addr.Address,
 
 func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	currBalance, found := st.Balances()[addr]
 	if !found {
-		rt.Abort("addr not found.")
+		rt.AbortArgMsg("addr not found.")
 	}
 
 	currBalance.Impl().Locked_ -= amount
@@ -131,8 +132,9 @@ func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked add
 	toB := st.Balances()[toAvailable]
 
 	if fromB.Locked() < amount {
-		rt.Abort("attempt to lock funds greater than actor has")
-		return
+		rt.Abort(
+			exitcode.UserDefinedError(exitcode.InsufficientFunds_User),
+			"attempt to lock funds greater than actor has")
 	}
 
 	fromB.Impl().Locked_ -= amount
@@ -174,16 +176,18 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.Tok
 	var msgSender addr.Address // TODO replace this from VM runtime
 
 	if balance < 0 {
-		rt.Abort("negative balance to withdraw.")
+		rt.AbortArgMsg("negative balance to withdraw.")
 	}
 
 	senderBalance, found := st.Balances()[msgSender]
 	if !found {
-		rt.Abort("sender address not found.")
+		rt.AbortArgMsg("sender address not found.")
 	}
 
 	if senderBalance.Available() < balance {
-		rt.Abort("insufficient balance.")
+		rt.Abort(
+			exitcode.UserDefinedError(exitcode.InsufficientFunds_User),
+			"insufficient balance.")
 	}
 
 	senderBalance.Impl().Available_ = senderBalance.Available() - balance
@@ -203,7 +207,7 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
 	// TODO subtract balance from msgSender
 	// TODO add balance to StorageMarketActor
 	if balance < 0 {
-		rt.Abort("negative balance to add.")
+		rt.AbortArgMsg("negative balance to add.")
 	}
 
 	senderBalance, found := st.Balances()[msgSender]
@@ -302,7 +306,7 @@ func (a *StorageMarketActorCode_I) GetLastDealExpirationFromDealIDs(rt Runtime, 
 	for _, dealID := range dealIDs {
 		deal, found := st.Deals()[dealID]
 		if !found {
-			rt.Abort("dealID not found.")
+			rt.AbortArgMsg("dealID not found.")
 		}
 
 		// TODO: more checks or be convinced that it's enough to assume deals are still valid

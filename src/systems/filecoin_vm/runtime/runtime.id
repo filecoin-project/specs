@@ -43,7 +43,6 @@ type Runtime interface {
 
     SuccessReturn()             msg.InvocOutput
     ValueReturn(Bytes)          msg.InvocOutput
-    ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
 
     // Throw an error indicating a failure condition has occurred, from which the given actor
     // code is unable to recover. If an error is thrown in actor code, and not handled by any
@@ -52,7 +51,19 @@ type Runtime interface {
     // Note: this should only be used for exceptional conditions, such as inconsistent state
     // values or precondition violations. Operations that may fail during normal execution
     // should use error return values, not call this method.
-    Abort(string)
+    Abort(errExitCode exitcode.ExitCode, msg string)
+
+    // Calls Abort with InvalidArguments_User.
+    AbortArgMsg(msg string)
+    AbortArg()
+
+    // Calls Abort with InconsistentState_User.
+    AbortStateMsg(msg string)
+    AbortState()
+
+    // Calls Abort with RuntimeAPIError.
+    // For internal use only (not in actor code).
+    AbortAPI(msg string)
 
     // Check that the given condition is true (and call Abort if not).
     Assert(bool)
@@ -73,7 +84,7 @@ type Runtime interface {
 
     // Send allows the current execution context to invoke methods on other actors in the system.
     SendPropagatingErrors(input msg.InvocInput) msg.InvocOutput
-    SendCatchingErrors(input msg.InvocInput) msg.InvocOutput
+    SendCatchingErrors(input msg.InvocInput) (output msg.InvocOutput, exitCode exitcode.ExitCode)
 
     // Create an actor in the state tree. May only be called by InitActor.
     CreateActor(

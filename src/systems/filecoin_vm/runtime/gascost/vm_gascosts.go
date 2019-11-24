@@ -4,7 +4,7 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 var (
 	// TODO: assign all of these.
-	GasAmountPlaceholder = msg.GasAmount_FromInt(1)
+	GasAmountPlaceholder                 = msg.GasAmount_FromInt(1)
 	GasAmountPlaceholder_UpdateStateTree = GasAmountPlaceholder
 )
 
@@ -16,7 +16,7 @@ var (
 	// Gas cost charged to the originator of an on-chain message (regardless of
 	// whether it succeeds or fails in application) is given by:
 	//   OnChainMessageBase + len(serialized message)*OnChainMessagePerByte
-	OnChainMessageBase = GasAmountPlaceholder
+	OnChainMessageBase    = GasAmountPlaceholder
 	OnChainMessagePerByte = GasAmountPlaceholder
 
 	// Gas cost for any method invocation (including the original one initiated
@@ -29,7 +29,7 @@ var (
 
 	// Gas cost (Base + len*PerByte) for any Get operation to the IPLD store
 	// in the runtime VM context.
-	IpldGetBase = GasAmountPlaceholder
+	IpldGetBase    = GasAmountPlaceholder
 	IpldGetPerByte = GasAmountPlaceholder
 
 	// Gas cost (Base + len*PerByte) for any Put operation to the IPLD store
@@ -38,7 +38,7 @@ var (
 	// Note: these costs should be significantly higher than the costs for Get
 	// operations, since they reflect not only serialization/deserialization
 	// but also persistent storage of chain data.
-	IpldPutBase = GasAmountPlaceholder
+	IpldPutBase    = GasAmountPlaceholder
 	IpldPutPerByte = GasAmountPlaceholder
 
 	// Gas cost for updating an actor's substate (i.e., UpdateRelease).
