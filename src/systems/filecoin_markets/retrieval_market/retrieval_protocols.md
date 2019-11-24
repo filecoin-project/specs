@@ -2,7 +2,7 @@
 title: "Retrieval Peer Resolver"
 ---
 
-# Retrieval Protocals
+# Retrieval Protocols
 
 The `retrieval market` will initially be implemented as two `libp2p` services.
 

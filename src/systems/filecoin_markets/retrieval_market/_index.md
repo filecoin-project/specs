@@ -39,7 +39,7 @@ The underlying protocols will change, but the API interfaces for the client & pr
 
 The baseline version of proposing and accepting a deal will work as follows:
 
-- The client finds a finds provider of a given piece with FindProviders.
+- The client finds a provider of a given piece with FindProviders.
 - The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)
 - The client creates a payment channel as neccesary and a lane, ensures there are free funds in the channel
 - The client sends a RetrievalDealProposal to the retrieval miner. (via RetrievalProtocol)
@@ -59,7 +59,7 @@ The baseline version of proposing and accepting a deal will work as follows:
 
 The evolved protocol for proposing and accepting a deal will work as follows:
 
-- The client finds a finds provider of a given piece with FindProviders.
+- The client finds a provider of a given piece with FindProviders.
 - The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)
 - The client creates a payment channel as neccesary and a lane, ensures there are free funds in the channel
 - The client schedules a Data Transfer Pull Request passing the RetrievalDealProposal as a voucher.

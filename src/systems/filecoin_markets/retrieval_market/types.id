@@ -2,6 +2,7 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 
 type PaymentChannel struct {}
 type PaymentVoucher struct {}
@@ -27,19 +28,19 @@ type RetrievalQueryItemStatus union {
 }
 
 type RetrievalQueryParams struct {
-    PayloadCid       ipld.CID  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
+    PayloadCID       ipld.CID  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
     Selector         ipld.Selector  // optional, query if miner has this cid in this piece. some miners may not be able to respond.
     MaxPricePerByte  actor.TokenAmount  // optional, tell miner uninterested if more expensive than this
 }
 
 type RetrievalQuery struct {
-    PieceID ipld.CID  // V0
+    PieceCID piece.PieceCID  // V0
     RetrievalQueryParams  // V1
 }
 
 type RetrievalQueryResponse struct {
     Status                   RetrievalQueryResponseStatus
-    PayloadCidFound          RetrievalQueryItemStatus  // V1 - if a PayloadCid was requested, the result
+    PayloadCIDFound          RetrievalQueryItemStatus  // V1 - if a PayloadCid was requested, the result
     SelectorFound            RetrievalQueryItemStatus  // V1 - if a Selector was requested, the result
 
     Size                     uint64  // Total size of piece in bytes
@@ -72,7 +73,7 @@ type DealStatus union {
 }
 
 type RetrievalParams struct {
-    PayloadCid    ipld.CID  // V1
+    PayloadCID    ipld.CID  // V1
     Selector      ipld.Selector  // V1
     PricePerByte  actor.TokenAmount
 }
@@ -81,7 +82,7 @@ type RetrievalDealID UInt
 
 type RetrievalDealProposal struct {
     Payment          PaymentChannel
-    PieceID          ipld.CID
+    PieceCID         piece.PieceCID
     ID               RetrievalDealID  // V1 - an identifier for the retrieval
     RetrievalParams
 }
