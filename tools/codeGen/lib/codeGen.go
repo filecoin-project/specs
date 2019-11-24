@@ -264,6 +264,20 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 
 		xr := x.(*AlgType)
 
+		if xr.isTuple {
+			Assert(xr.sort == AlgSort_Prod)
+			retEntries := []GoNode{}
+			for _, field := range xr.Fields() {
+				goFieldType := GenGoTypeAcc(field.fieldType, ctx.Extend(*field.fieldName))
+				retEntries = append(retEntries, goFieldType)
+			}
+			ret = GoTupleType{
+				elementTypes: retEntries,
+			}
+			ctx.declMap[name] = ret
+			return
+		}
+
 		interfaceName := name
 		interfaceID := GoIdent{name: interfaceName}
 
