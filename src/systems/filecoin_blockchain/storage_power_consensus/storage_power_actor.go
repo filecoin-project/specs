@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	Method_StoragePowerActor_ProcessPowerReport = actor.MethodPlaceholder
-	Method_StoragePowerActor_ProcessFaultReport = actor.MethodPlaceholder
+	Method_StoragePowerActor_EpochTick = actor.MethodPlaceholder + iota
+	Method_StoragePowerActor_ProcessPowerReport
+	Method_StoragePowerActor_ProcessFaultReport
 )
 
 ////////////////////////////////////////////////////////////////////////////////

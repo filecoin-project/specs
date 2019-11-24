@@ -11,7 +11,8 @@ import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 const (
-	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
+	Method_StorageMarketActor_EpochTick = actor.MethodPlaceholder + iota
+	Method_StorageMarketActor_GetUnsealedCIDForDealIDs
 )
 
 ////////////////////////////////////////////////////////////////////////////////

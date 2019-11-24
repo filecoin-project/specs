@@ -15,7 +15,7 @@ import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 const (
-	Method_StorageMinerActor_SubmitPoSt = actor.MethodPlaceholder
+	Method_StorageMinerActor_SubmitPoSt = actor.MethodPlaceholder + iota
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -591,7 +591,7 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 
 	receipt := rt.SendCatchingErrors(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
+		Method_: storage_market.Method_StorageMarketActor_GetUnsealedCIDForDealIDs,
 		Params_: params,
 	})
 
