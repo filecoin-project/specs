@@ -104,6 +104,9 @@ type StorageMarketActorCode struct {
     // batch process storage deal payment
     // Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
     // client only stops paying when a sector gets cleared (expired or faulted)
+    // Note: Clients stop paying when miners enter into Failing state
+    // payment happens at next _onSuccessfulPoSt when miner recovers
+    // If a miner did not recover, payment will stop at the first fault
     ProcessDealPayment(
         rt               Runtime
         dealIDs          [deal.DealID]

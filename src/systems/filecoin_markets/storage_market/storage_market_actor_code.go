@@ -25,8 +25,6 @@ const (
 
 const LastPaymentEpochNone = 0
 
-var TreasuryAddr addr.Address
-
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,9 +83,9 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.Tok
 	senderBalance.Impl().Available_ = senderBalance.Available() - balance
 	st.Balances()[msgSender] = senderBalance
 
-	st._transferBalance(rt, TreasuryAddr, msgSender, balance)
-
 	UpdateRelease(rt, h, st)
+
+	// TODO send funds to msgSender with rt.Send
 }
 
 func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {

@@ -102,7 +102,7 @@ func (st *StorageMarketActorState_I) _assertDealExpireAfterMaxProveCommitWindow(
 	currEpoch := rt.CurrEpoch()
 	dealExpiration := dealP.EndEpoch()
 
-	if dealExpiration < (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
+	if dealExpiration <= (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
 		rt.Abort("sma._assertDealExpireAfterMaxProveCommitWindow: deal might expire before prove commit.")
 	}
 
@@ -176,11 +176,6 @@ func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Addres
 
 // move funds from locked in client to available in provider
 func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked addr.Address, toAvailable addr.Address, amount actor.TokenAmount) {
-	if fromLocked == TreasuryAddr {
-		toB := st.Balances()[toAvailable]
-		toB.Impl().Available_ += amount
-		return
-	}
 
 	fromB := st.Balances()[fromLocked]
 	toB := st.Balances()[toAvailable]
