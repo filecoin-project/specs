@@ -22,7 +22,6 @@ A block header contains information relevant to a particular point in time over 
 - The address of the miner that mined the block
 - A ticket associated to this block's creation to be used as randomness elsewhere in the protocol (see
 {{<sref leader_election>}} for more details)
-- An electionProof showing this miner was eligible to mine
 - The set of parent blocks and aggregate {{<sref chain_selection "chain weight">}} of the parents
 - This block's height
 - Merkle root of the state tree (after applying the messages -- state transitions -- included in this block)
@@ -47,12 +46,12 @@ For more on Tipsets, see {{<sref expected_consensus "the Expected Consensus spec
 # VRF Personalization
 
 We define VRF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. `Ticket` and
-`ElectionProof`).
+`Post`).
 
 | Type          | Prefix |
 | ------------- | ------ |
 | Ticket        | `0x01` |
-| ElectionProof | `0x02` |
+| Post          | `0x02` |
 
 
 # Ticket
@@ -72,16 +71,14 @@ what is meant is that the bytes of the `VRFResult` field in the `Ticket` struct 
 Specifically, tickets are compared lexicographically,
 interpreting the bytes of the `VRFResult.Output` as an unsigned integer value (little-endian).
 
-# ElectionProof
+# ChallengeTicket
 
-An election proof is generated from a past ticket (chosen based on public network parameters)
-and a given epoch number (or height) by a miner during the leader election process.
-Its output value determines whether the miner is elected as one of the leaders,
-and hence is eligible to produce a block for the current epoch.
-The inclusion of the `ElectionProof` in the block allows other network participants
-to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket,
-(in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
+An election proof is generated from a given PartialTicket by Hashing it, and using that hash to generate a value in [0,1]. Specifically `ChallengeTicket = H(PartialTicket)/2^len(H)`. 
+Its output value is compared to a target to determine whether the miner is elected as one of the leaders and hence is eligible to produce a block for the current epoch.
+The inclusion of the `PartialTicket` in the block allows other network participants to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket, (in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
 block height with every leader election attempt.
+
+The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.
 
 # Message
 
