@@ -98,7 +98,7 @@ type StorageMinerActorState struct {
 }
 
 type StorageMinerActorCode struct {
-    NotifyOfPoStSurpriseChallenge(rt Runtime)
+    NotifyOfSurprisePoStChallenge(rt Runtime)
 
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)

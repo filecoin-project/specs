@@ -98,8 +98,8 @@ func (st *StorageMinerActorState_I) _shouldChallenge(rt Runtime, minChallengePer
 	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), minChallengePeriod)
 }
 
-// called by CronActor to notify StorageMiner of PoSt Challenge
-func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
+// called by StoragePowerActor to notify StorageMiner of PoSt Challenge (triggered by Cron)
+func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
 
 	if a._isChallenged(rt) {
@@ -463,84 +463,7 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission 
 		rt.Abort("TODO")
 	}
 
-	h, st := a.State(rt)
-
-	// The proof is verified, process ProvingSet.SectorsOn():
-	// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
-	// ProvingSet itself does not store states, states are all stored in Sectors.State
-	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
-		sectorState, found := st.Sectors()[sectorNo]
-		if !found {
-			// TODO: determine proper error here and error-handling machinery
-			rt.Abort("Sector state not found in map")
-		}
-		switch sectorState.State().StateNumber {
-		case SectorCommittedSN, SectorRecoveringSN:
-			st._updateActivateSector(rt, sectorNo)
-		case SectorActiveSN:
-			// Process payment in all active deals
-			// Note: this must happen before marking sectors as expired.
-			// TODO: Pay miner in a single batch message
-			// SendMessage(sma.ProcessStorageDealsPayment(sm.Sectors()[sectorNumber].DealIDs()))
-		default:
-			// TODO: determine proper error here and error-handling machinery
-			rt.Abort("Invalid sector state in ProvingSet.SectorsOn()")
-		}
-	}
-
-	// commit state change so that committed and recovering are now active
-
-	// Process ProvingSet.SectorsOff()
-	// ProvingSet.SectorsOff() contains SectorFailing
-	// SectorRecovering is Proving and hence will not be in GetZeros()
-	// heavy penalty if Failing for more than or equal to MAX_CONSECUTIVE_FAULTS
-	// otherwise increment FaultCount in Sectors().State
-	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOff() {
-		sectorState, found := st.Sectors()[sectorNo]
-		if !found {
-			continue
-		}
-		switch sectorState.State().StateNumber {
-		case SectorFailingSN:
-			st._updateFailSector(rt, sectorNo, true)
-		default:
-			// TODO: determine proper error here and error-handling machinery
-			rt.Abort("Invalid sector state in ProvingSet.SectorsOff")
-		}
-	}
-
-	// Process Expiration.
-	st._updateExpireSectors(rt)
-
-	UpdateRelease(rt, h, st)
-
-	h, st = a.State(rt)
-	terminationFaultCount := st.SectorTable().Impl().TerminationFaultCount_
-	Release(rt, h, st)
-
-	a._submitFaultReport(
-		rt,
-		util.UVarint(0), // NewDeclaredFaults
-		util.UVarint(0), // NewDetectedFaults
-		util.UVarint(terminationFaultCount),
-	)
-
-	a._submitPowerReport(rt)
-
-	// TODO: check EnsurePledgeCollateralSatisfied
-	// pledgeCollateralSatisfied
-
-	// Reset Proving Period and report power updates
-	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
-
-	h, st = a.State(rt)
-	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
-
-	st._updateCommittedSectors(rt)
-
-	UpdateRelease(rt, h, st)
-
-	return rt.SuccessReturn()
+	return a._onSuccessfulPoSt(rt, postSubmission)
 
 }
 
