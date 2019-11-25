@@ -1,17 +1,25 @@
 package filproofs
 
-import "bytes"
-import "errors"
-import "math"
-import "math/rand"
-import big "math/big"
-import "encoding/binary"
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"math"
+	"math/rand"
 
-import util "github.com/filecoin-project/specs/util"
-import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+	"encoding/binary"
+	big "math/big"
+
+	util "github.com/filecoin-project/specs/util"
+
+	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
+
+	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+	sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+)
 
 type SHA256Hash Bytes32
 type PedersenHash Bytes32
@@ -65,8 +73,8 @@ func SDRParams(cfg SDRCfg) *StackedDRG_I {
 		Algorithm_:  &StackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
-				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_Make_DRSample(&DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I{}),
-				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_Make_ChaCha20(&DRGCfg_Algorithm_RNGAlgorithm_ChaCha20_I{}),
+				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
+				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_ChaCha20,
 			},
 			Degree_: 6,
 			Nodes_:  DRGNodeCount(nodes),
@@ -75,10 +83,9 @@ func SDRParams(cfg SDRCfg) *StackedDRG_I {
 			Algorithm_: ExpanderGraphCfg_Algorithm_Make_ChungExpanderAlgorithm(
 				&ChungExpanderAlgorithm_I{
 					PermutationAlgorithm_: ChungExpanderAlgorithm_PermutationAlgorithm_Make_Feistel(&Feistel_I{
-						Keys_:   FEISTEL_KEYS[:],
-						Rounds_: FEISTEL_ROUNDS,
-						HashFunction_: ChungExpanderPermutationFeistelHashFunction_Make_SHA256(
-							&ChungExpanderPermutationFeistelHashFunction_SHA256_I{}),
+						Keys_:         FEISTEL_KEYS[:],
+						Rounds_:       FEISTEL_ROUNDS,
+						HashFunction_: ChungExpanderPermutationFeistelHashFunction_SHA256,
 					}),
 				}),
 			Degree_: 8,
@@ -106,35 +113,52 @@ func (sdr *StackedDRG_I) expander() *ExpanderGraph_I {
 func (drg *DRG_I) Parents(node UInt) []UInt {
 	config := drg.Config()
 	degree := UInt(config.Degree())
-	return config.Algorithm().ParentsAlgorithm().As_DRSample().Impl().Parents(degree, node)
+	return DRGAlgorithmComputeParents(config.Algorithm().ParentsAlgorithm(), degree, node)
 }
 
 // TODO: Verify this. Both the port from impl and the algorithm.
-func (drs *DRGCfg_Algorithm_ParentsAlgorithm_DRSample_I) Parents(degree, node UInt) (parents []UInt) {
-	util.Assert(node > 0)
-	parents = append(parents, node-1)
+func DRGAlgorithmComputeParents(alg DRGCfg_Algorithm_ParentsAlgorithm, degree UInt, node UInt) (parents []UInt) {
+	switch alg {
+	case DRGCfg_Algorithm_ParentsAlgorithm_DRSample:
+		util.Assert(node > 0)
+		parents = append(parents, node-1)
 
-	m := degree - 1
+		m := degree - 1
 
-	var k UInt
-	for k = 0; k < m; k++ {
-		logi := int(math.Floor(math.Log2(float64(node * m))))
-		// FIXME: Make RNG parameterizable and specify it.
-		j := rand.Intn(logi)
-		jj := math.Min(float64(node*m+k), float64(UInt(1)<<uint(j+1)))
-		backDist := randInRange(int(math.Max(float64(UInt(jj)>>1), 2)), int(jj+1))
-		out := (node*m + k - backDist) / m
+		var k UInt
+		for k = 0; k < m; k++ {
+			logi := int(math.Floor(math.Log2(float64(node * m))))
+			// FIXME: Make RNG parameterizable and specify it.
+			j := rand.Intn(logi)
+			jj := math.Min(float64(node*m+k), float64(UInt(1)<<uint(j+1)))
+			backDist := randInRange(int(math.Max(float64(UInt(jj)>>1), 2)), int(jj+1))
+			out := (node*m + k - backDist) / m
 
-		parents = append(parents, out)
+			parents = append(parents, out)
+		}
+
+		return parents
+
+	default:
+		panic(fmt.Sprintf("DRG algorithm not supported: %v", alg))
 	}
-
-	return parents
 }
 
 func randInRange(lowInclusive int, highExclusive int) UInt {
 	// NOTE: current implementation uses a more sophisticated method for repeated sampling within a range.
 	// We need to converge on and fully specify the actual method, since this must be deterministic.
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
+}
+
+func TicketToRandomInt(ticket []byte, nonce int, limit *big.Int) *big.Int {
+	nonceBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
+	input := ticket
+	input = append(input, nonceBytes...)
+	ranHash := HashBytes_SHA256Hash(input[:])
+	hashInt := bigIntFromLittleEndianBytes(ranHash)
+	num := hashInt.Mod(hashInt, limit)
+	return num
 }
 
 func (exp *ExpanderGraph_I) Parents(node UInt) []UInt {
@@ -778,12 +802,12 @@ func (sdr *StackedDRG_I) VerifyOfflineCircuitProof(commD sector.UnsealedSectorCI
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, faults sector.FaultSet) (sectors []sector.SectorID, challenges []UInt) {
+func (sdr *StackedDRG_I) GetChallengedSectors(randomness sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int) (sectors []sector.SectorID, challenges []UInt) {
 	panic("TODO")
 }
 
-func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, faults sector.FaultSet, sectorStore sectorIndex.SectorStore) []sector.ElectionCandidate {
-	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, faults)
+func (sdr *StackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
+	challengedSectors, challenges := sdr.GetChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
 	var proofAuxs []sector.ProofAux
 
 	for _, sector := range challengedSectors {

@@ -17,7 +17,7 @@ Until we launch, if something is missing, PR it in. If something is wrong, PR a 
 # New Proposals -> Drafts -> Spec
 
 {{% notice warning %}}
-⚠️ **WARNING:** Filecoin is in pre-launch mode, and we are finishing protocol spec and implementations of the _current_ construction/version of the protocol only. We are highly unlikely to merge anything new into the Filecoin Protocol until after mainnet. Feel free to explore ideas anyway and propeare improvements for the future.
+⚠️ **WARNING:** Filecoin is in pre-launch mode, and we are finishing protocol spec and implementations of the _current_ construction/version of the protocol only. We are highly unlikely to merge anything new into the Filecoin Protocol until after mainnet. Feel free to explore ideas anyway and prepare improvements for the future.
 {{% /notice %}}
 
 For anything that is not part of the currently speced systems (like 'repair', for example) the process we will use is:
@@ -40,8 +40,8 @@ It is acceptable for a PR for a draft to stay open for quite a while, as thought
 
 # On merging
 
-For anything in the drafts or notes folder, merge yourself after a review from a relevant person. For anything in the top level (canonical spec), @whyrusleeping or @jbenet will merge after proper review.
+For anything in the drafts or notes folder, merge yourself after a review from a relevant person. For anything in the top level (canonical spec), @zixuanzh, @anorth, @whyrusleeping or @jbenet will merge after proper review.
 
 # Issues
 
-Issues in the specs repo will be high signal, they will either be proposals, or issues directly relating to problems in the spec. More speculative research questions and discussion will happen in the research repo.
+Issues in the specs repo will be high signal. They will either be proposals, or issues directly relating to problems in the spec. More speculative research questions and discussion will happen in the research repo.

@@ -19,4 +19,7 @@ var (
 	// ApplyMessageFail represents the gas cost for failures to apply message.
 	// These failures are basic failures encountered at first application.
 	ApplyMessageFail = msg.GasAmount(1)
+
+	// TODO: determine these costs
+	PublicKeyCryptoOp = msg.GasAmount(50)
 )

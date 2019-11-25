@@ -8,9 +8,12 @@ import (
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
 )
+
+type Serialization = util.Serialization
 
 func (sms *StorageMiningSubsystem_I) CreateMiner(
 	ownerAddr addr.Address,
@@ -57,50 +60,68 @@ func (sms *StorageMiningSubsystem_I) OnNewRound() {
 }
 
 func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
-	// new election, incremented height
-	T1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
-	TK := sms.consensus().GetElectionProofSeed(sms.blockchain().BestChain(), sms.blockchain().LatestEpoch())
 
+	// Draw randomness from chain for ElectionPoSt and Ticket Generation
+	// Randomness for ticket generation in block production
+	randomness1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.keyStore().OwnerAddress(), sms.blockchain().LatestEpoch())
+
+	// Randomness for ElectionPoSt
+	randomnessK := sms.consensus().GetPoStChallenge(sms.blockchain().BestChain(), sms.keyStore().OwnerAddress(), sms.blockchain().LatestEpoch())
+
+	// TODO: @why @jz align on this
 	for _, worker := range sms.keyStore().Workers() {
-		newTicket := sms.PrepareNewTicket(T1, worker.VRFKeyPair())
-		newEP := sms.DrawElectionProof(TK, sms.blockchain().LatestEpoch(), worker.VRFKeyPair())
 
-		if sms.consensus().IsWinningElectionProof(newEP, worker.Address()) {
-			sms.blockProducer().GenerateBlock(newEP, newTicket, sms.blockchain().BestChain().HeadTipset(), worker.Address())
+		var input []byte
+		input = append(input, spc.VRFPersonalizationPoSt)
+		input = append(input, randomnessK...)
+
+		postRandomness := worker.VRFKeyPair().Impl().Generate(input).Output()
+		// TODO: add how sectors are actually stored in the SMS proving set
+		provingSet := make([]sector.SectorID, 0)
+
+		challengeTickets := sms.StorageProving().Impl().GeneratePoStCandidates(postRandomness, provingSet)
+
+		if len(challengeTickets) <= 0 {
+			return // fail to generate post candidates
 		}
+
+		winningCTs := make([]sector.ChallengeTicket, 0)
+
+		for _, ct := range challengeTickets {
+			// TODO align on worker address
+			if sms.consensus().IsWinningChallengeTicket(ct) {
+				winningCTs = append(winningCTs, ct)
+			}
+		}
+
+		if len(winningCTs) <= 0 {
+			return
+		}
+
+		newTicket := sms.PrepareNewTicket(randomness1, worker.VRFKeyPair())
+		postProof := sms.StorageProving().Impl().GeneratePoStProof(postRandomness, winningCTs)
+		chainHead := sms.blockchain().BestChain().HeadTipset()
+
+		sms.blockProducer().GenerateBlock(postProof, winningCTs, newTicket, chainHead, worker.Address())
+
 	}
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(priorTicket block.Ticket, vrfKP filcrypto.VRFKeyPair) block.Ticket {
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness, vrfKP filcrypto.VRFKeyPair) block.Ticket {
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	var input []byte
 	input = append(input, spc.VRFPersonalizationTicket)
-	input = append(input, priorTicket.Output()...)
+	input = append(input, randomness...)
 
 	// run through VRF
-	// TODO: uncomment below
-	// vrfRes := vrfKP.Generate(input)
-	var newTicket block.Ticket
+	vrfRes := vrfKP.Generate(input)
 
-	// return new ticket
-	// newTicket.VRFResult_ = vrfRes
-	// newTicket.Output_ = vrfRes.Output()
+	newTicket := &block.Ticket_I{
+		VRFResult_: vrfRes,
+		Output_:    vrfRes.Output(),
+	}
+
 	return newTicket
-}
-
-func (sms *StorageMiningSubsystem_I) DrawElectionProof(lookbackTicket block.Ticket, height block.ChainEpoch, vrfKP filcrypto.VRFKeyPair) block.ElectionProof {
-	panic("")
-	// // 0. Prepare new election proof
-	// var newEP ElectionProof
-
-	// // 1. Run it through VRF and get determinstic output
-	// // 1.i. # take the VRFOutput of that ticket as input, specified for the appropriate operation type
-	// input := VRFPersonalization.ElectionProof
-	// input.append(lookbackTicket.Output)
-	// input.append(height)
-	// // ii. # run it through the VRF and store the VRFProof in the new ticket
-	// newEP.VRFResult := vrfKP.Generate(input)
-	// return newEP
 }

@@ -38,8 +38,9 @@ func AccDeserializeState(x Bytes) AccountActorState {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) {
+func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
+	return rt.SuccessReturn()
 }
 
 func (a *AccountActorCode_I) VerifySignature(rt vmr.Runtime, sig filcrypto.Signature) InvocOutput {
@@ -48,9 +49,10 @@ func (a *AccountActorCode_I) VerifySignature(rt vmr.Runtime, sig filcrypto.Signa
 
 func (a *AccountActorCode_I) InvokeMethod(rt vmr.Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
 	switch method {
-	case 3:
-		var sig filcrypto.Signature // TODO: params[0]
-		return a.VerifySignature(rt, sig)
+	case actor.MethodConstructor:
+		rt.Assert(len(params) == 0)
+		return a.Constructor(rt)
+
 	default:
 		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
 	}

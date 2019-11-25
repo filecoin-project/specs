@@ -9,11 +9,11 @@ type VRFKeyPair struct {
 
     // Generate a VRF from the given input with the SecretKey that can be
     // verified with the PublicKey
-    Generate(input Bytes) VRFResult @(static)
+    Generate(input Bytes) VRFResult
 }
 
 type VRFResult struct {
-    Output            Bytes  @(internal)
+    Output            Bytes  // @(internal)
     MaxValue()        Bytes
     ValidateSyntax()  bool
 

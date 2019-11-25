@@ -90,7 +90,8 @@ func GenGoDecls(topLevelEntries []Entry) []GoNode {
 			switch decl.Case() {
 			case Decl_Case_Type:
 				xr := decl.(*TypeDecl)
-				GenGoTypeDeclAcc(xr.name, xr.type_, ctx.Extend(xr.name))
+				ret := GenGoTypeDeclAcc(xr.name, xr.type_, ctx.Extend(xr.name), false)
+				GenGoTypeSerializers(ctx, xr.name, ret)
 			case Decl_Case_Import:
 				xr := decl.(*ImportDecl)
 				GenGoImportDeclAcc(*xr, ctx)
@@ -142,8 +143,11 @@ func TranslateGoIdent(name string, ctx GoGenContext) GoIdent {
 	ret := name
 	utilNames := []string{
 		"Assert",
+		"BigInt",
 		"Bytes",
 		"Float",
+		"Int",
+		"Serialization",
 		"T",
 		"UInt",
 		"UInts",
@@ -176,7 +180,7 @@ func GenGoPackageDeclAcc(decl PackageDecl, ctx GoGenContext) GoNode {
 	return goPackageDecl
 }
 
-func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) (ret GoNode) {
+func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext, declAlias bool) (ret GoNode) {
 	Assert(x != nil)
 
 	if t, ok := ctx.declMap[name]; ok {
@@ -190,8 +194,9 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) (ret GoNode) {
 
 	ret = GenGoTypeAcc(x, ctx)
 	retDecl := GoTypeDecl{
-		name:  name,
-		type_: ret,
+		name:      name,
+		type_:     ret,
+		declAlias: declAlias,
 	}
 
 	if t, ok := ctx.declMap[name]; ok {
@@ -201,6 +206,50 @@ func GenGoTypeDeclAcc(name string, x Type, ctx GoGenContext) (ret GoNode) {
 		*ctx.retDecls = append(*ctx.retDecls, retDecl)
 	}
 	return
+}
+
+func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
+	serializeDecl := GoFunDecl{
+		receiverVar:  nil,
+		receiverType: nil,
+		funName:      "Serialize_" + name,
+		funType: GoFunType{
+			args: []GoField{
+				GoField{
+					fieldName: nil,
+					fieldType: GoIdent{name: name},
+				},
+			},
+			retType: TranslateGoIdent("Serialization", ctx),
+		},
+		funArgs: []GoNode{GoIdent{name: "x"}},
+		funBody: GenGoPanicTodoBody(),
+	}
+
+	deserializeDecl := GoFunDecl{
+		receiverVar:  nil,
+		receiverType: nil,
+		funName:      "Deserialize_" + name,
+		funType: GoFunType{
+			args: []GoField{
+				GoField{
+					fieldName: nil,
+					fieldType: TranslateGoIdent("Serialization", ctx),
+				},
+			},
+			retType: GoTupleType{
+				elementTypes: []GoNode{
+					interfaceID,
+					GoIdent{name: "error"},
+				},
+			},
+		},
+		funArgs: []GoNode{GoIdent{name: "x"}},
+		funBody: GenGoPanicTodoBody(),
+	}
+
+	*ctx.retDecls = append(*ctx.retDecls, serializeDecl)
+	*ctx.retDecls = append(*ctx.retDecls, deserializeDecl)
 }
 
 func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
@@ -217,6 +266,46 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 
 		interfaceName := name
 		interfaceID := GoIdent{name: interfaceName}
+
+		var caseTypeName string
+		var caseTypeID GoNode = nil
+
+		if xr.sort == AlgSort_Sum {
+			caseNames := []string{}
+
+			if xr.isEnum {
+				caseTypeName = name
+			} else {
+				caseTypeName = name + "_Case"
+			}
+			caseTypeID = GoIdent{caseTypeName}
+
+			*ctx.retDecls = append(*ctx.retDecls, GoTypeDecl{
+				name:      caseTypeName,
+				type_:     TranslateGoIdent("UVarint", ctx),
+				declAlias: false,
+			})
+
+			for _, field := range xr.Fields() {
+				Assert(field.fieldName != nil)
+				fieldName := *field.fieldName
+				caseNames = append(caseNames, fieldName)
+			}
+
+			caseTypeDecl := GoEnumDecl{
+				name:      caseTypeName,
+				caseNames: caseNames,
+			}
+
+			*ctx.retDecls = append(*ctx.retDecls, caseTypeDecl)
+		}
+
+		if xr.isEnum {
+			Assert(xr.sort == AlgSort_Sum)
+			ctx.declMap[name] = interfaceID
+			ret = interfaceID
+			break
+		}
 
 		implName := IdToImpl(name)
 		implID := GoIdent{name: implName}
@@ -274,28 +363,15 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 		// 	},
 		// })
 
-		var caseTypeID GoNode = nil
-
 		if xr.sort == AlgSort_Sum {
-			caseNames := []string{}
-
-			caseTypeName := name + "_Case"
-			caseTypeID = GoIdent{caseTypeName}
-
-			*ctx.retDecls = append(*ctx.retDecls, GoTypeDecl{
-				name:  caseTypeName,
-				type_: TranslateGoIdent("UVarint", ctx),
-			})
-
 			for _, field := range xr.Fields() {
 				Assert(field.fieldName != nil)
 				fieldName := *field.fieldName
 
-				caseNames = append(caseNames, fieldName)
 				caseWhich := GoIdent{caseTypeName + "_" + fieldName}
 
 				caseInterfaceName := name + "_" + fieldName
-				GenGoTypeDeclAcc(caseInterfaceName, field.fieldType, ctx.Extend(fieldName))
+				GenGoTypeDeclAcc(caseInterfaceName, field.fieldType, ctx.Extend(fieldName), true)
 
 				caseInterfaceType := GoIdent{caseInterfaceName}
 				// caseImplType := GoIdent { IdToImpl(caseInterfaceName) }
@@ -387,13 +463,6 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				*ctx.retDecls = append(*ctx.retDecls, caseNewDecl)
 			}
 
-			caseTypeDecl := GoEnumDecl{
-				name:      caseTypeName,
-				caseNames: caseNames,
-			}
-
-			*ctx.retDecls = append(*ctx.retDecls, caseTypeDecl)
-
 			interfaceFields = append(interfaceFields, GoField{
 				fieldName: RefString("Which"),
 				fieldType: GoFunType{
@@ -460,6 +529,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				typeCase: GoProdTypeCase_Interface,
 				fields:   interfaceFields,
 			},
+			declAlias: false,
 		}
 
 		implDecl := GoTypeDecl{
@@ -468,6 +538,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				typeCase: GoProdTypeCase_Struct,
 				fields:   implFields,
 			},
+			declAlias: false,
 		}
 
 		implRefDecl := GoTypeDecl{
@@ -476,6 +547,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				typeCase: GoProdTypeCase_Struct,
 				fields:   implRefFields,
 			},
+			declAlias: false,
 		}
 
 		*ctx.retDecls = append(*ctx.retDecls, interfaceDecl)
@@ -614,6 +686,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 						attributeList: []string{},
 						parseFmtInfo:  nil,
 						isInterface:   false,
+						isEnum:        false,
 					}),
 					attributeList: []string{},
 				}),

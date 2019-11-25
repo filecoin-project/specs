@@ -58,7 +58,7 @@ type Chain struct {
     LatestCheckpoint()  ChainEpoch
 
     TipsetAtEpoch(epoch ChainEpoch) Tipset
-    TicketAtEpoch(epoch ChainEpoch) Ticket
+    RandomnessAtEpoch(minerAddr addr.Address, epoch ChainEpoch) Bytes
 }
 
 // Checkpoint represents a particular block to use as a trust anchor

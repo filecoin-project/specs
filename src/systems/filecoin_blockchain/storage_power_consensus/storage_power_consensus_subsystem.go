@@ -3,8 +3,9 @@ package storage_power_consensus
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	base_mining "github.com/filecoin-project/specs/systems/filecoin_mining"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	util "github.com/filecoin-project/specs/util"
 )
 
 const FINALITY = 500
@@ -17,8 +18,8 @@ const (
 )
 
 const (
-	VRFPersonalizationTicket        = iota
-	VRFPersonalizationElectionProof = iota
+	VRFPersonalizationTicket = iota
+	VRFPersonalizationPoSt   = iota
 )
 
 // Storage Power Consensus Subsystem
@@ -58,9 +59,9 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) 
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.PublicKey) bool {
 	panic("")
-	// T1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
+	// Randomness1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
 	// input := VRFPersonalizationTicket
-	// input.append(T1.Output)
+	// input.append(Randomness1)
 	// return ticket.Verify(input, pk)
 }
 
@@ -72,41 +73,33 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningElectionProof(electionProof block.ElectionProof, workerAddr addr.Address) bool {
-	panic("")
-	// return spc.ec().IsWinningElectionProof(electionProof, minerPower, totalPower)
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeTicket sector.ChallengeTicket) bool {
+
+	// TODO: Send message to SPA to get ActivePowerInSector associated with sector
+	activePowerInSector := uint64(block.StoragePower(0))
+
+	// TODO: Send message to SPA
+	totalPower := uint64(block.StoragePower(0))
+
+	electionProof := block.SHA256(challengeTicket.Ticket())
+
+	return spc.ec().IsWinningElectionProof(electionProof, activePowerInSector, totalPower)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, epoch block.ChainEpoch) base_mining.SealSeed {
-	panic("")
-
-	// return &base_mining.SealSeed
-	// 	chain.TicketAtEpoch(epoch - SPC_LOOKBACK_TICKET),
-	// }
+func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_TICKET)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain block.Chain, epoch block.ChainEpoch) base_mining.SealSeed {
-	panic("")
-
-	// return &base_mining.SealSeed_I{
-	// 	chain.TicketAtEpoch(epoch - SPC_LOOKBACK_RANDOMNESS),
-	// }
+func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_RANDOMNESS)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain block.Chain, epoch block.ChainEpoch) base_mining.SealSeed {
-	panic("")
-
-	// return &base_mining.SealSeed_I{
-	// 	chain.TicketAtEpoch(epoch - SPC_LOOKBACK_SEAL),
-	// }
+func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_SEAL)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) base_mining.PoStChallenge {
-	panic("")
-
-	// return &base_mining.PoStChallenge_I{
-	// 	chain.TicketAtEpoch(epoch - SPC_LOOKBACK_POST),
-	// }
+func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {
+	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_POST)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.ChainEpoch, electionProof block.ElectionProof, workerAddr addr.Address) bool {

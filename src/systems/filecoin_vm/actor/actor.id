@@ -1,6 +1,7 @@
 // This contains actor things that are _outside_ of VM exection.
 // The VM uses this to execute actors.
 
+import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 // TokenAmount is an amount of Filecoin tokens. This type is used within
@@ -22,14 +23,14 @@ type TokenAmount UVarint  // TODO: bigint or varint?
 // still remain defined in the code to ensure the tag number is not
 // reused accidentally. The same should apply to the MethodNum
 // associated with methods in Filecoin VM Actors.
-type MethodNum UVarint
+type MethodNum Int
 
 // MethodParams is an array of objects to pass into a method. This
 // is the list of arguments/parameters.
 //
 // TODO: serialized or deserialized? (serialized for now)
 // TODO: force CIDs or by value is fine?
-type MethodParam Bytes
+type MethodParam Serialization
 type MethodParams [MethodParam]
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
@@ -53,8 +54,25 @@ type CallSeqNum UVarint
 // serialized code for the actor in the Filecoin Specification.
 type Code Bytes
 
-// CodeCID represents a CID for a Code object.
-type CodeCID ipld.CID
+// CodeID identifies an actor's code (either one of the builtin actors,
+// or, in the future, potentially a CID of VM code for a custom actor.)
+type CodeID union {
+    Builtin        BuiltinActorID
+    UserDefined    ipld.CID
+
+    IsBuiltin()    bool
+    IsSingleton()  bool
+}
+
+type BuiltinActorID enum {
+    Init
+    Cron
+    Account
+    PaymentChannel
+    StoragePower
+    StorageMiner
+    StorageMarket
+}
 
 // Actor is a base computation object in the Filecoin VM. Similar
 // to Actors in the Actor Model (programming), or Objects in Object-
@@ -64,32 +82,23 @@ type CodeCID ipld.CID
 // - we should not do inheritance, we should do composition.
 //   but we should make including actor state nicer.
 //
-// TODO: do we need this type? what is the difference between this and
-// ActorState
-type Actor struct {
-    State ActorState
-}
-
 // ActorState represents the on-chain storage actors keep.
 type ActorState struct {
     // common fields for all actors
 
-    CodeCID
+    CodeID
     // use a CID here, load it in interpreter.
     // Alternative is to use ActorState here but tricky w/ the type system
-    State       ActorSubstateCID
+    State                    ActorSubstateCID
 
-    Balance     TokenAmount
+    Balance                  TokenAmount
     CallSeqNum  // FKA Nonce
+
+    // Note: may be nil if actor has no public key
+    GetSignaturePublicKey()  filcrypto.PublicKey
 }
 
-// ActorID is a sequential number assigned to actors in a Filecoin Chain.
-// ActorIDs are assigned by the InitActor, when an Actor is introduced into
-// the Runtime.
-type ActorID UVarint
-
-type StateCID ipld.CID
-
+type ActorSystemStateCID ipld.CID
 type ActorSubstateCID ipld.CID
 
 // ActorState represents the on-chain storage actors keep. This type is a

@@ -43,7 +43,7 @@ Put another way, power accounting in the SPC is delayed between storage being pr
 
 The Miner lifecycle in the power table should be roughly as follows:
 - MinerRegistration: A new miner with an associated worker public key and address is registered on the power table by the storage mining subsystem, along with their associated sector size (there is only one per worker).
-- UpdatePower: These power increments and decrements (in multiples of the associated sector size) are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
+- UpdatePower: These power increments and decrements are called by various storage actor (and must thus be verified by every full node on the network). Specifically:
     - Power is incremented to account for a new SectorCommitment at the first PoSt past the first ProvingPeriod.
     - All Power is decremented immediately after a missed PoSt.
     - Power is decremented immediately after faults are declared, proportional to the faulty sector size.

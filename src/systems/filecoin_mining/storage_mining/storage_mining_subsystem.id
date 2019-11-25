@@ -9,10 +9,14 @@ import blockproducer "github.com/filecoin-project/specs/systems/filecoin_blockch
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import key_store "github.com/filecoin-project/specs/systems/filecoin_nodes/key_store"
+import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 
 type StorageMiningSubsystem struct {
+    FilecoinNode       node_base.FilecoinNode
+
     // TODO: constructor
-    // InitStorageMiningSubsystem() struct{}
+    // InitStorageMiningSubsystem(node node_base.FilecoinNode) struct{}
 
     // Component subsystems
     // StorageProvider    storage_provider.StorageProvider
@@ -56,14 +60,10 @@ type StorageMiningSubsystem struct {
     CommitSectorError()
 
     // call by StorageMiningSubsystem itself in BlockProduction
-    DrawElectionProof(
-        lookbackTicket  block.Ticket
-        height          block.ChainEpoch
-        vrfKP           filcrypto.VRFKeyPair
-    ) block.ElectionProof
-
-    // call by StorageMiningSubsystem itself in BlockProduction
-    PrepareNewTicket(priorTicket block.Ticket, workerKeyPair filcrypto.VRFKeyPair) block.Ticket
+    PrepareNewTicket(
+        randomness     util.Randomness
+        workerKeyPair  filcrypto.VRFKeyPair
+    ) block.Ticket
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()
@@ -73,4 +73,6 @@ type StorageMiningSubsystem struct {
     OnNewRound()
 
     tryLeaderElection()
+
+    submitPoStMessage(postSubmission poster.PoStSubmission) error
 }
