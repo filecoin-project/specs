@@ -1,9 +1,14 @@
 package storage_power_consensus
 
 import (
+	"math"
+	"math/big"
+
+	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -47,20 +52,6 @@ func (st *StoragePowerActorState_I) CID() ipld.CID {
 }
 func DeserializeState(x Bytes) State {
 	panic("TODO")
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func (r *FaultReport_I) GetDeclaredFaultSlash() actor.TokenAmount {
-	return actor.TokenAmount(0)
-}
-
-func (r *FaultReport_I) GetDetectedFaultSlash() actor.TokenAmount {
-	return actor.TokenAmount(0)
-}
-
-func (r *FaultReport_I) GetTerminatedFaultSlash() actor.TokenAmount {
-	return actor.TokenAmount(0)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,12 +143,14 @@ func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power bl
 	return pcRequired
 }
 
-func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int) []addr.Address {
+// _sampleMinersToSurprise implements the PoSt-Surprise sampling algorithm
+func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int, ticket block.Ticket) []addr.Address {
 	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
 	// support enumerating by int index. maybe we need that as an interface too,
 	// or something similar to an iterator (or iterator over the keys)
-	// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int)
+	// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int) using the ticket as a seed
 
+	ptSize := big.NewInt(int64(len(st.PowerTable())))
 	allMiners := make([]addr.Address, len(st.PowerTable()))
 	index := 0
 
@@ -166,21 +159,23 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 		index++
 	}
 
-	return postSurpriseSample(rt, allMiners, challengeCount)
-}
+	sampledMiners := make([]addr.Address, 0)
 
-// postSurpriseSample implements the PoSt-Surprise sampling algorithm
-func postSurpriseSample(rt Runtime, allMiners []addr.Address, challengeCount int) []addr.Address {
-
-	sm := make([]addr.Address, challengeCount)
-	for i := 0; i < challengeCount; i++ {
-		// rInt := rt.NextRandomInt() // we need something like this in the runtime
-		rInt := 4 // xkcd prng for now.
-		miner := allMiners[rInt%len(allMiners)]
-		sm = append(sm, miner)
+	for chall := 0; chall < challengeCount; chall++ {
+		minerIndex := filproofs.TicketToRandomInt(ticket.Output(), chall, ptSize)
+		panic(minerIndex)
+		// hack to turn bigint into int
+		minerIndexInt := 0
+		potentialChallengee := allMiners[minerIndexInt]
+		// call to storage miner actor:
+		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, PROVING_PERIOD/2)){
+		// hack below
+		if true {
+			sampledMiners = append(sampledMiners, potentialChallengee)
+		}
 	}
 
-	return sm
+	return sampledMiners
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,7 +327,7 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bo
 	return ret
 }
 
-func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report FaultReport) {
+func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report sector.FaultReport) {
 
 	var msgSender addr.Address // TODO replace this
 
@@ -379,26 +374,24 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 }
 
+// Surprise is in the storage power actor because it is a singleton actor and surprise helps miners maintain power
 // TODO: add Surprise to the cron actor
 func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 
-	// The number of blocks that a challenged miner has to respond
-	// TODO: this should be set in.. spa?
-	// var postChallengeTime util.UInt
-
-	var provingPeriod uint // TODO
+	var PROVING_PERIOD int // defined in storage_mining, TODO: move constants somewhere else
 
 	// sample the actor addresses
 	h, st := a.State(rt)
 
-	challengeCount := len(st.PowerTable()) / int(provingPeriod)
-	surprisedMiners := st._sampleMinersToSurprise(rt, challengeCount)
+	challengeCount := math.Ceil(float64(2*len(st.PowerTable())) / float64(PROVING_PERIOD))
+	surprisedMiners := st._sampleMinersToSurprise(rt, int(challengeCount), ticket)
 
 	UpdateRelease(rt, h, st)
 
 	// now send the messages
 	for _, addr := range surprisedMiners {
-		// TODO: rt.SendMessage(addr, ...)
+		// For each miner here check if they should be challenged and send message
+		// rt.SendMessage(addr, ...)
 		panic(addr)
 	}
 }

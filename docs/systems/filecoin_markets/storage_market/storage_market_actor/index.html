@@ -3976,10 +3976,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4586,25 +4586,28 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">BalancesHAMT</span> <span class="p">{</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">:</span> <span class="nx">StorageParticipantBalance</span><span class="p">}</span>
-<span class="kd">type</span> <span class="nx">DealsAMT</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">}</span>
+<span class="kd">type</span> <span class="nx">DealsAMT</span> <span class="p">{</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">:</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMarketActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Balances</span>  <span class="nx">BalancesHAMT</span>
-    <span class="nx">Deals</span>     <span class="nx">DealsAMT</span>
+    <span class="nx">Balances</span>               <span class="nx">BalancesHAMT</span>
+    <span class="nx">Deals</span>                  <span class="nx">DealsAMT</span>
+    <span class="nx">DealCollateralSlashed</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
-    <span class="c1">// generate storage deal id
-</span><span class="c1"></span>    <span class="nf">_generateStorageDealID</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+    <span class="nf">_generateStorageDealID</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
+    <span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_assertValidClientSignature</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealP</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="nf">_assertDealStartAfterCurrEpoch</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">p</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="nf">_assertDealNotYetExpired</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">p</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="nf">_assertValidDealTimingAtPublish</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">p</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="nf">_assertValidDealMinimum</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">p</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="nf">_assertSufficientBalanceAvailForDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">p</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
+    <span class="nf">_assertDealExpireAfterMaxProveCommitWindow</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">p</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
 
     <span class="c1">// check if StorageDeal is signed before expiry
 </span><span class="c1"></span>    <span class="c1">// check if StorageDeal has the right signatures
 </span><span class="c1"></span>    <span class="c1">// check if minimum StoragePrice and StorageCollateral are met
 </span><span class="c1"></span>    <span class="c1">// check if provider and client have sufficient balances
 </span><span class="c1"></span>    <span class="nf">_validateNewStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="nf">_lockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span>
-    <span class="nf">_processStorageDealPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
-    <span class="nf">_settleExpiredStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span>
-    <span class="nf">_slashLockedFunds</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
 
     <span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
@@ -4614,45 +4617,81 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">toAvailable</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">amount</span>       <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="p">)</span>
-    <span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_lockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span>
+
+    <span class="nf">_getOnChainDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
+    <span class="nf">_assertPublishedDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
+    <span class="nf">_assertActiveDealState</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
+    <span class="nf">_activateDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
+
+    <span class="nf">_getStorageFeeSinceLastPayment</span><span class="p">(</span>
+        <span class="nx">rt</span>               <span class="nx">Runtime</span>
+        <span class="nx">deal</span>             <span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span>
+        <span class="nx">newPaymentEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nf">_slashTerminatedFaults</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+    <span class="nf">_terminateDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span>
+    <span class="nf">_slashDealCollateral</span><span class="p">(</span>
+        <span class="nx">rt</span>      <span class="nx">Runtime</span>
+        <span class="nx">amount</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMarketActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">balance</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>  <span class="c1">// amount is in the message
 </span><span class="c1"></span>
-    <span class="c1">// call by CommitSector in StorageMiningSubsystem
-</span><span class="c1"></span>    <span class="c1">// a StorageDeal is only published on chain when it passes verifyStorageDeal
+    <span class="c1">// call by StorageMiningSubsystem before PreCommitSector
+</span><span class="c1"></span>    <span class="c1">// a StorageDeal is only published on chain when it passes _validateNewStorageDeal
+</span><span class="c1"></span>    <span class="c1">// _validateNewStorageDeal checks for the following:
+</span><span class="c1"></span>    <span class="c1">//     - deal did not start/expire when it is signed
+</span><span class="c1"></span>    <span class="c1">//     - deal hits the chain before its StartEpoch
+</span><span class="c1"></span>    <span class="c1">//     - client and provider address and signature are correct (TODO may be unnecessary)
+</span><span class="c1"></span>    <span class="c1">//     - client and provider have sufficient balances to lock up
 </span><span class="c1"></span>    <span class="c1">// a DealID will be assigned and stored in the mapping of DealID to StorageDeal
-</span><span class="c1"></span>    <span class="c1">// PublishStorageDeal should be called before SecotrCommits
-</span><span class="c1"></span>    <span class="c1">// an unregistered StorageDeal will not be processed
+</span><span class="c1"></span>    <span class="c1">// _lockBalance is then called after each _validateNewStorageDeal to lock up balances
 </span><span class="c1"></span>    <span class="nf">PublishStorageDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">])</span> <span class="p">[</span><span class="nx">PublishStorageDealResponse</span><span class="p">]</span>
 
-    <span class="c1">// call by CronActor when no PoSt is submitted within a ProvingPeriod
-</span><span class="c1"></span>    <span class="c1">// trigger subsequent calls on different SectorSet
-</span><span class="c1"></span>    <span class="c1">// pull SectorSet from the run time
-</span><span class="c1"></span>    <span class="nf">HandleCronAction</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="c1">// Call by sm.PreCommitSector
+</span><span class="c1"></span>    <span class="c1">// Verify the following:
+</span><span class="c1"></span>    <span class="c1">//     - dealIDs have been registered in PublishedDeals
+</span><span class="c1"></span>    <span class="c1">//     - deals will not expire by the time ProveCommit hits
+</span><span class="c1"></span>    <span class="c1">//     - deals have not started
+</span><span class="c1"></span>    <span class="c1">// Fail PreCommit if any of above is not true and abort
+</span><span class="c1"></span>    <span class="nf">VerifyPublishedDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 
-    <span class="c1">// call by CronActor / onPoStSubmission on ExpiredSet
-</span><span class="c1"></span>    <span class="c1">// remove StorageDeal from StorageMarketActor
-</span><span class="c1"></span>    <span class="c1">// if no more active deals contain in the sector
-</span><span class="c1"></span>    <span class="c1">// return StorageCollateral to miners
-</span><span class="c1"></span>    <span class="nf">SettleExpiredDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+    <span class="c1">// Call by sm.ProveCommitSector
+</span><span class="c1"></span>    <span class="c1">// Verify the following:
+</span><span class="c1"></span>    <span class="c1">//     - dealIDs are in PublishedDeals
+</span><span class="c1"></span>    <span class="c1">//     - deals have not expired, OK if deals have started
+</span><span class="c1"></span>    <span class="c1">// Fail ProveCommit if any of the above is not true and abort
+</span><span class="c1"></span>    <span class="c1">// Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
+</span><span class="c1"></span>    <span class="nf">ActivateDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">]</span>
 
-    <span class="c1">// call by CronActor / onPoStSubmission on ActiveSet to process deal payment
-</span><span class="c1"></span>    <span class="c1">// go through StorageDealIDs, if IDs are active in MarketActor
-</span><span class="c1"></span>    <span class="c1">// payment will be processed
-</span><span class="c1"></span>    <span class="nf">ProcessStorageDealsPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">],</span> <span class="nx">duration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="c1">// call by StorageMinerActor
+</span><span class="c1"></span>    <span class="c1">// slash deal collateral depending on the faults (only TerminatedFault)
+</span><span class="c1"></span>    <span class="nf">ProcessDealSlash</span><span class="p">(</span>
+        <span class="nx">rt</span>           <span class="nx">Runtime</span>
+        <span class="nx">dealIDs</span>      <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+        <span class="nx">slashAction</span>  <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealSlashAction</span>
+    <span class="p">)</span>
 
-    <span class="c1">// call by CronActor / on DeclareFault on FaultSet to slash deal collateral
-</span><span class="c1"></span>    <span class="c1">// Deals should be slashed for a single proving period
-</span><span class="c1"></span>    <span class="nf">SlashStorageDealsCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
+    <span class="c1">// batch process storage deal payment
+</span><span class="c1"></span>    <span class="c1">// Note: if a sector enters into a Failing state but later recovers, client still pays miner as usual
+</span><span class="c1"></span>    <span class="c1">// client only stops paying when a sector gets cleared (expired or faulted)
+</span><span class="c1"></span>    <span class="c1">// Note: Clients stop paying when miners enter into Failing state
+</span><span class="c1"></span>    <span class="c1">// payment happens at next _onSuccessfulPoSt when miner recovers
+</span><span class="c1"></span>    <span class="c1">// If a miner did not recover, payment will stop at the first fault
+</span><span class="c1"></span>    <span class="nf">ProcessDealPayment</span><span class="p">(</span>
+        <span class="nx">rt</span>               <span class="nx">Runtime</span>
+        <span class="nx">dealIDs</span>          <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+        <span class="nx">newPaymentEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span>
 
-    <span class="nf">GetLastExpirationFromDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="c1">// batch process storage deal expiration
+</span><span class="c1"></span>    <span class="nf">ProcessDealExpiration</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 
-    <span class="c1">// TODO: StorageDeals should be renewable
-</span><span class="c1"></span>    <span class="c1">// UpdateStorageDeal(newStorageDeals [deal.StorageDeal])
-</span><span class="c1"></span>
     <span class="nf">GetPieceInfosForDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4680,356 +4719,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_market</span>
-
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-
-<span class="kd">const</span> <span class="p">(</span>
-    <span class="nx">MethodGetUnsealedCIDForDealIDs</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">MethodNum</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="p">)</span>
-
-<span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1">// Boilerplate
-</span><span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
-<span class="kd">type</span> <span class="nx">Runtime</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span>
-<span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">State</span> <span class="p">=</span> <span class="nx">StorageMarketActorState</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">State</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">(</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">State</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">AcquireState</span><span class="p">()</span>
-    <span class="nx">stateCID</span> <span class="o">:=</span> <span class="nx">h</span><span class="p">.</span><span class="nf">Take</span><span class="p">()</span>
-    <span class="nx">stateBytes</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">stateCID</span><span class="p">))</span>
-    <span class="k">if</span> <span class="nx">stateBytes</span><span class="p">.</span><span class="nf">Which</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime_IpldGet_FunRet_Case_Bytes</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;IPLD lookup error&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="nx">state</span> <span class="o">:=</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">stateBytes</span><span class="p">.</span><span class="nf">As_Bytes</span><span class="p">())</span>
-    <span class="k">return</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">state</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">State</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">checkCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
-    <span class="nx">h</span><span class="p">.</span><span class="nf">Release</span><span class="p">(</span><span class="nx">checkCID</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">h</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">ActorStateHandle</span><span class="p">,</span> <span class="nx">st</span> <span class="nx">State</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">newCID</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">ActorSubstateCID</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Impl</span><span class="p">()))</span>
-    <span class="nx">h</span><span class="p">.</span><span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">newCID</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">CID</span><span class="p">()</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="kd">func</span> <span class="nf">DeserializeState</span><span class="p">(</span><span class="nx">x</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">State</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_generateStorageDealID</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageDeal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span> <span class="p">{</span>
-    <span class="c1">// TODO
-</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
-    <span class="k">return</span> <span class="nx">dealID</span>
-<span class="p">}</span>
-
-<span class="c1">// Call by PublishStorageDeals and GetLastDealExpirationFromDealIDs (consider remove this)
-</span><span class="c1">// This is the check before a StorageDeal appears onchain
-</span><span class="c1">// It checks the following:
-</span><span class="c1">//   - verify deal did not expire when it is signed
-</span><span class="c1">//   - verify deal hits the chain before StartEpoch
-</span><span class="c1">//   - verify client and provider address and signature are correct (TODO may not be needed)
-</span><span class="c1">//   - verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
-</span><span class="c1">//   - verify client and provider has sufficient balance
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_validateNewStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">d</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="c1">// TODO verify client and provider signature
-</span><span class="c1"></span>    <span class="c1">// TODO verify minimum StoragePrice, ProviderCollateralPerEpoch, and ClientCollateralPerEpoch
-</span><span class="c1"></span>    <span class="c1">// TODO: verify deal did not expire when it is signed
-</span><span class="c1"></span>
-    <span class="nx">currEpoch</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">CurrEpoch</span><span class="p">()</span>
-    <span class="nx">p</span> <span class="o">:=</span> <span class="nx">d</span><span class="p">.</span><span class="nf">Proposal</span><span class="p">()</span>
-
-    <span class="c1">// deal has started before publish
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">p</span><span class="p">.</span><span class="nf">StartEpoch</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">currEpoch</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kc">false</span>
-    <span class="p">}</span>
-
-    <span class="c1">// TODO: verify client and provider address and signature are correct (may not be needed)
-</span><span class="c1"></span>
-    <span class="c1">// verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderCollateralPerEpoch</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">MIN_PROVIDER_DEAL_COLLATERAL_PER_EPOCH</span> <span class="o">||</span>
-        <span class="nx">p</span><span class="p">.</span><span class="nf">ClientCollateralPerEpoch</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">MIN_CLIENT_DEAL_COLLATERAL_PER_EPOCH</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kc">false</span>
-    <span class="p">}</span>
-
-    <span class="c1">// verify client and provider has sufficient balance
-</span><span class="c1"></span>    <span class="nx">isClientBalAvailable</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">())</span>
-    <span class="nx">isProviderBalAvailable</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
-
-    <span class="k">if</span> <span class="p">!</span><span class="nx">isClientBalAvailable</span> <span class="o">||</span> <span class="p">!</span><span class="nx">isProviderBalAvailable</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="kc">false</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="kc">true</span>
-<span class="p">}</span>
-
-<span class="c1">// TODO: consider returning a boolean
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">amount</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;negative amount.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">currBalance</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">addr</span><span class="p">]</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;addr not found.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="o">-=</span> <span class="nx">amount</span>
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Locked_</span> <span class="o">+=</span> <span class="nx">amount</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">addr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="nx">amount</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;negative amount.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">currBalance</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">addr</span><span class="p">]</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;addr not found.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Locked_</span> <span class="o">-=</span> <span class="nx">amount</span>
-    <span class="nx">currBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="o">+=</span> <span class="nx">amount</span>
-<span class="p">}</span>
-
-<span class="c1">// move funds from locked in client to available in provider
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_transferBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">fromLocked</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">toAvailable</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">fromB</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">fromLocked</span><span class="p">]</span>
-    <span class="nx">toB</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">toAvailable</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="nx">fromB</span><span class="p">.</span><span class="nf">Locked</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">amount</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;attempt to lock funds greater than actor has&#34;</span><span class="p">)</span>
-        <span class="k">return</span>
-    <span class="p">}</span>
-
-    <span class="nx">fromB</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Locked_</span> <span class="o">-=</span> <span class="nx">amount</span>
-    <span class="nx">toB</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="o">+=</span> <span class="nx">amount</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_isBalanceAvailable</span><span class="p">(</span><span class="nx">a</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="nx">bal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">a</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nx">bal</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="nx">amount</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_lockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">p</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Proposal</span><span class="p">()</span>
-
-    <span class="nx">st</span><span class="p">.</span><span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">())</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">_lockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">())</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_processStorageDealPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">p</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Proposal</span><span class="p">()</span>
-
-    <span class="nx">amount</span> <span class="o">:=</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">StoragePricePerEpoch</span><span class="p">())</span> <span class="o">*</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">duration</span><span class="p">))</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">_transferBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">p</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">amount</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_settleExpiredStorageDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// TODO
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_slashLockedFunds</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// TODO
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">WithdrawBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">balance</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="kd">var</span> <span class="nx">msgSender</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="c1">// TODO replace this from VM runtime
-</span><span class="c1"></span>
-    <span class="k">if</span> <span class="nx">balance</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;negative balance to withdraw.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">senderBalance</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;sender address not found.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">balance</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;insufficient balance.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="p">=</span> <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="o">-</span> <span class="nx">balance</span>
-    <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span> <span class="p">=</span> <span class="nx">senderBalance</span>
-
-    <span class="c1">// TODO send funds to msgSender with `transferBalance` in VM runtime
-</span><span class="c1"></span>
-    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">AddBalance</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="kd">var</span> <span class="nx">msgSender</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>    <span class="c1">// TODO replace this
-</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">balance</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="c1">// TODO replace this
-</span><span class="c1"></span>
-    <span class="c1">// TODO subtract balance from msgSender
-</span><span class="c1"></span>    <span class="c1">// TODO add balance to StorageMarketActor
-</span><span class="c1"></span>    <span class="k">if</span> <span class="nx">balance</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
-        <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;negative balance to add.&#34;</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nx">senderBalance</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
-        <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nx">Available_</span> <span class="p">=</span> <span class="nx">senderBalance</span><span class="p">.</span><span class="nf">Available</span><span class="p">()</span> <span class="o">+</span> <span class="nx">balance</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span> <span class="p">=</span> <span class="nx">senderBalance</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">Balances</span><span class="p">()[</span><span class="nx">msgSender</span><span class="p">]</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">StorageParticipantBalance_I</span><span class="p">{</span>
-            <span class="nx">Locked_</span><span class="p">:</span>    <span class="mi">0</span><span class="p">,</span>
-            <span class="nx">Available_</span><span class="p">:</span> <span class="nx">balance</span><span class="p">,</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">PublishStorageDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">newStorageDeals</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span> <span class="p">[]</span><span class="nx">PublishStorageDealResponse</span> <span class="p">{</span>
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="nx">l</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">newStorageDeals</span><span class="p">)</span>
-    <span class="nx">response</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">PublishStorageDealResponse</span><span class="p">,</span> <span class="nx">l</span><span class="p">)</span>
-
-    <span class="c1">// TODO: verify behavior here
-</span><span class="c1"></span>    <span class="c1">// some StorageDeal will pass and some will fail
-</span><span class="c1"></span>    <span class="c1">// if ealier StorageDeal consumes some balance such that
-</span><span class="c1"></span>    <span class="c1">// funds are no longer sufficient for later storage deals
-</span><span class="c1"></span>    <span class="c1">// all later storage deals will return error
-</span><span class="c1"></span>    <span class="c1">// TODO: confirm st here will be changing
-</span><span class="c1"></span>    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">newDeal</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">newStorageDeals</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_validateNewStorageDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">newDeal</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">st</span><span class="p">.</span><span class="nf">_lockFundsForStorageDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">newDeal</span><span class="p">)</span>
-            <span class="nx">id</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_generateStorageDealID</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">newDeal</span><span class="p">)</span>
-            <span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()[</span><span class="nx">id</span><span class="p">]</span> <span class="p">=</span> <span class="nx">newDeal</span>
-            <span class="nx">response</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nf">PublishStorageDealSuccess</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="nx">response</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nf">PublishStorageDealError</span><span class="p">()</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nx">response</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">HandleCronAction</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">SettleExpiredDeals</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">storageDealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// for dealID := range storageDealIDs {
-</span><span class="c1"></span>    <span class="c1">// Return the storage collateral
-</span><span class="c1"></span>    <span class="c1">// storageDeal := sma.Deals()[dealID]
-</span><span class="c1"></span>    <span class="c1">// storageCollateral := storageDeal.StorageCollateral()
-</span><span class="c1"></span>    <span class="c1">// provider := storageDeal.Provider()
-</span><span class="c1"></span>    <span class="c1">// assert(sma.Balances()[provider].Locked() &gt;= storageCollateral)
-</span><span class="c1"></span>
-    <span class="c1">// // Move storageCollateral from locked to available
-</span><span class="c1"></span>    <span class="c1">// balance := sma.Balances()[provider]
-</span><span class="c1"></span>
-    <span class="c1">// sma.Balances()[provider] = &amp;StorageParticipantBalance_I{
-</span><span class="c1"></span>    <span class="c1">//     Locked_:    balance.Locked() - storageCollateral,
-</span><span class="c1"></span>    <span class="c1">//     Available_: balance.Available() + storageCollateral,
-</span><span class="c1"></span>    <span class="c1">// }
-</span><span class="c1"></span>
-    <span class="c1">// // Delete reference to the deal
-</span><span class="c1"></span>    <span class="c1">// delete(sma.Deals_, dealID)
-</span><span class="c1"></span>    <span class="c1">// }
-</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ProcessStorageDealsPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">,</span> <span class="nx">duration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
-        <span class="nx">st</span><span class="p">.</span><span class="nf">_processStorageDealPayment</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">],</span> <span class="nx">duration</span><span class="p">)</span>
-    <span class="p">}</span>
-
-    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">SlashStorageDealsCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// for _, dealID := range storageDealIDs {
-</span><span class="c1"></span>    <span class="c1">//     faultStorageDeal := sma.Deals()[dealID]
-</span><span class="c1"></span>    <span class="c1">// TODO remove locked funds and send slashed fund to TreasuryActor
-</span><span class="c1"></span>    <span class="c1">// TODO provider lose power for the FaultSet but not PledgeCollateral
-</span><span class="c1"></span>    <span class="c1">// }
-</span><span class="c1"></span>    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="c1">// Call by StorageMinerActor at CommitSector
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">GetLastDealExpirationFromDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
-
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="kd">var</span> <span class="nx">lastDealExpiration</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
-        <span class="nx">deal</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()[</span><span class="nx">dealID</span><span class="p">]</span>
-        <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
-            <span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;dealID not found.&#34;</span><span class="p">)</span>
-        <span class="p">}</span>
-
-        <span class="c1">// TODO: more checks or be convinced that it&#39;s enough to assume deals are still valid
-</span><span class="c1"></span>
-        <span class="nx">currExpiration</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Proposal</span><span class="p">().</span><span class="nf">EndEpoch</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nx">currExpiration</span> <span class="p">&gt;</span> <span class="nx">lastDealExpiration</span> <span class="p">{</span>
-            <span class="nx">lastDealExpiration</span> <span class="p">=</span> <span class="nx">currExpiration</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nx">lastDealExpiration</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">GetPieceInfosForDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorSize</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo_I</span> <span class="p">{</span>
-    <span class="nx">pieceInfos</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo_I</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">dealIDs</span><span class="p">))</span>
-
-    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">deal</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">proposal</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Proposal</span><span class="p">()</span>
-        <span class="nx">pieceSize</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UInt</span><span class="p">(</span><span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceSize</span><span class="p">().</span><span class="nf">Total</span><span class="p">())</span>
-
-        <span class="kd">var</span> <span class="nx">pieceInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo_I</span>
-        <span class="nx">pieceInfo</span><span class="p">.</span><span class="nx">PieceCID_</span> <span class="p">=</span> <span class="nx">proposal</span><span class="p">.</span><span class="nf">PieceCID</span><span class="p">()</span>
-        <span class="nx">pieceInfo</span><span class="p">.</span><span class="nx">Size_</span> <span class="p">=</span> <span class="nx">pieceSize</span>
-
-        <span class="nx">pieceInfos</span><span class="p">[</span><span class="nx">index</span><span class="p">]</span> <span class="p">=</span> <span class="nx">pieceInfo</span>
-    <span class="p">}</span>
-
-    <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nx">pieceInfos</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-    <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
+<p style="color: #D74848"><b><i>Something's not right. The <code>storage_market_actor.go</code> file was not found.</i></b></p>
 
 
 

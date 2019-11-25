@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_mining/sector/sectorset/</guid>
-      <description> // sector sets type SectorSet [SectorID] type UnsealedSectorSet SectorSet type SealedSectorSet SectorSet // compact sector sets type Bitfield Bytes // TODO: move to the right place -- a lib? type RLEpBitfield Bitfield // TODO: move to the right place -- a lib? type CompactSectorSet RLEpBitfield  </description>
+      <description> // sector sets type SectorSet [SectorID] type UnsealedSectorSet SectorSet type SealedSectorSet SectorSet // compact sector sets type Bitfield Bytes type RLEpBitfield Bitfield type CompactSectorSet RLEpBitfield  </description>
     </item>
     
   </channel>

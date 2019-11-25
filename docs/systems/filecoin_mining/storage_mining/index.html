@@ -3977,10 +3977,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4640,15 +4640,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">CommitSectorError</span><span class="p">()</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
-</span><span class="c1"></span>    <span class="nf">DrawElectionProof</span><span class="p">(</span>
-        <span class="nx">randomness</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">Randomness</span>
-        <span class="nx">height</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">vrfKP</span>       <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
-    <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
-
-    <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
 </span><span class="c1"></span>    <span class="nf">PrepareNewTicket</span><span class="p">(</span>
-        <span class="nx">randomness</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">Randomness</span>
+        <span class="nx">randomness</span>     <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
         <span class="nx">workerKeyPair</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
     <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
 

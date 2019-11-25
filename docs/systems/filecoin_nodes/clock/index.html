@@ -3977,10 +3977,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4683,7 +4683,7 @@ https://github.com/alex-shpak/hugo-book
 <p>Specifically, the Filecoin system clock is used:</p>
 
 <ul>
-<li>to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block&rsquo;s <code>ElectionProof</code> (which contains the epoch number) (see <a href="../../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> and <a href="../../../../#systems__filecoin_blockchain__chainsync__block_validation">Block Validation</a>).</li>
+<li>to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block&rsquo;s epoch number (see <a href="../../../../#systems__filecoin_blockchain__chainsync__block_validation">Block Validation</a>).</li>
 <li>to help protocol convergence by giving miners a specific cutoff after which to reject incoming blocks in this round (see <a href="../../../../#systems__filecoin_blockchain__chainsync">ChainSync - synchronizing the Blockchain</a>).</li>
 <li>to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in this round (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a>).</li>
 </ul>

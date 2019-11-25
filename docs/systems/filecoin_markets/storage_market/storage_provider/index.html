@@ -3976,10 +3976,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4683,13 +4683,13 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">publishStorageDealMessage</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span> <span class="p">{</span>
     <span class="c1">// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
-</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span>
-    <span class="kd">var</span> <span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span>
+</span><span class="c1"></span>    <span class="c1">// var dealID deal.DealID
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span>
 
     <span class="nx">storageDeal</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal_I</span><span class="p">{</span>
-        <span class="nx">ProposalMessage_</span><span class="p">:</span> <span class="nx">message</span><span class="p">,</span>
-        <span class="nx">ID_</span><span class="p">:</span>              <span class="nx">dealID</span><span class="p">,</span>
-    <span class="p">}</span>
+        <span class="nx">PublishMessage_</span><span class="p">:</span> <span class="nx">message</span><span class="p">,</span>
+        <span class="c1">// ID_:              dealID,
+</span><span class="c1"></span>    <span class="p">}</span>
 
     <span class="nx">provider</span><span class="p">.</span><span class="nf">DealStatus</span><span class="p">()[</span><span class="nx">dealCID</span><span class="p">]</span> <span class="p">=</span> <span class="nx">StorageDealPublished</span>
 

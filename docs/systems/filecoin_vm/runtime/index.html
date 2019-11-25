@@ -3977,10 +3977,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4585,7 +4585,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 
     <span class="c1">// Randomness returns a (pseudo)random stream (indexed by offset) for the current epoch.
-</span><span class="c1"></span>    <span class="nf">Randomness</span><span class="p">(</span><span class="nx">e</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">offset</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">Randomness</span><span class="p">(</span><span class="nx">e</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">offset</span> <span class="nx">UInt</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// Note: This is the _immediate_ caller.
 </span><span class="c1"></span>    <span class="c1">// Not necessarily the actor in the From field of the initial on-chain Message.
@@ -5151,7 +5151,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_valueReceived</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">e</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">offset</span> <span class="kt">uint64</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">e</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">offset</span> <span class="kt">uint64</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
 	<span class="c1">// TODO: validate CurrEpoch() - K &lt;= e &lt;= CurrEpoch()?
 </span><span class="c1"></span>	<span class="c1">// TODO: finish
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>

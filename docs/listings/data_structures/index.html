@@ -3976,10 +3976,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4570,7 +4570,6 @@ https://github.com/alex-shpak/hugo-book
 <li>The address of the miner that mined the block</li>
 <li>A ticket associated to this block&rsquo;s creation to be used as randomness elsewhere in the protocol (see
 <a href="../../../#algorithms__expected_consensus__leader_election">Secret Leader Election</a> for more details)</li>
-<li>An electionProof showing this miner was eligible to mine</li>
 <li>The set of parent blocks and aggregate <a href="../../../#algorithms__expected_consensus__chain_selection">chain weight</a> of the parents</li>
 <li>This block&rsquo;s height</li>
 <li>Merkle root of the state tree (after applying the messages &ndash; state transitions &ndash; included in this block)</li>
@@ -4655,7 +4654,7 @@ https://github.com/alex-shpak/hugo-book
 <h1 id="vrf-personalization">VRF Personalization</h1>
 
 <p>We define VRF personalizations as follow, to enable domain separation across operations that make use of the same VRF (e.g. <code>Ticket</code> and
-<code>ElectionProof</code>).</p>
+<code>Post</code>).</p>
 
 <table>
 <thead>
@@ -4672,7 +4671,7 @@ https://github.com/alex-shpak/hugo-book
 </tr>
 
 <tr>
-<td>ElectionProof</td>
+<td>Post</td>
 <td><code>0x02</code></td>
 </tr>
 </tbody>
@@ -4695,16 +4694,14 @@ what is meant is that the bytes of the <code>VRFResult</code> field in the <code
 Specifically, tickets are compared lexicographically,
 interpreting the bytes of the <code>VRFResult.Output</code> as an unsigned integer value (little-endian).</p>
 
-<h1 id="electionproof">ElectionProof</h1>
+<h1 id="challengeticket">ChallengeTicket</h1>
 
-<p>An election proof is generated from a past ticket (chosen based on public network parameters)
-and a given epoch number (or height) by a miner during the leader election process.
-Its output value determines whether the miner is elected as one of the leaders,
-and hence is eligible to produce a block for the current epoch.
-The inclusion of the <code>ElectionProof</code> in the block allows other network participants
-to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket,
-(in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
+<p>An election proof is generated from a given PartialTicket by Hashing it, and using that hash to generate a value in [0,1]. Specifically <code>ChallengeTicket = H(PartialTicket)/2^len(H)</code>.
+Its output value is compared to a target to determine whether the miner is elected as one of the leaders and hence is eligible to produce a block for the current epoch.
+The inclusion of the <code>PartialTicket</code> in the block allows other network participants to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket, (in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
 block height with every leader election attempt.</p>
+
+<p>The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.</p>
 
 <h1 id="message">Message</h1>
 
@@ -5061,7 +5058,7 @@ the same encoding, given the same input.</p>
 <ul>
 <li><a href="#ticket-comparison">Ticket Comparison</a></li>
 </ul></li>
-<li><a href="#electionproof">ElectionProof</a></li>
+<li><a href="#challengeticket">ChallengeTicket</a></li>
 <li><a href="#message">Message</a></li>
 <li><a href="#state-tree">State Tree</a></li>
 <li><a href="#actor">Actor</a></li>

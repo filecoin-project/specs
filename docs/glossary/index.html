@@ -3977,10 +3977,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4589,6 +4589,10 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="challenge-sampling">Challenge sampling</h2>
 
+<h2 id="challenge-ticket">Challenge Ticket</h2>
+
+<p>Derived from a <code>Partial Ticket</code> as part of ElectionPoSt and used to run leader election.</p>
+
 <h2 id="cid">Cid</h2>
 
 <p>CID is short for Content Identifier, a self describing content address used throughout the ipfs ecosystem. For more detailed information, see <a href="https://github.com/ipld/cid">the github documentation for it</a>.</p>
@@ -4617,10 +4621,6 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="deal">Deal</h2>
 
 <p>*** *A deal in a Filecoin market is made when a bid and ask are matched, corresponding to an agreement on a service and price between a miner and client.</p>
-
-<h2 id="election-proof">Election Proof</h2>
-
-<p>An <code>ElectionProof</code> is derived from a past <code>ticket</code> and is included in every block header. The <code>ElectionProof</code> proves that the miner was eligible to mine a block at that <code>height</code>.</p>
 
 <h2 id="erasure-coding">Erasure coding</h2>
 
@@ -4696,6 +4696,10 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="online-offline">Online/offline</h2>
 
+<h2 id="partial-ticket">Partial Ticket</h2>
+
+<p>Ticket produced as part of the ElectionPoSt process used to both prove leader elections and prove storage of a given data replica through PoSt. At least one is included in every block header.</p>
+
 <h2 id="payment-channel">Payment Channel</h2>
 
 <p>A payment channel is set up between actors in the Filecoin system to enable off-chain payments with on-chain guarantees, making settlement more efficient.</p>
@@ -4754,6 +4758,10 @@ https://github.com/alex-shpak/hugo-book
 
 <p>TODO add a note to distinguish predictability from randomness</p>
 
+<h2 id="randomness-ticket">Randomness Ticket</h2>
+
+<p>See Ticket.</p>
+
 <h2 id="election-randomness-lookback">Election Randomness Lookback</h2>
 
 <p>Security parameter. A number of rounds to sample back from when choosing randomness for use in leader election. A higher number turns a more localized lottery into a more global one since a miner wins or loses on all descendants of a given randomness, but enables miners to look-ahead and know whether they will be elected in the future.</p>
@@ -4798,7 +4806,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="ticket">Ticket</h2>
 
-<p>A <code>ticket</code> is used as a source of randomness in EC leader election. Every block depends on an <code>ElectionProof</code> derived from a <code>ticket</code>. At least one new <code>ticket</code> is produced with every new block. Ticket creation is described <a href="./expected-consensus.md#Ticket-generation">here</a>.</p>
+<p>A <code>ticket</code> is used as a source of randomness in EC leader election. Every block depends on one or more <code>ChallengeTicket</code> derived from a <code>PartialTicket</code> using input from a <code>RandomnessTicket</code> (naming PR welcome). One such new <code>RandomnessTicket</code> or <code>Ticket</code> is produced with every new block and included in its header</p>
 
 <h2 id="ticket-chain">Ticket Chain</h2>
 
@@ -4861,6 +4869,7 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="#bootstrapping">Bootstrapping</a></li>
 <li><a href="#chain-weight">Chain weight</a></li>
 <li><a href="#challenge-sampling">Challenge sampling</a></li>
+<li><a href="#challenge-ticket">Challenge Ticket</a></li>
 <li><a href="#cid">Cid</a></li>
 <li><a href="#client">Client</a></li>
 <li><a href="#collateral">Collateral</a></li>
@@ -4868,7 +4877,6 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="#confirmation">Confirmation</a></li>
 <li><a href="#consensus">Consensus</a></li>
 <li><a href="#deal">Deal</a></li>
-<li><a href="#election-proof">Election Proof</a></li>
 <li><a href="#erasure-coding">Erasure coding</a></li>
 <li><a href="#fault">Fault</a></li>
 <li><a href="#fair">Fair</a></li>
@@ -4886,6 +4894,7 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="#node">Node</a></li>
 <li><a href="#on-chain-off-chain">On-chain/off-chain</a></li>
 <li><a href="#online-offline">Online/offline</a></li>
+<li><a href="#partial-ticket">Partial Ticket</a></li>
 <li><a href="#payment-channel">Payment Channel</a></li>
 <li><a href="#piece">Piece</a></li>
 <li><a href="#pledge">Pledge</a></li>
@@ -4899,6 +4908,7 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="#proof-of-replication">Proof of Replication</a></li>
 <li><a href="#proof-of-spacetime">Proof of Spacetime</a></li>
 <li><a href="#random-ness">Random(ness)</a></li>
+<li><a href="#randomness-ticket">Randomness Ticket</a></li>
 <li><a href="#election-randomness-lookback">Election Randomness Lookback</a></li>
 <li><a href="#repair">Repair</a></li>
 <li><a href="#round">Round</a></li>

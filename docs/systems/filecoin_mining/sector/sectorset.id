@@ -4,6 +4,6 @@ type UnsealedSectorSet SectorSet
 type SealedSectorSet SectorSet
 
 // compact sector sets
-type Bitfield Bytes  // TODO: move to the right place -- a lib?
-type RLEpBitfield Bitfield  // TODO: move to the right place -- a lib?
+type Bitfield Bytes
+type RLEpBitfield Bitfield
 type CompactSectorSet RLEpBitfield

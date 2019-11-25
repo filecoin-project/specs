@@ -3977,10 +3977,10 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#algorithms__post__rational_post" class="menu-item depth-3">
+<a href="../../../../#algorithms__post__election_post" class="menu-item depth-3">
     
     
-        Rational-PoSt
+        Election PoSt
     
 </a>
 
@@ -4782,19 +4782,26 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">filproofs</span>
 
-<span class="kn">import</span> <span class="s">&#34;bytes&#34;</span>
-<span class="kn">import</span> <span class="s">&#34;errors&#34;</span>
-<span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
-<span class="kn">import</span> <span class="s">&#34;math&#34;</span>
-<span class="kn">import</span> <span class="s">&#34;math/rand&#34;</span>
-<span class="kn">import</span> <span class="nx">big</span> <span class="s">&#34;math/big&#34;</span>
-<span class="kn">import</span> <span class="s">&#34;encoding/binary&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;bytes&#34;</span>
+	<span class="s">&#34;errors&#34;</span>
+	<span class="s">&#34;fmt&#34;</span>
+	<span class="s">&#34;math&#34;</span>
+	<span class="s">&#34;math/rand&#34;</span>
 
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-<span class="kn">import</span> <span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
-<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-<span class="kn">import</span> <span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
+	<span class="s">&#34;encoding/binary&#34;</span>
+	<span class="nx">big</span> <span class="s">&#34;math/big&#34;</span>
+
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+	<span class="nx">file</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/file&#34;</span>
+
+	<span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+
+	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+
+	<span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
+<span class="p">)</span>
 
 <span class="kd">type</span> <span class="nx">SHA256Hash</span> <span class="nx">Bytes32</span>
 <span class="kd">type</span> <span class="nx">PedersenHash</span> <span class="nx">Bytes32</span>
@@ -4923,6 +4930,17 @@ https://github.com/alex-shpak/hugo-book
 	<span class="c1">// NOTE: current implementation uses a more sophisticated method for repeated sampling within a range.
 </span><span class="c1"></span>	<span class="c1">// We need to converge on and fully specify the actual method, since this must be deterministic.
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">highExclusive</span><span class="o">-</span><span class="nx">lowInclusive</span><span class="p">)</span> <span class="o">+</span> <span class="nx">lowInclusive</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">TicketToRandomInt</span><span class="p">(</span><span class="nx">ticket</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">nonce</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">limit</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">)</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
+	<span class="nx">nonceBytes</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+	<span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">.</span><span class="nf">PutUint64</span><span class="p">(</span><span class="nx">nonceBytes</span><span class="p">,</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">nonce</span><span class="p">))</span>
+	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">ticket</span>
+	<span class="nx">input</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">nonceBytes</span><span class="o">...</span><span class="p">)</span>
+	<span class="nx">ranHash</span> <span class="o">:=</span> <span class="nf">HashBytes_SHA256Hash</span><span class="p">(</span><span class="nx">input</span><span class="p">[:])</span>
+	<span class="nx">hashInt</span> <span class="o">:=</span> <span class="nf">bigIntFromLittleEndianBytes</span><span class="p">(</span><span class="nx">ranHash</span><span class="p">)</span>
+	<span class="nx">num</span> <span class="o">:=</span> <span class="nx">hashInt</span><span class="p">.</span><span class="nf">Mod</span><span class="p">(</span><span class="nx">hashInt</span><span class="p">,</span> <span class="nx">limit</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">num</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">exp</span> <span class="o">*</span><span class="nx">ExpanderGraph_I</span><span class="p">)</span> <span class="nf">Parents</span><span class="p">(</span><span class="nx">node</span> <span class="nx">UInt</span><span class="p">)</span> <span class="p">[]</span><span class="nx">UInt</span> <span class="p">{</span>
@@ -5566,12 +5584,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// PoSt
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">)</span> <span class="p">(</span><span class="nx">sectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">challenges</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">sectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">challenges</span> <span class="p">[]</span><span class="nx">UInt</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">faults</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">FaultSet</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ElectionCandidate</span> <span class="p">{</span>
-	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">faults</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span> <span class="p">{</span>
+	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GetChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">)</span>
 	<span class="kd">var</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sector</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">challengedSectors</span> <span class="p">{</span>

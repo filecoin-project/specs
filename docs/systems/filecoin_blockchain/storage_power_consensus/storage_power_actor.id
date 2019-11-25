@@ -2,6 +2,7 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type PowerTableEntry struct {
     ActivePower             block.StoragePower
@@ -13,16 +14,6 @@ type PowerTableEntry struct {
 type PowerReport struct {
     ActivePower    block.StoragePower  // set value
     InactivePower  block.StoragePower  // set value
-}
-
-type FaultReport struct {
-    NewDeclaredFaults          UVarint  // diff value
-    NewDetectedFaults          UVarint  // diff value
-    NewTerminatedFaults        UVarint  // diff value
-
-    GetDeclaredFaultSlash()    actor.TokenAmount
-    GetDetectedFaultSlash()    actor.TokenAmount
-    GetTerminatedFaultSlash()  actor.TokenAmount
 }
 
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
@@ -39,7 +30,8 @@ type StoragePowerActorState struct {
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount
-    _sampleMinersToSurprise(rt Runtime, challengeCount int) [addr.Address]
+    _sampleMinersToSurprise(rt Runtime, challengeCount int, ticket block.Ticket) [addr.Address]
+    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
 }
 
 type StoragePowerActorCode struct {
@@ -63,7 +55,7 @@ type StoragePowerActorCode struct {
     EnsurePledgeCollateralSatisfied(rt Runtime) bool
 
     ProcessPowerReport(rt Runtime, report PowerReport)
-    ProcessFaultReport(rt Runtime, report FaultReport)
+    ProcessFaultReport(rt Runtime, report sector.FaultReport)
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
         rt         Runtime
@@ -72,6 +64,13 @@ type StoragePowerActorCode struct {
     )
 
     Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
-    // this should be part of ReportConsensusFault, numSectors should be all sectors
+
+    shouldChallenge(
+        minerAddr           addr.Address
+        currEpoch           block.ChainEpoch
+        minChallengePeriod  block.ChainEpoch
+    ) bool
+
+    // this should call ReportConsensusFault, numSectors should be all sectors
     // ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
 }
