@@ -5,7 +5,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 
 type StorageProvingSubsystem struct {
     SectorSealer   sealer.SectorSealer
-    PoStGenerator  poster.PoStGenerator
+    PostGenerator  poster.PostGenerator
 
     VerifySeal(sv sector.SealVerifyInfo, pieceInfos [sector.PieceInfo]) union {ok bool, err error}
     ComputeUnsealedSectorCID(sectorSize UInt, pieceInfos [sector.PieceInfo]) union {unsealedSectorCID sector.UnsealedSectorCID, err error}
@@ -14,14 +14,4 @@ type StorageProvingSubsystem struct {
 
     // TODO: remove this?
     // GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
-
-    GeneratePoStCandidates(
-        challengeSeed  sector.PoStRandomness
-        sectorIDs      [sector.SectorID]
-    ) [sector.ChallengeTicket]
-
-    GeneratePoStProof(
-        challengeSeed     sector.PoStRandomness
-        challengeTickets  [sector.ChallengeTicket]
-    ) sector.PoStProof
 }

@@ -463,7 +463,7 @@ func (rt *VMContext) ValueReceived() actor.TokenAmount {
 	return rt._valueReceived
 }
 
-func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) util.Randomness {
+func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) block.Randomness {
 	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
 	// TODO: finish
 	panic("TODO")

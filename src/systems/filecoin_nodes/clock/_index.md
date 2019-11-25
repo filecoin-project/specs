@@ -13,7 +13,7 @@ Filecoin relies on this system clock in order to secure consensus, specifically 
 ## Clock uses
 Specifically, the Filecoin system clock is used:
 
-- to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block's epoch number (see {{<sref block_validation>}}).
+- to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block's `ElectionProof` (which contains the epoch number) (see {{<sref leader_election>}} and {{<sref block_validation>}}).
 - to help protocol convergence by giving miners a specific cutoff after which to reject incoming blocks in this round (see {{<sref chain_sync>}}).
 - to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in this round (see {{<sref storage_power_consensus>}}).
 

@@ -2,6 +2,8 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 
 type PoStRandomness Bytes
 
+type ElectionTicket Bytes  // SHA256 hash
+
 // Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
     Type            PoStType
@@ -17,31 +19,30 @@ type PoStType enum {
 
 type PoStVerifyInfo struct {
     Type        PoStType
-    Tickets     [ChallengeTicket]
+    Tickets     [ElectionTicket]
     PoStCfg
     Randomness  PoStRandomness
 }
 
 type OnChainPoStVerifyInfo struct {
-    Tickets    [ChallengeTicket]
+    Tickets    [ElectionTicket]
     PoStEpoch  block.ChainEpoch
     Proof      PoStProof
 }
 
 type PoStWitness struct {
-    Candidates [ChallengeTicket]
+    Candidates [ElectionCandidate]
 }
 
 type PoStProof struct {//<curve, system> {
     Type        PoStType
-    Tickets     [ChallengeTicket]
+    Tickets     [ElectionTicket]
     ProofBytes  Bytes
 }
 
-type ChallengeTicket struct {
-    Ticket        Bytes  // unhashed
+type ElectionCandidate struct {
+    Ticket        ElectionTicket
     PrivateProof  PrivatePoStProof
-    SectorID
 }
 
 type PrivatePoStProof struct {}

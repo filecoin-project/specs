@@ -60,8 +60,15 @@ type StorageMiningSubsystem struct {
     CommitSectorError()
 
     // call by StorageMiningSubsystem itself in BlockProduction
+    DrawElectionProof(
+        randomness  block.Randomness
+        height      block.ChainEpoch
+        vrfKP       filcrypto.VRFKeyPair
+    ) block.ElectionProof
+
+    // call by StorageMiningSubsystem itself in BlockProduction
     PrepareNewTicket(
-        randomness     util.Randomness
+        randomness     block.Randomness
         workerKeyPair  filcrypto.VRFKeyPair
     ) block.Ticket
 

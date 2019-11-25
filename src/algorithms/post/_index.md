@@ -1,7 +1,7 @@
 ---
 title: Proof-of-Spacetime
 entries:
-- election_post
+- rational_post
 - proof_of_spacetime_parameters.md
 ---
 

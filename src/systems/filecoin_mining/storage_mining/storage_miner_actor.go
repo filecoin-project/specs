@@ -1,23 +1,21 @@
 package storage_mining
 
-import (
-	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-	util "github.com/filecoin-project/specs/util"
-)
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+import power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+import util "github.com/filecoin-project/specs/util"
+import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 const (
-	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder
+	Method_StorageMinerActor_SubmitPoSt = actor.MethodPlaceholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,6 +57,9 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// TODO: placeholder epoch value -- this will be set later
+const MAX_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(3)
+
 func (st *SectorTable_I) ActivePower() block.StoragePower {
 	return block.StoragePower(st.ActiveSectors_ * util.UVarint(st.SectorSize_))
 }
@@ -72,7 +73,8 @@ func (cs *ChallengeStatus_I) OnNewChallenge(currEpoch block.ChainEpoch) Challeng
 	return cs
 }
 
-// Call by _onSuccessfulPoSt or _onMissedSurprisePoSt
+// Call by either SubmitPoSt or OnMissedPoSt
+// TODO: verify this is correct and if we need to distinguish SubmitPoSt vs OnMissedPoSt
 func (cs *ChallengeStatus_I) OnChallengeResponse(currEpoch block.ChainEpoch) ChallengeStatus {
 	cs.LastChallengeEndEpoch_ = currEpoch
 	return cs
@@ -83,6 +85,10 @@ func (cs *ChallengeStatus_I) IsChallenged() bool {
 	return cs.LastChallengeEpoch() > cs.LastChallengeEndEpoch()
 }
 
+func (st *StorageMinerActorState_I) _isChallenged(rt Runtime) bool {
+	return st.ChallengeStatus().IsChallenged()
+}
+
 func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	h, st := a.State(rt)
 	ret := st._isChallenged(rt)
@@ -90,16 +96,8 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	return ret
 }
 
-func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch, minChallengePeriod block.ChainEpoch) bool {
-	return currEpoch > (cs.LastChallengeEpoch()+minChallengePeriod) && !cs.IsChallenged()
-}
-
-func (st *StorageMinerActorState_I) ShouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool {
-	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), minChallengePeriod)
-}
-
-// called by StoragePowerActor to notify StorageMiner of PoSt Challenge (triggered by Cron)
-func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) InvocOutput {
+// called by CronActor to notify StorageMiner of PoSt Challenge
+func (a *StorageMinerActorCode_I) NotifyOfPoStChallenge(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
 
 	if a._isChallenged(rt) {
@@ -111,11 +109,8 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	h, st := a.State(rt)
 	st.ChallengeStatus().Impl().LastChallengeEpoch_ = rt.CurrEpoch()
 	UpdateRelease(rt, h, st)
-	return rt.SuccessReturn()
-}
 
-func (st *StorageMinerActorState_I) _isChallenged(rt Runtime) bool {
-	return st.ChallengeStatus().IsChallenged()
+	return rt.SuccessReturn()
 }
 
 func (st *StorageMinerActorState_I) _updateCommittedSectors(rt Runtime) {
@@ -164,7 +159,7 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime) {
 	panic(powerReport)
 }
 
-func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
+func (a *StorageMinerActorCode_I) _onMissedPoSt(rt Runtime) {
 	h, st := a.State(rt)
 
 	failingSectorNumbers := getSectorNums(st.Sectors())
@@ -202,21 +197,19 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 // If a Post is missed (either due to faults being not declared on time or
 // because the miner run out of time, every sector is reported as failing
 // for the current proving period.
-func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) CheckPoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// we can return if miner has not yet gotten the chance to submit a surprise post
 	if !a._isChallenged(rt) {
 		// Miner gets out of a challenge when submit a successful PoSt
 		// or when detected by CronActor. Hence, not being in isChallenged means that we are good here
 		return rt.SuccessReturn()
 	}
 
-	// garbage collection - need to be called by cron once in a while
 	a._expirePreCommittedSectors(rt)
 
 	// oh no -- we missed it. rekt
-	a._onMissedSurprisePoSt(rt)
+	a._onMissedPoSt(rt)
 
 	return rt.SuccessReturn()
 }
@@ -246,7 +239,7 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 	for _, preCommitSector := range st.PreCommittedSectors() {
 
 		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
-		if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_PERIOD {
+		if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 			// TODO: potentially some slashing if ProveCommitSector comes late
 		}
@@ -353,7 +346,8 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 // TODO: decide whether declared faults sectors should be
 // penalized in the same way as undeclared sectors and how
 
-// this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
+// SubmitPoSt Workflow:
+// - Verify PoSt Submission
 // - Process ProvingSet.SectorsOn()
 //   - State Transitions
 //     - Committed -> Active and credit power
@@ -366,8 +360,22 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 //     - State Transition
 //       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, ProvingSet
-// - Update ChallengeEndEpoch
-func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+	TODO() // TODO: validate caller
+
+	if !a._isChallenged(rt) {
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("cannot SubmitPoSt when not challenged")
+	}
+
+	// Verify correct PoSt Submission
+	isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
+	if !isPoStVerified {
+		// no state transition, just error out and miner should submitPoSt again
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("TODO")
+	}
+
 	h, st := a.State(rt)
 
 	// The proof is verified, process ProvingSet.SectorsOn():
@@ -435,57 +443,15 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 	// TODO: check EnsurePledgeCollateralSatisfied
 	// pledgeCollateralSatisfied
 
+	// Reset Proving Period and report power updates
+	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
+
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())
 	st._updateCommittedSectors(rt)
 	UpdateRelease(rt, h, st)
 
 	return rt.SuccessReturn()
-
-}
-
-func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
-	TODO() // TODO: validate caller
-
-	if !a._isChallenged(rt) {
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("cannot SubmitSurprisePoSt when not challenged")
-	}
-
-	// Verify correct PoSt Submission
-	isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
-	if !isPoStVerified {
-		// no state transition, just error out and miner should submitSurprisePoSt again
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("TODO")
-	}
-
-	return a._onSuccessfulPoSt(rt, postSubmission)
-
-}
-
-// Called by StoragePowerConsensus subsystem after verifying the Election proof
-// and verifying the PoSt proof within the block. (this happens outside the VM)
-// Assume ElectionPoSt has already been successfully verified when the function gets called.
-func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
-
-	// TODO: validate caller
-	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
-	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
-	TODO()
-
-	if !a._isChallenged(rt) {
-		rt.Abort("cannot SubmitElectionPoSt when not in election period")
-	}
-
-	// we do not need to verify post submission here, as this should have already been done
-	// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
-	// significant resources, as proofs are expensive to verify.
-	//
-	// notneeded := a._verifyPoStSubmission(rt, postSubmission)
-
-	return a._onSuccessfulPoSt(rt, postSubmission)
-
 }
 
 func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
@@ -533,7 +499,6 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// but miner can RecoverFaults in recovery before challenge
 	if a._isChallenged(rt) {
 		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("cannot RecoverFaults when sm isChallenged")
@@ -737,8 +702,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// check if ProveCommitSector comes too late after PreCommitSector
 	elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
 
-	// if more than MAX_PROVE_COMMIT_SECTOR_PERIOD has elapsed
-	if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_PERIOD {
+	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
+	if elapsedEpoch > MAX_PROVE_COMMIT_SECTOR_EPOCH {
 		// TODO: potentially some slashing if ProveCommitSector comes late
 
 		// expired

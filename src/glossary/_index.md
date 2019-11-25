@@ -39,10 +39,6 @@ See [Data Structures]()
 
 ## Challenge sampling
 
-## Challenge Ticket
-
-Derived from a `Partial Ticket` as part of ElectionPoSt and used to run leader election.
-
 ## Cid
 
 CID is short for Content Identifier, a self describing content address used throughout the ipfs ecosystem. For more detailed information, see [the github documentation for it](https://github.com/ipld/cid).
@@ -69,6 +65,10 @@ See [Filecoin Proofs](proofs.md)
 ## Deal
 
 *** *A deal in a Filecoin market is made when a bid and ask are matched, corresponding to an agreement on a service and price between a miner and client.
+
+## Election Proof
+
+An `ElectionProof` is derived from a past `ticket` and is included in every block header. The `ElectionProof` proves that the miner was eligible to mine a block at that `height`.
 
 ## Erasure coding
 
@@ -142,10 +142,6 @@ There are multiple types of miners in Filecoin:
 
 ## Online/offline
 
-## Partial Ticket
-
-Ticket produced as part of the ElectionPoSt process used to both prove leader elections and prove storage of a given data replica through PoSt. At least one is included in every block header.
-
 ## Payment Channel
 
 A payment channel is set up between actors in the Filecoin system to enable off-chain payments with on-chain guarantees, making settlement more efficient.
@@ -204,10 +200,6 @@ Used in the Filecoin system by a storage miner to prove that client data was kep
 
 TODO add a note to distinguish predictability from randomness
 
-## Randomness Ticket
-
-See Ticket.
-
 ## Election Randomness Lookback
 
 Security parameter. A number of rounds to sample back from when choosing randomness for use in leader election. A higher number turns a more localized lottery into a more global one since a miner wins or loses on all descendants of a given randomness, but enables miners to look-ahead and know whether they will be elected in the future.
@@ -250,7 +242,7 @@ In the context of:
 
 ## Ticket
 
-A `ticket` is used as a source of randomness in EC leader election. Every block depends on one or more `ChallengeTicket` derived from a `PartialTicket` using input from a `RandomnessTicket` (naming PR welcome). One such new `RandomnessTicket` or `Ticket` is produced with every new block and included in its header
+A `ticket` is used as a source of randomness in EC leader election. Every block depends on an `ElectionProof` derived from a `ticket`. At least one new `ticket` is produced with every new block. Ticket creation is described [here](./expected-consensus.md#Ticket-generation).
 
 ## Ticket Chain
 

@@ -2,7 +2,6 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type BlockProducer struct {
     // call by StorageMiningSubsystem when elected as a leader
@@ -10,11 +9,10 @@ type BlockProducer struct {
     // and then get back the messages and call AssembleBlock
     // TODO minerAddr is of type StorageMiner.Address
     GenerateBlock(
-        postProof                sector.PoStProof
-        winningChallengeTickets  [sector.ChallengeTicket]
-        newTicket                block.Ticket
-        chainHead                block.Tipset
-        minerAddr                addr.Address
+        electionProof  block.ElectionProof
+        T0             block.Ticket
+        tipset         block.Tipset
+        minerAddr      addr.Address
     )
 
     // call by BlockProducer itself after getting back messages

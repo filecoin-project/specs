@@ -32,15 +32,14 @@ func (self *ExpectedConsensus_I) IsValidConsensusFault(faults ConsensusFaultType
 	// && abs(block1.Epoch - block2.Epoch) == 1
 }
 
-func (self *ExpectedConsensus_I) IsWinningElectionProof(electionProof []byte, targetNum util.UVarint, targetDen util.UVarint) bool {
-	// Conceptually we are mapping the pseudorandom, deterministic hash output of the challenge ticket onto [0,1]
-	// by dividing by 2^HashLen and comparing that to the sector's target.
-	// if the challenge ticket hash is smaller than active power in the sector size / network total power * sectorSampled * ec.ExpectedLeaders
-	// it is a winning challenge ticket.
+func (self *ExpectedConsensus_I) IsWinningElectionProof(electionProof block.ElectionProof, minerPower block.StoragePower, totalPower block.StoragePower) bool {
+	panic("")
+	// Conceptually we are mapping the pseudorandom, deterministic VRFOutput onto [0,1]
+	// by dividing by 2^HashLen and comparing that to the miner's power (portion of network storage).
+	// if the VRF Output is smaller than the miner's power fraction * expected number of blocks per round
+	// it is a winning election proof.
 
-	// TODO: fix this
 	// return electionProof.Output()*totalPower < self.expectedBlocksPerEpoch*minerPower*electionProof.VRFResult_.MaxValue()
-	return false
 }
 
 func (self *ExpectedConsensus_I) GetBlockRewards(electionProof block.ElectionProof, minerPower block.StoragePower, totalPower block.StoragePower) util.UVarint {

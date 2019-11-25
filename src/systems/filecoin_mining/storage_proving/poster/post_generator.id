@@ -13,17 +13,12 @@ type PoStSubmission struct {
     ChainEpoch  block.ChainEpoch
 }
 
-type PoStGenerator struct {
-    GeneratePoStCandidates(
-        postCfg         sector.PoStCfg
-        challengeSeed   sector.PoStRandomness
-        candidateCount  UInt
-        sectors         [sector.SectorID]
-        sectorStore     sectorIndex.SectorStore
-    ) [sector.ChallengeTicket]
-
-    GeneratePoStProof(
-        postCfg  sector.PoStCfg
-        witness  sector.PoStWitness
+type PostGenerator struct {
+    GeneratePoSt(
+        postCfg        sector.PoStCfg
+        challengeSeed  sector.PoStRandomness
+        faults         sector.FaultSet
+        sectors        [sector.SectorID]
+        sectorStore    sectorIndex.SectorStore
     ) sector.PoStProof
 }
