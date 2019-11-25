@@ -11,8 +11,6 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
-var TreasuryAddr addr.Address
-
 func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID {
 	// TODO
 	var dealID deal.DealID
@@ -24,7 +22,7 @@ func (st *StorageMarketActorState_I) _isBalanceAvailable(a addr.Address, amount 
 	return bal.Available() >= amount
 }
 
-func (st *StorageMarketActorState_I) _assertValidClienSignature(rt Runtime, dealP deal.StorageDealProposal) {
+func (st *StorageMarketActorState_I) _assertValidClientSignature(rt Runtime, dealP deal.StorageDealProposal) {
 	// TODO: verify if we need to check provider signature
 	// or it is implicit in the message
 
@@ -168,7 +166,7 @@ func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Addres
 		rt.Abort("sma._unlockBalance: addr not found.")
 	}
 
-	if currBalance.Impl().Locked < amount {
+	if currBalance.Impl().Locked() < amount {
 		rt.Abort("sma._unlockBalance: insufficient funds to unlock.")
 	}
 
@@ -178,7 +176,8 @@ func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Addres
 
 // move funds from locked in client to available in provider
 func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked addr.Address, toAvailable addr.Address, amount actor.TokenAmount) {
-	if fromB == TreasuryAddr {
+	if fromLocked == TreasuryAddr {
+		toB := st.Balances()[toAvailable]
 		toB.Impl().Available_ += amount
 		return
 	}

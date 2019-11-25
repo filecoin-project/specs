@@ -32,7 +32,7 @@ type StorageDealProposal struct {
     ProviderCollateralPerEpoch    actor.TokenAmount
     ClientCollateralPerEpoch      actor.TokenAmount  // potentially collapse into one with ProviderDealCollateral
 
-    Duration()                    block.ChainEpoch   @(cached) // EndEpoch - StartEpoch
+    Duration()                    block.ChainEpoch   @(cached)  // EndEpoch - StartEpoch
     ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * Duration
     TotalStorageFee()             actor.TokenAmount  // StoragePricePerEpoch * Duration
     TotalClientCollateral()       actor.TokenAmount  // ClientCollateralPerEpoch * Duration

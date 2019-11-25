@@ -23,7 +23,7 @@ const (
 	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
 )
 
-const LastPaymentEpochNone = -1
+const LastPaymentEpochNone = 0
 
 var TreasuryAddr addr.Address
 
