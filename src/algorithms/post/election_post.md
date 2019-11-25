@@ -106,9 +106,9 @@ But while this means a miner will never win blocks from faked power, they won’
 This is why we need PoSt surprise: 
 
 Atop ElectionPost, a miner will be surprised with a PoSt challenge in every ProvingPeriod (~2 days). The ProvingPeriod resets whenever the miner publishes a PoSt (election or surprise). 
-This SurprisePoSt will use a challenge drawn from the chain at the start of this recovery period. Its PoStProof must be a proof over the PartialTickets for all sectors a miner is storing (i.e. a miner must submit a PoStProof made up of all partialTickets for all sectors in the `ProvigSet`, not just the winning ones on sampled sectors). For this reason a miner is incentivized to declare faults in order to successfully generate this PoStProof.
+This SurprisePoSt will use a challenge drawn from the chain at the start of this recovery period. Its PoStProof must be a proof over the PartialTickets for all sectors a miner is storing (i.e. a miner must submit a PoStProof made up of all partialTickets for all sectors in the `ProvingSet`, not just the winning ones on sampled sectors). For this reason a miner is incentivized to declare faults in order to successfully generate this PoStProof.
 
-Once challenged, a miner has a given ChallengePeriod (~2 hours) past which they, they will lose all their power and a portion of their pledge collateral if they have not submitted a PoSt on chain. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. No deal collateral will be slashed if miners can recover within the next three proving periods. Note that the exact amount of slashed pledge collateral is subject to change.
+Upon receiving a PoSt surprise challenge, a miner has a given ChallengePeriod (~2 hours) past which they, they will lose all their power and a portion of their pledge collateral if they have not submitted a PoSt on chain. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. No deal collateral will be slashed if miners can recover within the next three proving periods. Note that the exact amount of slashed pledge collateral and pledge collateral function itself are subject to change.
 
 Thereafter, the miner will have three more ProvingPeriods (specifically three challenges, so three ProvingPeriods on expectation) to recover their power by submitting a SurprisePoSt. If the miner does not do so, their sectors are permanently terminated and their storage deal collateral slashed (see the StorageMinerActor in the spec).
 
@@ -133,11 +133,11 @@ For i=0; i < challNumber; i++:
     chosenMiner = PowerTable[ranIndex].address
     // a miner should only be challenged if they have not submitted a post in ProvingPeriod/2 epochs and are not currently challenged
     if chosenMiner.shouldChallenge(ProvingPeriod/2):
-        sampledMiners.append(choseMiner)
+        sampledMiners.append(chosenMiner)
 ```
 
 The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled twice per proving period on expectation, but would only be sampled if they are in the latter half of their proving period leading to one challenge per proving period on expectation.
-This is done as follows: if there are M miners in the power table and a Proving Period of length P, 2M/P challenges will be issued at eeach epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/2 epochs and are not currently being challenged (this is checked using the storage_miner_actor).
+This is done as follows: if there are M miners in the power table and a Proving Period of length P, 2M/P challenges will be issued at each epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/2 epochs and are not currently being challenged (this is checked using the storage_miner_actor).
 
 An alternative approach would be to assign a probability of being challenged to each miner which grows at every epoch to be 1 PP epochs from the last challenge (but this would require more computation since every miner would have to be checked at every epoch).
 
@@ -150,10 +150,8 @@ Any faulted sectors will not count toward miner power in {{<sref expected_consen
 
 ## Fault Recovery
 
-In order to recover from faults (and make the faulted sectors active once more), a miner must mark the faults as `recovered` and then submit a PoSt proving the recovering sectors.
-When such a PoSt proof is successfully submitted all faults are reset and assumed to be recovered. A miner must either (1) resolve a faulty sector and accept challenges against it in the next proof submission, (2) report a sector faulty again if it persists but is eventually recoverable, (3) report a sector faulty *and done* if the fault cannot be recovered.
-
-If the miner knows that the sectors are permanently lost, they can submit them as part of the `doneSet`, to ensure they are removed from the proving set. In this case, the minwer would pay a portion of their pledge and deal collaterals accordingly.
+In order to recover from faults (and make the faulted sectors active once more), a miner must mark the faults as `recovering` and then submit a PoSt proving the recovering sectors.
+When such a PoSt proof is successfully submitted all faults are reset and assumed to be recovered. A miner must either resolve a failing sector and accept challenges against it in the next proof submission or fail to recover the failing sector within a proving period and the FaultCount on the sector will be incremented. Sectors that have been in the Failing state for more than `MaxFaultCount` consecutive epochs will be terminated and result in a `TerminatedFault`.
 
 {{% notice note %}}
 **Note**: It is important that all faults are known (i.e submitted to the chain) prior to challenge generation, because otherwise it would be possible to know the challenge set, before the actual challenge time. This would allow a miner to report only faults on challenged sectors, with a gurantee that other faulty sectors would not be detected.
