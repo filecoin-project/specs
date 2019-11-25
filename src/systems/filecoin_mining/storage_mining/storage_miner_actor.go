@@ -90,12 +90,12 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	return ret
 }
 
-func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch) bool {
-	return currEpoch > (cs.LastChallengeEpoch()+PROVING_PERIOD/2) && !cs.IsChallenged()
+func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch, minChallengePeriod block.ChainEpoch) bool {
+	return currEpoch > (cs.LastChallengeEpoch()+minChallengePeriod) && !cs.IsChallenged()
 }
 
-func (st *StorageMinerActorState_I) ShouldChallenge(rt Runtime) bool {
-	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch())
+func (st *StorageMinerActorState_I) ShouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool {
+	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), minChallengePeriod)
 }
 
 // called by StoragePowerActor to notify StorageMiner of PoSt Challenge (triggered by Cron)
