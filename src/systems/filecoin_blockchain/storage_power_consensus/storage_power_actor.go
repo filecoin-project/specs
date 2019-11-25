@@ -1,6 +1,7 @@
 package storage_power_consensus
 
 import (
+	"math"
 	"math/big"
 
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
@@ -173,7 +174,7 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 
 	sampledMiners := make([]addr.Address, 0)
 
-	for i := 0; i < challengeCount; i++ {
+	for chall := 0; chall < challengeCount; chall++ {
 		minerIndex := filproofs.TicketToRandomInt(ticket.Output(), chall, ptSize)
 		panic(minerIndex)
 		// hack to turn bigint into int
@@ -395,8 +396,8 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 	// sample the actor addresses
 	h, st := a.State(rt)
 
-	challengeCount := Ceil(float64(2*len(st.PowerTable())) / float64(PROVING_PERIOD))
-	surprisedMiners := st._sampleMinersToSurprise(rt, challengeCount, ticket)
+	challengeCount := math.Ceil(float64(2*len(st.PowerTable())) / float64(PROVING_PERIOD))
+	surprisedMiners := st._sampleMinersToSurprise(rt, int(challengeCount), ticket)
 
 	UpdateRelease(rt, h, st)
 

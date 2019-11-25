@@ -79,7 +79,7 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 		// TODO: add how sectors are actually stored in the SMS proving set
 		provingSet := make([]sector.SectorID, 0)
 
-		challengeTickets := sms.StorageProving().Impl().GeneratePoStCandidates(postRandomness, allSectors)
+		challengeTickets := sms.StorageProving().Impl().GeneratePoStCandidates(postRandomness, provingSet)
 
 		if len(challengeTickets) <= 0 {
 			return // fail to generate post candidates
