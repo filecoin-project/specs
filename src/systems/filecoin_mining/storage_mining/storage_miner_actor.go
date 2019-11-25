@@ -90,12 +90,12 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	return ret
 }
 
-func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch, minChallengePeriod block.ChainEpoch) bool {
-	return currEpoch > (cs.LastChallengeEpoch()+minChallengePeriod) && !cs.IsChallenged()
+func (cs *ChallengeStatus_I) ShouldChallenge(currEpoch block.ChainEpoch) bool {
+	return currEpoch > (cs.LastChallengeEpoch()+PROVING_PERIOD/2) && !cs.IsChallenged()
 }
 
-func (st *StorageMinerActorState_I) _shouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool {
-	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), minChallengePeriod)
+func (st *StorageMinerActorState_I) ShouldChallenge(rt Runtime) bool {
+	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch())
 }
 
 // called by StoragePowerActor to notify StorageMiner of PoSt Challenge (triggered by Cron)
@@ -434,9 +434,6 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 
 	// TODO: check EnsurePledgeCollateralSatisfied
 	// pledgeCollateralSatisfied
-
-	// Reset Proving Period and report power updates
-	// sm.ProvingPeriodEnd_ = PROVING_PERIOD_TIME
 
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnChallengeResponse(rt.CurrEpoch())

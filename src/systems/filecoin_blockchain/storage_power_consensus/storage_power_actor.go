@@ -181,7 +181,7 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 		minerIndexInt := 0
 		potentialChallengee := allMiners[minerIndexInt]
 		// call to storage miner actor:
-		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, PROVING_PERIOD/2)){
+		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt)){
 		// hack below
 		if true {
 			sampledMiners = append(sampledMiners, potentialChallengee)
@@ -391,7 +391,7 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 // TODO: add Surprise to the cron actor
 func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 
-	var PROVING_PERIOD int // defined in storage_mining
+	var PROVING_PERIOD int // defined in storage_mining, TODO: move constants somewhere else
 
 	// sample the actor addresses
 	h, st := a.State(rt)
