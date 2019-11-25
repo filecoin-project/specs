@@ -2,9 +2,9 @@ import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
 type KeyStore struct {
-    minerAddress  address.Address
-    ownerKey      filcrypto.VRFKeyPair
-    workerKey     filcrypto.VRFKeyPair
+    MinerAddress  address.Address
+    OwnerKey      filcrypto.VRFKeyPair
+    WorkerKey     filcrypto.VRFKeyPair
 
     // SignWithKey(key, sigType, input)
 }

@@ -27,4 +27,6 @@ type DomainSeparationTag union {
     PoSt
 }
 
-type InputDelimeter Bytes
+type InputDelimeter union {
+    Bytes
+}

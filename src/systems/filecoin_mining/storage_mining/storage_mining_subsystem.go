@@ -114,10 +114,10 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	// append the miner actor address for the miner generifying this in order to prevent miners with the same
 	// worker keys from generating the same randomness (given the VRF)
 	var input []byte
-	input = append(filcrypto.DomainSeparationTag_Case_Ticket)
+	input = append(input, byte(filcrypto.DomainSeparationTag_Case_Ticket))
 	input = append(input, randomness...)
-	input = append(input, filcrypto.InputDelimeter)
-	input = append(input, minerAddr...)
+	input = append(input, byte(filcrypto.InputDelimeter_Case_Bytes))
+	input = append(input, minerAddr.AddrToBytes()...)
 
 	// run through VRF
 	vrfRes := vrfKP.Generate(input)

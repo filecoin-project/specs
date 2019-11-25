@@ -55,6 +55,11 @@ func (a *Address_I) IsKeyType() bool {
 	panic("TODO")
 }
 
+func (a *Address_I) AddrToBytes() util.Bytes {
+	ret := make([]byte, 0)
+	return ret
+}
+
 func Address_Make_ID(net Address_NetworkID, x ActorID) Address {
 	return &Address_I{
 		NetworkID_: net,

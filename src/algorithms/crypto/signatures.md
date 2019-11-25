@@ -36,6 +36,8 @@ concatenated elements for input to a signature (or hash), as a byte  of little e
 uint 64 representation of the following:
 - inputDelimeter = `0`
 
+Alphanumerics used as input to signatures are encoded as ASCII strings.
+
 ## Signature Types
 
 Filecoin currently uses two types of signatures: 

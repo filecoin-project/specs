@@ -11,7 +11,8 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     GenerateElectionProof(tipset block.Tipset) block.ElectionProof
     ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]
 
-    ec ExpectedConsensus
+    ec          ExpectedConsensus
+    blockchain  blockchain.BlockchainSubsystem 
 
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
@@ -27,7 +28,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
         minerAddr     addr.Address
     ) bool
 
-    validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey) bool
+    validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey, minerAddr addr.Address) bool
 
     computeChainWeight(tipset block.Tipset) block.ChainWeight
 

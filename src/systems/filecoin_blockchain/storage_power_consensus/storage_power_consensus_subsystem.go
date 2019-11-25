@@ -1,7 +1,6 @@
 package storage_power_consensus
 
 import (
-	"github.com/filecoin-project/go-filecoin/address"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -52,15 +51,15 @@ func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) 
 	// return nil
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.PublicKey, minerAddr address.Address) bool {
-	randomness1 := spc.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
+func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.VRFPublicKey, minerAddr addr.Address) bool {
+	randomness1 := spc.GetTicketProductionSeed(spc.blockchain().BestChain(), spc.blockchain().LatestEpoch())
 
 	var input []byte
-	input = append(filcrypto.DomainSeparationTag_Case_Ticket...)
+	input = append(input, byte(filcrypto.DomainSeparationTag_Case_Ticket))
 	input = append(input, randomness1...)
-	input = append(input, filcrypto.InputDelimeter...)
-	input = append(input, minerAddr...)
-	return ticket.Verify(input, pk)
+	input = append(input, byte(filcrypto.InputDelimeter_Case_Bytes))
+	input = append(input, minerAddr.AddrToBytes()...)
+	return ticket.Verify(input, pk, minerAddr)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset block.Tipset) block.ChainWeight {
@@ -84,20 +83,20 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeT
 	return spc.ec().IsWinningElectionProof(electionProof, activePowerInSector, totalPower)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
-	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_TICKET)
+func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness {
+	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_TICKET)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
-	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_RANDOMNESS)
+func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness {
+	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_RANDOMNESS)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
-	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_SEAL)
+func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain block.Chain, epoch block.ChainEpoch) block.Randomness {
+	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_SEAL)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) block.Randomness {
-	return chain.RandomnessAtEpoch(minerAddr, epoch-SPC_LOOKBACK_POST)
+func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) block.Randomness {
+	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.ChainEpoch, electionProof block.ElectionProof, minerAddr addr.Address) bool {

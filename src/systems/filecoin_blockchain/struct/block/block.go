@@ -1,8 +1,8 @@
 package block
 
 import (
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -11,13 +11,6 @@ func SmallerBytes(a, b util.Bytes) util.Bytes {
 		return b
 	}
 	return a
-}
-
-// TODO: add SHA256 to filcrypto
-// TODO: import SHA256 from filcrypto
-func SHA256(input util.Bytes) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
 }
 
 func sliceEqual(a util.Bytes, b util.Bytes) bool {
@@ -30,16 +23,6 @@ func sliceEqual(a util.Bytes, b util.Bytes) bool {
 		}
 	}
 	return true
-}
-
-func epochToLittleEndianBytes(e ChainEpoch) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
-}
-
-func addrToLittleEndianBytes(addr addr.Address) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
 }
 
 // will return tipset from closest prior (or equal) epoch with a tipset
@@ -57,18 +40,18 @@ func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 	return current
 }
 
-func (chain *Chain_I) RandomnessAtEpoch(minerAddr addr.Address, epoch ChainEpoch) util.Bytes {
+func (chain *Chain_I) RandomnessAtEpoch(epoch ChainEpoch) util.Bytes {
 	ts := chain.TipsetAtEpoch(epoch)
-	priorRand := ts.MinTicket().DrawRandomness(minerAddr, epoch)
+	priorRand := ts.MinTicket().DrawRandomness(epoch)
 
 	// doesn't matter if ts.Epoch() != epoch
 	// since we generate new ticket from prior one in any case
 	// else we use ticket from that epoch and derive new randomness from it
 	var input []byte
 	input = append(input, priorRand...)
-	input = append(input filcrypto.inputDelimeter...)
-	input = append(input, epoch...)
-	return SHA256(input)
+	input = append(input, byte(filcrypto.InputDelimeter_Case_Bytes))
+	input = append(input, byte(epoch))
+	return filproofs.HashBytes_SHA256Hash(input)
 }
 
 func (chain *Chain_I) HeadEpoch() ChainEpoch {
