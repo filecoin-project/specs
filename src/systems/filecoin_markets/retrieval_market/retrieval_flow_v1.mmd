@@ -42,7 +42,7 @@ sequenceDiagram
   deactivate BSP
   Provider ->> DTP : Unpause
   end
-  loop Retreive In Pieces
+  loop Retrieve In Pieces
     Provider ->> DTP : Pause
     Provider ->> DTP : Send Request Payment Intermediate Voucher
     DTP ->> DTC : Send Intermediate Voucher

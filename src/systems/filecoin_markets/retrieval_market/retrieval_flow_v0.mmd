@@ -36,7 +36,7 @@ sequenceDiagram
   BSP -->> Provider : Blocks written
   deactivate BSP
   end
-  loop Retreive In Pieces
+  loop Retrieve In Pieces
     Provider ->> Client : Request Payment
     activate Client
     Client ->> Node : Create Voucher On Payment Channel
@@ -49,7 +49,7 @@ sequenceDiagram
     activate Node
     Node -->> Provider : Message For Voucher Redeemed On Chain
     deactivate Node
-    loop Sending Data Till Payment Required
+    loop Sending Data until Payment Required
         Provider ->> BSP: Read Blocks fro  BlockStore
         activate BSP
         BSP -->> Provider : Blocks
