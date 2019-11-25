@@ -171,13 +171,20 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 		index++
 	}
 
-	sampledMiners := make([]addr.Address, challengeCount)
-	for chall := 0; chall < challengeCount; chall++ {
+	sampledMiners := make([]addr.Address, 0)
+
+	for i := 0; i < challengeCount; i++ {
 		minerIndex := filproofs.TicketToRandomInt(ticket.Output(), chall, ptSize)
 		panic(minerIndex)
-		// hack
+		// hack to turn bigint into int
 		minerIndexInt := 0
-		sampledMiners = append(sampledMiners, allMiners[minerIndexInt])
+		potentialChallengee := allMiners[minerIndexInt]
+		// call to storage miner actor:
+		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, PROVING_PERIOD/2)){
+		// hack below
+		if true {
+			sampledMiners = append(sampledMiners, potentialChallengee)
+		}
 	}
 
 	return sampledMiners
@@ -379,6 +386,7 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 }
 
+// Surprise is in the storage power actor because it is a singleton actor and surprise helps miners maintain power
 // TODO: add Surprise to the cron actor
 func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 
@@ -387,7 +395,7 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 	// sample the actor addresses
 	h, st := a.State(rt)
 
-	challengeCount := len(st.PowerTable()) / int(PROVING_PERIOD)
+	challengeCount := Ceil(float64(2*len(st.PowerTable())) / float64(PROVING_PERIOD))
 	surprisedMiners := st._sampleMinersToSurprise(rt, challengeCount, ticket)
 
 	UpdateRelease(rt, h, st)
@@ -395,9 +403,7 @@ func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
 	// now send the messages
 	for _, addr := range surprisedMiners {
 		// For each miner here check if they should be challenged and send message
-		// if should_challenge{
-		//   rt.SendMessage(addr, ...)
-		// }
+		// rt.SendMessage(addr, ...)
 		panic(addr)
 	}
 }

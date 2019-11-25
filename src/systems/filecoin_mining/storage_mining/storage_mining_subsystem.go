@@ -76,8 +76,8 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 		input = append(input, randomnessK...)
 
 		postRandomness := worker.VRFKeyPair().Impl().Generate(input).Output()
-		// TODO: add how sectors are actually stored in the SMS
-		allSectors := make([]sector.SectorID, 0)
+		// TODO: add how sectors are actually stored in the SMS proving set
+		provingSet := make([]sector.SectorID, 0)
 
 		challengeTickets := sms.StorageProving().Impl().GeneratePoStCandidates(postRandomness, allSectors)
 

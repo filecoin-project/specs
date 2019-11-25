@@ -81,7 +81,7 @@ type StorageMinerActorState struct {
     // TODO ProvingPeriodEnd   Epoch
 
     _isChallenged(rt Runtime)  bool
-    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
+    _shouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _sectorExists(sectorNo sector.SectorNumber) bool
 
