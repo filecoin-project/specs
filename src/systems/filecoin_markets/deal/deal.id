@@ -17,8 +17,7 @@ type Signature struct {}  // TODO
 // even though some storage deals can expire earlier than the sector does.
 // Collaterals are denominated in PerEpoch to incur a cost for self dealing or
 // minimal deals that last for a long time.
-// TODO: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
-// TODO: StoragePrice is paid out by Epoch duration but the exact mechanics still lacks some details.
+// Note: ClientCollateralPerEpoch may not be needed and removed pending future confirmation.
 // There will be a Minimum value for both client and provider deal collateral.
 type StorageDealProposal struct {
     PieceCID                      piece.PieceCID  // 35 bytes CommP
@@ -33,9 +32,11 @@ type StorageDealProposal struct {
     ProviderCollateralPerEpoch    actor.TokenAmount
     ClientCollateralPerEpoch      actor.TokenAmount  // potentially collapse into one with ProviderDealCollateral
 
-    ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * (EndEpoch - StartEpoch)
-    ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateralPerEpoch * (EndEpoch - StartEpoch)
-    Duration()                    block.ChainEpoch
+    Duration()                    block.ChainEpoch   @(cached)  // EndEpoch - StartEpoch
+    ClientBalanceRequirement()    actor.TokenAmount  // (ClientCollateralPerEpoch + StoragePricePerEpoch) * Duration
+    TotalStorageFee()             actor.TokenAmount  // StoragePricePerEpoch * Duration
+    TotalClientCollateral()       actor.TokenAmount  // ClientCollateralPerEpoch * Duration
+    ProviderBalanceRequirement()  actor.TokenAmount  // ProviderCollateralPerEpoch * Duration
 
     CID()                         ProposalCID
 }
@@ -44,11 +45,29 @@ type StorageDealProposal struct {
 // We are enforcing that StorageProvider calls PublishStorageDeal to get back a StorageDeal struct
 // Provider's signature is implicit in the onchain call
 type StorageDeal struct {
-    Proposal()       StorageDealProposal  // can extract proposal from the message
-    ProposalMessage  msg.Message  // counter signature is implicit in the message
-    ID               DealID
+    Proposal()      StorageDealProposal  // can extract proposal from the message
+    PublishMessage  msg.Message  // counter signature is implicit in the message
 
-    CID()            DealCID
+    CID()           DealCID
+}
+
+type OnChainDeal struct {
+    Deal              StorageDeal
+    LastPaymentEpoch  block.ChainEpoch  // 0 = published
+    ID                DealID
+}
+
+// AMT from expiration epoch to dealID and to sectorNumber
+// defined as struct to specify helpers
+// effectively an AMT of the form DealExpirationAMT[Expiration][DealID] = PayloadPower
+type DealExpirationAMT struct {
+    Expiration  block.ChainEpoch  // key
+    Value       DealExpirationValue  // value
+}
+
+type DealExpirationValue struct {
+    ID     DealID  // key
+    Power  block.StoragePower  // value
 }
 
 type RetrievalDealProposal struct {}  // TODO
