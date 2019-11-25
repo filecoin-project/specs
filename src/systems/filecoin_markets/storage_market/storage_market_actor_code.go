@@ -1,18 +1,31 @@
 package storage_market
 
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import util "github.com/filecoin-project/specs/util"
-import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+
+	util "github.com/filecoin-project/specs/util"
+
+	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+)
 
 const (
 	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
 )
+
+const LastPaymentEpochNone = -1
+
+var TreasuryAddr addr.Address
 
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
@@ -56,8 +69,8 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.Tok
 
 	var msgSender addr.Address // TODO replace this from VM runtime
 
-	if balance < 0 {
-		rt.Abort("negative balance to withdraw.")
+	if balance <= 0 {
+		rt.Abort("non-positive balance to withdraw.")
 	}
 
 	senderBalance, found := st.Balances()[msgSender]
@@ -72,7 +85,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.Tok
 	senderBalance.Impl().Available_ = senderBalance.Available() - balance
 	st.Balances()[msgSender] = senderBalance
 
-	// TODO send funds to msgSender with `transferBalance` in VM runtime
+	st._transferBalance(rt, TreasuryAddr, msgSender, balance)
 
 	UpdateRelease(rt, h, st)
 }
@@ -83,8 +96,8 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
 	var msgSender addr.Address    // TODO replace this
 	var balance actor.TokenAmount // TODO replace this
 
-	if balance < 0 {
-		rt.Abort("negative balance to add.")
+	if balance <= 0 {
+		rt.Abort("non-positive balance to add.")
 	}
 
 	senderBalance, found := st.Balances()[msgSender]
@@ -122,10 +135,10 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 			st._lockFundsForStorageDeal(rt, newDeal)
 			id := st._generateStorageDealID(rt, newDeal)
 
-			onchainDeal := &deal.OnchainDeal_I{
+			onchainDeal := &deal.OnChainDeal_I{
 				ID_:               id,
 				Deal_:             newDeal,
-				LastPaymentEpoch_: block.ChainEpoch(0), // 0 = inactive
+				LastPaymentEpoch_: block.ChainEpoch(LastPaymentEpochNone), // -1 = inactive
 			}
 			st.Deals()[id] = onchainDeal
 			response[i] = PublishStorageDealSuccess(id)
@@ -147,7 +160,7 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 
 	for _, dealID := range dealIDs {
 
-		publishedDeal := st._getOnchainDeal(rt, dealID)
+		publishedDeal := st._getOnChainDeal(rt, dealID)
 		st._assertPublishedDealState(rt, dealID)
 
 		dealP := publishedDeal.Deal().Proposal()
@@ -163,15 +176,15 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 	Release(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.DealID) []deal.OnchainDeal {
+func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.DealID) []deal.OnChainDeal {
 
 	TODO() // verify StorageMinerActor
 
 	h, st := a.State(rt)
-	ret := make([]deal.OnchainDeal, len(dealIDs))
+	ret := make([]deal.OnChainDeal, len(dealIDs))
 
 	for _, dealID := range dealIDs {
-		publishedDeal := st._getOnchainDeal(rt, dealID)
+		publishedDeal := st._getOnChainDeal(rt, dealID)
 		st._assertPublishedDealState(rt, dealID)
 
 		dealP := publishedDeal.Deal().Proposal()
@@ -210,7 +223,7 @@ func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal
 	h, st := a.State(rt)
 
 	for _, dealID := range dealIDs {
-		deal := st._getOnchainDeal(rt, dealID)
+		deal := st._getOnChainDeal(rt, dealID)
 		st._assertActiveDealState(rt, dealID)
 
 		fee := st._getStorageFeeSinceLastPayment(rt, deal, newPaymentEpoch)
@@ -234,7 +247,7 @@ func (a *StorageMarketActorCode_I) ProcessDealExpiration(rt Runtime, dealIDs []d
 
 	for _, dealID := range dealIDs {
 
-		expiredDeal := st._getOnchainDeal(rt, dealID)
+		expiredDeal := st._getOnChainDeal(rt, dealID)
 		st._assertActiveDealState(rt, dealID)
 
 		dealP := expiredDeal.Deal().Proposal()

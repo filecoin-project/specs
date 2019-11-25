@@ -783,7 +783,7 @@ func (st *StorageMinerActorState_I) _getUtilizationInfo(rt Runtime, sectorNo sec
 	return utilizationInfo
 }
 
-func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.OnchainDeal) sector.SectorUtilizationInfo {
+func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.OnChainDeal) sector.SectorUtilizationInfo {
 
 	var maxUtilization block.StoragePower
 	var dealExpirationAMT deal.DealExpirationAMT
@@ -911,7 +911,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// Ok if deal has started
 	// Send(SMA.ActivateDeals(onChainInfo.DealIDs())
 	// abort if activation failed
-	var deals []deal.OnchainDeal
+	var deals []deal.OnChainDeal
 	initialUtilization := st._initializeUtilizationInfo(rt, deals)
 	lastDealExpiration := initialUtilization.DealExpirationAMT().Impl().LastDealExpiration()
 

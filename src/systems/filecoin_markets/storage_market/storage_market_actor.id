@@ -10,7 +10,7 @@ type StorageParticipantBalance struct {
 }
 
 type BalancesHAMT {addr.Address: StorageParticipantBalance}
-type DealsAMT {deal.DealID: deal.OnchainDeal}
+type DealsAMT {deal.DealID: deal.OnChainDeal}
 
 type StorageMarketActorState struct {
     Balances               BalancesHAMT
@@ -19,7 +19,7 @@ type StorageMarketActorState struct {
 
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
     _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool
-    _assertValidClienSignature(rt Runtime, dealP deal.StorageDealProposal)
+    _assertValidClientSignature(rt Runtime, dealP deal.StorageDealProposal)
     _assertDealStartAfterCurrEpoch(rt Runtime, p deal.StorageDealProposal)
     _assertDealNotYetExpired(rt Runtime, p deal.StorageDealProposal)
     _assertValidDealTimingAtPublish(rt Runtime, p deal.StorageDealProposal)
@@ -43,14 +43,14 @@ type StorageMarketActorState struct {
     )
     _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
 
-    _getOnchainDeal(rt Runtime, dealID deal.DealID) deal.OnchainDeal
+    _getOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal
     _assertPublishedDealState(rt Runtime, dealID deal.DealID)
     _assertActiveDealState(rt Runtime, dealID deal.DealID)
-    _activateDeal(rt Runtime, deal deal.OnchainDeal) deal.OnchainDeal
+    _activateDeal(rt Runtime, deal deal.OnChainDeal) deal.OnChainDeal
 
     _getStorageFeeSinceLastPayment(
         rt               Runtime
-        deal             deal.OnchainDeal
+        deal             deal.OnChainDeal
         newPaymentEpoch  block.ChainEpoch
     ) actor.TokenAmount
 
@@ -91,7 +91,7 @@ type StorageMarketActorCode struct {
     //     - deals have not expired, OK if deals have started
     // Fail ProveCommit if any of the above is not true and abort
     // Move deals from PublishDeals to ActiveDeals if all deals satisfy the requirement
-    ActivateDeals(rt Runtime, dealIDs [deal.DealID]) [deal.OnchainDeal]
+    ActivateDeals(rt Runtime, dealIDs [deal.DealID]) [deal.OnChainDeal]
 
     // call by StorageMinerActor
     // slash deal collateral depending on the faults (only TerminatedFault)

@@ -1,10 +1,17 @@
 package storage_market
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import (
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+)
+
+var TreasuryAddr addr.Address
 
 func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageDeal deal.StorageDeal) deal.DealID {
 	// TODO
@@ -55,6 +62,10 @@ func (st *StorageMarketActorState_I) _assertValidDealTimingAtPublish(rt Runtime,
 		rt.Abort("sma._assertValidDealTimingAtPublish: deal ends before it starts.")
 	}
 
+	// duration validation
+	if p.Duration() != p.EndEpoch()-p.StartEpoch() {
+		rt.Abort("sma._assertValidDealTimingAtPublish: deal duration does not match end - start.")
+	}
 }
 
 func (st *StorageMarketActorState_I) _assertValidDealMinimum(rt Runtime, p deal.StorageDealProposal) {
@@ -93,7 +104,7 @@ func (st *StorageMarketActorState_I) _assertDealExpireAfterMaxProveCommitWindow(
 	currEpoch := rt.CurrEpoch()
 	dealExpiration := dealP.EndEpoch()
 
-	if dealExpiration <= (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
+	if dealExpiration < (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
 		rt.Abort("sma._assertDealExpireAfterMaxProveCommitWindow: deal might expire before prove commit.")
 	}
 
@@ -111,7 +122,7 @@ func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.
 
 	p := d.Proposal()
 
-	st._assertValidClienSignature(rt, p)
+	st._assertValidClientSignature(rt, p)
 	st._assertValidDealTimingAtPublish(rt, p)
 	st._assertValidDealMinimum(rt, p)
 	st._assertSufficientBalanceAvailForDeal(rt, p)
@@ -119,7 +130,7 @@ func (st *StorageMarketActorState_I) _validateNewStorageDeal(rt Runtime, d deal.
 	return true
 }
 
-func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, deal deal.OnchainDeal) deal.OnchainDeal {
+func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, deal deal.OnChainDeal) deal.OnChainDeal {
 
 	dealP := deal.Deal().Proposal()
 	deal.Impl().LastPaymentEpoch_ = dealP.StartEpoch()
@@ -139,6 +150,10 @@ func (st *StorageMarketActorState_I) _lockBalance(rt Runtime, addr addr.Address,
 		rt.Abort("sma._lockBalance: addr not found.")
 	}
 
+	if currBalance.Impl().Available() < amount {
+		rt.Abort("sma._lockBalance: insufficient funds available to lock.")
+	}
+
 	currBalance.Impl().Available_ -= amount
 	currBalance.Impl().Locked_ += amount
 }
@@ -153,12 +168,21 @@ func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Addres
 		rt.Abort("sma._unlockBalance: addr not found.")
 	}
 
+	if currBalance.Impl().Locked < amount {
+		rt.Abort("sma._unlockBalance: insufficient funds to unlock.")
+	}
+
 	currBalance.Impl().Locked_ -= amount
 	currBalance.Impl().Available_ += amount
 }
 
 // move funds from locked in client to available in provider
 func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked addr.Address, toAvailable addr.Address, amount actor.TokenAmount) {
+	if fromB == TreasuryAddr {
+		toB.Impl().Available_ += amount
+		return
+	}
+
 	fromB := st.Balances()[fromLocked]
 	toB := st.Balances()[toAvailable]
 
@@ -178,10 +202,10 @@ func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal d
 	st._lockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
 }
 
-func (st *StorageMarketActorState_I) _getOnchainDeal(rt Runtime, dealID deal.DealID) deal.OnchainDeal {
+func (st *StorageMarketActorState_I) _getOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal {
 	deal, found := st.Deals()[dealID]
 	if !found {
-		rt.Abort("sm._getOnchainDeal: dealID not found in Deals.")
+		rt.Abort("sm._getOnChainDeal: dealID not found in Deals.")
 	}
 
 	return deal
@@ -189,9 +213,11 @@ func (st *StorageMarketActorState_I) _getOnchainDeal(rt Runtime, dealID deal.Dea
 
 func (st *StorageMarketActorState_I) _assertPublishedDealState(rt Runtime, dealID deal.DealID) {
 
-	deal := st._getOnchainDeal(rt, dealID)
+	// if returns then it is on chain
+	deal := st._getOnChainDeal(rt, dealID)
 
-	if deal.LastPaymentEpoch() != block.ChainEpoch(0) {
+	// must not be active
+	if deal.LastPaymentEpoch() != block.ChainEpoch(LastPaymentEpochNone) {
 		rt.Abort("sma._assertPublishedDealState: deal is not in PublishedDealState.")
 	}
 
@@ -199,9 +225,9 @@ func (st *StorageMarketActorState_I) _assertPublishedDealState(rt Runtime, dealI
 
 func (st *StorageMarketActorState_I) _assertActiveDealState(rt Runtime, dealID deal.DealID) {
 
-	deal := st._getOnchainDeal(rt, dealID)
+	deal := st._getOnChainDeal(rt, dealID)
 
-	if deal.LastPaymentEpoch() <= block.ChainEpoch(0) {
+	if deal.LastPaymentEpoch() == block.ChainEpoch(LastPaymentEpochNone) {
 		rt.Abort("sma._assertActiveDealState: deal is not in ActiveDealState.")
 	}
 }
@@ -216,7 +242,7 @@ func (st *StorageMarketActorState_I) _getParticipantBalance(rt Runtime, particip
 	return balance
 }
 
-func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, deal deal.OnchainDeal, newPaymentEpoch block.ChainEpoch) actor.TokenAmount {
+func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, deal deal.OnChainDeal, newPaymentEpoch block.ChainEpoch) actor.TokenAmount {
 
 	duration := newPaymentEpoch - deal.LastPaymentEpoch()
 	dealP := deal.Deal().Proposal()
@@ -261,7 +287,7 @@ func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal
 
 func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) {
 
-	deal := st._getOnchainDeal(rt, dealID)
+	deal := st._getOnChainDeal(rt, dealID)
 	st._assertActiveDealState(rt, dealID)
 
 	dealP := deal.Deal().Proposal()

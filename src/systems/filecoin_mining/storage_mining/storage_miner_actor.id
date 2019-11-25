@@ -92,7 +92,7 @@ type StorageMinerActorState struct {
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateSectorUtilization(rt Runtime, lastPoSt block.ChainEpoch) [deal.DealID]
-    _initializeUtilizationInfo(rt Runtime, deals [deal.OnchainDeal]) sector.SectorUtilizationInfo
+    _initializeUtilizationInfo(rt Runtime, deals [deal.OnChainDeal]) sector.SectorUtilizationInfo
 
     _getActivePower(rt Runtime) block.StoragePower
     _getInactivePower(rt Runtime) block.StoragePower
