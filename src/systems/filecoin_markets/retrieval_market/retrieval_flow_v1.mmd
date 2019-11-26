@@ -1,12 +1,12 @@
 sequenceDiagram
 
   participant Client as RetrievalClient
-  participant DTC as Data Transfer (Client)
-  participant DTP as Data Transfer (Provider)
+  participant DTS as Data Transfer Subsystem
   participant Provider as RetrievalProvider
   participant Node
+  participant BSC as BlockStore (Client)
   participant BSP as BlockStore (Provider)
-  participant StorageMiner as Storage Miner
+  participant StorageMiner as Storage Miner Subsystem
 
   opt Discovery
     Client ->> Node : Query Chain For Providers w/ PieceID
@@ -19,19 +19,24 @@ sequenceDiagram
   activate Provider
   Provider -->> Client : Send information about Piece (price, size, etc)
   deactivate Provider
-  Client ->> Node : Create/Activate Payment Channel
+  Client ->> DTS : Open Pull Data Transfer w/ RetrievalDealProposal voucher
+  activate DTS
+  DTS ->> Provider : Validate RetrievalDealProposal
+  activate Provider
+  Provider -->> DTS : Data Transfer Accepted
+  DTS -->> Client : Update Transfer In Progress
+  opt Create Payment Channel
+  activate Client
+  Client -> DTS : Pause
+  Client ->> Node : Create Payment Channel
   activate Node
   Node -->> Client : Message For Channel Gets On Chain
   deactivate Node
-  Client ->> DTC : Open Pull Data Transfer w/ RetrievalDealProposal voucher
-  activate DTC
-  DTC ->> DTP : Send date transfer pull Request
-  activate DTP
-  DTP ->> Provider : Validate RetrievalDealProposal
-  activate Provider
-  DTP -->> DTC : Data Transfer Accepted
+  Client -> DTS : Unpause
+  deactivate Client
+  end
   opt Unsealing
-  Provider ->> DTP : Pause
+  Provider ->> DTS : Pause
   Provider ->> StorageMiner : Unseal Sector
   activate StorageMiner
   StorageMiner -->> Provider : Unsealed Piece Data
@@ -40,31 +45,37 @@ sequenceDiagram
   activate BSP
   BSP -->> Provider : Blocks written
   deactivate BSP
-  Provider ->> DTP : Unpause
+  Provider ->> DTS : Unpause
   end
   loop Retrieve In Pieces
-    Provider ->> DTP : Pause
-    Provider ->> DTP : Send Request Payment Intermediate Voucher
-    DTP ->> DTC : Send Intermediate Voucher
-    DTC ->> Client : Validate Request Payment Voucher
+    loop Sending Data until Payment Required
+        DTS ->> BSP: Read Blocks from BlockStore
+        activate BSP
+        BSP -->> DTS : Blocks
+        deactivate BSP        
+        DTS ->> DTS : Handle Send+Verify Of Blocks
+        DTS ->> BSC : Write Blocks
+        activate BSC
+        BSC --> DTS: Blocks written
+        deactivate BSC
+    end
+    Provider ->> DTS : Pause
+    Provider ->> DTS : Send Request Payment Intermediate Voucher
+    DTS ->> Client : Validate Request Payment Voucher
     activate Client
     Client ->> Node : Create Voucher On Payment Channel
     activate Node
     Node -->> Client : Message For Voucher Gets On Chain
     deactivate Node
-    Client ->> DTC : Send Payment Intermediate Voucher
+    Client ->> DTS : Send Reference To Payment Voucher
     deactivate Client
-    DTC ->> DTP : Send Intermediate Voucher
-    DTP ->> Provider : Validate Payment Voucher
+    DTS ->> Provider : Validate Reference To Payment Voucher
     Provider ->> Node : Redeem Voucher On Payment Channel
     activate Node
     Node -->> Provider : Message For Voucher Redeemed On Chain
     deactivate Node
-    Provider ->> DTP : Unpause
-    loop Sending Data Till Payment Required
-        DTP ->> DTC : Send Blocks
-    end
+    Provider ->> DTS : Unpause
   end
   deactivate Provider
-  deactivate DTP
-  deactivate DTC
+  DTS -->> Client : Update Transfer Complete
+  deactivate DTS

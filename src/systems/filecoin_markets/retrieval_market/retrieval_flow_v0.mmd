@@ -1,11 +1,11 @@
 sequenceDiagram
 
   participant Client as RetrievalClient
-  participant Provider as RetrievalProvider
   participant Node
+  participant Provider as RetrievalProvider
   participant BSC as BlockStore (Client)
   participant BSP as BlockStore (Provider)
-  participant StorageMiner as Storage Miner
+  participant StorageMiner as Storage Miner Subsystem
 
   opt Discovery
     Client ->> Node : Query Chain For Providers w/ PieceID
@@ -18,14 +18,17 @@ sequenceDiagram
   activate Provider
   Provider -->> Client : Send information about Piece (price, size, etc)
   deactivate Provider
-  Client ->> Node : Create/Activate Payment Channel
-  activate Node
-  Node -->> Client : Message For Channel Gets On Chain
-  deactivate Node
   Client ->> Provider : Send RetrievalDealProposal
   activate Provider
   Provider -->> Client : Send RetrievalDealResponse, accepting
+  opt Create Payment Channel
   activate Client
+  Client ->> Node : Create Payment Channel
+  activate Node
+  Node -->> Client : Message For Channel Gets On Chain
+  deactivate Client
+  deactivate Node
+  end
   opt Unsealing
   Provider ->> StorageMiner : Unseal Sector
   activate StorageMiner
@@ -37,20 +40,8 @@ sequenceDiagram
   deactivate BSP
   end
   loop Retrieve In Pieces
-    Provider ->> Client : Request Payment
-    activate Client
-    Client ->> Node : Create Voucher On Payment Channel
-    activate Node
-    Node -->> Client : Message For Voucher Gets On Chain
-    deactivate Node
-    Client -->> Provider : Send Payment
-    deactivate Client
-    Provider ->> Node : Redeem Voucher On Payment Channel
-    activate Node
-    Node -->> Provider : Message For Voucher Redeemed On Chain
-    deactivate Node
     loop Sending Data until Payment Required
-        Provider ->> BSP: Read Blocks fro  BlockStore
+        Provider ->> BSP: Read Blocks from BlockStore
         activate BSP
         BSP -->> Provider : Blocks
         deactivate BSP
@@ -63,5 +54,17 @@ sequenceDiagram
         deactivate BSC
         deactivate Client
     end
+    Provider ->> Client : Request Payment
+    activate Client
+    Client ->> Node : Create Voucher On Payment Channel
+    activate Node
+    Node -->> Client : Message For Voucher Gets On Chain
+    deactivate Node
+    Client -->> Provider : Send Reference To Payment Voucher
+    deactivate Client
+    Provider ->> Node : Redeem Voucher On Payment Channel
+    activate Node
+    Node -->> Provider : Message For Voucher Redeemed On Chain
+    deactivate Node
   end
   deactivate Provider

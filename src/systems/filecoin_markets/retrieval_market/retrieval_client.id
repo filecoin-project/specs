@@ -1,4 +1,3 @@
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
@@ -34,17 +33,13 @@ type RetrievalClient struct {
     // V0
     FindProviders(pieceCID piece.PieceCID) [RetrievalPeer]
     Query(
-        p                RetrievalPeer
-        pieceCID         piece.PieceCID
-        payloadCID       ipld.CID
-        selector         ipld.Selector
-        maxPricePerByte  actor.TokenAmount
+        p         RetrievalPeer
+        pieceCID  piece.PieceCID
+        params    RetrievalQueryParams
     ) RetrievalQueryResponse
     Retrieve(
         pieceCID      piece.PieceCID
-        payloadCID    ipld.CID
-        selector      ipld.Selector
-        pricePerByte  actor.TokenAmount
+        params        RetrievalParams
         totalFunds    actor.TokenAmount
         miner         libp2p.PeerID
         clientWallet  addr.Address

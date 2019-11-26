@@ -28,6 +28,7 @@ type RetrievalProviderSubscriber struct {
 type RetrievalProvider struct {
     // V0
     SetPricePerByte(price actor.TokenAmount)
+    SetPaymentInterval(paymentInterval UInt, paymentIntervalIncrease UInt)
     SubscribeToEvents(subscriber RetrievalProviderSubscriber)
 
     // V1
