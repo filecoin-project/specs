@@ -81,7 +81,7 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeT
 	// TODO: Send message to SPA
 	totalPower := uint64(block.StoragePower(0))
 
-	electionProof := block.SHA256(challengeTicket.Ticket())
+	electionProof := block.SHA256(challengeTicket.PartialTicket())
 
 	return spc.ec().IsWinningElectionProof(electionProof, activePowerInSector, totalPower)
 }
