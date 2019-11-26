@@ -8,6 +8,6 @@ func (fps *FilecoinProofsSubsystem_I) VerifySeal(sealVerifyInfo sector.SealVerif
 		SealCfg_: sealCfg,
 	}
 
-	sdr := SDRParams(&cfg)
+	sdr := WinSDRParams(&cfg)
 	return sdr.VerifySeal(sealVerifyInfo)
 }

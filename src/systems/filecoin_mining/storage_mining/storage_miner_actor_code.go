@@ -544,9 +544,9 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
 
 	sealCfg := sector.SealCfg_I{
-		SectorSize_:     sectorSize,
-		SubsectorCount_: info.SubsectorCount(),
-		Partitions_:     info.Partitions(),
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.Partitions(),
 	}
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
@@ -563,7 +563,7 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.SDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
 	return sdr.VerifySeal(&svInfo)
 }
 

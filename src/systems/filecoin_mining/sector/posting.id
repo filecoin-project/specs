@@ -4,10 +4,10 @@ type PoStRandomness Bytes
 
 // Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
-    Type            PoStType
-    SectorSize      UInt
-    SubsectorCount  UInt
-    Partitions      UInt
+    Type         PoStType
+    SectorSize   UInt
+    WindowCount  UInt
+    Partitions   UInt
 }
 
 type PoStType enum {

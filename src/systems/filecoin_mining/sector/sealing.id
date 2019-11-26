@@ -14,9 +14,9 @@ type InteractiveSealRandomness Bytes
 type SealSeed Bytes
 
 type SealCfg struct {
-    SectorSize      UInt
-    SubsectorCount  UInt
-    Partitions      UInt
+    SectorSize   UInt
+    WindowCount  UInt
+    Partitions   UInt
 }
 
 // SealVerifyInfo is the structure of all thte information a verifier
@@ -67,9 +67,10 @@ type SectorProveCommitInfo struct {
 // ProofAux is meta data required to generate certain proofs
 // for a sector, for example PoSt.
 // These should be stored and indexed somewhere by CommR.
-type ProofAux struct {
-    CommRLast          Commitment
+type PersistentProofAux struct {
     CommC              Commitment
+    CommQ              Commitment
+    CommRLast          Commitment
 
     // TODO: This may be a partially-cached tree.
     // this may be empty
@@ -77,17 +78,16 @@ type ProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    PersistentAux   ProofAux
+    PersistentAux   PersistentProofAux  // TODO: Move this to sealer.SealOutputs.
 
     SectorID
     CommD           Commitment
     CommR           SealedSectorCID
     CommDTreePaths  [file.Path]
     CommCTreePath   file.Path
+    CommQTreePath   file.Path
 
     Seeds           [SealSeed]
-    SubsectorData   [Bytes]
-    Replicas        [Bytes]
     KeyLayers       [Bytes]
 }
 
@@ -108,7 +108,6 @@ type SealProofConfig struct {// TODO
 type FilecoinSNARKProof struct {}  //<bls12-381, Groth16>
 
 type SealAlgorithm enum {
-    // ZigZagPoRep
     StackedDRG
 }
 
