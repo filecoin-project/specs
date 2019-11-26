@@ -17,8 +17,30 @@ ProofOfSpacetime:
   post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
 
   Time:
-    post_disk_latency = post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
     post_time = post_disk_latency + post_proof_gen
+    post_time_parallel = post_disk_latency_parallel + post_proof_gen_parallel
+
+    DiskLatency:
+      post_disk_latency = post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
+      post_disk_latency_parallel = post_disk_latency / rig_storage_parallelization
+
+    // TODO: add MerkleTreeCaching for ColumnR
+    MerkleTreeCaching:
+      // TODO: make sure this is correct
+      post_merkle_regen_hashes = expt(2, (log2(nodes) - post_cached_layers))
+      // TODO: check if post_merkle_region_hashes shoulld be *2
+      post_merkle_regen_challenge_time = (post_merkle_regen_hashes * 2) * merkle_tree_hash_time
+      post_merkle_regen_challenges_time = post_merkle_regen_challenge_time * post_challenges
+      // log2(nodes) > post_cached_layers
+
+      post_cached_hashes = expt(2, post_cached_layers) + 1
+      post_cached_remaining_layers = commr_tree_depth - post_cached_layers
+      post_cached = post_cached_hashes * node_size
+      post_cached_gb = post_cached / (1024 * 1024 * 1024)
+      post_cached_fraction = post_cached / sector_size
+
+    ProofGeneration:
+      post_proof_gen = post_snark_time + post_merkle_regen_challenge_time
 
   Time (NoWrapper):
     //rig_storage_latency_throughput_kb = rig_storage_latency_throughput / 1024
@@ -56,6 +78,7 @@ ProofOfReplication:
 
   Commitment:
     commit_size = cid_size
+    // TODO: should be missing *2
     window_comm_tree_time = merkle_tree_hash_time * window_nodes
     window_comm_leaves_time = leaf_hash_time * windows
     commr_size = commit_size
@@ -73,9 +96,11 @@ ProofOfReplication:
 
     CommR (VectorR):
       commr_time = merkle_tree_hash_time * nodes
+      commr_tree_depth = log2(nodes) 
 
     CommR (ColumnR):
       commr_time = window_comm_tree_time + window_comm_leaves_time 
+      commr_tree_depth = log2(window_nodes)
 
     CommC:
       commc_tree_time = (window_comm_tree_time + window_comm_leaves_time) * drg_layers 
