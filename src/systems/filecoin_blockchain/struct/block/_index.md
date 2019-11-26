@@ -1,7 +1,5 @@
 ---
 title: Block
-entries:
-- tipset
 ---
 
 {{<label block>}}
