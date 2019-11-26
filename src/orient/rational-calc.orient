@@ -1,9 +1,41 @@
-FastPorep:
+// Note: all terms referring to size are in bytes, unless suffixed with _mb, _tb, etc.
+// Note: all terms referring to time are in seconds, unless suffixed with _mins, _days, etc.
+
+Rig:
+  rig_storage_min = rig_storage_min_tb * 1024 * 1024 * 1024 * 1024
+  rig_sectors_min = rig_storage_min / sector_size
+  rig_storage_parallelization_min = post_disk_latency / polling_time
+  rig_storage_unit_min = rig_storage_min / rig_storage_parallelization_min
+  rig_storage_unit_min_tb = rig_storage_unit_min / (1024 * 1024 * 1024 * 1024)
+
+Utils:
+  b_in_gb = (1024 * 1024 * 1024)
+  secs_in_month = (24 * 30 * 60 * 60)
+
+ProofOfSpacetime:
+  post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
+
+  Time:
+    post_disk_latency = post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
+    post_time = post_disk_latency + post_proof_gen
+
+  Time (NoWrapper):
+    //rig_storage_latency_throughput_kb = rig_storage_latency_throughput / 1024
+    //response_honest_min = (post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency * windows) / rig_storage_latency_throughput
+
+  SNARK:
+    inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
+    inclusion_proofs = inclusion_proof * post_challenges
+    ticket_proofs = ticket_constraints * post_challenges
+    post_snark_constraints = ticket_proofs + inclusion_proofs
+
+    post_snark_partitions = post_snark_constraints / post_max_snark_constraints
+    post_snark_size = post_snark_partitions * snark_size
+    post_snark_size_kb = post_snark_size / 1024
+
+ProofOfReplication:
   Security:
     porep_challenges = -lambda / (log2(1-spacegap/4))
-  Utils:
-    b_in_gb = (1024 * 1024 * 1024)
-    secs_in_month = (24 * 30 * 60 * 60)
 
   Graph:
     sector_size = sector_size_gb * b_in_gb
@@ -13,111 +45,81 @@ FastPorep:
     node_hash_size_gb = graph_parents * node_size_gb
     node_hash_size = node_hash_size_gb * b_in_gb
 
-    challenge_periods_per_month = secs_in_month / polling_time
-
     window_size = window_size_mb * 1024 * 1024
     windows = sector_size / window_size
     window_nodes = nodes / windows
 
-  Rig:
-    rig_storage_min = rig_storage_min_tb * 1024 * 1024 * 1024 * 1024
-    rig_sectors_min = rig_storage_min / sector_size
-    rig_storage_parallelization_min = response_honest_min / polling_time
-    rig_storage_unit_min = rig_storage_min / rig_storage_parallelization_min
-    rig_storage_unit_min_tb = rig_storage_unit_min / (1024 * 1024 * 1024 * 1024)
+  Encoding:
+    encoding_window_time = (window_nodes * graph_parents) * hashing_time * drg_layers
+    encoding_time = encoding_window_time * windows
+    decoding_time = encoding_window_time
 
-  Honest:
-    Retrieval:
-      // window_read = rig_storage_read_mbs 
-    Encoding:
-      encoding_window_time = (window_nodes * graph_parents) * hashing_time * drg_layers
-      encoding_time = encoding_window_time * windows
-      decoding_time = encoding_window_time
-      
-      encoding_time_parallel = encoding_time / rig_cores
-      window_time_parallel = encoding_window_time / rig_cores
+    encoding_time_parallel = encoding_time / rig_cores
+    window_time_parallel = encoding_window_time / rig_cores
 
-      Asic:
-        encoding_time_parallel_asic = encoding_time_parallel / hashing_amax
-        encoding_time_asic = encoding_time / hashing_amax
-        encoding_window_time_asic = encoding_window_time / hashing_amax
-        encoding_window_time_parallel_asic = encoding_window_time_parallel / hashing_amax
-        
-    Response:
-      response_honest_min = post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency
+    Asic:
+      encoding_time_parallel_asic = encoding_time_parallel / hashing_amax
+      encoding_time_asic = encoding_time / hashing_amax
+      encoding_window_time_asic = encoding_window_time / hashing_amax
+      encoding_window_time_parallel_asic = encoding_window_time_parallel / hashing_amax
 
-    Response (NoWrapper):
-      //rig_storage_latency_throughput_kb = rig_storage_latency_throughput / 1024
-      //response_honest_min = (post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency * windows) / rig_storage_latency_throughput
+  Retrieval:
+    // window_read = rig_storage_read_mbs * window_size_mb
 
-    Throughput:
-      // num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
-      // rig_cores = num_parallel_encoding
-      // seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
+  SNARK:
+    // D
+    // Data layer committed with merkle tree
+    data_inclusion = merkle_tree_datahash_constraints * log2(nodes)
+    data_inclusions = data_inclusion * porep_challenges
+    window_data_inclusions = data_inclusion * porep_challenges * windows
 
-    Vanilla:
-      post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
+    // C
+    window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
+    window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
+    column_leaf = leaf_hash_constraints * drg_layers
+    column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
+    window_column_leaves = column_leaves * windows
+    labeling_proof = kdf_constraints * graph_parents
+    labeling_proofs = labeling_proof * drg_layers * porep_challenges
+    window_labeling_proof = labeling_proofs * windows
 
-    SNARK:
-      PoSt:
-        inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
-        inclusion_proofs = inclusion_proof * post_challenges
-        ticket_proofs = ticket_constraints * post_challenges
-        post_snark_constraints = ticket_proofs + inclusion_proofs
+    // Q and R
+    replica_inclusion = merkle_tree_hash_constraints * log2(nodes)
+    replica_inclusions = replica_inclusion * porep_challenges
+    window_replica_inclusions = replica_inclusions * windows
 
-        post_snark_partitions = post_snark_constraints / post_max_snark_constraints
-        post_snark_size = post_snark_partitions * snark_size
-        post_snark_size_kb = post_snark_size / 1024
+    porep_snark_partitions = porep_snark_constraints / porep_max_snark_constraints
+    porep_snark_size = porep_snark_partitions * snark_size
+    porep_snark_size_kb = porep_snark_size / 1024
 
-      PoRep:
-        // D
-        // Data layer committed with merkle tree
-        data_inclusion = merkle_tree_datahash_constraints * log2(nodes)
-        data_inclusions = data_inclusion * porep_challenges
-        window_data_inclusions = data_inclusion * porep_challenges * windows
+    Constraints (WindowEncoding):
+      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
 
-        // C
-        window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
-        window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
-        column_leaf = leaf_hash_constraints * drg_layers
-        column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
-        window_column_leaves = column_leaves * windows
-        labeling_proof = kdf_constraints * graph_parents
-        labeling_proofs = labeling_proof * drg_layers * porep_challenges
-        window_labeling_proof = labeling_proofs * windows
+    Constraints (SectorEncoding):
+      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
 
-        // Q and R
-        replica_inclusion = merkle_tree_hash_constraints * log2(nodes)
-        replica_inclusions = replica_inclusion * porep_challenges
-        window_replica_inclusions = replica_inclusions * windows
+    Constraints (Wrapping):
+      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
 
-        porep_snark_partitions = porep_snark_constraints / porep_max_snark_constraints
-        porep_snark_size = porep_snark_partitions * snark_size
-        porep_snark_size_kb = porep_snark_size / 1024
+    // Column comitting data or replica. 
 
-        Constraints (WindowEncoding):
-          porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
+Rationality:
+  describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to pay store the entire sector, than re-encode those")
+  breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_hash_node * challenge_periods_per_month))
+  challenge_periods_per_month = secs_in_month / polling_time
+  regeneration_percentage = breakeven_nodes / nodes
 
-        Constraints (SectorEncoding):
-          porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+  Costs:
+    Compute:
+      nodes_per_second = hash_gb_per_second / node_hash_size_gb
+      nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
+      cost_hash_node = rig_cost_per_year / nodes_per_year 
 
-        Constraints (Wrapping):
-          porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+    Storage:
+      cost_storage_gbs = cost_gb_per_month / secs_in_month 
+      cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
 
-        // Column comitting data or replica. 
-
-    Cost:
-      Compute:
-        nodes_per_second = hash_gb_per_second / node_hash_size_gb
-        nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
-        cost_hash_node = rig_cost_per_year / nodes_per_year 
-
-      Storage:
-        cost_storage_gbs = cost_gb_per_month / secs_in_month 
-        cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
-
-  Adversary:
-    Rationality:
-      describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to pay store the entire sector, than re-encode those")
-      breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_hash_node * challenge_periods_per_month))
-      regeneration_percentage = breakeven_nodes / nodes
+// Throughput:
+//   num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
+//   rig_cores = num_parallel_encoding
+//   seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
