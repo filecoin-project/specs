@@ -49,7 +49,7 @@ func (pg *PoStGenerator_I) GeneratePoStProof(postCfg sector.PoStCfg, witness sec
 	return sdr.GeneratePoStProof(privateProofs)
 }
 
-func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
+func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG_I) {
 	var cfg filproofs.SDRCfg_I
 
 	switch postCfg.Type() {
@@ -63,5 +63,5 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I)
 		}
 	}
 
-	return filproofs.SDRParams(&cfg)
+	return filproofs.WinSDRParams(&cfg)
 }

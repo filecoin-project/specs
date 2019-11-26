@@ -4,7 +4,6 @@ import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-
 	//	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -16,7 +15,7 @@ func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) Stora
 	cfg := filproofs.SDRCfg_I{
 		SealCfg_: sv.SealCfg(),
 	}
-	sdr := filproofs.SDRParams(&cfg)
+	sdr := filproofs.WinSDRParams(&cfg)
 
 	result := sdr.VerifySeal(sv)
 
