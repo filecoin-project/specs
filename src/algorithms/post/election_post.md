@@ -140,7 +140,7 @@ Miners earn no reward from submitting PoStSurprise messages. This mechanism does
 Surprise PoSt works as follows:
 ```text
 // A number of challenged miners is chosen at every round
-challNumber = 2*NumMiners / ProvingPeriod
+challNumber = CHALLENGE_FREQUENCY*NumMiners / ProvingPeriod
 
 // Using the ticket to seed randomness, a miner is picked from the power table for each challenge
 sampledMiners = []
@@ -148,8 +148,8 @@ For i=0; i < challNumber; i++:
     ranHash = H(ticket, i)
     ranIndex = HashToInt(ranHash) mod len(PowerTable)
     chosenMiner = PowerTable[ranIndex].address
-    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/2 epochs and are not currently challenged
-    if chosenMiner.shouldChallenge(ProvingPeriod/2):
+    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/CHALLENGE_FREQUENCY epochs and are not currently challenged
+    if chosenMiner.shouldChallenge(ProvingPeriod/CHALLENGE_FREQUENCY):
         sampledMiners.append(chosenMiner)
 ```
 

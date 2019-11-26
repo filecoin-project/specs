@@ -3,7 +3,7 @@ package storage_mining
 import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
-	power "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
@@ -262,26 +262,9 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// This will prevent miner from submitting a Surprise PoSt past the challenge period
-	if !a._isChallenged(rt) {
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("cannot SubmitSurprisePoSt when not challenged")
-	}
-
-	// to pull in from constants
-	PROVING_PERIOD := block.ChainEpoch(0)
-
-	// check that miner can still submit (i.e. that the challenge window has not passed)
-	// should also be checked on verification
-	_, st := a.State(rt)
-	if rt.CurrEpoch() < st.ChallengeStatus().LastChallengeEpoch()+PROVING_PERIOD {
-		rt.Abort("cannot SubmitSurprisePoSt late")
-	}
-
 	// Verify correct PoSt Submission
 	// May choose to only submit once verified (and so remove this)
-	// isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
-	isPoStVerified := false // TODO HENRI
+	isPoStVerified := a._verifySurprisePoSt(rt) // TODO HENRI
 	if !isPoStVerified {
 		// no state transition, just error out and miner should submitSurprisePoSt again
 		// TODO: determine proper error here and error-handling machinery
@@ -292,11 +275,75 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission 
 
 }
 
+func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
+
+	// 1. Check that the miner in question is currently being challenged
+	if !a._isChallenged(rt) {
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("cannot SubmitSurprisePoSt when not challenged")
+	}
+
+	// to pull in from constants
+	PROVING_PERIOD := block.ChainEpoch(0)
+
+	// 2. Check that the challenge has not expired
+	// Check that miner can still submit (i.e. that the challenge window has not passed)
+	// This will prevent miner from submitting a Surprise PoSt past the challenge period
+	_, st := a.State(rt)
+	if rt.CurrEpoch() < st.ChallengeStatus().LastChallengeEpoch()+PROVING_PERIOD {
+		rt.Abort("cannot SubmitSurprisePoSt late")
+	}
+
+	// A proof must be a valid snark proof with the correct public inputs
+
+	// 3. Get appropriate randomness
+	surpriseRand := rt.Randomness(st.ChallengeStatus().LastChallengeEpoch(), 0)
+	panic(surpriseRand)
+	// 4. Get public inputs
+	// TODO HENRI
+
+	// 5. Verify the PoSt Proof
+	// TODO PORCU interface
+	return false
+}
+
+func (a *StorageMinerActorCode_I) VerifyElectionPoStProof(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+	// TODO: validate caller
+	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
+	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
+	TODO()
+
+	// 1. Check that the miner in question is currently allowed to run election
+	if !a._canBeElected(rt) {
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("cannot submit an election proof if challenged or having challenge response failure")
+	}
+
+	// A proof must be a valid snark proof with the correct public inputs
+
+	// 2. Get appropriate randomness
+	surpriseRand := rt.Randomness(rt.CurrEpoch(), 0)
+	panic(surpriseRand)
+	// 3. Verify ticket values for each ticket (ie leader election)
+	// for each ticket check that it is below target. If any is not, block is invalid
+	// for _, tix := range partialTickets {
+	// TODO Henri in future push
+	// }
+
+	// 4. Get public inputs
+	// TODO HENRI
+
+	// 5. Verify the PoSt Proof
+	// TODO PORCU interface
+
+	return rt.SuccessReturn()
+}
+
 // Called by StoragePowerConsensus subsystem after verifying the Election proof
-// and verifying the PoSt proof within the block. (this happens outside the VM)
+// and verifying the PoSt proof in the block header.
 // Assume ElectionPoSt has already been successfully verified when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
 
 	// TODO: validate caller
 	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
@@ -307,7 +354,6 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 		rt.Abort("cannot SubmitElectionPoSt when not in election period")
 	}
 
-	// reset challenge
 	// we do not need to verify post submission here, as this should have already been done
 	// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
 	// significant resources, as proofs are expensive to verify.
@@ -383,7 +429,7 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	activePower := st._getActivePower(rt)
 	inactivePower := st._getInactivePower(rt)
 
-	powerReport := &power.PowerReport_I{
+	powerReport := &spc.PowerReport_I{
 		ActivePower_:   activePower,
 		InactivePower_: inactivePower,
 	}

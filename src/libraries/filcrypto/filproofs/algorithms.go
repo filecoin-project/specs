@@ -150,10 +150,10 @@ func randInRange(lowInclusive int, highExclusive int) UInt {
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
-func TicketToRandomInt(ticket []byte, nonce int, limit *big.Int) *big.Int {
+func RandomInt(randomness util.Randomness, nonce int, limit *big.Int) *big.Int {
 	nonceBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
-	input := ticket
+	input := randomness
 	input = append(input, nonceBytes...)
 	ranHash := HashBytes_SHA256Hash(input[:])
 	hashInt := bigIntFromLittleEndianBytes(ranHash)

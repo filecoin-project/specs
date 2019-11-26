@@ -53,8 +53,8 @@ type ChallengeStatus struct {
     CanBeElected()         bool 
     ShouldChallenge(
         currEpoch           block.ChainEpoch
-        minChallengePeriod  block.ChainEpoch
-    ) bool  // only True when CurrEpoch > (LastChallengeEpoch + MIN_CHALLENGE_PERIOD)
+        challengeFreePeriod  block.ChainEpoch
+    ) bool
 }
 
 type PreCommittedSector struct {
@@ -86,7 +86,7 @@ type StorageMinerActorState struct {
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     _isChallenged(rt Runtime)  bool
     _canBeElected(rt Runtime)  bool
-    _shouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool
+    _shouldChallenge(rt Runtime, challengeFreePeriod block.ChainEpoch) bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
 
@@ -150,6 +150,9 @@ type StorageMinerActorCode struct {
 }
 
 type MinerInfo struct {
+    // The miner actor address assigned by the Storage Power Actor
+    Address        address.Address
+
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.

@@ -14,8 +14,8 @@ func (st *StorageMinerActorState_I) _canBeElected(rt Runtime) bool {
 	return st.ChallengeStatus().CanBeElected()
 }
 
-func (st *StorageMinerActorState_I) ShouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool {
-	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), minChallengePeriod)
+func (st *StorageMinerActorState_I) ShouldChallenge(rt Runtime, challengeFreePeriod block.ChainEpoch) bool {
+	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), challengeFreePeriod)
 }
 
 func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
