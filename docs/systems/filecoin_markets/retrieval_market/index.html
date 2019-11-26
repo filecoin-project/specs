@@ -1870,6 +1870,12 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-4">
 
+</ul>
+
+
+    
+    </li>
+
     <li>
     
       
@@ -1884,7 +1890,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct__block__tipset" class="menu-item depth-5">
+<a href="../../../../#systems__filecoin_blockchain__struct__tipset" class="menu-item depth-4">
     
     
         Tipset
@@ -1893,13 +1899,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-5">
-
-</ul>
-
-
-    
-    </li>
+<ul class="menu-item-section depth-4">
 
 </ul>
 
@@ -3151,6 +3151,68 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_peer_resolver" class="menu-item depth-4">
+    
+    
+        Retrieval Peer Resolver
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
+    
+    
+        Retrieval Peer Resolver
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4551,20 +4613,152 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="components">Components</h1>
 
-<p>Version 0 of the <code>retrieval market</code> protocol is what we (tentatively) will launch the filecoin network with. It is version zero because it will only be good enough to fit the bill as a way to pay another node for a file.</p>
+<p>The <code>retrieval market</code> refers to the process of negotiating deals for a provider to serve stored data to a client.</p>
 
 <p>The main components are as follows:</p>
 
 <ul>
-<li>A payment channel actor (See <a href="payment-channels.md">payment channels</a> for details)</li>
-<li>&lsquo;retrieval-v0&rsquo; <code>libp2p</code> services</li>
+<li>A payment channel actor (See <a href="../../../../#systems__filecoin_token__payment_channels__payment_channel_actor">Payment Channel Actor</a> for details)</li>
+<li>2 <code>libp2p</code> services -
+
+<ul>
+<li>a protocol for making queries</li>
+<li>a protocol for negotiating and carrying out retrieval deals (will disappear as a seperate libp2p protocol as retrieval markets evolve)</li>
+</ul></li>
 <li>A chain-based content routing interface</li>
-<li>A set of commands to interact with the above</li>
+<li>A client module to query retrieval miners and initiate deals for retrieval</li>
+<li>A provider module to respond to queries and deal proposals</li>
 </ul>
 
-<h1 id="retrieval-v0-libp2p-services">Retrieval V0 <code>libp2p</code> Services</h1>
+<h1 id="vo-v1">VO &amp; V1</h1>
 
-<p>The v0 <code>retrieval market</code> will initially be implemented as two <code>libp2p</code> services. It will be request response based, where the client who is requesting a file sends a <code>retrieval deal proposal</code> to the miner. The miner chooses whether or not to accept it, sends their response which (if they accept the proposal) includes a <code>signed retrieval deal</code>, followed by the actual requested content, streamed as a series of bitswap block messages, using a pre-order traversal of the dag. Each block should use the <a href="https://github.com/ipfs/go-bitswap/blob/c980d7ed36f278e93828acf920f3a911e8263265/message/message.go#L228">bitswap block message format</a>. This way, the client should be able to verify the data incrementally as it receives it. Once the client has received all the data, it should then send a payment channel SpendVoucher of the proposed amount to the miner. This protocol may be easily extended to include payments from the client to the miner every N blocks, but for now we omit that feature.</p>
+<p>V0 of the protocol has participants send data over the retrieval protocol itself in a series of Blocks encoded in Bitswap format and verify received blocks manually. It will only support fetching the payload CID which is at the root of PieceCID&rsquo;s Car File, and will only support fetching the whole DAG.</p>
+
+<p>In V1, the retrieval markets will evolve to support sending arbitrary payload CID&rsquo;s &amp; selectors within a piece (V1). Further, it will piggy back on the Data Transfer system and Graphsync to handle transfer and verification, to support arbitrary selectors, and to reduce roundtrips.
+The Data Transfer System will accordingly be augmented to support pausing/resuming and sending intermediate vouchers to facilitate this.
+V1 will also include additional mechanisms for timeouts and cancellations. (to be specified)</p>
+
+<p>Though the underlying protocols will change, the API interfaces for the client &amp; provider will not change from V0 to V1.</p>
+
+<h1 id="deal-flow-v0">Deal Flow (V0)</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Retrieval Flow - V0</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/retrieval_market/retrieval_flow_v0.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/retrieval_market/retrieval_flow_v0.mmd.svg" />
+
+
+
+
+</div>
+
+
+<p>The baseline version of proposing and accepting a deal will work as follows:</p>
+
+<ul>
+<li>The client finds a provider of a given piece with <code>FindProviders()</code>.</li>
+<li>The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)</li>
+<li>The client sends a RetrievalDealProposal to the retrieval miner. (via RetrievalProtocol)</li>
+<li>The provider validates the proposal and rejects it if it is invalid</li>
+<li>If the request is valid, the provider responds to it with an accept message</li>
+<li>The client creates a payment channel as neccesary and a lane, ensures there are free funds in the channel</li>
+<li>The provider unseals the sector as neccesary</li>
+<li>The provider sends blocks over the protocol until it requires payment</li>
+<li>The client consumes blocks over the retrieval protocol and manually verifies them</li>
+<li>When the provider requires payment to proceed, it sends payment request and does not send any more blocks</li>
+<li>The client puts a payment voucher on chain</li>
+<li>The client responds to the provider with a reference to the payment voucher</li>
+<li>The provider redeems the payment voucher on the chain</li>
+<li>The provider resumes sending blocks</li>
+<li>The client consumes blocks until payment is required again</li>
+<li>The process continues until the end of the query</li>
+</ul>
+
+<h1 id="deal-flow-v1">Deal Flow (V1)</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Retrieval Flow - V1</span>
+
+
+
+
+(<a href="docs/systems/filecoin_markets/retrieval_market/retrieval_flow_v1.mmd.svg" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_markets/retrieval_market/retrieval_flow_v1.mmd.svg" />
+
+
+
+
+</div>
+
+
+<p>The evolved protocol for proposing and accepting a deal will work as follows:</p>
+
+<ul>
+<li>The client finds a provider of a given piece with <code>FindProviders()</code>.</li>
+<li>The client queries a provider to see if it meets its retrieval criteria (via Query Protocol)</li>
+<li>The client schedules a <code>Data Transfer Pull Request</code> passing the <code>RetrievalDealProposal</code> as a voucher.</li>
+<li>The provider validates the proposal and rejects it if it is invalid</li>
+<li>If the proposal is valid, the provider responds with an accept message and begins monitoring the data transfer process</li>
+<li>The client creates a payment channel as neccesary and a lane, ensures there are free funds in the channel</li>
+<li>The provider unseals the sector as neccesary</li>
+<li>The provider monitors data transfer as it sends blocks over the protocol, until it requires payment</li>
+<li>When the provider requires payment, it pauses the data transfer and sends a request for payment as an intermediate voucher</li>
+<li>The client receives the request for payment</li>
+<li>The client puts a payment voucher on chain</li>
+<li>The client responds to provider with a reference to the payment voucher, sent as an intermediate voucher</li>
+<li>The provider redeems the payment voucher on the chain</li>
+<li>The provider unpauses the request and data resumes sending</li>
+<li>The process continues until the end of the query</li>
+</ul>
+
+<h3 id="bootstrapping-trust">Bootstrapping Trust</h3>
+
+<p>Neither the client nor the provider have any specific reason to trust the other. Therefore, payment for a retrieval deal is done in pieces, sending vouchers as bytes are sent and verified.</p>
+
+<p>The trust process is as follows:
+- When the deal is created, client &amp; provider agree to a &ldquo;payment interval&rdquo; in bytes, which is the <em>minimum</em> amount of data the provider will send before each required increment
+- They also agree to a &ldquo;payment interval increase&rdquo; &ndash; the interval will increase by this value after each successful transfer and payment, as trust develops
+- Example:
+   - If my &ldquo;payment interval&rdquo; is 1000, and my &ldquo;payment interval increase&rdquo; is 300:
+   - The provider must send at least 1000 bytes before it requires any payment (it may send more cause block boundaries are uneven)
+   - The client must pay for all bytes sent when the provider requests payment, if the provider has sent at least 1000 bytes
+   - The provider now must send at least 1300 bytes before it requests payment again
+   - The client must pay for all bytes it hasn&rsquo;t yet paid for when the provider
+   requests payment, assuming it&rsquo;s received at least 1300 bytes since last payment
+   - The process continues till the end of the retrieval, when the last payment will simply be for the remainder of bytes
+- Additional trust mechanisms in the V1 version of the protocol will include agreed upon timeouts and cancellation fees</p>
 </article>
 
       
@@ -4579,7 +4773,15 @@ https://github.com/alex-shpak/hugo-book
     <nav id="TableOfContents">
 <ul>
 <li><a href="#components">Components</a></li>
-<li><a href="#retrieval-v0-libp2p-services">Retrieval V0 <code>libp2p</code> Services</a></li>
+<li><a href="#vo-v1">VO &amp; V1</a></li>
+<li><a href="#deal-flow-v0">Deal Flow (V0)</a></li>
+<li><a href="#deal-flow-v1">Deal Flow (V1)</a>
+<ul>
+<li>
+<ul>
+<li><a href="#bootstrapping-trust">Bootstrapping Trust</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
   </aside>

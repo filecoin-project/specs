@@ -1869,6 +1869,12 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-4">
 
+</ul>
+
+
+    
+    </li>
+
     <li>
     
       
@@ -1883,7 +1889,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../../#systems__filecoin_blockchain__struct__block__tipset" class="menu-item depth-5">
+<a href="../../../../../#systems__filecoin_blockchain__struct__tipset" class="menu-item depth-4">
     
     
         Tipset
@@ -1892,13 +1898,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-5">
-
-</ul>
-
-
-    
-    </li>
+<ul class="menu-item-section depth-4">
 
 </ul>
 
@@ -3150,6 +3150,68 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_peer_resolver" class="menu-item depth-4">
+    
+    
+        Retrieval Peer Resolver
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
+    
+    
+        Retrieval Peer Resolver
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4549,6 +4611,21 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown">
   
 
+<h3 id="client-dependencies">Client Dependencies</h3>
+
+<p>The Retrieval Client Depends On The Following Dependencies</p>
+
+<ul>
+<li><strong>Host</strong>: A libp2p host (set setup the libp2p protocols)</li>
+<li><strong>Filecoin Node</strong>: A node implementation to query the chain for pieces and to setup and manage payment channels</li>
+<li><strong>BlockStore</strong>: Same as one used by data transfer module</li>
+<li><strong>Data Transfer</strong>: V1 only &ndash;Module used for transferring payload. Writes to the blockstore.</li>
+</ul>
+
+<h3 id="api">API</h3>
+
+
+
 
 
 
@@ -4568,9 +4645,58 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalClientDealState</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">RetrievalDealProposal</span>
+    <span class="nx">Status</span>                 <span class="nx">DealStatus</span>
+    <span class="nx">Sender</span>                 <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+    <span class="nx">TotalReceived</span>          <span class="nx">UInt</span>
+    <span class="nx">FundsSpent</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Open</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">FundsExpended</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Progress</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Error</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Complete</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalClientEvent</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">Open</span>
+    <span class="nx">FundsExpended</span>  <span class="c1">// when totalFunds is expended
+</span><span class="c1"></span>    <span class="nx">Progress</span>
+    <span class="nx">Error</span>
+    <span class="nx">Complete</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalClientSubscriber</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nf">OnEvent</span><span class="p">(</span><span class="nx">event</span> <span class="nx">RetrievalClientEvent</span><span class="p">,</span> <span class="nx">RetrievalClientDealState</span><span class="p">)</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">RetrievalClient</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">CreatePaymentChannel</span><span class="p">(</span><span class="nx">provider</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">payment</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">PaymentChannel</span>
+    <span class="c1">// V0
+</span><span class="c1"></span>    <span class="nf">FindProviders</span><span class="p">(</span><span class="nx">pieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span><span class="p">)</span> <span class="p">[</span><span class="nx">RetrievalPeer</span><span class="p">]</span>
+    <span class="nf">Query</span><span class="p">(</span>
+        <span class="nx">p</span>         <span class="nx">RetrievalPeer</span>
+        <span class="nx">pieceCID</span>  <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+        <span class="nx">params</span>    <span class="nx">RetrievalQueryParams</span>
+    <span class="p">)</span> <span class="nx">RetrievalQueryResponse</span>
+    <span class="nf">Retrieve</span><span class="p">(</span>
+        <span class="nx">pieceCID</span>      <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+        <span class="nx">params</span>        <span class="nx">RetrievalParams</span>
+        <span class="nx">totalFunds</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+        <span class="nx">miner</span>         <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">clientWallet</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">minerWallet</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="nx">RetrievalDealID</span>
+    <span class="nf">SubscribeToEvents</span><span class="p">(</span><span class="nx">subscriber</span> <span class="nx">RetrievalClientSubscriber</span><span class="p">)</span>
+
+    <span class="c1">// V1
+</span><span class="c1"></span>    <span class="nf">AddMoreFunds</span><span class="p">(</span><span class="nx">id</span> <span class="nx">RetrievalDealID</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">CancelDeal</span><span class="p">(</span><span class="nx">id</span> <span class="nx">RetrievalDealID</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">RetrievalStatus</span><span class="p">(</span><span class="nx">id</span> <span class="nx">RetrievalDealID</span><span class="p">)</span>
+    <span class="nf">ListDeals</span><span class="p">()</span> <span class="p">{</span><span class="nx">RetrievalDealID</span><span class="p">:</span> <span class="nx">RetrievalClientDealState</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4588,6 +4714,21 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#client-dependencies">Client Dependencies</a></li>
+<li><a href="#api">API</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 

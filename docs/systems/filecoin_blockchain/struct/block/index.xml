@@ -10,14 +10,5 @@
 	<atom:link href="/docs/systems/filecoin_blockchain/struct/block/index.xml" rel="self" type="application/rss+xml" />
     
     
-    <item>
-      <title>Tipset</title>
-      <link>/docs/systems/filecoin_blockchain/struct/block/tipset/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/docs/systems/filecoin_blockchain/struct/block/tipset/</guid>
-      <description>EC can elect multiple leaders in a given epoch meaning Filecoin chains can contain multiple blocks at each height (one per winning miner). This greatly increases chain throughput by allowing blocks to propagate through the network of nodes more efficiently but also means miners should coordinate how they select messages for inclusion in their blocks in order to avoid duplicates and maximize their earnings from transaction fees (see Message Pool).</description>
-    </item>
-    
   </channel>
 </rss>

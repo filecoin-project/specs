@@ -1,6 +1,55 @@
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+
+type RetrievalClientDealState struct {
+    RetrievalDealProposal
+    Status                 DealStatus
+    Sender                 libp2p.PeerID
+    TotalReceived          UInt
+    FundsSpent             actor.TokenAmount
+}
+
+type Open struct {}
+type FundsExpended struct {}
+type Progress struct {}
+type Error struct {}
+type Complete struct {}
+
+type RetrievalClientEvent union {
+    Open
+    FundsExpended  // when totalFunds is expended
+    Progress
+    Error
+    Complete
+}
+
+type RetrievalClientSubscriber struct {
+    OnEvent(event RetrievalClientEvent, RetrievalClientDealState)
+}
 
 type RetrievalClient struct {
-    CreatePaymentChannel(provider addr.Address, payment actor.TokenAmount) PaymentChannel
+    // V0
+    FindProviders(pieceCID piece.PieceCID) [RetrievalPeer]
+    Query(
+        p         RetrievalPeer
+        pieceCID  piece.PieceCID
+        params    RetrievalQueryParams
+    ) RetrievalQueryResponse
+    Retrieve(
+        pieceCID      piece.PieceCID
+        params        RetrievalParams
+        totalFunds    actor.TokenAmount
+        miner         libp2p.PeerID
+        clientWallet  addr.Address
+        minerWallet   addr.Address
+    ) RetrievalDealID
+    SubscribeToEvents(subscriber RetrievalClientSubscriber)
+
+    // V1
+    AddMoreFunds(id RetrievalDealID, amount actor.TokenAmount) error
+    CancelDeal(id RetrievalDealID) error
+    RetrievalStatus(id RetrievalDealID)
+    ListDeals() {RetrievalDealID: RetrievalClientDealState}
 }

@@ -474,6 +474,14 @@
   </url>
   
   <url>
+    <loc>/docs/systems/filecoin_markets/retrieval_market/retrieval_peer_resolver/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_markets/retrieval_market/retrieval_protocols/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/systems/filecoin_markets/retrieval_market/retrieval_provider/</loc>
   </url>
   
@@ -614,7 +622,7 @@
   </url>
   
   <url>
-    <loc>/docs/systems/filecoin_blockchain/struct/block/tipset/</loc>
+    <loc>/docs/systems/filecoin_blockchain/struct/tipset/</loc>
   </url>
   
   <url>

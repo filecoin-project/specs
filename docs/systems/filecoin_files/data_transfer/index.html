@@ -1870,6 +1870,12 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-4">
 
+</ul>
+
+
+    
+    </li>
+
     <li>
     
       
@@ -1884,7 +1890,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<a href="../../../../#systems__filecoin_blockchain__struct__block__tipset" class="menu-item depth-5">
+<a href="../../../../#systems__filecoin_blockchain__struct__tipset" class="menu-item depth-4">
     
     
         Tipset
@@ -1893,13 +1899,7 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<ul class="menu-item-section depth-5">
-
-</ul>
-
-
-    
-    </li>
+<ul class="menu-item-section depth-4">
 
 </ul>
 
@@ -3151,6 +3151,68 @@ https://github.com/alex-shpak/hugo-book
 
 
 <ul class="menu-item-section depth-3">
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_peer_resolver" class="menu-item depth-4">
+    
+    
+        Retrieval Peer Resolver
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
+    
+    
+        Retrieval Peer Resolver
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
 
     <li>
     
@@ -4807,12 +4869,14 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Ongoing</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Paused</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">Completed</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">Failed</span> <span class="kd">struct</span> <span class="p">{}</span>
 <span class="kd">type</span> <span class="nx">ChannelNotFoundError</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">DataTransferStatus</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">Ongoing</span>
+    <span class="nx">Paused</span>
     <span class="nx">Completed</span>
     <span class="nx">Failed</span>
     <span class="nx">ChannelNotFoundError</span>
@@ -4852,14 +4916,33 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 </span><span class="c1"></span>    <span class="nx">received</span>             <span class="nx">UVarint</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">Open</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">Progress</span> <span class="kd">struct</span> <span class="p">{}</span>
-<span class="kd">type</span> <span class="nx">Error</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Open</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Initiator</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">SendData</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">BytesToSend</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Progress</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">BytesSent</span> <span class="nx">UInt</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Pause</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Initiator</span> <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Error</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ErrorMsg</span> <span class="kt">string</span>
+<span class="p">}</span>
+
 <span class="kd">type</span> <span class="nx">Complete</span> <span class="kd">struct</span> <span class="p">{}</span>
 
 <span class="kd">type</span> <span class="nx">DataTransferEvent</span> <span class="nx">union</span> <span class="p">{</span>
     <span class="nx">Open</span>
+    <span class="nx">SendData</span>
     <span class="nx">Progress</span>
+    <span class="nx">Pause</span>
     <span class="nx">Error</span>
     <span class="nx">Complete</span>
 <span class="p">}</span>
@@ -4881,6 +4964,12 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
         <span class="nx">voucher</span>   <span class="nx">DataTransferVoucher</span>
         <span class="nx">PieceRef</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
         <span class="nx">Selector</span>  <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
+    <span class="p">)</span>
+    <span class="nf">ValidateIntermediate</span><span class="p">(</span>
+        <span class="nx">otherPeer</span>  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+        <span class="nx">voucher</span>    <span class="nx">DataTransferVoucher</span>
+        <span class="nx">PieceRef</span>   <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+        <span class="nx">Selector</span>   <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>
     <span class="p">)</span>
 <span class="p">}</span>
 
@@ -4914,6 +5003,15 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
     <span class="c1">// get status of a transfer
 </span><span class="c1"></span>    <span class="nf">TransferChannelStatus</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ChannelID</span><span class="p">)</span> <span class="nx">DataTransferStatus</span>
+
+    <span class="c1">// pause an ongoing channel
+</span><span class="c1"></span>    <span class="nf">PauseChannel</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ChannelID</span><span class="p">)</span>
+
+    <span class="c1">// resume an ongoing channel
+</span><span class="c1"></span>    <span class="nf">ResumeChannel</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ChannelID</span><span class="p">)</span>
+
+    <span class="c1">// send an additional voucher for an in progress request
+</span><span class="c1"></span>    <span class="nf">SendIntermediateVoucher</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ChannelID</span><span class="p">,</span> <span class="nx">voucher</span> <span class="nx">DataTransferVoucher</span><span class="p">)</span>
 
     <span class="c1">// get notified when certain types of events happen
 </span><span class="c1"></span>    <span class="nf">SubscribeToEvents</span><span class="p">(</span><span class="nx">subscriber</span> <span class="nx">DataTransferSubscriber</span><span class="p">)</span>

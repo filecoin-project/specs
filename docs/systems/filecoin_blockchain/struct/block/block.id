@@ -39,17 +39,9 @@ type BlockHeader struct {
     //	ComputeUnsignedFingerprint() []
 }
 
-// TODO: remove this. header is signed
-type SignedBlock struct {
-    BlockCID   &Block
-    MinerAddr  addr.Address
-    Signature  filcrypto.Signature
-}
-
 type Block struct {
     Header    BlockHeader
     Messages  [msg.Message]
-    Receipts  [msg.MessageReceipt]
 }
 
 type Chain struct {
