@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	MethodProcessPowerReport          = actor.MethodPlaceholder
-	MethodSlashPledgeForStorageFaults = actor.MethodPlaceholder
-	EnsurePledgeCollateralSatisfied   = actor.MethodPlaceholder
+	MethodProcessPowerReport         = actor.MethodPlaceholder
+	MethodSlashPledgeForStorageFault = actor.MethodPlaceholder
+	EnsurePledgeCollateralSatisfied  = actor.MethodPlaceholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////

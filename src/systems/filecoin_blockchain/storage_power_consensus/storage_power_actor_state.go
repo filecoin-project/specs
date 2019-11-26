@@ -27,11 +27,10 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address a
 		currEntry.Impl().LockedPledgeCollateral_ = 0
 		// TODO: extra handling of not having enough pledgecollateral to be slashed
 	} else {
-		currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
+		currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amountToSlash
 	}
 
-	// TODO: send amountToSlash to TreasuryActor
-	panic(amountToSlash)
+	st.Impl().PledgeCollateralSlashed_ += amountToSlash
 	st.Impl().PowerTable_[minerID] = currEntry
 
 }

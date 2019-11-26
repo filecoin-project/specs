@@ -6,7 +6,7 @@ import (
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+	market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -113,6 +113,15 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 		dealIDs = append(dealIDs, activeDealIDs...)
 
 	}
+	processDealSlashParam := make([]actor.MethodParam, 2)
+
+	Release(rt, h, st)
+	
+	rt.SendCatchingErrors(&msg.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: market.MethodProcessDealSlash,
+		Params_: processDealSlashParam,
+	})
 }
 
 // Called by the cron actor at every tick.
@@ -141,7 +150,7 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 
 	rt.SendCatchingErrors(&msg.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
-		Method_: power.MethodSlashPledgeForStorageFaults,
+		Method_: power.MethodSlashPledgeForStorageFault,
 		Params_: slashPledgeParams,
 	})
 }
@@ -194,6 +203,27 @@ func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime
 		// oh no -- we missed it. rekt
 		a._onMissedSurprisePoSt(rt)
 
+<<<<<<< HEAD
+=======
+	// this will go through even if miners do not have the right amount of pledge collateral
+	// when _submitPowerReport is called in DeclareFaults and _onMissedSurprisePoSt for power slashing
+	// however in _onSuccessfulPoSt EnsurePledgeCollateralSatsified will be called
+	// to ensure that miners have the required pledge collateral
+	// otherwise, post submission will fail
+	// Note: there is no power update in RecoverFaults and hence no EnsurePledgeCollatera or _submitPowerReport
+	rt.SendCatchingErrors(&msg.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: power.MethodProcessPowerReport,
+		Params_: processPowerReportParam,
+	})
+
+	if len(newExpiredDealIDs) > 0 {
+		rt.SendCatchingErrors(&msg.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: market.MethodProcessDealExpiration,
+			Params_: processDealExpirationParam,
+		})
+>>>>>>> wire slashDealsForStorageFault
 	}
 
 	return rt.SuccessReturn()
@@ -592,7 +622,7 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 	receipt := rt.SendCatchingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
+		Method_: market.MethodGetUnsealedCIDForDealIDs,
 		Params_: params,
 	})
 
