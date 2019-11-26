@@ -1,5 +1,6 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
 type WinStackedDRGLayers UInt
 type WinStackedDRGNodeSize UInt
@@ -81,6 +82,44 @@ type WinStackedDRG struct {
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
     Curve                   EllipticCurve
     Cfg                     SDRCfg
+
+    Drg()                   DRG
+    Expander()              ExpanderGraph
+    Seal(
+        sid         sector.SectorID
+        data        Bytes
+        randomness  sector.SealRandomness
+    ) SealSetupArtifacts
+    CreateSealProof(
+        challengeSeed  sector.InteractiveSealRandomness
+        aux            sector.ProofAuxTmp
+    ) sector.SealProof
+    CreatePrivateSealProof(
+        randomness  sector.InteractiveSealRandomness
+        aux         sector.ProofAuxTmp
+    ) PrivateOfflineProof
+
+    CreateOfflineCircuitProof(
+        challengeProofs  [OfflineWindowChallengeProof]
+        aux              sector.ProofAuxTmp
+    ) sector.SealProof
+    VerifyPrivateSealProof(
+        privateProof  [OfflineWindowChallengeProof]
+        sealSeeds     [sector.SealSeed]
+        randomness    sector.InteractiveSealRandomness
+        commD         Commitment
+        commR         sector.SealedSectorCID
+    ) bool
+    VerifySeal(sv sector.SealVerifyInfo) bool
+
+    GeneratePoStCandidates(
+        challengeSeed    sector.PoStRandomness
+        eligibleSectors  [sector.SectorNumber]
+        candidateCount   int
+        sectorStore      sectorIndex.SectorStore
+    ) [sector.ChallengeTicket]
+    GeneratePoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    VerifyPoSt(sv sector.PoStVerifyInfo) bool
 }
 
 type SDRCfg struct {
@@ -141,4 +180,16 @@ type Feistel struct {
     Rounds        ChungExpanderPermutationFeistelRounds
     HashFunction  ChungExpanderPermutationFeistelHashFunction
     Permute(size UInt, n UInt) UInt
+}
+
+type MerkleTree struct {
+    ProveInclusion(challenge UInt) InclusionProof
+}
+
+// TODO: Needs to be generic over hash.
+type InclusionProof struct {
+    Leaf()       Bytes
+    LeafIndex()  UInt
+    Root()       Commitment
+    Verify(root Bytes, challenge UInt) bool
 }
