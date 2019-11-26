@@ -30,7 +30,9 @@ type StoragePowerActorState struct {
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount
-    _sampleMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) [addr.Address]
+     _sampleMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) [addr.Address]
+    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
+    _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry
 }
 
 type StoragePowerActorCode struct {
@@ -54,7 +56,12 @@ type StoragePowerActorCode struct {
     EnsurePledgeCollateralSatisfied(rt Runtime) bool
 
     ProcessPowerReport(rt Runtime, report PowerReport)
-    SlashPledgeForStorageFaults(rt Runtime, faultType sector.StorageFaultType)
+    SlashPledgeForStorageFaults(
+        rt             Runtime
+        affectedPower  block.StoragePower
+        faultType      sector.StorageFaultType
+    )
+
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
         rt         Runtime

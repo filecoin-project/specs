@@ -180,12 +180,7 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) In
 
 	h, st := a.State(rt)
 
-	powerEntry, found := st.PowerTable()[minerID]
-
-	if !found {
-		rt.Abort("miner not found.")
-	}
-
+	powerEntry := st._safeGetPowerEntry(rt, minerID)
 	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
 
 	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
@@ -200,19 +195,29 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) In
 	return rt.ErrorReturn(exitcode.InsufficientPledgeCollateral)
 }
 
-// @param fault report
 // slash pledge collateral for Declared, Detected and Terminated faults
-func (a *StoragePowerActorCode_I) SlashPledgeForStorageFaults(rt Runtime, faultType sector.StorageFaultType) {
+func (a *StoragePowerActorCode_I) SlashPledgeForStorageFaults(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
 
-	// var msgSender addr.Address // TODO replace this
+	var msgSender addr.Address // TODO replace this
+
+	// placeholder values
+	const unitDeclaredFaultSlash = 1    // placeholder
+	const unitDetectedFaultSlash = 5    // placeholder
+	const unitTerminatedFaultSlash = 10 // placeholder
 
 	h, st := a.State(rt)
 
-	// declaredFaultSlash := report.GetDeclaredFaultSlash()
-	// detectedFaultSlash := report.GetDetectedFaultSlash()
-	// terminatedFaultSlash := report.GetTerminatedFaultSlash()
-
-	// st._slashPledgeCollateral(rt, msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
+	switch faultType {
+	case sector.DeclaredFault:
+		amountToSlash := actor.TokenAmount(unitDeclaredFaultSlash * affectedPower)
+		st._slashPledgeCollateral(rt, msgSender, amountToSlash)
+	case sector.DetectedFault:
+		amountToSlash := actor.TokenAmount(unitDetectedFaultSlash * affectedPower)
+		st._slashPledgeCollateral(rt, msgSender, amountToSlash)
+	case sector.TerminatedFault:
+		amountToSlash := actor.TokenAmount(unitTerminatedFaultSlash * affectedPower)
+		st._slashPledgeCollateral(rt, msgSender, amountToSlash)
+	}
 
 	UpdateRelease(rt, h, st)
 }
@@ -226,12 +231,7 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 
 	h, st := a.State(rt)
 
-	powerEntry, found := st.PowerTable()[minerID]
-
-	if !found {
-		rt.Abort("miner not found.")
-	}
-
+	powerEntry := st._safeGetPowerEntry(rt, minerID)
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
 	st.Impl().PowerTable_[minerID] = powerEntry

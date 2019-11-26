@@ -18,10 +18,7 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address a
 	// TODO: convert address to MinerActorID
 	var minerID addr.Address
 
-	currEntry, found := st.PowerTable()[minerID]
-	if !found {
-		rt.Abort("minerID not found.")
-	}
+	currEntry := st._safeGetPowerEntry(rt, minerID)
 
 	amountToSlash := amount
 
@@ -50,10 +47,7 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 	// TODO: convert address to MinerActorID
 	var minerID addr.Address
 
-	currEntry, found := st.PowerTable()[minerID]
-	if !found {
-		rt.Abort("minerID not found.")
-	}
+	currEntry := st._safeGetPowerEntry(rt, minerID)
 
 	if currEntry.Impl().AvailableBalance() < amount {
 		rt.Abort("insufficient available balance.")
@@ -73,11 +67,7 @@ func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address 
 	// TODO: convert address to MinerActorID
 	var minerID addr.Address
 
-	currEntry, found := st.PowerTable()[minerID]
-	if !found {
-		rt.Abort("minerID not found.")
-	}
-
+	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
 		rt.Abort("insufficient locked balance.")
 	}
@@ -129,4 +119,14 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 	}
 
 	return sampledMiners
+}
+
+func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry {
+	powerEntry, found := st.PowerTable()[minerID]
+
+	if !found {
+		rt.Abort("sm._safeGetPowerEntry: miner not found in power table.")
+	}
+
+	return powerEntry
 }

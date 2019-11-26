@@ -123,6 +123,30 @@ func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 
 }
 
+func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType sector.StorageFaultType) {
+	h, st := a.State(rt)
+
+	affectedPower := block.StoragePower(0)
+	for _, sectorNo := range sectorNumbers {
+
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		affectedPower += utilizationInfo.CurrUtilization()
+
+	}
+
+	Release(rt, h, st)
+
+	panic(affectedPower)
+	slashPledgeParams := make([]actor.MethodParam, 3)
+
+	rt.SendCatchingErrors(&msg.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: power.MethodSlashPledgeForStorageFaults,
+		Params_: slashPledgeParams,
+	})
+}
+
+// should always happen after _submitPowerReport to have the most up to date utilization info
 // reset NewTerminatedFaults
 func (a *StorageMinerActorCode_I) _slashCollateralForStorageFaults(
 	rt Runtime,
@@ -131,11 +155,18 @@ func (a *StorageMinerActorCode_I) _slashCollateralForStorageFaults(
 	newTerminatedFaults sector.CompactSectorSet, // diff value
 ) {
 
-	// TODO: Send(SPA, ProcessFaultReport(faultReport))
-
-	// only terminatedFault will be slashed
+	// only terminatedFault will result in collateral deal slashing
 	if len(newTerminatedFaults) > 0 {
 		a._slashDealsForStorageFault(rt, newTerminatedFaults.SectorsOn(), sector.TerminatedFault)
+		a._slashPledgeForStorageFault(rt, newTerminatedFaults.SectorsOn(), sector.TerminatedFault)
+	}
+
+	if len(newDetectedFaults) > 0 {
+		a._slashPledgeForStorageFault(rt, newDetectedFaults.SectorsOn(), sector.DetectedFault)
+	}
+
+	if len(newDeclaredFaults) > 0 {
+		a._slashPledgeForStorageFault(rt, newDeclaredFaults.SectorsOn(), sector.DeclaredFault)
 	}
 
 	// reset terminated faults
@@ -187,6 +218,8 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 
 	Release(rt, h, st)
 
+	a._submitPowerReport(rt, lastPoStResponse)
+
 	// Note: NewDetectedFaults is now the sum of all
 	// previously active, committed, and recovering sectors minus expired ones
 	// and any previously Failing sectors that did not exceed MaxFaultCount
@@ -197,8 +230,6 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 		newDetectedFaults,
 		newTerminatedFaults,
 	)
-
-	a._submitPowerReport(rt, lastPoStResponse)
 
 	// end of challenge
 	// now that new power and faults are tracked move pointer of last challenge response up
@@ -287,14 +318,14 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
 	Release(rt, h, st)
 
+	a._submitPowerReport(rt, lastPoStResponse)
+
 	a._slashCollateralForStorageFaults(
 		rt,
 		sector.CompactSectorSet(make([]byte, 0)), // NewDeclaredFaults
 		sector.CompactSectorSet(make([]byte, 0)), // NewDetectedFaults
 		newTerminatedFaults,
 	)
-
-	a._submitPowerReport(rt, lastPoStResponse)
 
 	// Ensure pledge collateral satisfied
 	// otherwise, abort _onSuccessfulPoSt
@@ -533,14 +564,14 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 	UpdateRelease(rt, h, st)
 
+	a._submitPowerReport(rt, lastPoStResponse)
+
 	a._slashCollateralForStorageFaults(
 		rt,
 		faultSet,                                 // DeclaredFaults
 		sector.CompactSectorSet(make([]byte, 0)), // DetectedFaults
 		sector.CompactSectorSet(make([]byte, 0)), // TerminatedFault
 	)
-
-	a._submitPowerReport(rt, lastPoStResponse)
 
 	return rt.SuccessReturn()
 }

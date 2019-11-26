@@ -6,7 +6,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 // ProveCommitSector needs to be submitted within MAX_PROVE_COMMIT_SECTOR_EPOCH after PreCommit
 const MAX_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(3)
 
-type StorageFaultType = int
+type StorageFaultType int
 
 const (
 	DeclaredFault   StorageFaultType = 0
