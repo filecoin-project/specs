@@ -11,6 +11,7 @@ Rig:
 Utils:
   b_in_gb = (1024 * 1024 * 1024)
   secs_in_month = (24 * 30 * 60 * 60)
+  cid_size = 32 + 1 + 1 + 1
 
 ProofOfSpacetime:
   post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
@@ -49,8 +50,38 @@ ProofOfReplication:
     windows = sector_size / window_size
     window_nodes = nodes / windows
 
+  Time:
+    porep_time = porep_proof_gen + porep_commit_time + encoding_time
+    porep_time_parallel = porel_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
+
+  Commitment:
+    commit_size = cid_size
+    window_comm_tree_time = merkle_tree_hash_time * window_nodes
+    window_comm_leaves_time = leaf_hash_time * windows
+    commr_size = commit_size
+    commd_size = commit_size
+    commrlast_size = commit_size
+
+    seal_commitment_size = commd_size + commr_size
+    // seal_commitment_time = commr_time
+
+    commd_time = merkle_tree_datahash_time * nodes
+
+    // TODO commr might be twice depending on CommQ
+    porep_commit_time = commr_time + commc_time
+    porep_commit_time_mins = porep_commit_time / 60
+
+    CommR (VectorR):
+      commr_time = merkle_tree_hash_time * nodes
+
+    CommR (ColumnR):
+      commr_time = window_comm_tree_time + window_comm_leaves_time 
+
+    CommC:
+      commc_tree_time = (window_comm_tree_time + window_comm_leaves_time) * drg_layers 
+
   Encoding:
-    encoding_window_time = (window_nodes * graph_parents) * hashing_time * drg_layers
+    encoding_window_time = (window_nodes * graph_parents) * kdf_time * drg_layers
     encoding_time = encoding_window_time * windows
     decoding_time = encoding_window_time
 
