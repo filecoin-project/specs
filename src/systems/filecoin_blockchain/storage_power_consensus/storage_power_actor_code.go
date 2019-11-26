@@ -92,13 +92,14 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 
 	h, st := a.State(rt)
 
-	currEntry, found := st.PowerTable()[minerID]
-	if !found {
-		rt.Abort("minerID not found.")
+	ret := st._ensurePledgeCollateralSatisfied(rt)
+	if !ret {
+		rt.Abort("insufficient pledge collateral.")
 	}
 
+	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.AvailableBalance() < amount {
-		rt.Abort("insufficient balance.")
+		rt.Abort("insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -175,28 +176,19 @@ func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
 
 func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) InvocOutput {
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
-
 	h, st := a.State(rt)
-
-	powerEntry := st._safeGetPowerEntry(rt, minerID)
-	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
-
-	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
-		return rt.SuccessReturn()
-	} else if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
-		st._lockPledgeCollateral(rt, minerID, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
-		return rt.SuccessReturn()
-	}
-
+	ret := st._ensurePledgeCollateralSatisfied(rt)
 	UpdateRelease(rt, h, st)
 
-	return rt.ErrorReturn(exitcode.InsufficientPledgeCollateral)
+	if !ret {
+		return rt.ErrorReturn(exitcode.InsufficientPledgeCollateral)
+	}
+
+	return rt.SuccessReturn()
 }
 
 // slash pledge collateral for Declared, Detected and Terminated faults
-func (a *StoragePowerActorCode_I) SlashPledgeForStorageFaults(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
+func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
 
 	var msgSender addr.Address // TODO replace this
 

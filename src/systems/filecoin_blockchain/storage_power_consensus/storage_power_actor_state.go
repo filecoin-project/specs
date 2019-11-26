@@ -129,3 +129,21 @@ func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.
 
 	return powerEntry
 }
+
+func (st *StoragePowerActorState_I) _ensurePledgeCollateralSatisfied(rt Runtime) bool {
+
+	// TODO: convert msgSender to MinerActorID
+	var minerID addr.Address
+
+	powerEntry := st._safeGetPowerEntry(rt, minerID)
+	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
+
+	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
+		return true
+	} else if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
+		st._lockPledgeCollateral(rt, minerID, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
+		return true
+	}
+
+	return false
+}
