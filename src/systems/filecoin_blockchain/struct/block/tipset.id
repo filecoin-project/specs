@@ -11,7 +11,6 @@ type Tipset struct {
     Weight             ChainWeight    @(cached)
     Epoch              ChainEpoch     @(cached)
 
-    ValidateSyntax()   bool           @(cached)
     LatestTimestamp()  clock.Time     @(cached)
     MinTicket()        Ticket         @(cached)
 }
