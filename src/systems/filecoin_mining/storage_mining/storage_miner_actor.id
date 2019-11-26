@@ -138,10 +138,10 @@ type StorageMinerActorCode struct {
         detected    sector.CompactSectorSet
         terminated  sector.CompactSectorSet
     )
-    _slashDealsFromFaultReport(
+    _slashDealsForStorageFault(
         rt             Runtime
         sectorNumbers  [sector.SectorNumber]
-        action         deal.StorageDealSlashAction
+        faultType      deal.StorageFaultType
     )
 
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)

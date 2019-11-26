@@ -191,7 +191,7 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 
 }
 
-func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.DealID, slashAction deal.StorageDealSlashAction) {
+func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.DealID, faultType deal.StorageFaultType) {
 
 	TODO() // only call by StorageMinerActor
 
@@ -199,9 +199,9 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.D
 
 	// only terminated fault will result in slashing of deal collateral
 
-	switch slashAction {
-	case deal.SlashTerminatedFaults:
-		st._slashTerminatedFaults(rt, dealIDs)
+	switch faultType {
+	case deal.TerminatedFault:
+		st._slashTerminatedFault(rt, dealIDs)
 	default:
 		rt.Abort("sma.ProcessDealSlash: invalid action type")
 	}

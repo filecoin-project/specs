@@ -54,7 +54,7 @@ type StorageMarketActorState struct {
         newPaymentEpoch  block.ChainEpoch
     ) actor.TokenAmount
 
-    _slashTerminatedFaults(rt Runtime, dealIDs [deal.DealID])
+    _slashTerminatedFault(rt Runtime, dealIDs [deal.DealID])
     _terminateDeal(rt Runtime, dealID deal.DealID)
     _slashDealCollateral(
         rt      Runtime
@@ -96,9 +96,9 @@ type StorageMarketActorCode struct {
     // call by StorageMinerActor
     // slash deal collateral depending on the faults (only TerminatedFault)
     ProcessDealSlash(
-        rt           Runtime
-        dealIDs      [deal.DealID]
-        slashAction  deal.StorageDealSlashAction
+        rt         Runtime
+        dealIDs    [deal.DealID]
+        faultType  deal.StorageFaultType
     )
 
     // batch process storage deal payment

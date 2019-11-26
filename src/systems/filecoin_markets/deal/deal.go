@@ -44,10 +44,12 @@ func (p *StorageDealProposal_I) CID() ProposalCID {
 	return cid
 }
 
-type StorageDealSlashAction = int
+type StorageFaultType = int
 
 const (
-	SlashTerminatedFaults StorageDealSlashAction = 0
+	DeclaredFault   StorageFaultType = 0
+	DetectedFault   StorageFaultType = 1
+	TerminatedFault StorageFaultType = 2
 )
 
 func (amt *DealExpirationAMT_I) Size() int {

@@ -100,6 +100,21 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
+func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType deal.StorageFaultType) {
+
+	h, st := a.State(rt)
+
+	dealIDs := make([]deal.DealID, 0)
+
+	for _, sectorNo := range sectorNumbers {
+
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
+		dealIDs = append(dealIDs, activeDealIDs...)
+
+	}
+}
+
 // Called by the cron actor at every tick.
 func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 	a.CheckSurprisePoStSubmissionHappened(rt)
@@ -112,7 +127,6 @@ func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
-<<<<<<< HEAD
 	// we can return if miner has not yet been challenged
 	if !a._isChallenged(rt) {
 		// Miner gets out of a challenge when submit a successful PoSt
@@ -126,37 +140,7 @@ func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime
 
 		// oh no -- we missed it. rekt
 		a._onMissedSurprisePoSt(rt)
-=======
-	// serialize this in param
-	_ = &power.PowerReport_I{
-		ActivePower_:   activePower,
-		InactivePower_: inactivePower,
-	}
 
-	// TODO: serialization helper
-	processPowerReportParam := make([]actor.MethodParam, 1)
-	processDealExpirationParam := make([]actor.MethodParam, len(newExpiredDealIDs))
-
-	Release(rt, h, st)
-
-	// this will go through even if miners do not have the right amount of pledge collateral
-	// when _submitPowerReport is called in DeclareFaults and _onMissedSurprisePoSt for power slashing
-	// however in _onSuccessfulPoSt EnsurePledgeCollateralSatsified will be called
-	// to ensure that miners have the required pledge collateral
-	// Note: there is no power update in RecoverFaults and hence no EnsurePledgeCollatera or _submitPowerReport
-	rt.SendCatchingErrors(&msg.InvocInput_I{
-		To_:     addr.StoragePowerActorAddr,
-		Method_: power.MethodProcessPowerReport,
-		Params_: processPowerReportParam,
-	})
-
-	if len(newExpiredDealIDs) > 0 {
-		rt.SendCatchingErrors(&msg.InvocInput_I{
-			To_:     addr.StorageMarketActorAddr,
-			Method_: storage_market.MethodProcessDealExpiration,
-			Params_: processDealExpirationParam,
-		})
->>>>>>> ensure pledge collateral
 	}
 
 	return rt.SuccessReturn()
@@ -399,21 +383,40 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	activePower := st._getActivePower(rt)
 	inactivePower := st._getInactivePower(rt)
 
-	powerReport := &spc.PowerReport_I{
+	// serialize this in param
+	_ = &power.PowerReport_I{
 		ActivePower_:   activePower,
 		InactivePower_: inactivePower,
 	}
 
+	// TODO: serialization helper
+	processPowerReportParam := make([]actor.MethodParam, 1)
+	processDealExpirationParam := make([]actor.MethodParam, len(newExpiredDealIDs))
+
 	Release(rt, h, st)
 
-	rt.Abort("TODO") // TODO: Send(SPA, ProcessPowerReport(powerReport))
-	panic(powerReport)
+	// this will go through even if miners do not have the right amount of pledge collateral
+	// when _submitPowerReport is called in DeclareFaults and _onMissedSurprisePoSt for power slashing
+	// however in _onSuccessfulPoSt EnsurePledgeCollateralSatsified will be called
+	// to ensure that miners have the required pledge collateral
+	// Note: there is no power update in RecoverFaults and hence no EnsurePledgeCollatera or _submitPowerReport
+	rt.SendCatchingErrors(&msg.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: power.MethodProcessPowerReport,
+		Params_: processPowerReportParam,
+	})
 
 	if len(newExpiredDealIDs) > 0 {
-		// Send(StorageMarketActor, ProcessDealExpiration)
+		rt.SendCatchingErrors(&msg.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: storage_market.MethodProcessDealExpiration,
+			Params_: processDealExpirationParam,
+		})
 	}
 
 }
+
+
 
 func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 
