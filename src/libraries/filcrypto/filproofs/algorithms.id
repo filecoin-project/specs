@@ -120,6 +120,15 @@ type WinStackedDRG struct {
     ) [sector.ChallengeTicket]
     GenerateElectionPoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
     VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
+
+    GenerateSurprisePoStCandidates(
+        challengeSeed    sector.PoStRandomness
+        eligibleSectors  [sector.SectorNumber]
+        candidateCount   int
+        sectorStore      sectorIndex.SectorStore
+    ) [sector.ChallengeTicket]
+    GenerateSurprisePoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
 }
 
 type SDRCfg struct {

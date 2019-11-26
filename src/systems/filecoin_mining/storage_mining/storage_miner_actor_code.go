@@ -284,17 +284,17 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission 
 	postCfg := sector.PoStCfg_I{
 		SectorSize_:  sectorSize,
 		WindowCount_: info.WindowCount(),
-		Partitions_:  info.ElectionPoStPartitions(),
+		Partitions_:  info.SurprisePoStPartitions(),
 	}
 
 	var pvInfo sector.PoStVerifyInfo_I
 
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
 
 	// Verify correct PoSt Submission
 	// May choose to only submit once verified (and so remove this)
 	// isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
-	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+	isPoStVerified := sdr.VerifySurprisePoSt(&pvInfo)
 	if !isPoStVerified {
 		// no state transition, just error out and miner should submitSurprisePoSt again
 		// TODO: determine proper error here and error-handling machinery
@@ -330,6 +330,30 @@ func (a *StorageMinerActorCode_I) SubmitElectionPoSt(rt Runtime, postSubmission 
 	// Update last challenge time as this one, to reset surprise post clock
 	h, st := a.State(rt)
 	st.ChallengeStatus().Impl().OnNewChallenge(rt.CurrEpoch())
+
+	info := st.Info()
+	sectorSize := info.SectorSize()
+
+	postCfg := sector.PoStCfg_I{
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.ElectionPoStPartitions(),
+	}
+
+	var pvInfo sector.PoStVerifyInfo_I
+
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
+
+	// Verify correct PoSt Submission
+	// May choose to only submit once verified (and so remove this)
+	// isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
+	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+	if !isPoStVerified {
+		// no state transition, just error out and miner should submitSurprisePoSt again
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("TODO")
+	}
+
 	UpdateRelease(rt, h, st)
 
 	// the following will update last challenge response time
