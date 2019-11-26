@@ -41,7 +41,7 @@ func (sms *StorageMiningSubsystem_I) HandleStorageDeal(deal deal.StorageDeal) {
 	// })
 }
 
-func (sms *StorageMiningSubsystem_I) generateOwnerAddress(workerPubKey filcrypto.PublicKey) addr.Address {
+func (sms *StorageMiningSubsystem_I) _generateOwnerAddress(workerPubKey filcrypto.PublicKey) addr.Address {
 	panic("TODO")
 }
 
@@ -51,25 +51,25 @@ func (sms *StorageMiningSubsystem_I) CommitSectorError() deal.StorageDeal {
 
 // triggered by new block reception and tipset assembly
 func (sms *StorageMiningSubsystem_I) OnNewBestChain() {
-	sms.tryLeaderElection()
+	sms._tryLeaderElection()
 }
 
 // triggered by wall clock
 func (sms *StorageMiningSubsystem_I) OnNewRound() {
-	sms.tryLeaderElection()
+	sms._tryLeaderElection()
 }
 
-func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
+func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 
 	// Draw randomness from chain for ElectionPoSt and Ticket Generation
 	// Randomness for ticket generation in block production
-	randomness1 := sms.consensus().GetTicketProductionSeed(sms.blockchain().BestChain(), sms.keyStore().OwnerAddress(), sms.blockchain().LatestEpoch())
+	randomness1 := sms._consensus().GetTicketProductionSeed(sms._blockchain().BestChain(), sms._keyStore().OwnerAddress(), sms._blockchain().LatestEpoch())
 
 	// Randomness for ElectionPoSt
-	randomnessK := sms.consensus().GetPoStChallenge(sms.blockchain().BestChain(), sms.keyStore().OwnerAddress(), sms.blockchain().LatestEpoch())
+	randomnessK := sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), sms._keyStore().OwnerAddress(), sms._blockchain().LatestEpoch())
 
 	// TODO: @why @jz align on this
-	for _, worker := range sms.keyStore().Workers() {
+	for _, worker := range sms._keyStore().Workers() {
 
 		var input []byte
 		input = append(input, spc.VRFPersonalizationPoSt)
@@ -89,7 +89,7 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 
 		for _, ct := range challengeTickets {
 			// TODO align on worker address
-			if sms.consensus().IsWinningChallengeTicket(ct) {
+			if sms._consensus().IsWinningChallengeTicket(ct) {
 				winningCTs = append(winningCTs, ct)
 			}
 		}
@@ -100,9 +100,9 @@ func (sms *StorageMiningSubsystem_I) tryLeaderElection() {
 
 		newTicket := sms.PrepareNewTicket(randomness1, worker.VRFKeyPair())
 		postProof := sms.StorageProving().Impl().GeneratePoStProof(postRandomness, winningCTs)
-		chainHead := sms.blockchain().BestChain().HeadTipset()
+		chainHead := sms._blockchain().BestChain().HeadTipset()
 
-		sms.blockProducer().GenerateBlock(postProof, winningCTs, newTicket, chainHead, worker.Address())
+		sms._blockProducer().GenerateBlock(postProof, winningCTs, newTicket, chainHead, worker.Address())
 
 	}
 }
@@ -124,4 +124,44 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	}
 
 	return newTicket
+}
+
+func (sms *StorageMiningSubsystem_I) VerifyPoSt(proof sector.PoStProof, partialTickets []sector.ChallengeTicket) {
+
+	// if proof.Type == sector.PoStType_ElectionPoSt {
+
+	// } else if proof.Type == sector.PoStType_SurprisePoSt {
+
+	// }
+	// TODO HENRI
+	panic("TODO")
+}
+
+// Should probably return an error eventually
+func (a *StorageMinerActorCode_I) _verifySurprisePoSt(originBlock block.BlockHeader, msgFrom addr.Address, proof sector.PoStProof, partialTickets []sector.ChallengeTicket) bool {
+	// 0. Fetch appropriate miner state using block
+	// state := originBlock.StateTree
+	// fromMiner := state.StorageMinerState(msgFrom)
+
+	// // 1. Check that the miner in question is currently being challenged
+	// if !fromMiner.ChallengeStatus.IsChallenged() {
+	// 	return false
+	// }
+
+	// 1. The Surprise proof must be submitted after the postRandomness for this proving
+	// period is on chain
+	// if rt.ChainEpoch < sm.ProvingPeriodEnd - challengeTime {
+	//   rt.Abort("too early")
+	// }
+
+	// 2. A proof must be a valid snark proof with the correct public inputs
+	// 2.1 Get randomness from the chain at the right epoch
+	// postRandomness := rt.Randomness(postSubmission.Epoch, 0)
+	// 2.2 Generate the set of challenges
+	// challenges := GenerateChallengesForPoSt(r, keys(sm.Sectors))
+	// 2.3 Verify the PoSt Proof
+	// verifyPoSt(challenges, TODO)
+
+	// rt.Abort("TODO") // TODO: finish
+	return false
 }

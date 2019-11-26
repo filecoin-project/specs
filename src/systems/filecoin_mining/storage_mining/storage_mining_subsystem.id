@@ -11,6 +11,7 @@ import storage_proving "github.com/filecoin-project/specs/systems/filecoin_minin
 import key_store "github.com/filecoin-project/specs/systems/filecoin_nodes/key_store"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StorageMiningSubsystem struct {
     FilecoinNode       node_base.FilecoinNode
@@ -26,23 +27,23 @@ type StorageMiningSubsystem struct {
     StorageProving     storage_proving.StorageProvingSubsystem
 
     // Need access to block producer in order to publish blocks
-    blockProducer      blockproducer.BlockProducer
+    _blockProducer      blockproducer.BlockProducer
 
     // Need access to SPC in order to mine a block
-    consensus          spc.StoragePowerConsensusSubsystem
+    _consensus          spc.StoragePowerConsensusSubsystem
 
     // Need access to the blockchain system in order to query for things in the chain
-    blockchain         blockchain.BlockchainSubsystem
+    _blockchain         blockchain.BlockchainSubsystem
 
     // Need access to the key store in order to generate tickets and election proofs
-    keyStore           key_store.KeyStore
+    _keyStore           key_store.KeyStore
 
     // TODO: why are these here? remove?
     StartMining()
     StopMining()
 
     // call by StorageMiningSubsystem itself to create miner
-    createMiner(
+    CreateMiner(
         ownerPubKey   filcrypto.PublicKey
         workerPubKey  filcrypto.PublicKey
         pledgeAmt     actor.TokenAmount
@@ -72,7 +73,9 @@ type StorageMiningSubsystem struct {
     // TODO: define clock better
     OnNewRound()
 
-    tryLeaderElection()
+    _tryLeaderElection()
 
-    submitPoStMessage(postSubmission poster.PoStSubmission) error
+    VerifyPoSt(proof sector.PoStProof, partialTickets [sector.ChallengeTicket])
+
+    _submitPoStMessage(postSubmission poster.PoStSubmission) error
 }

@@ -28,6 +28,5 @@ type StorageProvingSubsystem struct {
     VerifyPoStProof(
         challengeSeed     sector.PoStRandomness
         proof             [sector.PoStProof]
-        postType          PoStType
     ) bool
 }

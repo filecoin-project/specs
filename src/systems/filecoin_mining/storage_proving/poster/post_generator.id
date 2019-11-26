@@ -31,6 +31,5 @@ type PoStGenerator struct {
         postCfg          sector.PoStCfg
         Proof            sector.PoStProof
         challengeSeed    sector.PoStRandomness
-        postType         sector.PoStType
     ) bool
 }

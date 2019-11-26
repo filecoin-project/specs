@@ -41,9 +41,16 @@ type SectorOnChainInfo struct {
 
 type ChallengeStatus struct {
     LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
-    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon _onSuccessfulPoSt and _onMissedPoSt
+    _lastPoStFailureEpoch        block.ChainEpoch  // get updated upon _onMissedSurprisePoSt
+    _lastPoStSuccessEpoch        block.ChainEpoch  // get updated by successful Election or Suprise PoSt submission
+
+    OnNewChallenge(currEpoch block.ChainEpoch)
+    LastPoStResponseEpoch() block.ChainEpoch
+    OnPoStSuccess(currEpoch block.ChainEpoch)
+    OnPoStFailure(currEpoch block.ChainEpoch)
 
     IsChallenged()         bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+    CanBeElected()         bool 
     ShouldChallenge(
         currEpoch           block.ChainEpoch
         minChallengePeriod  block.ChainEpoch
@@ -78,6 +85,7 @@ type StorageMinerActorState struct {
 
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     _isChallenged(rt Runtime)  bool
+    _canBeElected(rt Runtime)  bool
     _shouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
@@ -91,7 +99,7 @@ type StorageMinerActorState struct {
     _updateExpireSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
-    _updateSectorUtilization(rt Runtime, lastPoSt block.ChainEpoch) [deal.DealID]
+    _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) [deal.DealID]
     _initializeUtilizationInfo(rt Runtime, deals [deal.OnChainDeal]) sector.SectorUtilizationInfo
 
     _getActivePower(rt Runtime) block.StoragePower
@@ -120,7 +128,7 @@ type StorageMinerActorCode struct {
     // Send ProcessBatchDealPayment to StorageMarketActor
     CreditSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber)
 
-    _onMissedPoSt(rt Runtime)
+    _onMissedSurprisePoSt(rt Runtime)
     _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission)
 
     _submitFaultReport(
