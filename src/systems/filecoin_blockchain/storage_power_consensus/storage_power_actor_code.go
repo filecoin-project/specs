@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	MethodProcessPowerReport        = actor.MethodPlaceholder
-	MethodProcessFaultReport        = actor.MethodPlaceholder
-	EnsurePledgeCollateralSatisfied = actor.MethodPlaceholder
+	MethodProcessPowerReport          = actor.MethodPlaceholder
+	MethodSlashPledgeForStorageFaults = actor.MethodPlaceholder
+	EnsurePledgeCollateralSatisfied   = actor.MethodPlaceholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -202,17 +202,17 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) In
 
 // @param fault report
 // slash pledge collateral for Declared, Detected and Terminated faults
-func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report sector.FaultReport) {
+func (a *StoragePowerActorCode_I) SlashPledgeForStorageFaults(rt Runtime, faultType sector.StorageFaultType) {
 
-	var msgSender addr.Address // TODO replace this
+	// var msgSender addr.Address // TODO replace this
 
 	h, st := a.State(rt)
 
-	declaredFaultSlash := report.GetDeclaredFaultSlash()
-	detectedFaultSlash := report.GetDetectedFaultSlash()
-	terminatedFaultSlash := report.GetTerminatedFaultSlash()
+	// declaredFaultSlash := report.GetDeclaredFaultSlash()
+	// detectedFaultSlash := report.GetDetectedFaultSlash()
+	// terminatedFaultSlash := report.GetTerminatedFaultSlash()
 
-	st._slashPledgeCollateral(rt, msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
+	// st._slashPledgeCollateral(rt, msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
 
 	UpdateRelease(rt, h, st)
 }

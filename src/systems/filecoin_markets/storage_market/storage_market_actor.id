@@ -98,7 +98,7 @@ type StorageMarketActorCode struct {
     ProcessDealSlash(
         rt         Runtime
         dealIDs    [deal.DealID]
-        faultType  deal.StorageFaultType
+        faultType  sector.StorageFaultType
     )
 
     // batch process storage deal payment

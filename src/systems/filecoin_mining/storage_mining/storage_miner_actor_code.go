@@ -100,7 +100,7 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType deal.StorageFaultType) {
+func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType sector.StorageFaultType) {
 
 	h, st := a.State(rt)
 
@@ -120,6 +120,28 @@ func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 	a.CheckSurprisePoStSubmissionHappened(rt)
 
 	return rt.SuccessReturn()
+
+}
+
+// reset NewTerminatedFaults
+func (a *StorageMinerActorCode_I) _slashCollateralForStorageFaults(
+	rt Runtime,
+	newDeclaredFaults sector.CompactSectorSet, // diff value
+	newDetectedFaults sector.CompactSectorSet, // diff value
+	newTerminatedFaults sector.CompactSectorSet, // diff value
+) {
+
+	// TODO: Send(SPA, ProcessFaultReport(faultReport))
+
+	// only terminatedFault will be slashed
+	if len(newTerminatedFaults) > 0 {
+		a._slashDealsForStorageFault(rt, newTerminatedFaults.SectorsOn(), sector.TerminatedFault)
+	}
+
+	// reset terminated faults
+	h, st := a.State(rt)
+	st.SectorTable().Impl().TerminatedFaults_ = sector.CompactSectorSet(make([]byte, 0))
+	UpdateRelease(rt, h, st)
 }
 
 // If the miner fails to respond to a surprise PoSt,
@@ -169,7 +191,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	// previously active, committed, and recovering sectors minus expired ones
 	// and any previously Failing sectors that did not exceed MaxFaultCount
 	// Note: previously declared faults is now treated as part of detected faults
-	a._submitFaultReport(
+	a._slashCollateralForStorageFaults(
 		rt,
 		sector.CompactSectorSet(make([]byte, 0)), // NewDeclaredFaults
 		newDetectedFaults,
@@ -265,7 +287,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
 	Release(rt, h, st)
 
-	a._submitFaultReport(
+	a._slashCollateralForStorageFaults(
 		rt,
 		sector.CompactSectorSet(make([]byte, 0)), // NewDeclaredFaults
 		sector.CompactSectorSet(make([]byte, 0)), // NewDetectedFaults
@@ -511,7 +533,7 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 	UpdateRelease(rt, h, st)
 
-	a._submitFaultReport(
+	a._slashCollateralForStorageFaults(
 		rt,
 		faultSet,                                 // DeclaredFaults
 		sector.CompactSectorSet(make([]byte, 0)), // DetectedFaults

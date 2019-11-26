@@ -132,16 +132,16 @@ type StorageMinerActorCode struct {
     _onMissedSurprisePoSt(rt Runtime)
     _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission)
 
-    _submitFaultReport(
+    _slashCollateralForStorageFaults(
         rt          Runtime
-        declared    sector.CompactSectorSet
-        detected    sector.CompactSectorSet
-        terminated  sector.CompactSectorSet
+        declared    sector.CompactSectorSet  // diff value
+        detected    sector.CompactSectorSet  // diff value
+        terminated  sector.CompactSectorSet  // diff value
     )
     _slashDealsForStorageFault(
         rt             Runtime
         sectorNumbers  [sector.SectorNumber]
-        faultType      deal.StorageFaultType
+        faultType      sector.StorageFaultType
     )
 
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
