@@ -28,8 +28,8 @@ type PoStGenerator struct {
     ) sector.PoStProof
 
     VerifyPoStProof(
-        postCfg          sector.PoStCfg
-        Proof            sector.PoStProof
-        challengeSeed    sector.PoStRandomness
+        postCfg        sector.PoStCfg
+        Proof          sector.PoStProof
+        challengeSeed  sector.PoStRandomness
     ) bool
 }

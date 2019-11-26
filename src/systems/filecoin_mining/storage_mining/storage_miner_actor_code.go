@@ -299,11 +299,30 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
 	// 3. Get appropriate randomness
 	surpriseRand := rt.Randomness(st.ChallengeStatus().LastChallengeEpoch(), 0)
 	panic(surpriseRand)
+
 	// 4. Get public inputs
-	// TODO HENRI
+	info := st.Info()
+	sectorSize := info.SectorSize()
+
+	postCfg := sector.PoStCfg_I{
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.SurprisePoStPartitions(),
+	}
+
+	var pvInfo sector.PoStVerifyInfo_I
+
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
 
 	// 5. Verify the PoSt Proof
-	// TODO PORCU interface
+	// Verify correct PoSt Submission
+	// May choose to only submit once verified (and so remove this)
+	// isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
+	isPoStVerified := sdr.VerifySurprisePoSt(&pvInfo)
+	if !isPoStVerified {
+		// no state transition, just error out and miner should submitSurprisePoSt again
+		rt.Abort("Failed PoSt proof verification.")
+	}
 	return false
 }
 
@@ -363,6 +382,30 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, postSub
 	// Update last challenge time as this one, to reset surprise post clock
 	h, st := a.State(rt)
 	st.ChallengeStatus().Impl().OnNewChallenge(rt.CurrEpoch())
+
+	info := st.Info()
+	sectorSize := info.SectorSize()
+
+	postCfg := sector.PoStCfg_I{
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.ElectionPoStPartitions(),
+	}
+
+	var pvInfo sector.PoStVerifyInfo_I
+
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
+
+	// Verify correct PoSt Submission
+	// May choose to only submit once verified (and so remove this)
+	// isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
+	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+	if !isPoStVerified {
+		// no state transition, just error out and miner should submitSurprisePoSt again
+		// TODO: determine proper error here and error-handling machinery
+		rt.Abort("TODO")
+	}
+
 	UpdateRelease(rt, h, st)
 
 	// the following will update last challenge response time
@@ -590,9 +633,9 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 	unsealedCID, _ := filproofs.ComputeUnsealedSectorCIDFromPieceInfos(sectorSize, pieceInfos)
 
 	sealCfg := sector.SealCfg_I{
-		SectorSize_:     sectorSize,
-		SubsectorCount_: info.SubsectorCount(),
-		Partitions_:     info.Partitions(),
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.SealPartitions(),
 	}
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
@@ -609,7 +652,7 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 		UnsealedCID_:           unsealedCID,
 	}
 
-	sdr := filproofs.SDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SealCfg_: &sealCfg})
 	return sdr.VerifySeal(&svInfo)
 }
 

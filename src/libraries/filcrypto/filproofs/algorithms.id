@@ -1,12 +1,14 @@
 import file "github.com/filecoin-project/specs/systems/filecoin_files/file"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
-type StackedDRGLayers UInt
-type StackedDRGNodeSize UInt
-type StackedDRGNodes UInt
-type StackedDRGSubsectorCount UInt
-type StackedDRGPartitions UInt
-type StackedDRGChallenges UInt
+type WinStackedDRGLayers UInt
+type WinStackedDRGNodeSize UInt
+type WinStackedDRGNodes UInt
+type WinStackedDRGWindowCount UInt
+type WinStackedDRGPartitions UInt
+type WinStackedDRGChallenges UInt
+type WinStackedDRGWindowChallenges UInt
 type DRGDepth struct {}
 type DRGFraction struct {}
 type DRGDegree UInt
@@ -48,47 +50,85 @@ type SealSetupArtifacts struct {
     CommD              sector.Commitment
     CommR              sector.SealedSectorCID
     CommC              sector.Commitment
+    CommQ              sector.Commitment
     CommRLast          sector.Commitment
     CommDTreePaths     [file.Path]
     CommCTreePath      file.Path
+    CommQTreePath      file.Path
     CommRLastTreePath  file.Path
     Seeds              [sector.SealSeed]
     KeyLayers          [Bytes]
-    Replicas           [Bytes]
+    QLayer             Bytes  // This is what is stored on disk and allows fast/cheap retrieval. TODO: Maybe a better name, ideally still allowing CommQ.
+    Replica            Bytes  // This is what we challenge in PoSt. It will be regenerated just in time. Should probably be removed from here.
 }
 
 type EllipticCurve struct {
     FieldModulus &util.BigInt
 }
 
-type WindowedStackedDRG struct {
-    Inner  StackedDRG
-    Outer  StackedDRG
-}
-
-type StackedDRG struct {
-    Mode              StackedDRGMode
-    Layers            StackedDRGLayers
-    NodeSize          StackedDRGNodeSize
-    Nodes             StackedDRGNodes
-    SubsectorCount    StackedDRGSubsectorCount
-    Partitions        StackedDRGPartitions
-    Challenges        StackedDRGChallenges
-    Algorithm         struct {}
+type WinStackedDRG struct {
+    Layers                  WinStackedDRGLayers
+    NodeSize                WinStackedDRGNodeSize
+    Nodes                   WinStackedDRGNodes
+    WindowCount             WinStackedDRGWindowCount
+    Partitions              WinStackedDRGPartitions
+    Challenges              WinStackedDRGChallenges
+    WindowChallenges        WinStackedDRGWindowChallenges
+    Algorithm               struct {}
     DRGCfg
     ExpanderGraphCfg
+    WindowDRGCfg            DRGCfg
+    WindowExpanderGraphCfg  ExpanderGraphCfg
     // invariant: DRGCfg.Nodes == ExpanderGraphCfg.Nodes
-    Curve             EllipticCurve
-    Cfg               SDRCfg
-    SealCfg           sector.SealCfg
-    ElectionPoStCfg   sector.PoStCfg
-    SurprisePoStCfg   sector.PoStCfg
-}
+    Curve                   EllipticCurve
+    Cfg                     SDRCfg
 
-type StackedDRGMode enum {
-    Inner
-    Outer
-    Both
+    Drg()                   DRG
+    Expander()              ExpanderGraph
+    Seal(
+        sid         sector.SectorID
+        data        Bytes
+        randomness  sector.SealRandomness
+    ) SealSetupArtifacts
+    CreateSealProof(
+        challengeSeed  sector.InteractiveSealRandomness
+        aux            sector.ProofAuxTmp
+    ) sector.SealProof
+    CreatePrivateSealProof(
+        randomness  sector.InteractiveSealRandomness
+        aux         sector.ProofAuxTmp
+    ) PrivateOfflineProof
+
+    CreateOfflineCircuitProof(
+        challengeProofs  [OfflineWindowChallengeProof]
+        aux              sector.ProofAuxTmp
+    ) sector.SealProof
+    VerifyPrivateSealProof(
+        privateProof  [OfflineWindowChallengeProof]
+        sealSeeds     [sector.SealSeed]
+        randomness    sector.InteractiveSealRandomness
+        commD         Commitment
+        commR         sector.SealedSectorCID
+    ) bool
+    VerifySeal(sv sector.SealVerifyInfo) bool
+
+    GenerateElectionPoStCandidates(
+        challengeSeed    sector.PoStRandomness
+        eligibleSectors  [sector.SectorNumber]
+        candidateCount   int
+        sectorStore      sectorIndex.SectorStore
+    ) [sector.ChallengeTicket]
+    GenerateElectionPoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
+
+    GenerateSurprisePoStCandidates(
+        challengeSeed    sector.PoStRandomness
+        eligibleSectors  [sector.SectorNumber]
+        candidateCount   int
+        sectorStore      sectorIndex.SectorStore
+    ) [sector.ChallengeTicket]
+    GenerateSurprisePoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
 }
 
 type SDRCfg struct {
@@ -149,4 +189,16 @@ type Feistel struct {
     Rounds        ChungExpanderPermutationFeistelRounds
     HashFunction  ChungExpanderPermutationFeistelHashFunction
     Permute(size UInt, n UInt) UInt
+}
+
+type MerkleTree struct {
+    ProveInclusion(challenge UInt) InclusionProof
+}
+
+// TODO: Needs to be generic over hash.
+type InclusionProof struct {
+    Leaf()       Bytes
+    LeafIndex()  UInt
+    Root()       Commitment
+    Verify(root Bytes, challenge UInt) bool
 }

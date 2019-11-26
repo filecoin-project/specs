@@ -4,10 +4,10 @@ type PoStRandomness Bytes
 
 // Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
-    Type            PoStType
-    SectorSize      UInt
-    SubsectorCount  UInt
-    Partitions      UInt
+    Type         PoStType
+    SectorSize   UInt
+    WindowCount  UInt
+    Partitions   UInt
 }
 
 type PoStType enum {
@@ -16,10 +16,10 @@ type PoStType enum {
 }
 
 type PoStVerifyInfo struct {
-    Type                    PoStType
-    ChallengeTickets        [ChallengeTicket]
+    Type              PoStType
+    ChallengeTickets  [ChallengeTicket]
     PoStCfg
-    Randomness              PoStRandomness
+    Randomness        PoStRandomness
 }
 
 type OnChainPoStVerifyInfo struct {
@@ -33,14 +33,14 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type                PoStType
-    ChallengeTickets    [ChallengeTicket]
-    ProofBytes          Bytes
+    Type              PoStType
+    ChallengeTickets  [ChallengeTicket]
+    ProofBytes        Bytes
 }
 
 type ChallengeTicket struct {
-    PartialTicket   Bytes  // unhashed
-    PrivateProof    PrivatePoStProof
+    PartialTicket  Bytes  // unhashed
+    PrivateProof   PrivatePoStProof
     SectorID
 }
 

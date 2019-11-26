@@ -35,10 +35,10 @@ func (pg *PoStGenerator_I) GeneratePoStCandidates(postCfg sector.PoStCfg, challe
 		sectorNumbers = append(sectorNumbers, s.Number())
 	}
 
-	return sdr.GeneratePoStCandidates(challengeSeed, sectorNumbers, candidateCount, sectorStore)
+	return sdr.GenerateElectionPoStCandidates(challengeSeed, sectorNumbers, candidateCount, sectorStore)
 }
 
-func (pg *PoStGenerator_I) GeneratePoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
+func (pg *PoStGenerator_I) GenerateElectionPoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
 	sdr := makeStackedDRGForPoSt(postCfg)
 	var privateProofs []sector.PrivatePoStProof
 
@@ -46,10 +46,10 @@ func (pg *PoStGenerator_I) GeneratePoStProof(postCfg sector.PoStCfg, witness sec
 		privateProofs = append(privateProofs, candidate.PrivateProof())
 	}
 
-	return sdr.GeneratePoStProof(privateProofs)
+	return sdr.GenerateElectionPoStProof(privateProofs)
 }
 
-func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I) {
+func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG_I) {
 	var cfg filproofs.SDRCfg_I
 
 	switch postCfg.Type() {
@@ -63,5 +63,5 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.StackedDRG_I)
 		}
 	}
 
-	return filproofs.SDRParams(&cfg)
+	return filproofs.WinSDRParams(&cfg)
 }
