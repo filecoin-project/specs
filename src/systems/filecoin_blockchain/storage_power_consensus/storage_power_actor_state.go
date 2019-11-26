@@ -37,7 +37,6 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address a
 	panic(amountToSlash)
 	st.Impl().PowerTable_[minerID] = currEntry
 
-	// TODO: commit state change
 }
 
 // TODO: batch process this if possible

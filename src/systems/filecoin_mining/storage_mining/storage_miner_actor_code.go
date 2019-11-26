@@ -112,6 +112,7 @@ func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
+<<<<<<< HEAD
 	// we can return if miner has not yet been challenged
 	if !a._isChallenged(rt) {
 		// Miner gets out of a challenge when submit a successful PoSt
@@ -125,6 +126,37 @@ func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime
 
 		// oh no -- we missed it. rekt
 		a._onMissedSurprisePoSt(rt)
+=======
+	// serialize this in param
+	_ = &power.PowerReport_I{
+		ActivePower_:   activePower,
+		InactivePower_: inactivePower,
+	}
+
+	// TODO: serialization helper
+	processPowerReportParam := make([]actor.MethodParam, 1)
+	processDealExpirationParam := make([]actor.MethodParam, len(newExpiredDealIDs))
+
+	Release(rt, h, st)
+
+	// this will go through even if miners do not have the right amount of pledge collateral
+	// when _submitPowerReport is called in DeclareFaults and _onMissedSurprisePoSt for power slashing
+	// however in _onSuccessfulPoSt EnsurePledgeCollateralSatsified will be called
+	// to ensure that miners have the required pledge collateral
+	// Note: there is no power update in RecoverFaults and hence no EnsurePledgeCollatera or _submitPowerReport
+	rt.SendCatchingErrors(&msg.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: power.MethodProcessPowerReport,
+		Params_: processPowerReportParam,
+	})
+
+	if len(newExpiredDealIDs) > 0 {
+		rt.SendCatchingErrors(&msg.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: storage_market.MethodProcessDealExpiration,
+			Params_: processDealExpirationParam,
+		})
+>>>>>>> ensure pledge collateral
 	}
 
 	return rt.SuccessReturn()
@@ -258,8 +290,9 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 
 	a._submitPowerReport(rt, lastPoStResponse)
 
-	// TODO: check EnsurePledgeCollateralSatisfied
-	// pledgeCollateralSatisfied
+	// Ensure pledge collateral satisfied
+	// otherwise, abort _onSuccessfulPoSt
+	a._ensurePledgeCollateralSatisfied(rt)
 
 	// Now that all is done update pointer to last response
 	h, st = a.State(rt)
@@ -407,9 +440,8 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// but miner can RecoverFaults in recovery before challenge
+	// RecoverFaults is only called when miners are not challenged
 	if a._isChallenged(rt) {
-		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("cannot RecoverFaults when sm isChallenged")
 	}
 
@@ -429,8 +461,6 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 			// SendMessage(sma.PublishStorageDeals) or sma.ResumeStorageDeals?
 			// throw if miner cannot cover StorageDealCollateral
 
-			// Check if miners have sufficient pledgeCollateral
-
 			// copy over the same FaultCount
 			st.Sectors()[sectorNo].Impl().State_ = SectorRecovering(sectorState.State().FaultCount)
 			st.Impl().ProvingSet_.Add(sectorNo)
@@ -447,6 +477,8 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	}
 
 	UpdateRelease(rt, h, st)
+
+	// EnsureDealCollateral
 
 	return rt.SuccessReturn()
 }
@@ -513,7 +545,6 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	}
 
 	ret := receipt.ReturnValue()
-
 	pieceInfos := sector.PieceInfosFromBytes(ret)
 
 	// Unless we enforce a minimum padding amount, this totalPieceSize calculation can be removed.
@@ -634,9 +665,6 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		rt.Abort("Seal verification failed")
 	}
 
-	// TODO: check EnsurePledgeCollateralSatisfied
-	// pledgeCollateralSatisfied
-
 	_, utilizationFound := st.SectorUtilization()[onChainInfo.SectorNumber()]
 	if utilizationFound {
 		rt.Abort("sm.ProveCommitSector: sector number found in SectorUtilization")
@@ -693,6 +721,19 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	UpdateRelease(rt, h, st)
 
 	return rt.SuccessReturn()
+}
+
+func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
+	emptyParams := make([]actor.MethodParam, 0)
+	ret := rt.SendCatchingErrors(&msg.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: power.EnsurePledgeCollateralSatisfied,
+		Params_: emptyParams,
+	})
+
+	if ret.ExitCode() == exitcode.InsufficientPledgeCollateral {
+		rt.Abort("sma._onSuccessfulPoSt: insufficient pledge collateral.")
+	}
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {

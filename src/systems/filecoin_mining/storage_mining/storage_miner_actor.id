@@ -112,6 +112,7 @@ type StorageMinerActorState struct {
 }
 
 type StorageMinerActorCode struct {
+    _isChallenged(rt Runtime) bool
     NotifyOfSurprisePoStChallenge(rt Runtime)
 
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
@@ -127,13 +128,9 @@ type StorageMinerActorCode struct {
     DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
 
-    // get active deals and last challenge end epoch
-    // will fail if the sector is in Failing, Recovering, or Committed state or not found
-    // Send ProcessBatchDealPayment to StorageMarketActor
-    CreditSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber)
-
+    _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _onMissedSurprisePoSt(rt Runtime)
-    _onSuccessfulPoSt(rt Runtime)
+    _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission)
 
     _submitFaultReport(
         rt          Runtime
@@ -146,9 +143,10 @@ type StorageMinerActorCode struct {
         sectorNumbers  [sector.SectorNumber]
         action         deal.StorageDealSlashAction
     )
-    _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
 
+    _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
     _expirePreCommittedSectors(rt Runtime)
+    _ensurePledgeCollateralSatisfied(rt Runtime)
 }
 
 type MinerInfo struct {

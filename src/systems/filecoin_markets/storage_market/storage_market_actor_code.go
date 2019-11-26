@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
+	MethodGetUnsealedCIDForDealIDs = actor.MethodPlaceholder
+	MethodProcessDealExpiration    = actor.MethodPlaceholder
 )
 
 const LastPaymentEpochNone = 0

@@ -10,12 +10,14 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	util "github.com/filecoin-project/specs/util"
 )
 
 const (
-	Method_StoragePowerActor_ProcessPowerReport = actor.MethodPlaceholder
-	Method_StoragePowerActor_ProcessFaultReport = actor.MethodPlaceholder
+	MethodProcessPowerReport        = actor.MethodPlaceholder
+	MethodProcessFaultReport        = actor.MethodPlaceholder
+	EnsurePledgeCollateralSatisfied = actor.MethodPlaceholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,9 +173,7 @@ func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
 	return totalPower
 }
 
-func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bool {
-
-	ret := false
+func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) InvocOutput {
 
 	// TODO: convert msgSender to MinerActorID
 	var minerID addr.Address
@@ -189,17 +189,19 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bo
 	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
 
 	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
-		ret = true
+		return rt.SuccessReturn()
 	} else if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
 		st._lockPledgeCollateral(rt, minerID, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
-		ret = true
+		return rt.SuccessReturn()
 	}
 
 	UpdateRelease(rt, h, st)
 
-	return ret
+	return rt.ErrorReturn(exitcode.InsufficientPledgeCollateral)
 }
 
+// @param fault report
+// slash pledge collateral for Declared, Detected and Terminated faults
 func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report sector.FaultReport) {
 
 	var msgSender addr.Address // TODO replace this
@@ -215,6 +217,8 @@ func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report sector.F
 	UpdateRelease(rt, h, st)
 }
 
+// @param PowerReport with ActivePower and InactivePower
+// update miner power based on the power report
 func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
 
 	// TODO: convert msgSender to MinerActorID
@@ -227,6 +231,7 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 	if !found {
 		rt.Abort("miner not found.")
 	}
+
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
 	st.Impl().PowerTable_[minerID] = powerEntry
