@@ -26,4 +26,10 @@ type PoStGenerator struct {
         postCfg  sector.PoStCfg
         witness  sector.PoStWitness
     ) sector.PoStProof
+
+    VerifyPoStProof(
+        postCfg  sector.PoStCfg
+        Proof    sector.PoStProof
+        challengeSeed sector.PoStRandomness
+    ) bool
 }

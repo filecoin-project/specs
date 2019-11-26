@@ -16,10 +16,10 @@ type PoStType enum {
 }
 
 type PoStVerifyInfo struct {
-    Type        PoStType
-    Tickets     [ChallengeTicket]
+    Type                    PoStType
+    ChallengeTickets        [ChallengeTicket]
     PoStCfg
-    Randomness  PoStRandomness
+    Randomness              PoStRandomness
 }
 
 type OnChainPoStVerifyInfo struct {
@@ -33,14 +33,14 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type        PoStType
-    Tickets     [ChallengeTicket]
-    ProofBytes  Bytes
+    Type                PoStType
+    ChallengeTickets    [ChallengeTicket]
+    ProofBytes          Bytes
 }
 
 type ChallengeTicket struct {
-    Ticket        Bytes  // unhashed
-    PrivateProof  PrivatePoStProof
+    PartialTicket   Bytes  // unhashed
+    PrivateProof    PrivatePoStProof
     SectorID
 }
 

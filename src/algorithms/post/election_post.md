@@ -40,14 +40,19 @@ The epoch time is divided into three non-overlapping portions: (1) checking sect
 
 If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.
 
+```md
 At every round:
-1. `(Sample randomness)` The miner draws a randomness ticket from the randomness chain from a given epoch SPC.post_lookback back and concats it with the minerID, and epoch for use as post_randomness (this is as it used to happen previously, except the PoSt_lookback is now also the EC randomness_lookback, which is small here):
+1. **(sample randomness)**
+The miner draws a randomness ticket from the randomness chain from a given epoch SPC.post_lookback back and concats it with the minerID, and epoch for use as post_randomness (this is as it used to happen previously, except the PoSt_lookback is now also the EC randomness_lookback, which is small here):
     - `post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))`
-    We use the VRF to generate a unique randomness for the minerId, in this way no adversary that could simulate the miner storage can check if the victim miner has won or not.
-1. **(select eligible sectors)** The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with a chosen number of `PartialTickets` (`sectorsSampled*eligibleSectors`).
+
+2. **(select eligible sectors)**
+The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with a chosen number of `PartialTickets` (`sectorsSampled*eligibleSectors`).
     - Select a subset of sectors of size `sectorsSampled*minerSectors` [details omitted]
+
     Note also that even with `challengeTicketNum == numSectors`, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
-1. **(generate Partial Ticket(s))** For each selected sector
+
+3. **(generate Partial Ticket(s))** for each selected sector
     - first, generate K `PoStChallenges` (C_i), sampled at random from the chosen sector.
     There will be a chosen challenge-range size (a power of 2), called `ChallengeRangeSize`. Challenge ranges must be subtree-aligned and thus divide the sector into fixed-size data blocks. So challenge ranges can be indexed because allowable challenge ranges do not overlap. C_i is selected from the valid indexes into the challenge ranges.
     `C_i = HashToBlockNumber(post_randomness || S_j || i)`
@@ -55,17 +60,22 @@ At every round:
     - for each C_i, miner reads the specified range of data from disk, which is of size `ChallengeRangeSize : C_i_output`
     - Miner generates a PartialTicket using all the PoSt witnesses
     - `PartialTicket = H(post_randomness || minerID ||S_ j || C_1_Output || … || C_K_Output)`
-1. **(check Challenge Ticket(s) for winners)** Given a returned ChallengeTicket, miner checks it is a winning ticket. Specifically, they do the following:
+
+4. **(check Challenge Ticket(s) for winners)**
+Given a returned PartialTicket, miner checks it is a winning ticket. Specifically, they do the following:
     - `ChallengeTicket = Finalize(PartialTicket).  = H(ChallengeTicket) / 2^len(H)`
     - Check that `ChallengeTicket < Target`
-    - If yes, it is a winning ticket and can be used as to submit a block
-    - In either case, try again with next sector
-1. **(generate a `PoStProof`)** for inclusion in the block header
+    - If yes, it is a winning ticket and can be used to submit a block
+    - In either case, try again with next sector to increase rewards
+
+5. **(generate a `PoStProof`)** for inclusion in the block header
     - Using the winning tickets from step 4 (there may be multiple tickets from the same `SectorNumber`), call `GeneratePoSt` from proofs to generate a single PoSt for the block
 
 If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.
+```
 
 **Parameters:**
+```md
 - `Randomness_ticket` --  a ticket drawn from the randomness ticket chain at a prior tipset 
 - `Randomness_lookback` -- how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
 - `K (e.g. 20-100s)` - number of  challenges per sector -- must be large enough such that the PoSpace is secure.
@@ -74,26 +84,33 @@ If no one has found a winning ticket in this epoch, increment epoch value as par
 - `Target` -- target value under which PoSt value must be for block creation -- `target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders`.
 Put another way check `challengeTicket * networkPower * sectorsSampled_denom < activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders`
 - `networkPower` - filecoin network’s power - read from the power table, expressed in number of bytes
+```
 
 ## ElectionPoSt verification
 
 At a high-level, to validate a winning PoSt Proof:
-  1. **Validate post_randomness:**
+```md
+1. **(Validate post_randomness):**
     - `post_randomness` is appropriate given `chain`, `post_lookback` and `epoch`
     - VRF is generated by miner who submitted the PoSt:
     `{0,1} ?= VRF_miner.Verify(post_randomness)`
     - VRF output is valid given expected inputs:
     `{0,1} ?= VRF_miner.Validate(H(randomness_ticket || chainEpoch))`
-    1. Rederive eligible sectors in order to verify that winning sectors were appropriately selected (meaning it’s in `S_j`) from
+
+2. Rederive eligible sectors in order to verify that winning sectors were appropriately selected (meaning it’s in `S_j`) from
     `{0, 1} ?= sectorID in (HashToSectorID(post_randomness || minerID || j))`
-    1. **Verify `PartialTicket` returned**
+
+3. **Verify `PartialTicket` returned**
     - Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.
-    1. **Derive and validate the `ChallengeTicket` from the PartialTickets**
+
+4. **Derive and validate the `ChallengeTicket` from the PartialTickets**
     - Prove the derived ChallengeTicket is below the target
     `{0, 1} ?= (ChallengeTicket < target)`
-    1. Validate the `postProof` using the `PartialTickets`
+
+5. Validate the `postProof` using the `PartialTickets`
     - Verify that the postProof was appropriately derived from the PartialTickets.
     - The PoSt proof will verify the correctness of any PartialTickets passed to it as public inputs. In order to do this, it also needs the sector number along with various on-chain data (randomness, CommR, miner ID, etc.).
+```
 
 As it stands, the proofs caller passes a list of all of the replicas (with filesystem paths and auxiliary metadata) which could be challenged and a wanted number of tickets. This code structure forces the miner architecture to look like a single machine with a large number of disks presented as a single filesystem, as shown in spec. That won’t change for now. VFS systems like NFS may be used to distribute disks among multiple machines virtualizing the FileStore.
 
