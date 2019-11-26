@@ -37,6 +37,9 @@
         "lambda": 10,
         "porep_challenges": 200,
         "!SectorEncoding": true,
-        "rig_storage_read_mbs": 80
+        "!VectorR": true,
+        "rig_storage_read_mbs": 80,
+        "rig_storage_parallelization": 30,
+        "post_cached_layers": 25
     }
 ]
