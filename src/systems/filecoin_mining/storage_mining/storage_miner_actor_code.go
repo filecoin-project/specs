@@ -401,7 +401,15 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, postSub
 		Partitions_:  info.ElectionPoStPartitions(),
 	}
 
-	var pvInfo sector.PoStVerifyInfo_I
+	// TODO: Populate this somehow.
+	var onChainInfo sector.OnChainPoStVerifyInfo
+
+	pvInfo := sector.PoStVerifyInfo_I{
+		OnChain_: onChainInfo,
+		// Candidates_: TODO,
+		PoStCfg_:    &postCfg,
+		Randomness_: sector.PoStRandomness(rt.Randomness(onChainInfo.PoStEpoch(), 0)),
+	}
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
 
