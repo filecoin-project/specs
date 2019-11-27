@@ -5,12 +5,9 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 
 type Path struct {}  // TODO
 
-type SealRandomness Bytes
-type InteractiveSealRandomness Bytes
-
 // SealSeed is unique to each Sector
 // SealSeed is:
-//    SealSeedHash(MinerID, SectorNumber, SealRandomness, UnsealedSectorCID)
+//    SealSeedHash(MinerID, SectorNumber, util.Randomness, UnsealedSectorCID)
 type SealSeed Bytes
 
 type SealCfg struct {
@@ -25,8 +22,8 @@ type SealVerifyInfo struct {
     SectorID
     OnChain                OnChainSealVerifyInfo
     SealCfg
-    Randomness             SealRandomness
-    InteractiveRandomness  InteractiveSealRandomness
+    Randomness             util.Randomness
+    InteractiveRandomness  util.Randomness
     UnsealedCID            UnsealedSectorCID  // CommD
 }
 

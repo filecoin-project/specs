@@ -10,7 +10,6 @@ import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import storage_proving "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving"
 import key_store "github.com/filecoin-project/specs/systems/filecoin_nodes/key_store"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type StorageMiningSubsystem struct {
@@ -79,6 +78,4 @@ type StorageMiningSubsystem struct {
         proof       sector.PoStProof
         candidates  [sector.PoStCandidate]
     )
-
-    _submitPoStMessage(postSubmission poster.PoStSubmission) error
 }

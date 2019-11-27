@@ -1,22 +1,12 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type UInt64 UInt
-
-// TODO: move this to somewhere the blockchain can import
-// candidates:
-// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
-// - "blockchain/builtins" or something like that - a component in the blockchain that handles storage verification
-type PoStSubmission struct {
-    PostProof   sector.PoStProof
-    ChainEpoch  block.ChainEpoch
-}
 
 type PoStGenerator struct {
     GeneratePoStCandidates(
         postCfg         sector.PoStCfg
-        challengeSeed   sector.PoStRandomness
+        challengeSeed   util.Randomness
         candidateCount  UInt
         sectors         [sector.SectorID]
         sectorStore     sectorIndex.SectorStore
@@ -30,6 +20,6 @@ type PoStGenerator struct {
     VerifyPoStProof(
         postCfg        sector.PoStCfg
         Proof          sector.PoStProof
-        challengeSeed  sector.PoStRandomness
+        challengeSeed  util.Randomness
     ) bool
 }

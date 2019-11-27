@@ -8,7 +8,6 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
@@ -181,7 +180,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 //       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, ProvingSet
 // - Update ChallengeEndEpoch
-func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 	h, st := a.State(rt)
 
 	// The proof is verified, process ProvingSet.SectorsOn():
@@ -259,26 +258,22 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 }
 
 // called by verifier to update miner state on successful surprise post
-func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// TODO: Populate this somehow.
-	var onChainInfo sector.OnChainPoStVerifyInfo
-
 	// Verify correct PoSt Submission
-	// May choose to only submit once verified (and so remove this)
-	isPoStVerified := a._verifySurprisePoSt(rt, onChainInfo) // TODO HENRI
+	isPoStVerified := a._verifySurprisePoSt(rt)
 	if !isPoStVerified {
 		// no state transition, just error out and miner should submitSurprisePoSt again
 		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("TODO")
 	}
 
-	return a._onSuccessfulPoSt(rt, postSubmission)
+	return a._onSuccessfulPoSt(rt)
 
 }
 
-func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
 
 	// 1. Check that the miner in question is currently being challenged
 	if !a._isChallenged(rt) {
@@ -298,10 +293,11 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo se
 	}
 
 	// A proof must be a valid snark proof with the correct public inputs
+	// TODO: Populate this somehow.
+	var onChainInfo sector.OnChainPoStVerifyInfo
 
 	// 3. Get appropriate randomness
-	surpriseRand := rt.Randomness(st.ChallengeStatus().LastChallengeEpoch(), 0)
-	panic(surpriseRand)
+	surpriseRand := rt.Randomness(onChainInfo.PoStEpoch(), 0) //(st.ChallengeStatus().LastChallengeEpoch(), 0)
 
 	// 4. Get public inputs
 	info := st.Info()
@@ -316,26 +312,19 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo se
 
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_: onChainInfo,
-		// Candidates_: TODO,
+		// Candidates_: TODO for surprise PoSt optim,
 		PoStCfg_:    &postCfg,
-		Randomness_: sector.PoStRandomness(rt.Randomness(onChainInfo.PoStEpoch(), 0)),
+		Randomness_: surpriseRand,
 	}
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
 
 	// 5. Verify the PoSt Proof
-	// Verify correct PoSt Submission
-	// May choose to only submit once verified (and so remove this)
-	// isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
 	isPoStVerified := sdr.VerifySurprisePoSt(&pvInfo)
-	if !isPoStVerified {
-		// no state transition, just error out and miner should submitSurprisePoSt again
-		rt.Abort("Failed PoSt proof verification.")
-	}
-	return false
+	return isPoStVerified
 }
 
-func (a *StorageMinerActorCode_I) VerifyElectionPoStProof(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) VerifyElectionPoSt(rt Runtime) bool {
 	// TODO: validate caller
 	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
 	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
@@ -347,86 +336,64 @@ func (a *StorageMinerActorCode_I) VerifyElectionPoStProof(rt Runtime, postSubmis
 		rt.Abort("cannot submit an election proof if challenged or having challenge response failure")
 	}
 
-	// A proof must be a valid snark proof with the correct public inputs
+	_, st := a.State(rt)
+	// TODO: Populate this somehow.
+	var onChainInfo sector.OnChainPoStVerifyInfo
 
 	// 2. Get appropriate randomness
-	surpriseRand := rt.Randomness(rt.CurrEpoch(), 0)
-	panic(surpriseRand)
-	// 3. Verify ticket values for each ticket (ie leader election)
-	// for each ticket check that it is below target. If any is not, block is invalid
-	// for _, tix := range partialTickets {
-	// TODO Henri in future push
-	// }
+	electionRand := rt.Randomness(onChainInfo.PoStEpoch(), 0) //(st.ChallengeStatus().LastChallengeEpoch(), 0)
 
-	// 4. Get public inputs
-	// TODO HENRI
+	// A proof must be a valid snark proof with the correct public inputs
+	// 3. Get public inputs
+	info := st.Info()
+	sectorSize := info.SectorSize()
+
+	postCfg := sector.PoStCfg_I{
+		Type_:        sector.PoStType_ElectionPoSt,
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.ElectionPoStPartitions(),
+	}
+
+	pvInfo := sector.PoStVerifyInfo_I{
+		OnChain_: onChainInfo,
+		// Candidates_: TODO,
+		PoStCfg_:    &postCfg,
+		Randomness_: electionRand,
+	}
+
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
 
 	// 5. Verify the PoSt Proof
-	// TODO PORCU interface
-
-	return rt.SuccessReturn()
+	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+	return isPoStVerified
 }
 
 // Called by StoragePowerConsensus subsystem after verifying the Election proof
 // and verifying the PoSt proof in the block header.
 // Assume ElectionPoSt has already been successfully verified when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime) InvocOutput {
 
 	// TODO: validate caller
 	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
 	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
 	TODO()
 
-	if !a._canBeElected(rt) {
-		rt.Abort("cannot SubmitElectionPoSt when not in election period")
-	}
-
 	// we do not need to verify post submission here, as this should have already been done
 	// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
 	// significant resources, as proofs are expensive to verify.
 	//
-	// notneeded := a._verifyPoStSubmission(rt, postSubmission)
+	// notneeded := a._verifyPoStSubmission(rt)
 
 	// Update last challenge time as this one, to reset surprise post clock
 	h, st := a.State(rt)
 	st.ChallengeStatus().Impl().OnNewChallenge(rt.CurrEpoch())
 
-	info := st.Info()
-	sectorSize := info.SectorSize()
-
-	postCfg := sector.PoStCfg_I{
-		SectorSize_:  sectorSize,
-		WindowCount_: info.WindowCount(),
-		Partitions_:  info.ElectionPoStPartitions(),
-	}
-
-	// TODO: Populate this somehow.
-	var onChainInfo sector.OnChainPoStVerifyInfo
-
-	pvInfo := sector.PoStVerifyInfo_I{
-		OnChain_: onChainInfo,
-		// Candidates_: TODO,
-		PoStCfg_:    &postCfg,
-		Randomness_: sector.PoStRandomness(rt.Randomness(onChainInfo.PoStEpoch(), 0)),
-	}
-
-	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
-
-	// Verify correct PoSt Submission
-	// May choose to only submit once verified (and so remove this)
-	// isPoStVerified := a._verifyPoStSubmission(rt, postSubmission)
-	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
-	if !isPoStVerified {
-		// no state transition, just error out and miner should submitSurprisePoSt again
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("TODO")
-	}
-
 	UpdateRelease(rt, h, st)
 
 	// the following will update last challenge response time
-	return a._onSuccessfulPoSt(rt, postSubmission)
+	return a._onSuccessfulPoSt(rt)
 
 }
 
@@ -664,8 +631,8 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
 		SealCfg_: &sealCfg,
 
-		Randomness_:            sector.SealRandomness(rt.Randomness(onChainInfo.SealEpoch(), 0)),
-		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
+		Randomness_:            rt.Randomness(onChainInfo.SealEpoch(), 0),
+		InteractiveRandomness_: rt.Randomness(onChainInfo.InteractiveEpoch(), 0),
 		UnsealedCID_:           unsealedCID,
 	}
 

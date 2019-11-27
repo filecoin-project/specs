@@ -1,6 +1,5 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
-type PoStRandomness Bytes
 type PartialTicket Bytes  // 32 bytes
 type ChallengeTicketsCommitment Bytes
 
@@ -22,7 +21,7 @@ type PoStVerifyInfo struct {
     CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
     Candidates  [PoStCandidate]
     PoStCfg
-    Randomness  PoStRandomness
+    Randomness  util.Randomness
     OnChain     OnChainPoStVerifyInfo
 }
 

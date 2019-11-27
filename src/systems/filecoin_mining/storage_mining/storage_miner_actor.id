@@ -3,7 +3,6 @@ import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type SectorExpirationQueueItem struct {
@@ -113,8 +112,11 @@ type StorageMinerActorCode struct {
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
 
-    SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission)
-    SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+    SubmitSurprisePoSt(rt Runtime)
+    SubmitVerifiedElectionPoSt(rt Runtime)
+
+    _verifySurprisePoSt(rt Runtime) bool
+    VerifyElectionPoSt(rt Runtime) bool
 
     CheckSurprisePoStSubmissionHappened(rt Runtime)
 
@@ -129,7 +131,7 @@ type StorageMinerActorCode struct {
     CreditSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber)
 
     _onMissedSurprisePoSt(rt Runtime)
-    _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+    _onSuccessfulPoSt(rt Runtime)
 
     _submitFaultReport(
         rt          Runtime
@@ -143,8 +145,6 @@ type StorageMinerActorCode struct {
         action         deal.StorageDealSlashAction
     )
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
-
-    _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
 
     _expirePreCommittedSectors(rt Runtime)
 }

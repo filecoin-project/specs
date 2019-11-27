@@ -88,14 +88,14 @@ type WinStackedDRG struct {
     Seal(
         sid         sector.SectorID
         data        Bytes
-        randomness  sector.SealRandomness
+        randomness  util.Randomness
     ) SealSetupArtifacts
     CreateSealProof(
-        challengeSeed  sector.InteractiveSealRandomness
+        challengeSeed  util.Randomness
         aux            sector.ProofAuxTmp
     ) sector.SealProof
     CreatePrivateSealProof(
-        randomness  sector.InteractiveSealRandomness
+        randomness  util.Randomness
         aux         sector.ProofAuxTmp
     ) PrivateOfflineProof
 
@@ -106,14 +106,14 @@ type WinStackedDRG struct {
     VerifyPrivateSealProof(
         privateProof  [OfflineWindowChallengeProof]
         sealSeeds     [sector.SealSeed]
-        randomness    sector.InteractiveSealRandomness
+        randomness    util.Randomness
         commD         Commitment
         commR         sector.SealedSectorCID
     ) bool
     VerifySeal(sv sector.SealVerifyInfo) bool
 
     GenerateElectionPoStCandidates(
-        challengeSeed    sector.PoStRandomness
+        challengeSeed    util.Randomness
         eligibleSectors  [sector.SectorNumber]
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
@@ -122,7 +122,7 @@ type WinStackedDRG struct {
     VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
 
     GenerateSurprisePoStCandidates(
-        challengeSeed    sector.PoStRandomness
+        challengeSeed    util.Randomness
         eligibleSectors  [sector.SectorNumber]
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
