@@ -4,29 +4,35 @@
 Rig:
   describe(rig_storage_latency, "Random Access latency on the storage medium (honest)")
   describe(rig_storage_parallelization, "Storage Units that can be accessed in parallel (honest)")
-
-  describe(rig_storage_min, "Minimum amount of storage required to mine (bytes)")
-  rig_storage_min = rig_storage_min_tb * 1024 * 1024 * 1024 * 1024
-  describe(rig_sectors_min, "Minimum amount of sectors require to mine")
-  rig_sectors_min = rig_storage_min / sector_size
+  describe(rig_storage_min, "Minimum storage required to mine (bytes)")
+  describe(rig_sectors_min, "Minimum sectors require to mine")
   describe(rig_storage_parallelization_min, "Minimum storage units that must be accessed in parallel in order to mine (honest)")
+
+  rig_storage_min = rig_storage_min_tb * 1024 * 1024 * 1024 * 1024
+  rig_sectors_min = rig_storage_min / sector_size
   rig_storage_parallelization_min = post_leaves_access / polling_time
 
   rig_storage_unit_min = rig_storage_min / rig_storage_parallelization_min
   rig_storage_unit_min_tb = rig_storage_unit_min / (1024 * 1024 * 1024 * 1024)
 
+Crypto:
+  describe(snark_size, "Size of a SNARK proof (bytes)")
+
 Utils:
+  describe(cid_size, "Size of a CID (bytes)")
+
   b_in_gb = (1024 * 1024 * 1024)
   secs_in_month = (24 * 30 * 60 * 60)
-  describe(cid_size, "Size of a CID (bytes)")
   cid_size = 32 + 1 + 1 + 1
 
 ProofOfSpacetime:
   // post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
+  Security:
+    describe(post_challenges, "Number of challenges in a PoRep proof")
 
   Time:
     describe(post_time, "Time to generate a PoSt Proof on a single core CPU")
-    describe(post_time_parallel, "Time to generate a PoSt proof on RIG_CORES CPU cores")
+    describe(post_time_parallel, "Parallel time to generate a PoSt proof on RIG_CORES CPU cores")
 
     post_time = post_leaves_access + post_proof_gen
     post_time_parallel = post_leaves_access_parallel + post_proof_gen_parallel
@@ -72,12 +78,15 @@ ProofOfSpacetime:
         Access:
           describe(post_mtree_access_challenge_time, "Time to sequentially read the replica leaves needed to regenerate the missing layers of the merkle tree for a single challenged node in PoSt")
           describe(post_mtree_access_challenges_time, "Same as post_mtree_access_challenge_time but for all the PoSt challenges")
+
           // TODO: this is using random access, we should use seq access instead
           post_mtree_access_challenge_time = post_mtree_regen_hashnodes * rig_storage_latency
           post_mtree_access_challenges_time = post_mtree_access_challenge_time * post_challenges
           // TODO: log2(nodes) > post_mtree_layers_cached
 
     ProofGeneration:
+      describe(post_proof_gen, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves)")
+
       post_proof_gen = post_snark_time + post_witness_gen 
 
   Time (NoWrapper):
@@ -85,32 +94,65 @@ ProofOfSpacetime:
     //response_honest_min = (post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency *windows) / rig_storage_latency_throughput
 
   SNARK:
-    inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
-    inclusion_proofs = inclusion_proof * post_challenges
-    ticket_proofs = ticket_constraints * post_challenges
-    post_snark_constraints = ticket_proofs + inclusion_proofs
+    describe(inclusion_proof, "Constraints for checking an inclusion proof in a binary merkle tree as large as the sector")
+    describe(post_inclusion_proofs, "Constraints for checking all inclusion proofs (in PoSt)")
+    describe(ticket_proofs, "Constraints for checking the partial ticket (in PoSt)")
+    describe(ticket_constraints, "Constraints of a partial ticket per challenged node (in PoSt)")
+    describe(post_snark_constraints, "Constraints for a PoSt")
+    describe(post_snark_partitions, "Number of partitions of a PoSt proof")
+    describe(post_snark_size, "Size of a PoSt proof (bytes)")
+    describe(post_snark_size_kb, "Size of a Post proof (KiB)")
+    describe(post_snark_partition_constraints, "Number of constraints for a PoSt partition")
 
-    post_snark_partitions = post_snark_constraints / post_max_snark_constraints
+    inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
+    post_inclusion_proofs = inclusion_proof * post_challenges
+    ticket_proofs = ticket_constraints * post_challenges
+
+    post_snark_constraints = ticket_proofs + post_inclusion_proofs
+    post_snark_partitions = post_snark_constraints / post_snark_partition_constraints
     post_snark_size = post_snark_partitions * snark_size
     post_snark_size_kb = post_snark_size / 1024
 
 ProofOfReplication:
   Security:
-    porep_challenges = -lambda / (log2(1-spacegap/4))
+    describe(porep_challenges, "Number of challenges in a PoRep proof")
+    describe(porep_lambda, "Bits of security of a PoRep proof")
+
+    porep_challenges = -porep_lambda / (log2(1-spacegap/4))
 
   Graph:
+    describe(nodes, "Number of nodes in a sector")
+    describe(sector_size, "Size of a sector (bytes)")
+    describe(sector_size_gb, "Size of a sector (GiB)")
+
+    describe(window_nodes, "Number of nodes in a window")
+    describe(window_size, "Size of a window (bytes)")
+    describe(window_size_mb, "Size of a window (MiB)")
+
+    describe(graph_parents, "Number of parents of a node in the PoRep window graph")
+    describe(drg_parents, "Number of DRG parents of a node in the PoRep window graph")
+    describe(expander_parents, "Number of Chung Expander parents of a node in the PoRep window graph")
+
+    describe(node_size, "Size of a node (bytes)")
+    describe(node_size_gb, "Size of a node (GiB)")
+    describe(kdf_hash_size, "Size of the input to the KDF hash (bytes)")
+    describe(kdf_hash_size_gb, "Size of the input to the KDF hash (GiB)")
+
     sector_size = sector_size_gb * b_in_gb
     graph_parents = drg_parents + expander_parents
     nodes = sector_size / node_size 
     node_size_gb = node_size / b_in_gb 
-    node_hash_size_gb = graph_parents * node_size_gb
-    node_hash_size = node_hash_size_gb * b_in_gb
+    kdf_hash_size_gb = graph_parents * node_size_gb
+    kdf_hash_size = kdf_hash_size_gb * b_in_gb
 
     window_size = window_size_mb * 1024 * 1024
     windows = sector_size / window_size
     window_nodes = nodes / windows
 
   Time:
+    describe(porep_time, "Time to seal a sector (PoRep proof)")
+    describe(porep_time_parallel, "Time to seal a sector (PoRep proof) with parallelization")
+
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
     porep_time_parallel = porel_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
 
@@ -205,7 +247,7 @@ Rationality:
 
   Costs:
     Compute:
-      nodes_per_second = hash_gb_per_second / node_hash_size_gb
+      nodes_per_second = hash_gb_per_second / kdf_hash_size_gb
       nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
       cost_hash_node = rig_cost_per_year / nodes_per_year 
 
