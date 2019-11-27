@@ -9,7 +9,7 @@ var UTCMaxDrift = time.Second
 // source, such as NTP, or a very precise hardware clock.
 var UTCSyncPeriod = time.Hour
 
-// EpochDuration is a constant that represents the time in seconds
+// EpochDuration is a constant that represents the duration in seconds
 // of a blockchain epoch.
 var EpochDuration = UnixTime(15)
 
@@ -17,14 +17,10 @@ func (_ *UTCClock_I) NowUTCUnix() UnixTime {
 	return UnixTime(time.Now().Unix())
 }
 
-// EpochAtTime returns the ChainEpoch corresponding to t.
+// EpochAtTime returns the ChainEpoch corresponding to time `t`.
 // It first subtracts GenesisTime, then divides by EpochDuration
-// and returns the resulting number of epochs. If t is before
-// GenesisTime zero is returned.
+// and returns the resulting number of epochs.
 func (c *ChainEpochClock_I) EpochAtTime(t UnixTime) ChainEpoch {
-	if t <= c.GenesisTime() {
-		return ChainEpoch(0)
-	}
 	difference := t - c.GenesisTime()
 	epochs := difference / EpochDuration
 	return ChainEpoch(epochs)
