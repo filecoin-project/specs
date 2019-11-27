@@ -40,6 +40,6 @@
         "!VectorR": true,
         "rig_storage_read_mbs": 80,
         "rig_storage_parallelization": 30,
-        "post_cached_layers": 25
+        "post_mtree_layers_cached": 25
     }
 ]
