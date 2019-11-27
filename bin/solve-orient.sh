@@ -10,7 +10,6 @@ else
     orient_bin=orient/bin/dcalc
     system_file=/orientd/$system_file
     input_file=/orientd/$input_file
-    output_file=/orientd/$output_file
 fi;
 
 mkdir -p $output_file && rmdir $output_file # Dirty hack to ensure output_file directory exists.

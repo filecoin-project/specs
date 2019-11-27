@@ -6,7 +6,6 @@ if [[ -z "${ORIENT_DCALC}" ]]; then
     orient_bin=orient/bin/orient
 else
     orient_bin=orient/bin/dcalc
-    output_dir=/orientd/$output_dir
     input_dir=/orientd/$input_dir
     diagram_dir=/orientd/$diagram_dir
 fi;
