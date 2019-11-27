@@ -115,8 +115,8 @@ type StorageMinerActorCode struct {
     SubmitSurprisePoSt(rt Runtime)
     SubmitVerifiedElectionPoSt(rt Runtime)
 
-    _verifySurprisePoSt(rt Runtime) bool
-    VerifyElectionPoSt(rt Runtime) bool
+    _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
+    VerifyElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool
 
     CheckSurprisePoStSubmissionHappened(rt Runtime)
 

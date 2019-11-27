@@ -258,11 +258,11 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 }
 
 // called by verifier to update miner state on successful surprise post
-func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	TODO() // TODO: validate caller
 
 	// Verify correct PoSt Submission
-	isPoStVerified := a._verifySurprisePoSt(rt)
+	isPoStVerified := a._verifySurprisePoSt(rt, onChainInfo)
 	if !isPoStVerified {
 		// no state transition, just error out and miner should submitSurprisePoSt again
 		// TODO: determine proper error here and error-handling machinery
@@ -273,7 +273,7 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime) InvocOutput {
 
 }
 
-func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
+func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
 	// 1. Check that the miner in question is currently being challenged
 	if !a._isChallenged(rt) {
@@ -293,8 +293,6 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
 	}
 
 	// A proof must be a valid snark proof with the correct public inputs
-	// TODO: Populate this somehow.
-	var onChainInfo sector.OnChainPoStVerifyInfo
 
 	// 3. Get appropriate randomness
 	surpriseRand := rt.Randomness(onChainInfo.PoStEpoch(), 0) //(st.ChallengeStatus().LastChallengeEpoch(), 0)
@@ -324,7 +322,7 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
 	return isPoStVerified
 }
 
-func (a *StorageMinerActorCode_I) VerifyElectionPoSt(rt Runtime) bool {
+func (a *StorageMinerActorCode_I) VerifyElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 	// TODO: validate caller
 	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
 	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
@@ -337,8 +335,6 @@ func (a *StorageMinerActorCode_I) VerifyElectionPoSt(rt Runtime) bool {
 	}
 
 	_, st := a.State(rt)
-	// TODO: Populate this somehow.
-	var onChainInfo sector.OnChainPoStVerifyInfo
 
 	// 2. Get appropriate randomness
 	electionRand := rt.Randomness(onChainInfo.PoStEpoch(), 0) //(st.ChallengeStatus().LastChallengeEpoch(), 0)
