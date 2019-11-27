@@ -19,8 +19,10 @@ For each tipset:
 
 - the `CronActor`'s tick method is invoked implicitly after all the blocks' messages.
 
-These implicit messages must succeed (have an exit code of zero) in order for the new state to be
-computed. Receipts for them are included in the receipt list just like other messages. 
+These implicit messages specify a gas price of zero, but must be included in the computation.
+They must succeed (have an exit code of zero) in order for the new state to be
+computed. Receipts for them are excluded from the receipt list; only explicit messages have an 
+explicit receipt. 
 
 The gas payment for each message execution is paid to the miner owner account immediately after
 that message is executed. There are no encumbrances to either the block reward or gas fees earned: 

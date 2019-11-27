@@ -33,12 +33,16 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 		// Pay block reward.
 		reward := _makeBlockRewardMessage(outTree, blk.Miner())
 		outTree, r = vmi.ApplyMessage(outTree, reward, blk.Miner())
-		receipts = append(receipts, r)
+		if r.ExitCode() != exitcode.OK() {
+			panic("block reward failed")
+		}
 
 		// Process block miner's Election PoSt.
 		epost := _makeElectionPoStMessage(outTree, blk.Miner(), msgs.Epoch(), blk.PoStProof())
 		outTree, r = vmi.ApplyMessage(outTree, epost, blk.Miner())
-		receipts = append(receipts, r)
+		if r.ExitCode() != exitcode.OK() {
+			panic("election post failed")
+		}
 
 		// Process messages from the block.
 		for _, m := range blk.Messages() {
@@ -56,7 +60,9 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 	cronSender := msgs.Blocks()[0].Miner()
 	cron := _makeCronTickMessage(outTree, cronSender)
 	outTree, r = vmi.ApplyMessage(outTree, cron, cronSender)
-	receipts = append(receipts, r)
+	if r.ExitCode() != exitcode.OK() {
+		panic("cron tick failed")
+	}
 
 	return
 }
