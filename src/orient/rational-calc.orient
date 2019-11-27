@@ -157,6 +157,18 @@ ProofOfReplication:
     porep_time_parallel = porel_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
 
   Commitment:
+    describe(window_comm_tree_time, "")
+    describe(window_comm_leaves_time, "")
+
+    describe(commit_size, "Size of a commitment (bytes)")
+    describe(commr_size, "Size of CommR (bytes)")
+    describe(commd_size, "Size of CommD (bytes)")
+    describe(commrlast_size, "Size of CommRLast (bytes)")
+    describe(seal_onchain_commitments_size, "Size of the seal commitments")
+
+    describe(commr_time, "Time to generate CommR (seconds)")
+    describe(commd_time, "Time to generate CommD (seconds)")
+
     commit_size = cid_size
     // TODO: should be missing *2
     window_comm_tree_time = merkle_tree_hash_time * window_nodes
@@ -165,7 +177,7 @@ ProofOfReplication:
     commd_size = commit_size
     commrlast_size = commit_size
 
-    seal_commitment_size = commd_size + commr_size
+    seal_onchain_commitments_size = commd_size + commr_size
     // seal_commitment_time = commr_time
 
     commd_time = merkle_tree_datahash_time * nodes
