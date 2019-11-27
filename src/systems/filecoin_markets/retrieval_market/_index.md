@@ -78,7 +78,7 @@ The evolved protocol for proposing and accepting a deal will work as follows:
 - The provider unpauses the request and data resumes sending 
 - The process continues until the end of the query
 
-### Bootstrapping Trust
+# Bootstrapping Trust
 
 Neither the client nor the provider have any specific reason to trust the other. Therefore, payment for a retrieval deal is done in pieces, sending vouchers as bytes are sent and verified.
 
@@ -94,3 +94,7 @@ The trust process is as follows:
    requests payment, assuming it's received at least 1300 bytes since last payment
    - The process continues till the end of the retrieval, when the last payment will simply be for the remainder of bytes
 - Additional trust mechanisms in the V1 version of the protocol will include agreed upon timeouts and cancellation fees
+
+# Common Data Types
+
+{{< readfile file="types.id" code="true" lang="go" >}}
