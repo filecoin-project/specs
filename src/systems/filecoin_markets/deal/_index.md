@@ -23,7 +23,7 @@ Filecoin Storage Market Deal Flow
 
 # Receive Challenge
 
-- 5. Miners enter the `Challenged` status whenever `NotifyOfPoStChallenge` is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before `CheckSurprisePoStSubmissionHappened` is called by the chain. Miners can only get out the challenge with `SubmitPoSt` or `onMissedSurprisePoSt`.
+- 5. Miners enter the `Challenged` status whenever `NotifyOfPoStChallenge` is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before `CheckSurprisePoStSubmissionHappened` is called by the chain. Miners can only get out the challenge with `SubmitSurprisePoSt` or `onMissedSurprisePoSt`.
 - 6. Miners are not allowed to call `DeclareFaults` or `RecoverFaults` when they are in the `Challneged` state but `CommitSector` is allowed and sectors will be added to a `StagedCommittedSectors` buffer. When miners get out of the `Challenged` status, `StagedCommittedSectors` will be copied over to their `Sectors`, `ProvingSet` and `SectorTable` and emptied.
 
 # Declare and Recover Faults
@@ -45,7 +45,7 @@ On every PoSt Submission, the following steps happen.
 - 14. Submit `FaultReport` and `PowerReport` to `StoragePowerActor` for slashing and power accounting.
 - 15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.
 - 16. Update challenge status and add `Committed` sectors received during the challenge to the `Sectors`, `ProvingSet`, and `SectorTable`.
-- 17. All Sectors will be considered in `DetectedFaults` when a miner fail to `SubmitPoSt` in a proving period and detected by `onMissedSurprisePoSt` in `CheckSurprisePoStSubmissionHappened` (move to State 18).
+- 17. All Sectors will be considered in `DetectedFaults` when a miner fail to `SubmitSurprisePoSt` or `SubmitElectionPoSt` (jointly `SubmitPoSt` methods) in a proving period and detected by `onMissedSurprisePoSt` in `CheckSurprisePoStSubmissionHappened` (move to State 18).
 
 # Detect Faults
 

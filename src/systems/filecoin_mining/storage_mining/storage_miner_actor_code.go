@@ -94,7 +94,14 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
-// Called by the cron actor at every tick. Will return immediately if the miner
+// Called by the cron actor at every tick.
+func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
+	a.CheckSurprisePoStSubmissionHappened(rt)
+
+	return rt.SuccessReturn()
+}
+
+// Will return immediately if the miner
 // has successfully submitted a PoSt (and is no longer challenged)
 // If a Post is missed (either due to faults being not declared on time or
 // because the miner run out of time, every sector is reported as failing
@@ -283,15 +290,15 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo se
 		rt.Abort("cannot SubmitSurprisePoSt when not challenged")
 	}
 
-	// to pull in from constants
+	// TODO pull in from constants
 	PROVING_PERIOD := block.ChainEpoch(0)
 
 	// 2. Check that the challenge has not expired
 	// Check that miner can still submit (i.e. that the challenge window has not passed)
 	// This will prevent miner from submitting a Surprise PoSt past the challenge period
 	_, st := a.State(rt)
-	if rt.CurrEpoch() < st.ChallengeStatus().LastChallengeEpoch()+PROVING_PERIOD {
-		rt.Abort("cannot SubmitSurprisePoSt late")
+	if rt.CurrEpoch() > st.ChallengeStatus().LastChallengeEpoch()+PROVING_PERIOD {
+		return false
 	}
 
 	// A proof must be a valid snark proof with the correct public inputs
@@ -331,8 +338,8 @@ func (a *StorageMinerActorCode_I) VerifyElectionPoSt(rt Runtime, onChainInfo sec
 
 	// 1. Check that the miner in question is currently allowed to run election
 	if !a._canBeElected(rt) {
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("cannot submit an election proof if challenged or having challenge response failure")
+		return false
+		// rt.Abort("cannot submit an election proof if challenged or having challenge response failure")
 	}
 
 	_, st := a.State(rt)

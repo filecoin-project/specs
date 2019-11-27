@@ -14,9 +14,9 @@ title: "Change Log - Version History"
         - sector states, state transitions, state accounting, power accounting
         - DeclareFaults + RecoverSectors flow
         - `CommitSector` flow
-        - `SubmitPost` flow
+        - `SubmitElectionPost` or `SubmitSurprisePoSt` flow
             - Sector proving, faults, recovery, and expiry
-        - `OnMissedPost` flow
+        - `OnMissedSurprisePost` flow
             - Fault sectors, drop power, expiry, and more
     - `StoragePowerActor`
         - power accounting based on `StorageMinerActor` state changes
