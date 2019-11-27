@@ -78,6 +78,23 @@ install_emacs_deps() {
   [ $? -eq 0 ] || die "failed to install emacs deps"
 }
 
+install_python3_np() {
+    echo ">  check or install python3 with numpy module"
+    # check if python3 is installed and numpy
+    python3 -c 'print("Hello")' > /dev/null 2>&1 
+    [ $? -eq 0 ] || die "python3 is not installed"
+    python3 -c 'import numpy' > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo -e "\tPython3 and numpy already installed"
+        return
+    fi
+
+    # try to install numpy
+    pip3 install --user numpy > /dev/null
+    python3 -c 'import numpy' > /dev/null 2>&1
+    [ $? -eq 0 ] || die "can't install python3 numpy module with pip3"
+}
+
 main() {
   must_run_from_spec_root
 
@@ -102,6 +119,7 @@ main() {
   install_slime
   install_cllaunch
   install_emacs_deps
+  install_python3_np
 
   # git repos
   prun git submodule update --init --recursive

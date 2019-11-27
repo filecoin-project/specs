@@ -2,6 +2,9 @@ output_dir=build/orient
 input_dir=src/orient
 diagram_dir=src/diagrams/orient
 
+# preprocessing step
+./$(dirname $0)/preprocessing/preprocessing.sh $(ls input_dir/*json)
+
 if [[ -z "${ORIENT_DCALC}" ]]; then
     orient_bin=orient/bin/orient
 else
@@ -10,8 +13,8 @@ else
     diagram_dir=/orientd/$diagram_dir
 fi;
 
-mkdir -p $output_dir
-mkdir -p $diagram_dir
+mkdir -p $output_dir > /dev/null 2>&1 
+mkdir -p $diagram_dir > /dev/null 2>&1
 
 $orient_bin solve --system=$input_dir/filecoin.orient --in=$input_dir/snark-table.json | jq > $output_dir/snark-table.json
 $orient_bin solve --system=$input_dir/filecoin.orient --in=$input_dir/filecoin.json | jq > build/orient/solved-parameters.json

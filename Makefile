@@ -90,6 +90,9 @@ deps: deps-basic deps-diag deps-orient
 deps-basic:
 	bin/install-deps-basic.sh -y
 
+fmt:
+	bin/fmt_json.sh
+
 deps-ouser:
 	bin/install-deps-orient-user.sh -y
 
