@@ -33,11 +33,11 @@ ProofOfSpacetime:
 
       // TODO: make sure this is correct
       Regeneration:
-        post_mtree_cached_hashnodes = expt(2, post_mtree_layers_cached) + 1
+        post_mtree_cached_hashnodes = expt(2, post_mtree_layers_cached) - 1
         post_mtree_layers_deleted = commr_tree_depth - post_mtree_layers_cached
 
-        post_mtree_regen_nodes = expt(2, (log2(nodes) - post_mtree_layers_cached))
-        // TODO: check if post_merkle_region_hashes shoulld be *2
+        post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted + 1) - 1
+        // TODO: check if post_merkle_region_hashes should be *2
         post_mtree_regen_challenge_time = (post_mtree_regen_nodes * 2) * merkle_tree_hash_time
         post_mtree_regen_challenges_time = post_mtree_regen_challenge_time * post_challenges
 
