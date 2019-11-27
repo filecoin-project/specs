@@ -311,8 +311,7 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo se
 	}
 
 	pvInfo := sector.PoStVerifyInfo_I{
-		OnChain_: onChainInfo,
-		// Candidates_: TODO for surprise PoSt optim,
+		OnChain_:    onChainInfo,
 		PoStCfg_:    &postCfg,
 		Randomness_: surpriseRand,
 	}
@@ -354,8 +353,7 @@ func (a *StorageMinerActorCode_I) VerifyElectionPoSt(rt Runtime, onChainInfo sec
 	}
 
 	pvInfo := sector.PoStVerifyInfo_I{
-		OnChain_: onChainInfo,
-		// Candidates_: TODO,
+		OnChain_:    onChainInfo,
 		PoStCfg_:    &postCfg,
 		Randomness_: electionRand,
 	}

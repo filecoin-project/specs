@@ -18,8 +18,6 @@ type PoStType enum {
 
 // TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
-    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
-    Candidates  [PoStCandidate]
     PoStCfg
     Randomness  util.Randomness
     OnChain     OnChainPoStVerifyInfo
@@ -33,6 +31,7 @@ type PoStCandidate struct {
 }
 
 type OnChainPoStVerifyInfo struct {
+    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
     Candidates  [PoStCandidate]
     PoStEpoch   block.ChainEpoch
     Proof       PoStProof
