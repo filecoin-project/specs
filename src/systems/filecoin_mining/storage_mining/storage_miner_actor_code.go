@@ -180,8 +180,10 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 //       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, ProvingSet
 // - Update ChallengeEndEpoch
-func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	h, st := a.State(rt)
+
+	// TODO add info on chain
 
 	// The proof is verified, process ProvingSet.SectorsOn():
 	// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
@@ -269,7 +271,7 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, onChainInfo sec
 		rt.Abort("TODO")
 	}
 
-	return a._onSuccessfulPoSt(rt)
+	return a._onSuccessfulPoSt(rt, onChainInfo)
 
 }
 
@@ -365,11 +367,15 @@ func (a *StorageMinerActorCode_I) VerifyElectionPoSt(rt Runtime, onChainInfo sec
 	return isPoStVerified
 }
 
+func (a *StorageMinerActorCode_I) IsValidElection(rt Runtime) InvocOutput {
+	panic("TODO")
+}
+
 // Called by StoragePowerConsensus subsystem after verifying the Election proof
 // and verifying the PoSt proof in the block header.
 // Assume ElectionPoSt has already been successfully verified when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
-func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 
 	// TODO: validate caller
 	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
@@ -389,7 +395,7 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime) InvocOu
 	UpdateRelease(rt, h, st)
 
 	// the following will update last challenge response time
-	return a._onSuccessfulPoSt(rt)
+	return a._onSuccessfulPoSt(rt, onChainInfo)
 
 }
 
