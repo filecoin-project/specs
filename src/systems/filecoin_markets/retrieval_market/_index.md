@@ -94,3 +94,7 @@ The trust process is as follows:
    requests payment, assuming it's received at least 1300 bytes since last payment
    - The process continues till the end of the retrieval, when the last payment will simply be for the remainder of bytes
 - Additional trust mechanisms in the V1 version of the protocol will include agreed upon timeouts and cancellation fees
+
+### Common Data Types
+
+{{< readfile file="types.id" code="true" lang="go" >}}
