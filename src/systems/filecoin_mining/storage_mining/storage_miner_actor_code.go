@@ -598,7 +598,7 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 // Sector Commitment
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
+func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool {
 	h, st := a.State(rt)
 	info := st.Info()
 	sectorSize := info.SectorSize()
@@ -734,8 +734,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		SectorNumber_:     preCommitSector.Info().SectorNumber(),
 	}
 
-	isSealVerificationCorrect := st._isSealVerificationCorrect(rt, onChainInfo)
-	if !isSealVerificationCorrect {
+	isSealVerified := st._verifySeal(rt, onChainInfo)
+	if !isSealVerified {
 		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("Seal verification failed")
 	}

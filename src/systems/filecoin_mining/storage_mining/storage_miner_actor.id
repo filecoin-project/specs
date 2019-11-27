@@ -87,7 +87,7 @@ type StorageMinerActorState struct {
     _isChallenged(rt Runtime)  bool
     _canBeElected(rt Runtime)  bool
     _shouldChallenge(rt Runtime, challengeFreePeriod block.ChainEpoch) bool
-    _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
+    _verifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
 
     _processStagedCommittedSectors(rt Runtime)
