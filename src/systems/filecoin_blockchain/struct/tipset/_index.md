@@ -7,7 +7,7 @@ Expected Consensus probabilistically elects multiple leaders in each epoch meani
 
 Each block references a parent tipset and validates _that tipset's state_, while proposing messages to be included for the current epoch. The state to which a new block's messages apply cannot be known until that block is incorporated into a tipset. It is thus not meaningful to execute the messages from a single block in isolation: a new state tree is only known once all messages in that block's tipset are executed. 
  
-A valid tipset contains a non-empty collection of blocks that all specify identical:
+A valid tipset contains a non-empty collection of blocks that have distinct miners and all specify identical:
 
 - `Epoch` 
 - `Parents`

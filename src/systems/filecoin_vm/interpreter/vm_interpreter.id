@@ -1,13 +1,23 @@
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 
-type MessageRef struct {
-    Message  msg.UnsignedMessage
-    Miner    addr.Address
+type UInt64 UInt
+
+// The messages from one block in a tipset.
+type BlockMessages struct {
+    Messages  [msg.UnsignedMessage]
+    Miner     addr.Address      // The block miner's actor address
+    PoStProof Bytes             // The miner's Election PoSt proof output
+}
+
+// The messages from a tipset, grouped by block.
+type TipSetMessages struct {
+    Blocks  [BlockMessages]
+    Epoch   UInt64              // The chain epoch of the blocks
 }
 
 type VMInterpreter struct {
-    ApplyMessageBatch(inTree st.StateTree, msgs [MessageRef]) struct {outTree st.StateTree, ret [msg.MessageReceipt]}
+    ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) struct {outTree st.StateTree, ret [msg.MessageReceipt]}
     ApplyMessage(inTree st.StateTree, msg msg.Message, minerAddr addr.Address) struct {outTree st.StateTree, ret msg.MessageReceipt}
 }
