@@ -262,9 +262,12 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, postSubmission p
 func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission) InvocOutput {
 	TODO() // TODO: validate caller
 
+	// TODO: Populate this somehow.
+	var onChainInfo sector.OnChainPoStVerifyInfo
+
 	// Verify correct PoSt Submission
 	// May choose to only submit once verified (and so remove this)
-	isPoStVerified := a._verifySurprisePoSt(rt) // TODO HENRI
+	isPoStVerified := a._verifySurprisePoSt(rt, onChainInfo) // TODO HENRI
 	if !isPoStVerified {
 		// no state transition, just error out and miner should submitSurprisePoSt again
 		// TODO: determine proper error here and error-handling machinery
@@ -275,7 +278,7 @@ func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, postSubmission 
 
 }
 
-func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
+func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
 	// 1. Check that the miner in question is currently being challenged
 	if !a._isChallenged(rt) {
@@ -305,12 +308,18 @@ func (a *StorageMinerActorCode_I) _verifySurprisePoSt(rt Runtime) bool {
 	sectorSize := info.SectorSize()
 
 	postCfg := sector.PoStCfg_I{
+		Type_:        sector.PoStType_SurprisePoSt,
 		SectorSize_:  sectorSize,
 		WindowCount_: info.WindowCount(),
 		Partitions_:  info.SurprisePoStPartitions(),
 	}
 
-	var pvInfo sector.PoStVerifyInfo_I
+	pvInfo := sector.PoStVerifyInfo_I{
+		OnChain_: onChainInfo,
+		// Candidates_: TODO,
+		PoStCfg_:    &postCfg,
+		Randomness_: sector.PoStRandomness(rt.Randomness(onChainInfo.PoStEpoch(), 0)),
+	}
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
 

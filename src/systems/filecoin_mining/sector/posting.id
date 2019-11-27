@@ -21,6 +21,7 @@ type PoStVerifyInfo struct {
     Candidates  [PoStCandidate]
     PoStCfg
     Randomness  PoStRandomness
+    OnChain     OnChainPoStVerifyInfo
 }
 
 type OnChainPoStVerifyInfo struct {
