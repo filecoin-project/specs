@@ -27,7 +27,7 @@ type BlockHeader struct {
     MessageReceipts  ReceiptRoot
 
     // Consensus things
-    Timestamp        clock.Time
+    Timestamp        clock.UnixTime
     Ticket
     ElectionProof
 
