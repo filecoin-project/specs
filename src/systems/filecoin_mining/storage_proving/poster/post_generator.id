@@ -20,7 +20,7 @@ type PoStGenerator struct {
         candidateCount  UInt
         sectors         [sector.SectorID]
         sectorStore     sectorIndex.SectorStore
-    ) [sector.ChallengeTicket]
+    ) [sector.PoStCandidate]
 
     GeneratePoStProof(
         postCfg  sector.PoStCfg

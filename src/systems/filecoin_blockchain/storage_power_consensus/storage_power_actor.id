@@ -66,8 +66,8 @@ type StoragePowerActorCode struct {
     Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
 
     shouldChallenge(
-        minerAddr           addr.Address
-        currEpoch           block.ChainEpoch
+        minerAddr            addr.Address
+        currEpoch            block.ChainEpoch
         challengeFreePeriod  block.ChainEpoch
     ) bool
 

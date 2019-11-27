@@ -76,8 +76,8 @@ type StorageMiningSubsystem struct {
     _tryLeaderElection()
 
     VerifyPoSt(
-        proof           sector.PoStProof
-        partialTickets  [sector.ChallengeTicket]
+        proof       sector.PoStProof
+        candidates  [sector.PoStCandidate]
     )
 
     _submitPoStMessage(postSubmission poster.PoStSubmission) error

@@ -10,11 +10,11 @@ type BlockProducer struct {
     // and then get back the messages and call AssembleBlock
     // TODO minerAddr is of type StorageMiner.Address
     GenerateBlock(
-        postProof                sector.PoStProof
-        winningChallengeTickets  [sector.ChallengeTicket]
-        newTicket                block.Ticket
-        chainHead                block.Tipset
-        minerAddr                addr.Address
+        postProof              sector.PoStProof
+        winningPoStCandidates  [sector.PoStCandidate]
+        newTicket              block.Ticket
+        chainHead              block.Tipset
+        minerAddr              addr.Address
     )
 
     // call by BlockProducer itself after getting back messages

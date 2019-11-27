@@ -867,7 +867,7 @@ func (sdr *WinStackedDRG_I) _getChallengedSectors(randomness sector.PoStRandomne
 ////////////////////////////////////////////////////////////////////////////////
 // Election PoSt
 
-func (sdr *WinStackedDRG_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
+func (sdr *WinStackedDRG_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.PoStCandidate {
 	challengedSectors, challenges := sdr._getChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
 	var proofAuxs []sector.PersistentProofAux
 
@@ -892,7 +892,7 @@ func (sdr *WinStackedDRG_I) VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool {
 ////////////////////////////////////////////////////////////////////////////////
 // Surprise PoSt
 
-func (sdr *WinStackedDRG_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
+func (sdr *WinStackedDRG_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.PoStCandidate {
 	challengedSectors, challenges := sdr._getChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
 	var proofAuxs []sector.PersistentProofAux
 

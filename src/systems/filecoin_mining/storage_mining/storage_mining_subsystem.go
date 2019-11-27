@@ -79,30 +79,30 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 		// TODO: add how sectors are actually stored in the SMS proving set
 		provingSet := make([]sector.SectorID, 0)
 
-		challengeTickets := sms.StorageProving().Impl().GeneratePoStCandidates(postRandomness, provingSet)
+		candidates := sms.StorageProving().Impl().GenerateElectionPoStCandidates(postRandomness, provingSet)
 
-		if len(challengeTickets) <= 0 {
+		if len(candidates) <= 0 {
 			return // fail to generate post candidates
 		}
 
-		winningCTs := make([]sector.ChallengeTicket, 0)
+		winningCandidates := make([]sector.PoStCandidate, 0)
 
-		for _, ct := range challengeTickets {
+		for _, candidate := range candidates {
 			// TODO align on worker address
-			if sms._consensus().IsWinningChallengeTicket(ct) {
-				winningCTs = append(winningCTs, ct)
+			if sms._consensus().IsWinningPartialTicket(candidate.PartialTicket()) {
+				winningCandidates = append(winningCandidates, candidate)
 			}
 		}
 
-		if len(winningCTs) <= 0 {
+		if len(winningCandidates) <= 0 {
 			return
 		}
 
 		newTicket := sms.PrepareNewTicket(randomness1, worker.VRFKeyPair())
-		postProof := sms.StorageProving().Impl().GeneratePoStProof(postRandomness, winningCTs)
+		postProof := sms.StorageProving().Impl().GenerateElectionPoStProof(postRandomness, winningCandidates)
 		chainHead := sms._blockchain().BestChain().HeadTipset()
 
-		sms._blockProducer().GenerateBlock(postProof, winningCTs, newTicket, chainHead, worker.Address())
+		sms._blockProducer().GenerateBlock(postProof, winningCandidates, newTicket, chainHead, worker.Address())
 
 	}
 }

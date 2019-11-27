@@ -117,7 +117,7 @@ type WinStackedDRG struct {
         eligibleSectors  [sector.SectorNumber]
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
-    ) [sector.ChallengeTicket]
+    ) [sector.PoStCandidate]
     GenerateElectionPoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
     VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
 
@@ -126,7 +126,7 @@ type WinStackedDRG struct {
         eligibleSectors  [sector.SectorNumber]
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
-    ) [sector.ChallengeTicket]
+    ) [sector.PoStCandidate]
     GenerateSurprisePoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
     VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
 }

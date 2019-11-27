@@ -52,7 +52,7 @@ type ChallengeStatus struct {
     IsChallenged()  bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
     CanBeElected()  bool
     ShouldChallenge(
-        currEpoch           block.ChainEpoch
+        currEpoch            block.ChainEpoch
         challengeFreePeriod  block.ChainEpoch
     ) bool
 }
@@ -151,7 +151,7 @@ type StorageMinerActorCode struct {
 
 type MinerInfo struct {
     // The miner actor address assigned by the Storage Power Actor
-    Address        address.Address
+    Address                 address.Address
 
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.

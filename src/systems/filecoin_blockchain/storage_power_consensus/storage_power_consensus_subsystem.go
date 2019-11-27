@@ -73,7 +73,7 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeTicket sector.ChallengeTicket) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(partialTicket sector.PartialTicket) bool {
 
 	// TODO: Send message to SPA to get ActivePowerInSector associated with sector
 	activePowerInSector := uint64(block.StoragePower(0))
@@ -81,9 +81,9 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningChallengeTicket(challengeT
 	// TODO: Send message to SPA
 	totalPower := uint64(block.StoragePower(0))
 
-	electionProof := block.SHA256(challengeTicket.PartialTicket())
+	challengeTicket := block.SHA256(partialTicket)
 
-	return spc.ec().IsWinningElectionProof(electionProof, activePowerInSector, totalPower)
+	return spc.ec().IsWinningChallengeTicket(challengeTicket, activePowerInSector, totalPower)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionSeed(chain block.Chain, minerAddr addr.Address, epoch block.ChainEpoch) util.Randomness {

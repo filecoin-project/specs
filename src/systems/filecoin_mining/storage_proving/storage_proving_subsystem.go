@@ -34,7 +34,7 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize util.U
 }
 
 // TODO also return error
-func (sps *StorageProvingSubsystem_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.ChallengeTicket {
+func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
 	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
 
 	// TODO: Get these correctly.
@@ -45,11 +45,39 @@ func (sps *StorageProvingSubsystem_I) GeneratePoStCandidates(challengeSeed secto
 
 	poster.GeneratePoStCandidates(cfg, challengeSeed, numChallengeTickets, sectorIDs, sectorStore)
 
-	todo := make([]sector.ChallengeTicket, 0)
+	todo := make([]sector.PoStCandidate, 0)
 	return todo
 }
 
-func (sps *StorageProvingSubsystem_I) GeneratePoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.ChallengeTicket) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) GenerateElectionPoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
+	witness := &sector.PoStWitness_I{
+		Candidates_: challengeTickets,
+	}
+
+	// TODO: Get this correctly. Maybe move into PoStGenerator struct.
+	var cfg sector.PoStCfg
+
+	var poster = sps.PoStGenerator()
+	return poster.GeneratePoStProof(cfg, witness)
+}
+
+// TODO also return error
+func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
+	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
+
+	// TODO: Get these correctly.
+	var cfg sector.PoStCfg
+	var sectorStore sector_index.SectorStore
+
+	var poster = sps.PoStGenerator()
+
+	poster.GeneratePoStCandidates(cfg, challengeSeed, numChallengeTickets, sectorIDs, sectorStore)
+
+	todo := make([]sector.PoStCandidate, 0)
+	return todo
+}
+
+func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: challengeTickets,
 	}

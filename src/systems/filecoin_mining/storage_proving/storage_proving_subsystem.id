@@ -18,11 +18,11 @@ type StorageProvingSubsystem struct {
     GeneratePoStCandidates(
         challengeSeed  sector.PoStRandomness
         sectorIDs      [sector.SectorID]
-    ) [sector.ChallengeTicket]
+    ) [sector.PoStCandidate]
 
     GeneratePoStProof(
-        challengeSeed     sector.PoStRandomness
-        challengeTickets  [sector.ChallengeTicket]
+        challengeSeed  sector.PoStRandomness
+        candidates     [sector.PoStCandidate]
     ) sector.PoStProof
 
     VerifyPoStProof(
