@@ -24,10 +24,10 @@ func (ts *Tipset_I) MinTicket() Ticket {
 	return ret
 }
 
-func (ts *Tipset_I) LatestTimestamp() clock.Time {
-	var latest clock.Time
+func (ts *Tipset_I) LatestTimestamp() clock.UnixTime {
+	var latest clock.UnixTime
 	for _, blk := range ts.Blocks_ {
-		if blk.Timestamp() > latest || latest == clock.Time(0) {
+		if blk.Timestamp() > latest || latest == clock.UnixTime(0) {
 			latest = blk.Timestamp()
 		}
 	}
