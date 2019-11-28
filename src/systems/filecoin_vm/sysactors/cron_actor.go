@@ -13,12 +13,12 @@ func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 	// Hook period actions in here.
 
-	// a.actors is basically a static registry for now, loaded
+	// a.Entries is basically a static registry for now, loaded
 	// in the interpreter static registry.
-	for _, a := range a.Actors() {
+	for _, entry := range a.Entries() {
 		rt.SendCatchingErrors(&msg.InvocInput_I{
-			To_:     a,
-			Method_: actor.MethodCron,
+			To_:     entry.ToAddr(),
+			Method_: entry.MethodNum(),
 			Params_: []actor.MethodParam{},
 			Value_:  actor.TokenAmount(0),
 		})
