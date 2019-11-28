@@ -8,6 +8,6 @@ func (bp *BlockProducer_I) GenerateBlock(ep block.ElectionProof, T0 block.Ticket
 	panic("TODO")
 }
 
-func (bp *BlockProducer_I) AssembleBlock(ep block.ElectionProof, T0 block.Tipset, ts block.Tipset, minerAddr addr.Address, messages []msg.Message) block.Block {
+func (bp *BlockProducer_I) AssembleBlock(ep block.ElectionProof, T0 block.Tipset, ts block.Tipset, minerAddr addr.Address, messages []msg.SignedMessage) block.Block {
 	panic("TODO")
 }

@@ -46,7 +46,7 @@ type StorageDealProposal struct {
 // Provider's signature is implicit in the onchain call
 type StorageDeal struct {
     Proposal()      StorageDealProposal  // can extract proposal from the message
-    PublishMessage  msg.Message  // counter signature is implicit in the message
+    PublishMessage  msg.SignedMessage  // counter signature is implicit in the message
 
     CID()           DealCID
 }

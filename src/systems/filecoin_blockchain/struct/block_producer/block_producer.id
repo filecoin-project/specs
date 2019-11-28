@@ -23,7 +23,7 @@ type BlockProducer struct {
         T0             block.Ticket
         tipset         block.Tipset
         minerAddr      addr.Address
-        messages       [msg.Message]
+        messages       [msg.SignedMessage]
     ) block.Block
 }
 
