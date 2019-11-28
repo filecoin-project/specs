@@ -223,9 +223,10 @@ ProofOfReplication:
   Encoding:
     describe(encoding_time, "Time to encode a sector", secs)
     describe(encoding_time_parallel, "Time to encode a sector in parallel", secs)
-
     describe(encoding_window_time, "Time to encode a window", secs)
     describe(encoding_window_time_parallel, "Time to encode a window in parallel", secs)
+    describe(decoding_time, "Time to decode a sector", secs)
+    describe(kdf_time, "Time to compute a KDF", secs)
 
     encoding_time = encoding_window_time * windows
     encoding_time_parallel = encoding_time / rig_cores
@@ -250,6 +251,22 @@ ProofOfReplication:
     describe(porep_snark_size, "Size of a PoRep proof (bytes)")
     describe(porep_snark_size_kb, "Size of a PoRep proof (KiB)")
     describe(porep_snark_partition_constraints, "Number of constraints for a PoRep partition")
+    describe(kdf_constraints, "Constraints of KDF per node")
+
+    describe(labeling_proof, "Constraints to check labeling of a single node")
+    describe(labeling_proofs, "Constraints to check labeling of a window")
+    describe(window_labeling_proof, "Constraints to check correct labeling for all windows")
+    describe(data_inclusion, "Constraints to check a single inclusion in CommD")
+    describe(data_inclusions, "Constraints to check all the inclusions required in a window in CommD")
+    describe(window_data_inclusions,  "Constraints to check all the inclusions required for all windows in CommD")
+    describe(replica_inclusion, "Constraints to check a single inclusion in CommR")
+    describe(replica_inclusions, "Constraints to check all the inclusions required in a window in CommR")
+    describe(window_replica_inclusions,  "Constraints to check all the inclusions required for all windows in CommR")
+    describe(window_inclusion, "Constraints to check a single inclusion proof in a window")
+    describe(window_inclusions, "Constraints to check all the required inclusion proofs in a window")
+    describe(column_leaf, "Constraints to check a single leaf generation from a column in a window")
+    describe(column_leaves, "Constraints to check all the leaves generation required in a window")
+    describe(window_column_leaves, "Constraints to check all the leaves generation required for all windows")
 
     // D
     // Data layer committed with merkle tree
@@ -291,7 +308,7 @@ Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
   describe(polling_time, "Time between two PoSt proofs")
   describe(challenge_periods_per_month, "Number of challenge periods in a month")
-  describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them"
+  describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them")
 
   breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_node_encoding * challenge_periods_per_month))
   challenge_periods_per_month = secs_in_month / polling_time
