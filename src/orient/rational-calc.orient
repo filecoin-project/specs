@@ -23,7 +23,15 @@ Rig:
   rig_storage_unit_max_tb = rig_storage_unit_max / (1024 * 1024 * 1024 * 1024)
 
 Crypto:
-  describe(snark_size, "Size of a SNARK proof (bytes)")
+  describe(snark_size, "Size of a SNARK proof", bytes)
+  describe(hashing_amax, "Factor of difference between stock CPU hashing and the fastest hashing")
+
+  describe(merkle_tree_datahash_constraints, "Constraints for hashing two nodes in CommD")
+  describe(merkle_tree_datahash_time, "Time to hash two nodes in CommD")
+  describe(merkle_tree_hash_constraints, "Constraints for hashing two nodes in CommR")
+  describe(merkle_tree_hash_time, "Time to hash two nodes in CommR")
+  describe(column_leaf_hash_constraints, "Constraints for hashing a single row in a column", secs)
+  describe(column_leaf_hash_time, "Time to compute the hash of a single row in a column", secs)
 
 Utils:
   describe(cid_size, "Size of a CID (bytes)")
@@ -128,6 +136,7 @@ ProofOfReplication:
   Security:
     describe(porep_challenges, "Number of challenges in a PoRep proof")
     describe(porep_lambda, "Bits of security of a PoRep proof")
+    describe(spacegap, "Maximum difference in storage between an honest prover and a maliciois prover")
 
     porep_challenges = -porep_lambda / (log2(1-spacegap/4))
 
@@ -166,9 +175,10 @@ ProofOfReplication:
     describe(porep_time, "Time to seal a sector (PoRep proof)", secs)
     describe(porep_time_parallel, "Time to seal a sector (PoRep proof) with parallelization", secs)
     describe(porep_proof_gen, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium)", secs)
+    describe(porep_proof_gen_parallel, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium) in parallel", secs)
 
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
-    porep_time_parallel = porel_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
+    porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
 
   Commitment:
     describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows")
@@ -194,7 +204,7 @@ ProofOfReplication:
     commit_size = cid_size
     // TODO: should be missing *2
     window_comm_tree_time = merkle_tree_hash_time * window_nodes
-    window_comm_leaves_time = leaf_hash_time * windows
+    window_comm_leaves_time = column_leaf_hash_time * windows
     commr_size = commit_size
     commd_size = commit_size
     commrlast_size = commit_size
@@ -223,8 +233,12 @@ ProofOfReplication:
   Encoding:
     describe(encoding_time, "Time to encode a sector", secs)
     describe(encoding_time_parallel, "Time to encode a sector in parallel", secs)
+    describe(encoding_time_asic, "Time to encode a sector with an ASIC", secs)
+    describe(encoding_time_parallel_asic, "Time to encode a sector in parallel with ASICs", secs)
     describe(encoding_window_time, "Time to encode a window", secs)
     describe(encoding_window_time_parallel, "Time to encode a window in parallel", secs)
+    describe(encoding_window_time_asic, "Time to encode a window with an ASIC", secs)
+    describe(encoding_window_time_parallel_asic, "Time to encode a window in parallel with ASICs", secs)
     describe(decoding_time, "Time to decode a sector", secs)
     describe(kdf_time, "Time to compute a KDF", secs)
 
@@ -277,7 +291,7 @@ ProofOfReplication:
     // C
     window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
     window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
-    column_leaf = leaf_hash_constraints * drg_layers
+    column_leaf = column_leaf_hash_constraints * drg_layers
     column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
     window_column_leaves = column_leaves * windows
     labeling_proof = kdf_constraints * graph_parents
@@ -319,6 +333,7 @@ Rationality:
       describe(cost_node_encoding, "Cost of encoding a single node")
       describe(nodes_per_second, "Nodes encoded per second using the fastest hardware")
       describe(nodes_per_year, "Nodes encoded per year using the fastest hardware")
+      describe(hash_gb_per_second, "GiB that can be hashed per second")
 
       nodes_per_second = hash_gb_per_second / kdf_hash_size_gb
       nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
@@ -328,6 +343,7 @@ Rationality:
       describe(cost_gb_per_month, "Cost of storing 1GiB per month")
       describe(cost_storage_gbs, "Cost of storing 1GiB per second")
       describe(cost_storage_sector_polling_time, "Cost of storage for `polling_time`")
+      describe(extra_storage_time, "Time for which an honest user must be storing a file beyond the challenge period")
 
       cost_storage_gbs = cost_gb_per_month / secs_in_month 
       cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
