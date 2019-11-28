@@ -29,9 +29,9 @@ type Runtime interface {
 
     AcquireState()         ActorStateHandle
 
-    SuccessReturn()        msg.InvocOutput
-    ValueReturn(Bytes)     msg.InvocOutput
-    ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
+    SuccessReturn()        InvocOutput
+    ValueReturn(Bytes)     InvocOutput
+    ErrorReturn(exitCode exitcode.ExitCode) InvocOutput
 
     // Throw an error indicating a failure condition has occurred, from which the given actor
     // code is unable to recover. If an error is thrown in actor code, and not handled by any
@@ -60,8 +60,8 @@ type Runtime interface {
     Compute(ComputeFunctionID, args [Any]) Any
 
     // Send allows the current execution context to invoke methods on other actors in the system.
-    SendPropagatingErrors(input msg.InvocInput) msg.InvocOutput
-    SendCatchingErrors(input msg.InvocInput) msg.InvocOutput
+    SendPropagatingErrors(input InvocInput) InvocOutput
+    SendCatchingErrors(input InvocInput) InvocOutput
 
     // Computes an address for a new actor. The returned address is intended to uniquely refer to
     // the actor even in the event of a chain re-org (whereas an ID-address might refer to a
@@ -79,6 +79,24 @@ type Runtime interface {
     IpldGet(c ipld.CID) union {Bytes, error}
     IpldPut(x ipld.Object) ipld.CID
 }
+
+type InvocInput struct {
+    To      addr.Address
+    Method  actor.MethodNum
+    Params  actor.MethodParams
+    Value   actor.TokenAmount
+}
+
+type InvocOutput struct {
+    ExitCode     exitcode.ExitCode
+    ReturnValue  Bytes
+}
+
+type MessageReceipt struct {
+    ExitCode     exitcode.ExitCode
+    ReturnValue  Bytes
+    GasUsed      msg.GasAmount
+}  // representation tuple
 
 type ActorExecAddressSeed struct {
     creator             addr.Address

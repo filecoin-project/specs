@@ -1,22 +1,14 @@
 package storage_market
 
 import (
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
-	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-
-	ipld "github.com/filecoin-project/specs/libraries/ipld"
-
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-
-	util "github.com/filecoin-project/specs/util"
-
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
+	util "github.com/filecoin-project/specs/util"
 )
 
 const (
@@ -28,7 +20,7 @@ const LastPaymentEpochNone = 0
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
-type InvocOutput = msg.InvocOutput
+type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type State = StorageMarketActorState

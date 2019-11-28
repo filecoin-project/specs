@@ -11,8 +11,6 @@ import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/e
 import util "github.com/filecoin-project/specs/util"
 
 type ActorSubstateCID = actor.ActorSubstateCID
-type InvocInput = msg.InvocInput
-type InvocOutput = msg.InvocOutput
 type ExitCode = exitcode.ExitCode
 type RuntimeError = exitcode.RuntimeError
 
@@ -77,7 +75,7 @@ type VMContext struct {
 	_valueReceived      actor.TokenAmount
 	_gasRemaining       msg.GasAmount
 	_numValidateCalls   int
-	_output             msg.InvocOutput
+	_output             InvocOutput
 }
 
 func VMContext_Make(
@@ -123,7 +121,7 @@ func (rt *VMContext) CreateActor(
 
 	rt._updateActorSystemStateInternal(address, stateCID)
 
-	rt.SendPropagatingErrors(&msg.InvocInput_I{
+	rt.SendPropagatingErrors(&InvocInput_I{
 		To_:     address,
 		Method_: actor.MethodConstructor,
 		Params_: constructorParams,
@@ -250,16 +248,16 @@ func (rt *VMContext) _checkRunning() {
 	}
 }
 func (rt *VMContext) SuccessReturn() InvocOutput {
-	return msg.InvocOutput_Make(exitcode.OK(), nil)
+	return InvocOutput_Make(exitcode.OK(), nil)
 }
 
 func (rt *VMContext) ValueReturn(value util.Bytes) InvocOutput {
-	return msg.InvocOutput_Make(exitcode.OK(), value)
+	return InvocOutput_Make(exitcode.OK(), value)
 }
 
 func (rt *VMContext) ErrorReturn(exitCode ExitCode) InvocOutput {
 	exitCode = exitcode.EnsureErrorCode(exitCode)
-	return msg.InvocOutput_Make(exitCode, nil)
+	return InvocOutput_Make(exitCode, nil)
 }
 
 func (rt *VMContext) _throwError(exitCode ExitCode) {
@@ -323,7 +321,7 @@ const (
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
 func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
-	msg.MessageReceipt, st.StateTree) {
+	MessageReceipt, st.StateTree) {
 
 	rt._running = true
 	ret := rt._sendInternal(input, CatchErrors)
@@ -331,12 +329,12 @@ func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
 	return ret, rt._globalStatePending
 }
 
-func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
+func _catchRuntimeErrors(f func() InvocOutput) (output InvocOutput) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch r.(type) {
 			case *RuntimeError:
-				output = msg.InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
+				output = InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
 			default:
 				panic(r)
 			}
@@ -355,7 +353,7 @@ func _invokeMethodInternal(
 	ret InvocOutput, gasUsed msg.GasAmount, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
-		ret = msg.InvocOutput_Make(exitcode.OK(), nil)
+		ret = InvocOutput_Make(exitcode.OK(), nil)
 		gasUsed = msg.GasAmount_Zero() // TODO: verify
 		return
 	}
@@ -377,7 +375,7 @@ func _invokeMethodInternal(
 	return
 }
 
-func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingSpec) msg.MessageReceipt {
+func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingSpec) MessageReceipt {
 	rtOuter._checkRunning()
 	rtOuter._checkStateLock(false)
 
@@ -430,22 +428,22 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._globalStatePending = rtInner._globalStatePending
 	}
 
-	return msg.MessageReceipt_Make(invocOutput, gasUsed)
+	return MessageReceipt_Make(invocOutput, gasUsed)
 }
 
-func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, errSpec ErrorHandlingSpec) msg.InvocOutput {
+func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, errSpec ErrorHandlingSpec) InvocOutput {
 	ret := rtOuter._sendInternal(input, errSpec)
-	return &msg.InvocOutput_I{
+	return &InvocOutput_I{
 		ExitCode_:    ret.ExitCode(),
 		ReturnValue_: ret.ReturnValue(),
 	}
 }
 
-func (rt *VMContext) SendPropagatingErrors(input InvocInput) msg.InvocOutput {
+func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
 	return rt._sendInternalOutputOnly(input, PropagateErrors)
 }
 
-func (rt *VMContext) SendCatchingErrors(input InvocInput) msg.InvocOutput {
+func (rt *VMContext) SendCatchingErrors(input InvocInput) InvocOutput {
 	return rt._sendInternalOutputOnly(input, CatchErrors)
 }
 
@@ -515,4 +513,35 @@ func (rt *VMContext) Compute(f ComputeFunctionID, args []Any) Any {
 	gasCost := def.GasCostFn(args)
 	rt._deductGasRemaining(gasCost)
 	return def.Body(args)
+}
+
+func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {
+	return &InvocInput_I{
+		To_:     to,
+		Method_: method,
+		Params_: params,
+		Value_:  value,
+	}
+}
+
+func InvocOutput_Make(exitCode exitcode.ExitCode, returnValue util.Bytes) InvocOutput {
+	return &InvocOutput_I{
+		ExitCode_:    exitCode,
+		ReturnValue_: returnValue,
+	}
+}
+
+func MessageReceipt_Make(output InvocOutput, gasUsed msg.GasAmount) MessageReceipt {
+	return &MessageReceipt_I{
+		ExitCode_:    output.ExitCode(),
+		ReturnValue_: output.ReturnValue(),
+		GasUsed_:     gasUsed,
+	}
+}
+
+func MessageReceipt_MakeSystemError(errCode exitcode.SystemErrorCode, gasUsed msg.GasAmount) MessageReceipt {
+	return MessageReceipt_Make(
+		InvocOutput_Make(exitcode.SystemError(errCode), nil),
+		gasUsed,
+	)
 }

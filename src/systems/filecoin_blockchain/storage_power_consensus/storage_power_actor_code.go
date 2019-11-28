@@ -9,7 +9,6 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -22,7 +21,7 @@ const (
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
-type InvocOutput = msg.InvocOutput
+type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type State = StoragePowerActorState
