@@ -6,7 +6,7 @@ type UInt64 UInt
 type PoStGenerator struct {
     GeneratePoStCandidates(
         postCfg         sector.PoStCfg
-        challengeSeed   util.Randomness
+        challengeSeed   sector.PoStRandomness
         candidateCount  UInt
         sectors         [sector.SectorID]
         sectorStore     sectorIndex.SectorStore
@@ -20,6 +20,6 @@ type PoStGenerator struct {
     VerifyPoStProof(
         postCfg        sector.PoStCfg
         Proof          sector.PoStProof
-        challengeSeed  util.Randomness
+        challengeSeed  sector.PoStRandomness
     ) bool
 }

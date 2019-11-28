@@ -138,15 +138,13 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	substateCID := actorState.State()
 
 	substate := node.LocalGraph().Get(ipld.CID(substateCID))
-	// TODO fix
+	// TODO fix conversion to bytes
 	panic(substate)
-	// substateBytes := util.Serialization(substate)
-
-	var substateBytes []byte
-	st, err := Deserialize_StorageMinerActorState(substateBytes)
+	var serializedSubstate Serialization
+	st, err := Deserialize_StorageMinerActorState(serializedSubstate)
 
 	if err == nil {
-		panic("Serialization error")
+		panic("Deserialization error")
 	}
 	return st
 }
@@ -166,7 +164,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 		return false
 	}
 
-	electionRand := sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch())
+	electionRand := sector.PoStRandomness(sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch()))
 
 	// A proof must be a valid snark proof with the correct public inputs
 	// 3. Get public inputs
@@ -217,7 +215,7 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 	// A proof must be a valid snark proof with the correct public inputs
 
 	// 3. Get appropriate randomness
-	surpriseRand := sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch())
+	surpriseRand := sector.PoStRandomness(sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch()))
 
 	// 4. Get public inputs
 	info := st.Info()

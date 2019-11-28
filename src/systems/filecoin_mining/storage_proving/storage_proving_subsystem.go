@@ -4,6 +4,7 @@ import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+
 	//	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -34,7 +35,7 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize util.U
 }
 
 // TODO also return error
-func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSeed util.Randomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
+func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
 	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
 
 	// TODO: Get these correctly.
@@ -49,7 +50,7 @@ func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSe
 	return todo
 }
 
-func (sps *StorageProvingSubsystem_I) GenerateElectionPoStProof(challengeSeed util.Randomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) GenerateElectionPoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: challengeTickets,
 	}
@@ -62,7 +63,7 @@ func (sps *StorageProvingSubsystem_I) GenerateElectionPoStProof(challengeSeed ut
 }
 
 // TODO also return error
-func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed util.Randomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
+func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
 	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
 
 	// TODO: Get these correctly.
@@ -77,7 +78,7 @@ func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSe
 	return todo
 }
 
-func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStProof(challengeSeed util.Randomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: challengeTickets,
 	}

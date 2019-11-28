@@ -533,8 +533,8 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 		// TODO: Make SealCfg sector.SealCfg from miner configuration (where is that?)
 		SealCfg_: &sealCfg,
 
-		Randomness_:            rt.Randomness(onChainInfo.SealEpoch(), 0),
-		InteractiveRandomness_: rt.Randomness(onChainInfo.InteractiveEpoch(), 0),
+		Randomness_:            sector.SealRandomness(rt.Randomness(onChainInfo.SealEpoch(), 0)),
+		InteractiveRandomness_: sector.InteractiveSealRandomness(rt.Randomness(onChainInfo.InteractiveEpoch(), 0)),
 		UnsealedCID_:           unsealedCID,
 	}
 

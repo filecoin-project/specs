@@ -2,6 +2,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 
 type PartialTicket Bytes  // 32 bytes
 type ChallengeTicketsCommitment Bytes
+type PoStRandomness Bytes
 
 // Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
@@ -19,7 +20,7 @@ type PoStType enum {
 // TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
     PoStCfg
-    Randomness  util.Randomness
+    Randomness  PoStRandomness
     OnChain     OnChainPoStVerifyInfo
 }
 

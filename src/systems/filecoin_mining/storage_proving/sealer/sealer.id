@@ -7,7 +7,7 @@ type SealInputs struct {
     SectorID      sector.SectorID
     SealCfg       sector.SealCfg
     MinerID       addr.Address
-    RandomSeed    util.Randomness
+    RandomSeed    sector.SealRandomness
     UnsealedPath  file.Path
     SealedPath    file.Path
     DealIDs       [deal.DealID]
@@ -16,7 +16,7 @@ type SealInputs struct {
 type CreateSealProofInputs struct {
     SectorID               sector.SectorID
     SealCfg                sector.SealCfg
-    InteractiveRandomSeed  util.Randomness
+    InteractiveRandomSeed  sector.InteractiveSealRandomness
     SealedPaths            [file.Path]
     SealOutputs
 }

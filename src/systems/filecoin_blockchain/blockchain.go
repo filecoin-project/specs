@@ -80,4 +80,4 @@ func HandleBlock(block block.Block) bool {
 // TryGenerateStateTree(block Block) stateTree.StateTree
 // AssembleTipsets() []Tipset
 // ChooseTipset(tipsets []Tipset) Tipset
-// Getutil.Randomness() Randomness
+// GetPostRandomness() Randomness

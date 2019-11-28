@@ -16,17 +16,17 @@ type StorageProvingSubsystem struct {
     // GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
 
     GeneratePoStCandidates(
-        challengeSeed  util.Randomness
+        challengeSeed  sector.PoStRandomness
         sectorIDs      [sector.SectorID]
     ) [sector.PoStCandidate]
 
     GeneratePoStProof(
-        challengeSeed  util.Randomness
+        challengeSeed  sector.PoStRandomness
         candidates     [sector.PoStCandidate]
     ) sector.PoStProof
 
     VerifyPoStProof(
-        challengeSeed  util.Randomness
+        challengeSeed  sector.PoStRandomness
         proof          [sector.PoStProof]
     ) bool
 }
