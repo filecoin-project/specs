@@ -1,27 +1,29 @@
-// Note: all terms referring to size are in bytes, unless suffixed with _mb, _tb, etc.
+// Note: all terms referring to size are in bytes, unless suffixed with _mib, _tib, etc.
 // Note: all terms referring to time are in seconds, unless suffixed with _mins, _days, etc.
 
 Rig:
   describe(rig_sectors_min, "Minimum sectors require to mine")
 
-  describe(rig_storage_latency, "Random Access latency on the storage medium (honest)")
+  describe(rig_storage_latency, "Random Access latency on the storage medium (honest)", secs)
   describe(rig_storage_parallelization, "Storage Units that can be accessed in parallel (honest)")
   describe(rig_storage_min, "Minimum storage required to mine", bytes)
-  describe(rig_storage_min_tb, "Minimum storage required to mine", tib)
+  describe(rig_storage_min_tib, "Minimum storage required to mine", tib)
   describe(rig_storage_parallelization_min, "Minimum storage units that must be accessed in parallel in order to mine (honest)")
   describe(rig_storage_unit_max, "Maximum storage capacity for a storage unit", bytes)
-  describe(rig_storage_unit_max_tb, "Maximum storage capacity for a storage unit", tib)
+  describe(rig_storage_unit_max_tib, "Maximum storage capacity for a storage unit", tib)
 
   describe(rig_malicious_cost_per_year, "Cost of the malicious computing rig per year")
   describe(rig_cores, "Number of CPU cores")
-  describe(rig_storage_read_mbs, "Sequential read speed (MiB/s)")
+  describe(rig_storage_read_mibs, "Sequential read speed (MB/s)")
+  describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
 
-  rig_storage_min = rig_storage_min_tb * 1024 * 1024 * 1024 * 1024
+  rig_storage_read_mibs = rig_storage_read_mibs * to_i
+  rig_storage_min = rig_storage_min_tib * b_in_tib
   rig_sectors_min = rig_storage_min / sector_size
   rig_storage_parallelization_min = post_data_access / polling_time
 
   rig_storage_unit_max = rig_storage_min / rig_storage_parallelization_min
-  rig_storage_unit_max_tb = rig_storage_unit_max / (1024 * 1024 * 1024 * 1024)
+  rig_storage_unit_max_tib = rig_storage_unit_max / b_in_tib 
 
 Crypto:
   describe(snark_size, "Size of a SNARK proof", bytes)
@@ -35,13 +37,23 @@ Crypto:
   describe(column_leaf_hash_time, "Time to compute the hash of a single row in a column", secs)
 
 Utils:
-  describe(cid_size, "Size of a CID (bytes)")
+  describe(cid_size, "Size of a CID", bytes)
   describe(secs_in_month, "Number of seconds in a month")
-  describe(b_in_gb, "Number of bytes in a GiB")
+  describe(secs_in_year, "Number of seconds in a year")
+  describe(b_in_tib, "Number of bytes in a TiB")
+  describe(b_in_gib, "Number of bytes in a GiB")
+  describe(b_in_mib, "Number of bytes in a MiB")
+  describe(b_in_kib, "Number of bytes in a KiB")
+  describe(to_i, "Ratio between GB and GiB")
 
-  b_in_gb = (1024 * 1024 * 1024)
+  b_in_tib = (1024 * 1024 * 1024 * 1024)
+  b_in_gib = (1024 * 1024 * 1024)
+  b_in_mib = (1024 * 1024)
+  b_in_kib = 1024
   secs_in_month = (24 * 30 * 60 * 60)
+  secs_in_year = (24 * 30 * 60 * 60 * 365)
   cid_size = 32 + 1 + 1 + 1
+  to_i = 1024/1000
 
 ProofOfSpacetime:
   // post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
@@ -92,20 +104,20 @@ ProofOfSpacetime:
         DataLayout (StackedReplicaDistributed):
           post_data_access = post_challenges * windows * rig_storage_latency
         DataLayout (StackedReplicaSequential):
-          post_data_access = post_challenges * node_size_mb * rig_storage_read_mbs
+          post_data_access = post_challenges * node_size_mib * rig_storage_read_mibs
 
     // TODO: add MerkleTreeCaching for ColumnR
     MerkleTreeCaching:
       Storage:
-        describe(post_mtree_cached, "Size of the cached parts of the replica merkle tree (bytes)")
+        describe(post_mtree_cached, "Size of the cached parts of the replica merkle tree", bytes)
         describe(post_mtree_cached_hashnodes, "Number of intermediary hash nodes cached of the replica merkle tree")
-        describe(post_mtree_cached_gb, "POST_MTREE_CACHED in GiB")
+        describe(post_mtree_cached_gib, "POST_MTREE_CACHED in GiB")
         describe(post_mtree_overhead, "Fraction of extra storage a miner will have to use to cache the replica merkle tree")
         describe(post_mtree_layers_cached, "Number of layers of the replica merkle tree being cached")
         describe(post_mtree_layers_deleted, "Number of layers of the replica merkle tree not being cached")
 
         post_mtree_cached = post_mtree_cached_hashnodes * node_size
-        post_mtree_cached_gb = post_mtree_cached / (1024 * 1024 * 1024)
+        post_mtree_cached_gib = post_mtree_cached / b_in_gib 
         post_mtree_overhead = post_mtree_cached / sector_size
         post_mtree_cached_hashnodes = expt(2, post_mtree_layers_cached) - 1
         post_mtree_layers_deleted = commr_tree_depth - post_mtree_layers_cached
@@ -134,7 +146,7 @@ ProofOfSpacetime:
           // TODO: log2(nodes) > post_mtree_layers_cached
 
   Time (NoWrapper):
-    //rig_storage_latency_throughput_kb = rig_storage_latency_throughput / 1024
+    //rig_storage_latency_throughput_kib = rig_storage_latency_throughput / 1024
     //response_honest_min = (post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency *windows) / rig_storage_latency_throughput
 
   SNARK:
@@ -144,8 +156,8 @@ ProofOfSpacetime:
     describe(ticket_constraints, "Constraints of a partial ticket per challenged node (in PoSt)")
     describe(post_snark_constraints, "Constraints for a PoSt")
     describe(post_snark_partitions, "Number of partitions of a PoSt proof")
-    describe(post_snark_size, "Size of a PoSt proof (bytes)")
-    describe(post_snark_size_kb, "Size of a Post proof (KiB)")
+    describe(post_snark_size, "Size of a PoSt proof", bytes)
+    describe(post_snark_size_kib, "Size of a Post proof", kib)
     describe(post_snark_partition_constraints, "Number of constraints for a PoSt partition")
 
     inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
@@ -155,25 +167,25 @@ ProofOfSpacetime:
     post_snark_constraints = ticket_proofs + post_inclusion_proofs
     post_snark_partitions = post_snark_constraints / post_snark_partition_constraints
     post_snark_size = post_snark_partitions * snark_size
-    post_snark_size_kb = post_snark_size / 1024
+    post_snark_size_kib = post_snark_size / b_in_kib
 
 ProofOfReplication:
   Security:
     describe(porep_challenges, "Number of challenges in a PoRep proof")
     describe(porep_lambda, "Bits of security of a PoRep proof")
-    describe(spacegap, "Maximum difference in storage between an honest prover and a maliciois prover")
+    describe(spacegap, "Maximum difference in storage between an honest prover and a malicious prover")
 
     porep_challenges = -porep_lambda / (log2(1-spacegap/4))
 
   Graph:
     describe(nodes, "Number of nodes in a sector")
     describe(sector_size, "Size of a sector", bytes)
-    describe(sector_size_mb, "Size of a sector", mib)
-    describe(sector_size_gb, "Size of a sector", gib)
+    describe(sector_size_mib, "Size of a sector", mib)
+    describe(sector_size_gib, "Size of a sector", gib)
 
     describe(window_nodes, "Number of nodes in a window")
-    describe(window_size, "Size of a window (bytes)")
-    describe(window_size_mb, "Size of a window (MiB)")
+    describe(window_size, "Size of a window", bytes)
+    describe(window_size_mib, "Size of a window", mib)
     describe(windows, "Number of windows in a sector")
 
     describe(graph_parents, "Number of parents of a node in the PoRep window graph")
@@ -183,21 +195,21 @@ ProofOfReplication:
     describe(wrapper_parents, "Number of parents in the wrapper layer")
 
     describe(node_size, "Size of a node", bytes)
-    describe(node_size_mb, "Size of a node", mib)
-    describe(node_size_gb, "Size of a node", gib)
-    describe(kdf_hash_size, "Size of the input to the KDF hash (bytes)")
-    describe(kdf_hash_size_gb, "Size of the input to the KDF hash (GiB)")
+    describe(node_size_mib, "Size of a node", mib)
+    describe(node_size_gib, "Size of a node", gib)
+    describe(kdf_hash_size, "Size of the input to the KDF hash", bytes)
+    describe(kdf_hash_size_gib, "Size of the input to the KDF hash", gi)
 
-    sector_size = sector_size_gb * b_in_gb
-    sector_size_mb = sector_size / (1024 * 1024)
+    sector_size = sector_size_gib * b_in_gib
+    sector_size_mib = sector_size / b_in_mib 
     graph_parents = drg_parents + expander_parents
     nodes = sector_size / node_size
-    node_size_mb = node_size / (1024 * 1024)
-    node_size_gb = node_size / b_in_gb 
-    kdf_hash_size_gb = graph_parents * node_size_gb
-    kdf_hash_size = kdf_hash_size_gb * b_in_gb
+    node_size_mib = node_size / b_in_mib 
+    node_size_gib = node_size / b_in_gib 
+    kdf_hash_size_gib = graph_parents * node_size_gib
+    kdf_hash_size = kdf_hash_size_gib * b_in_gib
 
-    window_size = window_size_mb * 1024 * 1024
+    window_size = window_size_mib * b_in_mib 
     windows = sector_size / window_size
     window_nodes = nodes / windows
 
@@ -214,10 +226,10 @@ ProofOfReplication:
     describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows")
     describe(window_comm_leaves_time, "Time to commit columns of a window")
 
-    describe(commit_size, "Size of a commitment (bytes)")
-    describe(commr_size, "Size of CommR (bytes)")
-    describe(commd_size, "Size of CommD (bytes)")
-    describe(commrlast_size, "Size of CommRLast (bytes)")
+    describe(commit_size, "Size of a commitment", bytes)
+    describe(commr_size, "Size of CommR", bytes)
+    describe(commd_size, "Size of CommD", bytes)
+    describe(commrlast_size, "Size of CommRLast", bytes)
 
     describe(commr_tree_depth, "Number of layers of the merkle tree with root hash CommR")
 
@@ -227,13 +239,13 @@ ProofOfReplication:
     describe(porep_commit_time_parallel, "Time to generate CommC, CommR and CommQ in parallel", secs)
 
 
-    describe(commr_time, "Time to generate CommR (seconds)")
-    describe(commd_time, "Time to generate CommD (seconds)")
-    describe(commc_time, "Time to generate CommC (seconds)")
+    describe(commr_time, "Time to generate CommR", secs)
+    describe(commd_time, "Time to generate CommD", secs)
+    describe(commc_time, "Time to generate CommC", secs)
 
     commit_size = cid_size
     // TODO: should be missing *2
-    window_comm_tree_time = merkle_tree_hash_time * window_nodes
+    window_comm_tree_time = merkle_tree_hash_time * (window_nodes * 2 - 1)
     window_comm_leaves_time = column_leaf_hash_time * windows
     commr_size = commit_size
     commd_size = commit_size
@@ -242,7 +254,7 @@ ProofOfReplication:
     seal_onchain_commitments_size = commd_size + commr_size
     // seal_commitment_time = commr_time
 
-    commd_time = merkle_tree_datahash_time * nodes
+    commd_time = merkle_tree_datahash_time * (2 * nodes - 1)
 
     // TODO commr might be twice depending on CommQ
     porep_commit_time = commr_time + commc_time
@@ -291,21 +303,21 @@ ProofOfReplication:
 
     Decoding (StackedReplicas):
       // Decoding in StackedReplicas: read the window output and decode it
-      window_read_time = window_size_mb / rig_storage_read_mbs
+      window_read_time = window_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_window_time + window_read_time
       decoding_time_parallel = encoding_window_time_parallel + window_read_time_parallel
 
     Decoding (WrappingVariant):
       // Decoding in WrappingVariant: read the window output and decode them
-      window_read_time = window_size_mb / rig_storage_read_mbs
+      window_read_time = window_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_window_time + window_read_time
       decoding_time_parallel = encoding_window_time_parallel + window_read_time_parallel
 
     Decoding (Wrapping):
       // Decoding in Wrapping: read all the window outputs and decode them
-      window_read_time = sector_size_mb / rig_storage_read_mbs
+      window_read_time = sector_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_time + window_read_time
       decoding_time_parallel = encoding_time_parallel + window_read_time_parallel
@@ -313,8 +325,8 @@ ProofOfReplication:
   SNARK:
     describe(porep_snark_constraints, "Constraints for a PoRep")
     describe(porep_snark_partitions, "Number of partitions of a PoRep proof")
-    describe(porep_snark_size, "Size of a PoRep proof (bytes)")
-    describe(porep_snark_size_kb, "Size of a PoRep proof (KiB)")
+    describe(porep_snark_size, "Size of a PoRep proof", bytes)
+    describe(porep_snark_size_kib, "Size of a PoRep proof", kib)
     describe(porep_snark_partition_constraints, "Number of constraints for a PoRep partition")
     describe(kdf_constraints, "Constraints of KDF per node")
 
@@ -356,7 +368,7 @@ ProofOfReplication:
 
     porep_snark_partitions = porep_snark_constraints / porep_snark_partition_constraints
     porep_snark_size = porep_snark_partitions * snark_size
-    porep_snark_size_kb = porep_snark_size / 1024
+    porep_snark_size_kib = porep_snark_size / b_in_kib
 
     Constraints (WindowEncoding):
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
@@ -375,7 +387,7 @@ Rationality:
   describe(challenge_periods_per_month, "Number of challenge periods in a month")
   describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them")
 
-  breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_node_encoding * challenge_periods_per_month))
+  breakeven_nodes = ((cost_gib_per_month *  sector_size_gib) / (cost_node_encoding * challenge_periods_per_month))
   challenge_periods_per_month = secs_in_month / polling_time
   regeneration_fraction = breakeven_nodes / nodes
 
@@ -384,22 +396,26 @@ Rationality:
       describe(cost_node_encoding, "Cost of encoding a single node")
       describe(nodes_per_second, "Nodes encoded per second using the fastest hardware")
       describe(nodes_per_year, "Nodes encoded per year using the fastest hardware")
-      describe(hash_gb_per_second, "GiB that can be hashed per second")
+      describe(hash_gb_per_second, "GB that can be hashed per second")
+      describe(hash_gib_per_second, "GiB that can be hashed per second")
 
-      nodes_per_second = hash_gb_per_second / kdf_hash_size_gb
-      nodes_per_year = nodes_per_second * (60 * 60 * 24 * 365)
+      hash_gib_per_second = hash_gb_per_second * to_i
+      nodes_per_second = hash_gib_per_second / kdf_hash_size_gib
+      nodes_per_year = nodes_per_second * secs_in_year 
       cost_node_encoding = rig_malicious_cost_per_year / nodes_per_year 
 
     Storage:
-      describe(cost_gb_per_month, "Cost of storing 1GiB per month")
-      describe(cost_storage_gbs, "Cost of storing 1GiB per second")
+      describe(cost_gb_per_month, "Cost of storing 1GB per month")
+      describe(cost_gib_per_month, "Cost of storing 1GiB per month")
+      describe(cost_storage_gibs, "Cost of storing 1GiB per second")
       describe(cost_storage_sector_polling_time, "Cost of storage for `polling_time`")
       describe(extra_storage_time, "Time for which an honest user must be storing a file beyond the challenge period")
 
-      cost_storage_gbs = cost_gb_per_month / secs_in_month 
-      cost_storage_sector_polling_time = cost_storage_gbs * (sector_size_gb * (polling_time + extra_storage_time))
+      cost_gib_per_month = cost_gb_per_month * to_i
+      cost_storage_gibs = cost_gib_per_month / secs_in_month 
+      cost_storage_sector_polling_time = cost_storage_gibs * (sector_size_gib * (polling_time + extra_storage_time))
 
 // Throughput:
-//   num_parallel_encoding = rig_ram_gb * rig_size / sector_size_gb
+//   num_parallel_encoding = rig_ram_gib * rig_size / sector_size_gib
 //   rig_cores = num_parallel_encoding
-//   seal_throughput = (sector_size_gb * num_parallel_encoding) / encoding_time
+//   seal_throughput = (sector_size_gib * num_parallel_encoding) / encoding_time
