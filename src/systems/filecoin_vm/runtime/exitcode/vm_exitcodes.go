@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+import util "github.com/filecoin-project/specs/util"
+
 type SystemErrorCode int
 type UserDefinedErrorCode int
 
@@ -12,6 +14,9 @@ const (
 	SystemErrorCode_Placeholder      = SystemErrorCode(-(1 << 30))
 	UserDefinedErrorCode_Placeholder = UserDefinedErrorCode(-(1 << 30))
 )
+
+var IMPL_FINISH = util.IMPL_FINISH
+var TODO = util.TODO
 
 // TODO: assign all of these.
 const (
@@ -88,7 +93,8 @@ func (x *ExitCode_I) AllowsStateUpdate() bool {
 }
 
 func (x *ExitCode_I) Equals(ExitCode) bool {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func EnsureErrorCode(x ExitCode) ExitCode {

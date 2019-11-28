@@ -6,6 +6,8 @@ import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/e
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import util "github.com/filecoin-project/specs/util"
 
+var IMPL_FINISH = util.IMPL_FINISH
+
 type Serialization = util.Serialization
 
 func MessageReceipt_Make(output InvocOutput, exitCode exitcode.ExitCode, gasUsed GasAmount) MessageReceipt {
@@ -54,7 +56,8 @@ func Sign(message UnsignedMessage, keyPair filcrypto.SigKeyPair) (SignedMessage,
 }
 
 func SignatureVerificationError() error {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func Verify(message SignedMessage, publicKey filcrypto.PublicKey) (UnsignedMessage, error) {
@@ -70,19 +73,33 @@ func Verify(message SignedMessage, publicKey filcrypto.PublicKey) (UnsignedMessa
 }
 
 func (x *GasAmount_I) Add(y GasAmount) GasAmount {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (x *GasAmount_I) Subtract(y GasAmount) GasAmount {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
+}
+
+func (x *GasAmount_I) SubtractWhileNonnegative(y GasAmount) (ret GasAmount, ok bool) {
+	ret = x.Subtract(y)
+	ok = true
+	if ret.LessThan(GasAmount_Zero()) {
+		ret = GasAmount_Zero()
+		ok = false
+	}
+	return
 }
 
 func (x *GasAmount_I) LessThan(y GasAmount) bool {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (x *GasAmount_I) Scale(count int) GasAmount {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func GasAmount_Affine(b GasAmount, x int, m GasAmount) GasAmount {
@@ -94,7 +111,8 @@ func GasAmount_Zero() GasAmount {
 }
 
 func GasAmount_FromInt(x int) GasAmount {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {

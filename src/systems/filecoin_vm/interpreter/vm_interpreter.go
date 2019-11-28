@@ -10,6 +10,7 @@ import gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/ga
 import util "github.com/filecoin-project/specs/util"
 
 var TODO = util.TODO
+var IMPL_FINISH = util.IMPL_FINISH
 
 func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree st.StateTree, msgs []MessageRef) (outTree st.StateTree, ret []msg.MessageReceipt) {
 	compTree := inTree
@@ -22,7 +23,8 @@ func (vmi *VMInterpreter_I) ApplyMessageBatch(inTree st.StateTree, msgs []Messag
 }
 
 func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {
-	// TODO: assert amount nonnegative
+	TODO() // TODO: assert amount is nonnegative (should TokenAmount be an int or a BigInt?)
+
 	retTree, err := tree.Impl().WithFundsTransfer(from, to, amount)
 	if err != nil {
 		panic("Interpreter error: insufficient funds (or transfer error) despite checks")
@@ -36,17 +38,25 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	st.StateTree, msg.MessageReceipt) {
 
 	gasUsed := msg.GasAmount_Zero()
+	gasRemaining := message.GasLimit()
 
 	_applyError := func(errCode exitcode.SystemErrorCode) (st.StateTree, msg.MessageReceipt) {
-		// TODO: If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
+		panic("TODO: deduct gasUsed from miner block reward.")
+		panic("TODO: if used gas goes to miner anyway, is this a no-op?")
+
 		return inTree, msg.MessageReceipt_MakeSystemError(errCode, gasUsed)
 	}
 
-	_useGas := func(x msg.GasAmount) {
-		gasUsed = gasUsed.Add(x)
+	_useInitGas := func(initGas msg.GasAmount) (ok bool) {
+		gasUsed = gasUsed.Add(initGas)
+		gasRemaining, ok = gasRemaining.SubtractWhileNonnegative(initGas)
+		return
 	}
 
-	_useGas(gascost.OnChainMessage(messageSizeOrig))
+	ok := _useInitGas(gascost.OnChainMessage(messageSizeOrig))
+	if !ok {
+		return _applyError(exitcode.OutOfGas)
+	}
 
 	compTree := inTree
 	var outTree st.StateTree
@@ -55,13 +65,12 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 
 	fromActor := compTree.GetActorState(message.From())
 	if fromActor == nil {
-		// TODO: This was originally exitcode.InvalidMethod; which is correct?
 		return _applyError(exitcode.ActorNotFound)
 	}
 
-	// make sure fromActor has enough money to run the max invocation
-	maxGasCost := gasToFIL(message.GasLimit(), message.GasPrice())
-	totalCost := message.Value() + actor.TokenAmount(maxGasCost)
+	// make sure fromActor has enough money to run with the specified gas limit
+	gasLimitCost := gasToFIL(message.GasLimit(), message.GasPrice())
+	totalCost := message.Value() + actor.TokenAmount(gasLimitCost)
 	if fromActor.Balance() < totalCost {
 		return _applyError(exitcode.InsufficientFunds_System)
 	}
@@ -78,12 +87,12 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 		return _applyError(exitcode.ActorNotFound)
 	}
 
-	// deduct maximum expenditure gas funds first
-	compTree = _withTransferFundsAssert(compTree, message.From(), addr.BurntFundsActorAddr, maxGasCost)
+	// deduct gas limit funds first
+	compTree = _withTransferFundsAssert(compTree, message.From(), addr.BurntFundsActorAddr, gasLimitCost)
 
 	rt := vmr.VMContext_Make(
 		message.From(),
-		minerAddr, // TODO: may not exist? (see below)
+		minerAddr,
 		fromActor.CallSeqNum(),
 		actor.CallSeqNum(0),
 		compTree,
@@ -102,19 +111,19 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	)
 
 	if !sendRet.ExitCode().AllowsStateUpdate() {
-		// error -- revert all state changes -- ie drop updates. burn used gas.
+		// error -- revert all state changes -- ie drop updates.
 		outTree = inTree
-		outTree = _withTransferFundsAssert(
-			outTree,
-			message.From(),
-			addr.BurntFundsActorAddr,
-			gasToFIL(sendRet.GasUsed(), message.GasPrice()),
-		)
+
+		TODO() // TODO: As currently specced, this will burn the entire gas limit,
+		// not just used gas; is this desired? If not, should refund unused gas as below.
+
 	} else {
 		// success -- refund unused gas
 		outTree = sendRetStateTree
 		refundGas := message.GasLimit().Subtract(sendRet.GasUsed())
-		TODO() // TODO: assert refundGas is nonnegative
+		if refundGas.LessThan(msg.GasAmount_Zero()) {
+			panic("Interpreter error: consumed more gas than limit")
+		}
 		outTree = _withTransferFundsAssert(
 			outTree,
 			addr.BurntFundsActorAddr,
@@ -125,15 +134,19 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 
 	outTree, err = outTree.Impl().WithIncrementedCallSeqNum(message.To())
 	if err != nil {
-		// TODO: if actor deletion is possible at some point, may need to allow this case
+		// Note: if actor deletion is possible at some point, may need to allow this case
 		panic("Internal interpreter error: failed to increment call sequence number")
 	}
 
 	// reward miner gas fees
+
+	TODO() // TODO: Is the burnt funds actor allowed to send money, or only to receive?
+	// If the latter, need to find a different temporary holding place for this amount.
+
 	outTree = _withTransferFundsAssert(
 		outTree,
 		addr.BurntFundsActorAddr,
-		minerAddr, // TODO: may not exist
+		minerAddr,
 		gasToFIL(sendRet.GasUsed(), message.GasPrice()),
 	)
 
@@ -141,6 +154,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 }
 
 func gasToFIL(gas msg.GasAmount, price msg.GasPrice) actor.TokenAmount {
-	panic("TODO") // BigInt arithmetic
+	IMPL_FINISH()
+	panic("") // BigInt arithmetic
 	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 }

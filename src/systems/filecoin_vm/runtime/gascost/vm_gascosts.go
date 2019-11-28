@@ -1,6 +1,10 @@
 package runtime
 
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+import util "github.com/filecoin-project/specs/util"
+
+var TODO = util.TODO
 
 var (
 	// TODO: assign all of these.
@@ -58,4 +62,22 @@ var (
 
 func OnChainMessage(messageSizeOrig int) msg.GasAmount {
 	return msg.GasAmount_Affine(OnChainMessageBase, messageSizeOrig, OnChainMessagePerByte)
+}
+
+func IpldGet(dataSize int) msg.GasAmount {
+	return msg.GasAmount_Affine(IpldGetBase, dataSize, IpldGetPerByte)
+}
+
+func IpldPut(dataSize int) msg.GasAmount {
+	return msg.GasAmount_Affine(IpldPutBase, dataSize, IpldPutPerByte)
+}
+
+func InvokeMethod(valueSent actor.TokenAmount) msg.GasAmount {
+	ret := InvokeMethodBase
+
+	TODO() // should TokenAmount be an int or a BigInt?
+	if valueSent > 0 {
+		ret = ret.Add(InvokeMethodTransferFunds)
+	}
+	return ret
 }

@@ -59,3 +59,7 @@ func (id *CodeID_I) IsSingleton() bool {
 
 	panic("Actor code ID case not supported")
 }
+
+func (x ActorSubstateCID) Ref() *ActorSubstateCID {
+	return &x
+}

@@ -94,6 +94,9 @@ type Runtime interface {
         constructorParams  actor.MethodParams
     )
 
-    IpldGet(c ipld.CID) union {Bytes, error}
-    IpldPut(x ipld.Object) ipld.CID
+    // Deduct gas cost for actor creation. May only be called by InitActor.
+    CreateActor_DeductGas()
+
+    IpldGet(c ipld.CID)      union {Bytes, error}
+    IpldPut(x ipld.Object)   ipld.CID
 }
