@@ -3199,7 +3199,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4646,9 +4646,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealSeed</span> <span class="nx">Bytes</span>
 
 <span class="kd">type</span> <span class="nx">SealCfg</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SectorSize</span>      <span class="nx">UInt</span>
-    <span class="nx">SubsectorCount</span>  <span class="nx">UInt</span>
-    <span class="nx">Partitions</span>      <span class="nx">UInt</span>
+    <span class="nx">SectorSize</span>   <span class="nx">UInt</span>
+    <span class="nx">WindowCount</span>  <span class="nx">UInt</span>
+    <span class="nx">Partitions</span>   <span class="nx">UInt</span>
 <span class="p">}</span>
 
 <span class="c1">// SealVerifyInfo is the structure of all thte information a verifier
@@ -4699,9 +4699,10 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// ProofAux is meta data required to generate certain proofs
 </span><span class="c1">// for a sector, for example PoSt.
 </span><span class="c1">// These should be stored and indexed somewhere by CommR.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">CommRLast</span>          <span class="nx">Commitment</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PersistentProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">CommC</span>              <span class="nx">Commitment</span>
+    <span class="nx">CommQ</span>              <span class="nx">Commitment</span>
+    <span class="nx">CommRLast</span>          <span class="nx">Commitment</span>
 
     <span class="c1">// TODO: This may be a partially-cached tree.
 </span><span class="c1"></span>    <span class="c1">// this may be empty
@@ -4709,17 +4710,16 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ProofAuxTmp</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PersistentAux</span>   <span class="nx">ProofAux</span>
-
+    <span class="nx">PersistentAux</span>   <span class="nx">PersistentProofAux</span>  <span class="c1">// TODO: Move this to sealer.SealOutputs.
+</span><span class="c1"></span>
     <span class="nx">SectorID</span>
     <span class="nx">CommD</span>           <span class="nx">Commitment</span>
     <span class="nx">CommR</span>           <span class="nx">SealedSectorCID</span>
     <span class="nx">CommDTreePaths</span>  <span class="p">[</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">]</span>
     <span class="nx">CommCTreePath</span>   <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">CommQTreePath</span>   <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
 
     <span class="nx">Seeds</span>           <span class="p">[</span><span class="nx">SealSeed</span><span class="p">]</span>
-    <span class="nx">SubsectorData</span>   <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
-    <span class="nx">Replicas</span>        <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
     <span class="nx">KeyLayers</span>       <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
 <span class="p">}</span>
 
@@ -4740,8 +4740,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">FilecoinSNARKProof</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">//&lt;bls12-381, Groth16&gt;
 </span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">SealAlgorithm</span> <span class="nx">enum</span> <span class="p">{</span>
-    <span class="c1">// ZigZagPoRep
-</span><span class="c1"></span>    <span class="nx">StackedDRG</span>
+    <span class="nx">StackedDRG</span>
 <span class="p">}</span>
 
 <span class="c1">// TODO

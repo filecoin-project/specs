@@ -3200,7 +3200,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4636,13 +4636,13 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SealInputs</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">SectorID</span>       <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-    <span class="nx">SealCfg</span>        <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
-    <span class="nx">MinerID</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">RandomSeed</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
-    <span class="nx">UnsealedPaths</span>  <span class="p">[</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">]</span>
-    <span class="nx">SealedPaths</span>    <span class="p">[</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">]</span>
-    <span class="nx">DealIDs</span>        <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nx">SectorID</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
+    <span class="nx">SealCfg</span>       <span class="nx">sector</span><span class="p">.</span><span class="nx">SealCfg</span>
+    <span class="nx">MinerID</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">RandomSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealRandomness</span>
+    <span class="nx">UnsealedPath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">SealedPath</span>    <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">DealIDs</span>       <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">CreateSealProofInputs</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4659,7 +4659,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">CreateSealProofOutputs</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SealInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span>
-    <span class="nx">ProofAux</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">ProofAux</span>
+    <span class="nx">ProofAux</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorSealer</span> <span class="kd">struct</span> <span class="p">{</span>

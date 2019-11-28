@@ -3199,7 +3199,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4609,19 +4609,64 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>
-This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.
-</p>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nv">asdf:load-system</span> <span class="ss">:orient</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">in-package</span> <span class="nv">orient.lang</span><span class="p">)</span></code></pre></div>
-</div>
-<pre class="example">
-#&lt;PACKAGE &#34;ORIENT.LANG&#34;&gt;
-</pre>
-<div class="src src-lisp">
-<div class="highlight"><pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*filecoin*</span> <span class="p">(</span><span class="nv">get-system</span> <span class="s">&#34;../../orient/filecoin.orient&#34;</span><span class="p">))</span>
-<span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*input*</span> <span class="p">(</span><span class="nv">interface:get-json-relation-list</span> <span class="s">&#34;../../orient/params.json&#34;</span><span class="p">))</span>
+  <p>This section describes parameters for Rational-PoSt, the Proof-of-Spacetime used in Filecoin.</p>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>POST-CHALLENGE-BLOCKS</td>
+<td>BLOCKS</td>
+<td>480</td>
+<td>The time offset before which the actual work of generating the PoSt cannot be started. This is some delta before the end of the Proving Period, and as such less than a single Proving Period.</td>
+</tr>
+
+<tr>
+<td>POST-CHALLENGE-HOURS</td>
+<td>HOURS</td>
+<td>2</td>
+<td>PoSt challenge time (see POST_CHALLENGE_BLOCKS).</td>
+</tr>
+
+<tr>
+<td>POST-PROVING-PERIOD</td>
+<td>BLOCKS</td>
+<td>5760</td>
+<td>The time interval in which a PoSt has to be submitted</td>
+</tr>
+</tbody>
+</table>
+
+<div class="notices todo" ><strong>TODO</strong>: The above values are tentative and need both backing from research as well as detailed reasoning why we picked them.</div>
+
+</article>
+
+      
+
+      
+    </div>
+
+    
+  
+
+
+
+  </main>
+
+  
+  
+</body>
+
+</html>
+n><span class="nv">interface:get-json-relation-list</span> <span class="s">&#34;../../orient/params.json&#34;</span><span class="p">))</span>
 <span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*multi-input*</span> <span class="p">(</span><span class="nv">interface:get-json-relation-list</span> <span class="s">&#34;../../orient/multi-params.json&#34;</span><span class="p">))</span></code></pre></div>
 </div>
 <pre class="example">

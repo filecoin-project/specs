@@ -1,13 +1,9 @@
-type Time string  // ISO nano timestamp
 type UnixTime int64  // unix timestamp
-type UnixTimeNano int64  // unix timestamp in nanoseconds
 
 // UTCClock is a normal, system clock reporting UTC time.
 // It should be kept in sync, with drift less than 1 second.
 type UTCClock struct {
-    NowUTC()          Time
-    NowUTCUnix()      UnixTime
-    NowUTCUnixNano()  UnixTimeNano
+    NowUTCUnix() UnixTime
 }
 
 // ChainEpoch represents a round of a blockchain protocol.
@@ -17,7 +13,7 @@ type ChainEpoch UVarint
 type ChainEpochClock struct {
     // GenesisTime is the time of the first block. EpochClock counts
     // up from there.
-    GenesisTime          Time
+    GenesisTime              UnixTime
 
-    EpochAtTime(t Time)  ChainEpoch
+    EpochAtTime(t UnixTime)  ChainEpoch
 }

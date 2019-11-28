@@ -3199,7 +3199,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4783,21 +4783,21 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">Owner</span>           <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>        <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">Worker</span>          <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">PeerId</span>          <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">PeerId</span>       <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">SectorSize</span>      <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
-    <span class="nx">SubsectorCount</span>  <span class="nx">UVarint</span>
-    <span class="nx">Partitions</span>      <span class="nx">UVarint</span>
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>   <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+    <span class="nx">WindowCount</span>  <span class="nx">UVarint</span>
+    <span class="nx">Partitions</span>   <span class="nx">UVarint</span>
 <span class="p">}</span>
 </code></pre></div>
 

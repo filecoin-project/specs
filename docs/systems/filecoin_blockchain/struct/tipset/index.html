@@ -3200,7 +3200,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4656,14 +4656,14 @@ Expected Consensus probabilistically elects multiple leaders in each epoch meani
     <span class="nx">BlockCIDs</span>          <span class="p">[</span><span class="nx">BlockCID</span><span class="p">]</span>
     <span class="nx">Blocks</span>             <span class="p">[</span><span class="nx">BlockHeader</span><span class="p">]</span>
 
-    <span class="nf">Has</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span>   <span class="kt">bool</span>           <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
-    <span class="nx">Parents</span>            <span class="nx">Tipset</span>         <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
-    <span class="nx">StateTree</span>          <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>   <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
-    <span class="nx">Weight</span>             <span class="nx">ChainWeight</span>    <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
-    <span class="nx">Epoch</span>              <span class="nx">ChainEpoch</span>     <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">Has</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span>   <span class="kt">bool</span>            <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nx">Parents</span>            <span class="nx">Tipset</span>          <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nx">StateTree</span>          <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>    <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nx">Weight</span>             <span class="nx">ChainWeight</span>     <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nx">Epoch</span>              <span class="nx">ChainEpoch</span>      <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
 
-    <span class="nf">LatestTimestamp</span><span class="p">()</span>  <span class="nx">clock</span><span class="p">.</span><span class="nx">Time</span>     <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
-    <span class="nf">MinTicket</span><span class="p">()</span>        <span class="nx">Ticket</span>         <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">LatestTimestamp</span><span class="p">()</span>  <span class="nx">clock</span><span class="p">.</span><span class="nx">UnixTime</span>  <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">MinTicket</span><span class="p">()</span>        <span class="nx">Ticket</span>          <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4717,10 +4717,10 @@ Expected Consensus probabilistically elects multiple leaders in each epoch meani
 	<span class="k">return</span> <span class="nx">ret</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">ts</span> <span class="o">*</span><span class="nx">Tipset_I</span><span class="p">)</span> <span class="nf">LatestTimestamp</span><span class="p">()</span> <span class="nx">clock</span><span class="p">.</span><span class="nx">Time</span> <span class="p">{</span>
-	<span class="kd">var</span> <span class="nx">latest</span> <span class="nx">clock</span><span class="p">.</span><span class="nx">Time</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">ts</span> <span class="o">*</span><span class="nx">Tipset_I</span><span class="p">)</span> <span class="nf">LatestTimestamp</span><span class="p">()</span> <span class="nx">clock</span><span class="p">.</span><span class="nx">UnixTime</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">latest</span> <span class="nx">clock</span><span class="p">.</span><span class="nx">UnixTime</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">ts</span><span class="p">.</span><span class="nx">Blocks_</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Timestamp</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">latest</span> <span class="o">||</span> <span class="nx">latest</span> <span class="o">==</span> <span class="nx">clock</span><span class="p">.</span><span class="nf">Time</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Timestamp</span><span class="p">()</span> <span class="p">&gt;</span> <span class="nx">latest</span> <span class="o">||</span> <span class="nx">latest</span> <span class="o">==</span> <span class="nx">clock</span><span class="p">.</span><span class="nf">UnixTime</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
 			<span class="nx">latest</span> <span class="p">=</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Timestamp</span><span class="p">()</span>
 		<span class="p">}</span>
 	<span class="p">}</span>

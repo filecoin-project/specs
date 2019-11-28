@@ -3200,7 +3200,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4630,16 +4630,12 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Time</span> <span class="kt">string</span>  <span class="c1">// ISO nano timestamp
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnixTime</span> <span class="kt">int64</span>  <span class="c1">// unix timestamp
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">UnixTimeNano</span> <span class="kt">int64</span>  <span class="c1">// unix timestamp in nanoseconds
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">UnixTime</span> <span class="kt">int64</span>  <span class="c1">// unix timestamp
 </span><span class="c1"></span>
 <span class="c1">// UTCClock is a normal, system clock reporting UTC time.
 </span><span class="c1">// It should be kept in sync, with drift less than 1 second.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">UTCClock</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">NowUTC</span><span class="p">()</span>          <span class="nx">Time</span>
-    <span class="nf">NowUTCUnix</span><span class="p">()</span>      <span class="nx">UnixTime</span>
-    <span class="nf">NowUTCUnixNano</span><span class="p">()</span>  <span class="nx">UnixTimeNano</span>
+    <span class="nf">NowUTCUnix</span><span class="p">()</span> <span class="nx">UnixTime</span>
 <span class="p">}</span>
 
 <span class="c1">// ChainEpoch represents a round of a blockchain protocol.
@@ -4649,9 +4645,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ChainEpochClock</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// GenesisTime is the time of the first block. EpochClock counts
 </span><span class="c1"></span>    <span class="c1">// up from there.
-</span><span class="c1"></span>    <span class="nx">GenesisTime</span>          <span class="nx">Time</span>
+</span><span class="c1"></span>    <span class="nx">GenesisTime</span>              <span class="nx">UnixTime</span>
 
-    <span class="nf">EpochAtTime</span><span class="p">(</span><span class="nx">t</span> <span class="nx">Time</span><span class="p">)</span>  <span class="nx">ChainEpoch</span>
+    <span class="nf">EpochAtTime</span><span class="p">(</span><span class="nx">t</span> <span class="nx">UnixTime</span><span class="p">)</span>  <span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4689,43 +4685,19 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// source, such as NTP, or a very precise hardware clock.
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">UTCSyncPeriod</span> <span class="p">=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span>
 
-<span class="c1">// EpochDuration is a constant that represents the UTC time duration
+<span class="c1">// EpochDuration is a constant that represents the duration in seconds
 </span><span class="c1">// of a blockchain epoch.
-</span><span class="c1"></span><span class="kd">var</span> <span class="nx">EpochDuration</span> <span class="p">=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span> <span class="o">*</span> <span class="mi">15</span>
-
-<span class="c1">// ISOFormat is the ISO timestamp format we use, in Go time package notation.
-</span><span class="c1"></span><span class="kd">var</span> <span class="nx">ISOFormat</span> <span class="p">=</span> <span class="s">&#34;2006-01-02T15:04:05.999999999Z&#34;</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">UTCClock_I</span><span class="p">)</span> <span class="nf">NowUTC</span><span class="p">()</span> <span class="nx">Time</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">Time</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">Format</span><span class="p">(</span><span class="nx">ISOFormat</span><span class="p">))</span>
-<span class="p">}</span>
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">EpochDuration</span> <span class="p">=</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">UTCClock_I</span><span class="p">)</span> <span class="nf">NowUTCUnix</span><span class="p">()</span> <span class="nx">UnixTime</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nf">UnixTime</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">Unix</span><span class="p">())</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">_</span> <span class="o">*</span><span class="nx">UTCClock_I</span><span class="p">)</span> <span class="nf">NowUTCUnixNano</span><span class="p">()</span> <span class="nx">UnixTimeNano</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">UnixTimeNano</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">().</span><span class="nf">UnixNano</span><span class="p">())</span>
-<span class="p">}</span>
-
-<span class="c1">// EpochAtTime returns the ChainEpoch corresponding to t.
+<span class="c1">// EpochAtTime returns the ChainEpoch corresponding to time `t`.
 </span><span class="c1">// It first subtracts GenesisTime, then divides by EpochDuration
 </span><span class="c1">// and returns the resulting number of epochs.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainEpochClock_I</span><span class="p">)</span> <span class="nf">EpochAtTime</span><span class="p">(</span><span class="nx">t</span> <span class="nx">Time</span><span class="p">)</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nx">g1</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">GenesisTime</span><span class="p">()</span>
-	<span class="nx">g2</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">ISOFormat</span><span class="p">,</span> <span class="nb">string</span><span class="p">(</span><span class="nx">g1</span><span class="p">))</span>
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="c1">// an implementation should probably not panic here
-</span><span class="c1"></span>		<span class="c1">// this is for simplicity of the spec
-</span><span class="c1"></span>		<span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="nx">t2</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="nx">ISOFormat</span><span class="p">,</span> <span class="nb">string</span><span class="p">(</span><span class="nx">t</span><span class="p">))</span>
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="nx">difference</span> <span class="o">:=</span> <span class="nx">t2</span><span class="p">.</span><span class="nf">Sub</span><span class="p">(</span><span class="nx">g2</span><span class="p">)</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">ChainEpochClock_I</span><span class="p">)</span> <span class="nf">EpochAtTime</span><span class="p">(</span><span class="nx">t</span> <span class="nx">UnixTime</span><span class="p">)</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
+	<span class="nx">difference</span> <span class="o">:=</span> <span class="nx">t</span> <span class="o">-</span> <span class="nx">c</span><span class="p">.</span><span class="nf">GenesisTime</span><span class="p">()</span>
 	<span class="nx">epochs</span> <span class="o">:=</span> <span class="nx">difference</span> <span class="o">/</span> <span class="nx">EpochDuration</span>
 	<span class="k">return</span> <span class="nf">ChainEpoch</span><span class="p">(</span><span class="nx">epochs</span><span class="p">)</span>
 <span class="p">}</span>

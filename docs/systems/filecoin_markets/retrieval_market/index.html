@@ -3200,7 +3200,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4743,7 +4743,7 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 <li>The process continues until the end of the query</li>
 </ul>
 
-<h3 id="bootstrapping-trust">Bootstrapping Trust</h3>
+<h1 id="bootstrapping-trust">Bootstrapping Trust</h1>
 
 <p>Neither the client nor the provider have any specific reason to trust the other. Therefore, payment for a retrieval deal is done in pieces, sending vouchers as bytes are sent and verified.</p>
 
@@ -4759,6 +4759,151 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
    requests payment, assuming it&rsquo;s received at least 1300 bytes since last payment
    - The process continues till the end of the retrieval, when the last payment will simply be for the remainder of bytes
 - Additional trust mechanisms in the V1 version of the protocol will include agreed upon timeouts and cancellation fees</p>
+
+<h1 id="common-data-types">Common Data Types</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">libp2p</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/libp2p&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+<span class="kn">import</span> <span class="nx">piece</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_files/piece&#34;</span>
+
+<span class="kd">type</span> <span class="nx">PaymentVoucher</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalPeer</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Address</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">ID</span>       <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>  <span class="c1">// optional
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Available</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Unavailable</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Unknown</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalQueryResponseStatus</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">Available</span>
+    <span class="nx">Unavailable</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalQueryItemStatus</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">Available</span>
+    <span class="nx">Unavailable</span>
+    <span class="nx">Unknown</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalQueryParams</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PayloadCID</span>                  <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>  <span class="c1">// optional, query if miner has this cid in this piece. some miners may not be able to respond.
+</span><span class="c1"></span>    <span class="nx">Selector</span>                    <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>  <span class="c1">// optional, query if miner has this cid in this piece. some miners may not be able to respond.
+</span><span class="c1"></span>    <span class="nx">MaxPricePerByte</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>  <span class="c1">// optional, tell miner uninterested if more expensive than this
+</span><span class="c1"></span>    <span class="nx">MinPaymentInterval</span>          <span class="nx">UInt</span>  <span class="c1">// optional, tell miner uninterested unless payment interval is greater than this
+</span><span class="c1"></span>    <span class="nx">MinPaymentIntervalIncrease</span>  <span class="nx">UInt</span>  <span class="c1">// optional, tell miner uninterested unless payment interval increase is greater than this
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalQuery</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PieceCID</span> <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>  <span class="c1">// V0
+</span><span class="c1"></span>    <span class="nx">RetrievalQueryParams</span>  <span class="c1">// V1
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalQueryResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Status</span>                      <span class="nx">RetrievalQueryResponseStatus</span>
+    <span class="nx">PayloadCIDFound</span>             <span class="nx">RetrievalQueryItemStatus</span>  <span class="c1">// V1 - if a PayloadCid was requested, the result
+</span><span class="c1"></span>    <span class="nx">SelectorFound</span>               <span class="nx">RetrievalQueryItemStatus</span>  <span class="c1">// V1 - if a Selector was requested, the result
+</span><span class="c1"></span>
+    <span class="nx">Size</span>                        <span class="kt">uint64</span>  <span class="c1">// Total size of piece in bytes
+</span><span class="c1"></span>    <span class="nx">ExpectedPayloadSize</span>         <span class="kt">uint64</span>  <span class="c1">// V1 - optional, if PayloadCID + selector are specified and miner knows, can offer an expected size
+</span><span class="c1"></span>
+    <span class="nx">PaymentAddress</span>              <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// address to send funds to -- may be different than miner addr
+</span><span class="c1"></span>    <span class="nx">MinPricePerByte</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">MaxPaymentInterval</span>          <span class="nx">UInt</span>
+    <span class="nx">MaxPaymentIntervalIncrease</span>  <span class="nx">UInt</span>
+
+    <span class="nf">PieceRetrievalPrice</span><span class="p">()</span>  <span class="c1">// == MinPricePerByte * Size
+</span><span class="c1"></span>    <span class="nf">PayloadRetrievalPrice</span><span class="p">()</span>  <span class="c1">// V1 - optional == MinPricePerByte * ExpectedPayloadSize
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Accepted</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Failed</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Rejected</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Unsealing</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">FundsNeeded</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Ongoing</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">FundsNeededLastPayment</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">Completed</span> <span class="kd">struct</span> <span class="p">{}</span>
+<span class="kd">type</span> <span class="nx">DealNotFound</span> <span class="kd">struct</span> <span class="p">{}</span>
+
+<span class="kd">type</span> <span class="nx">DealStatus</span> <span class="nx">union</span> <span class="p">{</span>
+    <span class="nx">Accepted</span>
+    <span class="nx">Failed</span>
+    <span class="nx">Rejected</span>
+    <span class="nx">Unsealing</span>
+    <span class="nx">FundsNeeded</span>
+    <span class="nx">Ongoing</span>
+    <span class="nx">FundsNeededLastPayment</span>
+    <span class="nx">Completed</span>
+    <span class="nx">DealNotFound</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalParams</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PayloadCID</span>               <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>  <span class="c1">// V1
+</span><span class="c1"></span>    <span class="nx">Selector</span>                 <span class="nx">ipld</span><span class="p">.</span><span class="nx">Selector</span>  <span class="c1">// V1
+</span><span class="c1"></span>    <span class="nx">PricePerByte</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nx">PaymentInterval</span>          <span class="nx">UInt</span>
+    <span class="nx">PaymentIntervalIncrease</span>  <span class="nx">UInt</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalDealID</span> <span class="nx">UInt</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalDealProposal</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PieceCID</span>         <span class="nx">piece</span><span class="p">.</span><span class="nx">PieceCID</span>
+    <span class="nx">ID</span>               <span class="nx">RetrievalDealID</span>  <span class="c1">// V1 - an identifier for the retrieval
+</span><span class="c1"></span>    <span class="nx">RetrievalParams</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Prefix</span>  <span class="nx">Bytes</span>
+    <span class="nx">Data</span>    <span class="nx">Bytes</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalDealResponse</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Status</span>       <span class="nx">DealStatus</span>
+    <span class="nx">ID</span>           <span class="nx">RetrievalDealID</span>  <span class="c1">// V1 - an identifier for the retrieval
+</span><span class="c1"></span>
+    <span class="c1">// payment required to proceed
+</span><span class="c1"></span>    <span class="nx">PaymentOwed</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="nx">Message</span>      <span class="kt">string</span>
+    <span class="nx">Blocks</span>       <span class="p">[</span><span class="nx">Block</span><span class="p">]</span>  <span class="c1">// V0 only
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">RetrievalDealPayment</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ID</span>              <span class="nx">RetrievalDealID</span>  <span class="c1">// V1 - an identifier for the retrieval
+</span><span class="c1"></span>    <span class="nx">PaymentChannel</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">PaymentVoucher</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
 </article>
 
       
@@ -4775,13 +4920,9 @@ V1 will also include additional mechanisms for timeouts and cancellations. (to b
 <li><a href="#components">Components</a></li>
 <li><a href="#vo-v1">VO &amp; V1</a></li>
 <li><a href="#deal-flow-v0">Deal Flow (V0)</a></li>
-<li><a href="#deal-flow-v1">Deal Flow (V1)</a>
-<ul>
-<li>
-<ul>
+<li><a href="#deal-flow-v1">Deal Flow (V1)</a></li>
 <li><a href="#bootstrapping-trust">Bootstrapping Trust</a></li>
-</ul></li>
-</ul></li>
+<li><a href="#common-data-types">Common Data Types</a></li>
 </ul>
 </nav>
   </aside>

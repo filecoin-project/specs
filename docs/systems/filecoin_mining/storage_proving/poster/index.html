@@ -3200,7 +3200,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4736,7 +4736,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">makeStackedDRGForPoSt</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">)</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">filproofs</span><span class="p">.</span><span class="nx">StackedDRG_I</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">makeStackedDRGForPoSt</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">)</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">filproofs</span><span class="p">.</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="p">{</span>
 	<span class="kd">var</span> <span class="nx">cfg</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nx">SDRCfg_I</span>
 
 	<span class="k">switch</span> <span class="nx">postCfg</span><span class="p">.</span><span class="nf">Type</span><span class="p">()</span> <span class="p">{</span>
@@ -4750,7 +4750,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="p">}</span>
 	<span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">SDRParams</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cfg</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">filproofs</span><span class="p">.</span><span class="nf">WinSDRParams</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cfg</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

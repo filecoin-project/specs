@@ -3200,7 +3200,7 @@ https://github.com/alex-shpak/hugo-book
 <a href="../../../../#systems__filecoin_markets__retrieval_market__retrieval_protocols" class="menu-item depth-4">
     
     
-        Retrieval Peer Resolver
+        Retrieval Protocols
     
 </a>
 
@@ -4712,11 +4712,11 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="c1">// SectorInfo is an object that gathers all the information miners know about their
 </span><span class="c1">// sectors. This is meant to be used for a local index.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorInfo</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ID</span>              <span class="nx">SectorID</span>
-    <span class="nx">UnsealedInfo</span>    <span class="nx">UnsealedSectorInfo</span>
-    <span class="nx">SealedInfo</span>      <span class="nx">SealedSectorInfo</span>
+    <span class="nx">ID</span>                  <span class="nx">SectorID</span>
+    <span class="nx">UnsealedInfo</span>        <span class="nx">UnsealedSectorInfo</span>
+    <span class="nx">SealedInfo</span>          <span class="nx">SealedSectorInfo</span>
     <span class="nx">SealVerifyInfo</span>
-    <span class="nx">ProofAux</span>
+    <span class="nx">PersistentProofAux</span>
 <span class="p">}</span>
 
 <span class="c1">// UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector
