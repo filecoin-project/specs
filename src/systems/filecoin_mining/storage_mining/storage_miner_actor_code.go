@@ -267,18 +267,8 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 }
 
 // called by verifier to update miner state on successful surprise post
-func (a *StorageMinerActorCode_I) SubmitSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
+func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	TODO() // TODO: validate caller
-
-	// Verify correct PoSt Submission
-	// TODO call in sms
-	// isPoStVerified := a._verifySurprisePoSt(rt, onChainInfo)
-	isPoStVerified := false
-	if !isPoStVerified {
-		// no state transition, just error out and miner should submitSurprisePoSt again
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("TODO")
-	}
 
 	return a._onSuccessfulPoSt(rt, onChainInfo)
 
