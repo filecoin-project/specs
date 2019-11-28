@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	MethodGetUnsealedCIDForDealIDs = actor.MethodPlaceholder
-	MethodProcessDealExpiration    = actor.MethodPlaceholder
-	MethodProcessDealSlash         = actor.MethodPlaceholder
+	Method_StorageMarketActor_EpochTick = actor.MethodPlaceholder + iota
+	Method_StorageMarketActor_GetUnsealedCIDForDealIDs
+	Method_StorageMarketActor_ProcessDealExpiration
+	Method_StorageMarketActor_ProcessDealSlash
 )
 
 const LastPaymentEpochNone = 0

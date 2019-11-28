@@ -14,9 +14,11 @@ import (
 )
 
 const (
-	MethodProcessPowerReport         = actor.MethodPlaceholder
-	MethodSlashPledgeForStorageFault = actor.MethodPlaceholder
-	EnsurePledgeCollateralSatisfied  = actor.MethodPlaceholder
+	Method_StoragePowerActor_EpochTick = actor.MethodPlaceholder + iota
+	Method_StoragePowerActor_ProcessPowerReport
+	Method_StoragePowerActor_ProcessFaultReport
+	Method_StoragePowerActor_SlashPledgeForStorageFault
+	Method_StoragePowerActor_EnsurePledgeCollateralSatisfied
 )
 
 // placeholder values

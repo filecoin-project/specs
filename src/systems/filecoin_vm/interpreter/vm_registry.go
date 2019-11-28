@@ -5,6 +5,7 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
+import storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 import sysactors "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
@@ -71,6 +72,13 @@ func _registerBuiltinActors() {
 
 	// wire in CRON actions.
 	// TODO: there's probably a better place to put this, but for now, do it here.
-	cron.Actors_ = append(cron.Actors_, addr.StoragePowerActorAddr)
-	cron.Actors_ = append(cron.Actors_, addr.StorageMarketActorAddr)
+	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{
+		ToAddr_:    addr.StoragePowerActorAddr,
+		MethodNum_: spc.Method_StoragePowerActor_EpochTick,
+	})
+
+	cron.Entries_ = append(cron.Entries_, &sysactors.CronTableEntry_I{
+		ToAddr_:    addr.StorageMarketActorAddr,
+		MethodNum_: storage_market.Method_StorageMarketActor_EpochTick,
+	})
 }
