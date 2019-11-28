@@ -1775,14 +1775,6 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-3">
 
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
 </ul>
 
 
@@ -4611,6 +4603,51 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
+<p>The VM interpreter orchestrates the execution of messages from a tipset on that tipset&rsquo;s parent state,
+producing a new state and a sequence of message receipts. The CIDs of this new state and of the receipt
+collection are included in blocks from the subsequent epoch, which must agree about those CIDs
+in order to form a new tipset.</p>
+
+<p>The messages from all the blocks in a tipset must be executed in order to produce a next state.
+In addition, for each block:
+- the block reward is paid to the miner owner account, and
+- the block producer&rsquo;s election PoSt is processed by an implicit invocation on the associated actor<br />
+before that block&rsquo;s messages are executed</p>
+
+<p>For each tipset:</p>
+
+<ul>
+<li>the <code>CronActor</code>&rsquo;s tick method is invoked implicitly after all the blocks&rsquo; messages.</li>
+</ul>
+
+<p>These implicit messages specify a gas price of zero, but must be included in the computation.
+They must succeed (have an exit code of zero) in order for the new state to be
+computed. Receipts for them are excluded from the receipt list; only explicit messages have an
+explicit receipt.</p>
+
+<p>The gas payment for each message execution is paid to the miner owner account immediately after
+that message is executed. There are no encumbrances to either the block reward or gas fees earned:
+both may be spent immediately, including by a message in the same block in which they are earned.</p>
+
+<p>Since different miners produce blocks in the same epoch, multiple blocks in a single tipset may
+include the same message (identified by the same CID).
+When this happens, the message is processed only the first time it is encountered in the tipset&rsquo;s
+canonical order. Subsequent instances of the message are ignored and do not result in any
+state mutation or produce a receipt.</p>
+
+<p>The sequence of executions for a tipset is thus summarised:</p>
+
+<ul>
+<li>pay reward for first block</li>
+<li>process election post for first block</li>
+<li>messages for first block</li>
+<li>pay reward for second block</li>
+<li>process election post for second block</li>
+<li>messages for second block (skipping any already encountered)</li>
+<li>[&hellip; subsequent blocks &hellip;]</li>
+<li>cron tick</li>
+</ul>
+
 <p>(You can see the <em>old</em> VM interpreter <a href="docs/systems/filecoin_vm/vm_interpreter_old">here</a> )</p>
 
 <h1 id="vm-interpreter-interface"><code>vm/interpreter</code> interface</h1>
@@ -4634,17 +4671,27 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 
-<span class="kd">type</span> <span class="nx">MessageRef</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Message</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span>
-    <span class="nx">Miner</span>    <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-<span class="p">}</span>
+<span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
+
+<span class="c1">// The messages from one block in a tipset.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">BlockMessages</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Messages</span>   <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">]</span>
+    <span class="nx">Miner</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// The block miner&#39;s actor address
+</span><span class="c1"></span>    <span class="nx">PoStProof</span>  <span class="nx">Bytes</span>  <span class="c1">// The miner&#39;s Election PoSt proof output
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">// The messages from a tipset, grouped by block.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">TipSetMessages</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Blocks</span>  <span class="p">[</span><span class="nx">BlockMessages</span><span class="p">]</span>
+    <span class="nx">Epoch</span>   <span class="nx">UInt64</span>  <span class="c1">// The chain epoch of the blocks
+</span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">VMInterpreter</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">ApplyMessageBatch</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="p">[</span><span class="nx">MessageRef</span><span class="p">])</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
+    <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
     <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -4677,43 +4724,71 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">interpreter</span>
 
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
-<span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
-<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
-<span class="kn">import</span> <span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+	<span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+	<span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
+	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
+	<span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
+	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
 
 <span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessageBatch</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="p">[]</span><span class="nx">MessageRef</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[]</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">compTree</span> <span class="o">:=</span> <span class="nx">inTree</span>
-	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span> <span class="p">{</span>
-		<span class="nx">oT</span><span class="p">,</span> <span class="nx">r</span> <span class="o">:=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">compTree</span><span class="p">,</span> <span class="nx">m</span><span class="p">.</span><span class="nf">Message</span><span class="p">(),</span> <span class="nx">m</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
-		<span class="nx">compTree</span> <span class="p">=</span> <span class="nx">oT</span>        <span class="c1">// assign the current tree. (this call always succeeds)
-</span><span class="c1"></span>		<span class="nx">ret</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">ret</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span> <span class="c1">// add message receipt
-</span><span class="c1"></span>	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">compTree</span><span class="p">,</span> <span class="nx">ret</span>
-<span class="p">}</span>
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="c1">// TODO: reduce these when expected gas costs are known
+</span><span class="c1"></span>	<span class="nx">sumbitElectionPostGasLimit</span> <span class="p">=</span> <span class="mf">1e18</span>
+	<span class="nx">payBlockRewardGasLimit</span>     <span class="p">=</span> <span class="mf">1e1</span>
+	<span class="nx">cronTickGasLimit</span>           <span class="p">=</span> <span class="mf">1e18</span>
+<span class="p">)</span>
 
-<span class="kd">func</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
-	<span class="c1">// TODO: should this gasUsed value be zero?
-</span><span class="c1"></span>	<span class="c1">// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
-</span><span class="c1"></span>	<span class="nx">gasUsed</span> <span class="o">:=</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span>
-	<span class="nf">TODO</span><span class="p">()</span>
-	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
-<span class="p">}</span>
+<span class="c1">// Applies all the message in a tipset, along with implicit block- and tipset-specific state
+</span><span class="c1">// transitions.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">inTree</span>
+	<span class="nx">seenMsgs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">]</span><span class="kd">struct</span><span class="p">{})</span> <span class="c1">// CIDs of messages already seen once.
+</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">r</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
+		<span class="c1">// Pay block reward.
+</span><span class="c1"></span>		<span class="nx">reward</span> <span class="o">:=</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
+		<span class="nx">outTree</span><span class="p">,</span> <span class="nx">r</span> <span class="p">=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">reward</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
+		<span class="k">if</span> <span class="nx">r</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
+			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;block reward failed&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
-	<span class="c1">// TODO: assert amount nonnegative
-</span><span class="c1"></span>	<span class="nx">retTree</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
-	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: insufficient funds (or transfer error) despite checks&#34;</span><span class="p">)</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">retTree</span>
+		<span class="c1">// Process block miner&#39;s Election PoSt.
+</span><span class="c1"></span>		<span class="nx">epost</span> <span class="o">:=</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">(),</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Epoch</span><span class="p">(),</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">PoStProof</span><span class="p">())</span>
+		<span class="nx">outTree</span><span class="p">,</span> <span class="nx">r</span> <span class="p">=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">epost</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
+		<span class="k">if</span> <span class="nx">r</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
+			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;election post failed&#34;</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="c1">// Process messages from the block.
+</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Messages</span><span class="p">()</span> <span class="p">{</span>
+			<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span>
+			<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+				<span class="k">continue</span>
+			<span class="p">}</span>
+			<span class="nx">outTree</span><span class="p">,</span> <span class="nx">r</span> <span class="p">=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
+			<span class="nx">receipts</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">receipts</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span>
+			<span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span> <span class="p">=</span> <span class="kd">struct</span><span class="p">{}{}</span>
+		<span class="p">}</span>
 	<span class="p">}</span>
+
+	<span class="c1">// Invoke cron tick, attributing it to the miner of the first block.
+</span><span class="c1"></span>	<span class="nx">cronSender</span> <span class="o">:=</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nf">Miner</span><span class="p">()</span>
+	<span class="nx">cron</span> <span class="o">:=</span> <span class="nf">_makeCronTickMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">cronSender</span><span class="p">)</span>
+	<span class="nx">outTree</span><span class="p">,</span> <span class="nx">r</span> <span class="p">=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">cron</span><span class="p">,</span> <span class="nx">cronSender</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">r</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">()</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;cron tick failed&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
@@ -4731,7 +4806,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="p">}</span>
 
 	<span class="c1">// make sure fromActor has enough money to run the max invocation
-</span><span class="c1"></span>	<span class="nx">maxGasCost</span> <span class="o">:=</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
+</span><span class="c1"></span>	<span class="nx">maxGasCost</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
 	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span> <span class="o">+</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">maxGasCost</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds</span><span class="p">)</span>
@@ -4779,7 +4854,7 @@ https://github.com/alex-shpak/hugo-book
 			<span class="nx">outTree</span><span class="p">,</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
 			<span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span>
-			<span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
+			<span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
 		<span class="p">)</span>
 	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 		<span class="c1">// success -- refund unused gas
@@ -4790,7 +4865,7 @@ https://github.com/alex-shpak/hugo-book
 			<span class="nx">outTree</span><span class="p">,</span>
 			<span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">From</span><span class="p">(),</span>
-			<span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">refundGas</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
+			<span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">refundGas</span><span class="p">,</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
 		<span class="p">)</span>
 	<span class="p">}</span>
 
@@ -4805,14 +4880,92 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">outTree</span><span class="p">,</span>
 		<span class="nx">addr</span><span class="p">.</span><span class="nx">BurntFundsActorAddr</span><span class="p">,</span>
 		<span class="nx">minerAddr</span><span class="p">,</span> <span class="c1">// TODO: may not exist
-</span><span class="c1"></span>		<span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
+</span><span class="c1"></span>		<span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">sendRet</span><span class="p">.</span><span class="nf">GasUsed</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">()),</span>
 	<span class="p">)</span>
 
 	<span class="k">return</span> <span class="nx">outTree</span><span class="p">,</span> <span class="nx">sendRet</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+	<span class="c1">// TODO: should this gasUsed value be zero?
+</span><span class="c1"></span>	<span class="c1">// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
+</span><span class="c1"></span>	<span class="nx">gasUsed</span> <span class="o">:=</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span>
+	<span class="nf">TODO</span><span class="p">()</span>
+	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
+	<span class="c1">// TODO: assert amount nonnegative
+</span><span class="c1"></span>	<span class="nx">retTree</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">tree</span><span class="p">.</span><span class="nf">Impl</span><span class="p">().</span><span class="nf">WithFundsTransfer</span><span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">,</span> <span class="nx">amount</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: insufficient funds (or transfer error) despite checks&#34;</span><span class="p">)</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">retTree</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="nx">gas</span><span class="p">)</span> <span class="o">*</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="nx">price</span><span class="p">))</span>
+<span class="p">}</span>
+
+<span class="c1">// Builds a message for paying block reward from the treasury account to a miner owner.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="c1">// networkTreasuryActor := loadActor(NetworkTreasuryActorAddress)
+</span><span class="c1"></span>	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
+</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
+</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
+</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
+</span><span class="c1"></span>	<span class="c1">//	To_:         NetworkTreasuryActorAddress,
+</span><span class="c1"></span>	<span class="c1">//	Method_:     NetworkTreasury.PayBlockReward,
+</span><span class="c1"></span>	<span class="c1">//	Params_:     serialize([minerActorAddr]),
+</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
+</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
+</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
+</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   payBlockRewardGasLimit,
+</span><span class="c1"></span>	<span class="c1">//}
+</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when network treasury actor implemented&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// Builds a message for submitting ElectionPost on behalf of a miner actor.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeElectionPoStMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">UInt64</span><span class="p">,</span> <span class="nx">postProof</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
+</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
+</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
+</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
+</span><span class="c1"></span>	<span class="c1">//	To_:         minerActorAddr,
+</span><span class="c1"></span>	<span class="c1">//	Method_:     StorageMinerActor.SubmitElectionPoSt,
+</span><span class="c1"></span>	<span class="c1">//	Params_:     serialize([PoStSubmission{postProof, epoch}]),
+</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
+</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
+</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
+</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   sumbitElectionPostGasLimit,
+</span><span class="c1"></span>	<span class="c1">//}
+</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when necessary dependencies are importable&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// Builds a message for invoking the cron actor tick.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeCronTickMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
+	<span class="c1">// minerActor := loadActorSubstate(minerActorAddr)
+</span><span class="c1"></span>	<span class="c1">// minerWorker := loadActor(minerActor.Info.Worker)
+</span><span class="c1"></span>	<span class="c1">//return &amp;UnsignedMessage_I{
+</span><span class="c1"></span>	<span class="c1">//	From_:       minerActor.Info.Worker,
+</span><span class="c1"></span>	<span class="c1">//	To_:         CronActorAddress,
+</span><span class="c1"></span>	<span class="c1">//	Method_:     CronActor.EpochTick,
+</span><span class="c1"></span>	<span class="c1">//	Params_:     nil,
+</span><span class="c1"></span>	<span class="c1">//	CallSeqNum_: minerWorker.CallSeqNum,
+</span><span class="c1"></span>	<span class="c1">//	Value_:      0,
+</span><span class="c1"></span>	<span class="c1">//	GasPrice_:   0,
+</span><span class="c1"></span>	<span class="c1">//	GasLimit_:   cronTickGasLimit,
+</span><span class="c1"></span>	<span class="c1">//}
+</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO: implement when necessary dependencies are importable&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">_msgCID</span><span class="p">(</span><span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">)</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">_encodeParams</span><span class="p">(</span><span class="nx">p</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="nx">Bytes</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

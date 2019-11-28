@@ -1775,14 +1775,6 @@ https://github.com/alex-shpak/hugo-book
 
 <ul class="menu-item-section depth-3">
 
-    <li>
-    
-    </li>
-
-    <li>
-    
-    </li>
-
 </ul>
 
 
@@ -4614,7 +4606,7 @@ Expected Consensus probabilistically elects multiple leaders in each epoch meani
 
 <p>Each block references a parent tipset and validates <em>that tipset&rsquo;s state</em>, while proposing messages to be included for the current epoch. The state to which a new block&rsquo;s messages apply cannot be known until that block is incorporated into a tipset. It is thus not meaningful to execute the messages from a single block in isolation: a new state tree is only known once all messages in that block&rsquo;s tipset are executed.</p>
 
-<p>A valid tipset contains a non-empty collection of blocks that all specify identical:</p>
+<p>A valid tipset contains a non-empty collection of blocks that have distinct miners and all specify identical:</p>
 
 <ul>
 <li><code>Epoch</code></li>
