@@ -223,6 +223,10 @@ func (rt *VMContext) ImmediateCaller() addr.Address {
 	return rt._immediateCaller
 }
 
+func (rt *VMContext) CurrReceiver() addr.Address {
+	return rt._actorAddress
+}
+
 func (rt *VMContext) ToplevelBlockWinner() addr.Address {
 	return rt._toplevelBlockWinner
 }
@@ -516,11 +520,6 @@ func (rt *VMContext) AcquireState() ActorStateHandle {
 		_initValue: rt._globalStatePending.GetActorState(rt._actorAddress).State().Ref(),
 		_rt:        rt,
 	}
-}
-
-func (rt *VMContext) CurrMethodNum() actor.MethodNum {
-	IMPL_FINISH()
-	panic("")
 }
 
 func (rt *VMContext) VerifySignature(signerActor addr.Address, sig filcrypto.Signature, m filcrypto.Message) bool {
