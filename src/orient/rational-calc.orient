@@ -17,10 +17,10 @@ Rig:
 
   describe(rig_malicious_cost_per_year, "Cost of the malicious computing rig per year")
   describe(rig_cores, "Number of CPU cores")
-  describe(rig_storage_read_mibs, "Sequential read speed (MB/s)")
+  describe(rig_storage_read_mbs, "Sequential read speed (MB/s)")
   describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
 
-  rig_storage_read_mibs = rig_storage_read_mibs * to_i
+  rig_storage_read_mibs = rig_storage_read_mbs * to_i
   rig_storage_min = rig_storage_min_tib * b_in_tib
   rig_sectors_min = rig_storage_min / sector_size
   rig_storage_parallelization_min = post_data_access / polling_time
@@ -132,10 +132,12 @@ ProofOfSpacetime:
 
         Regeneration:
           describe(post_mtree_regen_hashnodes, "Number of intermediary nodes to be regenerated for a single replica merkle tree inclusion proof in PoSt")
+          describe(post_mtree_regen_nodes, "Number of leaf nodes to be access for a single replica merkle tree inclusion proof in PoSt")
           describe(post_mtree_challenge_regen, "Time to generate the missing intermediary hash nodes of the replica merkle tree inclusion proof for a single challenge in PoSt")
           describe(post_mtree_challenges_regen, "Same as post_mtree_challenge_regen but for all the PoSt challenges")
 
           post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1
+          post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted) - 1
           post_mtree_challenge_regen = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
           post_mtree_challenges_regen = post_mtree_challenge_regen * post_challenges
 
@@ -144,7 +146,7 @@ ProofOfSpacetime:
           describe(post_mtree_challenges_read, "Same as post_mtree_challenge_read but for all the PoSt challenges")
 
           // TODO: this is using random access, we should use seq access instead
-          post_mtree_challenge_read = post_mtree_regen_hashnodes * rig_storage_latency
+          post_mtree_challenge_read = post_mtree_regen_nodes * rig_storage_latency
           post_mtree_challenges_read = post_mtree_challenge_read * post_challenges
           // TODO: log2(nodes) > post_mtree_layers_cached
 
