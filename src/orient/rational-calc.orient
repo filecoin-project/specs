@@ -1,3 +1,6 @@
+// TODO:
+// - Time cost per constraint
+// 
 // Note: all terms referring to size are in bytes, unless suffixed with _mib, _tib, etc.
 // Note: all terms referring to time are in seconds, unless suffixed with _mins, _days, etc.
 
