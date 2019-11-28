@@ -68,3 +68,10 @@ func Address_Make_ActorExec(net Address_NetworkID, hash ActorExecHash) Address {
 		Data_:      Address_Data_Make_ActorExec(hash),
 	}
 }
+
+type Address_Ptr = *Address
+
+func (a *Address_I) Ref() Address_Ptr {
+	var ret Address = a
+	return &ret
+}

@@ -3,7 +3,16 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 // GasAmount is a quantity of gas.
-type GasAmount UVarint
+type GasAmount struct {
+    value                BigInt
+
+    Add(GasAmount)       GasAmount
+    Subtract(GasAmount)  GasAmount
+    SubtractIfNonnegative(GasAmount) (ret GasAmount, ok bool)
+    LessThan(GasAmount) bool
+    Equals(GasAmount) bool
+    Scale(int) GasAmount
+}
 
 // GasPrice is a Gas-to-FIL cost
 type GasPrice actor.TokenAmount
