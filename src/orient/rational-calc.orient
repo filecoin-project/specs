@@ -52,6 +52,7 @@ ProofOfSpacetime:
     describe(post_time, "Time to generate a PoSt Proof on a single core CPU")
     describe(post_time_parallel, "Parallel time to generate a PoSt proof on RIG_CORES CPU cores")
     describe(post_snark_time, "Time to generate a PoSt SNARK")
+    describe(post_snark_time_parallel, "Time to generate a PoSt SNARK in parallel")
 
     post_time = post_proof_gen
     post_time_parallel = post_proof_gen_parallel
@@ -60,6 +61,7 @@ ProofOfSpacetime:
       describe(post_proof_gen, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves)")
       describe(post_proof_gen_parallel, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves) in parallel")
       describe(post_inclusions_time, "Time to regenerate and to read the merkle tree inclusion proofs for the challenged nodes from memory")
+      describe(post_inclusions_time_parallel, "Time to regenerate and to read the merkle tree inclusion proofs for the challenged nodes from memory in parallel")
 
       post_proof_gen = post_snark_time + post_inclusions_time + post_data_access 
       post_proof_gen = post_snark_time_parallel + post_inclusions_time_parallel + post_data_access_parallel
@@ -110,7 +112,7 @@ ProofOfSpacetime:
 
       Time:
         // Note: this assumes reading the cached parts of the merkle tree instantaneous
-
+        // TODO: post inclusion should be defined for wrapping etc.
         post_inclusions_time = post_mtree_challenges_regen + post_mtree_challenges_read
 
         Regeneration:
