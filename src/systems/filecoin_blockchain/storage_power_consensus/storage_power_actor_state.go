@@ -123,7 +123,7 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 		potentialChallengee := allMiners[minerIndexInt]
 		// call to storage miner actor:
 		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, PROVING_PERIOD/CHALLENGE_FREQUENCY)){
-		// hack below
+		// hack below TODO fix
 		if true {
 			sampledMiners = append(sampledMiners, potentialChallengee)
 		}

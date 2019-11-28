@@ -4,12 +4,15 @@ package storage_mining
 // import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -124,4 +127,121 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	}
 
 	return newTicket
+}
+
+// TODO Import IPLDStore
+var localIPLDStore ipld.GraphStore
+
+func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState {
+	actorState := stateTree.GetActorState(minerAddr)
+	substateCID := actorState.State()
+	substate := localIPLDStore.Get(ipld.CID(substateCID))
+	// TODO fix
+	panic(substate)
+	// substateBytes := util.Serialization(substate)
+
+	var substateBytes []byte
+	st, err := Deserialize_StorageMinerActorState(substateBytes)
+
+	if err == nil {
+		panic("Serialization error")
+	}
+	return st
+}
+
+func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+
+	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
+
+	// 1. Check that the miner in question is currently allowed to run election
+	if !st._canBeElected(header.Epoch()) {
+		return false
+		// rt.Abort("cannot submit an election proof if challenged or having challenge response failure")
+	}
+
+	// 2. Get appropriate randomness
+	if onChainInfo.PoStEpoch() != st.ChallengeStatus().LastChallengeEpoch() {
+		return false
+	}
+
+	electionRand := sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch())
+
+	// A proof must be a valid snark proof with the correct public inputs
+	// 3. Get public inputs
+	info := st.Info()
+	sectorSize := info.SectorSize()
+
+	postCfg := sector.PoStCfg_I{
+		Type_:        sector.PoStType_ElectionPoSt,
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.ElectionPoStPartitions(),
+	}
+
+	pvInfo := sector.PoStVerifyInfo_I{
+		OnChain_:    onChainInfo,
+		PoStCfg_:    &postCfg,
+		Randomness_: electionRand,
+	}
+
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
+
+	// 5. Verify the PoSt Proof
+	isPoStVerified := sdr.VerifyElectionPoSt(&pvInfo)
+	return isPoStVerified
+}
+
+func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+
+	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
+
+	// 1. Check that the miner in question is currently being challenged
+	if !st._isChallenged() {
+		// TODO: determine proper error here and error-handling machinery
+		// rt.Abort("cannot SubmitSurprisePoSt when not challenged")
+		return false
+	}
+
+	// TODO pull in from constants
+	PROVING_PERIOD := block.ChainEpoch(0)
+
+	// 2. Check that the challenge has not expired
+	// Check that miner can still submit (i.e. that the challenge window has not passed)
+	// This will prevent miner from submitting a Surprise PoSt past the challenge period
+	if header.Epoch() > st.ChallengeStatus().LastChallengeEpoch()+PROVING_PERIOD {
+		return false
+	}
+
+	// A proof must be a valid snark proof with the correct public inputs
+
+	// 3. Get appropriate randomness
+	surpriseRand := sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch())
+
+	// 4. Get public inputs
+	info := st.Info()
+	sectorSize := info.SectorSize()
+
+	postCfg := sector.PoStCfg_I{
+		Type_:        sector.PoStType_SurprisePoSt,
+		SectorSize_:  sectorSize,
+		WindowCount_: info.WindowCount(),
+		Partitions_:  info.SurprisePoStPartitions(),
+	}
+
+	pvInfo := sector.PoStVerifyInfo_I{
+		OnChain_:    onChainInfo,
+		PoStCfg_:    &postCfg,
+		Randomness_: surpriseRand,
+	}
+
+	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
+
+	// 5. Verify the PoSt Proof
+	isPoStVerified := sdr.VerifySurprisePoSt(&pvInfo)
+	return isPoStVerified
+}
+
+func (a *StorageMinerActorCode_I) IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool {
+	panic("TODO")
+	return false
 }

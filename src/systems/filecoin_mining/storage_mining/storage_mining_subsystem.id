@@ -74,8 +74,13 @@ type StorageMiningSubsystem struct {
 
     _tryLeaderElection()
 
-    VerifyPoSt(
-        proof       sector.PoStProof
-        candidates  [sector.PoStCandidate]
-    )
+    VerifyElectionPoSt(
+        header       block.BlockHeader
+        onChainInfo  sector.OnChainPoStVerifyInfo
+    ) bool
+    VerifySurprisePoSt(
+        header       block.BlockHeader
+        onChainInfo  sector.OnChainPoStVerifyInfo
+    ) bool
+    IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool
 }

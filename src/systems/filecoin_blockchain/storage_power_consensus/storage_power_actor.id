@@ -31,7 +31,6 @@ type StoragePowerActorState struct {
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount
     _sampleMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) [addr.Address]
-    _shouldChallenge(rt Runtime) bool
 }
 
 type StoragePowerActorCode struct {
