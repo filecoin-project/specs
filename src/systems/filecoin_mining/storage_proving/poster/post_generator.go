@@ -33,7 +33,7 @@ func (pg *PoStGenerator_I) GeneratePoStCandidates(postCfg sector.PoStCfg, challe
 	return sdr.GenerateElectionPoStCandidates(challengeSeed, sectors, candidateCount, sectorStore)
 }
 
-func (pg *PoStGenerator_I) GenerateElectionPoStProof(postCfg sector.PoStCfg, sealSeed util.Randomness, witness sector.PoStWitness) sector.PoStProof {
+func (pg *PoStGenerator_I) GenerateElectionPoStProof(postCfg sector.PoStCfg, randomness sector.PoStRandomness, witness sector.PoStWitness) sector.PoStProof {
 	sdr := makeStackedDRGForPoSt(postCfg)
 	var privateProofs []sector.PrivatePoStCandidateProof
 
@@ -41,7 +41,7 @@ func (pg *PoStGenerator_I) GenerateElectionPoStProof(postCfg sector.PoStCfg, sea
 		privateProofs = append(privateProofs, candidate.PrivateProof())
 	}
 
-	return sdr.GenerateElectionPoStProof(privateProofs, sealSeed)
+	return sdr.GenerateElectionPoStProof(privateProofs, randomness)
 }
 
 func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG_I) {

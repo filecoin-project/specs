@@ -870,7 +870,7 @@ func (sdr *WinStackedDRG_I) _getChallengedSectors(sectorIDs []sector.SectorID, r
 	return sectors
 }
 
-func generateSectorChallenge(randomness util.Randomness, n int, sectorIDs []sector.SectorID) (sector sector.SectorID) {
+func generateSectorChallenge(randomness sector.PoStRandomness, n int, sectorIDs []sector.SectorID) (sector sector.SectorID) {
 	preimage := append(randomness, littleEndianBytesFromInt(n, 8)...)
 	hash := SHA256Hash(preimage)
 	sectorChallenge := bigIntFromLittleEndianBytes(hash)
@@ -882,7 +882,7 @@ func generateSectorChallenge(randomness util.Randomness, n int, sectorIDs []sect
 	return sectorIDs[int(sectorIndex.Uint64())]
 }
 
-func generateLeafChallenge(randomness util.Randomness, sectorChallengeIndex UInt, leafChallengeIndex int, nodes int, challengeRangeSize int) UInt {
+func generateLeafChallenge(randomness sector.PoStRandomness, sectorChallengeIndex UInt, leafChallengeIndex int, nodes int, challengeRangeSize int) UInt {
 	preimage := append(randomness, littleEndianBytesFromUInt(sectorChallengeIndex, 8)...)
 	preimage = append(preimage, littleEndianBytesFromInt(leafChallengeIndex, 8)...)
 	hash := SHA256Hash(preimage)
@@ -931,7 +931,7 @@ func generateCandidate(randomness sector.PoStRandomness, aux sector.PersistentPr
 	return &candidate
 }
 
-func (sdr *WinStackedDRG_I) _generatePoStCandidates(challengeSeed util.Randomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+func (sdr *WinStackedDRG_I) _generatePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
 	nodes := int(sdr.Nodes())
 	leafChallengeCount := int(sdr.LeafChallengeCount())
 	challengeRangeSize := int(sdr.ChallengeRangeSize())
@@ -951,7 +951,7 @@ func (sdr *WinStackedDRG_I) _generatePoStCandidates(challengeSeed util.Randomnes
 type PrivatePoStProof struct {
 }
 
-func (sdr *WinStackedDRG_I) CreatePoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed util.Randomness, aux sector.PersistentProofAux) sector.PoStProof {
+func (sdr *WinStackedDRG_I) CreatePoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness, aux sector.PersistentProofAux) sector.PoStProof {
 	privateProof := sdr.CreatePrivatePoStProof(privateCandidateProofs, challengeSeed)
 
 	var candidates []sector.PoStCandidate // FIXME
@@ -962,7 +962,7 @@ func (sdr *WinStackedDRG_I) CreatePoStProof(privateCandidateProofs []sector.Priv
 	return sdr.CreatePoStCircuitProof(privateProof)
 }
 
-func (sdr *WinStackedDRG_I) CreatePrivatePoStProof(candidateProofs []sector.PrivatePoStCandidateProof, challengeSeed util.Randomness) PrivatePoStProof {
+func (sdr *WinStackedDRG_I) CreatePrivatePoStProof(candidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
 	panic("TODO")
 }
 
@@ -974,7 +974,7 @@ func (sdr *WinStackedDRG_I) CreatePoStCircuitProof(privateProof PrivatePoStProof
 	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) VerifyPoSTProof(privateProof PrivatePoStProof, challengeSeed util.Randomness, candidates []sector.PoStCandidate) bool {
+func (sdr *WinStackedDRG_I) VerifyPoSTProof(privateProof PrivatePoStProof, challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) bool {
 	panic("TODO")
 }
 func (sdr *WinStackedDRG_I) _verifyPoSt(sv sector.PoStVerifyInfo) bool {
@@ -988,7 +988,7 @@ func (sdr *WinStackedDRG_I) GenerateElectionPoStCandidates(challengeSeed sector.
 	return sdr._generatePoStCandidates(challengeSeed, eligibleSectors, candidateCount, sectorStore)
 }
 
-func (sdr *WinStackedDRG_I) GenerateElectionPoStProof(privateProofs []sector.PrivatePoStCandidateProof, challengeSeed util.Randomness) sector.PoStProof {
+func (sdr *WinStackedDRG_I) GenerateElectionPoStProof(privateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
 	privateProof := sdr.CreatePrivatePoStProof(privateProofs, challengeSeed)
 
 	return sdr.CreatePoStCircuitProof(privateProof)
@@ -1005,7 +1005,7 @@ func (sdr *WinStackedDRG_I) GenerateSurprisePoStCandidates(challengeSeed sector.
 	return sdr._generatePoStCandidates(challengeSeed, eligibleSectors, candidateCount, sectorStore)
 }
 
-func (sdr *WinStackedDRG_I) GenerateSurprisePoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed util.Randomness, aux sector.PersistentProofAux) sector.PoStProof {
+func (sdr *WinStackedDRG_I) GenerateSurprisePoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness, aux sector.PersistentProofAux) sector.PoStProof {
 	privateProof := sdr.CreatePrivatePoStProof(privateCandidateProofs, challengeSeed)
 
 	return sdr.CreatePoStCircuitProof(privateProof)

@@ -136,7 +136,7 @@ type WinStackedDRG struct {
     VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
     CreatePrivatePoStProof(
         candidateProofs  [sector.PrivatePoStCandidateProof]
-        challengeSeed    util.Randomness
+        challengeSeed    sector.PoStRandomness
         aux              sector.PersistentProofAux
     ) PrivatePoStProof
     VerifyPrivatePoStProof(
