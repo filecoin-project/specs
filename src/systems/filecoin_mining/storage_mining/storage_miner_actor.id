@@ -150,9 +150,6 @@ type StorageMinerActorCode struct {
 }
 
 type MinerInfo struct {
-    // The miner actor address assigned by the Storage Power Actor
-    Address                 address.Address
-
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.

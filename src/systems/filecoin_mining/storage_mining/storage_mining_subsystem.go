@@ -11,6 +11,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
@@ -129,13 +130,14 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	return newTicket
 }
 
-// TODO Import IPLDStore
-var localIPLDStore ipld.GraphStore
+// TODO: fix linking here
+var node node_base.FilecoinNode
 
 func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState {
 	actorState := stateTree.GetActorState(minerAddr)
 	substateCID := actorState.State()
-	substate := localIPLDStore.Get(ipld.CID(substateCID))
+
+	substate := node.LocalGraph().Get(ipld.CID(substateCID))
 	// TODO fix
 	panic(substate)
 	// substateBytes := util.Serialization(substate)

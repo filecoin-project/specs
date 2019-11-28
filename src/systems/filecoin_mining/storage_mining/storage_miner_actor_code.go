@@ -101,11 +101,8 @@ func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 	return rt.SuccessReturn()
 }
 
-// Will return immediately if the miner
-// has successfully submitted a PoSt (and is no longer challenged)
-// If a Post is missed (either due to faults being not declared on time or
-// because the miner run out of time, every sector is reported as failing
-// for the current proving period.
+// If the miner is currently challenged for surprise PoSt,
+// reports every sector as failing for the current proving period.
 func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 

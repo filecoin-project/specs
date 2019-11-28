@@ -36,7 +36,7 @@ func (cs *ChallengeStatus_I) CanBeElected(currEpoch block.ChainEpoch) bool {
 	// true if most recent successful post (surprise or election) was recent enough
 	// and not currently getting challenged
 
-	// pull in from consts
+	// TODO: pull in from consts
 	PROVING_PERIOD := block.ChainEpoch(0)
 	return !cs.IsChallenged() && currEpoch < cs._lastPoStSuccessEpoch()+PROVING_PERIOD
 }
