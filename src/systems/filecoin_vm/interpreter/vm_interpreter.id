@@ -6,15 +6,15 @@ type UInt64 UInt
 
 // The messages from one block in a tipset.
 type BlockMessages struct {
-    Messages  [msg.UnsignedMessage]
-    Miner     addr.Address      // The block miner's actor address
-    PoStProof Bytes             // The miner's Election PoSt proof output
+    Messages   [msg.UnsignedMessage]
+    Miner      addr.Address  // The block miner's actor address
+    PoStProof  Bytes  // The miner's Election PoSt proof output
 }
 
 // The messages from a tipset, grouped by block.
 type TipSetMessages struct {
     Blocks  [BlockMessages]
-    Epoch   UInt64              // The chain epoch of the blocks
+    Epoch   UInt64  // The chain epoch of the blocks
 }
 
 type VMInterpreter struct {
