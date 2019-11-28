@@ -142,3 +142,14 @@ func (st *StoragePowerActorState_I) _ensurePledgeCollateralSatisfied(rt Runtime)
 
 	return false
 }
+
+func (st *StoragePowerActorState_I) _getAffectedPledge(rt Runtime, minerID addr.Address, affectedPower block.StoragePower) actor.TokenAmount {
+
+	// TODO: revisit this calculation
+	powerEntry := st._safeGetPowerEntry(rt, minerID)
+	totalPower := powerEntry.ActivePower() + powerEntry.InactivePower()
+	pledgeRequired := st._getPledgeCollateralReq(rt, totalPower)
+	affectedPledge := actor.TokenAmount(uint64(pledgeRequired) * uint64(affectedPower) / uint64(totalPower))
+
+	return affectedPledge
+}

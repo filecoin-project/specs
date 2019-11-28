@@ -34,6 +34,11 @@ type StoragePowerActorState struct {
 
     _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry
     _ensurePledgeCollateralSatisfied(rt Runtime) bool
+    _getAffectedPledge(
+        rt             Runtime
+        minerID        addr.Address
+        affectedPower  block.StoragePower
+    ) actor.TokenAmount
 }
 
 type StoragePowerActorCode struct {

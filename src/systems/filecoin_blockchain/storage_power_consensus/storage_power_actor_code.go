@@ -200,21 +200,17 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 
 	h, st := a.State(rt)
 
-	// TODO: revisit this calculation
-	powerEntry := st._safeGetPowerEntry(rt, minerID)
-	totalPower := powerEntry.ActivePower() + powerEntry.InactivePower()
-	pledgeRequired := st._getPledgeCollateralReq(rt, totalPower)
-	pledgeAffected := actor.TokenAmount(uint64(pledgeRequired) * uint64(affectedPower) / uint64(totalPower))
+	affectedPledge := st._getAffectedPledge(rt, minerID, affectedPower)
 
 	switch faultType {
 	case sector.DeclaredFault:
-		amountToSlash := actor.TokenAmount(DeclaredFaultSlashPercent * uint64(pledgeAffected) / 100)
+		amountToSlash := actor.TokenAmount(DeclaredFaultSlashPercent * uint64(affectedPledge) / 100)
 		st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	case sector.DetectedFault:
-		amountToSlash := actor.TokenAmount(DetectedFaultSlashPercent * uint64(pledgeAffected) / 100)
+		amountToSlash := actor.TokenAmount(DetectedFaultSlashPercent * uint64(affectedPledge) / 100)
 		st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	case sector.TerminatedFault:
-		amountToSlash := actor.TokenAmount(TerminatedFaultSlashPercent * uint64(pledgeAffected) / 100)
+		amountToSlash := actor.TokenAmount(TerminatedFaultSlashPercent * uint64(affectedPledge) / 100)
 		st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	}
 
