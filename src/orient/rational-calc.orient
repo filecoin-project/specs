@@ -144,6 +144,7 @@ ProofOfReplication:
     describe(graph_parents, "Number of parents of a node in the PoRep window graph")
     describe(drg_parents, "Number of DRG parents of a node in the PoRep window graph")
     describe(expander_parents, "Number of Chung Expander parents of a node in the PoRep window graph")
+    describe(drg_layers, "Number of layers in the DRG")
 
     describe(node_size, "Size of a node (bytes)")
     describe(node_size_gb, "Size of a node (GiB)")
@@ -178,6 +179,8 @@ ProofOfReplication:
     describe(commd_size, "Size of CommD (bytes)")
     describe(commrlast_size, "Size of CommRLast (bytes)")
 
+    describe(commr_tree_depth, "Number of layers of the merkle tree with root hash CommR")
+
     describe(seal_onchain_commitments_size, "Size of the seal commitments", bytes)
     describe(porep_commit_time, "Time to generate CommC, CommR and CommQ", secs)
     describe(porep_commit_time_mins, "Time to generate CommC, CommR and CommQ", mins)
@@ -186,6 +189,7 @@ ProofOfReplication:
 
     describe(commr_time, "Time to generate CommR (seconds)")
     describe(commd_time, "Time to generate CommD (seconds)")
+    describe(commc_time, "Time to generate CommC (seconds)")
 
     commit_size = cid_size
     // TODO: should be missing *2
@@ -213,15 +217,23 @@ ProofOfReplication:
       commr_tree_depth = log2(window_nodes)
 
     CommC:
+      describe(commc_tree_time, "Time to generate the merkle tree of CommC (after the leaves have been computed)", secs)
       commc_tree_time = (window_comm_tree_time + window_comm_leaves_time) * drg_layers 
 
   Encoding:
-    encoding_window_time = (window_nodes * graph_parents) * kdf_time * drg_layers
-    encoding_time = encoding_window_time * windows
-    decoding_time = encoding_window_time
+    describe(encoding_time, "Time to encode a sector", secs)
+    describe(encoding_time_parallel, "Time to encode a sector in parallel", secs)
 
+    describe(encoding_window_time, "Time to encode a window", secs)
+    describe(encoding_window_time_parallel, "Time to encode a window in parallel", secs)
+
+    encoding_time = encoding_window_time * windows
     encoding_time_parallel = encoding_time / rig_cores
-    window_time_parallel = encoding_window_time / rig_cores
+
+    encoding_window_time = (window_nodes * graph_parents) * kdf_time * drg_layers
+    encoding_window_time_parallel = encoding_window_time / rig_cores
+
+    decoding_time = encoding_window_time
 
     Asic:
       encoding_time_parallel_asic = encoding_time_parallel / hashing_amax
@@ -278,6 +290,7 @@ ProofOfReplication:
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
   describe(polling_time, "Time between two PoSt proofs")
+  describe(challenge_periods_per_month, "Number of challenge periods in a month")
   describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them"
 
   breakeven_nodes = ((cost_gb_per_month *  sector_size_gb) / (cost_node_encoding * challenge_periods_per_month))
