@@ -10,13 +10,10 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
+func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
 		rt.Abort("negative amount.")
 	}
-
-	// TODO: convert address to MinerActorID
-	var minerID addr.Address
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 
@@ -25,7 +22,7 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address a
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
 		amountToSlash = currEntry.Impl().LockedPledgeCollateral_
 		currEntry.Impl().LockedPledgeCollateral_ = 0
-		// TODO: extra handling of not having enough pledgecollateral to be slashed
+		// TODO: extra handling of not having enough pledge collateral to be slashed
 	} else {
 		currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amountToSlash
 	}
@@ -38,14 +35,11 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address a
 // TODO: batch process this if possible
 func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	// AvailableBalance -> LockedPledgeCollateral
-	// TODO: potentially unnecessary check
 	if amount < 0 {
 		rt.Abort("negative amount.")
 	}
 
-	// TODO: convert address to MinerActorID
-	var minerID addr.Address
-
+	minerID := rt.ToplevelSender()
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 
 	if currEntry.Impl().AvailableBalance() < amount {
@@ -63,8 +57,7 @@ func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address 
 		rt.Abort("negative amount.")
 	}
 
-	// TODO: convert address to MinerActorID
-	var minerID addr.Address
+	minerID := rt.ToplevelSender()
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
@@ -132,16 +125,18 @@ func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.
 
 func (st *StoragePowerActorState_I) _ensurePledgeCollateralSatisfied(rt Runtime) bool {
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	minerID := rt.ToplevelSender()
 
 	powerEntry := st._safeGetPowerEntry(rt, minerID)
 	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
 
 	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
+		extraLockedFund := powerEntry.LockedPledgeCollateral() - pledgeCollateralRequired
+		st._unlockPledgeCollateral(rt, minerID, extraLockedFund)
 		return true
 	} else if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
-		st._lockPledgeCollateral(rt, minerID, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
+		fundToLock := pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()
+		st._lockPledgeCollateral(rt, minerID, fundToLock)
 		return true
 	}
 

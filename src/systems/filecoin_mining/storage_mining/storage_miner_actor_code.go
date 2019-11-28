@@ -100,6 +100,13 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 	return rt.SuccessReturn()
 }
 
+func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
+	h, st := a.State(rt)
+	ret := st._isChallenged(rt)
+	Release(rt, h, st)
+	return ret
+}
+
 func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType sector.StorageFaultType) {
 
 	h, st := a.State(rt)
@@ -116,8 +123,8 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 	processDealSlashParam := make([]actor.MethodParam, 2)
 
 	Release(rt, h, st)
-	
-	rt.SendCatchingErrors(&msg.InvocInput_I{
+
+	rt.SendPropagatingErrors(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
 		Method_: market.MethodProcessDealSlash,
 		Params_: processDealSlashParam,
@@ -145,10 +152,8 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 
 	Release(rt, h, st)
 
-	panic(affectedPower)
-	slashPledgeParams := make([]actor.MethodParam, 3)
-
-	rt.SendCatchingErrors(&msg.InvocInput_I{
+	slashPledgeParams := make([]actor.MethodParam, len(block.Serialize_StoragePower(affectedPower)))
+	rt.SendPropagatingErrors(&msg.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
 		Method_: power.MethodSlashPledgeForStorageFault,
 		Params_: slashPledgeParams,
@@ -200,30 +205,10 @@ func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime
 		// garbage collection - need to be called by cron once in a while
 		a._expirePreCommittedSectors(rt)
 
+
 		// oh no -- we missed it. rekt
 		a._onMissedSurprisePoSt(rt)
 
-<<<<<<< HEAD
-=======
-	// this will go through even if miners do not have the right amount of pledge collateral
-	// when _submitPowerReport is called in DeclareFaults and _onMissedSurprisePoSt for power slashing
-	// however in _onSuccessfulPoSt EnsurePledgeCollateralSatsified will be called
-	// to ensure that miners have the required pledge collateral
-	// otherwise, post submission will fail
-	// Note: there is no power update in RecoverFaults and hence no EnsurePledgeCollatera or _submitPowerReport
-	rt.SendCatchingErrors(&msg.InvocInput_I{
-		To_:     addr.StoragePowerActorAddr,
-		Method_: power.MethodProcessPowerReport,
-		Params_: processPowerReportParam,
-	})
-
-	if len(newExpiredDealIDs) > 0 {
-		rt.SendCatchingErrors(&msg.InvocInput_I{
-			To_:     addr.StorageMarketActorAddr,
-			Method_: market.MethodProcessDealExpiration,
-			Params_: processDealExpirationParam,
-		})
->>>>>>> wire slashDealsForStorageFault
 	}
 
 	return rt.SuccessReturn()
@@ -357,11 +342,6 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 		newTerminatedFaults,
 	)
 
-	// Ensure pledge collateral satisfied
-	// otherwise, abort _onSuccessfulPoSt
-	a._ensurePledgeCollateralSatisfied(rt)
-
-	// Now that all is done update pointer to last response
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnPoStSuccess(rt.CurrEpoch())
 	st._processStagedCommittedSectors(rt)
@@ -374,6 +354,10 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 // called by verifier to update miner state on successful surprise post
 func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	TODO() // TODO: validate caller
+
+	// Ensure pledge collateral satisfied
+	// otherwise, abort SubmitVerifiedSurprisePoSt
+	a._ensurePledgeCollateralSatisfied(rt)
 
 	return a._onSuccessfulPoSt(rt, onChainInfo)
 
@@ -467,37 +451,41 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	inactivePower := st._getInactivePower(rt)
 
 	// serialize this in param
-	_ = &power.PowerReport_I{
+		powerReport := &power.PowerReport_I{
 		ActivePower_:   activePower,
 		InactivePower_: inactivePower,
 	}
 
-	// TODO: serialization helper
-	processPowerReportParam := make([]actor.MethodParam, 1)
-	processDealExpirationParam := make([]actor.MethodParam, len(newExpiredDealIDs))
+	processPowerReportParam := make([]actor.MethodParam, len(power.Serialize_PowerReport(powerReport)))
+	processDealExpirationParam := make([]actor.MethodParam, len(newExpiredDealIDs)) // this should be serialized
 
 	Release(rt, h, st)
 
 	// this will go through even if miners do not have the right amount of pledge collateral
 	// when _submitPowerReport is called in DeclareFaults and _onMissedSurprisePoSt for power slashing
-	// however in _onSuccessfulPoSt EnsurePledgeCollateralSatsified will be called
+	// however in SubmitSurprisePoSt EnsurePledgeCollateralSatsified will be called
 	// to ensure that miners have the required pledge collateral
+	// otherwise, post submission will fail
 	// Note: there is no power update in RecoverFaults and hence no EnsurePledgeCollatera or _submitPowerReport
-	rt.SendCatchingErrors(&msg.InvocInput_I{
+	// Note: ElectionPoSt will always go through and some block rewards will go to LockedBalance in StoragePowerActor
+	// if the block winning miner is undercollateralized
+	rt.SendPropagatingErrors(&msg.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
 		Method_: power.MethodProcessPowerReport,
 		Params_: processPowerReportParam,
 	})
 
 	if len(newExpiredDealIDs) > 0 {
-		rt.SendCatchingErrors(&msg.InvocInput_I{
+		rt.SendPropagatingErrors(&msg.InvocInput_I{
 			To_:     addr.StorageMarketActorAddr,
-			Method_: storage_market.MethodProcessDealExpiration,
+			Method_: market.MethodProcessDealExpiration,
 			Params_: processDealExpirationParam,
 		})
 	}
 
 }
+
+
 
 
 
@@ -625,10 +613,6 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 		Method_: market.MethodGetUnsealedCIDForDealIDs,
 		Params_: params,
 	})
-
-	if receipt.ExitCode() == exitcode.InvalidSectorPacking {
-		return false
-	}
 
 	ret := receipt.ReturnValue()
 	pieceInfos := sector.PieceInfosFromBytes(ret)
@@ -811,15 +795,11 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
 	emptyParams := make([]actor.MethodParam, 0)
-	ret := rt.SendCatchingErrors(&msg.InvocInput_I{
+	rt.SendPropagatingErrors(&msg.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
 		Method_: power.EnsurePledgeCollateralSatisfied,
 		Params_: emptyParams,
 	})
-
-	if ret.ExitCode() == exitcode.InsufficientPledgeCollateral {
-		rt.Abort("sma._onSuccessfulPoSt: insufficient pledge collateral.")
-	}
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {

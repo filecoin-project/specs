@@ -54,7 +54,7 @@ type StoragePowerActorCode struct {
     // PowerTable Operations
     GetTotalPower(rt Runtime) block.StoragePower
 
-    EnsurePledgeCollateralSatisfied(rt Runtime) bool
+    EnsurePledgeCollateralSatisfied(rt Runtime)
 
     ProcessPowerReport(rt Runtime, report PowerReport)
     SlashPledgeForStorageFault(

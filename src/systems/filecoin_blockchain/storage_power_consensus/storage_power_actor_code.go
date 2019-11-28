@@ -10,7 +10,6 @@ import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
-	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -18,6 +17,15 @@ const (
 	MethodProcessPowerReport         = actor.MethodPlaceholder
 	MethodSlashPledgeForStorageFault = actor.MethodPlaceholder
 	EnsurePledgeCollateralSatisfied  = actor.MethodPlaceholder
+)
+
+// placeholder values
+// these are the scaling constants for percentage pledge collateral to slash
+// given a miner's affected power and its total power
+const (
+	DeclaredFaultSlashPercent   = 1   // placeholder
+	DetectedFaultSlashPercent   = 10  // placeholder
+	TerminatedFaultSlashPercent = 100 // placeholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,15 +65,14 @@ func DeserializeState(x Bytes) State {
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
-	var msgValue actor.TokenAmount
+	msgValue := rt.ValueReceived()
 
 	// TODO: this should be enforced somewhere else
 	if msgValue < 0 {
 		rt.Abort("negative message value.")
 	}
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
@@ -87,8 +94,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 		rt.Abort("negative amount.")
 	}
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
@@ -107,7 +113,11 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 
 	UpdateRelease(rt, h, st)
 
-	// TODO: send funds to msgSender
+	// send funds to miner
+	rt.SendPropagatingErrors(&msg.InvocInput_I{
+		To_:    minerID,
+		Value_: amount,
+	})
 }
 
 func (a *StoragePowerActorCode_I) CreateStorageMiner(
@@ -129,9 +139,7 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	// store ownerAddr and workerAddr there
 	// and return StorageMinerActor address
 
-	// TODO: minerID should be a MinerActorID
-	// which is smaller than MinerAddress
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
@@ -145,8 +153,7 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Address) {
 
-	// TODO: make explicit address type
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
@@ -174,43 +181,54 @@ func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
 	return totalPower
 }
 
-func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) InvocOutput {
+func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 
 	h, st := a.State(rt)
 	ret := st._ensurePledgeCollateralSatisfied(rt)
 	UpdateRelease(rt, h, st)
 
 	if !ret {
-		return rt.ErrorReturn(exitcode.InsufficientPledgeCollateral)
+		rt.Abort("exitcode.InsufficientPledgeCollateral")
 	}
 
-	return rt.SuccessReturn()
 }
 
 // slash pledge collateral for Declared, Detected and Terminated faults
 func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
 
-	var msgSender addr.Address // TODO replace this
-
-	// placeholder values
-	const unitDeclaredFaultSlash = 1    // placeholder
-	const unitDetectedFaultSlash = 5    // placeholder
-	const unitTerminatedFaultSlash = 10 // placeholder
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
+	// TODO: revisit this calculation
+	powerEntry := st._safeGetPowerEntry(rt, minerID)
+	totalPower := powerEntry.ActivePower() + powerEntry.InactivePower()
+	pledgeRequired := st._getPledgeCollateralReq(rt, totalPower)
+	pledgeAffected := actor.TokenAmount(uint64(pledgeRequired) * uint64(affectedPower) / uint64(totalPower))
+
 	switch faultType {
 	case sector.DeclaredFault:
-		amountToSlash := actor.TokenAmount(unitDeclaredFaultSlash * affectedPower)
-		st._slashPledgeCollateral(rt, msgSender, amountToSlash)
+		amountToSlash := actor.TokenAmount(DeclaredFaultSlashPercent * uint64(pledgeAffected) / 100)
+		st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	case sector.DetectedFault:
-		amountToSlash := actor.TokenAmount(unitDetectedFaultSlash * affectedPower)
-		st._slashPledgeCollateral(rt, msgSender, amountToSlash)
+		amountToSlash := actor.TokenAmount(DetectedFaultSlashPercent * uint64(pledgeAffected) / 100)
+		st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	case sector.TerminatedFault:
-		amountToSlash := actor.TokenAmount(unitTerminatedFaultSlash * affectedPower)
-		st._slashPledgeCollateral(rt, msgSender, amountToSlash)
+		amountToSlash := actor.TokenAmount(TerminatedFaultSlashPercent * uint64(pledgeAffected) / 100)
+		st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	}
 
+	// this is done this way because we can't send messages when holding onto the state lock
+	amountToSlash := st.PledgeCollateralSlashed()
+	UpdateRelease(rt, h, st)
+
+	rt.SendPropagatingErrors(&msg.InvocInput_I{
+		To_:    addr.BurntFundsActorAddr,
+		Value_: amountToSlash,
+	})
+
+	h, st = a.State(rt)
+	st.Impl().PledgeCollateralSlashed_ = actor.TokenAmount(0)
 	UpdateRelease(rt, h, st)
 }
 
@@ -218,8 +236,7 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 // update miner power based on the power report
 func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 

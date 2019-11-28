@@ -9,7 +9,7 @@ const MAX_PROVE_COMMIT_SECTOR_EPOCH = block.ChainEpoch(3)
 type StorageFaultType int
 
 const (
-	DeclaredFault   StorageFaultType = 0
-	DetectedFault   StorageFaultType = 1
-	TerminatedFault StorageFaultType = 2
+	DeclaredFault StorageFaultType = 1 + iota
+	DetectedFault
+	TerminatedFault
 )
