@@ -9,6 +9,9 @@ type WinStackedDRGWindowCount UInt
 type WinStackedDRGPartitions UInt
 type WinStackedDRGChallenges UInt
 type WinStackedDRGWindowChallenges UInt
+type WinStackedDRGLeafChallengeCount UInt
+type WinStackedDRGChallengeRangeSize UInt
+
 type DRGDepth struct {}
 type DRGFraction struct {}
 type DRGDegree UInt
@@ -74,6 +77,8 @@ type WinStackedDRG struct {
     Partitions              WinStackedDRGPartitions
     Challenges              WinStackedDRGChallenges
     WindowChallenges        WinStackedDRGWindowChallenges
+    LeafChallengeCount      WinStackedDRGLeafChallengeCount
+    ChallengeRangeSize      WinStackedDRGChallengeRangeSize
     Algorithm               struct {}
     DRGCfg
     ExpanderGraphCfg
@@ -193,6 +198,7 @@ type Feistel struct {
 
 type MerkleTree struct {
     ProveInclusion(challenge UInt) InclusionProof
+    Leaf(index UInt) Bytes
 }
 
 // TODO: Needs to be generic over hash.

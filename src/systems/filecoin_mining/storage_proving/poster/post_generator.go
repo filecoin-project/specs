@@ -30,17 +30,12 @@ func (pg *PoStGenerator_I) GeneratePoStCandidates(postCfg sector.PoStCfg, challe
 	// For now, dodge this by passing the whole SectorStore. Once we decide how we want to represent this, we can narrow the call.
 
 	sdr := makeStackedDRGForPoSt(postCfg)
-	var sectorNumbers []sector.SectorNumber
-	for _, s := range sectors {
-		sectorNumbers = append(sectorNumbers, s.Number())
-	}
-
-	return sdr.GenerateElectionPoStCandidates(challengeSeed, sectorNumbers, candidateCount, sectorStore)
+	return sdr.GenerateElectionPoStCandidates(challengeSeed, sectors, candidateCount, sectorStore)
 }
 
 func (pg *PoStGenerator_I) GenerateElectionPoStProof(postCfg sector.PoStCfg, witness sector.PoStWitness) sector.PoStProof {
 	sdr := makeStackedDRGForPoSt(postCfg)
-	var privateProofs []sector.PrivatePoStProof
+	var privateProofs []sector.PrivatePoStCandidateProof
 
 	for _, candidate := range witness.Candidates() {
 		privateProofs = append(privateProofs, candidate.PrivateProof())

@@ -18,7 +18,7 @@ import (
 
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
-	sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 )
 
 type SHA256Hash Bytes32
@@ -35,6 +35,8 @@ func WinSDRParams(cfg SDRCfg) *WinStackedDRG_I {
 	const NODE_SIZE = 32
 	const OFFLINE_CHALLENGES = 6666
 	const OFFLINE_WINDOW_CHALLENGES = 1111
+	const POST_LEAF_CHALLENGE_COUNT = 66
+	const POST_CHALLENGE_RANGE_SIZE = 1
 	const FEISTEL_ROUNDS = 3
 	var FEISTEL_KEYS = [FEISTEL_ROUNDS]UInt{1, 2, 3}
 	var FIELD_MODULUS = new(big.Int)
@@ -44,12 +46,14 @@ func WinSDRParams(cfg SDRCfg) *WinStackedDRG_I {
 	nodes := UInt(cfg.SealCfg().SectorSize() / NODE_SIZE)
 
 	return &WinStackedDRG_I{
-		Layers_:           WinStackedDRGLayers(LAYERS),
-		Challenges_:       WinStackedDRGChallenges(OFFLINE_CHALLENGES),
-		WindowChallenges_: WinStackedDRGWindowChallenges(OFFLINE_WINDOW_CHALLENGES),
-		NodeSize_:         WinStackedDRGNodeSize(NODE_SIZE),
-		Nodes_:            WinStackedDRGNodes(nodes),
-		Algorithm_:        &WinStackedDRG_Algorithm_I{},
+		Layers_:             WinStackedDRGLayers(LAYERS),
+		Challenges_:         WinStackedDRGChallenges(OFFLINE_CHALLENGES),
+		WindowChallenges_:   WinStackedDRGWindowChallenges(OFFLINE_WINDOW_CHALLENGES),
+		LeafChallengeCount_: WinStackedDRGLeafChallengeCount(POST_LEAF_CHALLENGE_COUNT),
+		ChallengeRangeSize_: WinStackedDRGChallengeRangeSize(POST_CHALLENGE_RANGE_SIZE),
+		NodeSize_:           WinStackedDRGNodeSize(NODE_SIZE),
+		Nodes_:              WinStackedDRGNodes(nodes),
+		Algorithm_:          &WinStackedDRG_Algorithm_I{},
 		DRGCfg_: &DRGCfg_I{
 			Algorithm_: &DRGCfg_Algorithm_I{
 				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
@@ -296,8 +300,11 @@ func (sdr *WinStackedDRG_I) GenerateCommitments(replica []byte, windowKeyLayers 
 	return commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath
 }
 
+func getProverID(minerID sector.MinerID) []byte {
+	panic("TODO")
+}
 func computeSealSeed(sid sector.SectorID, windowIndex int, randomness util.Randomness, commD sector.UnsealedSectorCID) sector.SealSeed {
-	var proverId []byte // TODO: Derive this from sid.MinerID()
+	proverId := getProverID(sid.MinerID())
 	sectorNumber := sid.Number()
 
 	var preimage []byte
@@ -315,13 +322,11 @@ func generateSDRKeyLayers(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector
 	var keyLayers [][]byte
 	var prevLayer []byte
 
-	//	for w := 0; i < windows; w++ {
 	for i := 0; i < layers; i++ {
 		currentLayer := labelLayer(drg, expander, sealSeed, window, nodeSize, nodes, prevLayer)
 		keyLayers = append(keyLayers, currentLayer)
 		prevLayer = currentLayer
 	}
-	//	}
 
 	return keyLayers
 }
@@ -426,11 +431,6 @@ func hashColumn(column []Label) PedersenHash {
 		preimage = append(preimage, label...)
 	}
 	return HashBytes_PedersenHash(preimage)
-}
-
-type PrivateOfflineProof struct {
-	WindowChallengeProofs []OfflineWindowChallengeProof
-	ChallengeProofs       []OfflineChallengeProof
 }
 
 func (sdr *WinStackedDRG_I) CreateSealProof(challengeSeed util.Randomness, aux sector.ProofAuxTmp) sector.SealProof {
@@ -580,18 +580,10 @@ func createWindowChallengeProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeeds
 		dataProofs = append(dataProofs, dataProof)
 	}
 
-	// var replicaProofs []InclusionProof
-
-	// for i := 0; i < windows; i++ {
-	// 	c := challenge + UInt(i*windowSize)
-	// 	replicaProof := replicaTree.proveInclusion(c)
-	// 	replicaProofs = append(replicaProofs, replicaProof)
-	// }
-
 	proof = OfflineWindowChallengeProof{
 		DataProofs:   dataProofs,
 		ColumnProofs: columnProofs,
-		//ReplicaProofs: replicaProofs,
+		//ReplicaProofs: replicaProofs, // FIXME
 	}
 
 	return proof
@@ -625,6 +617,11 @@ func createColumnProof(c UInt, nodeSize UInt, columnTree MerkleTree, aux sector.
 	return columnProof
 }
 
+type PrivateOfflineProof struct {
+	WindowChallengeProofs []OfflineWindowChallengeProof
+	ChallengeProofs       []OfflineChallengeProof
+}
+
 type OfflineChallengeProof struct {
 	// FIXME
 }
@@ -653,6 +650,10 @@ func (ip *InclusionProof_I) Root() Commitment {
 }
 
 func (mt *MerkleTree_I) ProveInclusion(challenge UInt) InclusionProof {
+	panic("TODO")
+}
+
+func (mt *MerkleTree_I) Leaf(index UInt) []byte {
 	panic("TODO")
 }
 
@@ -860,58 +861,130 @@ func (sdr *WinStackedDRG_I) _verifyOfflineCircuitProof(commD sector.UnsealedSect
 ////////////////////////////////////////////////////////////////////////////////
 // PoSt
 
-func (sdr *WinStackedDRG_I) _getChallengedSectors(randomness util.Randomness, eligibleSectors []sector.SectorNumber, candidateCount int) (sectors []sector.SectorID, challenges []UInt) {
+func (sdr *WinStackedDRG_I) _getChallengedSectors(sectorIDs []sector.SectorID, randomness util.Randomness, eligibleSectors []sector.SectorID, candidateCount int) (sectors []sector.SectorID) {
+	for i := 0; i < candidateCount; i++ {
+		sector := generateSectorChallenge(randomness, i, sectorIDs)
+		sectors = append(sectors, sector)
+	}
+
+	return sectors
+}
+
+func generateSectorChallenge(randomness util.Randomness, n int, sectorIDs []sector.SectorID) (sector sector.SectorID) {
+	preimage := append(randomness, littleEndianBytesFromInt(n, 8)...)
+	hash := SHA256Hash(preimage)
+	sectorChallenge := bigIntFromLittleEndianBytes(hash)
+
+	challengeModulus := new(big.Int)
+	challengeModulus.SetUint64(uint64(len(sectorIDs)))
+
+	sectorIndex := sectorChallenge.Mod(sectorChallenge, challengeModulus)
+	return sectorIDs[int(sectorIndex.Uint64())]
+}
+
+func generateLeafChallenge(randomness util.Randomness, sectorChallengeIndex UInt, leafChallengeIndex int, nodes int, challengeRangeSize int) UInt {
+	preimage := append(randomness, littleEndianBytesFromUInt(sectorChallengeIndex, 8)...)
+	preimage = append(preimage, littleEndianBytesFromInt(leafChallengeIndex, 8)...)
+	hash := SHA256Hash(preimage)
+	bigHash := bigIntFromLittleEndianBytes(hash)
+
+	challengeSpaceSize := nodes / challengeRangeSize
+	challengeModulus := new(big.Int)
+	challengeModulus.SetUint64(UInt(challengeSpaceSize))
+
+	leafChallenge := bigHash.Mod(bigHash, challengeModulus)
+
+	return leafChallenge.Uint64()
+}
+
+func generateCandidate(randomness util.Randomness, aux sector.PersistentProofAux, sectorID sector.SectorID, sectorChallengeIndex UInt, leafChallengeCount int, nodes int, challengeRangeSize int) sector.PoStCandidate {
+	treePath := aux.CommRLastTreePath()
+	tree := LoadMerkleTree(treePath)
+
+	var data []byte
+	var inclusionProofs []InclusionProof
+	for i := 0; i < leafChallengeCount; i++ {
+		leafChallenge := generateLeafChallenge(randomness, sectorChallengeIndex, i, nodes, challengeRangeSize)
+
+		for j := 0; j < challengeRangeSize; j++ {
+			leafIndex := leafChallenge + UInt(j)
+			data = append(data, tree.Leaf(leafIndex)...)
+			inclusionProof := tree.ProveInclusion(leafIndex)
+			inclusionProofs = append(inclusionProofs, inclusionProof)
+		}
+	}
+
+	preimage := randomness
+	preimage = append(preimage, getProverID(sectorID.MinerID())...)
+	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorID.Number()), 8)...)
+	preimage = append(preimage, data...)
+	partialTicket := sector.PartialTicket(HashBytes_PedersenHash(preimage))
+
+	privateProof := sector.PrivatePoStCandidateProof_I{}
+
+	candidate := sector.PoStCandidate_I{
+		PartialTicket_:  partialTicket,
+		PrivateProof_:   &privateProof,
+		SectorID_:       sectorID,
+		ChallengeIndex_: sectorChallengeIndex,
+	}
+	return &candidate
+}
+
+func (sdr *WinStackedDRG_I) _generatePoStCandidates(challengeSeed util.Randomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+	nodes := int(sdr.Nodes())
+	leafChallengeCount := int(sdr.LeafChallengeCount())
+	challengeRangeSize := int(sdr.ChallengeRangeSize())
+	challengedSectors := sdr._getChallengedSectors(eligibleSectors, challengeSeed, eligibleSectors, candidateCount)
+
+	for i, sectorID := range challengedSectors {
+		proofAux := sectorStore.GetSectorPersistentProofAux(sectorID)
+
+		candidate := generateCandidate(challengeSeed, proofAux, sectorID, UInt(i), leafChallengeCount, nodes, challengeRangeSize)
+
+		candidates = append(candidates, candidate)
+	}
+
+	return candidates
+}
+
+func (sdr *WinStackedDRG_I) _generatePoStProof(privateProofs []sector.PrivatePoStCandidateProof) sector.PoStProof {
+	// TODO: Create the circuit proof.
+	panic("TODO")
+}
+
+func (sdr *WinStackedDRG_I) _verifyPoSt(sv sector.PoStVerifyInfo) bool {
 	panic("TODO")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Election PoSt
 
-func (sdr *WinStackedDRG_I) GenerateElectionPoStCandidates(challengeSeed util.Randomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.PoStCandidate {
-	challengedSectors, challenges := sdr._getChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
-	var proofAuxs []sector.PersistentProofAux
-
-	for _, sector := range challengedSectors {
-		proofAux := sectorStore.GetSectorPersistentProofAux(sector)
-		proofAuxs = append(proofAuxs, proofAux)
-	}
-
-	_ = challenges
-
-	panic("TODO")
+func (sdr *WinStackedDRG_I) GenerateElectionPoStCandidates(challengeSeed util.Randomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) []sector.PoStCandidate {
+	return sdr._generatePoStCandidates(challengeSeed, eligibleSectors, candidateCount, sectorStore)
 }
 
-func (sdr *WinStackedDRG_I) GenerateElectionPoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
-	panic("TODO")
+func (sdr *WinStackedDRG_I) GenerateElectionPoStProof(privateProofs []sector.PrivatePoStCandidateProof) sector.PoStProof {
+	return sdr._generatePoStProof(privateProofs)
 }
 
 func (sdr *WinStackedDRG_I) VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool {
-	panic("TODO")
+	return sdr._verifyPoSt(sv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Surprise PoSt
 
-func (sdr *WinStackedDRG_I) GenerateSurprisePoStCandidates(challengeSeed util.Randomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.PoStCandidate {
-	challengedSectors, challenges := sdr._getChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
-	var proofAuxs []sector.PersistentProofAux
-
-	for _, sector := range challengedSectors {
-		proofAux := sectorStore.GetSectorPersistentProofAux(sector)
-		proofAuxs = append(proofAuxs, proofAux)
-	}
-
-	_ = challenges
-
-	panic("TODO")
+func (sdr *WinStackedDRG_I) GenerateSurprisePoStCandidates(challengeSeed util.Randomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) []sector.PoStCandidate {
+	return sdr._generatePoStCandidates(challengeSeed, eligibleSectors, candidateCount, sectorStore)
 }
 
-func (sdr *WinStackedDRG_I) GenerateSurprisePoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
-	panic("TODO")
+func (sdr *WinStackedDRG_I) GenerateSurprisePoStProof(privateProofs []sector.PrivatePoStCandidateProof) sector.PoStProof {
+	return sdr._generatePoStProof(privateProofs)
 }
 
 func (sdr *WinStackedDRG_I) VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool {
-	panic("TODO")
+	return sdr._verifyPoSt(sv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1085,6 +1158,13 @@ func bigIntFromLittleEndianBytes(bytes []byte) *big.Int {
 	reverse(bytes)
 	return new(big.Int).SetBytes(bytes)
 }
+
+// func intFromLittleEndianBytes(bytes []byte) *big.Int {
+// 	reverse(bytes)
+// 	big := new(big.Int).SetBytes(bytes)
+
+// 	big.
+// }
 
 // size is number of bytes to return
 func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
