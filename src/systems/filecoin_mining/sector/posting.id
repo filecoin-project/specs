@@ -49,10 +49,6 @@ type PoStProof struct {//<curve, system> {
     ProofBytes  Bytes
 }
 
-type PrivatePoStProof struct {
-
-}
-
 type PrivatePoStCandidateProof struct {
-
+    ChallengeSeed util.Randomness
 }
