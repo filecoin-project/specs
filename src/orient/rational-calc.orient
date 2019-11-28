@@ -115,12 +115,12 @@ ProofOfSpacetime:
 
         Regeneration:
           describe(post_mtree_regen_hashnodes, "Number of intermediary nodes to be regenerated for a single replica merkle tree inclusion proof in PoSt")
-          describe(post_mtree_regen_challenge_time, "Time to generate the missing intermediary hash nodes of the replica merkle tree inclusion proof for a single challenge in PoSt")
-          describe(post_mtree_challenges_regen, "Same as post_mtree_regen_challenge_time but for all the PoSt challenges")
+          describe(post_mtree_challenge_regen, "Time to generate the missing intermediary hash nodes of the replica merkle tree inclusion proof for a single challenge in PoSt")
+          describe(post_mtree_challenges_regen, "Same as post_mtree_challenge_regen but for all the PoSt challenges")
 
           post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1
-          post_mtree_regen_challenge_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
-          post_mtree_challenges_regen = post_mtree_regen_challenge_time * post_challenges
+          post_mtree_challenge_regen = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
+          post_mtree_challenges_regen = post_mtree_challenge_regen * post_challenges
 
         Access:
           describe(post_mtree_challenge_read, "Time to sequentially read the replica leaves needed to regenerate the missing layers of the merkle tree for a single challenged node in PoSt")
