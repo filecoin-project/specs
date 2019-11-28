@@ -72,20 +72,52 @@ func Verify(message SignedMessage, publicKey filcrypto.PublicKey) (UnsignedMessa
 	return message.Message(), nil
 }
 
-func (x GasAmount) Add(y GasAmount) GasAmount {
-	panic("TODO")
+func (x *GasAmount_I) Add(y GasAmount) GasAmount {
+	IMPL_FINISH()
+	panic("")
 }
 
-func (x GasAmount) Subtract(y GasAmount) GasAmount {
-	panic("TODO")
+func (x *GasAmount_I) Subtract(y GasAmount) GasAmount {
+	IMPL_FINISH()
+	panic("")
 }
 
-func (x GasAmount) LessThan(y GasAmount) bool {
-	panic("TODO")
+func (x *GasAmount_I) SubtractWhileNonnegative(y GasAmount) (ret GasAmount, ok bool) {
+	ret = x.Subtract(y)
+	ok = true
+	if ret.LessThan(GasAmount_Zero()) {
+		ret = GasAmount_Zero()
+		ok = false
+	}
+	return
+}
+
+func (x *GasAmount_I) LessThan(y GasAmount) bool {
+	IMPL_FINISH()
+	panic("")
+}
+
+func (x *GasAmount_I) Equals(y GasAmount) bool {
+	IMPL_FINISH()
+	panic("")
+}
+
+func (x *GasAmount_I) Scale(count int) GasAmount {
+	IMPL_FINISH()
+	panic("")
+}
+
+func GasAmount_Affine(b GasAmount, x int, m GasAmount) GasAmount {
+	return b.Add(m.Scale(x))
 }
 
 func GasAmount_Zero() GasAmount {
-	panic("TODO")
+	return GasAmount_FromInt(0)
+}
+
+func GasAmount_FromInt(x int) GasAmount {
+	IMPL_FINISH()
+	panic("")
 }
 
 func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {

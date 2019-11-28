@@ -17,6 +17,11 @@ type TipSetMessages struct {
     Epoch   UInt64  // The chain epoch of the blocks
 }
 
+type MessageRef struct {
+    Message          msg.UnsignedMessage
+    MessageSizeOrig  int
+}
+
 type VMInterpreter struct {
     ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) struct {outTree st.StateTree, ret [msg.MessageReceipt]}
     ApplyMessage(inTree st.StateTree, msg msg.Message, minerAddr addr.Address) struct {outTree st.StateTree, ret msg.MessageReceipt}

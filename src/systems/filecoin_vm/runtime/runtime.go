@@ -8,6 +8,7 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import gascost "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost"
 import util "github.com/filecoin-project/specs/util"
 
 type ActorSubstateCID = actor.ActorSubstateCID
@@ -138,6 +139,16 @@ func (rt *VMContext) AbortAPI(msg string) Runtime_AbortAPI_FunRet {
 	return &Runtime_AbortAPI_FunRet_I{}
 }
 
+func (rt *VMContext) CreateActor_DeductGas() Runtime_CreateActor_DeductGas_FunRet {
+	if !rt._actorAddress.Equals(addr.InitActorAddr) {
+		rt.AbortAPI("Only InitActor may call rt.CreateActor_DeductGas")
+	}
+
+	rt._deductGasRemaining(gascost.ExecNewActor)
+
+	return &Runtime_CreateActor_DeductGas_FunRet_I{}
+}
+
 func (rt *VMContext) CreateActor(
 	stateCID actor.ActorSystemStateCID,
 	address addr.Address,
@@ -179,6 +190,8 @@ func (rt *VMContext) _updateActorSubstateInternal(actorAddress addr.Address, new
 func (rt *VMContext) _updateReleaseActorSubstate(newStateCID ActorSubstateCID) {
 	rt._checkRunning()
 	rt._checkActorStateAcquired()
+	rt._deductGasRemaining(gascost.UpdateActorSubstate)
+
 	rt._updateActorSubstateInternal(rt._actorAddress, newStateCID)
 	rt._actorStateAcquired = false
 }
@@ -314,24 +327,19 @@ func (rt *VMContext) _apiError(errMsg string) {
 	rt._throwErrorFull(exitcode.SystemError(exitcode.RuntimeAPIError), errMsg)
 }
 
-func (rt *VMContext) _checkGasRemaining() {
-	if rt._gasRemaining.LessThan(msg.GasAmount_Zero()) {
-		rt._throwError(exitcode.SystemError(exitcode.OutOfGas))
+func _gasAmountAssertValid(x msg.GasAmount) {
+	if x.LessThan(msg.GasAmount_Zero()) {
+		panic("Interpreter error: negative gas amount")
 	}
 }
 
 func (rt *VMContext) _deductGasRemaining(x msg.GasAmount) {
-	// TODO: check x >= 0
-	rt._checkGasRemaining()
-	rt._gasRemaining = rt._gasRemaining.Subtract(x)
-	rt._checkGasRemaining()
-}
-
-func (rt *VMContext) _refundGasRemaining(x msg.GasAmount) {
-	// TODO: check x >= 0
-	rt._checkGasRemaining()
-	rt._gasRemaining = rt._gasRemaining.Add(x)
-	rt._checkGasRemaining()
+	_gasAmountAssertValid(x)
+	var ok bool
+	rt._gasRemaining, ok = rt._gasRemaining.SubtractWhileNonnegative(x)
+	if !ok {
+		rt._throwError(exitcode.SystemError(exitcode.OutOfGas))
+	}
 }
 
 func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount actor.TokenAmount) error {
@@ -388,10 +396,9 @@ func _invokeMethodInternal(
 	actorCode ActorCode,
 	method actor.MethodNum,
 	params actor.MethodParams) (
-	ret InvocOutput, gasUsed msg.GasAmount, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
+	ret InvocOutput, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
-		gasUsed = msg.GasAmount_Zero() // TODO: verify
 		ret = msg.InvocOutput_Make(nil)
 		return
 	}
@@ -405,9 +412,6 @@ func _invokeMethodInternal(
 	})
 	rt._running = false
 
-	// TODO: Update gasUsed
-	TODO()
-
 	internalCallSeqNumFinal = rt._internalCallSeqNum
 
 	return
@@ -417,18 +421,16 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 	rtOuter._checkRunning()
 	rtOuter._checkActorStateNotAcquired()
 
+	initGasRemaining := rtOuter._gasRemaining
+
+	rtOuter._deductGasRemaining(gascost.InvokeMethod(input.Value()))
+
 	toActor := rtOuter._globalStatePending.GetActorState(input.To())
 
 	toActorCode, err := loadActorCode(toActor.CodeID())
 	if err != nil {
 		rtOuter._throwError(exitcode.SystemError(exitcode.ActorCodeNotFound))
 	}
-
-	var toActorMethodGasBound msg.GasAmount
-	TODO() // TODO: obtain from actor registry
-	rtOuter._deductGasRemaining(toActorMethodGasBound)
-	// TODO: gasUsed may be larger than toActorMethodGasBound if toActor itself makes sub-calls.
-	// To prevent this, we would need to calculate the gas bounds recursively.
 
 	err = rtOuter._transferFunds(rtOuter._actorAddress, input.To(), input.Value())
 	if err != nil {
@@ -446,17 +448,20 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._gasRemaining,
 	)
 
-	invocOutput, gasUsed, exitCode, internalCallSeqNumFinal := _invokeMethodInternal(
+	invocOutput, exitCode, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
 		toActorCode,
 		input.Method(),
 		input.Params(),
 	)
 
+	_gasAmountAssertValid(rtOuter._gasRemaining.Subtract(rtInner._gasRemaining))
+	rtOuter._gasRemaining = rtInner._gasRemaining
+	gasUsed := initGasRemaining.Subtract(rtOuter._gasRemaining)
+	_gasAmountAssertValid(gasUsed)
+
 	rtOuter._internalCallSeqNum = internalCallSeqNumFinal
 
-	rtOuter._refundGasRemaining(toActorMethodGasBound)
-	rtOuter._deductGasRemaining(gasUsed)
 	if exitCode.Equals(exitcode.SystemError(exitcode.OutOfGas)) {
 		// OutOfGas error cannot be caught
 		rtOuter._throwError(exitCode)
@@ -504,11 +509,28 @@ func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) util.Randomne
 }
 
 func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
-	panic("TODO")
+	var serializedSize int
+	IMPL_FINISH()
+	panic("") // compute serializedSize
+
+	rt._deductGasRemaining(gascost.IpldPut(serializedSize))
+
+	IMPL_FINISH()
+	panic("") // write to IPLD store
 }
 
 func (rt *VMContext) IpldGet(c ipld.CID) Runtime_IpldGet_FunRet {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("") // get from IPLD store
+
+	var serializedSize int
+	IMPL_FINISH()
+	panic("") // retrieve serializedSize
+
+	rt._deductGasRemaining(gascost.IpldGet(serializedSize))
+
+	IMPL_FINISH()
+	panic("") // return item
 }
 
 func (rt *VMContext) CurrEpoch() block.ChainEpoch {

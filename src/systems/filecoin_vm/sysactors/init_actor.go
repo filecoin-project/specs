@@ -69,6 +69,8 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 		rt.AbortArgMsg("cannot exec an actor of this type")
 	}
 
+	rt.CreateActor_DeductGas()
+
 	newAddr := _computeNewActorExecAddress(rt)
 
 	actorState := &actor.ActorState_I{
