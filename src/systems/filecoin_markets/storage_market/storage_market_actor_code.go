@@ -41,7 +41,7 @@ func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, Stat
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -69,16 +69,16 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.Tok
 	var msgSender addr.Address // TODO replace this from VM runtime
 
 	if balance <= 0 {
-		rt.Abort("non-positive balance to withdraw.")
+		rt.AbortArgMsg("non-positive balance to withdraw.")
 	}
 
 	senderBalance, found := st.Balances()[msgSender]
 	if !found {
-		rt.Abort("sender address not found.")
+		rt.AbortArgMsg("sender address not found.")
 	}
 
 	if senderBalance.Available() < balance {
-		rt.Abort("insufficient balance.")
+		rt.AbortFundsMsg("insufficient balance.")
 	}
 
 	senderBalance.Impl().Available_ = senderBalance.Available() - balance
@@ -96,7 +96,7 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
 	var balance actor.TokenAmount // TODO replace this
 
 	if balance <= 0 {
-		rt.Abort("non-positive balance to add.")
+		rt.AbortArgMsg("non-positive balance to add.")
 	}
 
 	senderBalance, found := st.Balances()[msgSender]
@@ -211,7 +211,7 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.D
 	case deal.SlashTerminatedFaults:
 		st._slashTerminatedFaults(rt, dealIDs)
 	default:
-		rt.Abort("sma.ProcessDealSlash: invalid action type")
+		rt.AbortArgMsg("sma.ProcessDealSlash: invalid action type")
 	}
 
 	UpdateRelease(rt, h, st)

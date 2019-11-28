@@ -43,8 +43,7 @@ type InvocInput struct {
 }
 
 type InvocOutput struct {
-    ExitCode     exitcode.ExitCode
-    ReturnValue  Bytes
+    ReturnValue Bytes
 }
 
 type MessageReceipt struct {

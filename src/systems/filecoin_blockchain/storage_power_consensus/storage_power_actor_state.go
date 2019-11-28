@@ -11,7 +11,7 @@ import (
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert address to MinerActorID
@@ -19,7 +19,7 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address a
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	amountToSlash := amount
@@ -44,7 +44,7 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 	// AvailableBalance -> LockedPledgeCollateral
 	// TODO: potentially unnecessary check
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert address to MinerActorID
@@ -52,11 +52,11 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	if currEntry.Impl().AvailableBalance() < amount {
-		rt.Abort("insufficient available balance.")
+		rt.AbortFundsMsg("insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -67,7 +67,7 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	// lockedPledgeCollateral -> AvailableBalance
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert address to MinerActorID
@@ -75,11 +75,11 @@ func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address 
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
-		rt.Abort("insufficient locked balance.")
+		rt.AbortFundsMsg("insufficient locked balance.")
 	}
 
 	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount

@@ -33,7 +33,7 @@ func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -61,7 +61,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	// TODO: this should be enforced somewhere else
 	if msgValue < 0 {
-		rt.Abort("negative message value.")
+		rt.AbortArgMsg("negative message value.")
 	}
 
 	// TODO: convert msgSender to MinerActorID
@@ -73,7 +73,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	if !found {
 		// AddBalance will just fail if miner is not created before hand
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
 	st.Impl().PowerTable_[minerID] = currEntry
@@ -84,7 +84,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	// TODO: convert msgSender to MinerActorID
@@ -94,11 +94,11 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 
 	currEntry, found := st.PowerTable()[minerID]
 	if !found {
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 
 	if currEntry.AvailableBalance() < amount {
-		rt.Abort("insufficient balance.")
+		rt.AbortFundsMsg("insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -150,7 +150,7 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Ad
 	h, st := a.State(rt)
 
 	if (st.PowerTable()[minerID].ActivePower() + st.PowerTable()[minerID].InactivePower()) > 0 {
-		rt.Abort("power still remains.")
+		rt.AbortStateMsg("power still remains.")
 	}
 
 	delete(st.PowerTable(), minerID)
@@ -185,7 +185,7 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bo
 	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
-		rt.Abort("miner not found.")
+		rt.AbortArgMsg("miner not found.")
 	}
 
 	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
@@ -227,7 +227,7 @@ func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerRep
 	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
-		rt.Abort("miner not found.")
+		rt.AbortArgMsg("miner not found.")
 	}
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()

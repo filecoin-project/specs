@@ -18,10 +18,12 @@ type RuntimeError = exitcode.RuntimeError
 
 var EnsureErrorCode = exitcode.EnsureErrorCode
 var SystemError = exitcode.SystemError
+var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
 
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 // ActorCode is the interface that all actor code types should satisfy.
@@ -56,12 +58,11 @@ func (h *ActorStateHandle) Take() ActorSubstateCID {
 // interpreter once per actor method invocation, and responds to that method's Runtime
 // API calls.
 type VMContext struct {
-	_globalStateInit        st.StateTree
-	_globalStatePending     st.StateTree
-	_running                bool
-	_actorAddress           addr.Address
-	_actorStateAcquired     bool
-	_actorStateAcquiredInit actor.ActorSubstateCID
+	_globalStateInit    st.StateTree
+	_globalStatePending st.StateTree
+	_running            bool
+	_actorAddress       addr.Address
+	_actorStateAcquired bool
 
 	_immediateCaller          addr.Address
 	_toplevelSender           addr.Address
@@ -84,15 +85,12 @@ func VMContext_Make(
 	valueReceived actor.TokenAmount,
 	gasRemaining msg.GasAmount) *VMContext {
 
-	actorStateInit := globalState.GetActorState(actorAddress)
-
 	return &VMContext{
-		_globalStateInit:        globalState,
-		_globalStatePending:     globalState,
-		_running:                false,
-		_actorAddress:           actorAddress,
-		_actorStateAcquired:     false,
-		_actorStateAcquiredInit: actorStateInit.State(),
+		_globalStateInit:    globalState,
+		_globalStatePending: globalState,
+		_running:            false,
+		_actorAddress:       actorAddress,
+		_actorStateAcquired: false,
 
 		_toplevelSender:           toplevelSender,
 		_toplevelBlockWinner:      toplevelBlockWinner,
@@ -105,6 +103,41 @@ func VMContext_Make(
 	}
 }
 
+func (rt *VMContext) AbortArgMsg(msg string) Runtime_AbortArgMsg_FunRet {
+	rt.Abort(exitcode.UserDefinedError(exitcode.InvalidArguments_User), msg)
+	return &Runtime_AbortArgMsg_FunRet_I{}
+}
+
+func (rt *VMContext) AbortArg() Runtime_AbortArg_FunRet {
+	rt.AbortArgMsg("Invalid arguments")
+	return &Runtime_AbortArg_FunRet_I{}
+}
+
+func (rt *VMContext) AbortStateMsg(msg string) Runtime_AbortStateMsg_FunRet {
+	rt.Abort(exitcode.UserDefinedError(exitcode.InconsistentState_User), msg)
+	return &Runtime_AbortStateMsg_FunRet_I{}
+}
+
+func (rt *VMContext) AbortState() Runtime_AbortState_FunRet {
+	rt.AbortStateMsg("Inconsistent state")
+	return &Runtime_AbortState_FunRet_I{}
+}
+
+func (rt *VMContext) AbortFundsMsg(msg string) Runtime_AbortFundsMsg_FunRet {
+	rt.Abort(exitcode.UserDefinedError(exitcode.InsufficientFunds_User), msg)
+	return &Runtime_AbortFundsMsg_FunRet_I{}
+}
+
+func (rt *VMContext) AbortFunds() Runtime_AbortFunds_FunRet {
+	rt.AbortFundsMsg("Insufficient funds")
+	return &Runtime_AbortFunds_FunRet_I{}
+}
+
+func (rt *VMContext) AbortAPI(msg string) Runtime_AbortAPI_FunRet {
+	rt.Abort(exitcode.SystemError(exitcode.RuntimeAPIError), msg)
+	return &Runtime_AbortAPI_FunRet_I{}
+}
+
 func (rt *VMContext) CreateActor(
 	stateCID actor.ActorSystemStateCID,
 	address addr.Address,
@@ -112,7 +145,7 @@ func (rt *VMContext) CreateActor(
 	constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
 
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
-		rt.Abort("Only InitActor may call rt.CreateActor")
+		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
 
 	rt._updateActorSystemStateInternal(address, stateCID)
@@ -157,7 +190,7 @@ func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 	prevState := rt._globalStatePending.GetActorState(rt._actorAddress)
 	prevStateCID := prevState.State()
 	if !ActorSubstateCID_Equals(prevStateCID, checkStateCID) {
-		rt.Abort("State CID differs upon release call")
+		rt.AbortAPI("State CID differs upon release call")
 	}
 
 	rt._actorStateAcquired = false
@@ -165,23 +198,29 @@ func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 
 func (rt *VMContext) Assert(cond bool) Runtime_Assert_FunRet {
 	if !cond {
-		rt.Abort("Runtime check failed")
+		rt.Abort(exitcode.SystemError(exitcode.RuntimeAssertFailure), "Runtime assertion failed")
 	}
 	return &Runtime_Assert_FunRet_I{}
 }
 
-func (rt *VMContext) _checkActorStateAcquired() {
-	if !rt._running {
-		panic("Error in runtime implementation: actor interface invoked without running actor")
-	}
-
-	if !rt._actorStateAcquired {
-		rt.Abort("Actor state not acquired")
+func (rt *VMContext) _checkActorStateAcquiredFlag(expected bool) {
+	rt._checkRunning()
+	if rt._actorStateAcquired != expected {
+		rt._apiError("State updates and message sends must be disjoint")
 	}
 }
 
-func (rt *VMContext) Abort(errMsg string) Runtime_Abort_FunRet {
-	rt._throwErrorFull(exitcode.SystemError(exitcode.MethodAbort), errMsg)
+func (rt *VMContext) _checkActorStateAcquired() {
+	rt._checkActorStateAcquiredFlag(true)
+}
+
+func (rt *VMContext) _checkActorStateNotAcquired() {
+	rt._checkActorStateAcquiredFlag(false)
+}
+
+func (rt *VMContext) Abort(errExitCode exitcode.ExitCode, errMsg string) Runtime_Abort_FunRet {
+	errExitCode = exitcode.EnsureErrorCode(errExitCode)
+	rt._throwErrorFull(errExitCode, errMsg)
 	return &Runtime_Abort_FunRet_I{}
 }
 
@@ -212,7 +251,7 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 	rt._checkNumValidateCalls(0)
 	caller := rt.ImmediateCaller()
 	if !callerExpectedPattern.Matches(caller) {
-		rt.Abort("Method invoked by incorrect caller")
+		rt.AbortAPI("Method invoked by incorrect caller")
 	}
 	rt._numValidateCalls += 1
 	return &Runtime_ValidateImmediateCallerMatches_FunRet_I{}
@@ -246,7 +285,7 @@ func (rt *VMContext) ValidateImmediateCallerAcceptAny() Runtime_ValidateImmediat
 
 func (rt *VMContext) _checkNumValidateCalls(x int) {
 	if rt._numValidateCalls != x {
-		rt.Abort("Method must validate caller identity exactly once")
+		rt.AbortAPI("Method must validate caller identity exactly once")
 	}
 }
 
@@ -256,16 +295,11 @@ func (rt *VMContext) _checkRunning() {
 	}
 }
 func (rt *VMContext) SuccessReturn() InvocOutput {
-	return msg.InvocOutput_Make(exitcode.OK(), nil)
+	return msg.InvocOutput_Make(nil)
 }
 
 func (rt *VMContext) ValueReturn(value util.Bytes) InvocOutput {
-	return msg.InvocOutput_Make(exitcode.OK(), value)
-}
-
-func (rt *VMContext) ErrorReturn(exitCode ExitCode) InvocOutput {
-	exitCode = exitcode.EnsureErrorCode(exitCode)
-	return msg.InvocOutput_Make(exitCode, nil)
+	return msg.InvocOutput_Make(value)
 }
 
 func (rt *VMContext) _throwError(exitCode ExitCode) {
@@ -278,12 +312,6 @@ func (rt *VMContext) _throwErrorFull(exitCode ExitCode, errMsg string) {
 
 func (rt *VMContext) _apiError(errMsg string) {
 	rt._throwErrorFull(exitcode.SystemError(exitcode.RuntimeAPIError), errMsg)
-}
-
-func (rt *VMContext) _checkStateLock(expected bool) {
-	if rt._actorStateAcquired != expected {
-		rt._apiError("State update and message send blocks must be disjoint")
-	}
 }
 
 func (rt *VMContext) _checkGasRemaining() {
@@ -308,7 +336,7 @@ func (rt *VMContext) _refundGasRemaining(x msg.GasAmount) {
 
 func (rt *VMContext) _transferFunds(from addr.Address, to addr.Address, amount actor.TokenAmount) error {
 	rt._checkRunning()
-	rt._checkStateLock(false)
+	rt._checkActorStateNotAcquired()
 
 	newGlobalStatePending, err := rt._globalStatePending.Impl().WithFundsTransfer(from, to, amount)
 	if err != nil {
@@ -337,12 +365,13 @@ func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
 	return ret, rt._globalStatePending
 }
 
-func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
+func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput, exitCode exitcode.ExitCode) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch r.(type) {
 			case *RuntimeError:
-				output = msg.InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
+				output = msg.InvocOutput_Make(nil)
+				exitCode = (r.(*RuntimeError).ExitCode)
 			default:
 				panic(r)
 			}
@@ -350,6 +379,7 @@ func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
 	}()
 
 	output = f()
+	exitCode = exitcode.OK()
 	return
 }
 
@@ -358,18 +388,18 @@ func _invokeMethodInternal(
 	actorCode ActorCode,
 	method actor.MethodNum,
 	params actor.MethodParams) (
-	ret InvocOutput, gasUsed msg.GasAmount, internalCallSeqNumFinal actor.CallSeqNum) {
+	ret InvocOutput, gasUsed msg.GasAmount, exitCode exitcode.ExitCode, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
-		ret = msg.InvocOutput_Make(exitcode.OK(), nil)
 		gasUsed = msg.GasAmount_Zero() // TODO: verify
+		ret = msg.InvocOutput_Make(nil)
 		return
 	}
 
 	rt._running = true
-	ret = _catchRuntimeErrors(func() InvocOutput {
+	ret, exitCode = _catchRuntimeErrors(func() InvocOutput {
 		methodOutput := actorCode.InvokeMethod(rt, method, params)
-		rt._checkStateLock(false)
+		rt._checkActorStateNotAcquired()
 		rt._checkNumValidateCalls(1)
 		return methodOutput
 	})
@@ -385,7 +415,7 @@ func _invokeMethodInternal(
 
 func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingSpec) msg.MessageReceipt {
 	rtOuter._checkRunning()
-	rtOuter._checkStateLock(false)
+	rtOuter._checkActorStateNotAcquired()
 
 	toActor := rtOuter._globalStatePending.GetActorState(input.To())
 
@@ -402,7 +432,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	err = rtOuter._transferFunds(rtOuter._actorAddress, input.To(), input.Value())
 	if err != nil {
-		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds))
+		rtOuter._throwError(exitcode.SystemError(exitcode.InsufficientFunds_System))
 	}
 
 	rtInner := VMContext_Make(
@@ -416,7 +446,7 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._gasRemaining,
 	)
 
-	invocOutput, gasUsed, internalCallSeqNumFinal := _invokeMethodInternal(
+	invocOutput, gasUsed, exitCode, internalCallSeqNumFinal := _invokeMethodInternal(
 		rtInner,
 		toActorCode,
 		input.Method(),
@@ -427,36 +457,39 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 
 	rtOuter._refundGasRemaining(toActorMethodGasBound)
 	rtOuter._deductGasRemaining(gasUsed)
+	if exitCode.Equals(exitcode.SystemError(exitcode.OutOfGas)) {
+		// OutOfGas error cannot be caught
+		rtOuter._throwError(exitCode)
+	}
 
-	if errSpec == PropagateErrors && invocOutput.ExitCode().IsError() {
+	if errSpec == PropagateErrors && exitCode.IsError() {
 		rtOuter._throwError(exitcode.SystemError(exitcode.MethodSubcallError))
 	}
 
-	if invocOutput.ExitCode().AllowsStateUpdate() {
+	if exitCode.AllowsStateUpdate() {
 		rtOuter._globalStatePending = rtInner._globalStatePending
 	}
 
-	return msg.MessageReceipt_Make(invocOutput, gasUsed)
+	return msg.MessageReceipt_Make(invocOutput, exitCode, gasUsed)
 }
 
-func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, errSpec ErrorHandlingSpec) msg.InvocOutput {
+func (rtOuter *VMContext) _sendInternalOutputs(input InvocInput, errSpec ErrorHandlingSpec) (msg.InvocOutput, exitcode.ExitCode) {
 	ret := rtOuter._sendInternal(input, errSpec)
-	return &msg.InvocOutput_I{
-		ExitCode_:    ret.ExitCode(),
-		ReturnValue_: ret.ReturnValue(),
-	}
+	return msg.InvocOutput_Make(ret.ReturnValue()), ret.ExitCode()
 }
 
 func (rt *VMContext) SendPropagatingErrors(input InvocInput) msg.InvocOutput {
-	return rt._sendInternalOutputOnly(input, PropagateErrors)
+	ret, _ := rt._sendInternalOutputs(input, PropagateErrors)
+	return ret
 }
 
-func (rt *VMContext) SendCatchingErrors(input InvocInput) msg.InvocOutput {
-	return rt._sendInternalOutputOnly(input, CatchErrors)
+func (rt *VMContext) SendCatchingErrors(input InvocInput) (msg.InvocOutput, exitcode.ExitCode) {
+	return rt._sendInternalOutputs(input, CatchErrors)
 }
 
 func (rt *VMContext) CurrentBalance() actor.TokenAmount {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (rt *VMContext) ValueReceived() actor.TokenAmount {
@@ -466,7 +499,8 @@ func (rt *VMContext) ValueReceived() actor.TokenAmount {
 func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) util.Randomness {
 	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
 	// TODO: finish
-	panic("TODO")
+	TODO()
+	panic("")
 }
 
 func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
@@ -478,25 +512,34 @@ func (rt *VMContext) IpldGet(c ipld.CID) Runtime_IpldGet_FunRet {
 }
 
 func (rt *VMContext) CurrEpoch() block.ChainEpoch {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (rt *VMContext) AcquireState() ActorStateHandle {
-	panic("TODO")
+	rt._checkRunning()
+	rt._checkActorStateNotAcquired()
+	rt._actorStateAcquired = true
+
+	return ActorStateHandle{
+		_initValue: rt._globalStatePending.GetActorState(rt._actorAddress).State().Ref(),
+		_rt:        rt,
+	}
 }
 
 func (rt *VMContext) CurrMethodNum() actor.MethodNum {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func (rt *VMContext) VerifySignature(signerActor addr.Address, sig filcrypto.Signature, m filcrypto.Message) bool {
 	st := rt._globalStatePending.Impl().GetActorState(signerActor)
 	if st == nil {
-		rt.Abort("VerifySignature: signer actor not found")
+		rt.AbortAPI("VerifySignature: signer actor not found")
 	}
 	pk := st.GetSignaturePublicKey()
 	if pk == nil {
-		rt.Abort("VerifySignature: signer actor has no public key")
+		rt.AbortAPI("VerifySignature: signer actor has no public key")
 	}
 	ret := rt.Compute(ComputeFunctionID_VerifySignature, []Any{pk, sig, m})
 	return ret.(bool)
@@ -505,7 +548,7 @@ func (rt *VMContext) VerifySignature(signerActor addr.Address, sig filcrypto.Sig
 func (rt *VMContext) Compute(f ComputeFunctionID, args []Any) Any {
 	def, found := _computeFunctionDefs[f]
 	if !found {
-		rt.Abort("Function definition in rt.Compute() not found")
+		rt.AbortAPI("Function definition in rt.Compute() not found")
 	}
 	gasCost := def.GasCostFn(args)
 	rt._deductGasRemaining(gasCost)
