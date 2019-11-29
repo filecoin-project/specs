@@ -1,7 +1,9 @@
 [
 	{
-		"!SectorEncoding": true,
+    "!ElectionWithFallbackPoSt": true,
+    "!SectorEncoding": true,
 		"!VectorR": true,
+    "!WrappingVariant": true,
 		"challenged_sectors_percentage": 0.04,
 		"cost_amax": 1,
 		"cost_gb_per_month": 0.005,
@@ -20,16 +22,14 @@
 		"merkle_tree_hash_time": 2.56e-7,
 		"node_size": 32,
 		"polling_time": 15,
-		"porep_challenges": 200,
 		"porep_lambda": 10,
 		"porep_snark_partition_constraints": 100000000,
-		"post_challenges": 300,
+    "post_lambda": 10,
 		"post_mtree_layers_cached": 25,
 		"post_snark_partition_constraints": 3000000,
 		"rig_cores": 16,
 		"rig_cost_per_year": 2.5,
 		"rig_ram_gib": 32,
-		"rig_size": 1,
 		"rig_storage_latency": 0.003,
 		"rig_storage_min_tib": 100,
 		"rig_storage_parallelization": 30,
@@ -37,6 +37,7 @@
 		"sector_size_gib": 32,
 		"snark_size": 192,
 		"ticket_constraints": 1376,
+		"ticket_hash": 2.56e-7,
 		"window_size_mib": 32768,
 		"wrapper_parents": 10
 	}
