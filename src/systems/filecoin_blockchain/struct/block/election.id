@@ -5,9 +5,9 @@ type Ticket struct {
     VRFResult  filcrypto.VRFResult
 
     Output     Bytes                @(cached)
-    DrawRandomness(minerAddr addr.Address, round ChainEpoch) Bytes
+    DrawRandomness(round ChainEpoch) Bytes
     ValidateSyntax() bool
-    Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
+    Verify(input Bytes, pk filcrypto.VRFPublicKey, minerAddr addr.Address) bool
 }
 
 type ElectionProof struct {

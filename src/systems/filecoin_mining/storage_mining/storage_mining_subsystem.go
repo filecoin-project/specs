@@ -7,7 +7,6 @@ import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -67,57 +66,56 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 
 	// Draw randomness from chain for ElectionPoSt and Ticket Generation
 	// Randomness for ticket generation in block production
-	randomness1 := sms._consensus().GetTicketProductionSeed(sms._blockchain().BestChain(), sms._keyStore().OwnerAddress(), sms._blockchain().LatestEpoch())
+	randomness1 := sms._consensus().GetTicketProductionSeed(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 
 	// Randomness for ElectionPoSt
-	randomnessK := sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), sms._keyStore().OwnerAddress(), sms._blockchain().LatestEpoch())
+	randomnessK := sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 
-	// TODO: @why @jz align on this
-	for _, worker := range sms._keyStore().Workers() {
+	var input []byte
+	input = append(input, byte(filcrypto.DomainSeparationTag_Case_PoSt))
+	input = append(input, randomnessK...)
 
-		var input []byte
-		input = append(input, spc.VRFPersonalizationPoSt)
-		input = append(input, randomnessK...)
+	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
+	// TODO: add how sectors are actually stored in the SMS proving set
+	provingSet := make([]sector.SectorID, 0)
 
-		postRandomness := worker.VRFKeyPair().Impl().Generate(input).Output()
-		// TODO: add how sectors are actually stored in the SMS proving set
-		provingSet := make([]sector.SectorID, 0)
+	candidates := sms.StorageProving().Impl().GenerateElectionPoStCandidates(postRandomness, provingSet)
 
-		candidates := sms.StorageProving().Impl().GenerateElectionPoStCandidates(postRandomness, provingSet)
-
-		if len(candidates) <= 0 {
-			return // fail to generate post candidates
-		}
-
-		winningCandidates := make([]sector.PoStCandidate, 0)
-
-		for _, candidate := range candidates {
-			// TODO align on worker address
-			if sms._consensus().IsWinningPartialTicket(candidate.PartialTicket()) {
-				winningCandidates = append(winningCandidates, candidate)
-			}
-		}
-
-		if len(winningCandidates) <= 0 {
-			return
-		}
-
-		newTicket := sms.PrepareNewTicket(randomness1, worker.VRFKeyPair())
-		postProof := sms.StorageProving().Impl().GenerateElectionPoStProof(postRandomness, winningCandidates)
-		chainHead := sms._blockchain().BestChain().HeadTipset()
-
-		sms._blockProducer().GenerateBlock(postProof, winningCandidates, newTicket, chainHead, worker.Address())
-
+	if len(candidates) <= 0 {
+		return // fail to generate post candidates
 	}
+
+	winningCandidates := make([]sector.PoStCandidate, 0)
+
+	for _, candidate := range candidates {
+		// TODO align on worker address
+		if sms._consensus().IsWinningPartialTicket(candidate.PartialTicket()) {
+			winningCandidates = append(winningCandidates, candidate)
+		}
+	}
+
+	if len(winningCandidates) <= 0 {
+		return
+	}
+
+	newTicket := sms.PrepareNewTicket(randomness1, sms._keyStore().WorkerKey(), sms._keyStore().MinerAddress())
+	postProof := sms.StorageProving().Impl().GenerateElectionPoStProof(postRandomness, winningCandidates)
+	chainHead := sms._blockchain().BestChain().HeadTipset()
+
+	sms._blockProducer().GenerateBlock(postProof, winningCandidates, newTicket, chainHead, sms._keyStore().MinerAddress())
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness, vrfKP filcrypto.VRFKeyPair) block.Ticket {
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness, vrfKP filcrypto.VRFKeyPair, minerAddr addr.Address) block.Ticket {
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
+	// append the miner actor address for the miner generifying this in order to prevent miners with the same
+	// worker keys from generating the same randomness (given the VRF)
 	var input []byte
-	input = append(input, spc.VRFPersonalizationTicket)
+	input = append(input, byte(filcrypto.DomainSeparationTag_Case_Ticket))
 	input = append(input, randomness...)
+	input = append(input, byte(filcrypto.InputDelimeter_Case_Bytes))
+	input = append(input, minerAddr.ToBytes()...)
 
 	// run through VRF
 	vrfRes := vrfKP.Generate(input)
@@ -167,7 +165,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 		return false
 	}
 
-	electionRand := sector.PoStRandomness(sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch()))
+	electionRand := sector.PoStRandomness(sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), onChainInfo.PoStEpoch()))
 
 	// A proof must be a valid snark proof with the correct public inputs
 	// 3. Get public inputs
@@ -215,7 +213,7 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 	// A proof must be a valid snark proof with the correct public inputs
 
 	// 3. Get appropriate randomness
-	surpriseRand := sector.PoStRandomness(sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), header.MinerAddress(), onChainInfo.PoStEpoch()))
+	surpriseRand := sector.PoStRandomness(sms._consensus().GetPoStChallenge(sms._blockchain().BestChain(), onChainInfo.PoStEpoch()))
 
 	// 4. Get public inputs
 	info := st.Info()

@@ -19,3 +19,14 @@ type VRFResult struct {
 
     Verify(input Bytes, pk VRFPublicKey) bool
 }
+
+type Ticket Bytes
+type PoSt Bytes
+type DomainSeparationTag union {
+    Ticket
+    PoSt
+}
+
+type InputDelimeter union {
+    Bytes
+}
