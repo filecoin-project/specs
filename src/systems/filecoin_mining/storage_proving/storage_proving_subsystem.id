@@ -15,12 +15,22 @@ type StorageProvingSubsystem struct {
     // TODO: remove this?
     // GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
 
-    GeneratePoStCandidates(
+    GenerateElectionPoStCandidates(
         challengeSeed  sector.PoStRandomness
         sectorIDs      [sector.SectorID]
     ) [sector.PoStCandidate]
 
-    GeneratePoStProof(
+    GenerateSurprisePoStCandidates(
+        challengeSeed  sector.PoStRandomness
+        sectorIDs      [sector.SectorID]
+    ) [sector.PoStCandidate]
+
+    CreateElectionPoStProof(
+        challengeSeed  sector.PoStRandomness
+        candidates     [sector.PoStCandidate]
+    ) sector.PoStProof
+
+    CreateSurprisePoStProof(
         challengeSeed  sector.PoStRandomness
         candidates     [sector.PoStCandidate]
     ) sector.PoStProof

@@ -1,5 +1,5 @@
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import sectorIndex "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
+import sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
 type UInt64 UInt
@@ -14,21 +14,26 @@ type PoStSubmission struct {
 }
 
 type PoStGenerator struct {
+    // TODO: Can we put the PoStCfg and/or SectorStore in this struct?
+    PoStCfg      sector.PoStCfg
+    SectorStore  sector_index.SectorStore
+
     GeneratePoStCandidates(
-        postCfg         sector.PoStCfg
         challengeSeed   sector.PoStRandomness
         candidateCount  UInt
         sectors         [sector.SectorID]
-        sectorStore     sectorIndex.SectorStore
     ) [sector.PoStCandidate]
 
-    GeneratePoStProof(
-        postCfg  sector.PoStCfg
-        witness  sector.PoStWitness
+    CreateElectionPoStProof(
+        witness sector.PoStWitness
     ) sector.PoStProof
 
+    CreateSurprisePoStProof(
+        witness sector.PoStWitness
+    ) sector.PoStProof
+
+    // FIXME: Verification shouldn't require a PoStGenerator. Move this.
     VerifyPoStProof(
-        postCfg        sector.PoStCfg
         Proof          sector.PoStProof
         challengeSeed  sector.PoStRandomness
     ) bool
