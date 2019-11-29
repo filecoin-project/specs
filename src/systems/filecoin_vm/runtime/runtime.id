@@ -22,27 +22,15 @@ type Runtime interface {
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
-    CurrMethodNum()             actor.MethodNum
-
-    // Note: This is the actor in the From field of the initial on-chain message.
-    // Not necessarily the immediate caller.
-    ToplevelSender()            addr.Address
+    CurrMethodNum()        actor.MethodNum
 
     // The actor who mined the block in which the initial on-chain message appears.
-    ToplevelBlockWinner()       addr.Address
+    ToplevelBlockWinner()  addr.Address
 
-    // Top-level call sequence number of the "From" actor in the initial on-chain message.
-    ToplevelSenderCallSeqNum()  actor.CallSeqNum
+    AcquireState()         ActorStateHandle
 
-    // Sequence number representing the total number of calls (to any actor, any method)
-    // during the current top-level message execution.
-    // Note: resets with every top-level message, and therefore not necessarily monotonic.
-    InternalCallSeqNum()        actor.CallSeqNum
-
-    AcquireState()              ActorStateHandle
-
-    SuccessReturn()             msg.InvocOutput
-    ValueReturn(Bytes)          msg.InvocOutput
+    SuccessReturn()        msg.InvocOutput
+    ValueReturn(Bytes)     msg.InvocOutput
     ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
 
     // Throw an error indicating a failure condition has occurred, from which the given actor
@@ -75,6 +63,11 @@ type Runtime interface {
     SendPropagatingErrors(input msg.InvocInput) msg.InvocOutput
     SendCatchingErrors(input msg.InvocInput) msg.InvocOutput
 
+    // Computes an address for a new actor. The returned address is intended to uniquely refer to
+    // the actor even in the event of a chain re-org (whereas an ID-address might refer to a
+    // different actor after messages are re-ordered).
+    NewActorAddress() addr.Address
+
     // Create an actor in the state tree. May only be called by InitActor.
     CreateActor(
         stateCID           actor.ActorSystemStateCID
@@ -85,4 +78,10 @@ type Runtime interface {
 
     IpldGet(c ipld.CID) union {Bytes, error}
     IpldPut(x ipld.Object) ipld.CID
+}
+
+type ActorExecAddressSeed struct {
+    creator             addr.Address
+    toplevelCallSeqNum  actor.CallSeqNum
+    internalCallSeqNum  actor.CallSeqNum
 }

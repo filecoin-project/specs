@@ -16,9 +16,3 @@ type InitActorCode struct {
     Exec(r vmr.Runtime, code actor.CodeID, params actor.MethodParams) addr.Address
     GetActorIDForAddress(r vmr.Runtime, address addr.Address) addr.ActorID
 }
-
-type ActorExecAddressSeed struct {
-    creator             addr.Address
-    toplevelCallSeqNum  actor.CallSeqNum
-    internalCallSeqNum  actor.CallSeqNum
-}

@@ -70,7 +70,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 		rt.Abort("cannot exec an actor of this type")
 	}
 
-	newAddr := _computeNewActorExecAddress(rt)
+	newAddr := rt.NewActorAddress()
 
 	actorState := &actor.ActorState_I{
 		CodeID_:     codeID,
@@ -104,18 +104,6 @@ func (s *InitActorState_I) _assignNextID() addr.ActorID {
 	actorID := s.NextID_
 	s.NextID_++
 	return actorID
-}
-
-func _computeNewActorExecAddress(rt Runtime) addr.Address {
-	seed := &ActorExecAddressSeed_I{
-		creator_:            rt.ImmediateCaller(),
-		toplevelCallSeqNum_: rt.ToplevelSenderCallSeqNum(),
-		internalCallSeqNum_: rt.InternalCallSeqNum(),
-	}
-	hash := addr.ActorExecHash(Serialize_ActorExecAddressSeed(seed))
-
-	// Intended to be a unique identifier, stable across reorgs
-	return addr.Address_Make_ActorExec(addr.Address_NetworkID_Testnet, hash)
 }
 
 func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
