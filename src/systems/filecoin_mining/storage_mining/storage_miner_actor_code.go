@@ -10,7 +10,6 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 	util "github.com/filecoin-project/specs/util"
@@ -27,7 +26,7 @@ type State = StorageMinerActorState
 type Any = util.Any
 type Bool = util.Bool
 type Bytes = util.Bytes
-type InvocOutput = msg.InvocOutput
+type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
 
 var TODO = util.TODO
@@ -503,7 +502,7 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	Release(rt, h, st) // if no modifications made; or
 
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
-	receipt := rt.SendCatchingErrors(&msg.InvocInput_I{
+	receipt := rt.SendCatchingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
 		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
 		Params_: params,

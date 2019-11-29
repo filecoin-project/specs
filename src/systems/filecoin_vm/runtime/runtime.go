@@ -13,8 +13,6 @@ import (
 )
 
 type ActorSubstateCID = actor.ActorSubstateCID
-type InvocInput = msg.InvocInput
-type InvocOutput = msg.InvocOutput
 type ExitCode = exitcode.ExitCode
 type RuntimeError = exitcode.RuntimeError
 
@@ -65,15 +63,21 @@ type VMContext struct {
 	_actorStateAcquired     bool
 	_actorStateAcquiredInit actor.ActorSubstateCID
 
-	_immediateCaller          addr.Address
-	_toplevelSender           addr.Address
-	_toplevelBlockWinner      addr.Address
+	_immediateCaller addr.Address
+	// Note: This is the actor in the From field of the initial on-chain message.
+	// Not necessarily the immediate caller.
+	_toplevelSender      addr.Address
+	_toplevelBlockWinner addr.Address
+	// Top-level call sequence number of the "From" actor in the initial on-chain message.
 	_toplevelSenderCallSeqNum actor.CallSeqNum
-	_internalCallSeqNum       actor.CallSeqNum
-	_valueReceived            actor.TokenAmount
-	_gasRemaining             msg.GasAmount
-	_numValidateCalls         int
-	_output                   msg.InvocOutput
+	// Sequence number representing the total number of calls (to any actor, any method)
+	// during the current top-level message execution.
+	// Note: resets with every top-level message, and therefore not necessarily monotonic.
+	_internalCallSeqNum actor.CallSeqNum
+	_valueReceived      actor.TokenAmount
+	_gasRemaining       msg.GasAmount
+	_numValidateCalls   int
+	_output             InvocOutput
 }
 
 func VMContext_Make(
@@ -119,7 +123,7 @@ func (rt *VMContext) CreateActor(
 
 	rt._updateActorSystemStateInternal(address, stateCID)
 
-	rt.SendPropagatingErrors(&msg.InvocInput_I{
+	rt.SendPropagatingErrors(&InvocInput_I{
 		To_:     address,
 		Method_: actor.MethodConstructor,
 		Params_: constructorParams,
@@ -191,20 +195,8 @@ func (rt *VMContext) ImmediateCaller() addr.Address {
 	return rt._immediateCaller
 }
 
-func (rt *VMContext) ToplevelSender() addr.Address {
-	return rt._toplevelSender
-}
-
 func (rt *VMContext) ToplevelBlockWinner() addr.Address {
 	return rt._toplevelBlockWinner
-}
-
-func (rt *VMContext) InternalCallSeqNum() actor.CallSeqNum {
-	return rt._internalCallSeqNum
-}
-
-func (rt *VMContext) ToplevelSenderCallSeqNum() actor.CallSeqNum {
-	return rt._toplevelSenderCallSeqNum
 }
 
 func (rt *VMContext) ValidateImmediateCallerMatches(
@@ -258,16 +250,16 @@ func (rt *VMContext) _checkRunning() {
 	}
 }
 func (rt *VMContext) SuccessReturn() InvocOutput {
-	return msg.InvocOutput_Make(exitcode.OK(), nil)
+	return InvocOutput_Make(exitcode.OK(), nil)
 }
 
 func (rt *VMContext) ValueReturn(value util.Bytes) InvocOutput {
-	return msg.InvocOutput_Make(exitcode.OK(), value)
+	return InvocOutput_Make(exitcode.OK(), value)
 }
 
 func (rt *VMContext) ErrorReturn(exitCode ExitCode) InvocOutput {
 	exitCode = exitcode.EnsureErrorCode(exitCode)
-	return msg.InvocOutput_Make(exitCode, nil)
+	return InvocOutput_Make(exitCode, nil)
 }
 
 func (rt *VMContext) _throwError(exitCode ExitCode) {
@@ -331,7 +323,7 @@ const (
 // TODO: This function should be private (not intended to be exposed to actors).
 // (merging runtime and interpreter packages should solve this)
 func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
-	msg.MessageReceipt, st.StateTree) {
+	MessageReceipt, st.StateTree) {
 
 	rt._running = true
 	ret := rt._sendInternal(input, CatchErrors)
@@ -339,12 +331,12 @@ func (rt *VMContext) SendToplevelFromInterpreter(input InvocInput) (
 	return ret, rt._globalStatePending
 }
 
-func _catchRuntimeErrors(f func() msg.InvocOutput) (output msg.InvocOutput) {
+func _catchRuntimeErrors(f func() InvocOutput) (output InvocOutput) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch r.(type) {
 			case *RuntimeError:
-				output = msg.InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
+				output = InvocOutput_Make(EnsureErrorCode(r.(*RuntimeError).ExitCode), nil)
 			default:
 				panic(r)
 			}
@@ -363,7 +355,7 @@ func _invokeMethodInternal(
 	ret InvocOutput, gasUsed msg.GasAmount, internalCallSeqNumFinal actor.CallSeqNum) {
 
 	if method == actor.MethodSend {
-		ret = msg.InvocOutput_Make(exitcode.OK(), nil)
+		ret = InvocOutput_Make(exitcode.OK(), nil)
 		gasUsed = msg.GasAmount_Zero() // TODO: verify
 		return
 	}
@@ -385,7 +377,7 @@ func _invokeMethodInternal(
 	return
 }
 
-func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingSpec) msg.MessageReceipt {
+func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingSpec) MessageReceipt {
 	rtOuter._checkRunning()
 	rtOuter._checkStateLock(false)
 
@@ -438,22 +430,22 @@ func (rtOuter *VMContext) _sendInternal(input InvocInput, errSpec ErrorHandlingS
 		rtOuter._globalStatePending = rtInner._globalStatePending
 	}
 
-	return msg.MessageReceipt_Make(invocOutput, gasUsed)
+	return MessageReceipt_Make(invocOutput, gasUsed)
 }
 
-func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, errSpec ErrorHandlingSpec) msg.InvocOutput {
+func (rtOuter *VMContext) _sendInternalOutputOnly(input InvocInput, errSpec ErrorHandlingSpec) InvocOutput {
 	ret := rtOuter._sendInternal(input, errSpec)
-	return &msg.InvocOutput_I{
+	return &InvocOutput_I{
 		ExitCode_:    ret.ExitCode(),
 		ReturnValue_: ret.ReturnValue(),
 	}
 }
 
-func (rt *VMContext) SendPropagatingErrors(input InvocInput) msg.InvocOutput {
+func (rt *VMContext) SendPropagatingErrors(input InvocInput) InvocOutput {
 	return rt._sendInternalOutputOnly(input, PropagateErrors)
 }
 
-func (rt *VMContext) SendCatchingErrors(input InvocInput) msg.InvocOutput {
+func (rt *VMContext) SendCatchingErrors(input InvocInput) InvocOutput {
 	return rt._sendInternalOutputOnly(input, CatchErrors)
 }
 
@@ -469,6 +461,17 @@ func (rt *VMContext) Randomness(e block.ChainEpoch, offset uint64) util.Randomne
 	// TODO: validate CurrEpoch() - K <= e <= CurrEpoch()?
 	// TODO: finish
 	panic("TODO")
+}
+
+func (rt *VMContext) NewActorAddress() addr.Address {
+	seed := &ActorExecAddressSeed_I{
+		creator_:            rt._immediateCaller,
+		toplevelCallSeqNum_: rt._toplevelSenderCallSeqNum,
+		internalCallSeqNum_: rt._internalCallSeqNum,
+	}
+	hash := addr.ActorExecHash(Serialize_ActorExecAddressSeed(seed))
+
+	return addr.Address_Make_ActorExec(addr.Address_NetworkID_Testnet, hash)
 }
 
 func (rt *VMContext) IpldPut(x ipld.Object) ipld.CID {
@@ -512,4 +515,35 @@ func (rt *VMContext) Compute(f ComputeFunctionID, args []Any) Any {
 	gasCost := def.GasCostFn(args)
 	rt._deductGasRemaining(gasCost)
 	return def.Body(args)
+}
+
+func InvocInput_Make(to addr.Address, method actor.MethodNum, params actor.MethodParams, value actor.TokenAmount) InvocInput {
+	return &InvocInput_I{
+		To_:     to,
+		Method_: method,
+		Params_: params,
+		Value_:  value,
+	}
+}
+
+func InvocOutput_Make(exitCode exitcode.ExitCode, returnValue util.Bytes) InvocOutput {
+	return &InvocOutput_I{
+		ExitCode_:    exitCode,
+		ReturnValue_: returnValue,
+	}
+}
+
+func MessageReceipt_Make(output InvocOutput, gasUsed msg.GasAmount) MessageReceipt {
+	return &MessageReceipt_I{
+		ExitCode_:    output.ExitCode(),
+		ReturnValue_: output.ReturnValue(),
+		GasUsed_:     gasUsed,
+	}
+}
+
+func MessageReceipt_MakeSystemError(errCode exitcode.SystemErrorCode, gasUsed msg.GasAmount) MessageReceipt {
+	return MessageReceipt_Make(
+		InvocOutput_Make(exitcode.SystemError(errCode), nil),
+		gasUsed,
+	)
 }
