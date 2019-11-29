@@ -82,15 +82,20 @@ ProofOfSpacetime:
     describe(post_proof_gen_parallel, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves) in parallel", secs)
     describe(post_inclusions_time, "Time to generate merkle tree inclusion proofs for PoSt (assuming all data in memory)", secs)
     describe(post_inclusions_time_parallel, "Time to regenerate and to read the merkle tree inclusion proofs for the challenged nodes from memory in parallel", secs)
+    describe(post_ticket_gen, "Time to generate a ticket", secs)
 
     post_time = post_proof_gen
     post_time_parallel = post_proof_gen_parallel
-    post_proof_gen = post_snark_time + post_inclusions_time + post_data_access 
+    post_proof_gen = post_snark_time + post_inclusions_time + post_ticket_gen + post_data_access 
     // TODO: this should be max(), not sum
     post_proof_gen_parallel = post_snark_time_parallel + post_inclusions_time_parallel + post_data_access_parallel
 
     // TODO: add MerkleTreeCaching for ColumnR
     // This only accounts for generating the merkle trees
+    Ticket:
+      describe(ticket_hash, "Time to compute the hash of a node for ticket generation in PoSt", secs)
+      post_ticket_gen = ticket_hash * post_challenges
+
     InclusionProofs:
       Caching:
         describe(post_mtree_cached, "Size of the cached parts of the replica merkle tree", bytes)
@@ -446,7 +451,7 @@ Filecoin:
     // Note this is simplistic and accounts for no framing
     block_size = (proofs_per_block / proofs_block_fraction) 
 
-  Proofs: 
+  OnChainProofs: 
     describe(seals_per_year, "Number of PoRep proofs per year")
     describe(posts_per_year, "Number of PoSt proofs per year")
     describe(filecoin_reseals_per_year, "Number of times a sector is re-sealed in a year")
@@ -486,14 +491,22 @@ Filecoin:
 
   Mining:
     ElectionPoSt:
+      describe(epost_challenged_sectors, "Number of challenged sectors during Election PoSt")
       describe(epost_challenged_sectors_fraction, "Fraction of challenged sectors during Election PoSt")
       describe(epost_data_access, "Time to access data for Election PoSt", secs)
-      describe(epost_data_access, "Time to access data for Election PoSt in parallel", secs)
-      describe(epost_challenged_sectors, "Number of challenged sectors during Election PoSt")
+      describe(epost_data_access_parallel, "Time to access data for Election PoSt in parallel", secs)
+      describe(epost_time, "Time to generate an Election PoSt", secs)
+      describe(epost_time_parallel, "Time to generate an Election PoSt in parallel", secs)
+      describe(epost_tickets_gen, "Time to generate all the tickets in Election PoSt", secs)
+      describe(epost_tickets_gen_parallel, "Time to generate all the tickets in Election PoSt in parallel", secs)
 
       epost_challenged_sectors = rig_sectors_min * epost_challenged_sectors_fraction
       epost_data_access = post_data_access * epost_challenged_sectors
       epost_data_access_parallel = epost_data_access_parallel / rig_storage_parallelization  
+      epost_tickets_gen = (post_inclusions_time + post_ticket_gen) * epost_challenged_sectors
+
+      epost_time = epost_data_access + epost_tickets_gen
+      epost_time_parallel = epost_data_access_parallel + epost_tickets_gen_parallel
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
