@@ -253,13 +253,13 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
 
 	PROVING_PERIOD := 0 // defined in storage_mining, TODO: move constants somewhere else
-	CHALLENGE_FREQUENCY := 0
+	SURPRISE_CHALLENGE_FREQUENCY := 0
 
 	// sample the actor addresses
 	h, st := a.State(rt)
 
 	randomness := rt.Randomness(rt.CurrEpoch(), 0)
-	challengeCount := math.Ceil(float64(CHALLENGE_FREQUENCY*len(st.PowerTable())) / float64(PROVING_PERIOD))
+	challengeCount := math.Ceil(float64(SURPRISE_CHALLENGE_FREQUENCY*len(st.PowerTable())) / float64(PROVING_PERIOD))
 	surprisedMiners := st._sampleMinersToSurprise(rt, int(challengeCount), randomness)
 
 	UpdateRelease(rt, h, st)
