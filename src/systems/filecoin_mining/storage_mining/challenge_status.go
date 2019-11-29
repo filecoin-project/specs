@@ -32,6 +32,13 @@ func (cs *ChallengeStatus_I) IsChallenged() bool {
 	return cs.LastChallengeEpoch() > cs.LastPoStResponseEpoch()
 }
 
+func (cs *ChallengeStatus_I) ChallengeHasExpired(currEpoch block.ChainEpoch) bool {
+	// check if current challenge is past due
+	// TODO: pull in from consts
+	PROVING_PERIOD := block.ChainEpoch(0)
+	return cs.IsChallenged() && currEpoch > cs.LastChallengeEpoch()+PROVING_PERIOD
+}
+
 func (cs *ChallengeStatus_I) CanBeElected(currEpoch block.ChainEpoch) bool {
 	// true if most recent successful post (surprise or election) was recent enough
 	// and not currently getting challenged

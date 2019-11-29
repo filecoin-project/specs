@@ -49,6 +49,7 @@ type ChallengeStatus struct {
     OnPoStFailure(currEpoch block.ChainEpoch)
 
     IsChallenged() bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+    ChallengeHasExpired(currEpoch block.ChainEpoch) bool
     CanBeElected(currEpoch block.ChainEpoch) bool
     ShouldChallenge(
         currEpoch            block.ChainEpoch
@@ -85,6 +86,7 @@ type StorageMinerActorState struct {
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     _isChallenged()         bool
     _canBeElected(currEpoch block.ChainEpoch) bool
+    _challengeHasExpired(currEpoch block.ChainEpoch) bool
     _shouldChallenge(
         currEpoch            block.ChainEpoch
         challengeFreePeriod  block.ChainEpoch

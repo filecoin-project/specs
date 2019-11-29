@@ -73,6 +73,13 @@ func (a *StorageMinerActorCode_I) _canBeElected(rt Runtime) bool {
 	return ret
 }
 
+func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
+	h, st := a.State(rt)
+	ret := st._challengeHasExpired(rt.CurrEpoch())
+	Release(rt, h, st)
+	return ret
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Surprise PoSt
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,11 +120,13 @@ func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime
 		return rt.SuccessReturn()
 	}
 
-	// garbage collection - need to be called by cron once in a while
-	a._expirePreCommittedSectors(rt)
+	if a._challengeHasExpired(rt) {
+		// garbage collection - need to be called by cron once in a while
+		a._expirePreCommittedSectors(rt)
 
-	// oh no -- we missed it. rekt
-	a._onMissedSurprisePoSt(rt)
+		// oh no -- we missed it. rekt
+		a._onMissedSurprisePoSt(rt)
+	}
 
 	return rt.SuccessReturn()
 }

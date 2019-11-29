@@ -202,13 +202,10 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 		return false
 	}
 
-	// TODO pull in from constants
-	PROVING_PERIOD := block.ChainEpoch(0)
-
 	// 2. Check that the challenge has not expired
 	// Check that miner can still submit (i.e. that the challenge window has not passed)
 	// This will prevent miner from submitting a Surprise PoSt past the challenge period
-	if header.Epoch() > st.ChallengeStatus().LastChallengeEpoch()+PROVING_PERIOD {
+	if st._challengeHasExpired(header.Epoch()) {
 		return false
 	}
 

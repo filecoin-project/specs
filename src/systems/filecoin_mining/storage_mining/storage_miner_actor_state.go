@@ -14,6 +14,10 @@ func (st *StorageMinerActorState_I) _canBeElected(epoch block.ChainEpoch) bool {
 	return st.ChallengeStatus().CanBeElected(epoch)
 }
 
+func (st *StorageMinerActorState_I) _challengeHasExpired(epoch block.ChainEpoch) bool {
+	return st.ChallengeStatus().ChallengeHasExpired(epoch)
+}
+
 func (st *StorageMinerActorState_I) ShouldChallenge(currEpoch block.ChainEpoch, challengeFreePeriod block.ChainEpoch) bool {
 	return st.ChallengeStatus().ShouldChallenge(currEpoch, challengeFreePeriod)
 }
