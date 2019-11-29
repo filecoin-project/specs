@@ -28,6 +28,18 @@ a domain separation tag to treat the hash function as an independent random
 oracle. These tags are indicated in the relevant places throughout the specs.
 Read more about this in {{<sref randomness>}}.
 
+In the case of BLS signatures used as part of the Filecoin VRF, we define the following DSTs,
+byte of little endian uint64 representations of the following numbers:
+- for generating a new random ticket:           TicketDST   = `1`
+- for generating randomness for ElectionPoSt:   PoStDST     = `2`
+
+As with Filecoin's use of hash function we also define an input delimeter to separate
+concatenated elements for input to a signature (or hash), as a byte  of little endian
+uint 64 representation of the following:
+- inputDelimeter = `0`
+
+Alphanumerics used as input to signatures are encoded as ASCII strings.
+
 ## Signature Types
 
 Filecoin currently uses two types of signatures: 

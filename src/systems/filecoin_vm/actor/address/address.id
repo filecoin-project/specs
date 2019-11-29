@@ -20,6 +20,7 @@ type Address struct {
     String()         AddressString
     IsKeyType()      bool
     Equals(Address)  bool
+    ToBytes()        util.Bytes
 }
 
 // ActorID is a sequential number assigned to actors in a Filecoin Chain.

@@ -1,6 +1,10 @@
 package block
 
 import (
+<<<<<<< HEAD
+=======
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+>>>>>>> rewrite #626 cleanly. Specifically, rework DST, randomness usage, ticket production and validation, randomness drawing, key storee
 	util "github.com/filecoin-project/specs/util"
 )
 
