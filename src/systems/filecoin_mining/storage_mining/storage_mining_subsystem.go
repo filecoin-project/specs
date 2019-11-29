@@ -162,6 +162,10 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	return st
 }
 
+func (sms *StorageMiningSubsystem_I) GetWorkerKeyByMinerAddress(minerAddr addr.Address) filcrypto.VRFPublicKey {
+	panic("TODO")
+}
+
 func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
 	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
@@ -169,16 +173,22 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	// 1. Check that the miner in question is currently allowed to run election
 	if !st._canBeElected(header.Epoch()) {
 		return false
-		// rt.Abort("cannot submit an election proof if challenged or having challenge response failure")
 	}
 
-	// 2. Get appropriate randomness
-	if onChainInfo.PoStEpoch() != st.ChallengeStatus().LastChallengeEpoch() {
+	// 2. Verify appropriate randomness
+	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
+	randomness := sms._consensus().GetPoStChallengeSeed(sms._blockchain().BestChain(), header.Epoch())
+	postRandomnessInput := sector.PoStRandomness(sms._preparePoStRandomnessInput(randomness, header.MinerAddress()))
+
+	// Hack because of type recognition
+	var randInBytes []byte
+	postRand := &filcrypto.VRFResult_I{
+		Output_: randInBytes,
+	}
+
+	if !postRand.Verify(postRandomnessInput, sms.GetWorkerKeyByMinerAddress(header.MinerAddress())) {
 		return false
 	}
-
-	// TODO: verify
-	electionRand := sector.PoStRandomness(sms._consensus().GetPoStChallengeSeed(sms._blockchain().BestChain(), onChainInfo.PoStEpoch()))
 
 	// A proof must be a valid snark proof with the correct public inputs
 	// 3. Get public inputs
@@ -195,7 +205,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
 		PoStCfg_:    &postCfg,
-		Randomness_: electionRand,
+		Randomness_: onChainInfo.Randomness(),
 	}
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{ElectionPoStCfg_: &postCfg})
@@ -205,7 +215,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	return isPoStVerified
 }
 
-func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo, posterAddr addr.Address) bool {
 
 	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
 
@@ -225,9 +235,19 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 
 	// A proof must be a valid snark proof with the correct public inputs
 
-	// 3. Get appropriate randomness
-	// TODO: verify
-	surpriseRand := sector.PoStRandomness(sms._consensus().GetPoStChallengeSeed(sms._blockchain().BestChain(), onChainInfo.PoStEpoch()))
+	// 3. Verify appropriate randomness
+	randomnessEpoch := st.ChallengeStatus().LastChallengeEpoch()
+	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
+	randomness := sms._consensus().GetPoStChallengeSeed(sms._blockchain().BestChain(), randomnessEpoch)
+	postRandomnessInput := sms._preparePoStRandomnessInput(randomness, posterAddr)
+
+	postRand := &filcrypto.VRFResult_I{
+		Output_: onChainInfo.Randomness(),
+	}
+
+	if !postRand.Verify(postRandomnessInput, sms.GetWorkerKeyByMinerAddress(posterAddr)) {
+		return false
+	}
 
 	// 4. Get public inputs
 	info := st.Info()
@@ -243,7 +263,7 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 	pvInfo := sector.PoStVerifyInfo_I{
 		OnChain_:    onChainInfo,
 		PoStCfg_:    &postCfg,
-		Randomness_: surpriseRand,
+		Randomness_: onChainInfo.Randomness(),
 	}
 
 	sdr := filproofs.WinSDRParams(&filproofs.SDRCfg_I{SurprisePoStCfg_: &postCfg})
