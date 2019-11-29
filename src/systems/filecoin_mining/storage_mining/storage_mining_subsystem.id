@@ -61,10 +61,11 @@ type StorageMiningSubsystem struct {
 
     // call by StorageMiningSubsystem itself in BlockProduction
     PrepareNewTicket(
-        randomness     util.Randomness
-        workerKeyPair  filcrypto.VRFKeyPair
-        minerAddr      addr.Address
+        randomness  util.Randomness
+        minerAddr   addr.Address
     ) block.Ticket
+
+    _preparePoStRandomness(randomness util.Randomness, minerAddr addr.Address) sector.PoStRandomness
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()

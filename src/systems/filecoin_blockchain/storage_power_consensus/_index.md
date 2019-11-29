@@ -94,7 +94,7 @@ The miner runs the prior ticket through a Verifiable Random Function (VRF) to ge
 To generate a ticket for a given epoch n:
 ```text
 LastTicket = MinTicketAtEpoch(n-1)
-newRandomness = VRF_miner(TicketDST || pastTicket || 0 || minerActorAddress)
+newRandomness = VRF_miner(TicketDST || 0 || pastTicket || 0 || minerActorAddress)
 ```
 
 The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).

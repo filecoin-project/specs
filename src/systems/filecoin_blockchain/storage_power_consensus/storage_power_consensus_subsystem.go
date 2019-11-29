@@ -96,7 +96,7 @@ func (spc *StoragePowerConsensusSubsystem_I) GetSealSeed(chain block.Chain, epoc
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_SEAL)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeSeed(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
 }
 
