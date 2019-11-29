@@ -63,11 +63,3 @@ func makeStackedDRGForPoSt(postCfg sector.PoStCfg) (sdr *filproofs.WinStackedDRG
 
 	return filproofs.WinSDRParams(&cfg)
 }
-
-func Serialize_PoStSubmission(x PoStSubmission) Serialization {
-	panic("TODO")
-}
-
-func Deserialize_PoStSubmission(x Serialization) (PoStSubmission, error) {
-	panic("TODO")
-}

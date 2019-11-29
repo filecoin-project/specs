@@ -2,7 +2,7 @@ package block
 
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+	// filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -23,6 +23,12 @@ func sliceEqual(a util.Bytes, b util.Bytes) bool {
 		}
 	}
 	return true
+}
+
+// PLACEHOLDER TODO: Fix with filproofs hash
+func SHA256(data []byte) []byte {
+	var SHA256 []byte
+	return SHA256
 }
 
 // will return tipset from closest prior (or equal) epoch with a tipset
@@ -51,7 +57,7 @@ func (chain *Chain_I) RandomnessAtEpoch(epoch ChainEpoch) util.Bytes {
 	input = append(input, priorRand...)
 	input = append(input, byte(filcrypto.InputDelimeter_Case_Bytes))
 	input = append(input, byte(epoch))
-	return filproofs.HashBytes_SHA256Hash(input)
+	return SHA256(input)
 }
 
 func (chain *Chain_I) HeadEpoch() ChainEpoch {
