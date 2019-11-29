@@ -2533,37 +2533,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4644,7 +4613,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
 <span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
-<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">FilecoinNode</span>       <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
@@ -4660,23 +4629,23 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
 
     <span class="c1">// Need access to block producer in order to publish blocks
-</span><span class="c1"></span>    <span class="nx">blockProducer</span>      <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
+</span><span class="c1"></span>    <span class="nx">_blockProducer</span>     <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
 
     <span class="c1">// Need access to SPC in order to mine a block
-</span><span class="c1"></span>    <span class="nx">consensus</span>          <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">_consensus</span>         <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
 
     <span class="c1">// Need access to the blockchain system in order to query for things in the chain
-</span><span class="c1"></span>    <span class="nx">blockchain</span>         <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">_blockchain</span>        <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
 
     <span class="c1">// Need access to the key store in order to generate tickets and election proofs
-</span><span class="c1"></span>    <span class="nx">keyStore</span>           <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
+</span><span class="c1"></span>    <span class="nx">_keyStore</span>          <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
 
     <span class="c1">// TODO: why are these here? remove?
 </span><span class="c1"></span>    <span class="nf">StartMining</span><span class="p">()</span>
     <span class="nf">StopMining</span><span class="p">()</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself to create miner
-</span><span class="c1"></span>    <span class="nf">createMiner</span><span class="p">(</span>
+</span><span class="c1"></span>    <span class="nf">CreateMiner</span><span class="p">(</span>
         <span class="nx">ownerPubKey</span>   <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
         <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
         <span class="nx">pledgeAmt</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
@@ -4706,9 +4675,17 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// TODO: define clock better
 </span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
 
-    <span class="nf">tryLeaderElection</span><span class="p">()</span>
+    <span class="nf">_tryLeaderElection</span><span class="p">()</span>
 
-    <span class="nf">submitPoStMessage</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">VerifyElectionPoSt</span><span class="p">(</span>
+        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
+        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">VerifySurprisePoSt</span><span class="p">(</span>
+        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
+        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">IsValidElection</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 </code></pre></div>
 

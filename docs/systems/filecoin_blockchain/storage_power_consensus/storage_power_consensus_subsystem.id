@@ -16,8 +16,8 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
 
-    IsWinningChallengeTicket(
-        challengeTicket sector.ChallengeTicket
+    IsWinningPartialTicket(
+        partialTicket sector.PartialTicket
     ) bool
 
     validateElectionProof(

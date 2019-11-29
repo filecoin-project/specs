@@ -150,10 +150,10 @@ func randInRange(lowInclusive int, highExclusive int) UInt {
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
-func TicketToRandomInt(ticket []byte, nonce int, limit *big.Int) *big.Int {
+func RandomInt(randomness util.Randomness, nonce int, limit *big.Int) *big.Int {
 	nonceBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
-	input := ticket
+	input := randomness
 	input = append(input, nonceBytes...)
 	ranHash := HashBytes_SHA256Hash(input[:])
 	hashInt := bigIntFromLittleEndianBytes(ranHash)
@@ -864,7 +864,10 @@ func (sdr *WinStackedDRG_I) _getChallengedSectors(randomness sector.PoStRandomne
 	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.ChallengeTicket {
+////////////////////////////////////////////////////////////////////////////////
+// Election PoSt
+
+func (sdr *WinStackedDRG_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.PoStCandidate {
 	challengedSectors, challenges := sdr._getChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
 	var proofAuxs []sector.PersistentProofAux
 
@@ -878,14 +881,36 @@ func (sdr *WinStackedDRG_I) GeneratePoStCandidates(challengeSeed sector.PoStRand
 	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) GeneratePoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
+func (sdr *WinStackedDRG_I) GenerateElectionPoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
+	panic("TODO")
+}
+
+func (sdr *WinStackedDRG_I) VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool {
 	panic("TODO")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// PoSt Verification
+// Surprise PoSt
 
-func (sdr *WinStackedDRG_I) VerifyPoSt(sv sector.PoStVerifyInfo) bool {
+func (sdr *WinStackedDRG_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorNumber, candidateCount int, sectorStore sectorIndex.SectorStore) []sector.PoStCandidate {
+	challengedSectors, challenges := sdr._getChallengedSectors(challengeSeed, eligibleSectors, candidateCount)
+	var proofAuxs []sector.PersistentProofAux
+
+	for _, sector := range challengedSectors {
+		proofAux := sectorStore.GetSectorPersistentProofAux(sector)
+		proofAuxs = append(proofAuxs, proofAux)
+	}
+
+	_ = challenges
+
+	panic("TODO")
+}
+
+func (sdr *WinStackedDRG_I) GenerateSurprisePoStProof(privateProofs []sector.PrivatePoStProof) sector.PoStProof {
+	panic("TODO")
+}
+
+func (sdr *WinStackedDRG_I) VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool {
 	panic("TODO")
 }
 

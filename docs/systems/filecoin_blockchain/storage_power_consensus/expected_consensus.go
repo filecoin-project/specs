@@ -32,7 +32,7 @@ func (self *ExpectedConsensus_I) IsValidConsensusFault(faults ConsensusFaultType
 	// && abs(block1.Epoch - block2.Epoch) == 1
 }
 
-func (self *ExpectedConsensus_I) IsWinningElectionProof(electionProof []byte, targetNum util.UVarint, targetDen util.UVarint) bool {
+func (self *ExpectedConsensus_I) IsWinningChallengeTicket(electionProof []byte, targetNum util.UVarint, targetDen util.UVarint) bool {
 	// Conceptually we are mapping the pseudorandom, deterministic hash output of the challenge ticket onto [0,1]
 	// by dividing by 2^HashLen and comparing that to the sector's target.
 	// if the challenge ticket hash is smaller than active power in the sector size / network total power * sectorSampled * ec.ExpectedLeaders

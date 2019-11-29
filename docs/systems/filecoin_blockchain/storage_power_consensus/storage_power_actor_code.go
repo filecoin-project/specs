@@ -9,7 +9,6 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -22,7 +21,7 @@ const (
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
-type InvocOutput = msg.InvocOutput
+type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type State = StoragePowerActorState
@@ -250,15 +249,17 @@ func (a *StoragePowerActorCode_I) ReportConsensusFault(rt Runtime, slasherAddr a
 
 // Surprise is in the storage power actor because it is a singleton actor and surprise helps miners maintain power
 // TODO: add Surprise to the cron actor
-func (a *StoragePowerActorCode_I) Surprise(rt Runtime, ticket block.Ticket) {
+func (a *StoragePowerActorCode_I) Surprise(rt Runtime) {
 
-	var PROVING_PERIOD int // defined in storage_mining, TODO: move constants somewhere else
+	PROVING_PERIOD := 0 // defined in storage_mining, TODO: move constants somewhere else
+	SURPRISE_CHALLENGE_FREQUENCY := 0
 
 	// sample the actor addresses
 	h, st := a.State(rt)
 
-	challengeCount := math.Ceil(float64(2*len(st.PowerTable())) / float64(PROVING_PERIOD))
-	surprisedMiners := st._sampleMinersToSurprise(rt, int(challengeCount), ticket)
+	randomness := rt.Randomness(rt.CurrEpoch(), 0)
+	challengeCount := math.Ceil(float64(SURPRISE_CHALLENGE_FREQUENCY*len(st.PowerTable())) / float64(PROVING_PERIOD))
+	surprisedMiners := st._sampleMinersToSurprise(rt, int(challengeCount), randomness)
 
 	UpdateRelease(rt, h, st)
 

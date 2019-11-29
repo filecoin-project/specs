@@ -2532,37 +2532,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4633,7 +4602,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SectorExpirationQueueItem</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4671,14 +4639,22 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">type</span> <span class="nx">ChallengeStatus</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">LastChallengeEpoch</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
-</span><span class="c1"></span>    <span class="nx">LastChallengeEndEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon _onSuccessfulPoSt and _onMissedPoSt
+</span><span class="c1"></span>    <span class="nx">_lastPoStFailureEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon _onMissedSurprisePoSt
+</span><span class="c1"></span>    <span class="nx">_lastPoStSuccessEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by successful Election or Suprise PoSt submission
 </span><span class="c1"></span>
-    <span class="nf">IsChallenged</span><span class="p">()</span>         <span class="kt">bool</span>  <span class="c1">// only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
-</span><span class="c1"></span>    <span class="nf">ShouldChallenge</span><span class="p">(</span>
-        <span class="nx">currEpoch</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">minChallengePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="kt">bool</span>  <span class="c1">// only True when CurrEpoch &gt; (LastChallengeEpoch + MIN_CHALLENGE_PERIOD)
-</span><span class="c1"></span><span class="p">}</span>
+    <span class="nf">OnNewChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="nf">LastPoStResponseEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nf">OnPoStSuccess</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="nf">OnPoStFailure</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+
+    <span class="nf">IsChallenged</span><span class="p">()</span> <span class="kt">bool</span>  <span class="c1">// only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+</span><span class="c1"></span>    <span class="nf">ChallengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">CanBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">ShouldChallenge</span><span class="p">(</span>
+        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PreCommittedSector</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Info</span>           <span class="nx">sealing</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span>
@@ -4693,23 +4669,28 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorUtilizationAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PreCommittedSectors</span>        <span class="nx">PreCommittedSectorsAMT</span>
-    <span class="nx">StagedCommittedSectors</span>     <span class="nx">StagedCommittedSectorAMT</span>
-    <span class="nx">Sectors</span>                    <span class="nx">SectorsAMT</span>
-    <span class="nx">SectorUtilization</span>          <span class="nx">SectorUtilizationAMT</span>
-    <span class="nx">ProvingSet</span>                 <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+    <span class="nx">PreCommittedSectors</span>     <span class="nx">PreCommittedSectorsAMT</span>
+    <span class="nx">StagedCommittedSectors</span>  <span class="nx">StagedCommittedSectorAMT</span>
+    <span class="nx">Sectors</span>                 <span class="nx">SectorsAMT</span>
+    <span class="nx">SectorUtilization</span>       <span class="nx">SectorUtilizationAMT</span>
+    <span class="nx">ProvingSet</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
 
     <span class="nx">SectorTable</span>
     <span class="nx">SectorExpirationQueue</span>
     <span class="nx">ChallengeStatus</span>
 
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">Info</span>                       <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                    <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
     <span class="c1">// No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>  <span class="kt">bool</span>
-    <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minChallengePeriod</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">_isSealVerificationCorrect</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">()</span>         <span class="kt">bool</span>
+    <span class="nf">_canBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_shouldChallenge</span><span class="p">(</span>
+        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_verifySeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_assertSectorDidNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
     <span class="nf">_processStagedCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
@@ -4721,7 +4702,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
     <span class="nf">_updateClearSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
     <span class="nf">_updateActivateSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
-    <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoStResponse</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
     <span class="nf">_initializeUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">])</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span>
 
     <span class="nf">_getActivePower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
@@ -4735,8 +4716,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">PreCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>    <span class="nf">ProveCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorProveCommitInfo</span><span class="p">)</span>
 
-    <span class="nf">SubmitSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
-    <span class="nf">SubmitElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
+    <span class="nf">SubmitVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
+    <span class="nf">SubmitVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
 
     <span class="nf">CheckSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
@@ -4750,8 +4731,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// Send ProcessBatchDealPayment to StorageMarketActor
 </span><span class="c1"></span>    <span class="nf">CreditSectorDealPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
-    <span class="nf">_onMissedPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
-    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
+    <span class="nf">_onMissedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_submitFaultReport</span><span class="p">(</span>
         <span class="nx">rt</span>          <span class="nx">Runtime</span>
@@ -4766,8 +4747,6 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span>
     <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
 
-    <span class="nf">_verifyPoStSubmission</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
-
     <span class="nf">_expirePreCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -4775,21 +4754,23 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">Owner</span>        <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>                   <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">Worker</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">PeerId</span>       <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">PeerId</span>                  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">SectorSize</span>   <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
-    <span class="nx">WindowCount</span>  <span class="nx">UVarint</span>
-    <span class="nx">Partitions</span>   <span class="nx">UVarint</span>
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>              <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+    <span class="nx">WindowCount</span>             <span class="nx">UVarint</span>
+    <span class="nx">SealPartitions</span>          <span class="nx">UVarint</span>
+    <span class="nx">ElectionPoStPartitions</span>  <span class="nx">UVarint</span>
+    <span class="nx">SurprisePoStPartitions</span>  <span class="nx">UVarint</span>
 <span class="p">}</span>
 </code></pre></div>
 

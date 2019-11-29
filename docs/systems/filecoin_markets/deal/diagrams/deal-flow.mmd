@@ -30,6 +30,6 @@ StorageMiningSubsystem -->> StorageMinerActor: SubmitPoSt()
 StorageMinerActor -->> StorageMinerActor: activateSector
 StorageMinerActor -->> StorageProvider: NotifyOfOnChainDealStatus(DealActive)
 StorageProvider -->> StorageClient: NotifyOfStorageDealStatus(DealActive)
-CronActor -->> StorageMinerActor: NotifyOfPoStChallenge()/CheckPoStSubmissionHappened()
+CronActor -->> StorageMinerActor: NotifyOfPoStChallenge()/CheckSurprisePoStSubmissionHappened()
 StorageMinerActor -->> StorageProvider: NotifyOfOnChainDealStatus(DealExpired/DealFailing)
 StorageProvider -->> StorageClient: NotifyOfStorageDealStatus(DealExpired/DealFailing)

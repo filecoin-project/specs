@@ -3,7 +3,6 @@ import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 
 type SectorExpirationQueueItem struct {
@@ -41,13 +40,21 @@ type SectorOnChainInfo struct {
 
 type ChallengeStatus struct {
     LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
-    LastChallengeEndEpoch  block.ChainEpoch  // get updated upon _onSuccessfulPoSt and _onMissedPoSt
+    _lastPoStFailureEpoch  block.ChainEpoch  // get updated upon _onMissedSurprisePoSt
+    _lastPoStSuccessEpoch  block.ChainEpoch  // get updated by successful Election or Suprise PoSt submission
 
-    IsChallenged()         bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+    OnNewChallenge(currEpoch block.ChainEpoch)
+    LastPoStResponseEpoch() block.ChainEpoch
+    OnPoStSuccess(currEpoch block.ChainEpoch)
+    OnPoStFailure(currEpoch block.ChainEpoch)
+
+    IsChallenged() bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+    ChallengeHasExpired(currEpoch block.ChainEpoch) bool
+    CanBeElected(currEpoch block.ChainEpoch) bool
     ShouldChallenge(
-        currEpoch           block.ChainEpoch
-        minChallengePeriod  block.ChainEpoch
-    ) bool  // only True when CurrEpoch > (LastChallengeEpoch + MIN_CHALLENGE_PERIOD)
+        currEpoch            block.ChainEpoch
+        challengeFreePeriod  block.ChainEpoch
+    ) bool
 }
 
 type PreCommittedSector struct {
@@ -63,23 +70,28 @@ type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 type SectorUtilizationAMT {sector.SectorNumber: sector.SectorUtilizationInfo}
 
 type StorageMinerActorState struct {
-    PreCommittedSectors        PreCommittedSectorsAMT
-    StagedCommittedSectors     StagedCommittedSectorAMT
-    Sectors                    SectorsAMT
-    SectorUtilization          SectorUtilizationAMT
-    ProvingSet                 sector.CompactSectorSet
+    PreCommittedSectors     PreCommittedSectorsAMT
+    StagedCommittedSectors  StagedCommittedSectorAMT
+    Sectors                 SectorsAMT
+    SectorUtilization       SectorUtilizationAMT
+    ProvingSet              sector.CompactSectorSet
 
     SectorTable
     SectorExpirationQueue
     ChallengeStatus
 
     // contains mostly static info about this miner
-    Info                       &MinerInfo
+    Info                    &MinerInfo
 
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-    _isChallenged(rt Runtime)  bool
-    _shouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool
-    _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
+    _isChallenged()         bool
+    _canBeElected(currEpoch block.ChainEpoch) bool
+    _challengeHasExpired(currEpoch block.ChainEpoch) bool
+    _shouldChallenge(
+        currEpoch            block.ChainEpoch
+        challengeFreePeriod  block.ChainEpoch
+    ) bool
+    _verifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
 
     _processStagedCommittedSectors(rt Runtime)
@@ -91,7 +103,7 @@ type StorageMinerActorState struct {
     _updateExpireSectors(rt Runtime)
     _updateClearSector(rt Runtime, sectorNo sector.SectorNumber)
     _updateActivateSector(rt Runtime, sectorNo sector.SectorNumber)
-    _updateSectorUtilization(rt Runtime, lastPoSt block.ChainEpoch) [deal.DealID]
+    _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) [deal.DealID]
     _initializeUtilizationInfo(rt Runtime, deals [deal.OnChainDeal]) sector.SectorUtilizationInfo
 
     _getActivePower(rt Runtime) block.StoragePower
@@ -105,8 +117,8 @@ type StorageMinerActorCode struct {
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
 
-    SubmitSurprisePoSt(rt Runtime, postSubmission poster.PoStSubmission)
-    SubmitElectionPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+    SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
+    SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
 
     CheckSurprisePoStSubmissionHappened(rt Runtime)
 
@@ -120,8 +132,8 @@ type StorageMinerActorCode struct {
     // Send ProcessBatchDealPayment to StorageMarketActor
     CreditSectorDealPayment(rt Runtime, sectorNo sector.SectorNumber)
 
-    _onMissedPoSt(rt Runtime)
-    _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+    _onMissedSurprisePoSt(rt Runtime)
+    _onSuccessfulPoSt(rt Runtime)
 
     _submitFaultReport(
         rt          Runtime
@@ -136,8 +148,6 @@ type StorageMinerActorCode struct {
     )
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
 
-    _verifyPoStSubmission(rt Runtime, postSubmission poster.PoStSubmission) bool
-
     _expirePreCommittedSectors(rt Runtime)
 }
 
@@ -145,19 +155,21 @@ type MinerInfo struct {
     // Account that owns this miner.
     // - Income and returned collateral are paid to this address.
     // - This address is also allowed to change the worker address for the miner.
-    Owner        address.Address
+    Owner                   address.Address
 
     // Worker account for this miner.
     // This will be the key that is used to sign blocks created by this miner, and
     // sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
     // other day to day miner activities.
-    Worker       address.Address
+    Worker                  address.Address
 
     // Libp2p identity that should be used when connecting to this miner.
-    PeerId       libp2p.PeerID
+    PeerId                  libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    SectorSize   util.BytesAmount
-    WindowCount  UVarint
-    Partitions   UVarint
+    SectorSize              util.BytesAmount
+    WindowCount             UVarint
+    SealPartitions          UVarint
+    ElectionPoStPartitions  UVarint
+    SurprisePoStPartitions  UVarint
 }

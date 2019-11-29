@@ -2533,37 +2533,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4674,6 +4643,7 @@ state mutation or produce a receipt.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
 
@@ -4691,8 +4661,8 @@ state mutation or produce a receipt.</p>
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">VMInterpreter</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
-    <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
+    <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
+    <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4749,10 +4719,10 @@ state mutation or produce a receipt.</p>
 
 <span class="c1">// Applies all the message in a tipset, along with implicit block- and tipset-specific state
 </span><span class="c1">// transitions.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">inTree</span>
 	<span class="nx">seenMsgs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">]</span><span class="kd">struct</span><span class="p">{})</span> <span class="c1">// CIDs of messages already seen once.
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">r</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
+</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
 		<span class="c1">// Pay block reward.
 </span><span class="c1"></span>		<span class="nx">reward</span> <span class="o">:=</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
@@ -4792,7 +4762,7 @@ state mutation or produce a receipt.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">compTree</span> <span class="o">:=</span> <span class="nx">inTree</span>
 	<span class="kd">var</span> <span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
@@ -4839,7 +4809,7 @@ state mutation or produce a receipt.</p>
 	<span class="p">)</span>
 
 	<span class="nx">sendRet</span><span class="p">,</span> <span class="nx">sendRetStateTree</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span>
-		<span class="nx">msg</span><span class="p">.</span><span class="nf">InvocInput_Make</span><span class="p">(</span>
+		<span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocInput_Make</span><span class="p">(</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(),</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
@@ -4886,12 +4856,12 @@ state mutation or produce a receipt.</p>
 	<span class="k">return</span> <span class="nx">outTree</span><span class="p">,</span> <span class="nx">sendRet</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
 	<span class="c1">// TODO: should this gasUsed value be zero?
 </span><span class="c1"></span>	<span class="c1">// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
 </span><span class="c1"></span>	<span class="nx">gasUsed</span> <span class="o">:=</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span>
 	<span class="nf">TODO</span><span class="p">()</span>
-	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>

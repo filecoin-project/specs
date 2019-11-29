@@ -2533,37 +2533,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4637,8 +4606,7 @@ https://github.com/alex-shpak/hugo-book
 <h1 id="receive-challenge">Receive Challenge</h1>
 
 <ul>
-<li>5. Miners enter the <code>Challenged</code> status whenever <code>NotifyOfPoStChallenge</code> is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before <code>
-CheckPoStSubmissionHappened</code> is called by the chain. Miners can only get out the challenge with <code>SubmitPoSt</code> or <code>onMissedPoSt</code>.</li>
+<li>5. Miners enter the <code>Challenged</code> status whenever <code>NotifyOfPoStChallenge</code> is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before <code>CheckSurprisePoStSubmissionHappened</code> is called by the chain. Miners can only get out the challenge with <code>SubmitSurprisePoSt</code> or <code>onMissedSurprisePoSt</code>.</li>
 <li>6. Miners are not allowed to call <code>DeclareFaults</code> or <code>RecoverFaults</code> when they are in the <code>Challneged</code> state but <code>CommitSector</code> is allowed and sectors will be added to a <code>StagedCommittedSectors</code> buffer. When miners get out of the <code>Challenged</code> status, <code>StagedCommittedSectors</code> will be copied over to their <code>Sectors</code>, <code>ProvingSet</code> and <code>SectorTable</code> and emptied.</li>
 </ul>
 
@@ -4667,7 +4635,7 @@ CheckPoStSubmissionHappened</code> is called by the chain. Miners can only get o
 <li>14. Submit <code>FaultReport</code> and <code>PowerReport</code> to <code>StoragePowerActor</code> for slashing and power accounting.</li>
 <li>15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.</li>
 <li>16. Update challenge status and add <code>Committed</code> sectors received during the challenge to the <code>Sectors</code>, <code>ProvingSet</code>, and <code>SectorTable</code>.</li>
-<li>17. All Sectors will be considered in <code>DetectedFaults</code> when a miner fail to <code>SubmitPoSt</code> in a proving period and detected by <code>onMissedPoSt</code> in <code>CheckPoStSubmissionHappened</code> (move to State 18).</li>
+<li>17. All Sectors will be considered in <code>DetectedFaults</code> when a miner fail to <code>SubmitSurprisePoSt</code> or <code>SubmitElectionPoSt</code> (jointly <code>SubmitPoSt</code> methods) in a proving period and detected by <code>onMissedSurprisePoSt</code> in <code>CheckSurprisePoStSubmissionHappened</code> (move to State 18).</li>
 </ul>
 
 <h1 id="detect-faults">Detect Faults</h1>
@@ -4675,10 +4643,10 @@ CheckPoStSubmissionHappened</code> is called by the chain. Miners can only get o
 <p>(TODO: move into Storage Mining)</p>
 
 <ul>
-<li>18. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckPoStSubmissionHappened</code> on all the miners whose <code>ProvingPeriod</code> is up.
+<li>18. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckSurprisePoStSubmissionHappened</code> on all the miners whose <code>ProvingPeriod</code> is up.
 
 <ul>
-<li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>onMissedPoSt</code> detects the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
+<li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>onMissedSurprisePoSt</code> detects the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
 <li>TODO: reword in terms of a conditional in the mining cycle</li>
 <li>When there are sector faults are detected, some of <code>StorageDealCollateral</code> and <code>PledgeCollateral</code> are slashed, and power is lost.</li>
 <li>If the faults persist for <code>storagemining.MaxFaultCount</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>

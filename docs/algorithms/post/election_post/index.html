@@ -2532,37 +2532,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4640,62 +4609,69 @@ https://github.com/alex-shpak/hugo-book
 <p>The epoch time is divided into three non-overlapping portions: (1) checking sectors for small challenge tickets, (2) computing the SNARK to produce a PoSt certifying the winning challenge tickets, and (3) block production/propagation. The target duration for each is still to be tuned. Proof parameter adjustments might allow a longer block propagation window while maintaining PoSt security (but trades off against sealing time and other things).</p>
 
 <p>If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.</p>
+<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">At every round:
+<span class="k">1.</span> <span class="gs">**(sample randomness)**</span>
+The miner draws a randomness ticket from the randomness chain from a given epoch SPC.post_lookback back and concats it with the minerID, and epoch for use as post_randomness (this is as it used to happen previously, except the PoSt_lookback is now also the EC randomness_lookback, which is small here):
+    <span class="k">-</span> <span class="sb">`post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))`</span>
 
-<p>At every round:
-1. <code>(Sample randomness)</code> The miner draws a randomness ticket from the randomness chain from a given epoch SPC.post_lookback back and concats it with the minerID, and epoch for use as post_randomness (this is as it used to happen previously, except the PoSt_lookback is now also the EC randomness_lookback, which is small here):
-    - <code>post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))</code>
-    We use the VRF to generate a unique randomness for the minerId, in this way no adversary that could simulate the miner storage can check if the victim miner has won or not.
-1. <strong>(select eligible sectors)</strong> The miner calls <code>GenerateCandidates</code> from proofs with their non-faulted (declared or detected) sectors, meaning those in their <code>proving set</code> (from the <code>StorageMinerActor</code>) along with a chosen number of <code>PartialTickets</code> (<code>sectorsSampled*eligibleSectors</code>).
-    - Select a subset of sectors of size <code>sectorsSampled*minerSectors</code> [details omitted]
-    Note also that even with <code>challengeTicketNum == numSectors</code>, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
-1. <strong>(generate Partial Ticket(s))</strong> For each selected sector
-    - first, generate K <code>PoStChallenges</code> (C_i), sampled at random from the chosen sector.
-    There will be a chosen challenge-range size (a power of 2), called <code>ChallengeRangeSize</code>. Challenge ranges must be subtree-aligned and thus divide the sector into fixed-size data blocks. So challenge ranges can be indexed because allowable challenge ranges do not overlap. C_i is selected from the valid indexes into the challenge ranges.
-    <code>C_i = HashToBlockNumber(post_randomness || S_j || i)</code>
+<span class="k">2.</span> <span class="gs">**(select eligible sectors)**</span>
+The miner calls <span class="sb">`GenerateCandidates`</span> from proofs with their non-faulted (declared or detected) sectors, meaning those in their <span class="sb">`proving set`</span> (from the <span class="sb">`StorageMinerActor`</span>) along with a chosen number of <span class="sb">`PartialTickets`</span> (`sectorsSampled*eligibleSectors`).
+    <span class="k">-</span> Select a subset of sectors of size <span class="sb">`sectorsSampled*minerSectors`</span> [details omitted]
+
+    Note also that even with <span class="sb">`challengeTicketNum == numSectors`</span>, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
+
+<span class="k">3.</span> <span class="gs">**(generate Partial Ticket(s))**</span> for each selected sector
+    <span class="k">-</span> first, generate K <span class="sb">`PoStChallenges`</span> (C_i), sampled at random from the chosen sector.
+    There will be a chosen challenge-range size (a power of 2), called <span class="sb">`ChallengeRangeSize`</span>. Challenge ranges must be subtree-aligned and thus divide the sector into fixed-size data blocks. So challenge ranges can be indexed because allowable challenge ranges do not overlap. C_i is selected from the valid indexes into the challenge ranges.
+    <span class="sb">`C_i = HashToBlockNumber(post_randomness || S_j || i)`</span>
     C_i corresponds to a given index of a known-sized data block (the sector)
-    - for each C_i, miner reads the specified range of data from disk, which is of size <code>ChallengeRangeSize : C_i_output</code>
-    - Miner generates a PartialTicket using all the PoSt witnesses
-    - <code>PartialTicket = H(post_randomness || minerID ||S_ j || C_1_Output || … || C_K_Output)</code>
-1. <strong>(check Challenge Ticket(s) for winners)</strong> Given a returned ChallengeTicket, miner checks it is a winning ticket. Specifically, they do the following:
-    - <code>ChallengeTicket = Finalize(PartialTicket).  = H(ChallengeTicket) / 2^len(H)</code>
-    - Check that <code>ChallengeTicket &lt; Target</code>
-    - If yes, it is a winning ticket and can be used as to submit a block
-    - In either case, try again with next sector
-1. <strong>(generate a <code>PoStProof</code>)</strong> for inclusion in the block header
-    - Using the winning tickets from step 4 (there may be multiple tickets from the same <code>SectorNumber</code>), call <code>GeneratePoSt</code> from proofs to generate a single PoSt for the block</p>
+    <span class="k">-</span> for each C_i, miner reads the specified range of data from disk, which is of size <span class="sb">`ChallengeRangeSize : C_i_output`</span>
+    <span class="k">-</span> Miner generates a PartialTicket using all the PoSt witnesses
+    <span class="k">-</span> <span class="sb">`PartialTicket = H(post_randomness || minerID ||S_ j || C_1_Output || … || C_K_Output)`</span>
 
-<p>If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.</p>
+<span class="k">4.</span> <span class="gs">**(check Challenge Ticket(s) for winners)**</span>
+Given a returned PartialTicket, miner checks it is a winning ticket. Specifically, they do the following:
+    <span class="k">-</span> <span class="sb">`ChallengeTicket = Finalize(PartialTicket).  = H(ChallengeTicket) / 2^len(H)`</span>
+    <span class="k">-</span> Check that <span class="sb">`ChallengeTicket &lt; Target`</span>
+    <span class="k">-</span> If yes, it is a winning ticket and can be used to submit a block
+    <span class="k">-</span> In either case, try again with next sector to increase rewards
 
-<p><strong>Parameters:</strong>
-- <code>Randomness_ticket</code> &ndash;  a ticket drawn from the randomness ticket chain at a prior tipset
-- <code>Randomness_lookback</code> &ndash; how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
-- <code>K (e.g. 20-100s)</code> - number of  challenges per sector &ndash; must be large enough such that the PoSpace is secure.
-- <code>ChallengeRangeSize</code> - challenge read size (between 32B and 256KB)  &ndash; based on security analysis.
-- <code>sectorsSampled</code> - sector sampling fraction (e.g. 1, .10, .04) &ndash; 1 to start&ndash; It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
-- <code>Target</code> &ndash; target value under which PoSt value must be for block creation &ndash; <code>target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders</code>.
-Put another way check <code>challengeTicket * networkPower * sectorsSampled_denom &lt; activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders</code>
-- <code>networkPower</code> - filecoin network’s power - read from the power table, expressed in number of bytes</p>
+<span class="k">5.</span> <span class="gs">**(generate a `PoStProof`)**</span> for inclusion in the block header
+    <span class="k">-</span> Using the winning tickets from step 4 (there may be multiple tickets from the same <span class="sb">`SectorNumber`</span>), call <span class="sb">`GeneratePoSt`</span> from proofs to generate a single PoSt for the block
 
+If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.</code></pre></div>
+<p><strong>Parameters:</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md"><span class="k">-</span> <span class="sb">`Randomness_ticket`</span> --  a ticket drawn from the randomness ticket chain at a prior tipset 
+<span class="k">-</span> <span class="sb">`Randomness_lookback`</span> -- how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
+<span class="k">-</span> <span class="sb">`K (e.g. 20-100s)`</span> - number of  challenges per sector -- must be large enough such that the PoSpace is secure.
+<span class="k">-</span> <span class="sb">`ChallengeRangeSize`</span> - challenge read size (between 32B and 256KB)  -- based on security analysis.
+<span class="k">-</span> <span class="sb">`sectorsSampled`</span> - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
+<span class="k">-</span> <span class="sb">`Target`</span> -- target value under which PoSt value must be for block creation -- <span class="sb">`target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders`</span>.
+Put another way check <span class="sb">`challengeTicket * networkPower * sectorsSampled_denom &lt; activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders`</span>
+- <span class="sb">`networkPower`</span> - filecoin network’s power - read from the power table, expressed in number of bytes</code></pre></div>
 <h2 id="electionpost-verification">ElectionPoSt verification</h2>
 
-<p>At a high-level, to validate a winning PoSt Proof:
-  1. <strong>Validate post_randomness:</strong>
-    - <code>post_randomness</code> is appropriate given <code>chain</code>, <code>post_lookback</code> and <code>epoch</code>
-    - VRF is generated by miner who submitted the PoSt:
-    <code>{0,1} ?= VRF_miner.Verify(post_randomness)</code>
-    - VRF output is valid given expected inputs:
-    <code>{0,1} ?= VRF_miner.Validate(H(randomness_ticket || chainEpoch))</code>
-    1. Rederive eligible sectors in order to verify that winning sectors were appropriately selected (meaning it’s in <code>S_j</code>) from
-    <code>{0, 1} ?= sectorID in (HashToSectorID(post_randomness || minerID || j))</code>
-    1. <strong>Verify <code>PartialTicket</code> returned</strong>
-    - Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.
-    1. <strong>Derive and validate the <code>ChallengeTicket</code> from the PartialTickets</strong>
-    - Prove the derived ChallengeTicket is below the target
-    <code>{0, 1} ?= (ChallengeTicket &lt; target)</code>
-    1. Validate the <code>postProof</code> using the <code>PartialTickets</code>
-    - Verify that the postProof was appropriately derived from the PartialTickets.
-    - The PoSt proof will verify the correctness of any PartialTickets passed to it as public inputs. In order to do this, it also needs the sector number along with various on-chain data (randomness, CommR, miner ID, etc.).</p>
+<p>At a high-level, to validate a winning PoSt Proof:</p>
+<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md"><span class="k">1.</span> <span class="gs">**(Verify post_randomness):**</span>
+    <span class="k">-</span> <span class="sb">`post_randomness`</span> is appropriate given <span class="sb">`chain`</span>, <span class="sb">`post_lookback`</span> and <span class="sb">`epoch`</span>
+    <span class="k">-</span> VRF is generated by miner who submitted the PoSt:
+    <span class="sb">`{0,1} ?= VRF_miner.Verify(post_randomness)`</span>
+    <span class="k">-</span> VRF output is valid given expected inputs:
+    <span class="sb">`{0,1} ?= VRF_miner.Validate(H(randomness_ticket || chainEpoch))`</span>
 
+<span class="k">2.</span> Rederive eligible sectors in order to verify that winning sectors were appropriately selected (meaning it’s in <span class="sb">`S_j`</span>) from
+    <span class="sb">`{0, 1} ?= sectorID in (HashToSectorID(post_randomness || minerID || j))`</span>
+
+<span class="k">3.</span> <span class="gs">**Verify `PartialTicket` returned**</span>
+    <span class="k">-</span> Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.
+
+<span class="k">4.</span> <span class="gs">**Derive and validate the `ChallengeTicket` from the PartialTickets**</span>
+    <span class="k">-</span> Prove the derived ChallengeTicket is below the target
+    <span class="sb">`{0, 1} ?= (ChallengeTicket &lt; target)`</span>
+
+<span class="k">5.</span> <span class="gs">**Verify the `postProof` using the `PartialTickets`**</span>
+    <span class="k">-</span> Verify that the postProof was appropriately derived from the PartialTickets.
+    - The PoSt proof will verify the correctness of any PartialTickets passed to it as public inputs. In order to do this, it also needs the sector number along with various on-chain data (randomness, CommR, miner ID, etc.).</code></pre></div>
 <p>As it stands, the proofs caller passes a list of all of the replicas (with filesystem paths and auxiliary metadata) which could be challenged and a wanted number of tickets. This code structure forces the miner architecture to look like a single machine with a large number of disks presented as a single filesystem, as shown in spec. That won’t change for now. VFS systems like NFS may be used to distribute disks among multiple machines virtualizing the FileStore.</p>
 
 <p>There is no requirement to persist the witnesses (list of merkle proofs) for failure recovery. If something fails, we don’t expect recovery to be fast enough to allow the miner to participate in that round anyway.</p>
@@ -4723,7 +4699,7 @@ This SurprisePoSt will use a challenge drawn from the chain at the start of this
 
 <p>Surprise PoSt works as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">// A number of challenged miners is chosen at every round
-challNumber = 2*NumMiners / ProvingPeriod
+challNumber = SURPRISE_CHALLENGE_FREQUENCY*NumMiners / ProvingPeriod
 
 // Using the ticket to seed randomness, a miner is picked from the power table for each challenge
 sampledMiners = []
@@ -4731,11 +4707,12 @@ For i=0; i &lt; challNumber; i++:
     ranHash = H(ticket, i)
     ranIndex = HashToInt(ranHash) mod len(PowerTable)
     chosenMiner = PowerTable[ranIndex].address
-    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/2 epochs and are not currently challenged
-    if chosenMiner.shouldChallenge(ProvingPeriod/2):
+    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/SURPRISE_CHALLENGE_FREQUENCY epochs and are not currently challenged
+    if chosenMiner.shouldChallenge(SURPRISE_NO_CHALLENGE_PERIOD):
         sampledMiners.append(chosenMiner)</code></pre></div>
-<p>The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled twice per proving period on expectation, but would only be sampled if they are in the latter half of their proving period leading to one challenge per proving period on expectation.
-This is done as follows: if there are M miners in the power table and a Proving Period of length P, 2M/P challenges will be issued at each epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/2 epochs and are not currently being challenged (this is checked using the storage_miner_actor).</p>
+<p>The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled SURPRISE_CHALLENGE_FREQUENCY times per proving period on expectation, but would only be sampled if they are past the SURPRISE_NO_CHALLENGE_PERIOD (which should be PP/SPF so they are challenged in that period) in their proving period leading to one challenge per proving period on expectation.</p>
+
+<p>This is done as follows: if there are M miners in the power table and a Proving Period of length P, SPF*M/P challenges will be issued at each epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/SPF epochs and are not currently being challenged (this is checked using the storage_miner_actor).</p>
 
 <p>An alternative approach would be to assign a probability of being challenged to each miner which grows at every epoch to be 1 PP epochs from the last challenge (but this would require more computation since every miner would have to be checked at every epoch).</p>
 

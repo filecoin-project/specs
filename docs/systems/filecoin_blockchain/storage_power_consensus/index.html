@@ -2533,37 +2533,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4653,8 +4622,8 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
-    <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span>
-        <span class="nx">challengeTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span>
+    <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
+        <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">validateElectionProof</span><span class="p">(</span>
@@ -4884,8 +4853,8 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
-    <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span>
-        <span class="nx">challengeTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span>
+    <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
+        <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">validateElectionProof</span><span class="p">(</span>
@@ -5035,7 +5004,7 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 
 	<span class="c1">// TODO: Send message to SPA to get ActivePowerInSector associated with sector
 </span><span class="c1"></span>	<span class="nx">activePowerInSector</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
@@ -5043,9 +5012,9 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 	<span class="c1">// TODO: Send message to SPA
 </span><span class="c1"></span>	<span class="nx">totalPower</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 
-	<span class="nx">electionProof</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">.</span><span class="nf">Ticket</span><span class="p">())</span>
+	<span class="nx">challengeTicket</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">partialTicket</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningElectionProof</span><span class="p">(</span><span class="nx">electionProof</span><span class="p">,</span> <span class="nx">activePowerInSector</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">activePowerInSector</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetTicketProductionSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>

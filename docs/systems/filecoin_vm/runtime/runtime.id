@@ -22,28 +22,16 @@ type Runtime interface {
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
-    CurrMethodNum()             actor.MethodNum
-
-    // Note: This is the actor in the From field of the initial on-chain message.
-    // Not necessarily the immediate caller.
-    ToplevelSender()            addr.Address
+    CurrMethodNum()        actor.MethodNum
 
     // The actor who mined the block in which the initial on-chain message appears.
-    ToplevelBlockWinner()       addr.Address
+    ToplevelBlockWinner()  addr.Address
 
-    // Top-level call sequence number of the "From" actor in the initial on-chain message.
-    ToplevelSenderCallSeqNum()  actor.CallSeqNum
+    AcquireState()         ActorStateHandle
 
-    // Sequence number representing the total number of calls (to any actor, any method)
-    // during the current top-level message execution.
-    // Note: resets with every top-level message, and therefore not necessarily monotonic.
-    InternalCallSeqNum()        actor.CallSeqNum
-
-    AcquireState()              ActorStateHandle
-
-    SuccessReturn()             msg.InvocOutput
-    ValueReturn(Bytes)          msg.InvocOutput
-    ErrorReturn(exitCode exitcode.ExitCode) msg.InvocOutput
+    SuccessReturn()        InvocOutput
+    ValueReturn(Bytes)     InvocOutput
+    ErrorReturn(exitCode exitcode.ExitCode) InvocOutput
 
     // Throw an error indicating a failure condition has occurred, from which the given actor
     // code is unable to recover. If an error is thrown in actor code, and not handled by any
@@ -72,8 +60,13 @@ type Runtime interface {
     Compute(ComputeFunctionID, args [Any]) Any
 
     // Send allows the current execution context to invoke methods on other actors in the system.
-    SendPropagatingErrors(input msg.InvocInput) msg.InvocOutput
-    SendCatchingErrors(input msg.InvocInput) msg.InvocOutput
+    SendPropagatingErrors(input InvocInput) InvocOutput
+    SendCatchingErrors(input InvocInput) InvocOutput
+
+    // Computes an address for a new actor. The returned address is intended to uniquely refer to
+    // the actor even in the event of a chain re-org (whereas an ID-address might refer to a
+    // different actor after messages are re-ordered).
+    NewActorAddress() addr.Address
 
     // Create an actor in the state tree. May only be called by InitActor.
     CreateActor(
@@ -85,4 +78,28 @@ type Runtime interface {
 
     IpldGet(c ipld.CID) union {Bytes, error}
     IpldPut(x ipld.Object) ipld.CID
+}
+
+type InvocInput struct {
+    To      addr.Address
+    Method  actor.MethodNum
+    Params  actor.MethodParams
+    Value   actor.TokenAmount
+}
+
+type InvocOutput struct {
+    ExitCode     exitcode.ExitCode
+    ReturnValue  Bytes
+}
+
+type MessageReceipt struct {
+    ExitCode     exitcode.ExitCode
+    ReturnValue  Bytes
+    GasUsed      msg.GasAmount
+}  // representation tuple
+
+type ActorExecAddressSeed struct {
+    creator             addr.Address
+    toplevelCallSeqNum  actor.CallSeqNum
+    internalCallSeqNum  actor.CallSeqNum
 }

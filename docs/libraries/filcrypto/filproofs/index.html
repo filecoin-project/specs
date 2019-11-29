@@ -2533,37 +2533,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="../../../../#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4770,14 +4739,23 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">VerifySeal</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">GeneratePoStCandidates</span><span class="p">(</span>
+    <span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span>
         <span class="nx">challengeSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
         <span class="nx">eligibleSectors</span>  <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">]</span>
         <span class="nx">candidateCount</span>   <span class="kt">int</span>
         <span class="nx">sectorStore</span>      <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span>
-    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span><span class="p">]</span>
-    <span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span><span class="p">])</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
-    <span class="nf">VerifyPoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+    <span class="nf">GenerateElectionPoStProof</span><span class="p">(</span><span class="nx">privateProofs</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span><span class="p">])</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
+    <span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+
+    <span class="nf">GenerateSurprisePoStCandidates</span><span class="p">(</span>
+        <span class="nx">challengeSeed</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">eligibleSectors</span>  <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">]</span>
+        <span class="nx">candidateCount</span>   <span class="kt">int</span>
+        <span class="nx">sectorStore</span>      <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+    <span class="nf">GenerateSurprisePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span><span class="p">])</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
+    <span class="nf">VerifySurprisePoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SDRCfg</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -5029,10 +5007,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="k">return</span> <span class="nf">UInt</span><span class="p">(</span><span class="nx">rand</span><span class="p">.</span><span class="nf">Intn</span><span class="p">(</span><span class="nx">highExclusive</span><span class="o">-</span><span class="nx">lowInclusive</span><span class="p">)</span> <span class="o">+</span> <span class="nx">lowInclusive</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">TicketToRandomInt</span><span class="p">(</span><span class="nx">ticket</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">nonce</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">limit</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">)</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">RandomInt</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">nonce</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">limit</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">)</span> <span class="o">*</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span> <span class="p">{</span>
 	<span class="nx">nonceBytes</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 	<span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">.</span><span class="nf">PutUint64</span><span class="p">(</span><span class="nx">nonceBytes</span><span class="p">,</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">nonce</span><span class="p">))</span>
-	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">ticket</span>
+	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">randomness</span>
 	<span class="nx">input</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">nonceBytes</span><span class="o">...</span><span class="p">)</span>
 	<span class="nx">ranHash</span> <span class="o">:=</span> <span class="nf">HashBytes_SHA256Hash</span><span class="p">(</span><span class="nx">input</span><span class="p">[:])</span>
 	<span class="nx">hashInt</span> <span class="o">:=</span> <span class="nf">bigIntFromLittleEndianBytes</span><span class="p">(</span><span class="nx">ranHash</span><span class="p">)</span>
@@ -5743,7 +5721,10 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span> <span class="p">{</span>
+<span class="c1">////////////////////////////////////////////////////////////////////////////////
+</span><span class="c1">// Election PoSt
+</span><span class="c1"></span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span> <span class="p">{</span>
 	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">_getChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">)</span>
 	<span class="kd">var</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span>
 
@@ -5757,14 +5738,36 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">GenerateElectionPoStProof</span><span class="p">(</span><span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">VerifyElectionPoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1">// PoSt Verification
+</span><span class="c1">// Surprise PoSt
 </span><span class="c1"></span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">VerifyPoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">GenerateSurprisePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">eligibleSectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span> <span class="p">{</span>
+	<span class="nx">challengedSectors</span><span class="p">,</span> <span class="nx">challenges</span> <span class="o">:=</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">_getChallengedSectors</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">eligibleSectors</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">)</span>
+	<span class="kd">var</span> <span class="nx">proofAuxs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PersistentProofAux</span>
+
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sector</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">challengedSectors</span> <span class="p">{</span>
+		<span class="nx">proofAux</span> <span class="o">:=</span> <span class="nx">sectorStore</span><span class="p">.</span><span class="nf">GetSectorPersistentProofAux</span><span class="p">(</span><span class="nx">sector</span><span class="p">)</span>
+		<span class="nx">proofAuxs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">proofAuxs</span><span class="p">,</span> <span class="nx">proofAux</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">_</span> <span class="p">=</span> <span class="nx">challenges</span>
+
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">GenerateSurprisePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="nf">VerifySurprisePoSt</span><span class="p">(</span><span class="nx">sv</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 

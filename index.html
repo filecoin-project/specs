@@ -2537,37 +2537,6 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
-    <li>
-    
-      
-
-
-
-
-
-
-
-
-
-
-
-<a href="./#systems__filecoin_mining__storage_mining__mining_scheduler" class="menu-item depth-4">
-    
-    
-        Mining Scheduler
-    
-</a>
-
-
-
-<ul class="menu-item-section depth-4">
-
-</ul>
-
-
-    
-    </li>
-
 </ul>
 
 
@@ -4778,8 +4747,8 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">23f2582a</span>
-    <br /><span id="spec-version-date">2019-11-28_22:41:50Z</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">19892ed5</span>
+    <br /><span id="spec-version-date">2019-11-29_19:32:33Z</span>
   </div>
 </div>
 
@@ -6556,37 +6525,6 @@ function statusIndicatorsHide() {
 </div>
 
 
-<h3 id="protocol-flow-diagram-deals-off-chain">Protocol Flow Diagram &ndash; deals off chain</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="diagram">
-
-<span class="diagram-title">Protocol Sequence Diagram - Deals off Chain</span>
-
-
-
-
-(<a href="docs/intro/../diagrams/sequence/full-deals-off-chain.mmd.svg" target="_blank">open in new tab</a>)
-<br />
-<img src="docs/intro/../diagrams/sequence/full-deals-off-chain.mmd.svg" />
-
-
-
-
-</div>
-
-
 <h3 id="protocol-flow-diagram-deals-on-chain">Protocol Flow Diagram &ndash; deals on chain</h3>
 
 
@@ -7467,12 +7405,12 @@ via the operations of the VM, but does not necessarily correspond to any particu
 <li>sector states, state transitions, state accounting, power accounting</li>
 <li>DeclareFaults + RecoverSectors flow</li>
 <li><code>CommitSector</code> flow</li>
-<li><code>SubmitPost</code> flow
+<li><code>SubmitElectionPost</code> or <code>SubmitSurprisePoSt</code> flow
 
 <ul>
 <li>Sector proving, faults, recovery, and expiry</li>
 </ul></li>
-<li><code>OnMissedPost</code> flow
+<li><code>OnMissedSurprisePost</code> flow
 
 <ul>
 <li>Fault sectors, drop power, expiry, and more</li>
@@ -12281,7 +12219,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 
 <span class="c1">// GasAmount is a quantity of gas.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasAmount</span> <span class="nx">UVarint</span>
@@ -12314,24 +12251,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
     <span class="nx">Message</span>    <span class="nx">UnsignedMessage</span>
     <span class="nx">Signature</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
 <span class="p">}</span>  <span class="c1">// representation tuple
-</span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">InvocInput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">To</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">Method</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
-    <span class="nx">Params</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
-    <span class="nx">Value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ExitCode</span>     <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span>
-    <span class="nx">ReturnValue</span>  <span class="nx">Bytes</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ExitCode</span>     <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span>
-    <span class="nx">ReturnValue</span>  <span class="nx">Bytes</span>
-    <span class="nx">GasUsed</span>      <span class="nx">GasAmount</span>
-<span class="p">}</span>  <span class="c1">// representation tuple
 </span></code></pre></div>
 
 
@@ -12362,19 +12281,10 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
-
-<span class="kd">func</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">MessageReceipt_I</span><span class="p">{</span>
-		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">output</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(),</span>
-		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">output</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">(),</span>
-		<span class="nx">GasUsed_</span><span class="p">:</span>     <span class="nx">gasUsed</span><span class="p">,</span>
-	<span class="p">}</span>
-<span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">UnsignedMessage_Make</span><span class="p">(</span>
 	<span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
@@ -12443,29 +12353,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <span class="kd">func</span> <span class="nf">GasAmount_Zero</span><span class="p">()</span> <span class="nx">GasAmount</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">InvocInput_Make</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">InvocInput</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">InvocInput_I</span><span class="p">{</span>
-		<span class="nx">To_</span><span class="p">:</span>     <span class="nx">to</span><span class="p">,</span>
-		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">method</span><span class="p">,</span>
-		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">params</span><span class="p">,</span>
-		<span class="nx">Value_</span><span class="p">:</span>  <span class="nx">value</span><span class="p">,</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">returnValue</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">InvocOutput_I</span><span class="p">{</span>
-		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">exitCode</span><span class="p">,</span>
-		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">returnValue</span><span class="p">,</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span>
-		<span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">),</span> <span class="kc">nil</span><span class="p">),</span>
-		<span class="nx">gasUsed</span><span class="p">,</span>
-	<span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -12583,28 +12470,16 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
     <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
     <span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">CallerPattern</span><span class="p">)</span>
 
-    <span class="nf">CurrMethodNum</span><span class="p">()</span>             <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
-
-    <span class="c1">// Note: This is the actor in the From field of the initial on-chain message.
-</span><span class="c1"></span>    <span class="c1">// Not necessarily the immediate caller.
-</span><span class="c1"></span>    <span class="nf">ToplevelSender</span><span class="p">()</span>            <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nf">CurrMethodNum</span><span class="p">()</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
 
     <span class="c1">// The actor who mined the block in which the initial on-chain message appears.
-</span><span class="c1"></span>    <span class="nf">ToplevelBlockWinner</span><span class="p">()</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nf">ToplevelBlockWinner</span><span class="p">()</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
-    <span class="c1">// Top-level call sequence number of the &#34;From&#34; actor in the initial on-chain message.
-</span><span class="c1"></span>    <span class="nf">ToplevelSenderCallSeqNum</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
+    <span class="nf">AcquireState</span><span class="p">()</span>         <span class="nx">ActorStateHandle</span>
 
-    <span class="c1">// Sequence number representing the total number of calls (to any actor, any method)
-</span><span class="c1"></span>    <span class="c1">// during the current top-level message execution.
-</span><span class="c1"></span>    <span class="c1">// Note: resets with every top-level message, and therefore not necessarily monotonic.
-</span><span class="c1"></span>    <span class="nf">InternalCallSeqNum</span><span class="p">()</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
-
-    <span class="nf">AcquireState</span><span class="p">()</span>              <span class="nx">ActorStateHandle</span>
-
-    <span class="nf">SuccessReturn</span><span class="p">()</span>             <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
-    <span class="nf">ValueReturn</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">)</span>          <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
-    <span class="nf">ErrorReturn</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
+    <span class="nf">SuccessReturn</span><span class="p">()</span>        <span class="nx">InvocOutput</span>
+    <span class="nf">ValueReturn</span><span class="p">(</span><span class="nx">Bytes</span><span class="p">)</span>     <span class="nx">InvocOutput</span>
+    <span class="nf">ErrorReturn</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">InvocOutput</span>
 
     <span class="c1">// Throw an error indicating a failure condition has occurred, from which the given actor
 </span><span class="c1"></span>    <span class="c1">// code is unable to recover. If an error is thrown in actor code, and not handled by any
@@ -12633,8 +12508,13 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 </span><span class="c1"></span>    <span class="nf">Compute</span><span class="p">(</span><span class="nx">ComputeFunctionID</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[</span><span class="nx">Any</span><span class="p">])</span> <span class="nx">Any</span>
 
     <span class="c1">// Send allows the current execution context to invoke methods on other actors in the system.
-</span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
-    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
+</span><span class="c1"></span>    <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
+    <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span>
+
+    <span class="c1">// Computes an address for a new actor. The returned address is intended to uniquely refer to
+</span><span class="c1"></span>    <span class="c1">// the actor even in the event of a chain re-org (whereas an ID-address might refer to a
+</span><span class="c1"></span>    <span class="c1">// different actor after messages are re-ordered).
+</span><span class="c1"></span>    <span class="nf">NewActorAddress</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Create an actor in the state tree. May only be called by InitActor.
 </span><span class="c1"></span>    <span class="nf">CreateActor</span><span class="p">(</span>
@@ -12646,6 +12526,30 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
     <span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">Bytes</span><span class="p">,</span> <span class="kt">error</span><span class="p">}</span>
     <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">InvocInput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">To</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">Method</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
+    <span class="nx">Params</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
+    <span class="nx">Value</span>   <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ExitCode</span>     <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span>
+    <span class="nx">ReturnValue</span>  <span class="nx">Bytes</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">ExitCode</span>     <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span>
+    <span class="nx">ReturnValue</span>  <span class="nx">Bytes</span>
+    <span class="nx">GasUsed</span>      <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
+<span class="p">}</span>  <span class="c1">// representation tuple
+</span><span class="c1"></span>
+<span class="kd">type</span> <span class="nx">ActorExecAddressSeed</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">creator</span>             <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">toplevelCallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
+    <span class="nx">internalCallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -12677,19 +12581,19 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">runtime</span>
 
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+	<span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
+	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+	<span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
+	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
 
 <span class="kd">type</span> <span class="nx">ActorSubstateCID</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span>
-<span class="kd">type</span> <span class="nx">InvocInput</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput</span>
-<span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
 <span class="kd">type</span> <span class="nx">ExitCode</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span>
 <span class="kd">type</span> <span class="nx">RuntimeError</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeError</span>
 
@@ -12740,15 +12644,21 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="nx">_actorStateAcquired</span>     <span class="kt">bool</span>
 	<span class="nx">_actorStateAcquiredInit</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSubstateCID</span>
 
-	<span class="nx">_immediateCaller</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-	<span class="nx">_toplevelSender</span>           <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-	<span class="nx">_toplevelBlockWinner</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-	<span class="nx">_toplevelSenderCallSeqNum</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
-	<span class="nx">_internalCallSeqNum</span>       <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
-	<span class="nx">_valueReceived</span>            <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-	<span class="nx">_gasRemaining</span>             <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
-	<span class="nx">_numValidateCalls</span>         <span class="kt">int</span>
-	<span class="nx">_output</span>                   <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
+	<span class="nx">_immediateCaller</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="c1">// Note: This is the actor in the From field of the initial on-chain message.
+</span><span class="c1"></span>	<span class="c1">// Not necessarily the immediate caller.
+</span><span class="c1"></span>	<span class="nx">_toplevelSender</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="nx">_toplevelBlockWinner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="c1">// Top-level call sequence number of the &#34;From&#34; actor in the initial on-chain message.
+</span><span class="c1"></span>	<span class="nx">_toplevelSenderCallSeqNum</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
+	<span class="c1">// Sequence number representing the total number of calls (to any actor, any method)
+</span><span class="c1"></span>	<span class="c1">// during the current top-level message execution.
+</span><span class="c1"></span>	<span class="c1">// Note: resets with every top-level message, and therefore not necessarily monotonic.
+</span><span class="c1"></span>	<span class="nx">_internalCallSeqNum</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
+	<span class="nx">_valueReceived</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+	<span class="nx">_gasRemaining</span>       <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
+	<span class="nx">_numValidateCalls</span>   <span class="kt">int</span>
+	<span class="nx">_output</span>             <span class="nx">InvocOutput</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">VMContext_Make</span><span class="p">(</span>
@@ -12794,7 +12704,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSystemStateInternal</span><span class="p">(</span><span class="nx">address</span><span class="p">,</span> <span class="nx">stateCID</span><span class="p">)</span>
 
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">InvocInput_I</span><span class="p">{</span>
 		<span class="nx">To_</span><span class="p">:</span>     <span class="nx">address</span><span class="p">,</span>
 		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodConstructor</span><span class="p">,</span>
 		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">constructorParams</span><span class="p">,</span>
@@ -12866,20 +12776,8 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_immediateCaller</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ToplevelSender</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelSender</span>
-<span class="p">}</span>
-
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ToplevelBlockWinner</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelBlockWinner</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">InternalCallSeqNum</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ToplevelSenderCallSeqNum</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelSenderCallSeqNum</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span>
@@ -12933,16 +12831,16 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="p">}</span>
 <span class="p">}</span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SuccessReturn</span><span class="p">()</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ValueReturn</span><span class="p">(</span><span class="nx">value</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(),</span> <span class="nx">value</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(),</span> <span class="nx">value</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ErrorReturn</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="nx">exitCode</span> <span class="p">=</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="p">{</span>
@@ -13006,7 +12904,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="c1">// TODO: This function should be private (not intended to be exposed to actors).
 </span><span class="c1">// (merging runtime and interpreter packages should solve this)
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">MessageReceipt</span><span class="p">,</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">true</span>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">CatchErrors</span><span class="p">)</span>
@@ -13014,12 +12912,12 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="k">return</span> <span class="nx">ret</span><span class="p">,</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_catchRuntimeErrors</span><span class="p">(</span><span class="nx">f</span> <span class="kd">func</span><span class="p">()</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_catchRuntimeErrors</span><span class="p">(</span><span class="nx">f</span> <span class="kd">func</span><span class="p">()</span> <span class="nx">InvocOutput</span><span class="p">)</span> <span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">)</span> <span class="p">{</span>
 	<span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
 		<span class="k">if</span> <span class="nx">r</span> <span class="o">:=</span> <span class="nb">recover</span><span class="p">();</span> <span class="nx">r</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 			<span class="k">switch</span> <span class="nx">r</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
 			<span class="k">case</span> <span class="o">*</span><span class="nx">RuntimeError</span><span class="p">:</span>
-				<span class="nx">output</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">r</span><span class="p">.(</span><span class="o">*</span><span class="nx">RuntimeError</span><span class="p">).</span><span class="nx">ExitCode</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
+				<span class="nx">output</span> <span class="p">=</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">r</span><span class="p">.(</span><span class="o">*</span><span class="nx">RuntimeError</span><span class="p">).</span><span class="nx">ExitCode</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
 			<span class="k">default</span><span class="p">:</span>
 				<span class="nb">panic</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
 			<span class="p">}</span>
@@ -13038,7 +12936,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="nx">ret</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">internalCallSeqNumFinal</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="k">if</span> <span class="nx">method</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodSend</span> <span class="p">{</span>
-		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">)</span>
+		<span class="nx">ret</span> <span class="p">=</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">OK</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">)</span>
 		<span class="nx">gasUsed</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">()</span> <span class="c1">// TODO: verify
 </span><span class="c1"></span>		<span class="k">return</span>
 	<span class="p">}</span>
@@ -13060,7 +12958,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="k">return</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">errSpec</span> <span class="nx">ErrorHandlingSpec</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">errSpec</span> <span class="nx">ErrorHandlingSpec</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkStateLock</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
 
@@ -13113,22 +13011,22 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span> <span class="p">=</span> <span class="nx">rtInner</span><span class="p">.</span><span class="nx">_globalStatePending</span>
 	<span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternalOutputOnly</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">errSpec</span> <span class="nx">ErrorHandlingSpec</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rtOuter</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_sendInternalOutputOnly</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">,</span> <span class="nx">errSpec</span> <span class="nx">ErrorHandlingSpec</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_sendInternal</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">errSpec</span><span class="p">)</span>
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput_I</span><span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">InvocOutput_I</span><span class="p">{</span>
 		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">ret</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(),</span>
 		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">(),</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendPropagatingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternalOutputOnly</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">PropagateErrors</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="nx">input</span> <span class="nx">InvocInput</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">_sendInternalOutputOnly</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">CatchErrors</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -13144,6 +13042,17 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="c1">// TODO: validate CurrEpoch() - K &lt;= e &lt;= CurrEpoch()?
 </span><span class="c1"></span>	<span class="c1">// TODO: finish
 </span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">NewActorAddress</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+	<span class="nx">seed</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">ActorExecAddressSeed_I</span><span class="p">{</span>
+		<span class="nx">creator_</span><span class="p">:</span>            <span class="nx">rt</span><span class="p">.</span><span class="nx">_immediateCaller</span><span class="p">,</span>
+		<span class="nx">toplevelCallSeqNum_</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelSenderCallSeqNum</span><span class="p">,</span>
+		<span class="nx">internalCallSeqNum_</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span><span class="p">,</span>
+	<span class="p">}</span>
+	<span class="nx">hash</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorExecHash</span><span class="p">(</span><span class="nf">Serialize_ActorExecAddressSeed</span><span class="p">(</span><span class="nx">seed</span><span class="p">))</span>
+
+	<span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ActorExec</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">hash</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
@@ -13187,6 +13096,37 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="nx">gasCost</span> <span class="o">:=</span> <span class="nx">def</span><span class="p">.</span><span class="nf">GasCostFn</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_deductGasRemaining</span><span class="p">(</span><span class="nx">gasCost</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">def</span><span class="p">.</span><span class="nf">Body</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">InvocInput_Make</span><span class="p">(</span><span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">value</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">InvocInput</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+		<span class="nx">To_</span><span class="p">:</span>     <span class="nx">to</span><span class="p">,</span>
+		<span class="nx">Method_</span><span class="p">:</span> <span class="nx">method</span><span class="p">,</span>
+		<span class="nx">Params_</span><span class="p">:</span> <span class="nx">params</span><span class="p">,</span>
+		<span class="nx">Value_</span><span class="p">:</span>  <span class="nx">value</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">returnValue</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">InvocOutput_I</span><span class="p">{</span>
+		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">exitCode</span><span class="p">,</span>
+		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">returnValue</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span><span class="nx">output</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">MessageReceipt_I</span><span class="p">{</span>
+		<span class="nx">ExitCode_</span><span class="p">:</span>    <span class="nx">output</span><span class="p">.</span><span class="nf">ExitCode</span><span class="p">(),</span>
+		<span class="nx">ReturnValue_</span><span class="p">:</span> <span class="nx">output</span><span class="p">.</span><span class="nf">ReturnValue</span><span class="p">(),</span>
+		<span class="nx">GasUsed_</span><span class="p">:</span>     <span class="nx">gasUsed</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">MessageReceipt</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nf">MessageReceipt_Make</span><span class="p">(</span>
+		<span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">),</span> <span class="kc">nil</span><span class="p">),</span>
+		<span class="nx">gasUsed</span><span class="p">,</span>
+	<span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -13762,12 +13702,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
     <span class="nf">Exec</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">code</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CodeID</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">ActorID</span>
 <span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">ActorExecAddressSeed</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">creator</span>             <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">toplevelCallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
-    <span class="nx">internalCallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
-<span class="p">}</span>
 </code></pre></div>
 
 
@@ -13801,7 +13735,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 
 <span class="kd">const</span> <span class="p">(</span>
@@ -13812,7 +13745,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 <span class="c1">////////////////////////////////////////////////////////////////////////////////
 </span><span class="c1">// Boilerplate
 </span><span class="c1">////////////////////////////////////////////////////////////////////////////////
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">InvocOutput</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">InvocOutput</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocOutput</span>
 <span class="kd">type</span> <span class="nx">Runtime</span> <span class="p">=</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span>
 <span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
@@ -13866,7 +13799,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="s">&#34;cannot exec an actor of this type&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 
-	<span class="nx">newAddr</span> <span class="o">:=</span> <span class="nf">_computeNewActorExecAddress</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+	<span class="nx">newAddr</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">NewActorAddress</span><span class="p">()</span>
 
 	<span class="nx">actorState</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">actor</span><span class="p">.</span><span class="nx">ActorState_I</span><span class="p">{</span>
 		<span class="nx">CodeID_</span><span class="p">:</span>     <span class="nx">codeID</span><span class="p">,</span>
@@ -13900,18 +13833,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="nx">actorID</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span>
 	<span class="nx">s</span><span class="p">.</span><span class="nx">NextID_</span><span class="o">++</span>
 	<span class="k">return</span> <span class="nx">actorID</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="nf">_computeNewActorExecAddress</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
-	<span class="nx">seed</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">ActorExecAddressSeed_I</span><span class="p">{</span>
-		<span class="nx">creator_</span><span class="p">:</span>            <span class="nx">rt</span><span class="p">.</span><span class="nf">ImmediateCaller</span><span class="p">(),</span>
-		<span class="nx">toplevelCallSeqNum_</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">ToplevelSenderCallSeqNum</span><span class="p">(),</span>
-		<span class="nx">internalCallSeqNum_</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">InternalCallSeqNum</span><span class="p">(),</span>
-	<span class="p">}</span>
-	<span class="nx">hash</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">ActorExecHash</span><span class="p">(</span><span class="nf">Serialize_ActorExecAddressSeed</span><span class="p">(</span><span class="nx">seed</span><span class="p">))</span>
-
-	<span class="c1">// Intended to be a unique identifier, stable across reorgs
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">addr</span><span class="p">.</span><span class="nf">Address_Make_ActorExec</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address_NetworkID_Testnet</span><span class="p">,</span> <span class="nx">hash</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">InitActorCode_I</span><span class="p">)</span> <span class="nf">GetActorIDForAddress</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
@@ -14121,7 +14042,6 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
-<span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">CronActorCode_I</span><span class="p">)</span> <span class="nf">Constructor</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">Runtime</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
@@ -14135,7 +14055,7 @@ transport mechanism (including offline mechanisms) is acceptable.</p>
 	<span class="c1">// a.actors is basically a static registry for now, loaded
 </span><span class="c1"></span>	<span class="c1">// in the interpreter static registry.
 </span><span class="c1"></span>	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span><span class="p">.</span><span class="nf">Actors</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">SendCatchingErrors</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">InvocInput_I</span><span class="p">{</span>
 			<span class="nx">To_</span><span class="p">:</span>     <span class="nx">a</span><span class="p">,</span>
 			<span class="nx">Method_</span><span class="p">:</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodCron</span><span class="p">,</span>
 			<span class="nx">Params_</span><span class="p">:</span> <span class="p">[]</span><span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParam</span><span class="p">{},</span>
@@ -14494,6 +14414,7 @@ state mutation or produce a receipt.</p>
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
+<span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
 
@@ -14511,8 +14432,8 @@ state mutation or produce a receipt.</p>
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">VMInterpreter</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
-    <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
+    <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
+    <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -14569,10 +14490,10 @@ state mutation or produce a receipt.</p>
 
 <span class="c1">// Applies all the message in a tipset, along with implicit block- and tipset-specific state
 </span><span class="c1">// transitions.
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="p">(</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">receipts</span> <span class="p">[]</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 	<span class="nx">outTree</span> <span class="p">=</span> <span class="nx">inTree</span>
 	<span class="nx">seenMsgs</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">]</span><span class="kd">struct</span><span class="p">{})</span> <span class="c1">// CIDs of messages already seen once.
-</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">r</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span>
+</span><span class="c1"></span>	<span class="kd">var</span> <span class="nx">r</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span>
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">blk</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span><span class="p">.</span><span class="nf">Blocks</span><span class="p">()</span> <span class="p">{</span>
 		<span class="c1">// Pay block reward.
 </span><span class="c1"></span>		<span class="nx">reward</span> <span class="o">:=</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
@@ -14612,7 +14533,7 @@ state mutation or produce a receipt.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">vmi</span> <span class="o">*</span><span class="nx">VMInterpreter_I</span><span class="p">)</span> <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="nx">compTree</span> <span class="o">:=</span> <span class="nx">inTree</span>
 	<span class="kd">var</span> <span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
@@ -14659,7 +14580,7 @@ state mutation or produce a receipt.</p>
 	<span class="p">)</span>
 
 	<span class="nx">sendRet</span><span class="p">,</span> <span class="nx">sendRetStateTree</span> <span class="o">:=</span> <span class="nx">rt</span><span class="p">.</span><span class="nf">SendToplevelFromInterpreter</span><span class="p">(</span>
-		<span class="nx">msg</span><span class="p">.</span><span class="nf">InvocInput_Make</span><span class="p">(</span>
+		<span class="nx">vmr</span><span class="p">.</span><span class="nf">InvocInput_Make</span><span class="p">(</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">To</span><span class="p">(),</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
 			<span class="nx">message</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
@@ -14706,12 +14627,12 @@ state mutation or produce a receipt.</p>
 	<span class="k">return</span> <span class="nx">outTree</span><span class="p">,</span> <span class="nx">sendRet</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">errCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">SystemErrorCode</span><span class="p">)</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span> <span class="p">{</span>
 	<span class="c1">// TODO: should this gasUsed value be zero?
 </span><span class="c1"></span>	<span class="c1">// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
 </span><span class="c1"></span>	<span class="nx">gasUsed</span> <span class="o">:=</span> <span class="nx">gascost</span><span class="p">.</span><span class="nx">ApplyMessageFail</span>
 	<span class="nf">TODO</span><span class="p">()</span>
-	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">vmr</span><span class="p">.</span><span class="nf">MessageReceipt_MakeSystemError</span><span class="p">(</span><span class="nx">errCode</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_withTransferFundsAssert</span><span class="p">(</span><span class="nx">tree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span> <span class="p">{</span>
@@ -17709,8 +17630,8 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
-    <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span>
-        <span class="nx">challengeTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span>
+    <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
+        <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">validateElectionProof</span><span class="p">(</span>
@@ -17940,8 +17861,8 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
-    <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span>
-        <span class="nx">challengeTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span>
+    <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
+        <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">validateElectionProof</span><span class="p">(</span>
@@ -18091,7 +18012,7 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 
 	<span class="c1">// TODO: Send message to SPA to get ActivePowerInSector associated with sector
 </span><span class="c1"></span>	<span class="nx">activePowerInSector</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
@@ -18099,9 +18020,9 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 	<span class="c1">// TODO: Send message to SPA
 </span><span class="c1"></span>	<span class="nx">totalPower</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 
-	<span class="nx">electionProof</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">.</span><span class="nf">Ticket</span><span class="p">())</span>
+	<span class="nx">challengeTicket</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">partialTicket</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningElectionProof</span><span class="p">(</span><span class="nx">electionProof</span><span class="p">,</span> <span class="nx">activePowerInSector</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">activePowerInSector</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetTicketProductionSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
@@ -18271,8 +18192,7 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
     <span class="nf">_lockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">_unlockPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span>
     <span class="nf">_getPledgeCollateralReq</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">newPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
-    <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">networkPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_sampleMinersToSurprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">challengeCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -18307,9 +18227,9 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
     <span class="nf">Surprise</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">)</span> <span class="p">[</span><span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">]</span>
 
     <span class="nf">shouldChallenge</span><span class="p">(</span>
-        <span class="nx">minerAddr</span>           <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">currEpoch</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">minChallengePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">minerAddr</span>            <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="c1">// this should call ReportConsensusFault, numSectors should be all sectors
@@ -19443,43 +19363,6 @@ To summarize, only sectors in the Active state will command power. A Sector beco
 
                 
             
-                
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-<div class="tocMap-item ">
-    <div class="tocMap-item-label">
-        <a href="./#systems__filecoin_mining__storage_mining__mining_scheduler">
-        
-
-        Mining Scheduler
-
-        
-        </a>
-    </div>
-
-    <div class="tocMap-children">
-        
-    </div>
-</div>
-
-                
-            
         
     </div>
 </div>
@@ -19958,7 +19841,7 @@ satisfy those constraints, especially those relating to protocol security.</p>
 <span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
 <span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
-<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">FilecoinNode</span>       <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
@@ -19974,23 +19857,23 @@ satisfy those constraints, especially those relating to protocol security.</p>
     <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
 
     <span class="c1">// Need access to block producer in order to publish blocks
-</span><span class="c1"></span>    <span class="nx">blockProducer</span>      <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
+</span><span class="c1"></span>    <span class="nx">_blockProducer</span>     <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
 
     <span class="c1">// Need access to SPC in order to mine a block
-</span><span class="c1"></span>    <span class="nx">consensus</span>          <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">_consensus</span>         <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
 
     <span class="c1">// Need access to the blockchain system in order to query for things in the chain
-</span><span class="c1"></span>    <span class="nx">blockchain</span>         <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
+</span><span class="c1"></span>    <span class="nx">_blockchain</span>        <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
 
     <span class="c1">// Need access to the key store in order to generate tickets and election proofs
-</span><span class="c1"></span>    <span class="nx">keyStore</span>           <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
+</span><span class="c1"></span>    <span class="nx">_keyStore</span>          <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
 
     <span class="c1">// TODO: why are these here? remove?
 </span><span class="c1"></span>    <span class="nf">StartMining</span><span class="p">()</span>
     <span class="nf">StopMining</span><span class="p">()</span>
 
     <span class="c1">// call by StorageMiningSubsystem itself to create miner
-</span><span class="c1"></span>    <span class="nf">createMiner</span><span class="p">(</span>
+</span><span class="c1"></span>    <span class="nf">CreateMiner</span><span class="p">(</span>
         <span class="nx">ownerPubKey</span>   <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
         <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
         <span class="nx">pledgeAmt</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
@@ -20020,9 +19903,17 @@ satisfy those constraints, especially those relating to protocol security.</p>
 </span><span class="c1"></span>    <span class="c1">// TODO: define clock better
 </span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
 
-    <span class="nf">tryLeaderElection</span><span class="p">()</span>
+    <span class="nf">_tryLeaderElection</span><span class="p">()</span>
 
-    <span class="nf">submitPoStMessage</span><span class="p">(</span><span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">error</span>
+    <span class="nf">VerifyElectionPoSt</span><span class="p">(</span>
+        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
+        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">VerifySurprisePoSt</span><span class="p">(</span>
+        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
+        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">IsValidElection</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -20211,7 +20102,6 @@ satisfy those constraints, especially those relating to protocol security.</p>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SectorExpirationQueueItem</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -20249,14 +20139,22 @@ satisfy those constraints, especially those relating to protocol security.</p>
 
 <span class="kd">type</span> <span class="nx">ChallengeStatus</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">LastChallengeEpoch</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
-</span><span class="c1"></span>    <span class="nx">LastChallengeEndEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon _onSuccessfulPoSt and _onMissedPoSt
+</span><span class="c1"></span>    <span class="nx">_lastPoStFailureEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon _onMissedSurprisePoSt
+</span><span class="c1"></span>    <span class="nx">_lastPoStSuccessEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by successful Election or Suprise PoSt submission
 </span><span class="c1"></span>
-    <span class="nf">IsChallenged</span><span class="p">()</span>         <span class="kt">bool</span>  <span class="c1">// only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
-</span><span class="c1"></span>    <span class="nf">ShouldChallenge</span><span class="p">(</span>
-        <span class="nx">currEpoch</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">minChallengePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="kt">bool</span>  <span class="c1">// only True when CurrEpoch &gt; (LastChallengeEpoch + MIN_CHALLENGE_PERIOD)
-</span><span class="c1"></span><span class="p">}</span>
+    <span class="nf">OnNewChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="nf">LastPoStResponseEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nf">OnPoStSuccess</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="nf">OnPoStFailure</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+
+    <span class="nf">IsChallenged</span><span class="p">()</span> <span class="kt">bool</span>  <span class="c1">// only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+</span><span class="c1"></span>    <span class="nf">ChallengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">CanBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">ShouldChallenge</span><span class="p">(</span>
+        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PreCommittedSector</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Info</span>           <span class="nx">sealing</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span>
@@ -20271,23 +20169,28 @@ satisfy those constraints, especially those relating to protocol security.</p>
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorUtilizationAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PreCommittedSectors</span>        <span class="nx">PreCommittedSectorsAMT</span>
-    <span class="nx">StagedCommittedSectors</span>     <span class="nx">StagedCommittedSectorAMT</span>
-    <span class="nx">Sectors</span>                    <span class="nx">SectorsAMT</span>
-    <span class="nx">SectorUtilization</span>          <span class="nx">SectorUtilizationAMT</span>
-    <span class="nx">ProvingSet</span>                 <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+    <span class="nx">PreCommittedSectors</span>     <span class="nx">PreCommittedSectorsAMT</span>
+    <span class="nx">StagedCommittedSectors</span>  <span class="nx">StagedCommittedSectorAMT</span>
+    <span class="nx">Sectors</span>                 <span class="nx">SectorsAMT</span>
+    <span class="nx">SectorUtilization</span>       <span class="nx">SectorUtilizationAMT</span>
+    <span class="nx">ProvingSet</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
 
     <span class="nx">SectorTable</span>
     <span class="nx">SectorExpirationQueue</span>
     <span class="nx">ChallengeStatus</span>
 
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">Info</span>                       <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                    <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
     <span class="c1">// No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>  <span class="kt">bool</span>
-    <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minChallengePeriod</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">_isSealVerificationCorrect</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">()</span>         <span class="kt">bool</span>
+    <span class="nf">_canBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_shouldChallenge</span><span class="p">(</span>
+        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_verifySeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_assertSectorDidNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
     <span class="nf">_processStagedCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
@@ -20299,7 +20202,7 @@ satisfy those constraints, especially those relating to protocol security.</p>
     <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
     <span class="nf">_updateClearSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
     <span class="nf">_updateActivateSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
-    <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoStResponse</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
     <span class="nf">_initializeUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">])</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span>
 
     <span class="nf">_getActivePower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
@@ -20313,8 +20216,8 @@ satisfy those constraints, especially those relating to protocol security.</p>
     <span class="nf">PreCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>    <span class="nf">ProveCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorProveCommitInfo</span><span class="p">)</span>
 
-    <span class="nf">SubmitSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
-    <span class="nf">SubmitElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
+    <span class="nf">SubmitVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
+    <span class="nf">SubmitVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
 
     <span class="nf">CheckSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
@@ -20328,8 +20231,8 @@ satisfy those constraints, especially those relating to protocol security.</p>
 </span><span class="c1"></span>    <span class="c1">// Send ProcessBatchDealPayment to StorageMarketActor
 </span><span class="c1"></span>    <span class="nf">CreditSectorDealPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
-    <span class="nf">_onMissedPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
-    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
+    <span class="nf">_onMissedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_submitFaultReport</span><span class="p">(</span>
         <span class="nx">rt</span>          <span class="nx">Runtime</span>
@@ -20344,8 +20247,6 @@ satisfy those constraints, especially those relating to protocol security.</p>
     <span class="p">)</span>
     <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
 
-    <span class="nf">_verifyPoStSubmission</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
-
     <span class="nf">_expirePreCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -20353,21 +20254,23 @@ satisfy those constraints, especially those relating to protocol security.</p>
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">Owner</span>        <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>                   <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">Worker</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">PeerId</span>       <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">PeerId</span>                  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">SectorSize</span>   <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
-    <span class="nx">WindowCount</span>  <span class="nx">UVarint</span>
-    <span class="nx">Partitions</span>   <span class="nx">UVarint</span>
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>              <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+    <span class="nx">WindowCount</span>             <span class="nx">UVarint</span>
+    <span class="nx">SealPartitions</span>          <span class="nx">UVarint</span>
+    <span class="nx">ElectionPoStPartitions</span>  <span class="nx">UVarint</span>
+    <span class="nx">SurprisePoStPartitions</span>  <span class="nx">UVarint</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -20575,7 +20478,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 
 <span class="kd">type</span> <span class="nx">SectorExpirationQueueItem</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -20613,14 +20515,22 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 <span class="kd">type</span> <span class="nx">ChallengeStatus</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">LastChallengeEpoch</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
-</span><span class="c1"></span>    <span class="nx">LastChallengeEndEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon _onSuccessfulPoSt and _onMissedPoSt
+</span><span class="c1"></span>    <span class="nx">_lastPoStFailureEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated upon _onMissedSurprisePoSt
+</span><span class="c1"></span>    <span class="nx">_lastPoStSuccessEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>  <span class="c1">// get updated by successful Election or Suprise PoSt submission
 </span><span class="c1"></span>
-    <span class="nf">IsChallenged</span><span class="p">()</span>         <span class="kt">bool</span>  <span class="c1">// only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
-</span><span class="c1"></span>    <span class="nf">ShouldChallenge</span><span class="p">(</span>
-        <span class="nx">currEpoch</span>           <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">minChallengePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="kt">bool</span>  <span class="c1">// only True when CurrEpoch &gt; (LastChallengeEpoch + MIN_CHALLENGE_PERIOD)
-</span><span class="c1"></span><span class="p">}</span>
+    <span class="nf">OnNewChallenge</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="nf">LastPoStResponseEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="nf">OnPoStSuccess</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+    <span class="nf">OnPoStFailure</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
+
+    <span class="nf">IsChallenged</span><span class="p">()</span> <span class="kt">bool</span>  <span class="c1">// only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
+</span><span class="c1"></span>    <span class="nf">ChallengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">CanBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">ShouldChallenge</span><span class="p">(</span>
+        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PreCommittedSector</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Info</span>           <span class="nx">sealing</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span>
@@ -20635,23 +20545,28 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorUtilizationAMT</span> <span class="p">{</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">:</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span><span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActorState</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PreCommittedSectors</span>        <span class="nx">PreCommittedSectorsAMT</span>
-    <span class="nx">StagedCommittedSectors</span>     <span class="nx">StagedCommittedSectorAMT</span>
-    <span class="nx">Sectors</span>                    <span class="nx">SectorsAMT</span>
-    <span class="nx">SectorUtilization</span>          <span class="nx">SectorUtilizationAMT</span>
-    <span class="nx">ProvingSet</span>                 <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
+    <span class="nx">PreCommittedSectors</span>     <span class="nx">PreCommittedSectorsAMT</span>
+    <span class="nx">StagedCommittedSectors</span>  <span class="nx">StagedCommittedSectorAMT</span>
+    <span class="nx">Sectors</span>                 <span class="nx">SectorsAMT</span>
+    <span class="nx">SectorUtilization</span>       <span class="nx">SectorUtilizationAMT</span>
+    <span class="nx">ProvingSet</span>              <span class="nx">sector</span><span class="p">.</span><span class="nx">CompactSectorSet</span>
 
     <span class="nx">SectorTable</span>
     <span class="nx">SectorExpirationQueue</span>
     <span class="nx">ChallengeStatus</span>
 
     <span class="c1">// contains mostly static info about this miner
-</span><span class="c1"></span>    <span class="nx">Info</span>                       <span class="o">&amp;</span><span class="nx">MinerInfo</span>
+</span><span class="c1"></span>    <span class="nx">Info</span>                    <span class="o">&amp;</span><span class="nx">MinerInfo</span>
 
     <span class="c1">// No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
-</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>  <span class="kt">bool</span>
-    <span class="nf">_shouldChallenge</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minChallengePeriod</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">_isSealVerificationCorrect</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class="c1"></span>    <span class="nf">_isChallenged</span><span class="p">()</span>         <span class="kt">bool</span>
+    <span class="nf">_canBeElected</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_challengeHasExpired</span><span class="p">(</span><span class="nx">currEpoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_shouldChallenge</span><span class="p">(</span>
+        <span class="nx">currEpoch</span>            <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+        <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_verifySeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="nf">_assertSectorDidNotExist</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
     <span class="nf">_processStagedCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
@@ -20663,7 +20578,7 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="nf">_updateExpireSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
     <span class="nf">_updateClearSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
     <span class="nf">_updateActivateSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
-    <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
+    <span class="nf">_updateSectorUtilization</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoStResponse</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">]</span>
     <span class="nf">_initializeUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deals</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">])</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span>
 
     <span class="nf">_getActivePower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
@@ -20677,8 +20592,8 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="nf">PreCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorPreCommitInfo</span><span class="p">)</span>  <span class="c1">// TODO: check with Magik on sizes
 </span><span class="c1"></span>    <span class="nf">ProveCommitSector</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">info</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorProveCommitInfo</span><span class="p">)</span>
 
-    <span class="nf">SubmitSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
-    <span class="nf">SubmitElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
+    <span class="nf">SubmitVerifiedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
+    <span class="nf">SubmitVerifiedElectionPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span>
 
     <span class="nf">CheckSurprisePoStSubmissionHappened</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
@@ -20692,8 +20607,8 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 </span><span class="c1"></span>    <span class="c1">// Send ProcessBatchDealPayment to StorageMarketActor
 </span><span class="c1"></span>    <span class="nf">CreditSectorDealPayment</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span>
 
-    <span class="nf">_onMissedPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
-    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span>
+    <span class="nf">_onMissedSurprisePoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
+    <span class="nf">_onSuccessfulPoSt</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
     <span class="nf">_submitFaultReport</span><span class="p">(</span>
         <span class="nx">rt</span>          <span class="nx">Runtime</span>
@@ -20708,8 +20623,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="p">)</span>
     <span class="nf">_submitPowerReport</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">lastPoSt</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span>
 
-    <span class="nf">_verifyPoStSubmission</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">postSubmission</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span><span class="p">)</span> <span class="kt">bool</span>
-
     <span class="nf">_expirePreCommittedSectors</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 <span class="p">}</span>
 
@@ -20717,21 +20630,23 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
     <span class="c1">// Account that owns this miner.
 </span><span class="c1"></span>    <span class="c1">// - Income and returned collateral are paid to this address.
 </span><span class="c1"></span>    <span class="c1">// - This address is also allowed to change the worker address for the miner.
-</span><span class="c1"></span>    <span class="nx">Owner</span>        <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Owner</span>                   <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Worker account for this miner.
 </span><span class="c1"></span>    <span class="c1">// This will be the key that is used to sign blocks created by this miner, and
 </span><span class="c1"></span>    <span class="c1">// sign messages sent on behalf of this miner to commit sectors, submit PoSts, and
 </span><span class="c1"></span>    <span class="c1">// other day to day miner activities.
-</span><span class="c1"></span>    <span class="nx">Worker</span>       <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+</span><span class="c1"></span>    <span class="nx">Worker</span>                  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// Libp2p identity that should be used when connecting to this miner.
-</span><span class="c1"></span>    <span class="nx">PeerId</span>       <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
+</span><span class="c1"></span>    <span class="nx">PeerId</span>                  <span class="nx">libp2p</span><span class="p">.</span><span class="nx">PeerID</span>
 
     <span class="c1">// Amount of space in each sector committed to the network by this miner.
-</span><span class="c1"></span>    <span class="nx">SectorSize</span>   <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
-    <span class="nx">WindowCount</span>  <span class="nx">UVarint</span>
-    <span class="nx">Partitions</span>   <span class="nx">UVarint</span>
+</span><span class="c1"></span>    <span class="nx">SectorSize</span>              <span class="nx">util</span><span class="p">.</span><span class="nx">BytesAmount</span>
+    <span class="nx">WindowCount</span>             <span class="nx">UVarint</span>
+    <span class="nx">SealPartitions</span>          <span class="nx">UVarint</span>
+    <span class="nx">ElectionPoStPartitions</span>  <span class="nx">UVarint</span>
+    <span class="nx">SurprisePoStPartitions</span>  <span class="nx">UVarint</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -20759,132 +20674,6 @@ For example, if a miner currently PoSts for 10 sectors, and commits to 20 more s
 
 
 <p style="color: #D74848"><b><i>Something's not right. The <code>storage_miner_actor.go</code> file was not found.</i></b></p>
-
-
-
-
-</div>
-
-
-
-</div>
-
-  
-
-  
-    
-
-
-
-
-
-
-
-
-<div id="systems__filecoin_mining__storage_mining__mining_scheduler">
-
-<h4 class="section-header">
-  Mining Scheduler
-</h4>
-
-<div class="section-content">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">poster</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">mining</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining&#34;</span>
-<span class="c1">// import storage_indexer &#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_indexer&#34;
-</span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">MiningScheduler</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">getStagedSectors</span><span class="p">()</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span>
-    <span class="nf">getSealedSectors</span><span class="p">()</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SealedSectorSet</span>
-    <span class="nf">getFaultySectors</span><span class="p">()</span>    <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span>
-    <span class="nf">getRepairedSectors</span><span class="p">()</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span>
-    <span class="c1">// same as completedSectors/doneSectors
-</span><span class="c1"></span>    <span class="nf">getExpiredSectors</span><span class="p">()</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span>
-
-    <span class="nf">ProducePost</span><span class="p">(</span><span class="nx">sectors</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span><span class="p">)</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span>
-    <span class="nf">VerifyPost</span><span class="p">(</span><span class="nx">sectors</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span><span class="p">)</span> <span class="nx">poster</span><span class="p">.</span><span class="nx">PoStSubmission</span>
-
-    <span class="nf">ReportFaults</span><span class="p">(</span>
-        <span class="nx">actor</span> <span class="o">&amp;</span><span class="nx">StorageMinerActorCode</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="nf">RemoveSectors</span><span class="p">(</span><span class="nx">remove</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorSet</span><span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="nf">DePledge</span><span class="p">(</span>
-        <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="c1">// receives from sector storage subsystem
-</span><span class="c1"></span>    <span class="nf">SealedSector</span><span class="p">(</span>
-        <span class="nx">sealedSector</span> <span class="nx">mining</span><span class="p">.</span><span class="nx">SealedSector</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-
-    <span class="nf">AddSector</span><span class="p">(</span>
-        <span class="nx">pledge</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-        <span class="nx">sectorID</span>  <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-        <span class="nx">comm</span>      <span class="o">&amp;</span><span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainSealVerifyInfo</span>
-    <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
 
 
 
@@ -21294,7 +21083,7 @@ and serves to make storage conform to a set of expectations.</p>
     <span class="nx">Partitions</span>   <span class="nx">UInt</span>
 <span class="p">}</span>
 
-<span class="c1">// SealVerifyInfo is the structure of all thte information a verifier
+<span class="c1">// SealVerifyInfo is the structure of all the information a verifier
 </span><span class="c1">// needs to verify a Seal.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SealVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">SectorID</span>
@@ -21954,12 +21743,17 @@ G and T will be selected using these.</p>
     <span class="nf">GeneratePoStCandidates</span><span class="p">(</span>
         <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
         <span class="nx">sectorIDs</span>      <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
-    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
 
     <span class="nf">GeneratePoStProof</span><span class="p">(</span>
-        <span class="nx">challengeSeed</span>     <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
-        <span class="nx">challengeTickets</span>  <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span><span class="p">]</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">candidates</span>     <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
     <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
+
+    <span class="nf">VerifyPoStProof</span><span class="p">(</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">proof</span>          <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span><span class="p">]</span>
+    <span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -22176,18 +21970,8 @@ G and T will be selected using these.</p>
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
-
-<span class="c1">// TODO: move this to somewhere the blockchain can import
-</span><span class="c1">// candidates:
-</span><span class="c1">// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
-</span><span class="c1">// - &#34;blockchain/builtins&#34; or something like that - a component in the blockchain that handles storage verification
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStSubmission</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PostProof</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
-    <span class="nx">ChainEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PoStGenerator</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">GeneratePoStCandidates</span><span class="p">(</span>
@@ -22196,12 +21980,18 @@ G and T will be selected using these.</p>
         <span class="nx">candidateCount</span>  <span class="nx">UInt</span>
         <span class="nx">sectors</span>         <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
         <span class="nx">sectorStore</span>     <span class="nx">sectorIndex</span><span class="p">.</span><span class="nx">SectorStore</span>
-    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
 
     <span class="nf">GeneratePoStProof</span><span class="p">(</span>
         <span class="nx">postCfg</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
         <span class="nx">witness</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span>
     <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
+
+    <span class="nf">VerifyPoStProof</span><span class="p">(</span>
+        <span class="nx">postCfg</span>        <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span>
+        <span class="nx">Proof</span>          <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+    <span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -22246,7 +22036,7 @@ G and T will be selected using these.</p>
 </span><span class="c1">// TODO: Unify with orient model.
 </span><span class="c1"></span><span class="kd">const</span> <span class="nx">POST_CHALLENGE_DEADLINE</span> <span class="p">=</span> <span class="nb">uint</span><span class="p">(</span><span class="mi">480</span><span class="p">)</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">ChallengeTicket</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">,</span> <span class="nx">challengeSeed</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span><span class="p">,</span> <span class="nx">candidateCount</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sectors</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">,</span> <span class="nx">sectorStore</span> <span class="nx">sector_index</span><span class="p">.</span><span class="nx">SectorStore</span><span class="p">)</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span> <span class="p">{</span>
 	<span class="c1">// Question: Should we pass metadata into FilProofs so it can interact with SectorStore directly?
 </span><span class="c1"></span>	<span class="c1">// Like this:
 </span><span class="c1"></span>	<span class="c1">// PoStReponse := SectorStorageSubsystem.GeneratePoSt(sectorSize, challenge, faults, sectorsMetatada);
@@ -22266,10 +22056,10 @@ G and T will be selected using these.</p>
 		<span class="nx">sectorNumbers</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sectorNumbers</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nf">Number</span><span class="p">())</span>
 	<span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GeneratePoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">sectorNumbers</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">sectorStore</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span><span class="nx">challengeSeed</span><span class="p">,</span> <span class="nx">sectorNumbers</span><span class="p">,</span> <span class="nx">candidateCount</span><span class="p">,</span> <span class="nx">sectorStore</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">,</span> <span class="nx">witness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">pg</span> <span class="o">*</span><span class="nx">PoStGenerator_I</span><span class="p">)</span> <span class="nf">GenerateElectionPoStProof</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">,</span> <span class="nx">witness</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStWitness</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span> <span class="p">{</span>
 	<span class="nx">sdr</span> <span class="o">:=</span> <span class="nf">makeStackedDRGForPoSt</span><span class="p">(</span><span class="nx">postCfg</span><span class="p">)</span>
 	<span class="kd">var</span> <span class="nx">privateProofs</span> <span class="p">[]</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PrivatePoStProof</span>
 
@@ -22277,7 +22067,7 @@ G and T will be selected using these.</p>
 		<span class="nx">privateProofs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">,</span> <span class="nx">candidate</span><span class="p">.</span><span class="nf">PrivateProof</span><span class="p">())</span>
 	<span class="p">}</span>
 
-	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GeneratePoStProof</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">sdr</span><span class="p">.</span><span class="nf">GenerateElectionPoStProof</span><span class="p">(</span><span class="nx">privateProofs</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">makeStackedDRGForPoSt</span><span class="p">(</span><span class="nx">postCfg</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCfg</span><span class="p">)</span> <span class="p">(</span><span class="nx">sdr</span> <span class="o">*</span><span class="nx">filproofs</span><span class="p">.</span><span class="nx">WinStackedDRG_I</span><span class="p">)</span> <span class="p">{</span>
@@ -23110,8 +22900,7 @@ G and T will be selected using these.</p>
 <h4 id="receive-challenge">Receive Challenge</h4>
 
 <ul>
-<li>5. Miners enter the <code>Challenged</code> status whenever <code>NotifyOfPoStChallenge</code> is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before <code>
-CheckPoStSubmissionHappened</code> is called by the chain. Miners can only get out the challenge with <code>SubmitPoSt</code> or <code>onMissedPoSt</code>.</li>
+<li>5. Miners enter the <code>Challenged</code> status whenever <code>NotifyOfPoStChallenge</code> is called by the chain. Miners will then have X Epoch as the ProvingPeriod to submit a successful PoSt before <code>CheckSurprisePoStSubmissionHappened</code> is called by the chain. Miners can only get out the challenge with <code>SubmitSurprisePoSt</code> or <code>onMissedSurprisePoSt</code>.</li>
 <li>6. Miners are not allowed to call <code>DeclareFaults</code> or <code>RecoverFaults</code> when they are in the <code>Challneged</code> state but <code>CommitSector</code> is allowed and sectors will be added to a <code>StagedCommittedSectors</code> buffer. When miners get out of the <code>Challenged</code> status, <code>StagedCommittedSectors</code> will be copied over to their <code>Sectors</code>, <code>ProvingSet</code> and <code>SectorTable</code> and emptied.</li>
 </ul>
 
@@ -23140,7 +22929,7 @@ CheckPoStSubmissionHappened</code> is called by the chain. Miners can only get o
 <li>14. Submit <code>FaultReport</code> and <code>PowerReport</code> to <code>StoragePowerActor</code> for slashing and power accounting.</li>
 <li>15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.</li>
 <li>16. Update challenge status and add <code>Committed</code> sectors received during the challenge to the <code>Sectors</code>, <code>ProvingSet</code>, and <code>SectorTable</code>.</li>
-<li>17. All Sectors will be considered in <code>DetectedFaults</code> when a miner fail to <code>SubmitPoSt</code> in a proving period and detected by <code>onMissedPoSt</code> in <code>CheckPoStSubmissionHappened</code> (move to State 18).</li>
+<li>17. All Sectors will be considered in <code>DetectedFaults</code> when a miner fail to <code>SubmitSurprisePoSt</code> or <code>SubmitElectionPoSt</code> (jointly <code>SubmitPoSt</code> methods) in a proving period and detected by <code>onMissedSurprisePoSt</code> in <code>CheckSurprisePoStSubmissionHappened</code> (move to State 18).</li>
 </ul>
 
 <h4 id="detect-faults">Detect Faults</h4>
@@ -23148,10 +22937,10 @@ CheckPoStSubmissionHappened</code> is called by the chain. Miners can only get o
 <p>(TODO: move into Storage Mining)</p>
 
 <ul>
-<li>18. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckPoStSubmissionHappened</code> on all the miners whose <code>ProvingPeriod</code> is up.
+<li>18. <code>CronActor</code> calls <code>StoragePowerActor.EpochTick</code> at every block. This calls <code>StorageMinerActor.CheckSurprisePoStSubmissionHappened</code> on all the miners whose <code>ProvingPeriod</code> is up.
 
 <ul>
-<li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>onMissedPoSt</code> detects the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
+<li>If no PoSt is submitted by the end of the <code>ProvingPeriod</code>, <code>onMissedSurprisePoSt</code> detects the missing PoSt, and sets all sectors to <code>Failing</code>.</li>
 <li>TODO: reword in terms of a conditional in the mining cycle</li>
 <li>When there are sector faults are detected, some of <code>StorageDealCollateral</code> and <code>PledgeCollateral</code> are slashed, and power is lost.</li>
 <li>If the faults persist for <code>storagemining.MaxFaultCount</code> then sectors are removed/cleared from <code>StorageMinerActor</code>.</li>
@@ -29257,62 +29046,69 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 <p>The epoch time is divided into three non-overlapping portions: (1) checking sectors for small challenge tickets, (2) computing the SNARK to produce a PoSt certifying the winning challenge tickets, and (3) block production/propagation. The target duration for each is still to be tuned. Proof parameter adjustments might allow a longer block propagation window while maintaining PoSt security (but trades off against sealing time and other things).</p>
 
 <p>If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.</p>
+<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md">At every round:
+<span class="k">1.</span> <span class="gs">**(sample randomness)**</span>
+The miner draws a randomness ticket from the randomness chain from a given epoch SPC.post_lookback back and concats it with the minerID, and epoch for use as post_randomness (this is as it used to happen previously, except the PoSt_lookback is now also the EC randomness_lookback, which is small here):
+    <span class="k">-</span> <span class="sb">`post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))`</span>
 
-<p>At every round:
-1. <code>(Sample randomness)</code> The miner draws a randomness ticket from the randomness chain from a given epoch SPC.post_lookback back and concats it with the minerID, and epoch for use as post_randomness (this is as it used to happen previously, except the PoSt_lookback is now also the EC randomness_lookback, which is small here):
-    - <code>post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))</code>
-    We use the VRF to generate a unique randomness for the minerId, in this way no adversary that could simulate the miner storage can check if the victim miner has won or not.
-1. <strong>(select eligible sectors)</strong> The miner calls <code>GenerateCandidates</code> from proofs with their non-faulted (declared or detected) sectors, meaning those in their <code>proving set</code> (from the <code>StorageMinerActor</code>) along with a chosen number of <code>PartialTickets</code> (<code>sectorsSampled*eligibleSectors</code>).
-    - Select a subset of sectors of size <code>sectorsSampled*minerSectors</code> [details omitted]
-    Note also that even with <code>challengeTicketNum == numSectors</code>, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
-1. <strong>(generate Partial Ticket(s))</strong> For each selected sector
-    - first, generate K <code>PoStChallenges</code> (C_i), sampled at random from the chosen sector.
-    There will be a chosen challenge-range size (a power of 2), called <code>ChallengeRangeSize</code>. Challenge ranges must be subtree-aligned and thus divide the sector into fixed-size data blocks. So challenge ranges can be indexed because allowable challenge ranges do not overlap. C_i is selected from the valid indexes into the challenge ranges.
-    <code>C_i = HashToBlockNumber(post_randomness || S_j || i)</code>
+<span class="k">2.</span> <span class="gs">**(select eligible sectors)**</span>
+The miner calls <span class="sb">`GenerateCandidates`</span> from proofs with their non-faulted (declared or detected) sectors, meaning those in their <span class="sb">`proving set`</span> (from the <span class="sb">`StorageMinerActor`</span>) along with a chosen number of <span class="sb">`PartialTickets`</span> (`sectorsSampled*eligibleSectors`).
+    <span class="k">-</span> Select a subset of sectors of size <span class="sb">`sectorsSampled*minerSectors`</span> [details omitted]
+
+    Note also that even with <span class="sb">`challengeTicketNum == numSectors`</span>, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
+
+<span class="k">3.</span> <span class="gs">**(generate Partial Ticket(s))**</span> for each selected sector
+    <span class="k">-</span> first, generate K <span class="sb">`PoStChallenges`</span> (C_i), sampled at random from the chosen sector.
+    There will be a chosen challenge-range size (a power of 2), called <span class="sb">`ChallengeRangeSize`</span>. Challenge ranges must be subtree-aligned and thus divide the sector into fixed-size data blocks. So challenge ranges can be indexed because allowable challenge ranges do not overlap. C_i is selected from the valid indexes into the challenge ranges.
+    <span class="sb">`C_i = HashToBlockNumber(post_randomness || S_j || i)`</span>
     C_i corresponds to a given index of a known-sized data block (the sector)
-    - for each C_i, miner reads the specified range of data from disk, which is of size <code>ChallengeRangeSize : C_i_output</code>
-    - Miner generates a PartialTicket using all the PoSt witnesses
-    - <code>PartialTicket = H(post_randomness || minerID ||S_ j || C_1_Output || … || C_K_Output)</code>
-1. <strong>(check Challenge Ticket(s) for winners)</strong> Given a returned ChallengeTicket, miner checks it is a winning ticket. Specifically, they do the following:
-    - <code>ChallengeTicket = Finalize(PartialTicket).  = H(ChallengeTicket) / 2^len(H)</code>
-    - Check that <code>ChallengeTicket &lt; Target</code>
-    - If yes, it is a winning ticket and can be used as to submit a block
-    - In either case, try again with next sector
-1. <strong>(generate a <code>PoStProof</code>)</strong> for inclusion in the block header
-    - Using the winning tickets from step 4 (there may be multiple tickets from the same <code>SectorNumber</code>), call <code>GeneratePoSt</code> from proofs to generate a single PoSt for the block</p>
+    <span class="k">-</span> for each C_i, miner reads the specified range of data from disk, which is of size <span class="sb">`ChallengeRangeSize : C_i_output`</span>
+    <span class="k">-</span> Miner generates a PartialTicket using all the PoSt witnesses
+    <span class="k">-</span> <span class="sb">`PartialTicket = H(post_randomness || minerID ||S_ j || C_1_Output || … || C_K_Output)`</span>
 
-<p>If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.</p>
+<span class="k">4.</span> <span class="gs">**(check Challenge Ticket(s) for winners)**</span>
+Given a returned PartialTicket, miner checks it is a winning ticket. Specifically, they do the following:
+    <span class="k">-</span> <span class="sb">`ChallengeTicket = Finalize(PartialTicket).  = H(ChallengeTicket) / 2^len(H)`</span>
+    <span class="k">-</span> Check that <span class="sb">`ChallengeTicket &lt; Target`</span>
+    <span class="k">-</span> If yes, it is a winning ticket and can be used to submit a block
+    <span class="k">-</span> In either case, try again with next sector to increase rewards
 
-<p><strong>Parameters:</strong>
-- <code>Randomness_ticket</code> &ndash;  a ticket drawn from the randomness ticket chain at a prior tipset
-- <code>Randomness_lookback</code> &ndash; how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
-- <code>K (e.g. 20-100s)</code> - number of  challenges per sector &ndash; must be large enough such that the PoSpace is secure.
-- <code>ChallengeRangeSize</code> - challenge read size (between 32B and 256KB)  &ndash; based on security analysis.
-- <code>sectorsSampled</code> - sector sampling fraction (e.g. 1, .10, .04) &ndash; 1 to start&ndash; It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
-- <code>Target</code> &ndash; target value under which PoSt value must be for block creation &ndash; <code>target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders</code>.
-Put another way check <code>challengeTicket * networkPower * sectorsSampled_denom &lt; activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders</code>
-- <code>networkPower</code> - filecoin network’s power - read from the power table, expressed in number of bytes</p>
+<span class="k">5.</span> <span class="gs">**(generate a `PoStProof`)**</span> for inclusion in the block header
+    <span class="k">-</span> Using the winning tickets from step 4 (there may be multiple tickets from the same <span class="sb">`SectorNumber`</span>), call <span class="sb">`GeneratePoSt`</span> from proofs to generate a single PoSt for the block
 
+If no one has found a winning ticket in this epoch, increment epoch value as part of the post_randomness sampling and try again.</code></pre></div>
+<p><strong>Parameters:</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md"><span class="k">-</span> <span class="sb">`Randomness_ticket`</span> --  a ticket drawn from the randomness ticket chain at a prior tipset 
+<span class="k">-</span> <span class="sb">`Randomness_lookback`</span> -- how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
+<span class="k">-</span> <span class="sb">`K (e.g. 20-100s)`</span> - number of  challenges per sector -- must be large enough such that the PoSpace is secure.
+<span class="k">-</span> <span class="sb">`ChallengeRangeSize`</span> - challenge read size (between 32B and 256KB)  -- based on security analysis.
+<span class="k">-</span> <span class="sb">`sectorsSampled`</span> - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
+<span class="k">-</span> <span class="sb">`Target`</span> -- target value under which PoSt value must be for block creation -- <span class="sb">`target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders`</span>.
+Put another way check <span class="sb">`challengeTicket * networkPower * sectorsSampled_denom &lt; activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders`</span>
+- <span class="sb">`networkPower`</span> - filecoin network’s power - read from the power table, expressed in number of bytes</code></pre></div>
 <h5 id="electionpost-verification">ElectionPoSt verification</h5>
 
-<p>At a high-level, to validate a winning PoSt Proof:
-  1. <strong>Validate post_randomness:</strong>
-    - <code>post_randomness</code> is appropriate given <code>chain</code>, <code>post_lookback</code> and <code>epoch</code>
-    - VRF is generated by miner who submitted the PoSt:
-    <code>{0,1} ?= VRF_miner.Verify(post_randomness)</code>
-    - VRF output is valid given expected inputs:
-    <code>{0,1} ?= VRF_miner.Validate(H(randomness_ticket || chainEpoch))</code>
-    1. Rederive eligible sectors in order to verify that winning sectors were appropriately selected (meaning it’s in <code>S_j</code>) from
-    <code>{0, 1} ?= sectorID in (HashToSectorID(post_randomness || minerID || j))</code>
-    1. <strong>Verify <code>PartialTicket</code> returned</strong>
-    - Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.
-    1. <strong>Derive and validate the <code>ChallengeTicket</code> from the PartialTickets</strong>
-    - Prove the derived ChallengeTicket is below the target
-    <code>{0, 1} ?= (ChallengeTicket &lt; target)</code>
-    1. Validate the <code>postProof</code> using the <code>PartialTickets</code>
-    - Verify that the postProof was appropriately derived from the PartialTickets.
-    - The PoSt proof will verify the correctness of any PartialTickets passed to it as public inputs. In order to do this, it also needs the sector number along with various on-chain data (randomness, CommR, miner ID, etc.).</p>
+<p>At a high-level, to validate a winning PoSt Proof:</p>
+<div class="highlight"><pre class="chroma"><code class="language-md" data-lang="md"><span class="k">1.</span> <span class="gs">**(Verify post_randomness):**</span>
+    <span class="k">-</span> <span class="sb">`post_randomness`</span> is appropriate given <span class="sb">`chain`</span>, <span class="sb">`post_lookback`</span> and <span class="sb">`epoch`</span>
+    <span class="k">-</span> VRF is generated by miner who submitted the PoSt:
+    <span class="sb">`{0,1} ?= VRF_miner.Verify(post_randomness)`</span>
+    <span class="k">-</span> VRF output is valid given expected inputs:
+    <span class="sb">`{0,1} ?= VRF_miner.Validate(H(randomness_ticket || chainEpoch))`</span>
 
+<span class="k">2.</span> Rederive eligible sectors in order to verify that winning sectors were appropriately selected (meaning it’s in <span class="sb">`S_j`</span>) from
+    <span class="sb">`{0, 1} ?= sectorID in (HashToSectorID(post_randomness || minerID || j))`</span>
+
+<span class="k">3.</span> <span class="gs">**Verify `PartialTicket` returned**</span>
+    <span class="k">-</span> Prove that the PartialTicket were appropriately derived from the eligible sectors, by submitting all miner sectors along with the wanted number of tickets and verifying that the outputted PartialTicket match.
+
+<span class="k">4.</span> <span class="gs">**Derive and validate the `ChallengeTicket` from the PartialTickets**</span>
+    <span class="k">-</span> Prove the derived ChallengeTicket is below the target
+    <span class="sb">`{0, 1} ?= (ChallengeTicket &lt; target)`</span>
+
+<span class="k">5.</span> <span class="gs">**Verify the `postProof` using the `PartialTickets`**</span>
+    <span class="k">-</span> Verify that the postProof was appropriately derived from the PartialTickets.
+    - The PoSt proof will verify the correctness of any PartialTickets passed to it as public inputs. In order to do this, it also needs the sector number along with various on-chain data (randomness, CommR, miner ID, etc.).</code></pre></div>
 <p>As it stands, the proofs caller passes a list of all of the replicas (with filesystem paths and auxiliary metadata) which could be challenged and a wanted number of tickets. This code structure forces the miner architecture to look like a single machine with a large number of disks presented as a single filesystem, as shown in spec. That won’t change for now. VFS systems like NFS may be used to distribute disks among multiple machines virtualizing the FileStore.</p>
 
 <p>There is no requirement to persist the witnesses (list of merkle proofs) for failure recovery. If something fails, we don’t expect recovery to be fast enough to allow the miner to participate in that round anyway.</p>
@@ -29340,7 +29136,7 @@ This SurprisePoSt will use a challenge drawn from the chain at the start of this
 
 <p>Surprise PoSt works as follows:</p>
 <div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">// A number of challenged miners is chosen at every round
-challNumber = 2*NumMiners / ProvingPeriod
+challNumber = SURPRISE_CHALLENGE_FREQUENCY*NumMiners / ProvingPeriod
 
 // Using the ticket to seed randomness, a miner is picked from the power table for each challenge
 sampledMiners = []
@@ -29348,11 +29144,12 @@ For i=0; i &lt; challNumber; i++:
     ranHash = H(ticket, i)
     ranIndex = HashToInt(ranHash) mod len(PowerTable)
     chosenMiner = PowerTable[ranIndex].address
-    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/2 epochs and are not currently challenged
-    if chosenMiner.shouldChallenge(ProvingPeriod/2):
+    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/SURPRISE_CHALLENGE_FREQUENCY epochs and are not currently challenged
+    if chosenMiner.shouldChallenge(SURPRISE_NO_CHALLENGE_PERIOD):
         sampledMiners.append(chosenMiner)</code></pre></div>
-<p>The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled twice per proving period on expectation, but would only be sampled if they are in the latter half of their proving period leading to one challenge per proving period on expectation.
-This is done as follows: if there are M miners in the power table and a Proving Period of length P, 2M/P challenges will be issued at each epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/2 epochs and are not currently being challenged (this is checked using the storage_miner_actor).</p>
+<p>The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled SURPRISE_CHALLENGE_FREQUENCY times per proving period on expectation, but would only be sampled if they are past the SURPRISE_NO_CHALLENGE_PERIOD (which should be PP/SPF so they are challenged in that period) in their proving period leading to one challenge per proving period on expectation.</p>
+
+<p>This is done as follows: if there are M miners in the power table and a Proving Period of length P, SPF*M/P challenges will be issued at each epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/SPF epochs and are not currently being challenged (this is checked using the storage_miner_actor).</p>
 
 <p>An alternative approach would be to assign a probability of being challenged to each miner which grows at every epoch to be 1 PP epochs from the last challenge (but this would require more computation since every miner would have to be checked at every epoch).</p>
 
