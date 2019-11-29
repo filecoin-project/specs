@@ -50,7 +50,7 @@ Utils:
   describe(b_in_kib, "Number of bytes in a KiB")
   describe(to_i, "Ratio between GB and GiB")
 
-  b_in_tib = (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
+  b_in_eib = (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
   b_in_pib = (1024 * 1024 * 1024 * 1024 * 1024)
   b_in_tib = (1024 * 1024 * 1024 * 1024)
   b_in_gib = (1024 * 1024 * 1024)
