@@ -9,6 +9,9 @@ type WinStackedDRGWindowCount UInt
 type WinStackedDRGPartitions UInt
 type WinStackedDRGChallenges UInt
 type WinStackedDRGWindowChallenges UInt
+type WinStackedDRGLeafChallengeCount UInt
+type WinStackedDRGChallengeRangeSize UInt
+
 type DRGDepth struct {}
 type DRGFraction struct {}
 type DRGDegree UInt
@@ -74,6 +77,8 @@ type WinStackedDRG struct {
     Partitions              WinStackedDRGPartitions
     Challenges              WinStackedDRGChallenges
     WindowChallenges        WinStackedDRGWindowChallenges
+    LeafChallengeCount      WinStackedDRGLeafChallengeCount
+    ChallengeRangeSize      WinStackedDRGChallengeRangeSize
     Algorithm               struct {}
     DRGCfg
     ExpanderGraphCfg
@@ -118,7 +123,7 @@ type WinStackedDRG struct {
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
     ) [sector.PoStCandidate]
-    GenerateElectionPoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    GenerateElectionPoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
     VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
 
     GenerateSurprisePoStCandidates(
@@ -127,8 +132,18 @@ type WinStackedDRG struct {
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
     ) [sector.PoStCandidate]
-    GenerateSurprisePoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    GenerateSurprisePoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
     VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
+    CreatePrivatePoStProof(
+        candidateProofs  [sector.PrivatePoStCandidateProof]
+        challengeSeed    sector.PoStRandomness
+        aux              sector.PersistentProofAux
+    ) PrivatePoStProof
+    VerifyPrivatePoStProof(
+        privateProof  PrivatePoStProof
+        candidates    [sector.PoStCandidate]
+        commRLast     sector.Commitment
+    ) bool
 }
 
 type SDRCfg struct {
@@ -193,6 +208,7 @@ type Feistel struct {
 
 type MerkleTree struct {
     ProveInclusion(challenge UInt) InclusionProof
+    Leaf(index UInt) Bytes
 }
 
 // TODO: Needs to be generic over hash.

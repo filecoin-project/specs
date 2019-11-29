@@ -19,12 +19,13 @@ type PoStType enum {
 type PoStVerifyInfo struct {
     PoStCfg
     Randomness  PoStRandomness
+    CommR       SealedSectorCID
     OnChain     OnChainPoStVerifyInfo
 }
 
 type PoStCandidate struct {
     PartialTicket  // Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
-    PrivateProof    PrivatePoStProof  // Optional — should be ommitted for verification.
+    PrivateProof    PrivatePoStCandidateProof  // Optional — should be ommitted for verification.
     SectorID
     ChallengeIndex  UInt
 }
@@ -46,4 +47,6 @@ type PoStProof struct {//<curve, system> {
     ProofBytes  Bytes
 }
 
-type PrivatePoStProof struct {}
+type PrivatePoStCandidateProof struct {
+    ChallengeSeed PoStRandomness
+}
