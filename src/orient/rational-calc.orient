@@ -1,9 +1,7 @@
+// If you wish to make an apple pie from scratch, you must first uber-calc the universe.
+
 // TODO:
 // - Time cost per constraint
-// 
-// Note: all terms referring to size are in bytes, unless suffixed with _mib, _tib, etc.
-// Note: all terms referring to time are in seconds, unless suffixed with _mins, _days, etc.
-
 Rig:
   describe(rig_sectors_min, "Minimum sectors require to mine")
 
@@ -44,12 +42,16 @@ Utils:
   describe(cid_size, "Size of a CID", bytes)
   describe(secs_in_month, "Number of seconds in a month")
   describe(secs_in_year, "Number of seconds in a year")
+  describe(b_in_eib, "Number of bytes in a EiB")
+  describe(b_in_pib, "Number of bytes in a PiB")
   describe(b_in_tib, "Number of bytes in a TiB")
   describe(b_in_gib, "Number of bytes in a GiB")
   describe(b_in_mib, "Number of bytes in a MiB")
   describe(b_in_kib, "Number of bytes in a KiB")
   describe(to_i, "Ratio between GB and GiB")
 
+  b_in_tib = (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
+  b_in_pib = (1024 * 1024 * 1024 * 1024 * 1024)
   b_in_tib = (1024 * 1024 * 1024 * 1024)
   b_in_gib = (1024 * 1024 * 1024)
   b_in_mib = (1024 * 1024)
@@ -66,6 +68,10 @@ ProofOfSpacetime:
     describe(post_lambda, "Bits of security of a PoSt proof")
     describe(post_soundness, "Probability of an adversary to succeed in generating a convincing PoSt proof")
     post_soundness = expt(2, -post_lambda)
+
+  Size:
+    describe(post_proof_size, "Size of a PoSt proof")
+    post_proof_size = post_snark_size
 
   ProofGeneration:
     describe(post_time, "Time to generate a PoSt Proof on a single core CPU", secs)
@@ -162,7 +168,7 @@ ProofOfSpacetime:
     inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
     post_inclusion_proofs = inclusion_proof * post_challenges
     ticket_proofs = ticket_constraints * post_challenges
-
+    // TODO: handle different constructions
     post_snark_constraints = ticket_proofs + post_inclusion_proofs
     post_snark_partitions = post_snark_constraints / post_snark_partition_constraints
     post_snark_size = post_snark_partitions * snark_size
@@ -222,6 +228,10 @@ ProofOfReplication:
 
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
     porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
+
+  Size:
+    describe(porep_proof_size, "Size of a PoRep proof")
+    porep_proof_size = porep_snark_size + seal_onchain_commitments_size
 
   Commitment:
     describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows", secs)
@@ -395,6 +405,81 @@ ProofOfReplication (StackedChungParameters):
   stacked_layers = (log2(regeneration_fraction / chung_a) / log2(chung_c)) + 1
   porep_challenges = -porep_lambda / (log2(1-chung_delta))
   post_challenges = -post_lambda / (log2(chung_sigma))
+
+EC:
+  describe(ec_e, "Number of winning miners per epoch on expectation")
+
+Filecoin:
+  describe(filecoin_block_time, "Time between two blocks", secs)
+  describe(blocks_in_a_year, "Number of blocks in a year")
+
+  filecoin_block_time = polling_time
+  blocks_in_a_year = (secs_in_year / filecoin_block_time) * ec_e
+
+  Storage:
+    describe(filecoin_sectors, "Number of sectors in the Filecoin DSN")
+    describe(filecoin_miners, "Number of Storage Miners")
+    describe(filecoin_storage_capacity, "Amount of storage that the Filecoin DSN can support", bytes)
+    describe(filecoin_storage_capacity_gib, "Amount of storage that the Filecoin DSN can support", gib)
+    describe(filecoin_storage_capacity_eib, "Amount of storage that the Filecoin DSN can support", eib)
+
+    filecoin_sectors = filecoin_storage_capacity_gib / sector_size_gib
+    filecoin_storage_capacity_eib = filecoin_storage_capacity / b_in_eib
+    filecoin_storage_capacity_gib = filecoin_storage_capacity / b_in_gib
+
+  Chain:
+    describe(chain_size_year, "Size of one year worth of blocks", bytes)
+    describe(chain_size_year_gib, "Size of one year worth of blocks", kib)
+    describe(block_size, "Size of a block", bytes)
+    describe(block_size_kib, "Size of a block", bytes)
+    describe(proofs_block_fraction, "Fraction of the block dedicated to proofs")
+
+    chain_size_year = block_size * blocks_in_a_year
+    chain_size_year_gib = chain_size_year / b_in_gib
+    block_size_kib = block_size / b_in_kib
+
+    block_size = (proofs_per_block / proofs_block_fraction) 
+
+  Proofs: 
+    describe(seals_per_year, "Number of PoRep proofs per year")
+    describe(posts_per_year, "Number of PoSt proofs per year")
+    describe(filecoin_reseals_per_year, "Number of times a sector is re-sealed in a year")
+    describe(seals_per_sector_per_year, "Number of seal proofs per sector per year")
+    describe(posts_per_sector_per_year, "Number of post proofs per sector per year")
+    describe(seals_size_per_year, "Size of seal proofs per year", bytes)
+    describe(posts_size_per_year, "Size of post proofs per year", bytes)
+    describe(seals_size_per_block, "Size of seal proofs per block", bytes)
+    describe(posts_size_per_block, "Size of post proofs per block", bytes)
+    describe(proofs_per_block, "Size of proofs per block", bytes)
+
+    seals_per_sector_per_year = filecoin_reseals_per_year + 1
+    seals_per_year = filecoin_sectors * seals_per_sector_per_year
+    posts_per_year = filecoin_sectors * posts_per_sector_per_year 
+
+    seals_size_per_year = seals_per_year * porep_proof_size
+    posts_size_per_year = posts_per_year * post_proof_size
+
+    seals_size_per_block = seals_size_per_year / blocks_in_a_year
+    posts_size_per_block = posts_size_per_year / blocks_in_a_year
+
+    proofs_per_block = seals_size_per_block + proofs_per_block
+
+    PoSt (ElectionWithFallbackPoSt):
+      describe(fposts_per_sector_per_year, "Number of fallback post proofs per sector per year")
+      describe(eposts_per_sector_per_year, "Number of election post proofs per sector per year")
+      describe(fallback_ratio, "Fraction of fallback PoSts")
+      describe(fallback_period, "Time between last proof submitted and a required fallback PoSt", secs)
+      posts_per_sector_per_year = eposts_per_sector_per_year + fposts_per_sector_per_year
+
+      // TODO: model single ticket vs multiple tickets
+      ElectionPoSt:
+        eposts_per_sector_per_year = blocks_in_a_year / filecoin_sectors
+
+      FallbackPoSt:
+        fposts_per_sector_per_year = (secs_in_year / fallback_period) * fallback_ratio
+
+
+  Mining:
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
