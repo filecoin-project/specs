@@ -30,12 +30,13 @@ Rig:
 
 Crypto:
   describe(snark_size, "Size of a SNARK proof", bytes)
+  describe(snark_constraint_time, "Time of proving a SNARK constraint", secs)
   describe(hashing_amax, "Factor of difference between stock CPU hashing and the fastest hashing")
 
   describe(merkle_tree_datahash_constraints, "Constraints for hashing two nodes in CommD")
-  describe(merkle_tree_datahash_time, "Time to hash two nodes in CommD")
+  describe(merkle_tree_datahash_time, "Time to hash two nodes in CommD", secs)
   describe(merkle_tree_hash_constraints, "Constraints for hashing two nodes in CommR")
-  describe(merkle_tree_hash_time, "Time to hash two nodes in CommR")
+  describe(merkle_tree_hash_time, "Time to hash two nodes in CommR", secs)
   describe(column_leaf_hash_constraints, "Constraints for hashing a single row in a column", secs)
   describe(column_leaf_hash_time, "Time to compute the hash of a single row in a column", secs)
 
@@ -63,55 +64,25 @@ ProofOfSpacetime:
   Security:
     describe(post_challenges, "Number of challenges in a PoRep proof")
 
-  Time:
-    describe(post_time, "Time to generate a PoSt Proof on a single core CPU")
-    describe(post_time_parallel, "Parallel time to generate a PoSt proof on RIG_CORES CPU cores")
-    describe(post_snark_time, "Time to generate a PoSt SNARK")
-    describe(post_snark_time_parallel, "Time to generate a PoSt SNARK in parallel")
+  ProofGeneration:
+    describe(post_time, "Time to generate a PoSt Proof on a single core CPU", secs)
+    describe(post_time_parallel, "Parallel time to generate a PoSt proof on RIG_CORES CPU cores", secs)
+    describe(post_snark_time, "Time to generate a PoSt SNARK", secs)
+    describe(post_snark_time_parallel, "Time to generate a PoSt SNARK in parallel", secs)
+    describe(post_proof_gen, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves)", secs)
+    describe(post_proof_gen_parallel, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves) in parallel", secs)
+    describe(post_inclusions_time, "Time to generate merkle tree inclusion proofs for PoSt (assuming all data in memory)", secs)
+    describe(post_inclusions_time_parallel, "Time to regenerate and to read the merkle tree inclusion proofs for the challenged nodes from memory in parallel", secs)
 
     post_time = post_proof_gen
     post_time_parallel = post_proof_gen_parallel
-
-    ProofGeneration:
-      describe(post_proof_gen, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves)")
-      describe(post_proof_gen_parallel, "Time to generate a PoSt Proof (including SNARKs, generating witnesses and reading from storage the challenged leaves) in parallel")
-      describe(post_inclusions_time, "Time to regenerate and to read the merkle tree inclusion proofs for the challenged nodes from memory")
-      describe(post_inclusions_time_parallel, "Time to regenerate and to read the merkle tree inclusion proofs for the challenged nodes from memory in parallel")
-
-      post_proof_gen = post_snark_time + post_inclusions_time + post_data_access 
-      post_proof_gen = post_snark_time_parallel + post_inclusions_time_parallel + post_data_access_parallel
-
-    DiskLatency:
-      describe(post_data_access, "Time to retrieve from the storage unit the data (excluding Merkle tee) for PoSt")
-      describe(post_data_access_parallel, "Time to retrieve from the storage unit the data (excluding Merkle tee) in parallel for PoSt")
-
-      post_data_access_parallel = post_data_access / rig_storage_parallelization
-
-      DataAccess (Wrapping):
-        post_data_access = post_challenges * rig_storage_latency
-
-      DataAccess (WrappingVariant):
-        describe(wrapper_kdf_time, "Time to generate a node on the wrapper layer", secs)
-        describe(wrapper_challenged_nodes_parents, "Number of parents of all the challenged nodes on the wrapper layer in PoSt")
-        describe(wrapper_challenged_nodes_parents_read, "Time to retrieve from storage medium all the parents of the challenged nodes on the wrapper layer in PoSt", secs)
-        describe(wrapper_challenged_nodes_parents_regen, "Time to re-generate all the challenged nodes on the wrapper layer from the window outputs", secs)
-
-        wrapper_kdf_time = kdf_time * wrapper_parents
-        wrapper_challenged_nodes_parents = post_challenges * wrapper_parents
-        wrapper_challenged_nodes_parents_read = wrapper_challenged_nodes_parents * rig_storage_latency
-        wrapper_challenged_nodes_parents_regen = wrapper_kdf_time * post_challenges
-
-        post_data_access = wrapper_challenged_nodes_parents_regen + wrapper_challenged_nodes_parents_read 
-
-      DataAccess (StackedReplicas):
-        DataLayout (StackedReplicaDistributed):
-          post_data_access = post_challenges * windows * rig_storage_latency
-        DataLayout (StackedReplicaSequential):
-          post_data_access = post_challenges * node_size_mib * rig_storage_read_mibs
+    post_proof_gen = post_snark_time + post_inclusions_time + post_data_access 
+    post_proof_gen = post_snark_time_parallel + post_inclusions_time_parallel + post_data_access_parallel
 
     // TODO: add MerkleTreeCaching for ColumnR
-    MerkleTreeCaching:
-      Storage:
+    // This only accounts for generating the merkle trees
+    InclusionProofs:
+      Caching:
         describe(post_mtree_cached, "Size of the cached parts of the replica merkle tree", bytes)
         describe(post_mtree_cached_hashnodes, "Number of intermediary hash nodes cached of the replica merkle tree")
         describe(post_mtree_cached_gib, "POST_MTREE_CACHED in GiB")
@@ -125,34 +96,54 @@ ProofOfSpacetime:
         post_mtree_cached_hashnodes = expt(2, post_mtree_layers_cached) - 1
         post_mtree_layers_deleted = commr_tree_depth - post_mtree_layers_cached
 
-      Time:
-        // Note: this assumes reading the cached parts of the merkle tree instantaneous
-        // TODO: post inclusion should be defined for wrapping etc.
-        post_inclusions_time = post_mtree_challenges_regen + post_mtree_challenges_read
+      Generation:
+        describe(post_mtree_regen_hashnodes, "Number of intermediary nodes to be regenerated for a single replica merkle tree inclusion proof in PoSt")
+        describe(post_mtree_regen_nodes, "Number of leaf nodes to be access for a single replica merkle tree inclusion proof in PoSt")
+        describe(post_inclusion_time, "Time to generate a Merkle tree inclusion proof for PoSt", secs)
 
-        Regeneration:
-          describe(post_mtree_regen_hashnodes, "Number of intermediary nodes to be regenerated for a single replica merkle tree inclusion proof in PoSt")
-          describe(post_mtree_regen_nodes, "Number of leaf nodes to be access for a single replica merkle tree inclusion proof in PoSt")
-          describe(post_mtree_challenge_regen, "Time to generate the missing intermediary hash nodes of the replica merkle tree inclusion proof for a single challenge in PoSt")
-          describe(post_mtree_challenges_regen, "Same as post_mtree_challenge_regen but for all the PoSt challenges")
+        post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1
+        // TODO: this is for a single inclusion, check if this is used in the right way
+        post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted) - 1
+        post_inclusions_time = post_inclusion_time * post_challenges
 
-          post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1
-          post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted) - 1
-          post_mtree_challenge_regen = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
-          post_mtree_challenges_regen = post_mtree_challenge_regen * post_challenges
+      Generation (Wrapping):
+        post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
 
-        Access:
-          describe(post_mtree_challenge_read, "Time to sequentially read the replica leaves needed to regenerate the missing layers of the merkle tree for a single challenged node in PoSt")
-          describe(post_mtree_challenges_read, "Same as post_mtree_challenge_read but for all the PoSt challenges")
+      Generation (StackedReplicas):
+        post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
 
-          // TODO: this is using random access, we should use seq access instead
-          post_mtree_challenge_read = post_mtree_regen_nodes * rig_storage_latency
-          post_mtree_challenges_read = post_mtree_challenge_read * post_challenges
-          // TODO: log2(nodes) > post_mtree_layers_cached
+      Generation (WrappingVariant):
+        describe(wrapper_kdf_time, "Time to generate a node on the wrapper layer", secs)
 
-  Time (NoWrapper):
-    //rig_storage_latency_throughput_kib = rig_storage_latency_throughput / 1024
-    //response_honest_min = (post_challenges * challenged_sectors_percentage * rig_sectors_min * rig_storage_latency *windows) / rig_storage_latency_throughput
+        wrapper_kdf_time = kdf_time * wrapper_parents * post_mtree_regen_nodes
+        post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time + wrapper_kdf_time
+
+  StorageAccess:
+    describe(post_challenge_read, "Time to read from storage medium data required for a single challenge in PoSt", secs)
+    describe(post_data_access, "Time to retrieve from the storage unit the data for PoSt", secs)
+    describe(post_data_access_parallel, "Time to retrieve from the storage unit the data in parallel for PoSt", secs)
+
+    post_data_access = post_challenge_read * post_challenges
+    post_data_access_parallel = post_data_access / rig_storage_parallelization
+
+    Access (Wrapping):
+      // TODO: this is using random access, we should use seq access instead
+      post_challenge_read = (1 + post_mtree_regen_nodes) * rig_storage_latency
+      // TODO: log2(nodes) > post_mtree_layers_cached
+
+    Access (WrappingVariant):
+      describe(wrapper_lookup_read, "Time to retrieve from storage medium all the parents of a wrapper layer node", secs)
+      describe(wrapper_lookup_with_mtree, "Time to retrieved from storage medium all the parents of the challenged node and those required for the merkle tree regeneration", secs)
+
+      wrapper_lookup_read = wrapper_parents * rig_storage_latency
+      wrapper_lookup_with_mtree = wrapper_lookup_read * (1 + post_mtree_regen_nodes)
+      post_challenge_read = wrapper_lookup_with_mtree 
+
+    Access (StackedReplicas):
+      describe(stack_lookup_read, "Time to read from storage medium the column of a single window", secs)
+
+      stack_lookup_read = windows * rig_storage_latency
+      post_challenge_read = stack_lookup_read 
 
   SNARK:
     describe(inclusion_proof, "Constraints for checking an inclusion proof in a binary merkle tree as large as the sector")
@@ -173,6 +164,7 @@ ProofOfSpacetime:
     post_snark_partitions = post_snark_constraints / post_snark_partition_constraints
     post_snark_size = post_snark_partitions * snark_size
     post_snark_size_kib = post_snark_size / b_in_kib
+    post_snark_time = snark_constraint_time * post_snark_constraints
 
 ProofOfReplication:
   Security:
@@ -228,8 +220,8 @@ ProofOfReplication:
     porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
 
   Commitment:
-    describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows")
-    describe(window_comm_leaves_time, "Time to commit columns of a window")
+    describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows", secs)
+    describe(window_comm_leaves_time, "Time to commit columns of a window", secs)
 
     describe(commit_size, "Size of a commitment", bytes)
     describe(commr_size, "Size of CommR", bytes)
@@ -330,11 +322,12 @@ ProofOfReplication:
   SNARK:
     describe(porep_snark_constraints, "Constraints for a PoRep")
     describe(porep_snark_partitions, "Number of partitions of a PoRep proof")
+    describe(porep_snark_time, "Time to generate a PoRep SNARK proof", secs)
     describe(porep_snark_size, "Size of a PoRep proof", bytes)
     describe(porep_snark_size_kib, "Size of a PoRep proof", kib)
     describe(porep_snark_partition_constraints, "Number of constraints for a PoRep partition")
-    describe(kdf_constraints, "Constraints of KDF per node")
 
+    describe(kdf_constraints, "Constraints of KDF per node")
     describe(labeling_proof, "Constraints to check labeling of a single node")
     describe(labeling_proofs, "Constraints to check labeling of a window")
     describe(window_labeling_proof, "Constraints to check correct labeling for all windows")
@@ -374,6 +367,7 @@ ProofOfReplication:
     porep_snark_partitions = porep_snark_constraints / porep_snark_partition_constraints
     porep_snark_size = porep_snark_partitions * snark_size
     porep_snark_size_kib = porep_snark_size / b_in_kib
+    porep_snark_time = snark_constraint_time * porep_snark_constraints
 
     Constraints (WindowEncoding):
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
@@ -388,7 +382,7 @@ ProofOfReplication:
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
-  describe(polling_time, "Time between two PoSt proofs")
+  describe(polling_time, "Time between two PoSt proofs", secs)
   describe(challenge_periods_per_month, "Number of challenge periods in a month")
   describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them")
 
