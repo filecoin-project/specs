@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
+	Method_StorageMarketActor_EpochTick = actor.MethodPlaceholder + iota
+	Method_StorageMarketActor_GetUnsealedCIDForDealIDs
 )
 
 const LastPaymentEpochNone = 0

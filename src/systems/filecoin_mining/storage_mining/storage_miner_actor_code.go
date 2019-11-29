@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder
+	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder + iota
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -493,7 +493,7 @@ func (a *StorageMinerActorCode_I) _isSealVerificationCorrect(rt Runtime, onChain
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 	receipt := rt.SendCatchingErrors(&msg.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
+		Method_: storage_market.Method_StorageMarketActor_GetUnsealedCIDForDealIDs,
 		Params_: params,
 	})
 
