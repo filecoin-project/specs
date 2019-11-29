@@ -65,7 +65,7 @@ type StorageMiningSubsystem struct {
         minerAddr   addr.Address
     ) block.Ticket
 
-    _preparePoStRandomness(randomness util.Randomness, minerAddr addr.Address) sector.PoStRandomness
+    _preparePoStRandomnessInput(randomness util.Randomness, minerAddr addr.Address) util.Randomness
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()
