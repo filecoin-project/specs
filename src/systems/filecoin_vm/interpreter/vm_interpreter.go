@@ -25,10 +25,10 @@ const (
 
 // Applies all the message in a tipset, along with implicit block- and tipset-specific state
 // transitions.
-func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) (outTree st.StateTree, receipts []msg.MessageReceipt) {
+func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) (outTree st.StateTree, receipts []vmr.MessageReceipt) {
 	outTree = inTree
 	seenMsgs := make(map[ipld.CID]struct{}) // CIDs of messages already seen once.
-	var r msg.MessageReceipt
+	var r vmr.MessageReceipt
 	for _, blk := range msgs.Blocks() {
 		// Pay block reward.
 		reward := _makeBlockRewardMessage(outTree, blk.Miner())
@@ -68,7 +68,7 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 }
 
 func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.UnsignedMessage, minerAddr addr.Address) (
-	st.StateTree, msg.MessageReceipt) {
+	st.StateTree, vmr.MessageReceipt) {
 
 	compTree := inTree
 	var outTree st.StateTree
@@ -115,7 +115,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	)
 
 	sendRet, sendRetStateTree := rt.SendToplevelFromInterpreter(
-		msg.InvocInput_Make(
+		vmr.InvocInput_Make(
 			message.To(),
 			message.Method(),
 			message.Params(),
@@ -162,12 +162,12 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	return outTree, sendRet
 }
 
-func _applyError(errCode exitcode.SystemErrorCode) msg.MessageReceipt {
+func _applyError(errCode exitcode.SystemErrorCode) vmr.MessageReceipt {
 	// TODO: should this gasUsed value be zero?
 	// If nonzero, there is not guaranteed to be a nonzero gas balance from which to deduct it.
 	gasUsed := gascost.ApplyMessageFail
 	TODO()
-	return msg.MessageReceipt_MakeSystemError(errCode, gasUsed)
+	return vmr.MessageReceipt_MakeSystemError(errCode, gasUsed)
 }
 
 func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Address, amount actor.TokenAmount) st.StateTree {

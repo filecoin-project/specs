@@ -2,7 +2,6 @@ package sysactors
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
@@ -16,7 +15,7 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 	// a.actors is basically a static registry for now, loaded
 	// in the interpreter static registry.
 	for _, a := range a.Actors() {
-		rt.SendCatchingErrors(&msg.InvocInput_I{
+		rt.SendCatchingErrors(&vmr.InvocInput_I{
 			To_:     a,
 			Method_: actor.MethodCron,
 			Params_: []actor.MethodParam{},

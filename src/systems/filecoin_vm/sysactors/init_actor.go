@@ -5,7 +5,6 @@ import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import util "github.com/filecoin-project/specs/util"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 
 const (
@@ -16,7 +15,7 @@ const (
 ////////////////////////////////////////////////////////////////////////////////
 // Boilerplate
 ////////////////////////////////////////////////////////////////////////////////
-type InvocOutput = msg.InvocOutput
+type InvocOutput = vmr.InvocOutput
 type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type Serialization = util.Serialization
