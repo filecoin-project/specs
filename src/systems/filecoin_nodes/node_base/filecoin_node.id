@@ -4,6 +4,7 @@ import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import key_store "github.com/filecoin-project/specs/systems/filecoin_nodes/key_store"
 
 type FilecoinNode struct {
     Node        libp2p.Node
@@ -12,6 +13,7 @@ type FilecoinNode struct {
     FileStore   filestore.FileStore
     Clock       clock.UTCClock
     LocalGraph  ipld.GraphStore
+    KeyStore    key_store.KeyStore
 
     SubmitMessage(m msg.SignedMessage) error
 }
