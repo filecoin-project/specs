@@ -40,9 +40,11 @@
     "ticket_constraints": 1376,
     "ticket_hash": 2.56e-07,
     "window_size_mib": 32768,
-    "wrapper_parents": 10
+    "wrapper_parents": 10,
+    "expander_degree": 14,
+    "spacegap": 0.1,
     "alpha": 0.6,
-    "delta": 0.01
-
+    "delta": 0.01,
+    "beta": 0.93
   }
 ]

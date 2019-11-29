@@ -426,8 +426,8 @@ ProofOfReplication (StackedChungParameters):
     assume(achung > 0)
 
     stacked_layers = log2(psi/achung)/log2(cchung) + 1
-    porep_challenges = -lambda / log2(1 - delta)
-    post_challenges = -lambda / log2(sigma)
+    porep_challenges = -porep_lambda / log2(1 - delta)
+    post_challenges = -post_lambda / log2(sigma)
    
 
 EC:

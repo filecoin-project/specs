@@ -37,7 +37,8 @@ def parse():
     args = parser.parse_args() 
     alpha = args.alpha if args.alpha is not None else "alpha"
     beta = args.beta if args.beta is not None else "beta"
-    degree = args.degree if args.degree is not None else "degree_expander"
+    degree = args.degree if args.degree is not None else "expander_degree"
+    # sys.stderr.write("parsing json %s" %args.json)
     try:
         json_input = json.load(args.json)
     except Exception as e:
@@ -91,10 +92,12 @@ def main():
     degree = extract_value(jinput,degreeT)
     if alpha is None or degree is None:
         # default behavior: return same thing if nothing to be done
+        # sys.stderr.write("alpha %s or degree %s" % (alpha,degree))
         json.dump(jinput, sys.stdout)
         sys.exit(0)
 
     beta = find_max_beta(degree,alpha)
+    # sys.stderr.write("found alpha %f -> beta %f" % (alpha,beta))
     rounded = round(beta,5)
     inject_value(jinput,alphaT,betaT,rounded)        
     json.dump(jinput,sys.stdout)
