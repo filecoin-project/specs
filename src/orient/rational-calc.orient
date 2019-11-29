@@ -21,7 +21,7 @@ Rig:
   rig_storage_read_mibs = rig_storage_read_mbs * to_i
   rig_storage_min = rig_storage_min_tib * b_in_tib
   rig_sectors_min = rig_storage_min / sector_size
-  rig_storage_parallelization_min = post_data_access / polling_time
+  rig_storage_parallelization_min = epost_data_access / polling_time
 
   rig_storage_unit_max = rig_storage_min / rig_storage_parallelization_min
   rig_storage_unit_max_tib = rig_storage_unit_max / b_in_tib 
@@ -86,7 +86,8 @@ ProofOfSpacetime:
     post_time = post_proof_gen
     post_time_parallel = post_proof_gen_parallel
     post_proof_gen = post_snark_time + post_inclusions_time + post_data_access 
-    post_proof_gen = post_snark_time_parallel + post_inclusions_time_parallel + post_data_access_parallel
+    // TODO: this should be max(), not sum
+    post_proof_gen_parallel = post_snark_time_parallel + post_inclusions_time_parallel + post_data_access_parallel
 
     // TODO: add MerkleTreeCaching for ColumnR
     // This only accounts for generating the merkle trees
@@ -227,6 +228,7 @@ ProofOfReplication:
     describe(porep_proof_gen_parallel, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium) in parallel", secs)
 
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
+    // TODO: this should be max(), not sum
     porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
 
   Size:
@@ -317,6 +319,7 @@ ProofOfReplication:
       window_read_time = window_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_window_time + window_read_time
+      // TODO: this should be max(), not sum
       decoding_time_parallel = encoding_window_time_parallel + window_read_time_parallel
 
     Decoding (WrappingVariant):
@@ -324,6 +327,7 @@ ProofOfReplication:
       window_read_time = window_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_window_time + window_read_time
+      // TODO: this should be max(), not sum
       decoding_time_parallel = encoding_window_time_parallel + window_read_time_parallel
 
     Decoding (Wrapping):
@@ -331,6 +335,7 @@ ProofOfReplication:
       window_read_time = sector_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_time + window_read_time
+      // TODO: this should be max(), not sum
       decoding_time_parallel = encoding_time_parallel + window_read_time_parallel
 
   SNARK:
@@ -480,6 +485,15 @@ Filecoin:
         fposts_per_sector_per_year = (secs_in_year / fallback_period) * fallback_ratio
 
   Mining:
+    ElectionPoSt:
+      describe(epost_challenged_sectors_fraction, "Fraction of challenged sectors during Election PoSt")
+      describe(epost_data_access, "Time to access data for Election PoSt", secs)
+      describe(epost_data_access, "Time to access data for Election PoSt in parallel", secs)
+      describe(epost_challenged_sectors, "Number of challenged sectors during Election PoSt")
+
+      epost_challenged_sectors = rig_sectors_min * epost_challenged_sectors_fraction
+      epost_data_access = post_data_access * epost_challenged_sectors
+      epost_data_access_parallel = epost_data_access_parallel / rig_storage_parallelization  
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
