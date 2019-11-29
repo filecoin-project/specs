@@ -193,39 +193,46 @@ ProofOfReplication:
 
   Graph:
     describe(nodes, "Number of nodes in a sector")
-    describe(sector_size, "Size of a sector", bytes)
-    describe(sector_size_mib, "Size of a sector", mib)
-    describe(sector_size_gib, "Size of a sector", gib)
-
-    describe(window_nodes, "Number of nodes in a window")
-    describe(window_size, "Size of a window", bytes)
-    describe(window_size_mib, "Size of a window", mib)
-    describe(windows, "Number of windows in a sector")
-
-    describe(graph_parents, "Number of parents of a node in the PoRep window graph")
-    describe(drg_parents, "Number of DRG parents of a node in the PoRep window graph")
-    describe(expander_parents, "Number of Chung Expander parents of a node in the PoRep window graph")
     describe(stacked_layers, "Number of layers in the DRG")
-    describe(wrapper_parents, "Number of parents in the wrapper layer")
 
-    describe(node_size, "Size of a node", bytes)
-    describe(node_size_mib, "Size of a node", mib)
-    describe(node_size_gib, "Size of a node", gib)
-    describe(kdf_hash_size, "Size of the input to the KDF hash", bytes)
-    describe(kdf_hash_size_gib, "Size of the input to the KDF hash", gi)
+    Sector:
+      describe(sector_size, "Size of a sector", bytes)
+      describe(sector_size_mib, "Size of a sector", mib)
+      describe(sector_size_gib, "Size of a sector", gib)
 
-    sector_size = sector_size_gib * b_in_gib
-    sector_size_mib = sector_size / b_in_mib 
-    graph_parents = drg_parents + expander_parents
-    nodes = sector_size / node_size
-    node_size_mib = node_size / b_in_mib 
-    node_size_gib = node_size / b_in_gib 
-    kdf_hash_size_gib = graph_parents * node_size_gib
-    kdf_hash_size = kdf_hash_size_gib * b_in_gib
+      sector_size = sector_size_gib * b_in_gib
+      sector_size_mib = sector_size / b_in_mib 
 
-    window_size = window_size_mib * b_in_mib 
-    windows = sector_size / window_size
-    window_nodes = nodes / windows
+    Window:
+      describe(window_nodes, "Number of nodes in a window")
+      describe(window_size, "Size of a window", bytes)
+      describe(window_size_mib, "Size of a window", mib)
+      describe(windows, "Number of windows in a sector")
+
+      window_size = window_size_mib * b_in_mib 
+      windows = sector_size / window_size
+      window_nodes = nodes / windows
+
+    Parents:
+      describe(graph_parents, "Number of parents of a node in the PoRep window graph")
+      describe(drg_parents, "Number of DRG parents of a node in the PoRep window graph")
+      describe(expander_parents, "Number of Chung Expander parents of a node in the PoRep window graph")
+      describe(wrapper_parents, "Number of parents in the wrapper layer")
+
+      graph_parents = drg_parents + expander_parents
+
+    Nodes:
+      describe(node_size, "Size of a node", bytes)
+      describe(node_size_mib, "Size of a node", mib)
+      describe(node_size_gib, "Size of a node", gib)
+      describe(kdf_hash_size, "Size of the input to the KDF hash", bytes)
+      describe(kdf_hash_size_gib, "Size of the input to the KDF hash", gi)
+
+      nodes = sector_size / node_size
+      node_size_mib = node_size / b_in_mib 
+      node_size_gib = node_size / b_in_gib 
+      kdf_hash_size_gib = graph_parents * node_size_gib
+      kdf_hash_size = kdf_hash_size_gib * b_in_gib
 
   Time:
     describe(porep_time, "Time to seal a sector (PoRep proof)", secs)
