@@ -412,16 +412,23 @@ ProofOfReplication:
     // Column comitting data or replica. 
 
 ProofOfReplication (StackedChungParameters):
-  describe(chung_a, "Chung A")
-  describe(chung_c, "Chung C")
-  describe(chung_delta, "Chung delta")
-  describe(chung_sigma, "Chung sigma")
+    describe("stacked_layers","Number of layers of bipartite chung expanders")
+    eps = spacegap 
+    // TODO psi should be regeneration_fraction * safetyMargin 
+    // Right now it is defined as a custom alpha (since that is what is used to
+    // compute beta).
+    psi = alpha
+    // precision = 0.0001
+    sigma = 1 - eps + delta + 0.0001
+    assume(sigma <= 1 - eps + delta)
+    cchung = beta / alpha
+    achung = eps - (cchung * delta / (cchung-1)) + (cchung-1) * (sigma-1) / cchung
+    assume(achung > 0)
 
-  chung_a = spacegap - (chung_c / (chung_c -1)) * chung_delta + ((chung_c-1)/ chung_c) * (chung_sigma - 1)
-
-  stacked_layers = (log2(regeneration_fraction / chung_a) / log2(chung_c)) + 1
-  porep_challenges = -porep_lambda / (log2(1-chung_delta))
-  post_challenges = -post_lambda / (log2(chung_sigma))
+    stacked_layers = log2(psi/achung)/log2(cchung) + 1
+    porep_challenges = -lambda / log2(1 - delta)
+    post_challenges = -lambda / log2(sigma)
+   
 
 EC:
   describe(ec_e, "Number of winning miners per epoch on expectation")

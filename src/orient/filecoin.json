@@ -23,6 +23,4 @@
   "lambda": 10,
   "sector_size_gib": 32,
   "post_challenge_hours": 2,
-  "alpha": 0.2,
-  "beta": 0.53
 }
