@@ -1,14 +1,16 @@
 package runtime
 
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
-import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
-import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
-import util "github.com/filecoin-project/specs/util"
+import (
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
+	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+	util "github.com/filecoin-project/specs/util"
+)
 
 type ActorSubstateCID = actor.ActorSubstateCID
 type ExitCode = exitcode.ExitCode

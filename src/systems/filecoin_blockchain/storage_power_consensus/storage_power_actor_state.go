@@ -7,6 +7,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	util "github.com/filecoin-project/specs/util"
 )
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
@@ -97,7 +98,7 @@ func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power bl
 }
 
 // _sampleMinersToSurprise implements the PoSt-Surprise sampling algorithm
-func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int, ticket block.Ticket) []addr.Address {
+func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) []addr.Address {
 	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
 	// support enumerating by int index. maybe we need that as an interface too,
 	// or something similar to an iterator (or iterator over the keys)
@@ -115,14 +116,14 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 	sampledMiners := make([]addr.Address, 0)
 
 	for chall := 0; chall < challengeCount; chall++ {
-		minerIndex := filproofs.TicketToRandomInt(ticket.Output(), chall, ptSize)
+		minerIndex := filproofs.RandomInt(randomness, chall, ptSize)
 		panic(minerIndex)
 		// hack to turn bigint into int
 		minerIndexInt := 0
 		potentialChallengee := allMiners[minerIndexInt]
 		// call to storage miner actor:
-		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, PROVING_PERIOD/2)){
-		// hack below
+		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, SURPRISE_NO_CHALLENGE_PERIOD)){
+		// hack below TODO fix
 		if true {
 			sampledMiners = append(sampledMiners, potentialChallengee)
 		}

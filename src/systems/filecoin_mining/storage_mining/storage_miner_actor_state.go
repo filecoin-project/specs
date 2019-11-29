@@ -6,12 +6,20 @@ import (
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
-func (st *StorageMinerActorState_I) _isChallenged(rt Runtime) bool {
+func (st *StorageMinerActorState_I) _isChallenged() bool {
 	return st.ChallengeStatus().IsChallenged()
 }
 
-func (st *StorageMinerActorState_I) ShouldChallenge(rt Runtime, minChallengePeriod block.ChainEpoch) bool {
-	return st.ChallengeStatus().ShouldChallenge(rt.CurrEpoch(), minChallengePeriod)
+func (st *StorageMinerActorState_I) _canBeElected(epoch block.ChainEpoch) bool {
+	return st.ChallengeStatus().CanBeElected(epoch)
+}
+
+func (st *StorageMinerActorState_I) _challengeHasExpired(epoch block.ChainEpoch) bool {
+	return st.ChallengeStatus().ChallengeHasExpired(epoch)
+}
+
+func (st *StorageMinerActorState_I) ShouldChallenge(currEpoch block.ChainEpoch, challengeFreePeriod block.ChainEpoch) bool {
+	return st.ChallengeStatus().ShouldChallenge(currEpoch, challengeFreePeriod)
 }
 
 func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
@@ -26,7 +34,7 @@ func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
 	st.Impl().StagedCommittedSectors_ = make(map[sector.SectorNumber]StagedCommittedSectorInfo)
 }
 
-func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoSt block.ChainEpoch) []deal.DealID {
+func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) []deal.DealID {
 	// TODO: verify if we should update Sector utilization for failing sectors
 	// depends on decision around collateral requirement for inactive power
 	// and what happens when a failing sector expires
@@ -40,7 +48,7 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 
 		currEpoch := rt.CurrEpoch()
 		newExpiredDealIDs := make([]deal.DealID, 0)
-		newExpiredDeals := utilizationInfo.DealExpirationAMT().Impl().ExpiredDealsInRange(lastPoSt, currEpoch)
+		newExpiredDeals := utilizationInfo.DealExpirationAMT().Impl().ExpiredDealsInRange(lastPoStResponse, currEpoch)
 
 		for _, expiredDeal := range newExpiredDeals {
 			expiredPower := expiredDeal.Power()

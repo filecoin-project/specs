@@ -19,7 +19,7 @@ type SealCfg struct {
     Partitions   UInt
 }
 
-// SealVerifyInfo is the structure of all thte information a verifier
+// SealVerifyInfo is the structure of all the information a verifier
 // needs to verify a Seal.
 type SealVerifyInfo struct {
     SectorID

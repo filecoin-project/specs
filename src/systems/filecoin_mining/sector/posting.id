@@ -1,5 +1,7 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 
+type PartialTicket Bytes  // 32 bytes
+type ChallengeTicketsCommitment Bytes
 type PoStRandomness Bytes
 
 // Can move to a new posting.id if we think worth it.
@@ -15,33 +17,36 @@ type PoStType enum {
     SurprisePoSt
 }
 
+// TODO: refactor these types to get rid of the squishy optional fields.
 type PoStVerifyInfo struct {
-    Type        PoStType
-    Tickets     [ChallengeTicket]
     PoStCfg
     Randomness  PoStRandomness
+    OnChain     OnChainPoStVerifyInfo
+}
+
+type PoStCandidate struct {
+    PartialTicket  // Optional —  will eventually be omitted for SurprisePoSt verification, needed for now.
+    PrivateProof    PrivatePoStProof  // Optional — should be ommitted for verification.
+    SectorID
+    ChallengeIndex  UInt
 }
 
 type OnChainPoStVerifyInfo struct {
-    Tickets    [ChallengeTicket]
-    PoStEpoch  block.ChainEpoch
-    Proof      PoStProof
+    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+    Candidates  [PoStCandidate]
+    Randomness  PoStRandomness
+    PoStEpoch   block.ChainEpoch
+    Proof       PoStProof
 }
 
 type PoStWitness struct {
-    Candidates [ChallengeTicket]
+    Candidates [PoStCandidate]
 }
 
 type PoStProof struct {//<curve, system> {
     Type        PoStType
-    Tickets     [ChallengeTicket]
+    Candidates  [PoStCandidate]
     ProofBytes  Bytes
-}
-
-type ChallengeTicket struct {
-    Ticket        Bytes  // unhashed
-    PrivateProof  PrivatePoStProof
-    SectorID
 }
 
 type PrivatePoStProof struct {}

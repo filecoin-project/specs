@@ -30,8 +30,7 @@ type StoragePowerActorState struct {
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount
-    _sampleMinersToSurprise(rt Runtime, challengeCount int, ticket block.Ticket) [addr.Address]
-    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
+    _sampleMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) [addr.Address]
 }
 
 type StoragePowerActorCode struct {
@@ -66,9 +65,9 @@ type StoragePowerActorCode struct {
     Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
 
     shouldChallenge(
-        minerAddr           addr.Address
-        currEpoch           block.ChainEpoch
-        minChallengePeriod  block.ChainEpoch
+        minerAddr            addr.Address
+        currEpoch            block.ChainEpoch
+        challengeFreePeriod  block.ChainEpoch
     ) bool
 
     // this should call ReportConsensusFault, numSectors should be all sectors
