@@ -51,10 +51,7 @@ type ChallengeStatus struct {
     IsChallenged() bool  // only True when proving SurprisePoSt (implicit because ElectionPoSt completes within a block)
     ChallengeHasExpired(currEpoch block.ChainEpoch) bool
     CanBeElected(currEpoch block.ChainEpoch) bool
-    ShouldChallenge(
-        currEpoch            block.ChainEpoch
-        challengeFreePeriod  block.ChainEpoch
-    ) bool
+    ShouldChallenge() bool
 }
 
 type PreCommittedSector struct {
@@ -87,10 +84,7 @@ type StorageMinerActorState struct {
     _isChallenged()         bool
     _canBeElected(currEpoch block.ChainEpoch) bool
     _challengeHasExpired(currEpoch block.ChainEpoch) bool
-    _shouldChallenge(
-        currEpoch            block.ChainEpoch
-        challengeFreePeriod  block.ChainEpoch
-    ) bool
+    _shouldChallenge() bool
     _verifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)
 

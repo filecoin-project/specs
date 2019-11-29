@@ -148,12 +148,12 @@ For i=0; i < challNumber; i++:
     ranHash = H(ticket, i)
     ranIndex = HashToInt(ranHash) mod len(PowerTable)
     chosenMiner = PowerTable[ranIndex].address
-    // a miner should only be challenged if they have not submitted a post in ProvingPeriod/SURPRISE_CHALLENGE_FREQUENCY epochs and are not currently challenged
-    if chosenMiner.shouldChallenge(SURPRISE_NO_CHALLENGE_PERIOD):
+    // a miner can be challenged at any time in the proving period
+    if chosenMiner.shouldChallenge():
         sampledMiners.append(chosenMiner)
 ```
 
-The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled SURPRISE_CHALLENGE_FREQUENCY times per proving period on expectation, but would only be sampled if they are past the SURPRISE_NO_CHALLENGE_PERIOD (which should be PP/SPF so they are challenged in that period) in their proving period leading to one challenge per proving period on expectation.
+The surprise process described above is triggered by the cron actor in the storage_power_actor (through which the power table is searched for challengeable miners). A miner should be getting randomly sampled SURPRISE_CHALLENGE_FREQUENCY times per proving period on expectation.
 
 This is done as follows: if there are M miners in the power table and a Proving Period of length P, SPF*M/P challenges will be issued at each epoch. Miners are sampled using a randomness ticket from the chain and will only be challenged if they have not submitted a PoSt in at least PP/SPF epochs and are not currently being challenged (this is checked using the storage_miner_actor).
 

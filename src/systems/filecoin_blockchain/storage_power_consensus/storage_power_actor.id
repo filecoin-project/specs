@@ -64,12 +64,6 @@ type StoragePowerActorCode struct {
 
     Surprise(rt Runtime, ticket block.Ticket) [addr.Address]
 
-    shouldChallenge(
-        minerAddr            addr.Address
-        currEpoch            block.ChainEpoch
-        challengeFreePeriod  block.ChainEpoch
-    ) bool
-
     // this should call ReportConsensusFault, numSectors should be all sectors
     // ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
 }
