@@ -22,9 +22,11 @@ type VRFResult struct {
 
 type Ticket Bytes
 type PoSt Bytes
+type Block Bytes
 type DomainSeparationTag union {
     Ticket
     PoSt
+    Block   
 }
 
 type InputDelimeter union {

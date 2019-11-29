@@ -1,7 +1,6 @@
 package block
 
 import (
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -47,17 +46,10 @@ func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 }
 
 func (chain *Chain_I) RandomnessAtEpoch(epoch ChainEpoch) util.Bytes {
-	ts := chain.TipsetAtEpoch(epoch)
-	priorRand := ts.MinTicket().DrawRandomness(epoch)
 	// doesn't matter if ts.Epoch() != epoch
 	// since we generate new ticket from prior one in any case
-	// else we use ticket from that epoch and derive new randomness from it
-
-	var input []byte
-	input = append(input, priorRand...)
-	input = append(input, byte(filcrypto.InputDelimeter_Case_Bytes))
-	input = append(input, byte(epoch))
-	return SHA256(input)
+	ts := chain.TipsetAtEpoch(epoch)
+	return ts.MinTicket().DrawRandomness(epoch)
 }
 
 func (chain *Chain_I) HeadEpoch() ChainEpoch {

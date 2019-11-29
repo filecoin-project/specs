@@ -243,3 +243,48 @@ func (a *StorageMinerActorCode_I) IsValidElection(onChainInfo sector.OnChainPoSt
 	panic("TODO")
 	return false
 }
+
+func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {
+	var workerAddress addr.Address
+	var workerKeyPair filcrypto.SigKeyPair
+	panic("TODO") // TODO: get worker address and key pair
+
+	// TODO: is this just workerAddress, or is there a separation here
+	// (worker is AccountActor, workerMiner is StorageMinerActor)?
+	var workerMinerActorAddress addr.Address
+	panic("TODO")
+
+	var gasPrice msg.GasPrice
+	var gasLimit msg.GasAmount
+	panic("TODO") // TODO: determine gas price and limit
+
+	var callSeqNum actor.CallSeqNum
+	panic("TODO") // TODO: retrieve CallSeqNum from worker
+
+	messageParams := actor.MethodParams([]actor.MethodParam{
+		actor.MethodParam(poster.Serialize_PoStSubmission(postSubmission)),
+	})
+
+	unsignedMessage := msg.UnsignedMessage_Make(
+		workerAddress,
+		workerMinerActorAddress,
+		Method_StorageMinerActor_SubmitPoSt,
+		messageParams,
+		callSeqNum,
+		actor.TokenAmount(0),
+		gasPrice,
+		gasLimit,
+	)
+
+	signedMessage, err := msg.Sign(unsignedMessage, workerKeyPair)
+	if err != nil {
+		return err
+	}
+
+	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
