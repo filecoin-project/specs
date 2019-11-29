@@ -171,7 +171,8 @@ ProofOfSpacetime:
     describe(post_snark_size_kib, "Size of a Post proof", kib)
     describe(post_snark_partition_constraints, "Number of constraints for a PoSt partition")
 
-    inclusion_proof = merkle_tree_hash_constraints * log2(nodes)
+    // TODO: make sure VectorR/etc are handled correctly
+    inclusion_proof = merkle_tree_hash_constraints * commr_tree_depth 
     post_inclusion_proofs = inclusion_proof * post_challenges
     ticket_proofs = ticket_constraints * post_challenges
     // TODO: handle different constructions
@@ -255,7 +256,6 @@ ProofOfReplication:
     describe(porep_commit_time, "Time to generate CommC, CommR and CommQ", secs)
     describe(porep_commit_time_mins, "Time to generate CommC, CommR and CommQ", mins)
     describe(porep_commit_time_parallel, "Time to generate CommC, CommR and CommQ in parallel", secs)
-
 
     describe(commr_time, "Time to generate CommR", secs)
     describe(commd_time, "Time to generate CommD", secs)
@@ -384,7 +384,7 @@ ProofOfReplication:
     window_labeling_proof = labeling_proofs * windows
 
     // Q and R
-    replica_inclusion = merkle_tree_hash_constraints * log2(nodes)
+    replica_inclusion = merkle_tree_hash_constraints * commr_tree_depth 
     replica_inclusions = replica_inclusion * porep_challenges
     window_replica_inclusions = replica_inclusions * windows
 
