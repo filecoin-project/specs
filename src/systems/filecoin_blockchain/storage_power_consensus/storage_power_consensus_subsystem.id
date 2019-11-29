@@ -47,10 +47,10 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     GetElectionProofSeed(chain block.Chain, epoch block.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(chain block.Chain, epoch block.ChainEpoch) util.Randomness
+    GetSealSeed(chain block.Chain, epoch block.ChainEpoch) sector.SealRandomness
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) util.Randomness
+    GetPoStChallenge(chain block.Chain, epoch block.ChainEpoch) sector.PoStRandomness
 
     GetFinality()     block.ChainEpoch
     FinalizedEpoch()  block.ChainEpoch

@@ -26,7 +26,7 @@ type Block Bytes
 type DomainSeparationTag union {
     Ticket
     PoSt
-    Block   
+    Block
 }
 
 type InputDelimeter union {
