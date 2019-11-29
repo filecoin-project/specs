@@ -62,7 +62,10 @@ Utils:
 ProofOfSpacetime:
   // post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
   Security:
-    describe(post_challenges, "Number of challenges in a PoRep proof")
+    describe(post_challenges, "Number of challenges in a PoSt proof")
+    describe(post_lambda, "Bits of security of a PoSt proof")
+    describe(post_soundness, "Probability of an adversary to succeed in generating a convincing PoSt proof")
+    post_soundness = expt(2, -post_lambda)
 
   ProofGeneration:
     describe(post_time, "Time to generate a PoSt Proof on a single core CPU", secs)
@@ -171,8 +174,9 @@ ProofOfReplication:
     describe(porep_challenges, "Number of challenges in a PoRep proof")
     describe(porep_lambda, "Bits of security of a PoRep proof")
     describe(spacegap, "Maximum difference in storage between an honest prover and a malicious prover")
+    describe(porep_soundness, "Probability of an adversary to succeed in generating a convincing PoRep proof")
 
-    porep_challenges = -porep_lambda / (log2(1-spacegap/4))
+    porep_soundness = expt(2, -porep_lambda)
 
   Graph:
     describe(nodes, "Number of nodes in a sector")
@@ -188,7 +192,7 @@ ProofOfReplication:
     describe(graph_parents, "Number of parents of a node in the PoRep window graph")
     describe(drg_parents, "Number of DRG parents of a node in the PoRep window graph")
     describe(expander_parents, "Number of Chung Expander parents of a node in the PoRep window graph")
-    describe(drg_layers, "Number of layers in the DRG")
+    describe(stacked_layers, "Number of layers in the DRG")
     describe(wrapper_parents, "Number of parents in the wrapper layer")
 
     describe(node_size, "Size of a node", bytes)
@@ -267,7 +271,7 @@ ProofOfReplication:
 
     CommC:
       describe(commc_tree_time, "Time to generate the merkle tree of CommC (after the leaves have been computed)", secs)
-      commc_tree_time = (window_comm_tree_time + window_comm_leaves_time) * drg_layers 
+      commc_tree_time = (window_comm_tree_time + window_comm_leaves_time) * stacked_layers 
 
   Encoding:
     describe(encoding_time, "Time to encode a sector", secs)
@@ -283,7 +287,7 @@ ProofOfReplication:
     encoding_time = encoding_window_time * windows
     encoding_time_parallel = encoding_time / rig_cores
 
-    encoding_window_time = (window_nodes * graph_parents) * kdf_time * drg_layers
+    encoding_window_time = (window_nodes * graph_parents) * kdf_time * stacked_layers
     encoding_window_time_parallel = encoding_window_time / rig_cores
 
     Asic:
@@ -352,11 +356,11 @@ ProofOfReplication:
     // C
     window_inclusion = merkle_tree_hash_constraints * log2(window_nodes)
     window_inclusions =  window_inclusion * porep_challenges * (graph_parents + 1)
-    column_leaf = column_leaf_hash_constraints * drg_layers
+    column_leaf = column_leaf_hash_constraints * stacked_layers
     column_leaves = column_leaf * porep_challenges * (graph_parents + 1)
     window_column_leaves = column_leaves * windows
     labeling_proof = kdf_constraints * graph_parents
-    labeling_proofs = labeling_proof * drg_layers * porep_challenges
+    labeling_proofs = labeling_proof * stacked_layers * porep_challenges
     window_labeling_proof = labeling_proofs * windows
 
     // Q and R
@@ -379,6 +383,18 @@ ProofOfReplication:
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
 
     // Column comitting data or replica. 
+
+ProofOfReplication (StackedChungParameters):
+  describe(chung_a, "Chung A")
+  describe(chung_c, "Chung C")
+  describe(chung_delta, "Chung delta")
+  describe(chung_sigma, "Chung sigma")
+
+  chung_a = spacegap - (chung_c / (chung_c -1)) * chung_delta + ((chung_c-1)/ chung_c) * (chung_sigma - 1)
+
+  stacked_layers = (log2(regeneration_fraction / chung_a) / log2(chung_c)) + 1
+  porep_challenges = -porep_lambda / (log2(1-chung_delta))
+  post_challenges = -post_lambda / (log2(chung_sigma))
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
