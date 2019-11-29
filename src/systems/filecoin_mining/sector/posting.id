@@ -34,6 +34,7 @@ type PoStCandidate struct {
 type OnChainPoStVerifyInfo struct {
     CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
     Candidates  [PoStCandidate]
+    Randomness  PoStRandomness
     PoStEpoch   block.ChainEpoch
     Proof       PoStProof
 }
