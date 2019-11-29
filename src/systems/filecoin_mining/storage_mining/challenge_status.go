@@ -45,7 +45,7 @@ func (cs *ChallengeStatus_I) CanBeElected(currEpoch block.ChainEpoch) bool {
 
 	// TODO: pull in from consts
 	PROVING_PERIOD := block.ChainEpoch(0)
-	return currEpoch < cs._lastPoStSuccessEpoch()+PROVING_PERIOD
+	return currEpoch < cs._lastPoStSuccessEpoch()+PROVING_PERIOD || cs._lastPoStFailureEpoch() > cs._lastPoStSuccessEpoch()
 }
 
 func (cs *ChallengeStatus_I) ShouldChallenge() bool {
