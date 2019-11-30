@@ -87,7 +87,7 @@ type ProofAuxTmp struct {
     CommCTreePath   file.Path
     CommQTreePath   file.Path
 
-    Seeds           [SealSeed]
+    Seed            SealSeed
     KeyLayers       [Bytes]
 }
 

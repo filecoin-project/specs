@@ -62,7 +62,7 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 					CommDTreePaths_: sealArtifacts.CommDTreePaths(),
 					CommCTreePath_:  sealArtifacts.CommCTreePath(),
 					CommQTreePath_:  sealArtifacts.CommQTreePath(),
-					Seeds_:          sealArtifacts.Seeds(),
+					Seed_:           sealArtifacts.Seed(),
 					KeyLayers_:      sealArtifacts.KeyLayers(),
 				}})).Impl()
 }
