@@ -14,7 +14,6 @@ type PoStSubmission struct {
 }
 
 type PoStGenerator struct {
-    // TODO: Can we put the PoStCfg and/or SectorStore in this struct?
     PoStCfg      sector.PoStCfg
     SectorStore  sector_index.SectorStore
 
