@@ -47,6 +47,4 @@ type PoStProof struct {//<curve, system> {
     ProofBytes  Bytes
 }
 
-type PrivatePoStCandidateProof struct {
-    ChallengeSeed PoStRandomness
-}
+type PrivatePoStCandidateProof struct {}

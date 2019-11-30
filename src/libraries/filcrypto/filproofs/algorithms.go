@@ -662,6 +662,7 @@ func LoadMerkleTree(path file.Path) MerkleTree {
 }
 
 func (ip *InclusionProof_I) Verify(root []byte, challenge UInt) bool {
+	// FIXME: need to verify proof length of private inclusion proofs.
 	panic("TODO")
 }
 
@@ -914,24 +915,33 @@ func generateCandidate(randomness sector.PoStRandomness, aux sector.PersistentPr
 		}
 	}
 
-	preimage := randomness
-	preimage = append(preimage, getProverID(sectorID.MinerID())...)
-	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorID.Number()), 8)...)
-	preimage = append(preimage, data...)
-	partialTicket := sector.PartialTicket(HashBytes_PedersenHash(preimage))
+	partialTicket := computePartialTicket(randomness, sectorID, data)
 
-	privateProof := sector.PrivatePoStCandidateProof_I{}
+	privateProof := InternalPrivateCandidateProof{
+		InclusionProofs: inclusionProofs,
+	}
 
 	candidate := sector.PoStCandidate_I{
 		PartialTicket_:  partialTicket,
-		PrivateProof_:   &privateProof,
+		PrivateProof_:   privateProof.externalize(),
 		SectorID_:       sectorID,
 		ChallengeIndex_: sectorChallengeIndex,
 	}
 	return &candidate
 }
 
+func computePartialTicket(randomness sector.PoStRandomness, sectorID sector.SectorID, data []byte) sector.PartialTicket {
+	preimage := randomness
+	preimage = append(preimage, getProverID(sectorID.MinerID())...)
+	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorID.Number()), 8)...)
+	preimage = append(preimage, data...)
+	partialTicket := sector.PartialTicket(HashBytes_PedersenHash(preimage))
+
+	return partialTicket
+}
+
 func (sdr *WinStackedDRG_I) _generatePoStCandidates(challengeSeed sector.PoStRandomness, eligibleSectors []sector.SectorID, candidateCount int, sectorStore sector_index.SectorStore) (candidates []sector.PoStCandidate) {
+
 	nodes := int(sdr.Nodes())
 	leafChallengeCount := int(sdr.LeafChallengeCount())
 	challengeRangeSize := int(sdr.ChallengeRangeSize())
@@ -948,36 +958,141 @@ func (sdr *WinStackedDRG_I) _generatePoStCandidates(challengeSeed sector.PoStRan
 	return candidates
 }
 
-type PrivatePoStProof struct {
-}
-
 func (sdr *WinStackedDRG_I) CreatePoStProof(privateCandidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) sector.PoStProof {
 	privateProof := sdr.CreatePrivatePoStProof(privateCandidateProofs, challengeSeed)
 
-	var candidates []sector.PoStCandidate // FIXME
+	// var candidates []sector.PoStCandidate // FIXME
 
-	// // Sanity check: newly-created proofs must pass verification.
-	util.Assert(sdr.VerifyPrivatePoStProof(privateProof, candidates))
+	// Hmmmmm: we cannot perform this santiy check without the sectorIDs. Should we require them just for that purpose or perform the check earlier?
+	// Sanity check: newly-created proofs must pass verification.
+	//util.Assert(sdr.VerifyPrivatePoStProof(privateProof, candidates, sectorIDs, sectorCommitments))
 
 	return sdr.CreatePoStCircuitProof(privateProof)
 }
 
+type PrivatePoStProof struct {
+	ChallengeSeed   sector.PoStRandomness
+	CandidateProofs []sector.PrivatePoStCandidateProof
+}
+
 func (sdr *WinStackedDRG_I) CreatePrivatePoStProof(candidateProofs []sector.PrivatePoStCandidateProof, challengeSeed sector.PoStRandomness) PrivatePoStProof {
+	return PrivatePoStProof{
+		ChallengeSeed:   challengeSeed,
+		CandidateProofs: candidateProofs,
+	}
+}
+
+type InternalPrivateCandidateProof struct {
+	InclusionProofs []InclusionProof
+}
+
+// This exists because we need to pass private proofs out of filproofs for winner selection.
+// Actually implementing it would (will?) be tedious, since it means doing the same for InclusionProofs.
+func (p *InternalPrivateCandidateProof) externalize() sector.PrivatePoStCandidateProof {
 	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(privateProof PrivatePoStProof, candidates []sector.PoStCandidate) bool {
-	panic("TODO")
+// This is the inverse of InternalPrivateCandidateProof.externalize and equally tedious.
+func newInternalPrivateProof(externalPrivateProof sector.PrivatePoStCandidateProof) InternalPrivateCandidateProof {
+	return InternalPrivateCandidateProof{}
+}
+
+func (sdr *WinStackedDRG_I) VerifyInternalPrivateCandidateProof(p *InternalPrivateCandidateProof, challengeSeed sector.PoStRandomness, candidate sector.PoStCandidate, commRLast Commitment) bool {
+	util.Assert(candidate.PrivateProof() == nil)
+
+	nodes := int(sdr.Nodes())
+	challengeRangeSize := int(sdr.ChallengeRangeSize())
+
+	sectorID := candidate.SectorID()
+	claimedPartialTicket := candidate.PartialTicket()
+
+	allInclusionProofs := p.InclusionProofs
+
+	var ticketData []byte
+
+	for _, p := range allInclusionProofs {
+		ticketData = append(ticketData, p.Leaf()...)
+	}
+
+	// Check partial ticket
+	calculatedTicket := computePartialTicket(challengeSeed, sectorID, ticketData)
+
+	if len(calculatedTicket) != len(claimedPartialTicket) {
+		return false
+	}
+	for i, byte := range claimedPartialTicket {
+		if byte != calculatedTicket[i] {
+			return false
+		}
+	}
+
+	// Helper to get InclusionProofs sequentially.
+	next := func() InclusionProof {
+		if len(allInclusionProofs) < 1 {
+			return nil
+		}
+
+		proof := allInclusionProofs[0]
+		allInclusionProofs = allInclusionProofs[1:]
+		return proof
+	}
+
+	// Check all inclusion proofs.
+	for i := 0; i < int(sdr.LeafChallengeCount()); i++ {
+		leafChallenge := generateLeafChallenge(challengeSeed, candidate.ChallengeIndex(), i, nodes, challengeRangeSize)
+		for j := 0; j < challengeRangeSize; j++ {
+			leafIndex := leafChallenge + UInt(j)
+			proof := next()
+			if proof == nil {
+				// All required inclusion proofs must be provided.
+				return false
+			}
+			if !proof.Verify(commRLast, leafIndex) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func (sdr *WinStackedDRG_I) VerifyPrivatePoStProof(privateProof PrivatePoStProof, candidates []sector.PoStCandidate, sectorIDs []sector.SectorID, sectorCommitments sector.SectorCommitments) bool {
+	// This is safe by construction.
+	challengeSeed := privateProof.ChallengeSeed
+
+	for i, p := range privateProof.CandidateProofs {
+		proof := newInternalPrivateProof(p)
+
+		candidate := candidates[i]
+		ci := candidate.ChallengeIndex()
+		expectedSectorID := sectorIDs[ci]
+
+		challengedSectorID := generateSectorChallenge(challengeSeed, i, sectorIDs)
+
+		if expectedSectorID != challengedSectorID {
+			return false
+		}
+
+		commRLast := sectorCommitments[expectedSectorID]
+
+		if !sdr.VerifyInternalPrivateCandidateProof(&proof, challengeSeed, candidate, commRLast) {
+			return false
+		}
+	}
+	return true
 }
 
 func (sdr *WinStackedDRG_I) CreatePoStCircuitProof(privateProof PrivatePoStProof) sector.PoStProof {
 	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) VerifyPoSTProof(privateProof PrivatePoStProof, challengeSeed sector.PoStRandomness, candidates []sector.PoStCandidate) bool {
-	panic("TODO")
-}
-func (sdr *WinStackedDRG_I) _verifyPoSt(sv sector.PoStVerifyInfo) bool {
+func (sdr *WinStackedDRG_I) _verifyPoStProof(sv sector.PoStVerifyInfo) bool {
+	// commT := sv.CommT()
+	// candidates := sv.Candidates()
+	// randomness := sv.Randomness()
+	// postProof := sv.OnChain.Proof()
+
+	// Verify circuit proof.
 	panic("TODO")
 }
 
@@ -993,7 +1108,7 @@ func (sdr *WinStackedDRG_I) CreateElectionPoStProof(privateCandidateProofs []sec
 }
 
 func (sdr *WinStackedDRG_I) VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool {
-	return sdr._verifyPoSt(sv)
+	return sdr._verifyPoStProof(sv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1008,7 +1123,7 @@ func (sdr *WinStackedDRG_I) CreateSurprisePoStProof(privateCandidateProofs []sec
 }
 
 func (sdr *WinStackedDRG_I) VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool {
-	return sdr._verifyPoSt(sv)
+	return sdr._verifyPoStProof(sv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
