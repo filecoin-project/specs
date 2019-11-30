@@ -1,7 +1,9 @@
 // If you wish to make an apple pie from scratch, you must first uber-calc the universe.
 
 // TODO:
-// - Time cost per constraint
+// - make sure chung works so that we can remove hard-coded layers, parents and challenges
+// - update supranational calc with new one
+// - solve all the TODOs
 Rig:
   describe(rig_sectors_min, "Minimum sectors require to mine")
 
@@ -15,6 +17,7 @@ Rig:
 
   describe(rig_malicious_cost_per_year, "Cost of the malicious computing rig per year")
   describe(rig_cores, "Number of CPU cores")
+  describe(rig_snark_parallelization, "Number of SNARK proofs that can be generated in parallel")
   describe(rig_storage_read_mbs, "Sequential read speed (MB/s)")
   describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
 
@@ -30,7 +33,6 @@ Crypto:
   describe(snark_size, "Size of a SNARK proof", bytes)
   describe(snark_constraint_time, "Time of proving a SNARK constraint", secs)
   describe(hashing_amax, "Factor of difference between stock CPU hashing and the fastest hashing")
-
   describe(merkle_tree_datahash_constraints, "Constraints for hashing two nodes in CommD")
   describe(merkle_tree_datahash_time, "Time to hash two nodes in CommD", secs)
   describe(merkle_tree_hash_constraints, "Constraints for hashing two nodes in CommR")
@@ -42,6 +44,7 @@ Utils:
   describe(cid_size, "Size of a CID", bytes)
   describe(secs_in_month, "Number of seconds in a month")
   describe(secs_in_year, "Number of seconds in a year")
+  describe(secs_in_day, "Number of seconds in a day")
   describe(b_in_eib, "Number of bytes in a EiB")
   describe(b_in_pib, "Number of bytes in a PiB")
   describe(b_in_tib, "Number of bytes in a TiB")
@@ -56,8 +59,9 @@ Utils:
   b_in_gib = (1024 * 1024 * 1024)
   b_in_mib = (1024 * 1024)
   b_in_kib = 1024
-  secs_in_month = (24 * 30 * 60 * 60)
-  secs_in_year = (24 * 30 * 60 * 60 * 365)
+  secs_in_month = (24 * 60 * 60 * 30)
+  secs_in_year = (24  * 60 * 60 * 365)
+  secs_in_day = (24 * 60 * 60)
   cid_size = 32 + 1 + 1 + 1
   to_i = 1024/1000
 
@@ -114,12 +118,13 @@ ProofOfSpacetime:
       Generation:
         describe(post_mtree_regen_hashnodes, "Number of intermediary nodes to be regenerated for a single replica merkle tree inclusion proof in PoSt")
         describe(post_mtree_regen_nodes, "Number of leaf nodes to be access for a single replica merkle tree inclusion proof in PoSt")
-        describe(post_inclusion_time, "Time to generate a Merkle tree inclusion proof for PoSt", secs)
+        describe(post_inclusion_time, "Time to generate a Merkle tree inclusion proof for PoSt (assuming all data in memory)", secs)
 
         post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1
         // TODO: this is for a single inclusion, check if this is used in the right way
         post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted) - 1
         post_inclusions_time = post_inclusion_time * post_challenges
+        post_inclusions_time_parallel = post_inclusions_time / rig_cores
 
       Generation (Wrapping):
         post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time
@@ -170,6 +175,7 @@ ProofOfSpacetime:
     describe(post_snark_size, "Size of a PoSt proof", bytes)
     describe(post_snark_size_kib, "Size of a Post proof", kib)
     describe(post_snark_partition_constraints, "Number of constraints for a PoSt partition")
+    describe(post_snark_partition_time, "Time to generate a single PoSt SNARK partition", secs)
 
     // TODO: make sure VectorR/etc are handled correctly
     inclusion_proof = merkle_tree_hash_constraints * commr_tree_depth 
@@ -181,6 +187,12 @@ ProofOfSpacetime:
     post_snark_size = post_snark_partitions * snark_size
     post_snark_size_kib = post_snark_size / b_in_kib
     post_snark_time = snark_constraint_time * post_snark_constraints
+    post_snark_partition_time = snark_constraint_time * post_snark_constraints
+    // Parallelization calculation: it must take at least the time for a single snark
+    // the remaining can be done in parallel
+    // Similar in spirit to:
+    // min(porep_snark_partition_time, porep_snark_time / snarrk_parallelization)
+    post_snark_time_parallel = post_snark_partition_time + (post_snark_time - post_snark_partition_time) / (rig_snark_parallelization - 1)
 
 ProofOfReplication:
   Security:
@@ -240,6 +252,9 @@ ProofOfReplication:
     describe(porep_proof_gen, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium)", secs)
     describe(porep_proof_gen_parallel, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium) in parallel", secs)
 
+    porep_proof_gen = porep_snark_time // TODO: add post_inclusions_time + porep_data_access 
+    porep_proof_gen_parallel = porep_snark_time_parallel
+
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
     // TODO: this should be max(), not sum
     porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
@@ -266,7 +281,7 @@ ProofOfReplication:
 
     describe(commr_time, "Time to generate CommR", secs)
     describe(commd_time, "Time to generate CommD", secs)
-    describe(commc_time, "Time to generate CommC", secs)
+    describe(commc_time, "Time to generate the merkle tree of CommC (assuming leaves in memory)", secs)
 
     commit_size = cid_size
     // TODO: should be missing *2
@@ -283,6 +298,7 @@ ProofOfReplication:
 
     // TODO commr might be twice depending on CommQ
     porep_commit_time = commr_time + commc_time
+    porep_commit_time_parallel = porep_commit_time / rig_cores 
     porep_commit_time_mins = porep_commit_time / 60
 
     CommR (VectorR):
@@ -294,8 +310,7 @@ ProofOfReplication:
       commr_tree_depth = log2(window_nodes)
 
     CommC:
-      describe(commc_tree_time, "Time to generate the merkle tree of CommC (after the leaves have been computed)", secs)
-      commc_tree_time = (window_comm_tree_time + window_comm_leaves_time) * stacked_layers 
+      commc_time = (window_comm_tree_time + window_comm_leaves_time) * stacked_layers
 
   Encoding:
     describe(encoding_time, "Time to encode a sector", secs)
@@ -354,6 +369,7 @@ ProofOfReplication:
     describe(porep_snark_constraints, "Constraints for a PoRep")
     describe(porep_snark_partitions, "Number of partitions of a PoRep proof")
     describe(porep_snark_time, "Time to generate a PoRep SNARK proof", secs)
+    describe(porep_snark_time_parallel, "Time to compute a PoRep snark in parallel")
     describe(porep_snark_size, "Size of a PoRep proof", bytes)
     describe(porep_snark_size_kib, "Size of a PoRep proof", kib)
     describe(porep_snark_partition_constraints, "Number of constraints for a PoRep partition")
@@ -373,6 +389,7 @@ ProofOfReplication:
     describe(column_leaf, "Constraints to check a single leaf generation from a column in a window")
     describe(column_leaves, "Constraints to check all the leaves generation required in a window")
     describe(window_column_leaves, "Constraints to check all the leaves generation required for all windows")
+    describe(porep_snark_partition_time, "Time to compute a single snark partion", secs)
 
     // D
     // Data layer committed with merkle tree
@@ -399,6 +416,12 @@ ProofOfReplication:
     porep_snark_size = porep_snark_partitions * snark_size
     porep_snark_size_kib = porep_snark_size / b_in_kib
     porep_snark_time = snark_constraint_time * porep_snark_constraints
+    porep_snark_partition_time = snark_constraint_time * porep_snark_constraints
+    // Parallelization calculation: it must take at least the time for a single snark
+    // the remaining can be done in parallel
+    // Similar in spirit to:
+    // min(porep_snark_partition_time, porep_snark_time / snarrk_parallelization)
+    porep_snark_time_parallel = porep_snark_partition_time + (porep_snark_time - porep_snark_partition_time) / (rig_snark_parallelization - 1)
 
     Constraints (WindowEncoding):
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
@@ -480,13 +503,16 @@ Filecoin:
     seals_size_per_block = seals_size_per_year / blocks_in_a_year
     posts_size_per_block = posts_size_per_year / blocks_in_a_year
 
-    proofs_per_block = seals_size_per_block + proofs_per_block
+    proofs_per_block = seals_size_per_block + posts_size_per_block
 
     PoSt (ElectionWithFallbackPoSt):
       describe(fposts_per_sector_per_year, "Number of fallback post proofs per sector per year")
       describe(eposts_per_sector_per_year, "Number of election post proofs per sector per year")
       describe(fallback_ratio, "Fraction of fallback PoSts")
       describe(fallback_period, "Time between last proof submitted and a required fallback PoSt", secs)
+      describe(fallback_period_days, "Time between last proof submitted and a required fallback PoSt", secs)
+
+      fallback_period_days = fallback_period / secs_in_day
       posts_per_sector_per_year = eposts_per_sector_per_year + fposts_per_sector_per_year
 
       // TODO: model single ticket vs multiple tickets
@@ -511,6 +537,7 @@ Filecoin:
       epost_data_access = post_data_access * epost_challenged_sectors
       epost_data_access_parallel = epost_data_access_parallel / rig_storage_parallelization  
       epost_tickets_gen = (post_inclusions_time + post_ticket_gen) * epost_challenged_sectors
+      epost_tickets_gen_parallel = epost_tickets_gen / rig_cores
 
       epost_time = epost_data_access + epost_tickets_gen
       epost_time_parallel = epost_data_access_parallel + epost_tickets_gen_parallel
