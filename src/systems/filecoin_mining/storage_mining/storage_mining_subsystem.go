@@ -82,11 +82,16 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 		return // fail to generate post candidates
 	}
 
+	// TODO Fix
+	var currState stateTree.StateTree
 	winningCandidates := make([]sector.PoStCandidate, 0)
+	st := sms._getStorageMinerActorState(currState, sms._keyStore().MinerAddress())
 
 	for _, candidate := range candidates {
-		// TODO align on worker address
-		if sms._consensus().IsWinningPartialTicket(candidate.PartialTicket()) {
+		// TODO: fix
+		sectorNum := sector.SectorNumber(0)
+		sectorPower := st._getCurrUtilization(sectorNum)
+		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
 	}
@@ -269,9 +274,18 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 	return isPoStVerified
 }
 
-func (a *StorageMinerActorCode_I) IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool {
-	panic("TODO")
-	return false
+func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
+
+	for _, info := range onChainInfo.Candidates() {
+		// TODO: fix
+		sectorNum := sector.SectorNumber(0)
+		sectorPower := st._getCurrUtilization(sectorNum)
+		if !sms._consensus().IsWinningPartialTicket(header.StateTree(), info.PartialTicket(), sectorPower) {
+			return false
+		}
+	}
+	return true
 }
 
 // func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {

@@ -7,9 +7,11 @@ type ExpectedConsensus struct {
     ComputeChainWeight(tipset block.Tipset) block.ChainWeight
     IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
     IsWinningChallengeTicket(
-        electionProof  Bytes
-        targetNum      util.UVarint
-        targetDen      util.UVarint
+        challengeTicket  util.Bytes
+        sectorPower      block.StoragePower
+        totalPower       block.StoragePower
+        sampleNum        util.UVarint
+        sampleDenom      util.UVarint
     ) bool
     GetBlockRewards(
         electionProof  block.ElectionProof

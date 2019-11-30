@@ -2,9 +2,12 @@ package storage_power_consensus
 
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -66,17 +69,41 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(partialTicket sector.PartialTicket) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower) bool {
 
-	// TODO: Send message to SPA to get ActivePowerInSector associated with sector
-	activePowerInSector := uint64(block.StoragePower(0))
-
-	// TODO: Send message to SPA
-	totalPower := uint64(block.StoragePower(0))
-
+	// finalize the partial ticket
 	challengeTicket := block.SHA256(partialTicket)
 
-	return spc.ec().IsWinningChallengeTicket(challengeTicket, activePowerInSector, totalPower)
+	st := spc._getStoragePowerActorState(stateTree)
+	activePower := st._getActivePower()
+
+	// TODO: pull from constants
+	SAMPLE_NUM := util.UVarint(1)
+	SAMPLE_DENOM := util.UVarint(25)
+
+	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, activePower, SAMPLE_NUM, SAMPLE_DENOM)
+}
+
+// TODO: fix linking here
+var node node_base.FilecoinNode
+
+func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) StoragePowerActorState {
+	// powerAddr := stateTree.GetActorAddress(stateTree.ActorName_StoragePowerActor)
+	// TODO Fix
+	var powerAddr addr.Address
+	actorState := stateTree.GetActorState(powerAddr)
+	substateCID := actorState.State()
+
+	substate := node.LocalGraph().Get(ipld.CID(substateCID))
+	// TODO fix conversion to bytes
+	panic(substate)
+	var serializedSubstate util.Serialization
+	st, err := Deserialize_StoragePowerActorState(serializedSubstate)
+
+	if err == nil {
+		panic("Deserialization error")
+	}
+	return st
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {

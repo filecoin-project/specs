@@ -65,8 +65,10 @@ The miner calls `GenerateCandidates` from proofs with their non-faulted (declare
 
 4. **(check Challenge Ticket(s) for winners)**
 Given a returned PartialTicket, miner checks it is a winning ticket. Specifically, they do the following:
-    - `ChallengeTicket = Finalize(PartialTicket).  = H(ChallengeTicket) / 2^len(H)`
+    - `ChallengeTicket = Finalize(PartialTicket) = H(ChallengeTicket) / 2^len(H)`
     - Check that `ChallengeTicket < Target`
+        - `target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders`.
+        - Put another way check `challengeTicket_num * networkPower * sectorsSampled_denom < activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders * challengeTicket_denom`
     - If yes, it is a winning ticket and can be used to submit a block
     - In either case, try again with next sector to increase rewards
 
@@ -83,8 +85,6 @@ If no one has found a winning ticket in this epoch, increment epoch value as par
 - `K (e.g. 20-100s)` - number of  challenges per sector -- must be large enough such that the PoSpace is secure.
 - `ChallengeRangeSize` - challenge read size (between 32B and 256KB)  -- based on security analysis.
 - `sectorsSampled` - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
-- `Target` -- target value under which PoSt value must be for block creation -- `target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders`.
-Put another way check `challengeTicket * networkPower * sectorsSampled_denom < activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders`
 - `networkPower` - filecoin network’s power - read from the power table, expressed in number of bytes
 ```
 

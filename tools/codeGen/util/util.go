@@ -44,6 +44,16 @@ func String_FromNative(x string) String {
 	return String(x)
 }
 
+// TODO
+func BigFromBytes(x []byte) *BigInt {
+	return big.NewInt(0)
+}
+
+// TODO
+func BigFromUint64(x uint64) *BigInt {
+	return big.NewInt(0)
+}
+
 // Indirection to prevent the compiler from ignoring unreachable code
 func TODO() {
 	panic("TODO")

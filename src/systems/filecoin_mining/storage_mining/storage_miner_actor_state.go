@@ -236,6 +236,12 @@ func (st *StorageMinerActorState_I) _getUtilizationInfo(rt Runtime, sectorNo sec
 	return utilizationInfo
 }
 
+func (st *StorageMinerActorState_I) _getCurrUtilization(sectorNo sector.SectorNumber) block.StoragePower {
+	utilizationInfo, _ := st.SectorUtilization()[sectorNo]
+
+	return utilizationInfo.CurrUtilization()
+}
+
 func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.OnChainDeal) sector.SectorUtilizationInfo {
 
 	var maxUtilization block.StoragePower

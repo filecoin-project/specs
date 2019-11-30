@@ -19,14 +19,12 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     ValidateBlock(block block.Block) error
 
     IsWinningPartialTicket(
-        partialTicket sector.PartialTicket
+        st                 st.StateTree
+        partialTicket      sector.PartialTicket
+        sectorUtilization  block.StoragePower
     ) bool
 
-    validateElectionProof(
-        height         block.ChainEpoch
-        electionProof  block.ElectionProof
-        minerAddr      addr.Address
-    ) bool
+    _getStoragePowerActorState(stateTree st.StateTree) StoragePowerActorState
 
     validateTicket(
         tix             block.Ticket
