@@ -21,11 +21,10 @@ type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to
 
 type StoragePowerActorState struct {
     // PowerTable is a mapping from MinerActorID to PowerTableEntry
-    PowerTable               PowerTableHAMT
-    EC                       ExpectedConsensus
-    PledgeCollateralSlashed  actor.TokenAmount
+    PowerTable  PowerTableHAMT
+    EC          ExpectedConsensus
 
-    _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
+    _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) actor.TokenAmount
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount

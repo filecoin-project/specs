@@ -136,6 +136,7 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	// and return StorageMinerActor address
 
 	minerID := rt.ImmediateCaller()
+	panic("TODO: caller is not miner actor")
 
 	h, st := a.State(rt)
 
@@ -199,31 +200,25 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 	h, st := a.State(rt)
 
 	affectedPledge := st._getAffectedPledge(rt, minerID, affectedPower)
+	amountToSlash := actor.TokenAmount(0)
 
 	switch faultType {
 	case sector.DeclaredFault:
-		amountToSlash := actor.TokenAmount(DeclaredFaultSlashPercent * uint64(affectedPledge) / 100)
-		st._slashPledgeCollateral(rt, minerID, amountToSlash)
+		amountToSlash = actor.TokenAmount(DeclaredFaultSlashPercent * uint64(affectedPledge) / 100)
 	case sector.DetectedFault:
-		amountToSlash := actor.TokenAmount(DetectedFaultSlashPercent * uint64(affectedPledge) / 100)
-		st._slashPledgeCollateral(rt, minerID, amountToSlash)
+		amountToSlash = actor.TokenAmount(DetectedFaultSlashPercent * uint64(affectedPledge) / 100)
 	case sector.TerminatedFault:
-		amountToSlash := actor.TokenAmount(TerminatedFaultSlashPercent * uint64(affectedPledge) / 100)
-		st._slashPledgeCollateral(rt, minerID, amountToSlash)
+		amountToSlash = actor.TokenAmount(TerminatedFaultSlashPercent * uint64(affectedPledge) / 100)
 	}
 
-	// this is done this way because we can't send messages when holding onto the state lock
-	amountToSlash := st.PledgeCollateralSlashed()
+	amountSlashed := st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	UpdateRelease(rt, h, st)
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:    addr.BurntFundsActorAddr,
-		Value_: amountToSlash,
+		Value_: amountSlashed,
 	})
 
-	h, st = a.State(rt)
-	st.Impl().PledgeCollateralSlashed_ = actor.TokenAmount(0)
-	UpdateRelease(rt, h, st)
 }
 
 // @param PowerReport with ActivePower and InactivePower

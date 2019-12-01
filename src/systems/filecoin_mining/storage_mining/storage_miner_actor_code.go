@@ -392,7 +392,8 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 
 	UpdateRelease(rt, h, st)
 
-	// EnsureDealCollateral
+	// TODO: EnsureDealCollateral
+	panic("TODO")
 
 	return rt.SuccessReturn()
 }

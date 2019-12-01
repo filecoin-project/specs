@@ -10,7 +10,7 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID addr.Address, amount actor.TokenAmount) {
+func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID addr.Address, amount actor.TokenAmount) actor.TokenAmount {
 	if amount < 0 {
 		rt.Abort("negative amount.")
 	}
@@ -27,8 +27,9 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID a
 		currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amountToSlash
 	}
 
-	st.Impl().PledgeCollateralSlashed_ += amountToSlash
 	st.Impl().PowerTable_[minerID] = currEntry
+
+	return amountToSlash
 
 }
 
