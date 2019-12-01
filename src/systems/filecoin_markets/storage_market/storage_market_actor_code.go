@@ -58,6 +58,7 @@ func DeserializeState(x Bytes) State {
 func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
 	msgSender := rt.ImmediateCaller()
+	panic("TODO: assert caller is miner worker")
 
 	h, st := a.State(rt)
 
@@ -92,10 +93,6 @@ func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
 	msgValue := rt.ValueReceived()
 
 	h, st := a.State(rt)
-
-	if msgValue <= 0 {
-		rt.Abort("non-positive balance to add.")
-	}
 
 	senderBalance, found := st.Balances()[msgSender]
 	if found {

@@ -181,14 +181,16 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	activePower := st._getActivePower(rt)
 	inactivePower := st._getInactivePower(rt)
 
-	// serialize this in param
-	powerReport := &spc.PowerReport_I{
+	// power report in processPowerReportParam
+	_ = &spc.PowerReport_I{
 		ActivePower_:   activePower,
 		InactivePower_: inactivePower,
 	}
 
-	processPowerReportParam := make([]actor.MethodParam, len(spc.Serialize_PowerReport(powerReport)))
-	processDealExpirationParam := make([]actor.MethodParam, len(newExpiredDealIDs)) // this should be serialized
+	// @param powerReport spc.PowerReport
+	processPowerReportParam := make([]actor.MethodParam, 1)
+	// @param dealIDs []deal.DealID
+	processDealExpirationParam := make([]actor.MethodParam, 1)
 
 	Release(rt, h, st)
 
@@ -215,14 +217,6 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	}
 
 }
-
-// Decision is to currently account for power based on sector
-// with at least one active deals and deals cannot be updated
-// an alternative proposal is to account for power based on active deals
-// an improvement proposal is to allow storage deal update in a sector
-
-// TODO: decide whether declared faults sectors should be
-// penalized in the same way as undeclared sectors and how
 
 // this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
 // - Process ProvingSet.SectorsOn()
@@ -453,6 +447,9 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 		dealIDs = append(dealIDs, activeDealIDs...)
 
 	}
+
+	// @param dealIDs []deal.DealID
+	// @param faultType sector.StorageFaultType
 	processDealSlashParam := make([]actor.MethodParam, 2)
 
 	Release(rt, h, st)
@@ -477,7 +474,9 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 
 	Release(rt, h, st)
 
-	slashPledgeParams := make([]actor.MethodParam, len(block.Serialize_StoragePower(affectedPower)))
+	// @param affectedPower block.StoragePower
+	// @param faultType sector.StorageFaultType
+	slashPledgeParams := make([]actor.MethodParam, 2)
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
 		Method_: spc.MethodSlashPledgeForStorageFault,

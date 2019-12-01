@@ -66,13 +66,8 @@ func DeserializeState(x Bytes) State {
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	msgValue := rt.ValueReceived()
-
-	// TODO: this should be enforced somewhere else
-	if msgValue < 0 {
-		rt.Abort("negative message value.")
-	}
-
 	minerID := rt.ImmediateCaller()
+	panic("TODO: fix minerID usage")
 
 	h, st := a.State(rt)
 
@@ -91,21 +86,22 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.Abort("spa.WithdrawBalance: negative amount.")
 	}
 
 	minerID := rt.ImmediateCaller()
+	panic("TODO: fix minerID usage and assert caller is miner worker")
 
 	h, st := a.State(rt)
 
 	ret := st._ensurePledgeCollateralSatisfied(rt)
 	if !ret {
-		rt.Abort("insufficient pledge collateral.")
+		rt.Abort("spa.WithdrawBalance: insufficient pledge collateral.")
 	}
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.AvailableBalance() < amount {
-		rt.Abort("insufficient available balance.")
+		rt.Abort("spa.WithdrawBalance: insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -154,14 +150,16 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Address) {
 
 	minerID := rt.ImmediateCaller()
+	panic("TODO: use address and verify address is the caller")
+	panic(minerID)
 
 	h, st := a.State(rt)
 
-	if (st.PowerTable()[minerID].ActivePower() + st.PowerTable()[minerID].InactivePower()) > 0 {
+	if (st.PowerTable()[address].ActivePower() + st.PowerTable()[address].InactivePower()) > 0 {
 		rt.Abort("power still remains.")
 	}
 
-	delete(st.PowerTable(), minerID)
+	delete(st.PowerTable(), address)
 
 	UpdateRelease(rt, h, st)
 }

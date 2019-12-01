@@ -58,6 +58,7 @@ func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address 
 	}
 
 	minerID := rt.ImmediateCaller()
+	panic("TODO: fix minerID usage and assert caller is miner worker")
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
