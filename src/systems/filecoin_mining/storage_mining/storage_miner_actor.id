@@ -130,7 +130,7 @@ type StorageMinerActorCode struct {
     _isChallenged(rt Runtime) bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _onMissedSurprisePoSt(rt Runtime)
-    _onSuccessfulPoSt(rt Runtime, postSubmission poster.PoStSubmission)
+    _onSuccessfulPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
 
     _slashCollateralForStorageFaults(
         rt          Runtime

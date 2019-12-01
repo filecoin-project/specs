@@ -114,7 +114,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 	UpdateRelease(rt, h, st)
 
 	// send funds to miner
-	rt.SendPropagatingErrors(&msg.InvocInput_I{
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:    minerID,
 		Value_: amount,
 	})
@@ -218,7 +218,7 @@ func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affecte
 	amountToSlash := st.PledgeCollateralSlashed()
 	UpdateRelease(rt, h, st)
 
-	rt.SendPropagatingErrors(&msg.InvocInput_I{
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:    addr.BurntFundsActorAddr,
 		Value_: amountToSlash,
 	})

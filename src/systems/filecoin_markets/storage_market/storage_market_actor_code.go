@@ -6,7 +6,6 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -81,7 +80,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amount actor.Toke
 	UpdateRelease(rt, h, st)
 
 	// send funds to miner
-	rt.SendPropagatingErrors(&msg.InvocInput_I{
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:    msgSender,
 		Value_: amount,
 	})

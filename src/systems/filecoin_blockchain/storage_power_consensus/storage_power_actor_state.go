@@ -39,7 +39,7 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 		rt.Abort("negative amount.")
 	}
 
-	minerID := rt.ToplevelSender()
+	minerID := rt.ImmediateCaller()
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 
 	if currEntry.Impl().AvailableBalance() < amount {
@@ -57,7 +57,7 @@ func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address 
 		rt.Abort("negative amount.")
 	}
 
-	minerID := rt.ToplevelSender()
+	minerID := rt.ImmediateCaller()
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
@@ -125,7 +125,7 @@ func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.
 
 func (st *StoragePowerActorState_I) _ensurePledgeCollateralSatisfied(rt Runtime) bool {
 
-	minerID := rt.ToplevelSender()
+	minerID := rt.ImmediateCaller()
 
 	powerEntry := st._safeGetPowerEntry(rt, minerID)
 	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
