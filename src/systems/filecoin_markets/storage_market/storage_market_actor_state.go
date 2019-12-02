@@ -17,8 +17,8 @@ func (st *StorageMarketActorState_I) _generateStorageDealID(rt Runtime, storageD
 	return dealID
 }
 
-func (st *StorageMarketActorState_I) _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool {
-	bal := st.Balances()[a]
+func (st *StorageMarketActorState_I) _isBalanceAvailable(rt Runtime, a addr.Address, amount actor.TokenAmount) bool {
+	bal := st._safeGetBalance(rt, a)
 	return bal.Available() >= amount
 }
 
@@ -88,8 +88,8 @@ func (st *StorageMarketActorState_I) _assertValidDealMinimum(rt Runtime, p deal.
 func (st *StorageMarketActorState_I) _assertSufficientBalanceAvailForDeal(rt Runtime, p deal.StorageDealProposal) {
 
 	// verify client and provider has sufficient balance
-	isClientBalAvailable := st._isBalanceAvailable(p.Client(), p.ClientBalanceRequirement())
-	isProviderBalAvailable := st._isBalanceAvailable(p.Provider(), p.ProviderBalanceRequirement())
+	isClientBalAvailable := st._isBalanceAvailable(rt, p.Client(), p.ClientBalanceRequirement())
+	isProviderBalAvailable := st._isBalanceAvailable(rt, p.Provider(), p.ProviderBalanceRequirement())
 
 	if !isClientBalAvailable || !isProviderBalAvailable {
 		rt.Abort("sma._validateNewStorageDeal: client or provider insufficient balance.")
@@ -137,16 +137,12 @@ func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, deal deal.OnChain
 	return deal
 }
 
-// TODO: consider returning a boolean
 func (st *StorageMarketActorState_I) _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
 		rt.Abort("sma._lockBalance: negative amount.")
 	}
 
-	currBalance, found := st.Balances()[addr]
-	if !found {
-		rt.Abort("sma._lockBalance: addr not found.")
-	}
+	currBalance := st._safeGetBalance(rt, addr)
 
 	if currBalance.Impl().Available() < amount {
 		rt.Abort("sma._lockBalance: insufficient funds available to lock.")
@@ -161,10 +157,7 @@ func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Addres
 		rt.Abort("sma._unlockBalance: negative amount.")
 	}
 
-	currBalance, found := st.Balances()[addr]
-	if !found {
-		rt.Abort("sma._unlockBalance: addr not found.")
-	}
+	currBalance := st._safeGetBalance(rt, addr)
 
 	if currBalance.Impl().Locked() < amount {
 		rt.Abort("sma._unlockBalance: insufficient funds to unlock.")
@@ -177,8 +170,8 @@ func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Addres
 // move funds from locked in client to available in provider
 func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked addr.Address, toAvailable addr.Address, amount actor.TokenAmount) {
 
-	fromB := st.Balances()[fromLocked]
-	toB := st.Balances()[toAvailable]
+	fromB := st._safeGetBalance(rt, fromLocked)
+	toB := st._safeGetBalance(rt, toAvailable)
 
 	if fromB.Locked() < amount {
 		rt.Abort("sma._transferBalance: attempt to unlock funds greater than actor has")
@@ -196,10 +189,10 @@ func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal d
 	st._lockBalance(rt, p.Provider(), p.ProviderBalanceRequirement())
 }
 
-func (st *StorageMarketActorState_I) _getOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal {
+func (st *StorageMarketActorState_I) _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal {
 	deal, found := st.Deals()[dealID]
 	if !found {
-		rt.Abort("sm._getOnChainDeal: dealID not found in Deals.")
+		rt.Abort("sm._safeGetOnChainDeal: dealID not found in Deals.")
 	}
 
 	return deal
@@ -208,7 +201,7 @@ func (st *StorageMarketActorState_I) _getOnChainDeal(rt Runtime, dealID deal.Dea
 func (st *StorageMarketActorState_I) _assertPublishedDealState(rt Runtime, dealID deal.DealID) {
 
 	// if returns then it is on chain
-	deal := st._getOnChainDeal(rt, dealID)
+	deal := st._safeGetOnChainDeal(rt, dealID)
 
 	// must not be active
 	if deal.LastPaymentEpoch() != block.ChainEpoch(LastPaymentEpochNone) {
@@ -219,18 +212,18 @@ func (st *StorageMarketActorState_I) _assertPublishedDealState(rt Runtime, dealI
 
 func (st *StorageMarketActorState_I) _assertActiveDealState(rt Runtime, dealID deal.DealID) {
 
-	deal := st._getOnChainDeal(rt, dealID)
+	deal := st._safeGetOnChainDeal(rt, dealID)
 
 	if deal.LastPaymentEpoch() == block.ChainEpoch(LastPaymentEpochNone) {
 		rt.Abort("sma._assertActiveDealState: deal is not in ActiveDealState.")
 	}
 }
 
-func (st *StorageMarketActorState_I) _getParticipantBalance(rt Runtime, participant addr.Address) StorageParticipantBalance {
+func (st *StorageMarketActorState_I) _safeGetBalance(rt Runtime, participant addr.Address) StorageParticipantBalance {
 	balance, found := st.Balances()[participant]
 
 	if !found {
-		rt.Abort("sma._getParticipantBalance: participant balance not found.")
+		rt.Abort("sma._safeGetBalance: participant balance not found.")
 	}
 
 	return balance
@@ -246,7 +239,7 @@ func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, 
 		unitPrice := dealP.StoragePricePerEpoch()
 		fee := actor.TokenAmount(uint64(duration) * uint64(unitPrice))
 
-		clientBalance := st._getParticipantBalance(rt, dealP.Client())
+		clientBalance := st._safeGetBalance(rt, dealP.Client())
 
 		if fee > clientBalance.Locked() {
 			rt.Abort("sma._getStorageFeeSinceLastPayment: fee cannot exceed client LockedBalance.")
@@ -262,11 +255,7 @@ func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, 
 
 func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal.StorageDealProposal) actor.TokenAmount {
 	amountToSlash := dealP.ProviderBalanceRequirement()
-
-	providerBal, found := st.Balances()[dealP.Provider()]
-	if !found {
-		rt.Abort("sma._slashDealCollateral: provider not found in balances.")
-	}
+	providerBal := st._safeGetBalance(rt, dealP.Provider())
 
 	if providerBal.Locked() < amountToSlash {
 		amountToSlash = providerBal.Locked()
@@ -285,7 +274,7 @@ func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal
 // return client collateral
 func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) actor.TokenAmount {
 
-	deal := st._getOnChainDeal(rt, dealID)
+	deal := st._safeGetOnChainDeal(rt, dealID)
 	st._assertActiveDealState(rt, dealID)
 
 	dealP := deal.Deal().Proposal()
