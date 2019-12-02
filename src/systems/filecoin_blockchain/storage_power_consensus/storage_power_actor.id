@@ -19,18 +19,25 @@ type PowerReport struct {
 // type PowerTableHAMT {actor.ActorID: PowerTableEntry}
 type PowerTableHAMT {addr.Address: PowerTableEntry}  // TODO: convert address to ActorID
 
-// TODO: What does graceful removal look like?
-
 type StoragePowerActorState struct {
     // PowerTable is a mapping from MinerActorID to PowerTableEntry
     PowerTable  PowerTableHAMT
     EC          ExpectedConsensus
 
-    _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
+    _slashPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) actor.TokenAmount
     _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount)
     _getPledgeCollateralReq(rt Runtime, newPower block.StoragePower) actor.TokenAmount
     _sampleMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) [addr.Address]
+    _shouldChallenge(rt Runtime, networkPower block.StoragePower) bool
+
+    _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry
+    _ensurePledgeCollateralSatisfied(rt Runtime) bool
+    _getAffectedPledge(
+        rt             Runtime
+        minerID        addr.Address
+        affectedPower  block.StoragePower
+    ) actor.TokenAmount
 }
 
 type StoragePowerActorCode struct {
@@ -51,10 +58,15 @@ type StoragePowerActorCode struct {
     // PowerTable Operations
     GetTotalPower(rt Runtime) block.StoragePower
 
-    EnsurePledgeCollateralSatisfied(rt Runtime) bool
+    EnsurePledgeCollateralSatisfied(rt Runtime)
 
     ProcessPowerReport(rt Runtime, report PowerReport)
-    ProcessFaultReport(rt Runtime, report sector.FaultReport)
+    SlashPledgeForStorageFault(
+        rt             Runtime
+        affectedPower  block.StoragePower
+        faultType      sector.StorageFaultType
+    )
+
     ReportConsensusFault(
         // slasherAddr  addr.Address TODO: fromActor
         rt         Runtime

@@ -6,9 +6,13 @@ title: Storage Power Actor
 
 {{< readfile file="storage_power_actor.id" code="true" lang="go" >}}
 
-# `StoragePowerActor` implementation
+# `StoragePowerActorState` implementation
 
-{{< readfile file="storage_power_actor.go" code="true" lang="go" >}}
+{{< readfile file="storage_power_actor_state.go" code="true" lang="go" >}}
+
+# `StoragePowerActorCode` implementation
+
+{{< readfile file="storage_power_actor_code.go" code="true" lang="go" >}}
 
 
 {{<label power_table>}}

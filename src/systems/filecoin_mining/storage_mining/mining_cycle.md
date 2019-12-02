@@ -9,9 +9,6 @@ Block miners should constantly be performing Proofs of SpaceTime, and also check
 
 After successfully calling `CreateStorageMiner`, a miner actor will be created on-chain, and registered in the storage market. This miner, like all other Filecoin State Machine actors, has a fixed set of methods that can be used to interact with or control it.
 
-{{< readfile file="storage_miner_actor.id" code="true" lang="go" >}}
-{{< readfile file="storage_miner_actor.go" code="true" lang="go" >}}
-
 ## Owner Worker distinction
 
 The miner actor has two distinct 'controller' addresses. One is the worker, which is the address which will be responsible for doing all of the work, submitting proofs, committing new sectors, and all other day to day activities. The owner address is the address that created the miner, paid the collateral, and has block rewards paid out to it. The reason for the distinction is to allow different parties to fulfil the different roles. One example would be for the owner to be a multisig wallet, or a cold storage key, and the worker key to be a 'hot wallet' key.

@@ -6,13 +6,14 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
 
 const (
-	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
+	MethodGetUnsealedCIDForDealIDs = actor.MethodPlaceholder
+	MethodProcessDealExpiration    = actor.MethodPlaceholder
+	MethodProcessDealSlash         = actor.MethodPlaceholder
 )
 
 const LastPaymentEpochNone = 0
@@ -54,12 +55,14 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.TokenAmount) {
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
+
+	msgSender := rt.ImmediateCaller()
+	panic("TODO: assert caller is miner worker")
+
 	h, st := a.State(rt)
 
-	var msgSender addr.Address // TODO replace this from VM runtime
-
-	if balance <= 0 {
+	if amount <= 0 {
 		rt.Abort("non-positive balance to withdraw.")
 	}
 
@@ -68,36 +71,37 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.Tok
 		rt.Abort("sender address not found.")
 	}
 
-	if senderBalance.Available() < balance {
+	if senderBalance.Available() < amount {
 		rt.Abort("insufficient balance.")
 	}
 
-	senderBalance.Impl().Available_ = senderBalance.Available() - balance
+	senderBalance.Impl().Available_ = senderBalance.Available() - amount
 	st.Balances()[msgSender] = senderBalance
 
 	UpdateRelease(rt, h, st)
 
-	// TODO send funds to msgSender with rt.Send
+	// send funds to miner
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    msgSender,
+		Value_: amount,
+	})
 }
 
 func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
+
+	msgSender := rt.ImmediateCaller()
+	msgValue := rt.ValueReceived()
+
 	h, st := a.State(rt)
-
-	var msgSender addr.Address    // TODO replace this
-	var balance actor.TokenAmount // TODO replace this
-
-	if balance <= 0 {
-		rt.Abort("non-positive balance to add.")
-	}
 
 	senderBalance, found := st.Balances()[msgSender]
 	if found {
-		senderBalance.Impl().Available_ = senderBalance.Available() + balance
+		senderBalance.Impl().Available_ = senderBalance.Available() + msgValue
 		st.Balances()[msgSender] = senderBalance
 	} else {
 		st.Balances()[msgSender] = &StorageParticipantBalance_I{
 			Locked_:    0,
-			Available_: balance,
+			Available_: msgValue,
 		}
 	}
 
@@ -190,7 +194,7 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 
 }
 
-func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.DealID, slashAction deal.StorageDealSlashAction) {
+func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.DealID, faultType sector.StorageFaultType) {
 
 	TODO() // only call by StorageMinerActor
 
@@ -198,11 +202,11 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.D
 
 	// only terminated fault will result in slashing of deal collateral
 
-	switch slashAction {
-	case deal.SlashTerminatedFaults:
-		st._slashTerminatedFaults(rt, dealIDs)
+	switch faultType {
+	case sector.TerminatedFault:
+		st._slashTerminatedFault(rt, dealIDs)
 	default:
-		rt.Abort("sma.ProcessDealSlash: invalid action type")
+		// do nothing
 	}
 
 	UpdateRelease(rt, h, st)
