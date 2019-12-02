@@ -5,6 +5,8 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import util "github.com/filecoin-project/specs/util"
 
+var IMPL_FINISH = util.IMPL_FINISH
+
 type Serialization = util.Serialization
 
 func UnsignedMessage_Make(
@@ -45,7 +47,8 @@ func Sign(message UnsignedMessage, keyPair filcrypto.SigKeyPair) (SignedMessage,
 }
 
 func SignatureVerificationError() error {
-	panic("TODO")
+	IMPL_FINISH()
+	panic("")
 }
 
 func Verify(message SignedMessage, publicKey filcrypto.PublicKey) (UnsignedMessage, error) {

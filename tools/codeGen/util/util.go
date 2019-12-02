@@ -49,6 +49,12 @@ func TODO() {
 	panic("TODO")
 }
 
+// Version of TODO() indicating that the operation is believed to be unambiguous,
+// but is not yet implemented as code in the spec repository.
+func IMPL_FINISH() {
+	panic("Not yet implemented in the spec")
+}
+
 type UVarint = uint64
 type Varint = int64
 type UInt = uint64

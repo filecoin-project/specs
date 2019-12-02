@@ -137,7 +137,10 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	actorState := stateTree.GetActorState(minerAddr)
 	substateCID := actorState.State()
 
-	substate := node.LocalGraph().Get(ipld.CID(substateCID))
+	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
+	if err != nil {
+		panic("TODO")
+	}
 	// TODO fix conversion to bytes
 	panic(substate)
 	var serializedSubstate Serialization

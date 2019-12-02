@@ -37,6 +37,7 @@ func (a *CronActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 		return a.EpochTick(rt)
 
 	default:
-		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
+		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
+		panic("")
 	}
 }
