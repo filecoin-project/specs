@@ -57,7 +57,6 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	h, st := a.State(rt)
 	st = &InitActorState_I{
 		AddressMap_: map[addr.Address]addr.ActorID{}, // TODO: HAMT
-		IDMap_:      map[addr.ActorID]addr.Address{}, // TODO: HAMT
 		NextID_:     addr.ActorID(0),
 	}
 	UpdateRelease(rt, h, st)
@@ -86,7 +85,6 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 
 	// Store the mappings of address to actor ID.
 	st.AddressMap()[newAddr] = actorID
-	st.IDMap()[actorID] = newAddr
 
 	UpdateRelease(rt, h, st)
 
