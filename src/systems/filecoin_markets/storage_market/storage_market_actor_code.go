@@ -34,7 +34,7 @@ func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, Stat
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -64,13 +64,13 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amount actor.Toke
 	h, st := a.State(rt)
 
 	if amount <= 0 {
-		rt.Abort("non-positive balance to withdraw.")
+		rt.AbortArgMsg("non-positive balance to withdraw.")
 	}
 
 	senderBalance := st._safeGetBalance(rt, msgSender)
 
 	if senderBalance.Available() < amount {
-		rt.Abort("insufficient balance.")
+		rt.AbortFundsMsg("insufficient balance.")
 	}
 
 	senderBalance.Impl().Available_ = senderBalance.Available() - amount

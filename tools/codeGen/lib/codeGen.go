@@ -220,7 +220,7 @@ func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 					fieldType: GoIdent{name: name},
 				},
 			},
-			retType: TranslateGoIdent("Serialization", ctx),
+			retType: GoNode_Ref(TranslateGoIdent("Serialization", ctx)),
 		},
 		funArgs: []GoNode{GoIdent{name: "x"}},
 		funBody: GenGoPanicTodoBody(),
@@ -237,12 +237,12 @@ func GenGoTypeSerializers(ctx GoGenContext, name string, interfaceID GoNode) {
 					fieldType: TranslateGoIdent("Serialization", ctx),
 				},
 			},
-			retType: GoTupleType{
+			retType: GoNode_Ref(GoTupleType{
 				elementTypes: []GoNode{
 					interfaceID,
 					GoIdent{name: "error"},
 				},
-			},
+			}),
 		},
 		funArgs: []GoNode{GoIdent{name: "x"}},
 		funBody: GenGoPanicTodoBody(),
@@ -263,6 +263,20 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 		name := strings.Join(ctx.tokens, "_")
 
 		xr := x.(*AlgType)
+
+		if xr.isTuple {
+			Assert(xr.sort == AlgSort_Prod)
+			retEntries := []GoNode{}
+			for _, field := range xr.Fields() {
+				goFieldType := GenGoTypeAcc(field.fieldType, ctx.Extend(*field.fieldName))
+				retEntries = append(retEntries, goFieldType)
+			}
+			ret = GoTupleType{
+				elementTypes: retEntries,
+			}
+			ctx.declMap[name] = ret
+			return
+		}
 
 		interfaceName := name
 		interfaceID := GoIdent{name: interfaceName}
@@ -330,7 +344,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 					fieldName: RefString(fieldName),
 					fieldType: GoFunType{
 						args:    []GoField{},
-						retType: GenGoTypeAcc(field.fieldType, ctx.Extend(fieldName)),
+						retType: GoNode_Ref(GenGoTypeAcc(field.fieldType, ctx.Extend(fieldName))),
 					},
 				})
 			}
@@ -347,7 +361,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 			interfaceFields = append(interfaceFields, GoField{
 				fieldName: RefString("Impl"),
 				fieldType: GoFunType{
-					retType: GoPtrType{targetType: implID},
+					retType: GoNode_Ref(GoPtrType{targetType: implID}),
 					args:    []GoField{},
 				},
 			})
@@ -380,7 +394,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				interfaceFields = append(interfaceFields, GoField{
 					fieldName: RefString("As_" + fieldName),
 					fieldType: GoFunType{
-						retType: GoIdent{caseInterfaceName},
+						retType: GoNode_Ref(GoIdent{caseInterfaceName}),
 						args:    []GoField{},
 					},
 				})
@@ -411,7 +425,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 					funName:      "As_" + fieldName,
 					funType: GoFunType{
 						args:    []GoField{},
-						retType: caseInterfaceType,
+						retType: GoNode_Ref(caseInterfaceType),
 					},
 					funArgs: []GoNode{},
 					funBody: caseAsDeclBody,
@@ -454,7 +468,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 								fieldType: GoIdent{caseInterfaceName},
 							},
 						},
-						retType: interfaceID,
+						retType: GoNode_Ref(interfaceID),
 					},
 					funArgs: []GoNode{caseNewDeclArg},
 					funBody: caseNewDeclBody,
@@ -466,7 +480,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 			interfaceFields = append(interfaceFields, GoField{
 				fieldName: RefString("Which"),
 				fieldType: GoFunType{
-					retType: caseTypeID,
+					retType: GoNode_Ref(caseTypeID),
 					args:    []GoField{},
 				},
 			})
@@ -503,7 +517,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 				funName:      "Which",
 				funType: GoFunType{
 					args:    []GoField{},
-					retType: caseTypeID,
+					retType: GoNode_Ref(caseTypeID),
 				},
 				funArgs: []GoNode{},
 				funBody: whichDeclBody,
@@ -575,7 +589,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 					funName: fieldName,
 					funType: GoFunType{
 						args:    []GoField{},
-						retType: baseFieldType,
+						retType: GoNode_Ref(baseFieldType),
 					},
 					funArgs: []GoNode{},
 					funBody: GenGoAccessorBody(implReceiverVar, GoMethodToFieldName(fieldName)),
@@ -589,7 +603,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 					funName: fieldName,
 					funType: GoFunType{
 						args:    []GoField{},
-						retType: baseFieldType,
+						retType: GoNode_Ref(baseFieldType),
 					},
 					funArgs: []GoNode{},
 					funBody: GenGoDerefAccessorBody(implRefReceiverVar, GoMethodToFieldName(fieldName)),
@@ -606,7 +620,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 			funName:      "Impl",
 			funType: GoFunType{
 				args:    []GoField{},
-				retType: GoPtrType{targetType: implID},
+				retType: GoNode_Ref(GoPtrType{targetType: implID}),
 			},
 			funArgs: []GoNode{},
 			funBody: GenGoIdentityBody(implReceiverVar),
@@ -618,7 +632,7 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 			funName:      "Impl",
 			funType: GoFunType{
 				args:    []GoField{},
-				retType: GoPtrType{targetType: implID},
+				retType: GoNode_Ref(GoPtrType{targetType: implID}),
 			},
 			funArgs: []GoNode{},
 			funBody: GenGoDerefCacheBody(implReceiverVar),
@@ -649,7 +663,14 @@ func GenGoTypeAcc(x Type, ctx GoGenContext) (ret GoNode) {
 
 	case Type_Case_FunType:
 		xr := x.(*FunType)
-		goRetType := GenGoTypeAcc(xr.retType, ctx.Extend("FunRet"))
+
+		var goRetType *GoNode
+		if DSLTypeIsTrivialStruct(xr.retType) {
+			goRetType = nil
+		} else {
+			goRetType = GoNode_Ref(GenGoTypeAcc(xr.retType, ctx.Extend("FunRet")))
+		}
+
 		goArgs := []GoField{}
 		for i, arg := range xr.args {
 			goArgType := GenGoTypeAcc(arg.fieldType, ctx.Extend(fmt.Sprintf("FunArg%v", i)))

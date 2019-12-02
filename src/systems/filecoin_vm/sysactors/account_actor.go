@@ -1,6 +1,7 @@
 package sysactors
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
@@ -9,7 +10,14 @@ func (a *AccountActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 }
 
 func (a *AccountActorCode_I) InvokeMethod(rt vmr.Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	// AccountActor has no methods.
-	rt.Abort("Invalid method")
-	panic("")
+	switch method {
+	case actor.MethodConstructor:
+		rt.Assert(len(params) == 0)
+		return a.Constructor(rt)
+
+	default:
+		// AccountActor has no methods.
+		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
+		panic("")
+	}
 }

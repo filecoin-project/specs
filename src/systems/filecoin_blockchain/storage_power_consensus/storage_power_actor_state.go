@@ -12,7 +12,7 @@ import (
 
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID addr.Address, amount actor.TokenAmount) actor.TokenAmount {
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
@@ -37,14 +37,14 @@ func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID a
 func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	// AvailableBalance -> LockedPledgeCollateral
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	minerID := rt.ImmediateCaller()
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 
 	if currEntry.Impl().AvailableBalance() < amount {
-		rt.Abort("insufficient available balance.")
+		rt.AbortFundsMsg("insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -55,7 +55,7 @@ func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address ad
 func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
 	// lockedPledgeCollateral -> AvailableBalance
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.AbortArgMsg("negative amount.")
 	}
 
 	minerID := rt.ImmediateCaller()
@@ -63,7 +63,7 @@ func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address 
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.Impl().LockedPledgeCollateral() < amount {
-		rt.Abort("insufficient locked balance.")
+		rt.AbortFundsMsg("insufficient locked balance.")
 	}
 
 	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
@@ -119,7 +119,7 @@ func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.
 	powerEntry, found := st.PowerTable()[minerID]
 
 	if !found {
-		rt.Abort("sm._safeGetPowerEntry: miner not found in power table.")
+		rt.AbortStateMsg("sm._safeGetPowerEntry: miner not found in power table.")
 	}
 
 	return powerEntry
