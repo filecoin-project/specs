@@ -78,7 +78,7 @@ const (
 
 type GoFunType struct {
 	args    []GoField
-	retType GoNode
+	retType *GoNode
 }
 
 type GoPtrType struct {
@@ -319,20 +319,23 @@ func GenAST(x GoNode) ast.Node {
 		}
 
 		goResultFields := []*ast.Field{}
-		switch xr.retType.(type) {
-		case GoTupleType:
-			rr := xr.retType.(GoTupleType)
-			for _, ri := range rr.elementTypes {
+		if xr.retType != nil {
+			retType := *xr.retType
+			switch retType.(type) {
+			case GoTupleType:
+				rr := retType.(GoTupleType)
+				for _, ri := range rr.elementTypes {
+					goResultFields = append(goResultFields, &ast.Field{
+						Names: nil,
+						Type:  GenAST(ri).(ast.Expr),
+					})
+				}
+			default:
 				goResultFields = append(goResultFields, &ast.Field{
 					Names: nil,
-					Type:  GenAST(ri).(ast.Expr),
+					Type:  GenAST(retType).(ast.Expr),
 				})
 			}
-		default:
-			goResultFields = append(goResultFields, &ast.Field{
-				Names: nil,
-				Type:  GenAST(xr.retType).(ast.Expr),
-			})
 		}
 
 		return &ast.FuncType{

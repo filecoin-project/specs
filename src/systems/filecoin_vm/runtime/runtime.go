@@ -109,46 +109,39 @@ func VMContext_Make(
 	}
 }
 
-func (rt *VMContext) AbortArgMsg(msg string) Runtime_AbortArgMsg_FunRet {
+func (rt *VMContext) AbortArgMsg(msg string) {
 	rt.Abort(exitcode.UserDefinedError(exitcode.InvalidArguments_User), msg)
-	return &Runtime_AbortArgMsg_FunRet_I{}
 }
 
-func (rt *VMContext) AbortArg() Runtime_AbortArg_FunRet {
+func (rt *VMContext) AbortArg() {
 	rt.AbortArgMsg("Invalid arguments")
-	return &Runtime_AbortArg_FunRet_I{}
 }
 
-func (rt *VMContext) AbortStateMsg(msg string) Runtime_AbortStateMsg_FunRet {
+func (rt *VMContext) AbortStateMsg(msg string) {
 	rt.Abort(exitcode.UserDefinedError(exitcode.InconsistentState_User), msg)
-	return &Runtime_AbortStateMsg_FunRet_I{}
 }
 
-func (rt *VMContext) AbortState() Runtime_AbortState_FunRet {
+func (rt *VMContext) AbortState() {
 	rt.AbortStateMsg("Inconsistent state")
-	return &Runtime_AbortState_FunRet_I{}
 }
 
-func (rt *VMContext) AbortFundsMsg(msg string) Runtime_AbortFundsMsg_FunRet {
+func (rt *VMContext) AbortFundsMsg(msg string) {
 	rt.Abort(exitcode.UserDefinedError(exitcode.InsufficientFunds_User), msg)
-	return &Runtime_AbortFundsMsg_FunRet_I{}
 }
 
-func (rt *VMContext) AbortFunds() Runtime_AbortFunds_FunRet {
+func (rt *VMContext) AbortFunds() {
 	rt.AbortFundsMsg("Insufficient funds")
-	return &Runtime_AbortFunds_FunRet_I{}
 }
 
-func (rt *VMContext) AbortAPI(msg string) Runtime_AbortAPI_FunRet {
+func (rt *VMContext) AbortAPI(msg string) {
 	rt.Abort(exitcode.SystemError(exitcode.RuntimeAPIError), msg)
-	return &Runtime_AbortAPI_FunRet_I{}
 }
 
 func (rt *VMContext) CreateActor(
 	stateCID actor.ActorSystemStateCID,
 	address addr.Address,
 	initBalance actor.TokenAmount,
-	constructorParams actor.MethodParams) Runtime_CreateActor_FunRet {
+	constructorParams actor.MethodParams) {
 
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
@@ -162,8 +155,6 @@ func (rt *VMContext) CreateActor(
 		Params_: constructorParams,
 		Value_:  initBalance,
 	})
-
-	return &Runtime_CreateActor_FunRet_I{}
 }
 
 func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
@@ -202,11 +193,10 @@ func (rt *VMContext) _releaseActorSubstate(checkStateCID ActorSubstateCID) {
 	rt._actorStateAcquired = false
 }
 
-func (rt *VMContext) Assert(cond bool) Runtime_Assert_FunRet {
+func (rt *VMContext) Assert(cond bool) {
 	if !cond {
 		rt.Abort(exitcode.SystemError(exitcode.RuntimeAssertFailure), "Runtime assertion failed")
 	}
-	return &Runtime_Assert_FunRet_I{}
 }
 
 func (rt *VMContext) _checkActorStateAcquiredFlag(expected bool) {
@@ -224,10 +214,9 @@ func (rt *VMContext) _checkActorStateNotAcquired() {
 	rt._checkActorStateAcquiredFlag(false)
 }
 
-func (rt *VMContext) Abort(errExitCode exitcode.ExitCode, errMsg string) Runtime_Abort_FunRet {
+func (rt *VMContext) Abort(errExitCode exitcode.ExitCode, errMsg string) {
 	errExitCode = exitcode.EnsureErrorCode(errExitCode)
 	rt._throwErrorFull(errExitCode, errMsg)
-	return &Runtime_Abort_FunRet_I{}
 }
 
 func (rt *VMContext) ImmediateCaller() addr.Address {
@@ -239,7 +228,7 @@ func (rt *VMContext) ToplevelBlockWinner() addr.Address {
 }
 
 func (rt *VMContext) ValidateImmediateCallerMatches(
-	callerExpectedPattern CallerPattern) Runtime_ValidateImmediateCallerMatches_FunRet {
+	callerExpectedPattern CallerPattern) {
 
 	rt._checkRunning()
 	rt._checkNumValidateCalls(0)
@@ -248,7 +237,6 @@ func (rt *VMContext) ValidateImmediateCallerMatches(
 		rt.AbortAPI("Method invoked by incorrect caller")
 	}
 	rt._numValidateCalls += 1
-	return &Runtime_ValidateImmediateCallerMatches_FunRet_I{}
 }
 
 type CallerPattern struct {
@@ -267,14 +255,12 @@ func CallerPattern_MakeAcceptAny() CallerPattern {
 	}
 }
 
-func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) Runtime_ValidateImmediateCallerIs_FunRet {
+func (rt *VMContext) ValidateImmediateCallerIs(callerExpected addr.Address) {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeSingleton(callerExpected))
-	return &Runtime_ValidateImmediateCallerIs_FunRet_I{}
 }
 
-func (rt *VMContext) ValidateImmediateCallerAcceptAny() Runtime_ValidateImmediateCallerAcceptAny_FunRet {
+func (rt *VMContext) ValidateImmediateCallerAcceptAny() {
 	rt.ValidateImmediateCallerMatches(CallerPattern_MakeAcceptAny())
-	return &Runtime_ValidateImmediateCallerAcceptAny_FunRet_I{}
 }
 
 func (rt *VMContext) _checkNumValidateCalls(x int) {

@@ -95,3 +95,7 @@ func RefGolangASTKeyValueExpr(x ast.KeyValueExpr) *ast.KeyValueExpr {
 func RefGolangASTBasicLit(x ast.BasicLit) *ast.BasicLit {
 	return &x
 }
+
+func GoNode_Ref(x GoNode) *GoNode {
+	return &x
+}
