@@ -41,7 +41,7 @@ func (a *StoragePowerActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, State
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -75,7 +75,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
 	if !found {
 		// AddBalance will just fail if miner is not created before hand
-		rt.Abort("minerID not found.")
+		rt.AbortArgMsg("minerID not found.")
 	}
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + msgValue
 	st.Impl().PowerTable_[minerID] = currEntry
@@ -86,7 +86,7 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
 	if amount < 0 {
-		rt.Abort("spa.WithdrawBalance: negative amount.")
+		rt.AbortArgMsg("spa.WithdrawBalance: negative amount.")
 	}
 
 	minerID := rt.ImmediateCaller()
@@ -96,12 +96,12 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 
 	ret := st._ensurePledgeCollateralSatisfied(rt)
 	if !ret {
-		rt.Abort("spa.WithdrawBalance: insufficient pledge collateral.")
+		rt.AbortFundsMsg("spa.WithdrawBalance: insufficient pledge collateral.")
 	}
 
 	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.AvailableBalance() < amount {
-		rt.Abort("spa.WithdrawBalance: insufficient available balance.")
+		rt.AbortFundsMsg("spa.WithdrawBalance: insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -157,7 +157,7 @@ func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Ad
 	h, st := a.State(rt)
 
 	if (st.PowerTable()[address].ActivePower() + st.PowerTable()[address].InactivePower()) > 0 {
-		rt.Abort("power still remains.")
+		rt.AbortStateMsg("power still remains.")
 	}
 
 	delete(st.PowerTable(), address)
@@ -187,7 +187,7 @@ func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 	UpdateRelease(rt, h, st)
 
 	if !ret {
-		rt.Abort("exitcode.InsufficientPledgeCollateral")
+		rt.AbortFundsMsg("exitcode.InsufficientPledgeCollateral")
 	}
 
 }

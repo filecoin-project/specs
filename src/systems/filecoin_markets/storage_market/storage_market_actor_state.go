@@ -36,7 +36,7 @@ func (st *StorageMarketActorState_I) _assertDealStartAfterCurrEpoch(rt Runtime, 
 
 	// deal has started before or in current epoch
 	if p.StartEpoch() <= currEpoch {
-		rt.Abort("sma._assertDealStartAfterCurrEpoch: deal started before or in CurrEpoch.")
+		rt.AbortStateMsg("sma._assertDealStartAfterCurrEpoch: deal started before or in CurrEpoch.")
 	}
 
 }
@@ -45,7 +45,7 @@ func (st *StorageMarketActorState_I) _assertDealNotYetExpired(rt Runtime, p deal
 	currEpoch := rt.CurrEpoch()
 
 	if p.EndEpoch() <= currEpoch {
-		rt.Abort("st._assertDealNotYetExpired: deal has expired.")
+		rt.AbortStateMsg("st._assertDealNotYetExpired: deal has expired.")
 	}
 }
 
@@ -57,12 +57,12 @@ func (st *StorageMarketActorState_I) _assertValidDealTimingAtPublish(rt Runtime,
 
 	// deal ends before it starts
 	if p.EndEpoch() <= p.StartEpoch() {
-		rt.Abort("sma._assertValidDealTimingAtPublish: deal ends before it starts.")
+		rt.AbortStateMsg("sma._assertValidDealTimingAtPublish: deal ends before it starts.")
 	}
 
 	// duration validation
 	if p.Duration() != p.EndEpoch()-p.StartEpoch() {
-		rt.Abort("sma._assertValidDealTimingAtPublish: deal duration does not match end - start.")
+		rt.AbortStateMsg("sma._assertValidDealTimingAtPublish: deal duration does not match end - start.")
 	}
 }
 
@@ -70,17 +70,17 @@ func (st *StorageMarketActorState_I) _assertValidDealMinimum(rt Runtime, p deal.
 
 	// minimum deal duration
 	if p.Duration() < deal.MIN_DEAL_DURATION {
-		rt.Abort("sma._assertValidDealMinimum: deal duration shorter than minimum.")
+		rt.AbortStateMsg("sma._assertValidDealMinimum: deal duration shorter than minimum.")
 	}
 
 	if p.StoragePricePerEpoch() <= deal.MIN_DEAL_PRICE {
-		rt.Abort("sma._assertValidDealMinimum: storage price less than minimum.")
+		rt.AbortStateMsg("sma._assertValidDealMinimum: storage price less than minimum.")
 	}
 
 	// verify StorageDealCollateral match requirements for MinimumStorageDealCollateral
 	if p.ProviderCollateralPerEpoch() < deal.MIN_PROVIDER_DEAL_COLLATERAL_PER_EPOCH ||
 		p.ClientCollateralPerEpoch() < deal.MIN_CLIENT_DEAL_COLLATERAL_PER_EPOCH {
-		rt.Abort("sma._assertValidDealMinimum: deal collaterals less than minimum.")
+		rt.AbortStateMsg("sma._assertValidDealMinimum: deal collaterals less than minimum.")
 	}
 
 }
@@ -92,7 +92,7 @@ func (st *StorageMarketActorState_I) _assertSufficientBalanceAvailForDeal(rt Run
 	isProviderBalAvailable := st._isBalanceAvailable(rt, p.Provider(), p.ProviderBalanceRequirement())
 
 	if !isClientBalAvailable || !isProviderBalAvailable {
-		rt.Abort("sma._validateNewStorageDeal: client or provider insufficient balance.")
+		rt.AbortFundsMsg("sma._validateNewStorageDeal: client or provider insufficient balance.")
 	}
 
 }
@@ -103,7 +103,7 @@ func (st *StorageMarketActorState_I) _assertDealExpireAfterMaxProveCommitWindow(
 	dealExpiration := dealP.EndEpoch()
 
 	if dealExpiration <= (currEpoch + sector.MAX_PROVE_COMMIT_SECTOR_EPOCH) {
-		rt.Abort("sma._assertDealExpireAfterMaxProveCommitWindow: deal might expire before prove commit.")
+		rt.AbortStateMsg("sma._assertDealExpireAfterMaxProveCommitWindow: deal might expire before prove commit.")
 	}
 
 }
@@ -139,13 +139,13 @@ func (st *StorageMarketActorState_I) _activateDeal(rt Runtime, deal deal.OnChain
 
 func (st *StorageMarketActorState_I) _lockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
-		rt.Abort("sma._lockBalance: negative amount.")
+		rt.AbortArgMsg("sma._lockBalance: negative amount.")
 	}
 
 	currBalance := st._safeGetBalance(rt, addr)
 
 	if currBalance.Impl().Available() < amount {
-		rt.Abort("sma._lockBalance: insufficient funds available to lock.")
+		rt.AbortFundsMsg("sma._lockBalance: insufficient funds available to lock.")
 	}
 
 	currBalance.Impl().Available_ -= amount
@@ -154,13 +154,13 @@ func (st *StorageMarketActorState_I) _lockBalance(rt Runtime, addr addr.Address,
 
 func (st *StorageMarketActorState_I) _unlockBalance(rt Runtime, addr addr.Address, amount actor.TokenAmount) {
 	if amount < 0 {
-		rt.Abort("sma._unlockBalance: negative amount.")
+		rt.AbortArgMsg("sma._unlockBalance: negative amount.")
 	}
 
 	currBalance := st._safeGetBalance(rt, addr)
 
 	if currBalance.Impl().Locked() < amount {
-		rt.Abort("sma._unlockBalance: insufficient funds to unlock.")
+		rt.AbortFundsMsg("sma._unlockBalance: insufficient funds to unlock.")
 	}
 
 	currBalance.Impl().Locked_ -= amount
@@ -174,7 +174,7 @@ func (st *StorageMarketActorState_I) _transferBalance(rt Runtime, fromLocked add
 	toB := st._safeGetBalance(rt, toAvailable)
 
 	if fromB.Locked() < amount {
-		rt.Abort("sma._transferBalance: attempt to unlock funds greater than actor has")
+		rt.AbortFundsMsg("sma._transferBalance: attempt to unlock funds greater than actor has")
 		return
 	}
 
@@ -192,7 +192,7 @@ func (st *StorageMarketActorState_I) _lockFundsForStorageDeal(rt Runtime, deal d
 func (st *StorageMarketActorState_I) _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal {
 	deal, found := st.Deals()[dealID]
 	if !found {
-		rt.Abort("sm._safeGetOnChainDeal: dealID not found in Deals.")
+		rt.AbortStateMsg("sm._safeGetOnChainDeal: dealID not found in Deals.")
 	}
 
 	return deal
@@ -205,7 +205,7 @@ func (st *StorageMarketActorState_I) _assertPublishedDealState(rt Runtime, dealI
 
 	// must not be active
 	if deal.LastPaymentEpoch() != block.ChainEpoch(LastPaymentEpochNone) {
-		rt.Abort("sma._assertPublishedDealState: deal is not in PublishedDealState.")
+		rt.AbortStateMsg("sma._assertPublishedDealState: deal is not in PublishedDealState.")
 	}
 
 }
@@ -215,7 +215,7 @@ func (st *StorageMarketActorState_I) _assertActiveDealState(rt Runtime, dealID d
 	deal := st._safeGetOnChainDeal(rt, dealID)
 
 	if deal.LastPaymentEpoch() == block.ChainEpoch(LastPaymentEpochNone) {
-		rt.Abort("sma._assertActiveDealState: deal is not in ActiveDealState.")
+		rt.AbortStateMsg("sma._assertActiveDealState: deal is not in ActiveDealState.")
 	}
 }
 
@@ -223,7 +223,7 @@ func (st *StorageMarketActorState_I) _safeGetBalance(rt Runtime, participant add
 	balance, found := st.Balances()[participant]
 
 	if !found {
-		rt.Abort("sma._safeGetBalance: participant balance not found.")
+		rt.AbortStateMsg("sma._safeGetBalance: participant balance not found.")
 	}
 
 	return balance
@@ -242,11 +242,11 @@ func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, 
 		clientBalance := st._safeGetBalance(rt, dealP.Client())
 
 		if fee > clientBalance.Locked() {
-			rt.Abort("sma._getStorageFeeSinceLastPayment: fee cannot exceed client LockedBalance.")
+			rt.AbortFundsMsg("sma._getStorageFeeSinceLastPayment: fee cannot exceed client LockedBalance.")
 		}
 
 	} else {
-		rt.Abort("sma._getStorageFeeSinceLastPayment: no new payment since last payment.")
+		rt.AbortStateMsg("sma._getStorageFeeSinceLastPayment: no new payment since last payment.")
 	}
 
 	return fee
