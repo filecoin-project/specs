@@ -10,6 +10,10 @@ title: Storage Miner Actor
 
 {{< readfile file="storage_miner_actor.id" code="true" lang="go" >}}
 
-# `StorageMinerActor` implementation
+# `StorageMinerActorState` implementation
 
-{{< readfile file="storage_miner_actor.go" code="true" lang="go" >}}
+{{< readfile file="storage_miner_actor_state.go" code="true" lang="go" >}}
+
+# `StorageMinerActorCode` implementation
+
+{{< readfile file="storage_miner_actor_code.go" code="true" lang="go" >}}

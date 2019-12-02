@@ -57,7 +57,8 @@ const (
 )
 
 var (
-	InvalidSectorPacking = UserDefinedError(1)
+	InvalidSectorPacking         = UserDefinedError(1)
+	InsufficientPledgeCollateral = UserDefinedError(2)
 )
 
 func OK() ExitCode {

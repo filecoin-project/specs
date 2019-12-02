@@ -10,9 +10,13 @@ title: Storage Market Actor
 
 {{< readfile file="storage_market_actor.id" code="true" lang="go" >}}
 
-# `StorageMarketActor` implementation
+# `StorageMarketActorState` implementation
 
-{{< readfile file="storage_market_actor.go" code="true" lang="go" >}}
+{{< readfile file="storage_market_actor_state.go" code="true" lang="go" >}}
+
+# `StorageMarketActorCode` implementation
+
+{{< readfile file="storage_market_actor_code.go" code="true" lang="go" >}}
 
 
 {{<label storage_deal_collateral>}}
