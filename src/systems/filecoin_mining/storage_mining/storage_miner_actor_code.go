@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder
+	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder + iota
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,14 +205,14 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	// if the block winning miner is undercollateralized
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
-		Method_: spc.MethodProcessPowerReport,
+		Method_: spc.Method_StoragePowerActor_ProcessPowerReport,
 		Params_: processPowerReportParam,
 	})
 
 	if len(newExpiredDealIDs) > 0 {
 		rt.SendPropagatingErrors(&vmr.InvocInput_I{
 			To_:     addr.StorageMarketActorAddr,
-			Method_: market.MethodProcessDealExpiration,
+			Method_: market.Method_StorageMarketActor_ProcessDealExpiration,
 			Params_: processDealExpirationParam,
 		})
 	}
@@ -459,7 +459,7 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: market.MethodProcessDealSlash,
+		Method_: market.Method_StorageMarketActor_ProcessDealSlash,
 		Params_: processDealSlashParam,
 	})
 }
@@ -484,7 +484,7 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
-		Method_: spc.MethodSlashPledgeForStorageFault,
+		Method_: spc.Method_StoragePowerActor_SlashPledgeForStorageFault,
 		Params_: slashPledgeParams,
 	})
 }
@@ -535,7 +535,7 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 	receipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: market.MethodGetUnsealedCIDForDealIDs,
+		Method_: market.Method_StorageMarketActor_GetUnsealedCIDForDealIDs,
 		Params_: params,
 	})
 
@@ -731,7 +731,7 @@ func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
 	emptyParams := make([]util.Serialization, 0)
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
-		Method_: spc.EnsurePledgeCollateralSatisfied,
+		Method_: spc.Method_StoragePowerActor_EnsurePledgeCollateralSatisfied,
 		Params_: emptyParams,
 	})
 }
