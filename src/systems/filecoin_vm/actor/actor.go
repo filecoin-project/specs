@@ -2,6 +2,9 @@ package actor
 
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
+import util "github.com/filecoin-project/specs/util"
+
+type Serialization = util.Serialization
 
 const (
 	MethodSend        = MethodNum(0)
@@ -62,4 +65,26 @@ func (id *CodeID_I) IsSingleton() bool {
 
 func (x ActorSubstateCID) Ref() *ActorSubstateCID {
 	return &x
+}
+
+// Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)
+type Has_AbortArg interface {
+	AbortArg()
+}
+
+func CheckArgs(params *MethodParams, rt Has_AbortArg, cond bool) {
+	if !cond {
+		rt.AbortArg()
+	}
+}
+
+func ArgPop(params *MethodParams, rt Has_AbortArg) Serialization {
+	CheckArgs(params, rt, len(*params) > 0)
+	ret := (*params)[0]
+	*params = (*params)[1:]
+	return ret
+}
+
+func ArgEnd(params *MethodParams, rt Has_AbortArg) {
+	CheckArgs(params, rt, len(*params) == 0)
 }

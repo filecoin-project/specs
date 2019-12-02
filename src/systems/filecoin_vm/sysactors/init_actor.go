@@ -20,6 +20,10 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type Serialization = util.Serialization
 
+var CheckArgs = actor.CheckArgs
+var ArgPop = actor.ArgPop
+var ArgEnd = actor.ArgEnd
+
 func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
 	stateCID := ipld.CID(h.Take())
@@ -131,34 +135,21 @@ func _codeIDSupportsExec(codeID actor.CodeID) bool {
 }
 
 func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	_checkArgs := func(cond bool) {
-		if !cond {
-			rt.AbortArg()
-		}
-	}
-
 	switch method {
 	case actor.MethodConstructor:
-		_checkArgs(len(params) == 0)
+		ArgEnd(&params, rt)
 		return a.Constructor(rt)
 
 	case Method_InitActor_Exec:
-		_checkArgs(len(params) != 0)
-
-		codeId, err := actor.Deserialize_CodeID(Serialization(params[0]))
-		_checkArgs(err == nil)
-		params = params[1:]
-
+		codeId, err := actor.Deserialize_CodeID(ArgPop(&params, rt))
+		CheckArgs(&params, rt, err == nil)
+		// Note: do not call ArgEnd (params is forwarded to Exec)
 		return a.Exec(rt, codeId, params)
 
 	case Method_InitActor_GetActorIDForAddress:
-		_checkArgs(len(params) != 0)
-
-		address, err := addr.Deserialize_Address(Serialization(params[0]))
-		_checkArgs(err == nil)
-		params = params[1:]
-
-		_checkArgs(len(params) == 0)
+		address, err := addr.Deserialize_Address(ArgPop(&params, rt))
+		CheckArgs(&params, rt, err == nil)
+		ArgEnd(&params, rt)
 		return a.GetActorIDForAddress(rt, address)
 
 	default:

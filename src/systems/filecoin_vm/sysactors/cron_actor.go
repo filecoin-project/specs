@@ -2,6 +2,7 @@ package sysactors
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
@@ -18,7 +19,7 @@ func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 		rt.SendCatchingErrors(&vmr.InvocInput_I{
 			To_:     a,
 			Method_: actor.MethodCron,
-			Params_: []actor.MethodParam{},
+			Params_: []util.Serialization{},
 			Value_:  actor.TokenAmount(0),
 		})
 	}

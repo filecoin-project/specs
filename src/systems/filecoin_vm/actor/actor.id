@@ -27,11 +27,7 @@ type MethodNum Int
 
 // MethodParams is an array of objects to pass into a method. This
 // is the list of arguments/parameters.
-//
-// TODO: serialized or deserialized? (serialized for now)
-// TODO: force CIDs or by value is fine?
-type MethodParam Serialization
-type MethodParams [MethodParam]
+type MethodParams [util.Serialization]
 
 // CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
 // This is a value used for securing against replay attacks:
