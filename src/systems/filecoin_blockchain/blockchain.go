@@ -15,10 +15,6 @@ func (self *BlockchainSubsystem_I) validateBlockSemantics(block block.Block) {
 	// if block.Timestamp() < block.ParentTipset().LatestTimestamp() {
 	// 	return ErrInvalidBlock("block was generated too far in the past")
 	// }
-	// // next check that it is mined within the allowed time in the current epoch
-	// if block.Timestamp() > self.epochCutoffTime() {
-	// 	return ErrInvalidBlock("block was generated too far in the future")
-	// }
 	// // 3. Verify SPC dependencies: miner, weights, tickets, EP
 	// SPCErr := self.SPCSubsystem.ValidateBlock(block)
 	// if SPCErr {
@@ -57,9 +53,6 @@ func (self *BlockchainSubsystem_I) validateBlockSemantics(block block.Block) {
 	// }
 }
 
-func (self *BlockchainSubsystem_I) epochCutoffTime() {
-	panic("TODO")
-}
 
 func (self *BlockchainSubsystem_R) HandleBlock(block block.Block) bool {
 	panic("TODO")
