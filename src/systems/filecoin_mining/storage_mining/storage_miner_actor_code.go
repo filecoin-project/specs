@@ -6,7 +6,7 @@ import (
 	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
-	storage_market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
+	market "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -105,6 +105,7 @@ func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 	a.CheckSurprisePoStSubmissionHappened(rt)
 
 	return rt.SuccessReturn()
+
 }
 
 // If the miner fails to respond to a surprise PoSt,
@@ -125,6 +126,7 @@ func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime
 
 		// oh no -- we missed it. rekt
 		a._onMissedSurprisePoSt(rt)
+
 	}
 
 	return rt.SuccessReturn()
@@ -149,18 +151,18 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 
 	Release(rt, h, st)
 
+	a._submitPowerReport(rt, lastPoStResponse)
+
 	// Note: NewDetectedFaults is now the sum of all
 	// previously active, committed, and recovering sectors minus expired ones
 	// and any previously Failing sectors that did not exceed MaxFaultCount
 	// Note: previously declared faults is now treated as part of detected faults
-	a._submitFaultReport(
+	a._slashCollateralForStorageFaults(
 		rt,
 		sector.CompactSectorSet(make([]byte, 0)), // NewDeclaredFaults
 		newDetectedFaults,
 		newTerminatedFaults,
 	)
-
-	a._submitPowerReport(rt, lastPoStResponse)
 
 	// end of challenge
 	// now that new power and faults are tracked move pointer of last challenge response up
@@ -170,13 +172,51 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 	UpdateRelease(rt, h, st)
 }
 
-// Decision is to currently account for power based on sector
-// with at least one active deals and deals cannot be updated
-// an alternative proposal is to account for power based on active deals
-// an improvement proposal is to allow storage deal update in a sector
+// construct PowerReport from SectorTable
+// need lastPoSt to search for new expired deals in _updateSectorUtilization since the lastPost
+// where DealExpirationAMT takes in a range of Epoch and return a list of values that expire in that range
+func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
+	h, st := a.State(rt)
+	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
+	activePower := st._getActivePower(rt)
+	inactivePower := st._getInactivePower(rt)
 
-// TODO: decide whether declared faults sectors should be
-// penalized in the same way as undeclared sectors and how
+	// power report in processPowerReportParam
+	_ = &spc.PowerReport_I{
+		ActivePower_:   activePower,
+		InactivePower_: inactivePower,
+	}
+
+	// @param powerReport spc.PowerReport
+	processPowerReportParam := make([]actor.MethodParam, 1)
+	// @param dealIDs []deal.DealID
+	processDealExpirationParam := make([]actor.MethodParam, 1)
+
+	Release(rt, h, st)
+
+	// this will go through even if miners do not have the right amount of pledge collateral
+	// when _submitPowerReport is called in DeclareFaults and _onMissedSurprisePoSt for power slashing
+	// however in SubmitSurprisePoSt EnsurePledgeCollateralSatsified will be called
+	// to ensure that miners have the required pledge collateral
+	// otherwise, post submission will fail
+	// Note: there is no power update in RecoverFaults and hence no EnsurePledgeCollatera or _submitPowerReport
+	// Note: ElectionPoSt will always go through and some block rewards will go to LockedBalance in StoragePowerActor
+	// if the block winning miner is undercollateralized
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: spc.MethodProcessPowerReport,
+		Params_: processPowerReportParam,
+	})
+
+	if len(newExpiredDealIDs) > 0 {
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: market.MethodProcessDealExpiration,
+			Params_: processDealExpirationParam,
+		})
+	}
+
+}
 
 // this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
 // - Process ProvingSet.SectorsOn()
@@ -249,19 +289,15 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
 	Release(rt, h, st)
 
-	a._submitFaultReport(
+	a._submitPowerReport(rt, lastPoStResponse)
+
+	a._slashCollateralForStorageFaults(
 		rt,
 		sector.CompactSectorSet(make([]byte, 0)), // NewDeclaredFaults
 		sector.CompactSectorSet(make([]byte, 0)), // NewDetectedFaults
 		newTerminatedFaults,
 	)
 
-	a._submitPowerReport(rt, lastPoStResponse)
-
-	// TODO: check EnsurePledgeCollateralSatisfied
-	// pledgeCollateralSatisfied
-
-	// Now that all is done update pointer to last response
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnPoStSuccess(rt.CurrEpoch())
 	st._processStagedCommittedSectors(rt)
@@ -274,6 +310,10 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 // called by verifier to update miner state on successful surprise post
 func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	TODO() // TODO: validate caller
+
+	// Ensure pledge collateral satisfied
+	// otherwise, abort SubmitVerifiedSurprisePoSt
+	a._ensurePledgeCollateralSatisfied(rt)
 
 	return a._onSuccessfulPoSt(rt, onChainInfo)
 
@@ -296,12 +336,6 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChain
 	//
 	// notneeded := a._verifyPoStSubmission(rt)
 
-	// Update last challenge time as this one, to reset surprise post clock
-	h, st := a.State(rt)
-	st.ChallengeStatus().Impl().OnNewChallenge(rt.CurrEpoch())
-
-	UpdateRelease(rt, h, st)
-
 	// the following will update last challenge response time
 	return a._onSuccessfulPoSt(rt, onChainInfo)
 
@@ -310,93 +344,6 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChain
 ////////////////////////////////////////////////////////////////////////////////
 // Faults
 ////////////////////////////////////////////////////////////////////////////////
-
-func (a *StorageMinerActorCode_I) _slashDealsFromFaultReport(rt Runtime, sectorNumbers []sector.SectorNumber, action deal.StorageDealSlashAction) {
-
-	h, st := a.State(rt)
-
-	dealIDs := make([]deal.DealID, 0)
-
-	for _, sectorNo := range sectorNumbers {
-
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
-		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
-		dealIDs = append(dealIDs, activeDealIDs...)
-
-	}
-
-	Release(rt, h, st)
-
-	// TODO: Send(StorageMarketActor, ProcessDealSlash)
-}
-
-// construct FaultReport
-// reset NewTerminatedFaults
-func (a *StorageMinerActorCode_I) _submitFaultReport(
-	rt Runtime,
-	newDeclaredFaults sector.CompactSectorSet,
-	newDetectedFaults sector.CompactSectorSet,
-	newTerminatedFaults sector.CompactSectorSet,
-) {
-	faultReport := &sector.FaultReport_I{
-		NewDeclaredFaults_:   newDeclaredFaults,
-		NewDetectedFaults_:   newDetectedFaults,
-		NewTerminatedFaults_: newTerminatedFaults,
-	}
-
-	rt.Abort("TODO") // TODO: Send(SPA, ProcessFaultReport(faultReport))
-	panic(faultReport)
-
-	// only terminatedFault will be slashed
-	if len(newTerminatedFaults) > 0 {
-		a._slashDealsFromFaultReport(rt, newTerminatedFaults.SectorsOn(), deal.SlashTerminatedFaults)
-	}
-
-	h, st := a.State(rt)
-	st.SectorTable().Impl().TerminatedFaults_ = sector.CompactSectorSet(make([]byte, 0))
-	UpdateRelease(rt, h, st)
-}
-
-// construct PowerReport from SectorTable
-// need lastPoSt to search for new expired deals in _updateSectorUtilization since the lastPost
-// where DealExpirationAMT takes in a range of Epoch and return a list of values that expire in that range
-func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
-	h, st := a.State(rt)
-	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
-	activePower := st._getActivePower(rt)
-	inactivePower := st._getInactivePower(rt)
-
-	powerReport := &spc.PowerReport_I{
-		ActivePower_:   activePower,
-		InactivePower_: inactivePower,
-	}
-
-	Release(rt, h, st)
-
-	rt.Abort("TODO") // TODO: Send(SPA, ProcessPowerReport(powerReport))
-	panic(powerReport)
-
-	if len(newExpiredDealIDs) > 0 {
-		// Send(StorageMarketActor, ProcessDealExpiration)
-	}
-
-}
-
-func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
-
-	h, st := a.State(rt)
-	for _, preCommitSector := range st.PreCommittedSectors() {
-
-		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
-
-		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
-			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-			// TODO: potentially some slashing if ProveCommitSector comes late
-		}
-	}
-	UpdateRelease(rt, h, st)
-
-}
 
 // RecoverFaults checks if miners have sufficent collateral
 // and adds SectorFailing into SectorRecovering
@@ -407,9 +354,8 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet) InvocOutput {
 	TODO() // TODO: validate caller
 
-	// but miner can RecoverFaults in recovery before challenge
+	// RecoverFaults is only called when miners are not challenged
 	if a._isChallenged(rt) {
-		// TODO: determine proper error here and error-handling machinery
 		rt.Abort("cannot RecoverFaults when sm isChallenged")
 	}
 
@@ -429,8 +375,6 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 			// SendMessage(sma.PublishStorageDeals) or sma.ResumeStorageDeals?
 			// throw if miner cannot cover StorageDealCollateral
 
-			// Check if miners have sufficient pledgeCollateral
-
 			// copy over the same FaultCount
 			st.Sectors()[sectorNo].Impl().State_ = SectorRecovering(sectorState.State().FaultCount)
 			st.Impl().ProvingSet_.Add(sectorNo)
@@ -447,6 +391,9 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	}
 
 	UpdateRelease(rt, h, st)
+
+	// TODO: EnsureDealCollateral
+	panic("TODO")
 
 	return rt.SuccessReturn()
 }
@@ -476,16 +423,95 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 	UpdateRelease(rt, h, st)
 
-	a._submitFaultReport(
+	a._submitPowerReport(rt, lastPoStResponse)
+
+	a._slashCollateralForStorageFaults(
 		rt,
 		faultSet,                                 // DeclaredFaults
 		sector.CompactSectorSet(make([]byte, 0)), // DetectedFaults
 		sector.CompactSectorSet(make([]byte, 0)), // TerminatedFault
 	)
 
-	a._submitPowerReport(rt, lastPoStResponse)
-
 	return rt.SuccessReturn()
+}
+
+func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType sector.StorageFaultType) {
+
+	h, st := a.State(rt)
+
+	dealIDs := make([]deal.DealID, 0)
+
+	for _, sectorNo := range sectorNumbers {
+
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
+		dealIDs = append(dealIDs, activeDealIDs...)
+
+	}
+
+	// @param dealIDs []deal.DealID
+	// @param faultType sector.StorageFaultType
+	processDealSlashParam := make([]actor.MethodParam, 2)
+
+	Release(rt, h, st)
+
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: market.MethodProcessDealSlash,
+		Params_: processDealSlashParam,
+	})
+}
+
+func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sectorNumbers []sector.SectorNumber, faultType sector.StorageFaultType) {
+	h, st := a.State(rt)
+
+	affectedPower := block.StoragePower(0)
+	for _, sectorNo := range sectorNumbers {
+
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		affectedPower += utilizationInfo.CurrUtilization()
+
+	}
+
+	Release(rt, h, st)
+
+	// @param affectedPower block.StoragePower
+	// @param faultType sector.StorageFaultType
+	slashPledgeParams := make([]actor.MethodParam, 2)
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: spc.MethodSlashPledgeForStorageFault,
+		Params_: slashPledgeParams,
+	})
+}
+
+// should always happen after _submitPowerReport to have the most up to date utilization info
+// reset NewTerminatedFaults
+func (a *StorageMinerActorCode_I) _slashCollateralForStorageFaults(
+	rt Runtime,
+	newDeclaredFaults sector.CompactSectorSet, // diff value
+	newDetectedFaults sector.CompactSectorSet, // diff value
+	newTerminatedFaults sector.CompactSectorSet, // diff value
+) {
+
+	// only terminatedFault will result in collateral deal slashing
+	if len(newTerminatedFaults) > 0 {
+		a._slashDealsForStorageFault(rt, newTerminatedFaults.SectorsOn(), sector.TerminatedFault)
+		a._slashPledgeForStorageFault(rt, newTerminatedFaults.SectorsOn(), sector.TerminatedFault)
+	}
+
+	if len(newDetectedFaults) > 0 {
+		a._slashPledgeForStorageFault(rt, newDetectedFaults.SectorsOn(), sector.DetectedFault)
+	}
+
+	if len(newDeclaredFaults) > 0 {
+		a._slashPledgeForStorageFault(rt, newDeclaredFaults.SectorsOn(), sector.DeclaredFault)
+	}
+
+	// reset terminated faults
+	h, st := a.State(rt)
+	st.SectorTable().Impl().TerminatedFaults_ = sector.CompactSectorSet(make([]byte, 0))
+	UpdateRelease(rt, h, st)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -504,16 +530,11 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	// TODO: serialize method param as {sectorSize,  DealIDs...}.
 	receipt := rt.SendCatchingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: storage_market.MethodGetUnsealedCIDForDealIDs,
+		Method_: market.MethodGetUnsealedCIDForDealIDs,
 		Params_: params,
 	})
 
-	if receipt.ExitCode() == exitcode.InvalidSectorPacking {
-		return false
-	}
-
 	ret := receipt.ReturnValue()
-
 	pieceInfos := sector.PieceInfosFromBytes(ret)
 
 	// Unless we enforce a minimum padding amount, this totalPieceSize calculation can be removed.
@@ -634,9 +655,6 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		rt.Abort("Seal verification failed")
 	}
 
-	// TODO: check EnsurePledgeCollateralSatisfied
-	// pledgeCollateralSatisfied
-
 	_, utilizationFound := st.SectorUtilization()[onChainInfo.SectorNumber()]
 	if utilizationFound {
 		rt.Abort("sm.ProveCommitSector: sector number found in SectorUtilization")
@@ -693,6 +711,31 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	UpdateRelease(rt, h, st)
 
 	return rt.SuccessReturn()
+}
+
+func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
+	emptyParams := make([]actor.MethodParam, 0)
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StoragePowerActorAddr,
+		Method_: spc.EnsurePledgeCollateralSatisfied,
+		Params_: emptyParams,
+	})
+}
+
+func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
+
+	h, st := a.State(rt)
+	for _, preCommitSector := range st.PreCommittedSectors() {
+
+		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
+
+		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
+			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
+			// TODO: potentially some slashing if ProveCommitSector comes late
+		}
+	}
+	UpdateRelease(rt, h, st)
+
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {

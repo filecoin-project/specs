@@ -14,8 +14,18 @@ import (
 )
 
 const (
-	Method_StoragePowerActor_ProcessPowerReport = actor.MethodPlaceholder
-	Method_StoragePowerActor_ProcessFaultReport = actor.MethodPlaceholder
+	MethodProcessPowerReport         = actor.MethodPlaceholder
+	MethodSlashPledgeForStorageFault = actor.MethodPlaceholder
+	EnsurePledgeCollateralSatisfied  = actor.MethodPlaceholder
+)
+
+// placeholder values
+// these are the scaling constants for percentage pledge collateral to slash
+// given a miner's affected power and its total power
+const (
+	DeclaredFaultSlashPercent   = 1   // placeholder
+	DetectedFaultSlashPercent   = 10  // placeholder
+	TerminatedFaultSlashPercent = 100 // placeholder
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,15 +65,9 @@ func DeserializeState(x Bytes) State {
 
 func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 
-	var msgValue actor.TokenAmount
-
-	// TODO: this should be enforced somewhere else
-	if msgValue < 0 {
-		rt.Abort("negative message value.")
-	}
-
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	msgValue := rt.ValueReceived()
+	minerID := rt.ImmediateCaller()
+	panic("TODO: fix minerID usage")
 
 	h, st := a.State(rt)
 
@@ -82,21 +86,22 @@ func (a *StoragePowerActorCode_I) AddBalance(rt Runtime) {
 func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
 
 	if amount < 0 {
-		rt.Abort("negative amount.")
+		rt.Abort("spa.WithdrawBalance: negative amount.")
 	}
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
+	panic("TODO: fix minerID usage and assert caller is miner worker")
 
 	h, st := a.State(rt)
 
-	currEntry, found := st.PowerTable()[minerID]
-	if !found {
-		rt.Abort("minerID not found.")
+	ret := st._ensurePledgeCollateralSatisfied(rt)
+	if !ret {
+		rt.Abort("spa.WithdrawBalance: insufficient pledge collateral.")
 	}
 
+	currEntry := st._safeGetPowerEntry(rt, minerID)
 	if currEntry.AvailableBalance() < amount {
-		rt.Abort("insufficient balance.")
+		rt.Abort("spa.WithdrawBalance: insufficient available balance.")
 	}
 
 	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
@@ -104,7 +109,11 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, amount actor.Token
 
 	UpdateRelease(rt, h, st)
 
-	// TODO: send funds to msgSender
+	// send funds to miner
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    minerID,
+		Value_: amount,
+	})
 }
 
 func (a *StoragePowerActorCode_I) CreateStorageMiner(
@@ -126,9 +135,8 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 	// store ownerAddr and workerAddr there
 	// and return StorageMinerActor address
 
-	// TODO: minerID should be a MinerActorID
-	// which is smaller than MinerAddress
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
+	panic("TODO: caller is not miner actor")
 
 	h, st := a.State(rt)
 
@@ -142,16 +150,17 @@ func (a *StoragePowerActorCode_I) CreateStorageMiner(
 
 func (a *StoragePowerActorCode_I) RemoveStorageMiner(rt Runtime, address addr.Address) {
 
-	// TODO: make explicit address type
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
+	panic("TODO: use address and verify address is the caller")
+	panic(minerID)
 
 	h, st := a.State(rt)
 
-	if (st.PowerTable()[minerID].ActivePower() + st.PowerTable()[minerID].InactivePower()) > 0 {
+	if (st.PowerTable()[address].ActivePower() + st.PowerTable()[address].InactivePower()) > 0 {
 		rt.Abort("power still remains.")
 	}
 
-	delete(st.PowerTable(), minerID)
+	delete(st.PowerTable(), address)
 
 	UpdateRelease(rt, h, st)
 }
@@ -171,62 +180,56 @@ func (a *StoragePowerActorCode_I) GetTotalPower(rt Runtime) block.StoragePower {
 	return totalPower
 }
 
-func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) bool {
+func (a *StoragePowerActorCode_I) EnsurePledgeCollateralSatisfied(rt Runtime) {
 
-	ret := false
+	h, st := a.State(rt)
+	ret := st._ensurePledgeCollateralSatisfied(rt)
+	UpdateRelease(rt, h, st)
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	if !ret {
+		rt.Abort("exitcode.InsufficientPledgeCollateral")
+	}
+
+}
+
+// slash pledge collateral for Declared, Detected and Terminated faults
+func (a *StoragePowerActorCode_I) SlashPledgeForStorageFault(rt Runtime, affectedPower block.StoragePower, faultType sector.StorageFaultType) {
+
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	powerEntry, found := st.PowerTable()[minerID]
+	affectedPledge := st._getAffectedPledge(rt, minerID, affectedPower)
+	amountToSlash := actor.TokenAmount(0)
 
-	if !found {
-		rt.Abort("miner not found.")
+	switch faultType {
+	case sector.DeclaredFault:
+		amountToSlash = actor.TokenAmount(DeclaredFaultSlashPercent * uint64(affectedPledge) / 100)
+	case sector.DetectedFault:
+		amountToSlash = actor.TokenAmount(DetectedFaultSlashPercent * uint64(affectedPledge) / 100)
+	case sector.TerminatedFault:
+		amountToSlash = actor.TokenAmount(TerminatedFaultSlashPercent * uint64(affectedPledge) / 100)
 	}
 
-	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
-
-	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
-		ret = true
-	} else if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
-		st._lockPledgeCollateral(rt, minerID, (pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()))
-		ret = true
-	}
-
+	amountSlashed := st._slashPledgeCollateral(rt, minerID, amountToSlash)
 	UpdateRelease(rt, h, st)
 
-	return ret
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    addr.BurntFundsActorAddr,
+		Value_: amountSlashed,
+	})
+
 }
 
-func (a *StoragePowerActorCode_I) ProcessFaultReport(rt Runtime, report sector.FaultReport) {
-
-	var msgSender addr.Address // TODO replace this
-
-	h, st := a.State(rt)
-
-	declaredFaultSlash := report.GetDeclaredFaultSlash()
-	detectedFaultSlash := report.GetDetectedFaultSlash()
-	terminatedFaultSlash := report.GetTerminatedFaultSlash()
-
-	st._slashPledgeCollateral(rt, msgSender, (declaredFaultSlash + detectedFaultSlash + terminatedFaultSlash))
-
-	UpdateRelease(rt, h, st)
-}
-
+// @param PowerReport with ActivePower and InactivePower
+// update miner power based on the power report
 func (a *StoragePowerActorCode_I) ProcessPowerReport(rt Runtime, report PowerReport) {
 
-	// TODO: convert msgSender to MinerActorID
-	var minerID addr.Address
+	minerID := rt.ImmediateCaller()
 
 	h, st := a.State(rt)
 
-	powerEntry, found := st.PowerTable()[minerID]
-
-	if !found {
-		rt.Abort("miner not found.")
-	}
+	powerEntry := st._safeGetPowerEntry(rt, minerID)
 	powerEntry.Impl().ActivePower_ = report.ActivePower()
 	powerEntry.Impl().InactivePower_ = report.InactivePower()
 	st.Impl().PowerTable_[minerID] = powerEntry
