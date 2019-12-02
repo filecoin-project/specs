@@ -44,8 +44,19 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 			panic("election post failed")
 		}
 
-		// Process messages from the block.
-		for _, m := range blk.Messages() {
+		// Process BLS messages from the block.
+		for _, m := range blk.BLSMessages() {
+			_, found := seenMsgs[_msgCID(m)]
+			if found {
+				continue
+			}
+			outTree, r = vmi.ApplyMessage(outTree, m, blk.Miner())
+			receipts = append(receipts, r)
+			seenMsgs[_msgCID(m)] = struct{}{}
+		}
+		// Process SECP messages from the block.
+		for _, sm := range blk.SECPMessages() {
+			m := sm.Message()
 			_, found := seenMsgs[_msgCID(m)]
 			if found {
 				continue

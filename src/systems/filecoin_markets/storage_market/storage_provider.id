@@ -13,10 +13,10 @@ type StorageProvider struct {
     OnNewStorageDealProposal(proposal deal.StorageDealProposal, payloadCID ipld.CID)
 
     // Call by StorageProvider to sign proposal and construct StorageDeal message
-    signStorageDealProposal(proposal deal.StorageDealProposal) msg.Message
+    signStorageDealProposal(proposal deal.StorageDealProposal) msg.SignedMessage
 
     // Call by StorageProvider to call sma.PublishStorageDeal
-    publishStorageDealMessage(message msg.Message)
+    publishStorageDealMessage(message msg.SignedMessage)
 
     // Call by StorageProvider to accept a StorageDealProposal and notify StorageClient
     acceptStorageDealProposal(proposal deal.StorageDealProposal)

@@ -7,9 +7,10 @@ type UInt64 UInt
 
 // The messages from one block in a tipset.
 type BlockMessages struct {
-    Messages   [msg.UnsignedMessage]
-    Miner      addr.Address  // The block miner's actor address
-    PoStProof  Bytes  // The miner's Election PoSt proof output
+    BLSMessages   [msg.UnsignedMessage]
+    SECPMessages  [msg.SignedMessage]
+    Miner         addr.Address  // The block miner's actor address
+    PoStProof     Bytes  // The miner's Election PoSt proof output
 }
 
 // The messages from a tipset, grouped by block.
@@ -20,5 +21,9 @@ type TipSetMessages struct {
 
 type VMInterpreter struct {
     ApplyTipSetMessages(inTree st.StateTree, msgs TipSetMessages) struct {outTree st.StateTree, ret [vmr.MessageReceipt]}
-    ApplyMessage(inTree st.StateTree, msg msg.Message, minerAddr addr.Address) struct {outTree st.StateTree, ret vmr.MessageReceipt}
+    ApplyMessage(
+        inTree     st.StateTree
+        msg        msg.UnsignedMessage
+        minerAddr  addr.Address
+    ) struct {outTree st.StateTree, ret vmr.MessageReceipt}
 }

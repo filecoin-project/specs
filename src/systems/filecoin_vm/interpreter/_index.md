@@ -10,10 +10,15 @@ collection are included in blocks from the subsequent epoch, which must agree ab
 in order to form a new tipset.
 
 The messages from all the blocks in a tipset must be executed in order to produce a next state.
+All messages from the first block are executed before those of second and subsequent blocks in the
+tipset. For each block, BLS-aggregated messages are executed first, then SECP signed messages.
+
 In addition, for each block:
+
 - the block reward is paid to the miner owner account, and 
 - the block producer's election PoSt is processed by an implicit invocation on the associated actor  
-before that block's messages are executed 
+
+via implicit messages before that block's explicit messages are executed. 
 
 For each tipset:
 
@@ -38,10 +43,10 @@ The sequence of executions for a tipset is thus summarised:
 
 - pay reward for first block
 - process election post for first block
-- messages for first block
+- messages for first block (BLS before SECP)
 - pay reward for second block
 - process election post for second block
-- messages for second block (skipping any already encountered)
+- messages for second block (BLS before SECP, skipping any already encountered)
 - [... subsequent blocks ...]
 - cron tick 
 

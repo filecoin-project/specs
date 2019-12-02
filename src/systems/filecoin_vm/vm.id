@@ -22,5 +22,5 @@ type VM struct {
     // local storage, and intermediate storage. It is definitely the case that
     // implementations may want to operate on this differently, depending on
     // how their IpldStores work.
-    Execute(inTree st.StateTree, msgs [msg.Message]) union {outTree st.StateTree, err error}
+    Execute(inTree st.StateTree, msgs [msg.UnsignedMessage]) union {outTree st.StateTree, err error}
 }

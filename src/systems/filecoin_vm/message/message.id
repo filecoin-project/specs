@@ -8,11 +8,6 @@ type GasAmount UVarint
 // GasPrice is a Gas-to-FIL cost
 type GasPrice actor.TokenAmount
 
-type Message union {
-    UnsignedMessage
-    SignedMessage
-}  // representation keyed
-
 type UnsignedMessage struct {
     From        addr.Address
     To          addr.Address
