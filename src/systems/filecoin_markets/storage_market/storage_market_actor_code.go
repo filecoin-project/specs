@@ -6,6 +6,7 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -66,10 +67,7 @@ func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amount actor.Toke
 		rt.Abort("non-positive balance to withdraw.")
 	}
 
-	senderBalance, found := st.Balances()[msgSender]
-	if !found {
-		rt.Abort("sender address not found.")
-	}
+	senderBalance := st._safeGetBalance(rt, msgSender)
 
 	if senderBalance.Available() < amount {
 		rt.Abort("insufficient balance.")
@@ -154,7 +152,7 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 
 	for _, dealID := range dealIDs {
 
-		publishedDeal := st._getOnChainDeal(rt, dealID)
+		publishedDeal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertPublishedDealState(rt, dealID)
 
 		dealP := publishedDeal.Deal().Proposal()
@@ -178,7 +176,7 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 	ret := make([]deal.OnChainDeal, len(dealIDs))
 
 	for _, dealID := range dealIDs {
-		publishedDeal := st._getOnChainDeal(rt, dealID)
+		publishedDeal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertPublishedDealState(rt, dealID)
 
 		dealP := publishedDeal.Deal().Proposal()
@@ -201,15 +199,23 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.D
 	h, st := a.State(rt)
 
 	// only terminated fault will result in slashing of deal collateral
-
+	amountSlashed := actor.TokenAmount(0)
 	switch faultType {
 	case sector.TerminatedFault:
-		st._slashTerminatedFault(rt, dealIDs)
+		for _, dealID := range dealIDs {
+			amountSlashed += st._terminateDeal(rt, dealID)
+		}
 	default:
 		// do nothing
 	}
 
 	UpdateRelease(rt, h, st)
+
+	// send funds to BurntFundsActor
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    addr.BurntFundsActorAddr,
+		Value_: amountSlashed,
+	})
 
 }
 
@@ -217,7 +223,7 @@ func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal
 	h, st := a.State(rt)
 
 	for _, dealID := range dealIDs {
-		deal := st._getOnChainDeal(rt, dealID)
+		deal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertActiveDealState(rt, dealID)
 
 		fee := st._getStorageFeeSinceLastPayment(rt, deal, newPaymentEpoch)
@@ -241,7 +247,7 @@ func (a *StorageMarketActorCode_I) ProcessDealExpiration(rt Runtime, dealIDs []d
 
 	for _, dealID := range dealIDs {
 
-		expiredDeal := st._getOnChainDeal(rt, dealID)
+		expiredDeal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertActiveDealState(rt, dealID)
 
 		dealP := expiredDeal.Deal().Proposal()
