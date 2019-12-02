@@ -6,6 +6,7 @@ import (
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -201,15 +202,23 @@ func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.D
 	h, st := a.State(rt)
 
 	// only terminated fault will result in slashing of deal collateral
-
+	amountSlashed := actor.TokenAmount(0)
 	switch faultType {
 	case sector.TerminatedFault:
-		st._slashTerminatedFault(rt, dealIDs)
+		for _, dealID := range dealIDs {
+			amountSlashed += st._terminateDeal(rt, dealID)
+		}
 	default:
 		// do nothing
 	}
 
 	UpdateRelease(rt, h, st)
+
+	// send funds to BurntFundsActor
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    addr.BurntFundsActorAddr,
+		Value_: amountSlashed,
+	})
 
 }
 

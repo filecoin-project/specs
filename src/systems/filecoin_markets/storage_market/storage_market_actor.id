@@ -13,9 +13,8 @@ type BalancesHAMT {addr.Address: StorageParticipantBalance}
 type DealsAMT {deal.DealID: deal.OnChainDeal}
 
 type StorageMarketActorState struct {
-    Balances               BalancesHAMT
-    Deals                  DealsAMT
-    DealCollateralSlashed  actor.TokenAmount
+    Balances  BalancesHAMT
+    Deals     DealsAMT
 
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
     _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool
@@ -54,12 +53,11 @@ type StorageMarketActorState struct {
         newPaymentEpoch  block.ChainEpoch
     ) actor.TokenAmount
 
-    _slashTerminatedFault(rt Runtime, dealIDs [deal.DealID])
-    _terminateDeal(rt Runtime, dealID deal.DealID)
+    _terminateDeal(rt Runtime, dealID deal.DealID) actor.TokenAmount
     _slashDealCollateral(
         rt      Runtime
         amount  actor.TokenAmount
-    )
+    ) actor.TokenAmount
 }
 
 type StorageMarketActorCode struct {

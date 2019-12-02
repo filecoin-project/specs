@@ -260,7 +260,7 @@ func (st *StorageMarketActorState_I) _getStorageFeeSinceLastPayment(rt Runtime, 
 
 }
 
-func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal.StorageDealProposal) {
+func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal.StorageDealProposal) actor.TokenAmount {
 	amountToSlash := dealP.ProviderBalanceRequirement()
 
 	providerBal, found := st.Balances()[dealP.Provider()]
@@ -275,11 +275,15 @@ func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal
 	}
 
 	st.Balances()[dealP.Provider()].Impl().Locked_ -= amountToSlash
-	st.DealCollateralSlashed_ += amountToSlash
+	return amountToSlash
 
 }
 
-func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) {
+// delete deal from active deals
+// send deal collateral to TreasuryActor
+// return locked storage fee to client
+// return client collateral
+func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) actor.TokenAmount {
 
 	deal := st._getOnChainDeal(rt, dealID)
 	st._assertActiveDealState(rt, dealID)
@@ -292,17 +296,5 @@ func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.Deal
 	lockedFee := st._getStorageFeeSinceLastPayment(rt, deal, dealP.EndEpoch())
 	st._unlockBalance(rt, dealP.Client(), clientCollateral+lockedFee)
 
-	st._slashDealCollateral(rt, dealP)
-}
-
-// delete deal from active deals
-// send deal collateral to TreasuryActor
-// return locked storage fee to client
-// return client collateral
-func (st *StorageMarketActorState_I) _slashTerminatedFaults(rt Runtime, dealIDs []deal.DealID) {
-
-	for _, dealID := range dealIDs {
-		st._terminateDeal(rt, dealID)
-	}
-
+	return st._slashDealCollateral(rt, dealP)
 }
