@@ -3,7 +3,11 @@
 // TODO:
 // - make sure chung works so that we can remove hard-coded layers, parents and challenges
 // - update supranational calc with new one
-// - solve all the TODOs
+// - webserver for ubercalc
+// - UI
+// - Test all flags combos
+// - Review calculator again
+
 Rig:
   describe(rig_sectors_min, "Minimum sectors require to mine")
 
@@ -94,7 +98,6 @@ ProofOfSpacetime:
     // TODO: this should be max(), not sum
     post_proof_gen_parallel = post_snark_time_parallel + post_inclusions_time_parallel + post_data_access_parallel
 
-    // TODO: add MerkleTreeCaching for ColumnR
     // This only accounts for generating the merkle trees
     Ticket:
       describe(ticket_hash, "Time to compute the hash of a node for ticket generation in PoSt", secs)
@@ -121,7 +124,6 @@ ProofOfSpacetime:
         describe(post_inclusion_time, "Time to generate a Merkle tree inclusion proof for PoSt (assuming all data in memory)", secs)
 
         post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1
-        // TODO: this is for a single inclusion, check if this is used in the right way
         post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted) - 1
         post_inclusions_time = post_inclusion_time * post_challenges
         post_inclusions_time_parallel = post_inclusions_time / rig_cores
@@ -147,7 +149,7 @@ ProofOfSpacetime:
     post_data_access_parallel = post_data_access / rig_storage_parallelization
 
     Access (Wrapping):
-      // TODO: this is using random access, we should use seq access instead
+      // TODO(enhancement): this is using random access, we should use seq access instead
       post_challenge_read = (1 + post_mtree_regen_nodes) * rig_storage_latency
       // TODO: log2(nodes) > post_mtree_layers_cached
 
@@ -176,11 +178,12 @@ ProofOfSpacetime:
     describe(post_snark_size_kib, "Size of a Post proof", kib)
     describe(post_snark_partition_constraints, "Number of constraints for a PoSt partition")
     describe(post_snark_partition_time, "Time to generate a single PoSt SNARK partition", secs)
+    describe(commr_column_size, "Number of nodes in the CommR leaf")
 
     // TODO: make sure VectorR/etc are handled correctly
     inclusion_proof = merkle_tree_hash_constraints * commr_tree_depth 
     post_inclusion_proofs = inclusion_proof * post_challenges
-    ticket_proofs = ticket_constraints * post_challenges
+    ticket_proofs = ticket_constraints * commr_column_size * post_challenges
     // TODO: handle different constructions
     post_snark_constraints = ticket_proofs + post_inclusion_proofs
     post_snark_partitions = post_snark_constraints / post_snark_partition_constraints
@@ -252,11 +255,10 @@ ProofOfReplication:
     describe(porep_proof_gen, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium)", secs)
     describe(porep_proof_gen_parallel, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium) in parallel", secs)
 
-    porep_proof_gen = porep_snark_time // TODO: add post_inclusions_time + porep_data_access 
+    porep_proof_gen = porep_snark_time // TODO(enhancement): add porep_inclusions_time + porep_data_access 
     porep_proof_gen_parallel = porep_snark_time_parallel
 
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
-    // TODO: this should be max(), not sum
     porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
 
   Size:
@@ -284,7 +286,6 @@ ProofOfReplication:
     describe(commc_time, "Time to generate the merkle tree of CommC (assuming leaves in memory)", secs)
 
     commit_size = cid_size
-    // TODO: should be missing *2
     window_comm_tree_time = merkle_tree_hash_time * (window_nodes * 2 - 1)
     window_comm_leaves_time = column_leaf_hash_time * windows
     commr_size = commit_size
@@ -304,10 +305,12 @@ ProofOfReplication:
     CommR (VectorR):
       commr_time = merkle_tree_hash_time * nodes
       commr_tree_depth = log2(nodes) 
+      commr_column_size = 1
 
     CommR (ColumnR):
       commr_time = window_comm_tree_time + window_comm_leaves_time 
       commr_tree_depth = log2(window_nodes)
+      commr_column_size = windows
 
     CommC:
       commc_time = (window_comm_tree_time + window_comm_leaves_time) * stacked_layers
@@ -346,7 +349,7 @@ ProofOfReplication:
       window_read_time = window_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_window_time + window_read_time
-      // TODO: this should be max(), not sum
+      // Note: this is an upperbound, it can be lower in theory min(time, disk access)
       decoding_time_parallel = encoding_window_time_parallel + window_read_time_parallel
 
     Decoding (WrappingVariant):
@@ -354,7 +357,7 @@ ProofOfReplication:
       window_read_time = window_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_window_time + window_read_time
-      // TODO: this should be max(), not sum
+      // Note: this is an upperbound, it can be lower in theory min(time, disk access)
       decoding_time_parallel = encoding_window_time_parallel + window_read_time_parallel
 
     Decoding (Wrapping):
@@ -362,7 +365,7 @@ ProofOfReplication:
       window_read_time = sector_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_time + window_read_time
-      // TODO: this should be max(), not sum
+      // Note: this is an upperbound, it can be lower in theory min(time, disk access)
       decoding_time_parallel = encoding_time_parallel + window_read_time_parallel
 
   SNARK:
@@ -535,7 +538,7 @@ Filecoin:
 
       epost_challenged_sectors = rig_sectors_min * epost_challenged_sectors_fraction
       epost_data_access = post_data_access * epost_challenged_sectors
-      epost_data_access_parallel = epost_data_access_parallel / rig_storage_parallelization  
+      epost_data_access_parallel = epost_data_access / rig_storage_parallelization  
       epost_tickets_gen = (post_inclusions_time + post_ticket_gen) * epost_challenged_sectors
       epost_tickets_gen_parallel = epost_tickets_gen / rig_cores
 
