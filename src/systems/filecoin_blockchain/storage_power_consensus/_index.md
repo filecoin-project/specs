@@ -55,7 +55,7 @@ Whenever comparing tickets is evoked in Filecoin, for instance when discussing s
 While each Filecoin block header contains a ticket field (see {{<sref tickets>}}), it is useful to think of a ticket chain abstraction.
 Due to the nature of Filecoin's Tipsets and the possibility of using tickets from epochs that did not yield leaders to produce randomness at a given epoch, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness generation at a given height.
 
-As in all uses of signatures and hashes, we use the uint64 little endian representation of `0` to delineate concatenated inputs.
+To read more about specifically how tickets are processed for randomness, see {{<sref randomness>}}. Note that the ticket output (bytes) can be used directly, unlike with more complex objects where one would use their serialization.
 
 To sample a ticket for a given epoch n:
 ```text
@@ -64,11 +64,11 @@ While true:
     Set referenceTipsetHeight = n - referenceTipsetOffset
     If blocks were mined at referenceTipsetHeight:
         ReferenceTipset = TipsetAtHeight(referenceTipsetHeight)
-        Select the block in ReferenceTipset with the smallest final ticket, return its ticket (pastTicket).
+        Select the block in ReferenceTipset with the smallest final ticket, return its value (pastTicket).
     If no blocks were mined at referenceTipsetHeight:
         Increment referenceTipsetOffset
         (Repeat)
-newRandomness = H(pastTicket || 0 || n)
+newRandomness = H(pastTicket || n)
 ```
 
 In english, this means two things:
@@ -93,8 +93,8 @@ The miner runs the prior ticket through a Verifiable Random Function (VRF) to ge
 
 To generate a ticket for a given epoch n:
 ```text
-LastTicket = MinTicketAtEpoch(n-1)
-newRandomness = VRF_miner(TicketDST || 0 || pastTicket || 0 || minerActorAddress)
+LastTicket = MinTicketValueAtEpoch(n-1)
+newRandomness = VRF_miner(H(TicketDST || Serialization(pastTicket, minerActorAddress)))
 ```
 
 The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).

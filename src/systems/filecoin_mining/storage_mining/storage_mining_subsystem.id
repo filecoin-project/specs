@@ -65,7 +65,7 @@ type StorageMiningSubsystem struct {
         minerAddr   addr.Address
     ) block.Ticket
 
-    _preparePoStRandomnessInput(randomness util.Randomness, minerAddr addr.Address) util.Randomness
+    _preparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()
@@ -85,4 +85,9 @@ type StorageMiningSubsystem struct {
         onChainInfo  sector.OnChainPoStVerifyInfo
     ) bool
     IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool
+}
+
+type PoStChallengeSeedInput struct {
+    ticket     util.Randomness
+    minerAddr  addr.Address
 }

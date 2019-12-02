@@ -18,22 +18,14 @@ BLS signature can be used as the basis to construct a VRF. Filecoin transforms
 the BLS signature scheme it uses (see {{<sref signatures Signatures>}} into a
 VRF, Filecoin uses the random oracle model and deterministically hash the
 signature to produce the final digest. Filecoin uses
-SHA256 as
-the hash function. The algorithm is the following:
+SHA256 as the hash function. The algorithm is the following:
 ```
 VRFOutput = SHA256(DST || BLSSignature(message))
 ```
 
 where `DST` is a domain separation tag in order to treat the hash
-function as an independent random oracle in the VRF output. The tag for VRF is
-set to
-```
-DST = "VRF" // encoded as an ASCII string
-```
+function as an independent random oracle in the VRF output (see {{<sref randomness>}}).
 
-**Note**: The message given to the BLS signature scheme for using it in the VRF
-context should also contain a domain separation tag. The relevant separation tag
-are mentionned in the relevant places throughout the specs.
 
 {{< readfile file="vrf.id" code="true" lang="go" >}}
 {{< readfile file="vrf.go" code="true" lang="go" >}}

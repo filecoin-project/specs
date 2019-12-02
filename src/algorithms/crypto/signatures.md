@@ -20,23 +20,13 @@ exhaustive list):
 ## Messages
 
 To generate a signature for the [`Message`](data-structures.md#message) type,
-first serialize it, then hash the serialized bytes with blake2b-256. Then, take
+first serialize it, then hash the serialized bytes with SHA256. Then, take
 the 32 byte digest output the hash and compute the signature over it.
+
 **Note**: for each specific use of a signature scheme, it is recommended to use
 a domain separation tag to treat the hash function as an independent random
 oracle. These tags are indicated in the relevant places throughout the specs.
-
-In the case of BLS signatures used as part of the Filecoin VRF, we define the following DSTs,
-byte of little endian uint64 representations of the following numbers:
-- for generating a new random ticket:           TicketDST   = `1`
-- for generating randomness for ElectionPoSt:   PoStDST     = `2`
-
-As with Filecoin's use of hash function we also define an input delimeter to separate
-concatenated elements for input to a signature (or hash), as a byte  of little endian
-uint 64 representation of the following:
-- inputDelimeter = `0`
-
-Alphanumerics used as input to signatures are encoded as ASCII strings.
+Read more about this in {{<sref randomness>}}.
 
 ## Signature Types
 
