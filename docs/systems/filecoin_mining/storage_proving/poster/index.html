@@ -4593,8 +4593,18 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 <span class="kn">import</span> <span class="nx">sectorIndex</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
+<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">UInt64</span> <span class="nx">UInt</span>
+
+<span class="c1">// TODO: move this to somewhere the blockchain can import
+</span><span class="c1">// candidates:
+</span><span class="c1">// - filproofs - may have to learn about Sectors (and if we move Seal stuff, Deals)
+</span><span class="c1">// - &#34;blockchain/builtins&#34; or something like that - a component in the blockchain that handles storage verification
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStSubmission</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PostProof</span>   <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
+    <span class="nx">ChainEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
+<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">PoStGenerator</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">GeneratePoStCandidates</span><span class="p">(</span>

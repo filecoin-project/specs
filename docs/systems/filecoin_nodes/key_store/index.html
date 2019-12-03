@@ -4597,16 +4597,9 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">address</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 
 <span class="kd">type</span> <span class="nx">KeyStore</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">OwnerAddress</span>  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">ownerKey</span>      <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">SigKeyPair</span>
-    <span class="nx">Workers</span>       <span class="p">[</span><span class="nx">Worker</span><span class="p">]</span>
-
-    <span class="c1">// SignWithKey(key, sigType, input)
-</span><span class="c1"></span><span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">Worker</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Address</span>     <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">VRFKeyPair</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
+    <span class="nx">MinerAddress</span>  <span class="nx">address</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">OwnerKey</span>      <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
+    <span class="nx">WorkerKey</span>     <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFKeyPair</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4641,11 +4634,16 @@ https://github.com/alex-shpak/hugo-book
 
 </p>
 
+<p>Filecoin storage miners rely on three main components:
+- <strong>The miner address</strong> uniquely assigned to a given storage miner actor upon calling <code>registerMiner()</code> in the Storage Power Consensus Subsystem. It is a unique identifier for a given storage miner to which its power and other keys will be associated.
+- <strong>The owner keypair</strong> is provided by the miner ahead of registration and its public key associated to the miner address. Block rewards and other payments are made to the ownerAddress.
+- <strong>The worker keypair</strong> can be chosen and changed by the miner, its public key associated to the miner address. It is used to sign transactions, signatures, etc.</p>
+
+<p>While miner addresses are unique, multiple storage miner actors can share an owner public key or likewise a worker public key.</p>
+
 <p>TODO:</p>
 
 <ul>
-<li>describe the different types of keys used in the protocol and their usage</li>
-<li>clean interfaces for getting signatures for full filecoin mining cycles</li>
 <li>potential reccomendations or clear disclaimers with regards to consequences of failed key security</li>
 <li>protocol for changing worker keys in filecoin</li>
 </ul>

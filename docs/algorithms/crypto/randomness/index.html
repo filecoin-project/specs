@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Storage Miner | Filecoin Spec</title>
+<title>Randomness | Filecoin Spec</title>
 
 
 
@@ -15,7 +15,6 @@
 <link rel="icon" href="../../../../favicon.png" type="image/x-icon">
 
 
-<link rel="alternate" type="application/rss+xml" href="../../../../docs/systems/filecoin_mining/storage_mining/index.xml" title="Filecoin Spec" />
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/javascript" src="./gumshoe.polyfills.min.js"></script>
@@ -60,7 +59,7 @@ https://github.com/alex-shpak/hugo-book
   
 
   <style>
-  nav ul a[href$="\2f docs\2fsystems\2f filecoin_mining\2fstorage_mining\2f "] {
+  nav ul a[href$="\2f docs\2f algorithms\2f crypto\2frandomness\2f "] {
       color: #0b3a53;
   }
   </style>
@@ -4566,34 +4565,32 @@ https://github.com/alex-shpak/hugo-book
   <label for="menu-control">
     <img src="../../../../svg/menu.svg" alt="Menu" />
   </label>
-  <strong>Storage Miner</strong>
+  <strong>Randomness</strong>
 </header>
 
       
 <article class="markdown">
+  
 
-<div id="systems__filecoin_mining__storage_mining__storage_mining_subsystem"></div>
+<div id="algorithms__crypto__randomness__randomness"></div>
 
-<p>TODO:</p>
+<p>Randomness is used throughout the protocol in order to generate values and extend the blockchain.
+Random values are drawn from the <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__ticket_chain">Ticket Chain</a> and appropriately formatted for usage.
+We describe this formatting below.</p>
 
-<ul>
-<li>rename &ldquo;Storage Mining Worker&rdquo; ?</li>
-</ul>
+<h2 id="encoding-on-chain-data-for-randomness">Encoding On-chain data for randomness</h2>
 
-<p>Filecoin Storage Mining Subsystem</p>
+<p>Any randomness derived from on-chain values uses the following encodings to represent these values as bytes
+- <strong>Bytes</strong>: Bytes
+- <strong>Ints</strong>: Little endian uint64 representation
+- <strong>Strings</strong>: ASCII
+- <strong>Objects</strong>: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes</p>
 
+<h2 id="domain-separation-tags">Domain Separation Tags</h2>
 
+<p>For <a href="../../../../#algorithms__crypto__signatures">Signatures</a> as well as <a href="../../../../#algorithms__crypto__vrf">Verifiable Random Function</a> usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.</p>
 
-
-
-
-
-
-
-
-
-
-
+<p>
 
 
 
@@ -4601,99 +4598,27 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">sectoridx</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector_index&#34;</span>
-<span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
-<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
-<span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
-<span class="kn">import</span> <span class="nx">blockproducer</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block_producer&#34;</span>
-<span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
-<span class="kn">import</span> <span class="nx">storage_proving</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving&#34;</span>
-<span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
-<span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
-<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
 
-<span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">FilecoinNode</span>       <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
 
-    <span class="c1">// TODO: constructor
-</span><span class="c1"></span>    <span class="c1">// InitStorageMiningSubsystem(node node_base.FilecoinNode) struct{}
-</span><span class="c1"></span>
-    <span class="c1">// Component subsystems
-</span><span class="c1"></span>    <span class="c1">// StorageProvider    storage_provider.StorageProvider
-</span><span class="c1"></span>    <span class="nx">StoragePowerActor</span>  <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerActorCode</span>
-    <span class="nx">MinerActor</span>         <span class="nx">StorageMinerActorCode</span>
-    <span class="nx">SectorIndex</span>        <span class="nx">sectoridx</span><span class="p">.</span><span class="nx">SectorIndexerSubsystem</span>
-    <span class="nx">StorageProving</span>     <span class="nx">storage_proving</span><span class="p">.</span><span class="nx">StorageProvingSubsystem</span>
 
-    <span class="c1">// Need access to block producer in order to publish blocks
-</span><span class="c1"></span>    <span class="nx">_blockProducer</span>     <span class="nx">blockproducer</span><span class="p">.</span><span class="nx">BlockProducer</span>
 
-    <span class="c1">// Need access to SPC in order to mine a block
-</span><span class="c1"></span>    <span class="nx">_consensus</span>         <span class="nx">spc</span><span class="p">.</span><span class="nx">StoragePowerConsensusSubsystem</span>
 
-    <span class="c1">// Need access to the blockchain system in order to query for things in the chain
-</span><span class="c1"></span>    <span class="nx">_blockchain</span>        <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
 
-    <span class="c1">// Need access to the key store in order to generate tickets and election proofs
-</span><span class="c1"></span>    <span class="nx">_keyStore</span>          <span class="nx">key_store</span><span class="p">.</span><span class="nx">KeyStore</span>
 
-    <span class="c1">// TODO: why are these here? remove?
-</span><span class="c1"></span>    <span class="nf">StartMining</span><span class="p">()</span>
-    <span class="nf">StopMining</span><span class="p">()</span>
 
-    <span class="c1">// call by StorageMiningSubsystem itself to create miner
-</span><span class="c1"></span>    <span class="nf">CreateMiner</span><span class="p">(</span>
-        <span class="nx">ownerPubKey</span>   <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
-        <span class="nx">workerPubKey</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
-        <span class="nx">pledgeAmt</span>     <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="p">)</span>
 
-    <span class="c1">// get miner key by address
-</span><span class="c1"></span>    <span class="nf">GetWorkerKeyByMinerAddress</span><span class="p">(</span><span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span>
 
-    <span class="c1">// call by StorageMarket.StorageProvider at the start of a deal.
-</span><span class="c1"></span>    <span class="c1">// Triggers AddNewDeal on SectorIndexer
-</span><span class="c1"></span>    <span class="c1">// StorageDeal contains DealCID
-</span><span class="c1"></span>    <span class="nf">HandleStorageDeal</span><span class="p">(</span><span class="nx">deal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span><span class="p">)</span>
 
-    <span class="c1">// call by StorageMinerActor when error in sealing
-</span><span class="c1"></span>    <span class="nf">CommitSectorError</span><span class="p">()</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">crypto</span>
 
-    <span class="c1">// call by StorageMiningSubsystem itself in BlockProduction
-</span><span class="c1"></span>    <span class="nf">PrepareNewTicket</span><span class="p">(</span>
-        <span class="nx">randomness</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-        <span class="nx">minerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+<span class="kd">type</span> <span class="nx">DomainSeparationTag</span> <span class="kt">int</span>
 
-    <span class="nf">_preparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-
-    <span class="c1">// call by BlockChain when a new block is produced
-</span><span class="c1"></span>    <span class="nf">OnNewBestChain</span><span class="p">()</span>
-
-    <span class="c1">// call by clock during BlockProduction
-</span><span class="c1"></span>    <span class="c1">// TODO: define clock better
-</span><span class="c1"></span>    <span class="nf">OnNewRound</span><span class="p">()</span>
-
-    <span class="nf">_tryLeaderElection</span><span class="p">()</span>
-
-    <span class="nf">VerifyElectionPoSt</span><span class="p">(</span>
-        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
-        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">VerifySurprisePoSt</span><span class="p">(</span>
-        <span class="nx">header</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">BlockHeader</span>
-        <span class="nx">onChainInfo</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
-    <span class="p">)</span> <span class="kt">bool</span>
-    <span class="nf">IsValidElection</span><span class="p">(</span><span class="nx">onChainInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="kt">bool</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">PoStChallengeSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">ticket</span>     <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-    <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-<span class="p">}</span>
+<span class="kd">const</span> <span class="p">(</span>
+    <span class="nx">DomainSeparationTag_TicketDrawing</span> <span class="nx">DomainSeparationTag</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="kc">iota</span>
+    <span class="nx">DomainSeparationTag_TicketProduction</span>
+    <span class="nx">DomainSeparationTag_PoSt</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">)</span>
 </code></pre></div>
 
 
@@ -4701,7 +4626,6 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<h1 id="sector-in-storageminer-state-machine-new-one">Sector in StorageMiner State Machine (new one)</h1>
 
 
 
@@ -4715,80 +4639,66 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<div class="diagram">
 
-<span class="diagram-title">Sector State (new one)</span>
 
 
 
 
-(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_fsm.dot.svg" target="_blank">open in new tab</a>)
-<br />
-<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_fsm.dot.svg" />
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">crypto</span>
 
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
 
+<span class="kd">type</span> <span class="nx">Randomness</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+<span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
+<span class="c1">// Derive a random byte string from a domain separation tag and an arbitrary
+</span><span class="c1">// serializable object.
+</span><span class="c1">//
+</span><span class="c1">// Note: to produce values of type Serialization, use the auto-generated method prototypes
+</span><span class="c1">//   Serialize_T(T) Serialization
+</span><span class="c1">// for each type T defined in .id.
+</span><span class="c1">//
+</span><span class="c1">// In order to derive randomness from a collection of objects, rather than just a single
+</span><span class="c1">// object, define a struct at the .id level that contains those objects as member fields.
+</span><span class="c1">// This will then cause a Serialize_*() method to be generated for the struct type.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">)</span> <span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Serialization</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">}</span>
 
-</div>
+<span class="c1">// As in DeriveRand(), but additionally accepts an index into the implicit pseudorandom stream.
+</span><span class="c1">// Index must be strictly positive.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">)</span> <span class="nf">DeriveRandWithIndex</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="nx">index</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">{</span>
+        <span class="nb">panic</span><span class="p">(</span><span class="s">&#34;DeriveRandWithIndex only accepts indices &gt; 0&#34;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span>
+<span class="p">}</span>
 
+<span class="kd">func</span> <span class="nf">_deriveRandInternal</span><span class="p">(</span><span class="nx">tag</span> <span class="nx">DomainSeparationTag</span><span class="p">,</span> <span class="nx">s</span> <span class="nx">Serialization</span><span class="p">,</span> <span class="nx">index</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">Randomness</span> <span class="p">{</span>
+    <span class="nx">buffer</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{}</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IntToBytesLittleEndian</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">tag</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">IntToBytesLittleEndian</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">index</span><span class="p">))</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">buffer</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="nf">Bytes</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">ret</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 
 
+</p>
 
+<div class="notices todo" ><p><strong>TODO</strong>: sync with lotus about the following and accordingly, remove ot keep. It is currently not part of the
+Filecoin spec.</p>
 
+<h2 id="input-delimeters">Input Delimeters</h2>
 
-
-
-
-
-
-
-<div class="diagram">
-
-<span class="diagram-title">Sector State Legend (new one)</span>
-
-
-
-
-(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_legend.dot.svg" target="_blank">open in new tab</a>)
-<br />
-<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_state_legend.dot.svg" />
-
-
-
-
-</div>
-
-
-<h1 id="sector-in-storageminer-state-machine-both">Sector in StorageMiner State Machine (both)</h1>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="diagram">
-
-<span class="diagram-title">Sector State Machine (both)</span>
-
-
-
-
-(<a href="docs/systems/filecoin_mining/storage_mining/diagrams/sector_fsm.dot.svg" target="_blank">open in new tab</a>)
-<br />
-<img src="docs/systems/filecoin_mining/storage_mining/diagrams/sector_fsm.dot.svg" />
-
-
-
-
+<p>As with Filecoin&rsquo;s use of hash function we also define an input delimeter to separate
+concatenated elements for input to a signature (or hash), as a byte representation of the following:
+- inputDelimeter = <code>0</code></p>
 </div>
 
 </article>
@@ -4804,8 +4714,11 @@ https://github.com/alex-shpak/hugo-book
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#sector-in-storageminer-state-machine-new-one">Sector in StorageMiner State Machine (new one)</a></li>
-<li><a href="#sector-in-storageminer-state-machine-both">Sector in StorageMiner State Machine (both)</a></li>
+<li>
+<ul>
+<li><a href="#encoding-on-chain-data-for-randomness">Encoding On-chain data for randomness</a></li>
+<li><a href="#domain-separation-tags">Domain Separation Tags</a></li>
+</ul></li>
 </ul>
 </nav>
   </aside>

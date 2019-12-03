@@ -8,7 +8,6 @@ import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 // Runtime is the VM's internal runtime object.
 // this is everything that is accessible to actors, beyond parameters.
-// FKA as vm.Context
 type Runtime interface {
     CurrEpoch() block.ChainEpoch
 
@@ -22,7 +21,8 @@ type Runtime interface {
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
-    CurrMethodNum()        actor.MethodNum
+    // The address of the actor receiving the message.
+    CurrReceiver()         addr.Address
 
     // The actor who mined the block in which the initial on-chain message appears.
     ToplevelBlockWinner()  addr.Address

@@ -4590,11 +4590,13 @@ exhaustive list):
 <h2 id="messages">Messages</h2>
 
 <p>To generate a signature for the <a href="../data-structures#message"><code>Message</code></a> type,
-first serialize it, then hash the serialized bytes with blake2b-256. Then, take
-the 32 byte digest output the hash and compute the signature over it.
-<strong>Note</strong>: for each specific use of a signature scheme, it is recommended to use
+first serialize it, then hash the serialized bytes with SHA256. Then, take
+the 32 byte digest output the hash and compute the signature over it.</p>
+
+<p><strong>Note</strong>: for each specific use of a signature scheme, it is recommended to use
 a domain separation tag to treat the hash function as an independent random
-oracle. These tags are indicated in the relevant places throughout the specs.</p>
+oracle. These tags are indicated in the relevant places throughout the specs.
+Read more about this in <a href="../../../../#algorithms__crypto__randomness">Randomness</a>.</p>
 
 <h2 id="signature-types">Signature Types</h2>
 

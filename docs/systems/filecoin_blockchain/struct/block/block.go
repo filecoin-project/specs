@@ -1,8 +1,6 @@
 package block
 
 import (
-	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -32,16 +30,6 @@ func sliceEqual(a util.Bytes, b util.Bytes) bool {
 	return true
 }
 
-func epochToLittleEndianBytes(e ChainEpoch) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
-}
-
-func addrToLittleEndianBytes(addr addr.Address) util.Bytes {
-	ret := make([]byte, 0)
-	return ret
-}
-
 // will return tipset from closest prior (or equal) epoch with a tipset
 // return epoch should be checked accordingly
 func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
@@ -57,13 +45,11 @@ func (chain *Chain_I) TipsetAtEpoch(epoch ChainEpoch) Tipset {
 	return current
 }
 
-func (chain *Chain_I) RandomnessAtEpoch(minerAddr addr.Address, epoch ChainEpoch) util.Bytes {
-	ts := chain.TipsetAtEpoch(epoch)
-
+func (chain *Chain_I) RandomnessAtEpoch(epoch ChainEpoch) util.Bytes {
 	// doesn't matter if ts.Epoch() != epoch
 	// since we generate new ticket from prior one in any case
-	// else we use ticket from that epoch and derive new randomness from it
-	return SHA256(ts.MinTicket().DrawRandomness(minerAddr, epoch))
+	ts := chain.TipsetAtEpoch(epoch)
+	return ts.MinTicket().DrawRandomness(epoch)
 }
 
 func (chain *Chain_I) HeadEpoch() ChainEpoch {

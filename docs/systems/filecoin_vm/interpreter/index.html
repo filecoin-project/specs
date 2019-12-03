@@ -4624,6 +4624,45 @@ state mutation or produce a receipt.</p>
 <li>cron tick</li>
 </ul>
 
+<h1 id="message-validity-and-failure">Message validity and failure</h1>
+
+<p>Every message in a valid block can be processed and produce a receipt (note that block validity
+implies all messages are syntactically valid and correctly signed). However, execution may
+or may not succeed, depending on the state to which the message is applied. If the execution
+of a message fails, the corresponding receipt will carry a non-zero exit code.</p>
+
+<p>If a message fails due to a reason that can reasonably be attributed to the miner including a
+message that could never have succeeded in the parent state, or because the sender lacks funds
+to cover the maximum message cost, then the miner pays a penalty by burning the gas fee
+(rather than the sender paying fees to the block miner).</p>
+
+<p>The only state changes resulting from a message failure are either:</p>
+
+<ul>
+<li>incrementing of the sending actor&rsquo;s <code>CallSeqNum</code>, and payment of gas fees from the sender to the owner of the miner of the block including the message; or</li>
+<li>a penalty equivalent to the gas fee for the failed message, burnt by the miner (sender&rsquo;s <code>CallSeqNum</code> unchanged).</li>
+</ul>
+
+<p>A message execution will fail if, in the immediately preceding state:</p>
+
+<ul>
+<li>the <code>From</code> actor does not exist in the state (miner penalized),</li>
+<li>the <code>From</code> actor is not an account actor (miner penalized),</li>
+<li>the <code>CallSeqNum</code> of the message does not match the <code>CallSeqNum</code> of the <code>From</code> actor (miner penalized),</li>
+<li>the <code>To</code> actor does not exist in state and the <code>To</code> address is not a pubkey-style address (miner penalized),</li>
+<li>the <code>To</code> actor does not exist in state and the message has a non-zero <code>MethodNum</code> (miner penalized),</li>
+<li>the <code>To</code> actor exists but does not have a method corresponding to the non-zero <code>MethodNum</code>,</li>
+<li>deserialized <code>Params</code> is not an array of length matching the arity of the <code>To</code> actor&rsquo;s <code>MethodNum</code> method,</li>
+<li>deserialized <code>Params</code> are not valid for the types specified by the <code>To</code> actor&rsquo;s <code>MethodNum</code> method,</li>
+<li>the <code>From</code> actor does not have sufficient balance to cover the sum of the message <code>Value</code> plus the
+maximum gas cost, <code>GasLimit * GasPrice</code> (miner penalized),</li>
+<li>the invoked method consumes more gas than the <code>GasLimit</code> allows, or</li>
+<li>the invoked method exits with a non-zero code (via <code>Runtime.Abort()</code>).</li>
+</ul>
+
+<p>Note that if the <code>To</code> actor does not exist in state and the address is a valid <code>H(pubkey)</code> address,
+it will be created as an account actor (only if the message has a MethodNum of zero).</p>
+
 <p>(You can see the <em>old</em> VM interpreter <a href="docs/systems/filecoin_vm/vm_interpreter_old">here</a> )</p>
 
 <h1 id="vm-interpreter-interface"><code>vm/interpreter</code> interface</h1>
@@ -5094,6 +5133,7 @@ state mutation or produce a receipt.</p>
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
+<li><a href="#message-validity-and-failure">Message validity and failure</a></li>
 <li><a href="#vm-interpreter-interface"><code>vm/interpreter</code> interface</a></li>
 <li><a href="#vm-interpreter-implementation"><code>vm/interpreter</code> implementation</a></li>
 <li><a href="#vm-interpreter-registry"><code>vm/interpreter/registry</code></a></li>

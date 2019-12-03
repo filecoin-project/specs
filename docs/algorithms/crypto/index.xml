@@ -11,6 +11,16 @@
     
     
     <item>
+      <title>Randomness</title>
+      <link>/docs/algorithms/crypto/randomness/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/algorithms/crypto/randomness/</guid>
+      <description>Randomness is used throughout the protocol in order to generate values and extend the blockchain. Random values are drawn from the Ticket Chain and appropriately formatted for usage. We describe this formatting below.
+Encoding On-chain data for randomness Any randomness derived from on-chain values uses the following encodings to represent these values as bytes - Bytes: Bytes - Ints: Little endian uint64 representation - Strings: ASCII - Objects: Their specified Serialization, currently CBOR-based serialization defined on algebraic datatypes</description>
+    </item>
+    
+    <item>
       <title>Signatures</title>
       <link>/docs/algorithms/crypto/signatures/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

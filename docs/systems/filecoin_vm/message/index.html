@@ -4572,6 +4572,70 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
+<p>A message is the unit of communication between two actors, and thus the primitive cause of changes
+in state. A message combines:</p>
+
+<ul>
+<li>a token amount to be transferred from the sender to the receiver, and</li>
+<li>a method with parameters to be invoked on the receiver (optional).</li>
+</ul>
+
+<p>Actor code may send additional messages to other actors while processing a received message.
+Messages are processed synchronously: an actor waits for a sent message to complete before resuming control.</p>
+
+<p>The processing of a message consumes units of computation and storage denominated in gas.
+A message&rsquo;s gas limit provides an upper bound on its computation. The sender of a message pays
+for the gas units consumed by a message&rsquo;s execution (including all nested messages) at a
+gas price they determine. A block producer chooses which messages to include in a block and is
+rewarded according to each message&rsquo;s gas price and consumption, forming a market.</p>
+
+<h1 id="message-syntax-validation">Message syntax validation</h1>
+
+<p>A syntactically invalid message must not be transmitted, retained in a message pool, or
+included in a block.</p>
+
+<p>A syntactically valid <code>UnsignedMessage</code>:</p>
+
+<ul>
+<li>has a well-formed, non-empty <code>To</code> address,</li>
+<li>has a well-formed, non-empty <code>From</code> address,</li>
+<li>has a non-negative <code>CallSeqNum</code>,</li>
+<li>has <code>Value</code> no less than zero and no greater than the total token supply (<code>2e9 * 1e18</code>), and</li>
+<li>has a non-negative <code>MethodNum</code>,</li>
+<li>has non-empty <code>Params</code> only if <code>MethodNum</code> is zero,</li>
+<li>has non-negative <code>GasPrice</code>,</li>
+<li>has <code>GasLimit</code> that is at least equal to the gas consumption associated with the message&rsquo;s serialized bytes,</li>
+<li>has <code>GasLimit</code> that is no greater than the block gas limit network parameter</li>
+<li>has a total serialized size no greater than 32 KiB.</li>
+</ul>
+
+<h1 id="message-semantic-validation">Message semantic validation</h1>
+
+<p>Semantic validation refers to validation requiring information outside of the message itself.</p>
+
+<p>A semantically valid <code>SignedMessage</code> must carry a signature that verifies the payload as having
+been signed with the public key of the account actor identified by the <code>From</code> address.
+Note that when the <code>From</code> address is an ID-address, the public key must be
+looked up in the state of the sending account actor in the parent state identified by the block.</p>
+
+<p>Note: the sending actor must exist <em>in the parent state identified by the block</em> that includes the message.
+This means that it is not valid for a single block to include a message that creates a new account
+actor and a message from that same actor.
+The first message from that actor must wait until a subsequent epoch.
+Message pools may exclude messages from an actor that is not yet present in the chain state.</p>
+
+<p>There is no further semantic validation of a message that can cause a block including the message
+to be invalid. Every syntactically valid and correctly signed message can be included in a block and
+will produce a receipt from execution.
+However, a message may fail to execute to completion, in which case it will not effect the desired state change.</p>
+
+<p>The reason for this &ldquo;no message semantic validation&rdquo; policy is that the state that a message will
+be applied to cannot be known before the message is executed <em>as part of a tipset</em>. A block producer
+does not know whether another block will precede it in the tipset, thus altering the state to
+which the block&rsquo;s messages will apply from the declared parent state.</p>
+
+
+
 
 
 
@@ -4600,16 +4664,20 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasPrice</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
 <span class="kd">type</span> <span class="nx">UnsignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">From</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="nx">To</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-
-    <span class="nx">Method</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
-    <span class="nx">Params</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>  <span class="c1">// Serialized parameters to the method.
-</span><span class="c1"></span>
-    <span class="c1">// When receiving a message from a user account the nonce in the message must match
-</span><span class="c1"></span>    <span class="c1">// the expected nonce in the &#34;from&#34; actor. This prevents replay attacks.
+    <span class="c1">// Address of the receiving actor.
+</span><span class="c1"></span>    <span class="nx">To</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="c1">// Address of the sending actor.
+</span><span class="c1"></span>    <span class="nx">From</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="c1">// Expected CallSeqNum of the sending actor (only for top-level messages).
 </span><span class="c1"></span>    <span class="nx">CallSeqNum</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span>
-    <span class="nx">Value</span>       <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="c1">// Amount of value to transfer from sender&#39;s to receiver&#39;s balance.
+</span><span class="c1"></span>    <span class="nx">Value</span>       <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+
+    <span class="c1">// Optional method to invoke on receiver, zero for a plain value send.
+</span><span class="c1"></span>    <span class="nx">Method</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
+    <span class="c1">/// Serialized parameters to the method (if method is non-zero).
+</span><span class="c1"></span>    <span class="nx">Params</span>      <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span>
 
     <span class="nx">GasPrice</span>
     <span class="nx">GasLimit</span>    <span class="nx">GasAmount</span>
@@ -4740,6 +4808,15 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#message-syntax-validation">Message syntax validation</a></li>
+<li><a href="#message-semantic-validation">Message semantic validation</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

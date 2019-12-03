@@ -9,16 +9,20 @@ type GasAmount UVarint
 type GasPrice actor.TokenAmount
 
 type UnsignedMessage struct {
-    From        addr.Address
+    // Address of the receiving actor.
     To          addr.Address
-
-    Method      actor.MethodNum
-    Params      actor.MethodParams  // Serialized parameters to the method.
-
-    // When receiving a message from a user account the nonce in the message must match
-    // the expected nonce in the "from" actor. This prevents replay attacks.
+    // Address of the sending actor.
+    From        addr.Address
+    // Expected CallSeqNum of the sending actor (only for top-level messages).
     CallSeqNum  actor.CallSeqNum
+
+    // Amount of value to transfer from sender's to receiver's balance.
     Value       actor.TokenAmount
+
+    // Optional method to invoke on receiver, zero for a plain value send.
+    Method      actor.MethodNum
+    /// Serialized parameters to the method (if method is non-zero).
+    Params      actor.MethodParams
 
     GasPrice
     GasLimit    GasAmount

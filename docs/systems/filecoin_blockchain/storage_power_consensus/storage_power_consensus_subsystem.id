@@ -3,6 +3,7 @@ import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
     // actor                StoragePowerActor
@@ -11,7 +12,8 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     GenerateElectionProof(tipset block.Tipset) block.ElectionProof
     ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]
 
-    ec ExpectedConsensus
+    ec          ExpectedConsensus
+    blockchain  blockchain.BlockchainSubsystem
 
     // call by BlockchainSubsystem during block reception
     ValidateBlock(block block.Block) error
@@ -23,10 +25,14 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     validateElectionProof(
         height         block.ChainEpoch
         electionProof  block.ElectionProof
-        workerAddr     addr.Address
+        minerAddr      addr.Address
     ) bool
 
-    validateTicket(tix block.Ticket, pk filcrypto.VRFPublicKey) bool
+    validateTicket(
+        tix             block.Ticket
+        pk              filcrypto.VRFPublicKey
+        minerActorAddr  addr.Address
+    ) bool
 
     computeChainWeight(tipset block.Tipset) block.ChainWeight
 
@@ -35,32 +41,16 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // Randomness methods
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionSeed(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetTicketProductionRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem during block production
-    GetElectionProofSeed(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetElectionProofRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealSeed(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetSealRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallenge(
-        chain      block.Chain
-        minerAddr  addr.Address
-        epoch      block.ChainEpoch
-    ) util.Randomness
+    GetPoStChallengeRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
 
     GetFinality()     block.ChainEpoch
     FinalizedEpoch()  block.ChainEpoch

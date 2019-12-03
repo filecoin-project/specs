@@ -4609,6 +4609,7 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
 </span><span class="c1"></span>    <span class="c1">// actor                StoragePowerActor
@@ -4617,7 +4618,8 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="nf">GenerateElectionProof</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
     <span class="nf">ChooseTipsetToMine</span><span class="p">(</span><span class="nx">tipsets</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">])</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">]</span>
 
-    <span class="nx">ec</span> <span class="nx">ExpectedConsensus</span>
+    <span class="nx">ec</span>          <span class="nx">ExpectedConsensus</span>
+    <span class="nx">blockchain</span>  <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
 
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
@@ -4629,10 +4631,14 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="nf">validateElectionProof</span><span class="p">(</span>
         <span class="nx">height</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">electionProof</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
-        <span class="nx">workerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">minerAddr</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">validateTicket</span><span class="p">(</span><span class="nx">tix</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">validateTicket</span><span class="p">(</span>
+        <span class="nx">tix</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+        <span class="nx">pk</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
+        <span class="nx">minerActorAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">computeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
 
@@ -4641,32 +4647,16 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
     <span class="c1">// Randomness methods
 </span><span class="c1"></span>
     <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">GetTicketProductionSeed</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">GetElectionProofSeed</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetElectionProofRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem in sealing sector
-</span><span class="c1"></span>    <span class="nf">GetSealSeed</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetSealRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem after sealing
-</span><span class="c1"></span>    <span class="nf">GetPoStChallenge</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="nf">GetFinality</span><span class="p">()</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nf">FinalizedEpoch</span><span class="p">()</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
@@ -4717,24 +4707,24 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 <p>While each Filecoin block header contains a ticket field (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>), it is useful to think of a ticket chain abstraction.
 Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using tickets from epochs that did not yield leaders to produce randomness at a given epoch, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness generation at a given height.</p>
 
-<p>To sample a ticket for a given epoch n:
-- Set referenceTipsetOffset = 0
-- While true:
-    - Set referenceTipsetHeight = n - referenceTipsetOffset
-    - If blocks were mined at referenceTipsetHeight:
-        - ReferenceTipset = TipsetAtHeight(referenceTipsetHeight)
-        - Select the block in ReferenceTipset with the smallest final ticket, return its ticket (pastTicket).
-    - If no blocks were mined at referenceTipsetHeight:
-        - Increment referenceTipsetOffset
-        - (Repeat)
-- newRandomness = H(pastTicket || minerAddress || n)</p>
+<p>To read more about specifically how tickets are processed for randomness, see <a href="../../../../#algorithms__crypto__randomness">Randomness</a>.</p>
 
+<p>To sample a ticket for a given epoch n:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">Set referenceTipsetOffset = 0
+While true:
+    Set referenceTipsetHeight = n - referenceTipsetOffset
+    If blocks were mined at referenceTipsetHeight:
+        ReferenceTipset = TipsetAtHeight(referenceTipsetHeight)
+        Select the block in ReferenceTipset with the smallest final ticket, return its value (pastTicket).
+    If no blocks were mined at referenceTipsetHeight:
+        Increment referenceTipsetOffset
+        (Repeat)
+newRandomness = H(TicketDrawDST || index || Serialization(epoch || pastTicketOutput))</code></pre></div>
 <p>In english, this means two things:
+- Choose the smallest ticket in the Tipset if it contains multiple blocks.
 - When sampling a ticket from an epoch with no blocks, draw the min ticket from the prior epoch with blocks and concatenate it with
-    - the minerAddress of the miner using this input
     - the wanted epoch number
-    - hash this concatenation for a usable ticket value
-- Choose the smallest ticket in the Tipset if it contains multiple blocks.</p>
+    - hash this concatenation for a usable ticket value</p>
 
 <p>See the <code>RandomnessAtEpoch</code> method below:
 
@@ -4757,18 +4747,21 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 
 </p>
 
-<p>The above means that ticket randomness is reseeded with every new block, but can indeed be derived by any miner for an arbitrary epoch number using a past epoch. However, this does not affect protocol security under Filecoin&rsquo;s clock synchrony assumption.</p>
+<p>The above means that ticket randomness is reseeded with every new block, but can indeed be derived by any miner for an arbitrary epoch number using a past epoch.</p>
 
 <div id="systems__filecoin_blockchain__storage_power_consensus__ticket_generation"></div>
 
-<h3 id="ticket-generation">Ticket generation</h3>
+<h3 id="randomness-ticket-generation">Randomness Ticket generation</h3>
 
 <p>This section discusses how tickets are generated by EC for the <code>Ticket</code> field in every block header.</p>
 
 <p>At round <code>N</code>, a new ticket is generated using tickets drawn from the Tipset at round <code>N-1</code> (as shown below).</p>
 
-<p>The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique ticket which can later be derived for randomness (as shown above).</p>
+<p>The miner runs the prior ticket through a Verifiable Random Function (VRF) to get a new unique ticket which can later be derived for randomness (as shown above). The prior ticket is prepended with the ticket domain separation tag and concatenated with the miner actor address (to ensure miners using the same worker keys get different randomness).</p>
 
+<p>To generate a ticket for a given epoch n:</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">LastTicket = MinTicketValueAtEpoch(n-1)
+newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, minerActorAddress)))</code></pre></div>
 <p>The VRF&rsquo;s deterministic output adds entropy to the ticket chain, limiting a miner&rsquo;s ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).</p>
 
 <p>We use the VRF from <a href="../../../../#algorithms__crypto__vrf">Verifiable Random Function</a> for ticket generation in EC (see the <code>PrepareNewTicket</code> method below).</p>
@@ -4840,6 +4833,7 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">blockchain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerConsensusSubsystem</span> <span class="kd">struct</span> <span class="p">{</span><span class="c1">//(@mutable)
 </span><span class="c1"></span>    <span class="c1">// actor                StoragePowerActor
@@ -4848,7 +4842,8 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
     <span class="nf">GenerateElectionProof</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
     <span class="nf">ChooseTipsetToMine</span><span class="p">(</span><span class="nx">tipsets</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">])</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">]</span>
 
-    <span class="nx">ec</span> <span class="nx">ExpectedConsensus</span>
+    <span class="nx">ec</span>          <span class="nx">ExpectedConsensus</span>
+    <span class="nx">blockchain</span>  <span class="nx">blockchain</span><span class="p">.</span><span class="nx">BlockchainSubsystem</span>
 
     <span class="c1">// call by BlockchainSubsystem during block reception
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
@@ -4860,10 +4855,14 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
     <span class="nf">validateElectionProof</span><span class="p">(</span>
         <span class="nx">height</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
         <span class="nx">electionProof</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
-        <span class="nx">workerAddr</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+        <span class="nx">minerAddr</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">validateTicket</span><span class="p">(</span><span class="nx">tix</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">validateTicket</span><span class="p">(</span>
+        <span class="nx">tix</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
+        <span class="nx">pk</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
+        <span class="nx">minerActorAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="kt">bool</span>
 
     <span class="nf">computeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
 
@@ -4872,32 +4871,16 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
     <span class="c1">// Randomness methods
 </span><span class="c1"></span>
     <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">GetTicketProductionSeed</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">GetElectionProofSeed</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetElectionProofRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem in sealing sector
-</span><span class="c1"></span>    <span class="nf">GetSealSeed</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetSealRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem after sealing
-</span><span class="c1"></span>    <span class="nf">GetPoStChallenge</span><span class="p">(</span>
-        <span class="nx">chain</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span>
-        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-        <span class="nx">epoch</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-    <span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+</span><span class="c1"></span>    <span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="nf">GetFinality</span><span class="p">()</span>     <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="nf">FinalizedEpoch</span><span class="p">()</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
@@ -4948,11 +4931,6 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 </span><span class="c1"></span>	<span class="nx">SPC_LOOKBACK_SEAL</span>       <span class="p">=</span> <span class="nx">FINALITY</span> <span class="c1">// should be set to finality
 </span><span class="c1"></span><span class="p">)</span>
 
-<span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">VRFPersonalizationTicket</span> <span class="p">=</span> <span class="kc">iota</span>
-	<span class="nx">VRFPersonalizationPoSt</span>   <span class="p">=</span> <span class="kc">iota</span>
-<span class="p">)</span>
-
 <span class="c1">// Storage Power Consensus Subsystem
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block_I</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
@@ -4988,13 +4966,11 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 	<span class="c1">// return nil
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">validateTicket</span><span class="p">(</span><span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-	<span class="c1">// Randomness1 := storagePowerConsensus.GetTicketProductionSeed(sms.CurrentChain, sms.Blockchain.LatestEpoch())
-</span><span class="c1"></span>	<span class="c1">// input := VRFPersonalizationTicket
-</span><span class="c1"></span>	<span class="c1">// input.append(Randomness1)
-</span><span class="c1"></span>	<span class="c1">// return ticket.Verify(input, pk)
-</span><span class="c1"></span><span class="p">}</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">validateTicket</span><span class="p">(</span><span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nx">randomness1</span> <span class="o">:=</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">spc</span><span class="p">.</span><span class="nf">blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">(),</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">blockchain</span><span class="p">().</span><span class="nf">LatestEpoch</span><span class="p">())</span>
+
+	<span class="k">return</span> <span class="nx">ticket</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">randomness1</span><span class="p">,</span> <span class="nx">pk</span><span class="p">,</span> <span class="nx">minerActorAddr</span><span class="p">)</span>
+<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">ComputeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">ComputeChainWeight</span><span class="p">(</span><span class="nx">tipset</span><span class="p">)</span>
@@ -5017,24 +4993,24 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">activePowerInSector</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetTicketProductionSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">epoch</span><span class="o">-</span><span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetElectionProofSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">epoch</span><span class="o">-</span><span class="nx">SPC_LOOKBACK_RANDOMNESS</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetElectionProofRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_RANDOMNESS</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetSealSeed</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">epoch</span><span class="o">-</span><span class="nx">SPC_LOOKBACK_SEAL</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetSealRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_SEAL</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetPoStChallenge</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">minerAddr</span><span class="p">,</span> <span class="nx">epoch</span><span class="o">-</span><span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">ValidateElectionProof</span><span class="p">(</span><span class="nx">height</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">electionProof</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">workerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">ValidateElectionProof</span><span class="p">(</span><span class="nx">height</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">electionProof</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 	<span class="c1">// // 1. Check that ElectionProof was validated in appropriate time
 </span><span class="c1"></span>	<span class="c1">// if height &gt; clock.roundTime {
 </span><span class="c1"></span>	<span class="c1">// 	return false
@@ -5070,7 +5046,7 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 <h3 id="repeated-leader-election-attempts">Repeated Leader Election attempts</h3>
 
 <p>In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid <code>ElectionProof</code> and trying again.
- Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch&rsquo;s appropriate time.</p>
+Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch&rsquo;s appropriate time.</p>
 </article>
 
       
@@ -5092,7 +5068,7 @@ Due to the nature of Filecoin&rsquo;s Tipsets and the possibility of using ticke
 </ul></li>
 <li><a href="#the-ticket-chain-and-drawing-randomness">The Ticket chain and drawing randomness</a>
 <ul>
-<li><a href="#ticket-generation">Ticket generation</a></li>
+<li><a href="#randomness-ticket-generation">Randomness Ticket generation</a></li>
 <li><a href="#ticket-validation">Ticket Validation</a></li>
 <li><a href="#repeated-leader-election-attempts">Repeated Leader Election attempts</a></li>
 </ul></li>

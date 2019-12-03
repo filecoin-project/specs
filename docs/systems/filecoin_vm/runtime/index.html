@@ -4603,7 +4603,6 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// Runtime is the VM&#39;s internal runtime object.
 </span><span class="c1">// this is everything that is accessible to actors, beyond parameters.
-</span><span class="c1">// FKA as vm.Context
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">Runtime</span> <span class="kd">interface</span> <span class="p">{</span>
     <span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 
@@ -4617,7 +4616,8 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">ValidateImmediateCallerAcceptAny</span><span class="p">()</span>
     <span class="nf">ValidateImmediateCallerMatches</span><span class="p">(</span><span class="nx">CallerPattern</span><span class="p">)</span>
 
-    <span class="nf">CurrMethodNum</span><span class="p">()</span>        <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span>
+    <span class="c1">// The address of the actor receiving the message.
+</span><span class="c1"></span>    <span class="nf">CurrReceiver</span><span class="p">()</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 
     <span class="c1">// The actor who mined the block in which the initial on-chain message appears.
 </span><span class="c1"></span>    <span class="nf">ToplevelBlockWinner</span><span class="p">()</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -4961,6 +4961,10 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_immediateCaller</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrReceiver</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">ToplevelBlockWinner</span><span class="p">()</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_toplevelBlockWinner</span>
 <span class="p">}</span>
@@ -5254,11 +5258,6 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">_initValue</span><span class="p">:</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">).</span><span class="nf">State</span><span class="p">().</span><span class="nf">Ref</span><span class="p">(),</span>
 		<span class="nx">_rt</span><span class="p">:</span>        <span class="nx">rt</span><span class="p">,</span>
 	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrMethodNum</span><span class="p">()</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span> <span class="p">{</span>
-	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">VerifySignature</span><span class="p">(</span><span class="nx">signerActor</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">sig</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span><span class="p">,</span> <span class="nx">m</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
