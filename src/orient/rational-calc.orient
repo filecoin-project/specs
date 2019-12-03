@@ -458,7 +458,8 @@ ProofOfReplication (StackedChungParameters):
 
   Chung: ./bin/chung_spec.py
     chung_beta = extern(chung_alpha, expander_parents)
-    chung_alpha = extern(chung_beta, expander_parents)
+    // chung_alpha = extern(chung_beta, expander_parents)
+    // expander_parents = extern(chung_alpha, chung_beta)
 
 EC:
   describe(ec_e, "Number of winning miners per epoch on expectation")

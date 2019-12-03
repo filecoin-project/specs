@@ -28,6 +28,7 @@
   {
     "!StackedChungParameters": true,
     "spacegap": 0.2,
+    "chung_delta": 0.01,
     "column_leaf_hash_constraints": 1376,
     "column_leaf_hash_time": 2.56e-7,
     "cost_amax": 1,
