@@ -18,11 +18,7 @@ Any randomness derived from on-chain values uses the following encodings to repr
 
 ## Domain Separation Tags
 
-For {{<sref crypto_signatures>}} as well as {{<vrf>}} usage in the protocol, we define the following
-Domain Separation Tags, prepending random inputs with bytes corresponding to the little endian uint64
-representations of the following numbers:
-- for generating a new random ticket:           TicketDST   = `1`
-- for generating randomness for ElectionPoSt:   PoStDST     = `2`
+For {{<sref crypto_signatures>}} as well as {{<sref vrf>}} usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.
 
 {{< readfile file="domain.go" code="true" lang="go" >}}
 {{< readfile file="randomness.go" code="true" lang="go" >}}
