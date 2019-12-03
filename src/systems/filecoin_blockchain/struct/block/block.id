@@ -14,7 +14,7 @@ type MessageReceipt util.Bytes
 // On-chain representation of a block header.
 type BlockHeader struct {
     // Chain linking
-    Parents                [&BlockHeader]
+    Parents                Tipset
     ParentWeight           ChainWeight
     // State
     ParentStateTree        st.StateTree
