@@ -64,8 +64,9 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 
 }
 
-func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePower {
-	var activePower = block.StoragePower(0)
+func (st *StorageMinerActorState_I) _getActivePower(rt Runtime, getActiveDealIDs bool) (block.StoragePower, []deal.DealID) {
+	activePower := block.StoragePower(0)
+	activeDealIDs := make([]deal.DealID, 0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
 		utilizationInfo, found := st.SectorUtilization()[sectorNo]
@@ -73,9 +74,14 @@ func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePow
 			rt.AbortStateMsg("sm._getActivePower: sectorNo not found in SectorUtilization")
 		}
 		activePower += utilizationInfo.CurrUtilization()
+
+		if getActiveDealIDs {
+			newActiveDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
+			activeDealIDs = append(activeDealIDs, newActiveDealIDs...)
+		}
 	}
 
-	return activePower
+	return activePower, activeDealIDs
 }
 
 func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StoragePower {

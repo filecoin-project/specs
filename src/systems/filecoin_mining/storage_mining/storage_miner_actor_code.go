@@ -153,7 +153,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 
 	Release(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse)
+	a._submitPowerReport(rt, lastPoStResponse, false)
 
 	// Note: NewDetectedFaults is now the sum of all
 	// previously active, committed, and recovering sectors minus expired ones
@@ -177,10 +177,10 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 // construct PowerReport from SectorTable
 // need lastPoSt to search for new expired deals in _updateSectorUtilization since the lastPost
 // where DealExpirationAMT takes in a range of Epoch and return a list of values that expire in that range
-func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
+func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch, processDealPayment bool) {
 	h, st := a.State(rt)
 	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
-	activePower := st._getActivePower(rt)
+	activePower, _ := st._getActivePower(rt, processDealPayment)
 	inactivePower := st._getInactivePower(rt)
 
 	// power report in processPowerReportParam
@@ -193,6 +193,8 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	processPowerReportParam := make([]util.Serialization, 1)
 	// @param dealIDs []deal.DealID
 	processDealExpirationParam := make([]util.Serialization, 1)
+	// @params dealIDs []deal.DealID activeDealIDs
+	processDealPaymentParam := make([]util.Serialization, 1)
 	panic("TODO: serialize arguments")
 
 	Release(rt, h, st)
@@ -219,6 +221,13 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 		})
 	}
 
+	if processDealPayment {
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: market.Method_StorageMarketActor_ProcessDealPayment,
+			Params_: processDealPaymentParam,
+		})
+	}
 }
 
 // this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
@@ -252,8 +261,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 		case SectorCommittedSN, SectorRecoveringSN:
 			st._updateActivateSector(rt, sectorNo)
 		case SectorActiveSN:
-			// do nothing
-			// deal payment is made at _onSuccessfulPoSt
+			// do nothing, deal payment is made at the end
 		default:
 			rt.AbortStateMsg("Invalid sector state in ProvingSet.SectorsOn()")
 		}
@@ -289,7 +297,8 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
 	Release(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse)
+	// also process deal payment
+	a._submitPowerReport(rt, lastPoStResponse, true)
 
 	a._slashCollateralForStorageFaults(
 		rt,
@@ -419,7 +428,7 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 	UpdateRelease(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse)
+	a._submitPowerReport(rt, lastPoStResponse, false)
 
 	a._slashCollateralForStorageFaults(
 		rt,

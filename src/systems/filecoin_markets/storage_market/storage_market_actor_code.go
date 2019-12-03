@@ -16,6 +16,7 @@ const (
 	Method_StorageMarketActor_GetPieceInfosForDealIDs
 	Method_StorageMarketActor_ProcessDealExpiration
 	Method_StorageMarketActor_ProcessDealSlash
+	Method_StorageMarketActor_ProcessDealPayment
 	Method_StorageMarketActor_VerifyPublishedDealIDs
 	Method_StorageMarketActor_ActivateDeals
 )
