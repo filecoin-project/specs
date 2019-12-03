@@ -14,28 +14,6 @@ An address is an identifier that refers to an actor in the Filecoin state. All [
 
 For more detail, see the full {{<sref app_address "address spec">}}.
 
-
-# Block
-
-A block header contains information relevant to a particular point in time over which the network may achieve consensus. The block header contains:
-
-- The address of the miner that mined the block
-- A ticket associated to this block's creation to be used as randomness elsewhere in the protocol (see
-{{<sref leader_election>}} for more details)
-- The set of parent blocks and aggregate {{<sref chain_selection "chain weight">}} of the parents
-- This block's height
-- Merkle root of the state tree (after applying the messages -- state transitions -- included in this block)
-- Merkle root of the messages (state transitions) in this block
-- Merkle root of the message receipts in this block
-- Timestamp
-
-{{% notice note %}}
-**Note:** A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms `block` and `block header` interchangeably.
-{{% /notice %}}
-
-{{<goFile Block>}}
-
-
 # Tipset
 
 For more on Tipsets, see {{<sref expected_consensus "the Expected Consensus spec">}}. Implementations may choose not to create a Tipset data structure, instead representing its operations in terms of the underlying blocks.

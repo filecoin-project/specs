@@ -7,25 +7,24 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
 type BlockCID ipld.CID
-type MessageRoot ipld.CID
-type ReceiptRoot ipld.CID
 type ChainWeight UVarint
 type ChainEpoch UVarint
+type MessageReceipt util.Bytes
 
 // On-chain representation of a block header.
 type BlockHeader struct {
     // Chain linking
     Parents          Tipset
-    Weight           ChainWeight
+    ParentWeight     ChainWeight
     Epoch            ChainEpoch
 
     // Miner Info
     MinerAddress     addr.Address
 
     // State
-    StateTree        st.StateTree
-    Messages         MessageRoot
-    MessageReceipts  ReceiptRoot
+    StateTree        st.StateTree    
+    Messages         &TxMeta
+    MessageReceipts  [&MessageReceipt]
 
     // Consensus things
     Timestamp        clock.UnixTime
@@ -40,11 +39,15 @@ type BlockHeader struct {
     //	ComputeUnsignedFingerprint() []
 }
 
+type TxMeta struct {
+    BLSMessages [msg.UnsignedMessage]
+    SECPMessages [msg.SignedMessage]
+}
+
 // Internal representation of a full block, with all messages.
 type Block struct {
     Header        BlockHeader
-    BLSMessages   [msg.UnsignedMessage]
-    SECPMessages  [msg.SignedMessage]
+    Messages      TxMeta
 }
 
 type Chain struct {
