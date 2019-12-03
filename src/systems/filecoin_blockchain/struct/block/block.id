@@ -22,7 +22,7 @@ type BlockHeader struct {
     MinerAddress     addr.Address
 
     // State
-    StateTree        st.StateTree    
+    StateTree        st.StateTree
     Messages         &TxMeta
     MessageReceipts  [&MessageReceipt]
 
@@ -40,14 +40,14 @@ type BlockHeader struct {
 }
 
 type TxMeta struct {
-    BLSMessages [msg.UnsignedMessage]
-    SECPMessages [msg.SignedMessage]
+    BLSMessages   [msg.UnsignedMessage]
+    SECPMessages  [msg.SignedMessage]
 }
 
 // Internal representation of a full block, with all messages.
 type Block struct {
-    Header        BlockHeader
-    Messages      TxMeta
+    Header    BlockHeader
+    Messages  TxMeta
 }
 
 type Chain struct {
