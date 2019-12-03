@@ -20,7 +20,7 @@ VRF, Filecoin uses the random oracle model and deterministically hash the
 signature to produce the final digest. Filecoin uses
 SHA256 as the hash function. The algorithm is the following:
 ```
-VRFOutput = SHA256(DST || BLSSignature(message))
+VRFOutput = SHA256(DST || index || BLSSignature(message))
 ```
 
 where `DST` is a domain separation tag in order to treat the hash

@@ -129,7 +129,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 		PastTicket_: randomness,
 		MinerAddr_:  minerAddr,
 	})
-	input := filcrypto.DomainSeparationTag_Ticket.DeriveRand(randInput)
+	input := filcrypto.DomainSeparationTag_TicketProduction.DeriveRand(randInput)
 
 	// var input []byte
 	// input = append(input, spc.VRFPersonalizationTicket)
