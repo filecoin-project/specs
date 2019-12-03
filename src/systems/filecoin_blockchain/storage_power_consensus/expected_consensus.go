@@ -37,20 +37,20 @@ func (self *ExpectedConsensus_I) IsValidConsensusFault(faults ConsensusFaultType
 func (self *ExpectedConsensus_I) IsWinningChallengeTicket(challengeTicket util.Bytes, maxTicket util.Bytes, sectorPower block.StoragePower, totalPower block.StoragePower, sampleNum util.UVarint, sampleDenom util.UVarint) bool {
 	// Conceptually we are mapping the pseudorandom, deterministic hash output of the challenge ticket onto [0,1]
 	// by dividing by 2^HashLen and comparing that to the sector's target.
-	// if the challenge ticket hash is smaller than active power in the sector size / network total power * sectorSampled * ec.ExpectedLeaders
+	// if the challenge ticket hash / max hash val < activeSectorPower / totalPower * 1 / sectorSampled * ec.ExpectedLeaders
 	// it is a winning challenge ticket.
 
-	// lhs := challengeTicket * totalPower * sampleDenom
-	// rhs := maxTicket * minerPower * sampleNum * self.expectedBlocksPerEpoch
+	// lhs := challengeTicket * totalPower * sampleNum
+	// rhs := maxTicket * minerPower * sampleDenom * self.expectedBlocksPerEpoch
 	lhs := util.BigFromBytes(challengeTicket[:])
 	lhs = lhs.Mul(lhs, util.BigFromUint64(uint64(totalPower)))
-	lhs = lhs.Mul(lhs, util.BigFromUint64(uint64(sampleDenom)))
+	lhs = lhs.Mul(lhs, util.BigFromUint64(uint64(sampleNum)))
 
 	// TODO: remove const here
 	SHA256Len := 256
 	// sectorPower * 2^len(H)
 	rhs := new(big.Int).Lsh(util.BigFromUint64(uint64(sectorPower)), uint(SHA256Len))
-	rhs = rhs.Mul(rhs, util.BigFromUint64(uint64(sampleNum)))
+	rhs = rhs.Mul(rhs, util.BigFromUint64(uint64(sampleDenom)))
 	rhs = rhs.Mul(rhs, big.NewInt(int64(self.expectedBlocksPerEpoch())))
 
 	// lhs < rhs?

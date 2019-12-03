@@ -94,7 +94,11 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	actorState := stateTree.GetActorState(powerAddr)
 	substateCID := actorState.State()
 
-	substate := node.LocalGraph().Get(ipld.CID(substateCID))
+	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
+	if err != nil {
+		panic("TODO")
+	}
+
 	// TODO fix conversion to bytes
 	panic(substate)
 	var serializedSubstate util.Serialization
