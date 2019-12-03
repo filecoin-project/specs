@@ -90,6 +90,7 @@ def main():
     jinput, alphaT,betaT, degreeT = parse()
     alpha = extract_value(jinput,alphaT)
     degree = extract_value(jinput,degreeT)
+
     if alpha is None or degree is None:
         # default behavior: return same thing if nothing to be done
         # sys.stderr.write("alpha %s or degree %s" % (alpha,degree))
@@ -99,7 +100,7 @@ def main():
     beta = find_max_beta(degree,alpha)
     # sys.stderr.write("found alpha %f -> beta %f" % (alpha,beta))
     rounded = round(beta,5)
-    inject_value(jinput,alphaT,betaT,rounded)        
+    inject_value(jinput,alphaT,betaT,rounded)
     json.dump(jinput,sys.stdout)
 
 main()

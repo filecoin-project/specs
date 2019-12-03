@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 ##
 ## This script is a simple test outputting what is given on its 
 ## argument

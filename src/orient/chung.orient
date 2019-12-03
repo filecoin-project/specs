@@ -1,0 +1,4 @@
+Chung: ../../bin/preprocessing/chung_spec.py
+  beta = extern(alpha, expander_degree)
+  alpha = extern(beta, expander_degree)
+
