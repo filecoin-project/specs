@@ -106,6 +106,11 @@ func IntToBytesLittleEndian(x int) Bytes {
 	return buf.Bytes()
 }
 
+func SerializeBytes(b Bytes) Serialization {
+	panic("TODO")
+	return b
+}
+
 func IntMin(x, y int) int {
 	if y < x {
 		return y
