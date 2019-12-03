@@ -443,9 +443,9 @@ ProofOfReplication (StackedChungParameters):
   describe(chung_delta, "Chung chung_delta")
   describe(chung_sigma, "Chung sigma")
 
-  stacked_layers = (log2(chung_psi / chung_a) / log2(chung_c)) + 1
-  porep_challenges = -porep_lambda / (log2(1 - chung_delta))
-  post_challenges = -post_lambda / (log2(chung_sigma))
+  // stacked_layers = (log2(chung_psi / chung_a) / log2(chung_c)) + 1
+  // porep_challenges = -porep_lambda / (log2(1 - chung_delta))
+  // post_challenges = -post_lambda / (log2(chung_sigma))
 
   chung_alpha = regeneration_fraction * cost_amax
   chung_eps = spacegap
