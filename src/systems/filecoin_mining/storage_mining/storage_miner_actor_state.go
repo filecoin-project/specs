@@ -54,7 +54,6 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 			expiredPower := expiredDeal.Power()
 			newUtilization -= expiredPower
 			newExpiredDealIDs = append(newExpiredDealIDs, expiredDeal.ID())
-
 		}
 
 		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
@@ -116,8 +115,6 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 	delete(st.SectorUtilization(), sectorNo)
 	st.ProvingSet_.Remove(sectorNo)
 	st.SectorExpirationQueue().Remove(sectorNo)
-
-	// Send message to SMA
 }
 
 // move Sector from Committed/Recovering into Active State
@@ -176,9 +173,7 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 	}
 
 	if newFaultCount > MAX_CONSECUTIVE_FAULTS {
-		// TODO: heavy penalization: slash pledge collateral and delete sector
-		// TODO: SendMessage(SPA.SlashPledgeCollateral)
-
+		// slashing is done at _slashCollateralForStorageFaults
 		st._updateClearSector(rt, sectorNo)
 		st.SectorTable().Impl().TerminatedFaults_.Add(sectorNo)
 	}
@@ -198,25 +193,19 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 			// Note: in order to verify if something was stored in the past, one must
 			// scan the chain. SectorNumber can be re-used.
 
-			// do nothing about deal payment
-			// it will be evaluated after _updateSectorUtilization
+			// expiration settlement will be done at _updateSectorUtilization
 			st._updateClearSector(rt, expiredSectorNo)
 		case SectorFailingSN:
 			// TODO: check if there is any fault that we should handle here
-			// If a SectorFailing Expires, return remaining StorageDealCollateral and remove sector
-			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
 
 			// a failing sector expires, no change to FaultCount
+			// expiration settlement will be done at _updateSectorUtilization
 			st._updateClearSector(rt, expiredSectorNo)
 		default:
 			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
 			rt.AbortStateMsg("Invalid sector state in SectorExpirationQueue")
 		}
 	}
-
-	// Return PledgeCollateral for active expirations
-	// SendMessage(spa.Depledge) // TODO
-	panic("TODO: refactor use of this method in order for caller to send this message")
 }
 
 func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber) {
