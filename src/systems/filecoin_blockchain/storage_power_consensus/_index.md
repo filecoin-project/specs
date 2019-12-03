@@ -68,7 +68,7 @@ While true:
     If no blocks were mined at referenceTipsetHeight:
         Increment referenceTipsetOffset
         (Repeat)
-newRandomness = H(TicketDrawDST || index || Serialization(pastTicketOutput))
+newRandomness = H(TicketDrawDST || epoch || Serialization(pastTicketOutput))
 ```
 
 In english, this means two things:

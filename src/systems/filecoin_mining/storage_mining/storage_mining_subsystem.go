@@ -112,7 +112,7 @@ func (sms *StorageMiningSubsystem_I) _preparePoStChallengeSeed(randomness util.R
 	return input
 }
 
-func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness, minerAddr addr.Address) block.Ticket {
+func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness, minerActorAddr addr.Address) block.Ticket {
 	// run it through the VRF and get deterministic output
 
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
@@ -120,7 +120,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	// worker keys from generating the same randomness (given the VRF)
 	randInput := block.Serialize_TicketProductionInput(&block.TicketProductionInput_I{
 		PastTicket_: randomness,
-		MinerAddr_:  minerAddr,
+		MinerAddr_:  minerActorAddr,
 	})
 	input := filcrypto.DomainSeparationTag_TicketProduction.DeriveRand(randInput)
 
