@@ -71,7 +71,7 @@ func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePow
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
 		utilizationInfo, found := st.SectorUtilization()[sectorNo]
 		if !found {
-			rt.Abort("sm._getActivePower: sectorNo not found in SectorUtilization")
+			rt.AbortStateMsg("sm._getActivePower: sectorNo not found in SectorUtilization")
 		}
 		activePower += utilizationInfo.CurrUtilization()
 	}
@@ -109,7 +109,7 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 		st.SectorTable().Impl().FailingSectors_.Remove(sectorNo)
 	default:
 		// Committed and Recovering should not go to Cleared directly
-		rt.Abort("invalid state in clearSector")
+		rt.AbortStateMsg("invalid state in clearSector")
 	}
 
 	delete(st.Sectors(), sectorNo)
@@ -131,8 +131,7 @@ func (st *StorageMinerActorState_I) _updateActivateSector(rt Runtime, sectorNo s
 	case SectorRecoveringSN:
 		st.SectorTable().Impl().RecoveringSectors_.Remove(sectorNo)
 	default:
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("sm._updateActivateSector: invalid state in activateSector")
+		rt.AbortStateMsg("sm._updateActivateSector: invalid state in activateSector")
 	}
 
 	st.Sectors()[sectorNo].Impl().State_ = SectorActive()
@@ -173,8 +172,7 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 		// no change to SectorTable but increase in FaultCount
 		st.Sectors()[sectorNo].Impl().State_ = SectorFailing(newFaultCount)
 	default:
-		// TODO: determine proper error here and error-handling machinery
-		rt.Abort("Invalid sector state in CronAction")
+		rt.AbortStateMsg("Invalid sector state in CronAction")
 	}
 
 	if newFaultCount > MAX_CONSECUTIVE_FAULTS {
@@ -212,19 +210,19 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 			st._updateClearSector(rt, expiredSectorNo)
 		default:
 			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
-			rt.Abort("Invalid sector state in SectorExpirationQueue")
+			rt.AbortStateMsg("Invalid sector state in SectorExpirationQueue")
 		}
 	}
 
 	// Return PledgeCollateral for active expirations
 	// SendMessage(spa.Depledge) // TODO
-	rt.Abort("TODO: refactor use of this method in order for caller to send this message")
+	panic("TODO: refactor use of this method in order for caller to send this message")
 }
 
 func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber) {
 	_, found := st.Sectors()[sectorNo]
 	if found {
-		rt.Abort("sm._assertSectorDidNotExist: sector already exists.")
+		rt.AbortStateMsg("sm._assertSectorDidNotExist: sector already exists.")
 	}
 }
 
@@ -232,7 +230,7 @@ func (st *StorageMinerActorState_I) _getUtilizationInfo(rt Runtime, sectorNo sec
 	utilizationInfo, found := st.SectorUtilization()[sectorNo]
 
 	if !found {
-		rt.Abort("sm._getUtilizationInfo: utilization info not found.")
+		rt.AbortStateMsg("sm._getUtilizationInfo: utilization info not found.")
 	}
 
 	return utilizationInfo

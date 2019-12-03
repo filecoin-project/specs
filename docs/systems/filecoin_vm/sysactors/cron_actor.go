@@ -2,6 +2,7 @@ package sysactors
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
@@ -12,13 +13,13 @@ func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
 	// Hook period actions in here.
 
-	// a.actors is basically a static registry for now, loaded
+	// a.Entries is basically a static registry for now, loaded
 	// in the interpreter static registry.
-	for _, a := range a.Actors() {
+	for _, entry := range a.Entries() {
 		rt.SendCatchingErrors(&vmr.InvocInput_I{
-			To_:     a,
-			Method_: actor.MethodCron,
-			Params_: []actor.MethodParam{},
+			To_:     entry.ToAddr(),
+			Method_: entry.MethodNum(),
+			Params_: []util.Serialization{},
 			Value_:  actor.TokenAmount(0),
 		})
 	}
@@ -37,6 +38,7 @@ func (a *CronActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 		return a.EpochTick(rt)
 
 	default:
-		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
+		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
+		panic("")
 	}
 }

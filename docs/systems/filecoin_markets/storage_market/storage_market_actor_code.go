@@ -12,7 +12,10 @@ import (
 )
 
 const (
-	MethodGetUnsealedCIDForDealIDs = actor.MethodNum(3)
+	Method_StorageMarketActor_EpochTick = actor.MethodPlaceholder + iota
+	Method_StorageMarketActor_GetUnsealedCIDForDealIDs
+	Method_StorageMarketActor_ProcessDealExpiration
+	Method_StorageMarketActor_ProcessDealSlash
 )
 
 const LastPaymentEpochNone = 0
@@ -32,7 +35,7 @@ func (a *StorageMarketActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, Stat
 	stateCID := h.Take()
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state := DeserializeState(stateBytes.As_Bytes())
 	return h, state
@@ -54,50 +57,50 @@ func DeserializeState(x Bytes) State {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, balance actor.TokenAmount) {
+func (a *StorageMarketActorCode_I) WithdrawBalance(rt Runtime, amount actor.TokenAmount) {
+
+	msgSender := rt.ImmediateCaller()
+	panic("TODO: assert caller is miner worker")
+
 	h, st := a.State(rt)
 
-	var msgSender addr.Address // TODO replace this from VM runtime
-
-	if balance <= 0 {
-		rt.Abort("non-positive balance to withdraw.")
+	if amount <= 0 {
+		rt.AbortArgMsg("non-positive balance to withdraw.")
 	}
 
-	senderBalance, found := st.Balances()[msgSender]
-	if !found {
-		rt.Abort("sender address not found.")
+	senderBalance := st._safeGetBalance(rt, msgSender)
+
+	if senderBalance.Available() < amount {
+		rt.AbortFundsMsg("insufficient balance.")
 	}
 
-	if senderBalance.Available() < balance {
-		rt.Abort("insufficient balance.")
-	}
-
-	senderBalance.Impl().Available_ = senderBalance.Available() - balance
+	senderBalance.Impl().Available_ = senderBalance.Available() - amount
 	st.Balances()[msgSender] = senderBalance
 
 	UpdateRelease(rt, h, st)
 
-	// TODO send funds to msgSender with rt.Send
+	// send funds to miner
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    msgSender,
+		Value_: amount,
+	})
 }
 
 func (a *StorageMarketActorCode_I) AddBalance(rt Runtime) {
+
+	msgSender := rt.ImmediateCaller()
+	msgValue := rt.ValueReceived()
+
 	h, st := a.State(rt)
-
-	var msgSender addr.Address    // TODO replace this
-	var balance actor.TokenAmount // TODO replace this
-
-	if balance <= 0 {
-		rt.Abort("non-positive balance to add.")
-	}
 
 	senderBalance, found := st.Balances()[msgSender]
 	if found {
-		senderBalance.Impl().Available_ = senderBalance.Available() + balance
+		senderBalance.Impl().Available_ = senderBalance.Available() + msgValue
 		st.Balances()[msgSender] = senderBalance
 	} else {
 		st.Balances()[msgSender] = &StorageParticipantBalance_I{
 			Locked_:    0,
-			Available_: balance,
+			Available_: msgValue,
 		}
 	}
 
@@ -150,7 +153,7 @@ func (a *StorageMarketActorCode_I) VerifyPublishedDealIDs(rt Runtime, dealIDs []
 
 	for _, dealID := range dealIDs {
 
-		publishedDeal := st._getOnChainDeal(rt, dealID)
+		publishedDeal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertPublishedDealState(rt, dealID)
 
 		dealP := publishedDeal.Deal().Proposal()
@@ -174,7 +177,7 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 	ret := make([]deal.OnChainDeal, len(dealIDs))
 
 	for _, dealID := range dealIDs {
-		publishedDeal := st._getOnChainDeal(rt, dealID)
+		publishedDeal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertPublishedDealState(rt, dealID)
 
 		dealP := publishedDeal.Deal().Proposal()
@@ -190,22 +193,30 @@ func (a *StorageMarketActorCode_I) ActivateDeals(rt Runtime, dealIDs []deal.Deal
 
 }
 
-func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.DealID, slashAction deal.StorageDealSlashAction) {
+func (a *StorageMarketActorCode_I) ProcessDealSlash(rt Runtime, dealIDs []deal.DealID, faultType sector.StorageFaultType) {
 
 	TODO() // only call by StorageMinerActor
 
 	h, st := a.State(rt)
 
 	// only terminated fault will result in slashing of deal collateral
-
-	switch slashAction {
-	case deal.SlashTerminatedFaults:
-		st._slashTerminatedFaults(rt, dealIDs)
+	amountSlashed := actor.TokenAmount(0)
+	switch faultType {
+	case sector.TerminatedFault:
+		for _, dealID := range dealIDs {
+			amountSlashed += st._terminateDeal(rt, dealID)
+		}
 	default:
-		rt.Abort("sma.ProcessDealSlash: invalid action type")
+		// do nothing
 	}
 
 	UpdateRelease(rt, h, st)
+
+	// send funds to BurntFundsActor
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    addr.BurntFundsActorAddr,
+		Value_: amountSlashed,
+	})
 
 }
 
@@ -213,7 +224,7 @@ func (a *StorageMarketActorCode_I) ProcessDealPayment(rt Runtime, dealIDs []deal
 	h, st := a.State(rt)
 
 	for _, dealID := range dealIDs {
-		deal := st._getOnChainDeal(rt, dealID)
+		deal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertActiveDealState(rt, dealID)
 
 		fee := st._getStorageFeeSinceLastPayment(rt, deal, newPaymentEpoch)
@@ -237,7 +248,7 @@ func (a *StorageMarketActorCode_I) ProcessDealExpiration(rt Runtime, dealIDs []d
 
 	for _, dealID := range dealIDs {
 
-		expiredDeal := st._getOnChainDeal(rt, dealID)
+		expiredDeal := st._safeGetOnChainDeal(rt, dealID)
 		st._assertActiveDealState(rt, dealID)
 
 		dealP := expiredDeal.Deal().Proposal()

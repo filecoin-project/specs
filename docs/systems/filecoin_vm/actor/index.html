@@ -4618,11 +4618,7 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="c1">// MethodParams is an array of objects to pass into a method. This
 </span><span class="c1">// is the list of arguments/parameters.
-</span><span class="c1">//
-</span><span class="c1">// TODO: serialized or deserialized? (serialized for now)
-</span><span class="c1">// TODO: force CIDs or by value is fine?
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">MethodParam</span> <span class="nx">Serialization</span>
-<span class="kd">type</span> <span class="nx">MethodParams</span> <span class="p">[</span><span class="nx">MethodParam</span><span class="p">]</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">MethodParams</span> <span class="p">[</span><span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span><span class="p">]</span>
 
 <span class="c1">// CallSeqNum is an invocation (Call) sequence (Seq) number (Num).
 </span><span class="c1">// This is a value used for securing against replay attacks:
@@ -4741,6 +4737,9 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+<span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="nx">MethodSend</span>        <span class="p">=</span> <span class="nf">MethodNum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -4797,6 +4796,32 @@ https://github.com/alex-shpak/hugo-book
 	<span class="p">}</span>
 
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Actor code ID case not supported&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="nf">Ref</span><span class="p">()</span> <span class="o">*</span><span class="nx">ActorSubstateCID</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">x</span>
+<span class="p">}</span>
+
+<span class="c1">// Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Has_AbortArg</span> <span class="kd">interface</span> <span class="p">{</span>
+	<span class="nf">AbortArg</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">,</span> <span class="nx">cond</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">cond</span> <span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortArg</span><span class="p">()</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ArgPop</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">)</span> <span class="nx">Serialization</span> <span class="p">{</span>
+	<span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="o">*</span><span class="nx">params</span> <span class="p">=</span> <span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+	<span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">ArgEnd</span><span class="p">(</span><span class="nx">params</span> <span class="o">*</span><span class="nx">MethodParams</span><span class="p">,</span> <span class="nx">rt</span> <span class="nx">Has_AbortArg</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nf">CheckArgs</span><span class="p">(</span><span class="nx">params</span><span class="p">,</span> <span class="nx">rt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="o">*</span><span class="nx">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
 

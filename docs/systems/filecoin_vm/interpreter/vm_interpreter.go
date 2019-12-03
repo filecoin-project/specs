@@ -15,6 +15,7 @@ import (
 type Bytes = util.Bytes
 
 var TODO = util.TODO
+var IMPL_FINISH = util.IMPL_FINISH
 
 const (
 	// TODO: reduce these when expected gas costs are known
@@ -44,8 +45,19 @@ func (vmi *VMInterpreter_I) ApplyTipSetMessages(inTree st.StateTree, msgs TipSet
 			panic("election post failed")
 		}
 
-		// Process messages from the block.
-		for _, m := range blk.Messages() {
+		// Process BLS messages from the block.
+		for _, m := range blk.BLSMessages() {
+			_, found := seenMsgs[_msgCID(m)]
+			if found {
+				continue
+			}
+			outTree, r = vmi.ApplyMessage(outTree, m, blk.Miner())
+			receipts = append(receipts, r)
+			seenMsgs[_msgCID(m)] = struct{}{}
+		}
+		// Process SECP messages from the block.
+		for _, sm := range blk.SECPMessages() {
+			m := sm.Message()
 			_, found := seenMsgs[_msgCID(m)]
 			if found {
 				continue
@@ -85,7 +97,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(inTree st.StateTree, message msg.Unsign
 	maxGasCost := _gasToFIL(message.GasLimit(), message.GasPrice())
 	totalCost := message.Value() + actor.TokenAmount(maxGasCost)
 	if fromActor.Balance() < totalCost {
-		return inTree, _applyError(exitcode.InsufficientFunds)
+		return inTree, _applyError(exitcode.InsufficientFunds_System)
 	}
 
 	// make sure this is the right message order for fromActor
@@ -181,7 +193,9 @@ func _withTransferFundsAssert(tree st.StateTree, from addr.Address, to addr.Addr
 }
 
 func _gasToFIL(gas msg.GasAmount, price msg.GasPrice) actor.TokenAmount {
-	return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
+	IMPL_FINISH()
+	panic("") // BigInt arithmetic
+	// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
 }
 
 // Builds a message for paying block reward from the treasury account to a miner owner.

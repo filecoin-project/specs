@@ -4599,11 +4599,6 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// GasPrice is a Gas-to-FIL cost
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasPrice</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
 
-<span class="kd">type</span> <span class="nx">Message</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="nx">UnsignedMessage</span>
-    <span class="nx">SignedMessage</span>
-<span class="p">}</span>  <span class="c1">// representation keyed
-</span><span class="c1"></span>
 <span class="kd">type</span> <span class="nx">UnsignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">From</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
     <span class="nx">To</span>          <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
@@ -4657,6 +4652,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
+<span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
+
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="kd">func</span> <span class="nf">UnsignedMessage_Make</span><span class="p">(</span>
@@ -4697,7 +4694,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">SignatureVerificationError</span><span class="p">()</span> <span class="kt">error</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">message</span> <span class="nx">SignedMessage</span><span class="p">,</span> <span class="nx">publicKey</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">PublicKey</span><span class="p">)</span> <span class="p">(</span><span class="nx">UnsignedMessage</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>

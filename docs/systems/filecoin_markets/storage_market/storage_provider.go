@@ -30,15 +30,15 @@ func (provider *StorageProvider_I) OnNewStorageDealProposal(proposal deal.Storag
 
 }
 
-func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.StorageDealProposal) msg.Message {
+func (provider *StorageProvider_I) signStorageDealProposal(proposal deal.StorageDealProposal) msg.SignedMessage {
 	// TODO: construct StorageDeal Message
-	var storageDealMessage msg.Message
+	var storageDealMessage msg.SignedMessage
 
 	// TODO: notify StorageClient StorageDealSigned
 	return storageDealMessage
 }
 
-func (provider *StorageProvider_I) publishStorageDealMessage(message msg.Message) deal.StorageDeal {
+func (provider *StorageProvider_I) publishStorageDealMessage(message msg.SignedMessage) deal.StorageDeal {
 	// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
 	// var dealID deal.DealID
 	var dealCID deal.DealCID

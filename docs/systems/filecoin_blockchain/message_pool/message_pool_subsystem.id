@@ -22,7 +22,7 @@ type MessagePoolSubsystem struct {
     // are then propagated to other filecoin nodes via the MessagePool
     // subsystem. Other nodes receive and propagate Messages via their
     // own MessagePools.
-    AddNewMessage(m msg.Message)
+    AddNewMessage(m msg.SignedMessage)
 
     // Stats returns information about the MessagePool contents.
     Stats() MessagePoolStats
@@ -40,7 +40,7 @@ type MessagePoolSubsystem struct {
     //
     // Note: This is where algorithms about chosing best messages given
     //       many leaders should go.
-    GetMostProfitableMessages(miner addr.Address) [msg.Message]
+    GetMostProfitableMessages(miner addr.Address) [msg.SignedMessage]
 }
 
 type MessagePoolStats struct {

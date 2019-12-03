@@ -4593,6 +4593,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">IsSuccess</span><span class="p">()</span>          <span class="kt">bool</span>
     <span class="nf">IsError</span><span class="p">()</span>            <span class="kt">bool</span>
     <span class="nf">AllowsStateUpdate</span><span class="p">()</span>  <span class="kt">bool</span>
+    <span class="nf">Equals</span><span class="p">(</span><span class="nx">ExitCode</span><span class="p">)</span>     <span class="kt">bool</span>
 
     <span class="nx">Success</span>              <span class="kd">struct</span> <span class="p">{}</span>
     <span class="nx">SystemError</span>          <span class="nx">SystemErrorCode</span>
@@ -4626,18 +4627,23 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">exitcode</span>
 
-<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="s">&#34;fmt&#34;</span>
 <span class="p">)</span>
 
-<span class="kd">type</span> <span class="nx">SystemErrorCode</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Int</span>
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+
+<span class="kd">type</span> <span class="nx">SystemErrorCode</span> <span class="kt">int</span>
+<span class="kd">type</span> <span class="nx">UserDefinedErrorCode</span> <span class="kt">int</span>
 
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="c1">// TODO: remove once canonical error codes are finalized
-</span><span class="c1"></span>	<span class="nx">SystemErrorCode_Placeholder</span> <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
+</span><span class="c1"></span>	<span class="nx">SystemErrorCode_Placeholder</span>      <span class="p">=</span> <span class="nf">SystemErrorCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
+	<span class="nx">UserDefinedErrorCode_Placeholder</span> <span class="p">=</span> <span class="nf">UserDefinedErrorCode</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">30</span><span class="p">))</span>
 <span class="p">)</span>
+
+<span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
+<span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
 
 <span class="c1">// TODO: assign all of these.
 </span><span class="c1"></span><span class="kd">const</span> <span class="p">(</span>
@@ -4652,20 +4658,20 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="c1">// an actor
 </span><span class="c1"></span>	<span class="nx">InvalidMethod</span>
 
-	<span class="c1">// InvalidArguments indicates that a method was called with the incorrect
+	<span class="c1">// InvalidArgumentsSystem indicates that a method was called with the incorrect
 </span><span class="c1"></span>	<span class="c1">// number of arguments, or that its arguments did not satisfy its
 </span><span class="c1"></span>	<span class="c1">// preconditions
-</span><span class="c1"></span>	<span class="nx">InvalidArguments</span>
+</span><span class="c1"></span>	<span class="nx">InvalidArguments_System</span>
 
 	<span class="c1">// InsufficientFunds represents a failure to apply a message, as
 </span><span class="c1"></span>	<span class="c1">// it did not carry sufficient funds for its application.
-</span><span class="c1"></span>	<span class="nx">InsufficientFunds</span>
+</span><span class="c1"></span>	<span class="nx">InsufficientFunds_System</span>
 
 	<span class="c1">// InvalidCallSeqNum represents a message invocation out of sequence.
 </span><span class="c1"></span>	<span class="c1">// This happens when message.CallSeqNum is not exactly actor.CallSeqNum + 1
 </span><span class="c1"></span>	<span class="nx">InvalidCallSeqNum</span>
 
-	<span class="c1">// OutOfGasError is returned when the execution of an actor method
+	<span class="c1">// OutOfGas is returned when the execution of an actor method
 </span><span class="c1"></span>	<span class="c1">// (including its subcalls) uses more gas than initially allocated.
 </span><span class="c1"></span>	<span class="nx">OutOfGas</span>
 
@@ -4673,8 +4679,9 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="c1">// to the runtime that does not satisfy its preconditions.
 </span><span class="c1"></span>	<span class="nx">RuntimeAPIError</span>
 
-	<span class="c1">// MethodPanic is returned when an actor method invocation calls rt.Abort.
-</span><span class="c1"></span>	<span class="nx">MethodAbort</span>
+	<span class="c1">// RuntimeAssertFailure is returned when an actor method invocation calls
+</span><span class="c1"></span>	<span class="c1">// rt.Assert with a false condition.
+</span><span class="c1"></span>	<span class="nx">RuntimeAssertFailure</span>
 
 	<span class="c1">// MethodSubcallError is returned when an actor method&#39;s Send call has
 </span><span class="c1"></span>	<span class="c1">// returned with a failure error code (and the Send call did not specify
@@ -4682,8 +4689,15 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>	<span class="nx">MethodSubcallError</span>
 <span class="p">)</span>
 
-<span class="kd">var</span> <span class="p">(</span>
-	<span class="nx">InvalidSectorPacking</span> <span class="p">=</span> <span class="nf">UserDefinedError</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">InsufficientFunds_User</span> <span class="p">=</span> <span class="nx">UserDefinedErrorCode_Placeholder</span> <span class="o">+</span> <span class="kc">iota</span>
+	<span class="nx">InvalidArguments_User</span>
+	<span class="nx">InconsistentState_User</span>
+
+	<span class="nx">InvalidSectorPacking</span>
+	<span class="nx">SealVerificationFailed</span>
+	<span class="nx">DeadlineExceeded</span>
+	<span class="nx">InsufficientPledgeCollateral</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nf">OK</span><span class="p">()</span> <span class="nx">ExitCode</span> <span class="p">{</span>
@@ -4703,10 +4717,12 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">AllowsStateUpdate</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="c1">// TODO: Confirm whether this is the desired behavior
-</span><span class="c1"></span>
-	<span class="c1">// return x.IsSuccess() || x.Which() == ExitCode_Case_UserDefinedError
-</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
+	<span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nf">IsSuccess</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">ExitCode_I</span><span class="p">)</span> <span class="nf">Equals</span><span class="p">(</span><span class="nx">ExitCode</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">EnsureErrorCode</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ExitCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
@@ -4738,7 +4754,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">e</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nf">UserDefinedError</span><span class="p">(</span><span class="nx">e</span> <span class="nx">UserDefinedErrorCode</span><span class="p">)</span> <span class="nx">ExitCode</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nf">ExitCode_Make_UserDefinedError</span><span class="p">(</span><span class="nf">ExitCode_UserDefinedError</span><span class="p">(</span><span class="nx">e</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div>

@@ -13,12 +13,11 @@ type BalancesHAMT {addr.Address: StorageParticipantBalance}
 type DealsAMT {deal.DealID: deal.OnChainDeal}
 
 type StorageMarketActorState struct {
-    Balances               BalancesHAMT
-    Deals                  DealsAMT
-    DealCollateralSlashed  actor.TokenAmount
+    Balances  BalancesHAMT
+    Deals     DealsAMT
 
     _generateStorageDealID(rt Runtime, deal deal.StorageDeal) deal.DealID
-    _isBalanceAvailable(a addr.Address, amount actor.TokenAmount) bool
+    _isBalanceAvailable(rt Runtime, a addr.Address, amount actor.TokenAmount) bool
     _assertValidClientSignature(rt Runtime, dealP deal.StorageDealProposal)
     _assertDealStartAfterCurrEpoch(rt Runtime, p deal.StorageDealProposal)
     _assertDealNotYetExpired(rt Runtime, p deal.StorageDealProposal)
@@ -43,7 +42,8 @@ type StorageMarketActorState struct {
     )
     _lockFundsForStorageDeal(rt Runtime, deal deal.StorageDeal)
 
-    _getOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal
+    _safeGetOnChainDeal(rt Runtime, dealID deal.DealID) deal.OnChainDeal
+    _safeGetBalance(rt Runtime, participant addr.Address) StorageParticipantBalance
     _assertPublishedDealState(rt Runtime, dealID deal.DealID)
     _assertActiveDealState(rt Runtime, dealID deal.DealID)
     _activateDeal(rt Runtime, deal deal.OnChainDeal) deal.OnChainDeal
@@ -54,12 +54,11 @@ type StorageMarketActorState struct {
         newPaymentEpoch  block.ChainEpoch
     ) actor.TokenAmount
 
-    _slashTerminatedFaults(rt Runtime, dealIDs [deal.DealID])
-    _terminateDeal(rt Runtime, dealID deal.DealID)
+    _terminateDeal(rt Runtime, dealID deal.DealID) actor.TokenAmount
     _slashDealCollateral(
         rt      Runtime
         amount  actor.TokenAmount
-    )
+    ) actor.TokenAmount
 }
 
 type StorageMarketActorCode struct {
@@ -96,9 +95,9 @@ type StorageMarketActorCode struct {
     // call by StorageMinerActor
     // slash deal collateral depending on the faults (only TerminatedFault)
     ProcessDealSlash(
-        rt           Runtime
-        dealIDs      [deal.DealID]
-        slashAction  deal.StorageDealSlashAction
+        rt         Runtime
+        dealIDs    [deal.DealID]
+        faultType  sector.StorageFaultType
     )
 
     // batch process storage deal payment

@@ -12,6 +12,7 @@ type ReceiptRoot ipld.CID
 type ChainWeight UVarint
 type ChainEpoch UVarint
 
+// On-chain representation of a block header.
 type BlockHeader struct {
     // Chain linking
     Parents          Tipset
@@ -39,9 +40,11 @@ type BlockHeader struct {
     //	ComputeUnsignedFingerprint() []
 }
 
+// Internal representation of a full block, with all messages.
 type Block struct {
-    Header    BlockHeader
-    Messages  [msg.Message]
+    Header        BlockHeader
+    BLSMessages   [msg.UnsignedMessage]
+    SECPMessages  [msg.SignedMessage]
 }
 
 type Chain struct {

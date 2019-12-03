@@ -4722,7 +4722,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// Provider&#39;s signature is implicit in the onchain call
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">StorageDeal</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">Proposal</span><span class="p">()</span>      <span class="nx">StorageDealProposal</span>  <span class="c1">// can extract proposal from the message
-</span><span class="c1"></span>    <span class="nx">PublishMessage</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span>  <span class="c1">// counter signature is implicit in the message
+</span><span class="c1"></span>    <span class="nx">PublishMessage</span>  <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span>  <span class="c1">// counter signature is implicit in the message
 </span><span class="c1"></span>
     <span class="nf">CID</span><span class="p">()</span>           <span class="nx">DealCID</span>
 <span class="p">}</span>

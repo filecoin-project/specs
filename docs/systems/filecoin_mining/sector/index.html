@@ -4596,7 +4596,6 @@ and serves to make storage conform to a set of expectations.</p>
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">deal</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
-<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Bytes32</span> <span class="nx">Bytes</span>
@@ -4610,16 +4609,6 @@ and serves to make storage conform to a set of expectations.</p>
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">SectorNumber</span> <span class="nx">UInt</span>
 
 <span class="kd">type</span> <span class="nx">FaultSet</span> <span class="nx">CompactSectorSet</span>
-
-<span class="kd">type</span> <span class="nx">FaultReport</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">NewDeclaredFaults</span>          <span class="nx">CompactSectorSet</span>  <span class="c1">// diff value
-</span><span class="c1"></span>    <span class="nx">NewDetectedFaults</span>          <span class="nx">CompactSectorSet</span>  <span class="c1">// diff value
-</span><span class="c1"></span>    <span class="nx">NewTerminatedFaults</span>        <span class="nx">CompactSectorSet</span>  <span class="c1">// diff value
-</span><span class="c1"></span>
-    <span class="nf">GetDeclaredFaultSlash</span><span class="p">()</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">GetDetectedFaultSlash</span><span class="p">()</span>    <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-    <span class="nf">GetTerminatedFaultSlash</span><span class="p">()</span>  <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
-<span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SectorUtilizationInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">DealExpirationAMT</span>  <span class="nx">deal</span><span class="p">.</span><span class="nx">DealExpirationAMT</span>

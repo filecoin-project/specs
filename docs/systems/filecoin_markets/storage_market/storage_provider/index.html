@@ -4606,10 +4606,10 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">OnNewStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">,</span> <span class="nx">payloadCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span>
 
     <span class="c1">// Call by StorageProvider to sign proposal and construct StorageDeal message
-</span><span class="c1"></span>    <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span>
+</span><span class="c1"></span>    <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span>
 
     <span class="c1">// Call by StorageProvider to call sma.PublishStorageDeal
-</span><span class="c1"></span>    <span class="nf">publishStorageDealMessage</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">publishStorageDealMessage</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">)</span>
 
     <span class="c1">// Call by StorageProvider to accept a StorageDealProposal and notify StorageClient
 </span><span class="c1"></span>    <span class="nf">acceptStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span>
@@ -4696,15 +4696,15 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">signStorageDealProposal</span><span class="p">(</span><span class="nx">proposal</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDealProposal</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span> <span class="p">{</span>
     <span class="c1">// TODO: construct StorageDeal Message
-</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">storageDealMessage</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span>
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">storageDealMessage</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span>
 
     <span class="c1">// TODO: notify StorageClient StorageDealSigned
 </span><span class="c1"></span>    <span class="k">return</span> <span class="nx">storageDealMessage</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">publishStorageDealMessage</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">provider</span> <span class="o">*</span><span class="nx">StorageProvider_I</span><span class="p">)</span> <span class="nf">publishStorageDealMessage</span><span class="p">(</span><span class="nx">message</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">)</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">StorageDeal</span> <span class="p">{</span>
     <span class="c1">// TODO: send message to StorageMarketActor.PublishStorageDeal and get back DealID
 </span><span class="c1"></span>    <span class="c1">// var dealID deal.DealID
 </span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">dealCID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealCID</span>

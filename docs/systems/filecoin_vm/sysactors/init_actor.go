@@ -20,22 +20,26 @@ type Runtime = vmr.Runtime
 type Bytes = util.Bytes
 type Serialization = util.Serialization
 
+var CheckArgs = actor.CheckArgs
+var ArgPop = actor.ArgPop
+var ArgEnd = actor.ArgEnd
+
 func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
 	stateCID := ipld.CID(h.Take())
 	if ipld.CID_Equals(stateCID, ipld.EmptyCID()) {
 		if rt.CurrMethodNum() != actor.MethodConstructor {
-			rt.Abort("Actor state not initialized")
+			rt.AbortAPI("Actor state not initialized")
 		}
 		return h, nil
 	}
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
-		rt.Abort("IPLD lookup error")
+		rt.AbortAPI("IPLD lookup error")
 	}
 	state, err := Deserialize_InitActorState(Serialization(stateBytes.As_Bytes()))
 	if err != nil {
-		rt.Abort("State deserialization error")
+		rt.AbortAPI("State deserialization error")
 	}
 	return h, state
 }
@@ -57,7 +61,6 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	h, st := a.State(rt)
 	st = &InitActorState_I{
 		AddressMap_: map[addr.Address]addr.ActorID{}, // TODO: HAMT
-		IDMap_:      map[addr.ActorID]addr.Address{}, // TODO: HAMT
 		NextID_:     addr.ActorID(0),
 	}
 	UpdateRelease(rt, h, st)
@@ -66,7 +69,7 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 
 func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParams actor.MethodParams) InvocOutput {
 	if !_codeIDSupportsExec(codeID) {
-		rt.Abort("cannot exec an actor of this type")
+		rt.AbortArgMsg("cannot exec an actor of this type")
 	}
 
 	newAddr := rt.NewActorAddress()
@@ -86,7 +89,6 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 
 	// Store the mappings of address to actor ID.
 	st.AddressMap()[newAddr] = actorID
-	st.IDMap()[actorID] = newAddr
 
 	UpdateRelease(rt, h, st)
 
@@ -133,45 +135,25 @@ func _codeIDSupportsExec(codeID actor.CodeID) bool {
 }
 
 func (a *InitActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {
-	argError := rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidArguments))
-
 	switch method {
 	case actor.MethodConstructor:
-		if len(params) != 0 {
-			return argError
-		}
+		ArgEnd(&params, rt)
 		return a.Constructor(rt)
 
-	// case actor.MethodCron:
-	//     disable. init has no cron action
-
 	case Method_InitActor_Exec:
-		if len(params) == 0 {
-			return argError
-		}
-		codeId, err := actor.Deserialize_CodeID(Serialization(params[0]))
-		if err != nil {
-			return argError
-		}
-		params = params[1:]
+		codeId, err := actor.Deserialize_CodeID(ArgPop(&params, rt))
+		CheckArgs(&params, rt, err == nil)
+		// Note: do not call ArgEnd (params is forwarded to Exec)
 		return a.Exec(rt, codeId, params)
 
 	case Method_InitActor_GetActorIDForAddress:
-		if len(params) == 0 {
-			return argError
-		}
-		address, err := addr.Deserialize_Address(Serialization(params[0]))
-		if err != nil {
-			return argError
-		}
-		params = params[1:]
-
-		if len(params) != 0 {
-			return argError
-		}
+		address, err := addr.Deserialize_Address(ArgPop(&params, rt))
+		CheckArgs(&params, rt, err == nil)
+		ArgEnd(&params, rt)
 		return a.GetActorIDForAddress(rt, address)
 
 	default:
-		return rt.ErrorReturn(exitcode.SystemError(exitcode.InvalidMethod))
+		rt.Abort(exitcode.SystemError(exitcode.InvalidMethod), "Invalid method")
+		panic("")
 	}
 }

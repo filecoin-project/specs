@@ -4606,7 +4606,8 @@ The Block is a unit of the Filecoin blockchain.</p>
 <span class="kd">type</span> <span class="nx">ChainWeight</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
 
-<span class="kd">type</span> <span class="nx">BlockHeader</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="c1">// On-chain representation of a block header.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">BlockHeader</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Chain linking
 </span><span class="c1"></span>    <span class="nx">Parents</span>          <span class="nx">Tipset</span>
     <span class="nx">Weight</span>           <span class="nx">ChainWeight</span>
@@ -4633,9 +4634,11 @@ The Block is a unit of the Filecoin blockchain.</p>
 </span><span class="c1"></span>    <span class="c1">//	ComputeUnsignedFingerprint() []
 </span><span class="c1"></span><span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Header</span>    <span class="nx">BlockHeader</span>
-    <span class="nx">Messages</span>  <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">]</span>
+<span class="c1">// Internal representation of a full block, with all messages.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Header</span>        <span class="nx">BlockHeader</span>
+    <span class="nx">BLSMessages</span>   <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">]</span>
+    <span class="nx">SECPMessages</span>  <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">Chain</span> <span class="kd">struct</span> <span class="p">{</span>

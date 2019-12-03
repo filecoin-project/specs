@@ -4616,7 +4616,7 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 </span><span class="c1"></span>    <span class="c1">// are then propagated to other filecoin nodes via the MessagePool
 </span><span class="c1"></span>    <span class="c1">// subsystem. Other nodes receive and propagate Messages via their
 </span><span class="c1"></span>    <span class="c1">// own MessagePools.
-</span><span class="c1"></span>    <span class="nf">AddNewMessage</span><span class="p">(</span><span class="nx">m</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
+</span><span class="c1"></span>    <span class="nf">AddNewMessage</span><span class="p">(</span><span class="nx">m</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">)</span>
 
     <span class="c1">// Stats returns information about the MessagePool contents.
 </span><span class="c1"></span>    <span class="nf">Stats</span><span class="p">()</span> <span class="nx">MessagePoolStats</span>
@@ -4634,7 +4634,7 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 </span><span class="c1"></span>    <span class="c1">//
 </span><span class="c1"></span>    <span class="c1">// Note: This is where algorithms about chosing best messages given
 </span><span class="c1"></span>    <span class="c1">//       many leaders should go.
-</span><span class="c1"></span>    <span class="nf">GetMostProfitableMessages</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">]</span>
+</span><span class="c1"></span>    <span class="nf">GetMostProfitableMessages</span><span class="p">(</span><span class="nx">miner</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">MessagePoolStats</span> <span class="kd">struct</span> <span class="p">{</span>

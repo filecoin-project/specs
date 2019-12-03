@@ -5130,7 +5130,7 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="c1">// local storage, and intermediate storage. It is definitely the case that
 </span><span class="c1"></span>    <span class="c1">// implementations may want to operate on this differently, depending on
 </span><span class="c1"></span>    <span class="c1">// how their IpldStores work.
-</span><span class="c1"></span>    <span class="nf">Execute</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
+</span><span class="c1"></span>    <span class="nf">Execute</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">])</span> <span class="nx">union</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 

@@ -4578,10 +4578,17 @@ collection are included in blocks from the subsequent epoch, which must agree ab
 in order to form a new tipset.</p>
 
 <p>The messages from all the blocks in a tipset must be executed in order to produce a next state.
-In addition, for each block:
-- the block reward is paid to the miner owner account, and
-- the block producer&rsquo;s election PoSt is processed by an implicit invocation on the associated actor<br />
-before that block&rsquo;s messages are executed</p>
+All messages from the first block are executed before those of second and subsequent blocks in the
+tipset. For each block, BLS-aggregated messages are executed first, then SECP signed messages.</p>
+
+<p>In addition, for each block:</p>
+
+<ul>
+<li>the block reward is paid to the miner owner account, and</li>
+<li>the block producer&rsquo;s election PoSt is processed by an implicit invocation on the associated actor<br /></li>
+</ul>
+
+<p>via implicit messages before that block&rsquo;s explicit messages are executed.</p>
 
 <p>For each tipset:</p>
 
@@ -4609,10 +4616,10 @@ state mutation or produce a receipt.</p>
 <ul>
 <li>pay reward for first block</li>
 <li>process election post for first block</li>
-<li>messages for first block</li>
+<li>messages for first block (BLS before SECP)</li>
 <li>pay reward for second block</li>
 <li>process election post for second block</li>
-<li>messages for second block (skipping any already encountered)</li>
+<li>messages for second block (BLS before SECP, skipping any already encountered)</li>
 <li>[&hellip; subsequent blocks &hellip;]</li>
 <li>cron tick</li>
 </ul>
@@ -4649,9 +4656,10 @@ state mutation or produce a receipt.</p>
 
 <span class="c1">// The messages from one block in a tipset.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">BlockMessages</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Messages</span>   <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">]</span>
-    <span class="nx">Miner</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// The block miner&#39;s actor address
-</span><span class="c1"></span>    <span class="nx">PoStProof</span>  <span class="nx">Bytes</span>  <span class="c1">// The miner&#39;s Election PoSt proof output
+    <span class="nx">BLSMessages</span>   <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">]</span>
+    <span class="nx">SECPMessages</span>  <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">]</span>
+    <span class="nx">Miner</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>  <span class="c1">// The block miner&#39;s actor address
+</span><span class="c1"></span>    <span class="nx">PoStProof</span>     <span class="nx">Bytes</span>  <span class="c1">// The miner&#39;s Election PoSt proof output
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// The messages from a tipset, grouped by block.
@@ -4662,7 +4670,11 @@ state mutation or produce a receipt.</p>
 
 <span class="kd">type</span> <span class="nx">VMInterpreter</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nf">ApplyTipSetMessages</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msgs</span> <span class="nx">TipSetMessages</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="p">[</span><span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">]}</span>
-    <span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">inTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">msg</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
+    <span class="nf">ApplyMessage</span><span class="p">(</span>
+        <span class="nx">inTree</span>     <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+        <span class="nx">msg</span>        <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span>
+        <span class="nx">minerAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="kd">struct</span> <span class="p">{</span><span class="nx">outTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">ret</span> <span class="nx">vmr</span><span class="p">.</span><span class="nx">MessageReceipt</span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4709,6 +4721,7 @@ state mutation or produce a receipt.</p>
 <span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
 
 <span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
+<span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 
 <span class="kd">const</span> <span class="p">(</span>
 	<span class="c1">// TODO: reduce these when expected gas costs are known
@@ -4738,8 +4751,19 @@ state mutation or produce a receipt.</p>
 			<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;election post failed&#34;</span><span class="p">)</span>
 		<span class="p">}</span>
 
-		<span class="c1">// Process messages from the block.
-</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Messages</span><span class="p">()</span> <span class="p">{</span>
+		<span class="c1">// Process BLS messages from the block.
+</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">BLSMessages</span><span class="p">()</span> <span class="p">{</span>
+			<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span>
+			<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
+				<span class="k">continue</span>
+			<span class="p">}</span>
+			<span class="nx">outTree</span><span class="p">,</span> <span class="nx">r</span> <span class="p">=</span> <span class="nx">vmi</span><span class="p">.</span><span class="nf">ApplyMessage</span><span class="p">(</span><span class="nx">outTree</span><span class="p">,</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">Miner</span><span class="p">())</span>
+			<span class="nx">receipts</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">receipts</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span>
+			<span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span> <span class="p">=</span> <span class="kd">struct</span><span class="p">{}{}</span>
+		<span class="p">}</span>
+		<span class="c1">// Process SECP messages from the block.
+</span><span class="c1"></span>		<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">sm</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">blk</span><span class="p">.</span><span class="nf">SECPMessages</span><span class="p">()</span> <span class="p">{</span>
+			<span class="nx">m</span> <span class="o">:=</span> <span class="nx">sm</span><span class="p">.</span><span class="nf">Message</span><span class="p">()</span>
 			<span class="nx">_</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">seenMsgs</span><span class="p">[</span><span class="nf">_msgCID</span><span class="p">(</span><span class="nx">m</span><span class="p">)]</span>
 			<span class="k">if</span> <span class="nx">found</span> <span class="p">{</span>
 				<span class="k">continue</span>
@@ -4779,7 +4803,7 @@ state mutation or produce a receipt.</p>
 </span><span class="c1"></span>	<span class="nx">maxGasCost</span> <span class="o">:=</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nf">GasLimit</span><span class="p">(),</span> <span class="nx">message</span><span class="p">.</span><span class="nf">GasPrice</span><span class="p">())</span>
 	<span class="nx">totalCost</span> <span class="o">:=</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Value</span><span class="p">()</span> <span class="o">+</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">maxGasCost</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">fromActor</span><span class="p">.</span><span class="nf">Balance</span><span class="p">()</span> <span class="p">&lt;</span> <span class="nx">totalCost</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nx">inTree</span><span class="p">,</span> <span class="nf">_applyError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_System</span><span class="p">)</span>
 	<span class="p">}</span>
 
 	<span class="c1">// make sure this is the right message order for fromActor
@@ -4875,8 +4899,10 @@ state mutation or produce a receipt.</p>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">_gasToFIL</span><span class="p">(</span><span class="nx">gas</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">price</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasPrice</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="nx">gas</span><span class="p">)</span> <span class="o">*</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="nx">price</span><span class="p">))</span>
-<span class="p">}</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// BigInt arithmetic
+</span><span class="c1"></span>	<span class="c1">// return actor.TokenAmount(util.UVarint(gas) * util.UVarint(price))
+</span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// Builds a message for paying block reward from the treasury account to a miner owner.
 </span><span class="c1"></span><span class="kd">func</span> <span class="nf">_makeBlockRewardMessage</span><span class="p">(</span><span class="nx">state</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span> <span class="p">{</span>
@@ -4972,6 +4998,7 @@ state mutation or produce a receipt.</p>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">market</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;</span>
 <span class="kn">import</span> <span class="nx">spc</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&#34;</span>
+<span class="kn">import</span> <span class="nx">storage_market</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_markets/storage_market&#34;</span>
 <span class="kn">import</span> <span class="nx">sysactors</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/sysactors&#34;</span>
 <span class="kn">import</span> <span class="nx">vmr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&#34;</span>
 
@@ -5038,8 +5065,15 @@ state mutation or produce a receipt.</p>
 
 	<span class="c1">// wire in CRON actions.
 </span><span class="c1"></span>	<span class="c1">// TODO: there&#39;s probably a better place to put this, but for now, do it here.
-</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">)</span>
-	<span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Actors_</span><span class="p">,</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">)</span>
+</span><span class="c1"></span>	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">CronTableEntry_I</span><span class="p">{</span>
+		<span class="nx">ToAddr_</span><span class="p">:</span>    <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span><span class="p">,</span>
+		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">spc</span><span class="p">.</span><span class="nx">Method_StoragePowerActor_EpochTick</span><span class="p">,</span>
+	<span class="p">})</span>
+
+	<span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">cron</span><span class="p">.</span><span class="nx">Entries_</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">sysactors</span><span class="p">.</span><span class="nx">CronTableEntry_I</span><span class="p">{</span>
+		<span class="nx">ToAddr_</span><span class="p">:</span>    <span class="nx">addr</span><span class="p">.</span><span class="nx">StorageMarketActorAddr</span><span class="p">,</span>
+		<span class="nx">MethodNum_</span><span class="p">:</span> <span class="nx">storage_market</span><span class="p">.</span><span class="nx">Method_StorageMarketActor_EpochTick</span><span class="p">,</span>
+	<span class="p">})</span>
 <span class="p">}</span>
 </code></pre></div>
 

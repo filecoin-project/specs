@@ -14,11 +14,11 @@ type FaultCount uint8
 const MAX_CONSECUTIVE_FAULTS = FaultCount(3)
 
 const (
-	SectorClearedSN    uint8 = 0
-	SectorCommittedSN  uint8 = 1
-	SectorActiveSN     uint8 = 2
-	SectorRecoveringSN uint8 = 3
-	SectorFailingSN    uint8 = 4
+	SectorClearedSN uint8 = 1 + iota
+	SectorCommittedSN
+	SectorActiveSN
+	SectorRecoveringSN
+	SectorFailingSN
 )
 
 type SectorState struct {
