@@ -12,11 +12,6 @@ func (tix *Ticket_I) ValidateSyntax() bool {
 
 func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
 
-	// var input []byte
-	// input = append(input, byte(filcrypto.DomainSeparationTag_Case_Ticket))
-	// input = append(input, randomness1...)
-	// input = append(input, byte(filcrypto.InputDelimeter_Case_Bytes))
-	// input = append(input, minerAddr.ToBytes()...)
 	inputRand := Serialize_TicketProductionInput(&TicketProductionInput_I{
 		PastTicket_: randomness,
 		MinerAddr_:  minerActorAddr,
@@ -29,10 +24,6 @@ func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, mi
 func (tix *Ticket_I) DrawRandomness(epoch ChainEpoch) util.Bytes {
 	ser := util.SerializeBytes(tix.Output())
 	return filcrypto.DomainSeparationTag_TicketDrawing.DeriveRandWithIndex(ser, int(epoch))
-	// var input []byte
-	// input = append(input, tix.Output()...)
-	// input = append(input, byte(epoch))
-	// return SHA256(input)
 }
 
 func (ep *ElectionProof_I) ValidateSyntax() bool {

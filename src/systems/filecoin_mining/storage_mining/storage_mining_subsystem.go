@@ -10,11 +10,8 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
-	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-	msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
@@ -106,10 +103,6 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 }
 
 func (sms *StorageMiningSubsystem_I) _preparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness {
-	// var input []byte
-	// input = append(input, byte(filcrypto.DomainSeparationTag_Case_PoSt))
-	// input = append(input, randomness...)
-	// input = append(input, minerAddr.ToBytes()...)
 
 	randInput := Serialize_PoStChallengeSeedInput(&PoStChallengeSeedInput_I{
 		ticket_:    randomness,
@@ -130,12 +123,6 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 		MinerAddr_:  minerAddr,
 	})
 	input := filcrypto.DomainSeparationTag_TicketProduction.DeriveRand(randInput)
-
-	// var input []byte
-	// input = append(input, spc.VRFPersonalizationTicket)
-	// input = append(input, byte(filcrypto.DomainSeparationTag_Case_Ticket))
-	// input = append(input, randomness...)
-	// input = append(input, minerAddr.ToBytes()...)
 
 	// run through VRF
 	vrfRes := sms._keyStore().WorkerKey().Impl().Generate(input)
@@ -286,47 +273,47 @@ func (a *StorageMinerActorCode_I) IsValidElection(onChainInfo sector.OnChainPoSt
 	return false
 }
 
-func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {
-	var workerAddress addr.Address
-	var workerKeyPair filcrypto.SigKeyPair
-	panic("TODO") // TODO: get worker address and key pair
+// func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {
+// 	var workerAddress addr.Address
+// 	var workerKeyPair filcrypto.SigKeyPair
+// 	panic("TODO") // TODO: get worker address and key pair
 
-	// TODO: is this just workerAddress, or is there a separation here
-	// (worker is AccountActor, workerMiner is StorageMinerActor)?
-	var workerMinerActorAddress addr.Address
-	panic("TODO")
+// 	// TODO: is this just workerAddress, or is there a separation here
+// 	// (worker is AccountActor, workerMiner is StorageMinerActor)?
+// 	var workerMinerActorAddress addr.Address
+// 	panic("TODO")
 
-	var gasPrice msg.GasPrice
-	var gasLimit msg.GasAmount
-	panic("TODO") // TODO: determine gas price and limit
+// 	var gasPrice msg.GasPrice
+// 	var gasLimit msg.GasAmount
+// 	panic("TODO") // TODO: determine gas price and limit
 
-	var callSeqNum actor.CallSeqNum
-	panic("TODO") // TODO: retrieve CallSeqNum from worker
+// 	var callSeqNum actor.CallSeqNum
+// 	panic("TODO") // TODO: retrieve CallSeqNum from worker
 
-	messageParams := actor.MethodParams([]actor.MethodParam{
-		actor.MethodParam(poster.Serialize_PoStSubmission(postSubmission)),
-	})
+// 	messageParams := actor.MethodParams([]actor.MethodParam{
+// 		actor.MethodParam(poster.Serialize_PoStSubmission(postSubmission)),
+// 	})
 
-	unsignedMessage := msg.UnsignedMessage_Make(
-		workerAddress,
-		workerMinerActorAddress,
-		Method_StorageMinerActor_SubmitPoSt,
-		messageParams,
-		callSeqNum,
-		actor.TokenAmount(0),
-		gasPrice,
-		gasLimit,
-	)
+// 	unsignedMessage := msg.UnsignedMessage_Make(
+// 		workerAddress,
+// 		workerMinerActorAddress,
+// 		Method_StorageMinerActor_SubmitPoSt,
+// 		messageParams,
+// 		callSeqNum,
+// 		actor.TokenAmount(0),
+// 		gasPrice,
+// 		gasLimit,
+// 	)
 
-	signedMessage, err := msg.Sign(unsignedMessage, workerKeyPair)
-	if err != nil {
-		return err
-	}
+// 	signedMessage, err := msg.Sign(unsignedMessage, workerKeyPair)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	err = sms.FilecoinNode().SubmitMessage(signedMessage)
-	if err != nil {
-		return err
-	}
+// 	err = sms.FilecoinNode().SubmitMessage(signedMessage)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
