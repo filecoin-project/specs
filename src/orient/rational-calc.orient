@@ -440,14 +440,25 @@ ProofOfReplication:
 ProofOfReplication (StackedChungParameters):
   describe(chung_a, "Chung A")
   describe(chung_c, "Chung C")
-  describe(chung_delta, "Chung delta")
+  describe(chung_delta, "Chung chung_delta")
   describe(chung_sigma, "Chung sigma")
 
-  chung_a = spacegap - (chung_c / (chung_c -1)) * chung_delta + ((chung_c-1)/ chung_c) * (chung_sigma - 1)
-
-  stacked_layers = (log2(regeneration_fraction / chung_a) / log2(chung_c)) + 1
-  porep_challenges = -porep_lambda / (log2(1-chung_delta))
+  stacked_layers = (log2(chung_psi / chung_a) / log2(chung_c)) + 1
+  porep_challenges = -porep_lambda / (log2(1 - chung_delta))
   post_challenges = -post_lambda / (log2(chung_sigma))
+
+  chung_alpha = regeneration_fraction * cost_amax
+  chung_eps = spacegap
+
+  chung_a = chung_eps - (chung_c * chung_delta  / (chung_c -1)) + (((chung_c - 1) * (chung_sigma - 1))/ chung_c)
+  chung_c = chung_beta / chung_alpha
+
+  chung_psi = chung_alpha
+  chung_sigma = 1 - chung_eps + chung_delta + 0.0001
+
+  Chung: ./bin/chung_spec.py
+    chung_beta = extern(chung_alpha, expander_parents)
+    chung_alpha = extern(chung_beta, expander_parents)
 
 EC:
   describe(ec_e, "Number of winning miners per epoch on expectation")
