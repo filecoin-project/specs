@@ -22,8 +22,11 @@ func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, mi
 }
 
 func (tix *Ticket_I) DrawRandomness(epoch ChainEpoch) util.Bytes {
-	ser := util.SerializeBytes(tix.Output())
-	return filcrypto.DomainSeparationTag_TicketDrawing.DeriveRandWithIndex(ser, int(epoch))
+	input := Serialize_TicketDrawingInput(&TicketDrawingInput_I{
+		PastTicket_: tix.Output(),
+		Epoch_:      epoch,
+	})
+	return filcrypto.DomainSeparationTag_TicketDrawing.DeriveRand(input)
 }
 
 func (ep *ElectionProof_I) ValidateSyntax() bool {

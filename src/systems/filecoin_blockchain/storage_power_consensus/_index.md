@@ -55,7 +55,7 @@ Whenever comparing tickets is evoked in Filecoin, for instance when discussing s
 While each Filecoin block header contains a ticket field (see {{<sref tickets>}}), it is useful to think of a ticket chain abstraction.
 Due to the nature of Filecoin's Tipsets and the possibility of using tickets from epochs that did not yield leaders to produce randomness at a given epoch, tracking the canonical ticket of a subchain at a given height can be arduous to reason about in terms of blocks. To that end, it is helpful to create a ticket chain abstraction made up of only those tickets to be used for randomness generation at a given height.
 
-To read more about specifically how tickets are processed for randomness, see {{<sref randomness>}}. Note that the serialization of the ticket output (bytes) should be used directly, unlike with more complex objects where one would use the entire object serialization.
+To read more about specifically how tickets are processed for randomness, see {{<sref randomness>}}.
 
 To sample a ticket for a given epoch n:
 ```text
@@ -68,7 +68,7 @@ While true:
     If no blocks were mined at referenceTipsetHeight:
         Increment referenceTipsetOffset
         (Repeat)
-newRandomness = H(TicketDrawDST || epoch || Serialization(pastTicketOutput))
+newRandomness = H(TicketDrawDST || index || Serialization(epoch || pastTicketOutput))
 ```
 
 In english, this means two things:

@@ -29,3 +29,8 @@ type TicketProductionInput struct {
     PastTicket  util.Randomness
     MinerAddr   addr.Address
 }
+
+type TicketDrawingInput struct {
+    PastTicket  util.Randomness
+    Epoch       ChainEpoch
+}
