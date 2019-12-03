@@ -50,6 +50,40 @@ The sequence of executions for a tipset is thus summarised:
 - [... subsequent blocks ...]
 - cron tick 
 
+# Message validity and failure
+Every message in a valid block can be processed and produce a receipt (note that block validity
+implies all messages are syntactically valid and correctly signed). However, execution may
+or may not succeed, depending on the state to which the message is applied. If the execution
+of a message fails, the corresponding receipt will carry a non-zero exit code. 
+
+If a message fails due to a reason that can reasonably be attributed to the miner including a
+message that could never have succeeded in the parent state, or because the sender lacks funds
+to cover the maximum message cost, then the miner pays a penalty by burning the gas fee 
+(rather than the sender paying fees to the block miner).
+
+The only state changes resulting from a message failure are either:
+
+- incrementing of the sending actor's `CallSeqNum`, and payment of gas fees from the sender to the owner of the miner of the block including the message; or
+- a penalty equivalent to the gas fee for the failed message, burnt by the miner (sender's `CallSeqNum` unchanged).
+ 
+A message execution will fail if, in the immediately preceding state:
+
+- the `From` actor does not exist in the state (miner penalized),
+- the `From` actor is not an account actor (miner penalized),
+- the `CallSeqNum` of the message does not match the `CallSeqNum` of the `From` actor (miner penalized),
+- the `To` actor does not exist in state and the `To` address is not a pubkey-style address (miner penalized),
+- the `To` actor does not exist in state and the message has a non-zero `MethodNum` (miner penalized),
+- the `To` actor exists but does not have a method corresponding to the non-zero `MethodNum`,
+- deserialized `Params` is not an array of length matching the arity of the `To` actor's `MethodNum` method,
+- deserialized `Params` are not valid for the types specified by the `To` actor's `MethodNum` method,
+- the `From` actor does not have sufficient balance to cover the sum of the message `Value` plus the
+maximum gas cost, `GasLimit * GasPrice` (miner penalized),
+- the invoked method consumes more gas than the `GasLimit` allows, or
+- the invoked method exits with a non-zero code (via `Runtime.Abort()`).
+
+Note that if the `To` actor does not exist in state and the address is a valid `H(pubkey)` address, 
+it will be created as an account actor (only if the message has a MethodNum of zero).
+
 (You can see the _old_ VM interpreter [here](docs/systems/filecoin_vm/vm_interpreter_old) )
 
 # `vm/interpreter` interface
