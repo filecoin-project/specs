@@ -118,6 +118,7 @@ def main():
     # sys.stderr.write("found alpha %f -> beta %f" % (alpha,beta))
     rounded = round(beta,5)
     inject_value(jinput,alphaT,betaT,rounded)
-    json.dump(jinput,sys.stdout)
+    # json.dump(jinput,sys.stdout)
+    print("{\"chung_beta\": %s}" % rounded)
 
 main()
