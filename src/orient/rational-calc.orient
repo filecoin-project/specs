@@ -208,7 +208,7 @@ ProofOfReplication:
 
   Graph:
     describe(nodes, "Number of nodes in a sector")
-    describe(stacked_layers, "Number of layers in the DRG")
+    describe(stacked_layers, "Number of stacked layers of the graph")
 
     Sector:
       describe(sector_size, "Size of a sector", bytes)
@@ -332,6 +332,8 @@ ProofOfReplication:
     encoding_window_time = (window_nodes * graph_parents) * kdf_time * stacked_layers
     encoding_window_time_parallel = encoding_window_time / rig_cores
 
+    // TODO: adding wrapper layer
+
     Asic:
       encoding_time_parallel_asic = encoding_time_parallel / hashing_amax
       encoding_time_asic = encoding_time / hashing_amax
@@ -437,6 +439,24 @@ ProofOfReplication:
 
     // Column comitting data or replica. 
 
+ProofOfReplication (StackedSDRParameters):
+  describe(sdr_layers_a, "SDR layers computation a")
+  describe(sdr_layers_b, "SDR layers computation b")
+  describe(sdr_layers_c, "SDR layers computation c")
+
+  sdr_eps = spacegap
+
+  stacked_layers = layers_b // TODO max(layers_a, layers_b) + 1
+  sdr_layers_a = (0.68 - sdr_eps + 4 * sdr_delta) / (0.12 - sdr_delta) + 2
+  sdr_layers_b = (log2(1 / (3 * (sdr_eps - 4 * sdr_delta)))) + 0.24 / (0.12 - sdr_delta) + 1
+  sdr_layers_c = (log2(2 / (1 + 3 * (sdr_eps - 5 * sdr_delta)))) + (0.57 - sdr_eps + 3 * sdr_delta) / (0.12 - sdr_delta) + 1
+
+  porep_challenges = -porep_lambda / (log2(1 - sdr_delta))
+  post_challenges = -post_lambda / (log2(1 - sdr_eps/2))
+
+  drg_parents = 6
+  expander_parents = 8
+
 ProofOfReplication (StackedChungParameters):
   describe(chung_a, "Chung A")
   describe(chung_c, "Chung C")
@@ -446,6 +466,8 @@ ProofOfReplication (StackedChungParameters):
   stacked_layers = (log2(chung_psi / chung_a) / log2(chung_c)) + 1
   porep_challenges = -porep_lambda / (log2(1 - chung_delta))
   post_challenges = -post_lambda / (log2(chung_sigma))
+
+  drg_parents = 0
 
   chung_alpha = regeneration_fraction * cost_amax
   chung_eps = spacegap

@@ -25,18 +25,26 @@
       "!StackedReplicas": true
     }
   ],
+  [
+    {
+      "!StackedChungParameters": true,
+      "!StackedSDRParameters": false,
+      "chung_delta": 0.01
+    },
+    {
+      "!StackedChungParameters": false,
+      "!StackedSDRParameters": true,
+      "sdr_delta": 0.01
+    }
+  ],
   {
-    "!StackedChungParameters": true,
     "spacegap": 0.2,
-    "chung_delta": 0.01,
     "column_leaf_hash_constraints": 1376,
     "column_leaf_hash_time": 2.56e-7,
     "cost_amax": 1,
     "cost_gb_per_month": 0.005,
-    "drg_parents": 0,
     "ec_e": 5,
     "epost_challenged_sectors_fraction": 0.04,
-    "expander_parents": 16,
     "extra_storage_time": 0,
     "fallback_period_days": 1,
     "fallback_ratio": 0.05,
