@@ -24,14 +24,11 @@ var CheckArgs = actor.CheckArgs
 var ArgPop = actor.ArgPop
 var ArgEnd = actor.ArgEnd
 
-func (a *InitActorCode_I) State(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
+func _loadState(rt Runtime) (vmr.ActorStateHandle, InitActorState) {
 	h := rt.AcquireState()
 	stateCID := ipld.CID(h.Take())
 	if ipld.CID_Equals(stateCID, ipld.EmptyCID()) {
-		if rt.CurrMethodNum() != actor.MethodConstructor {
-			rt.AbortAPI("Actor state not initialized")
-		}
-		return h, nil
+		rt.AbortAPI("Actor state not initialized")
 	}
 	stateBytes := rt.IpldGet(ipld.CID(stateCID))
 	if stateBytes.Which() != vmr.Runtime_IpldGet_FunRet_Case_Bytes {
@@ -58,8 +55,8 @@ func (st *InitActorState_I) CID() ipld.CID {
 ////////////////////////////////////////////////////////////////////////////////
 
 func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
-	h, st := a.State(rt)
-	st = &InitActorState_I{
+	h := rt.AcquireState()
+	st := &InitActorState_I{
 		AddressMap_: map[addr.Address]addr.ActorID{}, // TODO: HAMT
 		NextID_:     addr.ActorID(0),
 	}
@@ -84,7 +81,7 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
 
 	// Get the actor ID for this actor.
-	h, st := a.State(rt)
+	h, st := _loadState(rt)
 	actorID := st._assignNextID()
 
 	// Store the mappings of address to actor ID.
@@ -108,7 +105,7 @@ func (s *InitActorState_I) _assignNextID() addr.ActorID {
 }
 
 func (a *InitActorCode_I) GetActorIDForAddress(rt Runtime, address addr.Address) InvocOutput {
-	h, st := a.State(rt)
+	h, st := _loadState(rt)
 	actorID := st.AddressMap()[address]
 	Release(rt, h, st)
 	return rt.ValueReturn(Bytes(addr.Serialize_ActorID(actorID)))
