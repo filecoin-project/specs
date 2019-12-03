@@ -18,7 +18,7 @@ type Serialization = util.Serialization
 // object, define a struct at the .id level that contains those objects as member fields.
 // This will then cause a Serialize_*() method to be generated for the struct type.
 func (tag DomainSeparationTag) DeriveRand(s Serialization) Randomness {
-	return _deriveRandInternal(tag, s, 0)
+	return _deriveRandInternal(tag, s, -1)
 }
 
 // As in DeriveRand(), but additionally accepts an index into the implicit pseudorandom stream.

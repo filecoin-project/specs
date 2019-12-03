@@ -1,5 +1,6 @@
 # general
 crypto_signatures: "Signatures"
+randomness: "Randomness"
 data_structures: "Data Structures"
 ds_address: "Address"
 app_address: "Address"
