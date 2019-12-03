@@ -68,7 +68,7 @@ While true:
     If no blocks were mined at referenceTipsetHeight:
         Increment referenceTipsetOffset
         (Repeat)
-newRandomness = H(pastTicket || n)
+newRandomness = H(TicketDrawDST || index || Serialization(pastTicketOutput))
 ```
 
 In english, this means two things:
@@ -94,7 +94,7 @@ The miner runs the prior ticket through a Verifiable Random Function (VRF) to ge
 To generate a ticket for a given epoch n:
 ```text
 LastTicket = MinTicketValueAtEpoch(n-1)
-newRandomness = VRF_miner(H(TicketDST || index || Serialization(pastTicket, minerActorAddress)))
+newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, minerActorAddress)))
 ```
 
 The VRF's deterministic output adds entropy to the ticket chain, limiting a miner's ability to alter one block to influence a future ticket (given a miner does not know who will win a given round in advance).
