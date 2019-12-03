@@ -3,4 +3,10 @@ menuTitle: CID
 title: CIDs - Content IDentifiers
 ---
 
+For most objects referenced by Filecoin, a Content Identifier (CID for short) is used.
+This is effectively a hash value, prefixed with its hash function (multihash)
+as well as extra labels to inform applications about how to deserialize the given data.
+For a more detailed specification, we refer the reader to the
+[IPLD repository](https://github.com/ipld/cid).
+
 {{< readfile file="cid.id" code="true" lang="go" >}}
