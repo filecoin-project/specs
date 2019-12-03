@@ -10,21 +10,33 @@ func (tix *Ticket_I) ValidateSyntax() bool {
 	return tix.VRFResult_.ValidateSyntax()
 }
 
-func (tix *Ticket_I) Verify(input util.Bytes, pk filcrypto.VRFPublicKey) bool {
+func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
+
+	inputRand := Serialize_TicketProductionInput(&TicketProductionInput_I{
+		PastTicket_: randomness,
+		MinerAddr_:  minerActorAddr,
+	})
+	input := filcrypto.DomainSeparationTag_TicketProduction.DeriveRand(inputRand)
+
 	return tix.VRFResult_.Verify(input, pk)
 }
 
-func (tix *Ticket_I) DrawRandomness(minerAddr addr.Address, epoch ChainEpoch) util.Bytes {
-	input := tix.Output()
-	input = append(input, addrToLittleEndianBytes(minerAddr)...)
-	input = append(input, epochToLittleEndianBytes(epoch)...)
-	return input
+func (tix *Ticket_I) DrawRandomness(epoch ChainEpoch) util.Bytes {
+	input := Serialize_TicketDrawingInput(&TicketDrawingInput_I{
+		PastTicket_: tix.Output(),
+		Epoch_:      epoch,
+	})
+	return filcrypto.DomainSeparationTag_TicketDrawing.DeriveRand(input)
 }
 
 func (ep *ElectionProof_I) ValidateSyntax() bool {
+	panic("TODO")
 	return ep.VRFResult_.ValidateSyntax()
 }
 
-func (ep *ElectionProof_I) Verify(input util.Bytes, pk filcrypto.VRFPublicKey) bool {
+func (ep *ElectionProof_I) Verify(partialTicket util.Bytes, pk filcrypto.VRFPublicKey) bool {
+	panic("TODO")
+	var input []byte
+	input = append(input, partialTicket...)
 	return ep.VRFResult_.Verify(input, pk)
 }

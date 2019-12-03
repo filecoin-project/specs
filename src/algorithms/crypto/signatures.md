@@ -20,11 +20,13 @@ exhaustive list):
 ## Messages
 
 To generate a signature for the [`Message`](data-structures.md#message) type,
-first serialize it, then hash the serialized bytes with blake2b-256. Then, take
+first serialize it, then hash the serialized bytes with SHA256. Then, take
 the 32 byte digest output the hash and compute the signature over it.
+
 **Note**: for each specific use of a signature scheme, it is recommended to use
 a domain separation tag to treat the hash function as an independent random
 oracle. These tags are indicated in the relevant places throughout the specs.
+Read more about this in {{<sref randomness>}}.
 
 ## Signature Types
 
