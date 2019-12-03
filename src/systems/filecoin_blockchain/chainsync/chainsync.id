@@ -63,11 +63,11 @@ type ValidationGraph struct {
     // Obviously bad heads SHOULD be pruned out:
     // - Clearly invalid ChainWeight (lower than BestHead or too high)
     // - Heads that are not advancing in BlockPubsub
-    TargetHeads      [block.BlockCID]
+    TargetHeads      [&block.BlockHeader]
 
     // BestTargetHead is the single best candidate head
     // BestTargetHead == TargetHeads[0]
-    BestTargetHead   block.BlockCID
+    BestTargetHead   &block.BlockHeader
 }
 
 // PartialGraph is a datastructure used to track a set of blocks, and
@@ -75,27 +75,27 @@ type ValidationGraph struct {
 // subgraph.
 type PartialGraph struct {
     // fullGraph provides acess to all nodes
-    fullGraph                 BlockGraph
+    fullGraph  BlockGraph
 
     // Blocks is the set of all blocks in this PartialGraph
-    Blocks                    {block.BlockCID: struct {}}
+    Blocks     {&block.BlockHeader: struct {}}
 
     // Heads is the set of root/head blocks
-    Heads                     [block.BlockCID]
+    Heads      [&block.BlockHeader]
 
     // Tails is the set of leaf/tail blocks
-    Tails                     [block.BlockCID]
+    Tails      [&block.BlockHeader]
 
     // Add adds given BlockCID to the PartialGraph, updating Blocks,
     // Roots, and Leaves as needed.
-    Add(c block.BlockCID)
+    Add(c &block.BlockHeader)
 
     // Remove deletes given BlockCID from the PartialGraph, updating
     // Blocks, Roots, and Leaves as needed.
-    Remove(c block.BlockCID)
+    Remove(c &block.BlockHeader)
 }
 
 type BlockGraph struct {// TODO
-    Parents(b block.BlockCID) block.Tipset
-    Children(b block.BlockCID) [block.Block]
+    Parents(b &block.BlockHeader) block.Tipset
+    Children(b &block.BlockHeader) [block.Block]
 }

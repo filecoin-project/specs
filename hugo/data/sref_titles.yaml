@@ -27,6 +27,7 @@ chain_sync: "Chain Sync"
 block_validation: "Block Validation"
 
 ### Message Pool
+message: "Message"
 message_pool: "Message Pool"
 message_syncer: "Message Syncer"
 message_storage: "Message Storage"
