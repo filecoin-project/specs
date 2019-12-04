@@ -25,12 +25,12 @@ type ElectionProof struct {
 type BytesAmount UVarint
 type StoragePower BytesAmount
 
-type TicketProductionInput struct {
+type TicketProductionSeedInput struct {
     PastTicket  util.Randomness
     MinerAddr   addr.Address
 }
 
-type TicketDrawingInput struct {
+type TicketDrawingSeedInput struct {
     PastTicket  util.Randomness
     Epoch       ChainEpoch
 }

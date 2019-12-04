@@ -118,7 +118,7 @@ func (sms *StorageMiningSubsystem_I) PrepareNewTicket(randomness util.Randomness
 	// take the VRFResult of that ticket as input, specifying the personalization (see data structures)
 	// append the miner actor address for the miner generifying this in order to prevent miners with the same
 	// worker keys from generating the same randomness (given the VRF)
-	randInput := block.Serialize_TicketProductionInput(&block.TicketProductionInput_I{
+	randInput := block.Serialize_TicketProductionSeedInput(&block.TicketProductionSeedInput_I{
 		PastTicket_: randomness,
 		MinerAddr_:  minerActorAddr,
 	})
