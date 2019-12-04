@@ -43,7 +43,6 @@ type BlockchainSubsystem struct @(mutable) {
     TryGenerateStateTree(block block.Block) st.StateTree
 
     // call by clock in BlockReception upon new epoch
-    // TODO define clock here
     AssembleTipsets() [block.Tipset]
 
     // call by BlockchainSubsystem itself in BlockReception upon new epoch

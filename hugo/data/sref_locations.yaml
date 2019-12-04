@@ -63,6 +63,6 @@ post: [algorithms, proof_of_spacetime]
 election_post: [algorithms, proof_of_spacetime, election_post]
 
 # nodes
-clock: [filecoin_blockchain]
+clock: [systems, filecoin_nodes, clock]
 
 # token
