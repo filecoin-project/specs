@@ -24,7 +24,7 @@ type BlockHeader struct {
     Ticket
 
     Miner                  addr.Address
-    ElectionPoSt           OnChainPoStVerifyInfo
+    ElectionPoStOutput     ElectionPoStVerifyInfo
 
     // Proposed update
     Messages               &TxMeta
@@ -87,8 +87,7 @@ type SoftCheckpoint Checkpoint
 type TrustedCheckpoint Checkpoint
 
 // HACK: Duplicated from posting.id (actual source)
-type OnChainPoStVerifyInfo struct {
-    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+type ElectionPoStVerifyInfo struct {
     Candidates  [PoStCandidate]
     Randomness  PoStRandomness
     Proof       PoStProof

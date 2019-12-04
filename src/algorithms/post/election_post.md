@@ -20,7 +20,7 @@ To enable short PoSt response time, miners are required submit a PoSt when they 
 
 The chain keeps track of the last time that a miner received and submitted a Challenge (Election or Surprise). It randomly challenges a miner to submit a surprisePoSt once per `ProvingPeriod` in the latter half of their `ProvingPeriod`. For every miner challenged, a `NotifyOfPoStSurpriseChallenge` is issued and sent as an on-chain message to surprised `StorageMinerActor`. However, if the `StorageMinerActor` is already proving a SurprisePoStChallenge (`IsChallenged` is True) or the `StorageMinerActor` has received a challenge (by Election or Surprise) within the `MIN_CHALLENGE_PERIOD` (`ShouldChallenge` is False), then the PoSt surprise notification will be ignored and return success.
 
-For more on these components, see {{<sref election-post>}}. At a high-level though both are needed for different reasons:
+For more on these components, see {{<sref election_post>}}. At a high-level though both are needed for different reasons:
 - By coupling leader election and PoSt, `ElectionPoSt` ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, `SurprisePoSt` thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.
 

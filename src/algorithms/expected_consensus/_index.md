@@ -68,7 +68,7 @@ Design goals here include:
 - Miners should be rewarded proportional to their power in the system
 - The system should be able to tune how many blocks are put out per epoch on expectation (hence "expected consensus").
 
-As discussed in {{<sref election-post>}}, a miner will use the challenge ticket of an ElectionPoSt to uniformly draw a value from 0 to 1 when crafting a block.
+As discussed in {{<sref election_post>}}, a miner will use the challenge ticket of an ElectionPoSt to uniformly draw a value from 0 to 1 when crafting a block.
 
 The miner gets to draw one such challenge ticket per sector they have committed and must then compare the value derived from the challenge ticket against a target to determine whether they are eligible to mine. This is called finding a winning ticket.
 
