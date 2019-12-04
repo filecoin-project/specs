@@ -165,7 +165,7 @@ type MinerInfo struct {
     PeerId                  libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    SectorSize              util.BytesAmount
+    SectorSize              sector.SectorSize
     WindowCount             UVarint
     SealPartitions          UVarint
     ElectionPoStPartitions  UVarint

@@ -553,7 +553,7 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	// @param sectorSize util.UVarint
 	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
 	getPieceInfoParams := make([]util.Serialization, 2)
-	getPieceInfoParams = append(getPieceInfoParams, util.SerializeUVarint(sectorSize))
+	getPieceInfoParams = append(getPieceInfoParams, sector.Serialize_SectorSize(sectorSize))
 	for _, dealID := range onChainInfo.DealIDs() {
 		getPieceInfoParams = append(getPieceInfoParams, deal.Serialize_DealID(dealID))
 	}

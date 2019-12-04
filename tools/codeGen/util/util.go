@@ -121,12 +121,6 @@ func SerializeBytes(b Bytes) Serialization {
 	return b
 }
 
-func SerializeUVarint(i UVarint) Serialization {
-	panic("TODO")
-	var ret Serialization
-	return ret
-}
-
 func IntMin(x, y int) int {
 	if y < x {
 		return y
