@@ -1,7 +1,9 @@
 package state_tree
 
-import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
-import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import (
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+)
 
 func (inTree *StateTree_I) WithActorForAddress(a addr.Address) (StateTree, actor.ActorState) {
 	var err error
@@ -23,6 +25,10 @@ func (inTree *StateTree_I) WithActorForAddress(a addr.Address) (StateTree, actor
 	}
 
 	return compTree, actorState
+}
+
+func (st *StateTree_I) GetActorAddress(n ActorName) addr.Address {
+	panic("TODO")
 }
 
 // Note: may be nil if not found

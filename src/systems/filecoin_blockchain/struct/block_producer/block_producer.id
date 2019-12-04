@@ -19,11 +19,11 @@ type BlockProducer struct {
 
     // call by BlockProducer itself after getting back messages
     AssembleBlock(
-        electionProof  block.ElectionProof
-        T0             block.Ticket
-        tipset         block.Tipset
-        minerAddr      addr.Address
-        messages       [msg.SignedMessage]
+        ePoStInfo  sector.OnChainPoStVerifyInfo
+        T0         block.Ticket
+        tipset     block.Tipset
+        minerAddr  addr.Address
+        messages   [msg.SignedMessage]
     ) block.Block
 }
 

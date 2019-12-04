@@ -22,7 +22,7 @@ type StateTree struct {
     ActorStates   {addr.Address: actor.ActorState}
 
     // TODO: API ConvenienceAPI
-
+    GetActorAddress(n ActorName) addr.Address
     GetActorState(a addr.Address) actor.ActorState
 
     // Balance returns the balance of a given actor

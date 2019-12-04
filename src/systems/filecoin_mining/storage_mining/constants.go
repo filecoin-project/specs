@@ -11,3 +11,5 @@ const PROVING_PERIOD = block.ChainEpoch(2)                    // placeholder
 const SURPRISE_CHALLENGE_FREQUENCY = 2 // placeholder
 // how far into their PP does a miner get their first challenge
 const SUPRISE_NO_CHALLENGE_PERIOD = PROVING_PERIOD / SURPRISE_CHALLENGE_FREQUENCY
+const EPOST_SAMPLE_NUM = 1
+const EPOST_SAMPLE_DENOM = 25
