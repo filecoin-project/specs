@@ -15,28 +15,31 @@ type BlockHeader struct {
     Parents                [&BlockHeader]
     ParentWeight           ChainWeight
     // State
-    ParentStateTree        &st.StateTree
+    ParentState            &st.StateTree
     ParentMessageReceipts  &[&MessageReceipt]  // array-mapped trie ref
 
     // Consensus things
     Epoch                  ChainEpoch
     Timestamp              clock.UnixTime
     Ticket
-    ElectionProof
 
-    MinerAddress           addr.Address
+    Miner                  addr.Address
     ElectionPoSt           OnChainPoStVerifyInfo
 
     // Proposed update
-    BLSAggregateSig        filcrypto.Signature
-    BLSMessageCIDs         &[&msg.UnsignedMessage]  // array-mapped trie
-    SECPMessageCIDs        &[&msg.SignedMessage]  // array-mapped trie
+    Messages               &TxMeta
+    BLSAggregate           filcrypto.Signature
 
     // Signatures
-    BlockSig               filcrypto.Signature
+    Signature              filcrypto.Signature
 
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
+}
+
+type TxMeta struct {
+    BLSMessages   &[&msg.UnsignedMessage]  // array-mapped trie
+    SECPMessages  &[&msg.SignedMessage]  // array-mapped trie
 }
 
 // Internal representation of a full block, with all messages.
