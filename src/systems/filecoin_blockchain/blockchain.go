@@ -53,7 +53,6 @@ func (self *BlockchainSubsystem_I) validateBlockSemantics(block block.Block) {
 	// }
 }
 
-
 func (self *BlockchainSubsystem_R) HandleBlock(block block.Block) bool {
 	panic("TODO")
 }
