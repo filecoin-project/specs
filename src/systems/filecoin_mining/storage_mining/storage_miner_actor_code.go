@@ -620,19 +620,27 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 // Optimization: PreCommitSector could contain a list of deals that are not published yet.
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) InvocOutput {
 	TODO() // TODO: validate caller
-
 	// can be called regardless of Challenged status
 
-	// TODO: might take collateral in case no ProveCommit follows within sometime
-	// TODO: collateral also penalizes repeated precommit to get randomness that one likes
 	// TODO: might be a good place for Treasury
 
 	h, st := a.State(rt)
 
+	msgValue := rt.ValueReceived()
+
+	// TODO: move this to Construct
+	minerInfo := st.Info()
+	sectorSize := minerInfo.SectorSize()
+	depositReq := actor.TokenAmount(uint64(PRECOMMIT_DEPOSIT_PER_BYTE) * sectorSize)
+
+	if msgValue < depositReq {
+		rt.AbortFundsMsg("sm.PreCommitSector: insufficient precommit deposit.")
+	}
+
 	_, found := st.PreCommittedSectors()[info.SectorNumber()]
 
 	if found {
-		// TODO: burn some funds?
+		// no burn funds since miners can't do repeated precommit
 		rt.AbortStateMsg("Sector already pre committed.")
 	}
 
@@ -670,6 +678,8 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) InvocOutput {
 	TODO() // TODO: validate caller
 
+	msgSender := rt.ImmediateCaller()
+
 	h, st := a.State(rt)
 
 	preCommitSector, precommitFound := st.PreCommittedSectors()[info.SectorNumber()]
@@ -697,6 +707,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		//
 		// delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 		// UpdateRelease(rt, h, st)
+		//
+		// burn PRECOMMIT_DEPOSIT per sector
 
 		rt.Abort(
 			exitcode.UserDefinedError(exitcode.DeadlineExceeded),
@@ -793,6 +805,12 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 
 	UpdateRelease(rt, h, st)
+
+	// return deposit requirement to sender
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    msgSender,
+		Value_: depositReq,
+	})
 
 	return rt.SuccessReturn()
 }
