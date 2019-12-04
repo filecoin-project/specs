@@ -394,12 +394,8 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 		}
 		switch sectorState.State().StateNumber {
 		case SectorFailingSN:
-			// Check if miners have sufficient balances in sma
-
-			// SendMessage(sma.PublishStorageDeals) or sma.ResumeStorageDeals?
-			// throw if miner cannot cover StorageDealCollateral
-			// TODO: EnsureDealCollateral
-			panic("TODO")
+			// pledge collateral is ensured at PoSt submission
+			// no need to top up deal collateral because none was slashed during declared/detected faults
 
 			// copy over the same FaultCount
 			st.Sectors()[sectorNo].Impl().State_ = SectorRecovering(sectorState.State().FaultCount)
