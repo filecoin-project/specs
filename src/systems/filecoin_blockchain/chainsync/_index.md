@@ -353,7 +353,7 @@ State Machine:
   - **BV1 - Light Consensus State Checks**: Validate `b.ChainWeight`, `b.ChainEpoch`, `b.MinerAddress`, `b.Timestamp`, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at `b.ChainEpoch - consensus.LookbackParameter`. Eg Weight and Epoch have well defined valid ranges, and `b.MinerAddress`
   must exist in the lookback state). This requires some chain state, enough to establish plausibility levels of each of these values. A node should be able to estimate valid ranges for `b.ChainEpoch` based on the `LastTrustedCheckpoint`. `b.ChainWeight` is easy if some of the relatively recent chain is available, otherwise hard.
   - **BV2 - Signature Validation**: Verify `b.BlockSig` is correct.
-  - **BV3 - Verify ElectionProof**: Verify `b.ElectionProof` is correct. This requires having state for relevant lookback parameters.
+  - **BV3 - Verify ElectionPoSt**: Verify `b.ElectionPoStOutput` was correct generated and yielded winning `PartialTickets`.
   - **BV4 - Verify Ancestry links to chain**: Verify ancestry links back to trusted blocks. If the ancestry forks off before finality, or does not connect at all, it is a bad block.
   - **BV4 - Verify MessageSigs**: Verify the signatures on messages
   - **BV5 - Verify StateTree**: Verify the application of `b.Parents.Messages()` correctly produces `b.StateTree` and `b.MessageReceipts`

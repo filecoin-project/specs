@@ -14,7 +14,7 @@ This does mean that, in a given round, a lucky miner may succeed in generating a
 
 # ElectionPoSt
 
-To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that along with the ElectionProof. Both the ElectionProof and PoStProof are checked at Block Validation by `StoragePowerConsenusSubsystem`. When a block is included, a special message is added that calls `SubmitElectionPoSt` which will process sector updates in the same way as successful `SubmitSurprisePoSt` do.
+To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that along with the winning PartialTickets. Both the PartialTickets and PoStProof are checked at Block Validation by `StoragePowerConsenusSubsystem`. When a block is included, a special message is added that calls `SubmitElectionPoSt` which will process sector updates in the same way as successful `SubmitSurprisePoSt` do.
 
 # SurprisePoSt
 
@@ -35,7 +35,9 @@ As stated above, a miner is incentivized to repeat this process at every block t
 
 At every epoch, each miner will challenge a portion of sectors at random proportional to sectorsSampled, with each sector being issued K PoSt challenges (coverage may not be perfect).
 
-By proving access to the challenged range of nodes (i.e. merkle tree leaf from the committed sector) in the sector, the miner can generate a set of valid ChallengeTickets in order to check them as part of leader election in EC (in order to find the winning tickets, or ElectionProofs). The winning tickets will be stored on the block and used to generate a PoSt (using a SNARK). A block header will thus contain a number of “winning” ChallengeTickets (each containing a SectorID and other elements, used to derive ElectionProofs) and a PostProof generated from the ChallengeTickets.
+By proving access to the challenged range of nodes (i.e. merkle tree leaf from the committed sector) in the sector, the miner can generate a set of valid ChallengeTickets in order to check them as part of leader election in EC (in order to find the winning tickets). The winning tickets will be stored on the block and used to generate a PoSt (using a SNARK). A block header will thus contain a number of “winning” PoStCandidates (each containing a partialTicket, SectorID and other elements, used to verify the leader election) and a PostProof generated from the ChallengeTickets.
+
+This is all included in a field called `ElectionPoStOutput`
 
 In order to simplify implementation and bound block header size, we can set a maximum number of possible election proofs for any block. For instance, for EC.E=5, we can cap challengeTicket submissions at 16 per block, which would cover more than 99.99% of cases (using Chernoff bounds) encountered by a 50% miner (i.e. much more in practice).
 

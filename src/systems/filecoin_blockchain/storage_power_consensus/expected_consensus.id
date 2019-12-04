@@ -1,4 +1,5 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type ExpectedConsensus struct {
     expectedBlocksPerEpoch  UVarint
@@ -14,9 +15,7 @@ type ExpectedConsensus struct {
         sampleDenom      util.UVarint
     ) bool
     GetBlockRewards(
-        electionProof  block.ElectionProof
-        minerPower     block.StoragePower
-        totalPower     block.StoragePower
+        ePoStInfo sector.OnChainPoStVerifyInfo
     ) UVarint
 
     log2b(x UVarint) UVarint

@@ -28,15 +28,3 @@ func (tix *Ticket_I) DrawRandomness(epoch ChainEpoch) util.Bytes {
 	})
 	return filcrypto.DomainSeparationTag_TicketDrawing.DeriveRand(input)
 }
-
-func (ep *ElectionProof_I) ValidateSyntax() bool {
-	panic("TODO")
-	return ep.VRFResult_.ValidateSyntax()
-}
-
-func (ep *ElectionProof_I) Verify(partialTicket util.Bytes, pk filcrypto.VRFPublicKey) bool {
-	panic("TODO")
-	var input []byte
-	input = append(input, partialTicket...)
-	return ep.VRFResult_.Verify(input, pk)
-}

@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -57,6 +58,6 @@ func (self *ExpectedConsensus_I) IsWinningChallengeTicket(challengeTicket util.B
 	return lhs.Cmp(rhs) == -1
 }
 
-func (self *ExpectedConsensus_I) GetBlockRewards(electionProof block.ElectionProof, minerPower block.StoragePower, totalPower block.StoragePower) util.UVarint {
+func (self *ExpectedConsensus_I) GetBlockRewards(ePoStInfo sector.OnChainPoStVerifyInfo) util.UVarint {
 	panic("")
 }

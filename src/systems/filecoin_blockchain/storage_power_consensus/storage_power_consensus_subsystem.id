@@ -9,7 +9,6 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
     // actor                StoragePowerActor
     associatedStateTree &st.StateTree  // TODO: remove this. should not store this here.
 
-    GenerateElectionProof(tipset block.Tipset) block.ElectionProof
     ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]
 
     ec          ExpectedConsensus
@@ -40,9 +39,6 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
 
     // call by StorageMiningSubsystem during block production
     GetTicketProductionRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
-
-    // call by StorageMiningSubsystem during block production
-    GetElectionProofRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
     GetSealRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
