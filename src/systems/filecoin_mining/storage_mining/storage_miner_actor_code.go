@@ -696,8 +696,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
 	if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 
-		// TODO: remove dealIDs from PublishedDeals
-		// PreCommittedSectors is cleaned up at _expirePreCommitSectors called by Cron
+		// PreCommittedSectors is cleaned up at _expirePreCommitSectors triggered by Cron
 		rt.Abort(
 			exitcode.UserDefinedError(exitcode.DeadlineExceeded),
 			"more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed")
@@ -817,6 +816,8 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 	h, st := a.State(rt)
 
 	expiredSectorNum := 0
+	inactiveDealIDs := make([]deal.DealID, 0)
+
 	for _, preCommitSector := range st.PreCommittedSectors() {
 
 		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
@@ -824,19 +825,36 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
 			expiredSectorNum += 1
+			inactiveDealIDs = append(inactiveDealIDs, preCommitSector.Info().DealIDs()...)
 		}
 	}
 
-	UpdateRelease(rt, h, st)
-
 	depositToBurn := actor.TokenAmount(expiredSectorNum * int(PRECOMMIT_DEPOSIT))
 
-	// send funds to BurntFundsActor
-	rt.SendPropagatingErrors(&vmr.InvocInput_I{
-		To_:    addr.BurntFundsActorAddr,
-		Value_: depositToBurn,
-	})
+	UpdateRelease(rt, h, st)
 
+	// send funds to BurntFundsActor
+	if depositToBurn > 0 {
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:    addr.BurntFundsActorAddr,
+			Value_: depositToBurn,
+		})
+	}
+
+	// clear inactive deals
+	if len(inactiveDealIDs) > 0 {
+		// @param []deal.DealID inactiveDealIDs
+		dealsToClearParams := make([]util.Serialization, 1)
+		for _, dealID := range inactiveDealIDs {
+			dealsToClearParams = append(dealsToClearParams, deal.Serialize_DealID(dealID))
+		}
+
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: market.Method_StorageMarketActor_ClearInactiveDealIDs,
+			Params_: dealsToClearParams,
+		})
+	}
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {

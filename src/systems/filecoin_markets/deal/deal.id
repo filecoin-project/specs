@@ -53,7 +53,7 @@ type StorageDeal struct {
 
 type OnChainDeal struct {
     Deal              StorageDeal
-    LastPaymentEpoch  block.ChainEpoch  // 0 = published
+    LastPaymentEpoch  block.ChainEpoch  // -1 = published
     ID                DealID
 }
 
