@@ -15,8 +15,8 @@ type BlockHeader struct {
     Parents                [&BlockHeader]
     ParentWeight           ChainWeight
     // State
-    ParentStateTree        st.StateTree
-    ParentMessageReceipts  [&MessageReceipt]
+    ParentStateTree        &st.StateTree
+    ParentMessageReceipts  &[&MessageReceipt]  // array-mapped trie ref
 
     // Consensus things
     Epoch                  ChainEpoch
@@ -25,7 +25,7 @@ type BlockHeader struct {
     ElectionProof
 
     MinerAddress           addr.Address
-    // ElectionPoSt           OnChainPoStVerifyInfo
+    ElectionPoSt           OnChainPoStVerifyInfo
 
     // Proposed update
     BLSAggregateSig        filcrypto.Signature
@@ -82,3 +82,16 @@ type SoftCheckpoint Checkpoint
 // For more, see the Checkpoints section.
 // TODO: consider renaming as EconomicCheckpoint
 type TrustedCheckpoint Checkpoint
+
+// HACK: Duplicated from posting.id (actual source)
+type OnChainPoStVerifyInfo struct {
+    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+    Candidates  [PoStCandidate]
+    Randomness  PoStRandomness
+    Proof       PoStProof
+}
+
+type ChallengeTicketsCommitment struct {}  // see sector
+type PoStCandidate struct {}  // see sector
+type PoStRandomness struct {}  // see sector
+type PoStProof struct {}

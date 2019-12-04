@@ -7,6 +7,7 @@ app_address: "Address"
 vrf: "VRF"
 
 # blockchain
+message: "Message"
 sys_vm: "VM"
 ### blockchain
 block_producer: "Block Producer"
@@ -27,7 +28,6 @@ chain_sync: "Chain Sync"
 block_validation: "Block Validation"
 
 ### Message Pool
-message: "Message"
 message_pool: "Message Pool"
 message_syncer: "Message Syncer"
 message_storage: "Message Storage"
