@@ -277,7 +277,7 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 }
 
 func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
-	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
+	st := sms._getStorageMinerActorState(header.ParentStateTree(), header.MinerAddress())
 
 	for _, info := range onChainInfo.Candidates() {
 		sectorNum := info.SectorID().Number()
@@ -286,7 +286,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, on
 			// panic("No sector with that ID found")
 			return false
 		}
-		if !sms._consensus().IsWinningPartialTicket(header.StateTree(), info.PartialTicket(), sectorPower) {
+		if !sms._consensus().IsWinningPartialTicket(header.ParentStateTree(), info.PartialTicket(), sectorPower) {
 			return false
 		}
 	}
