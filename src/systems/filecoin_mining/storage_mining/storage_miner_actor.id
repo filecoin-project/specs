@@ -109,7 +109,7 @@ type StorageMinerActorState struct {
     _getActivePower(rt Runtime) block.StoragePower
     _getInactivePower(rt Runtime) block.StoragePower
     _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
-    _getCurrUtilization(sectorNo sector.SectorNumber) block.StoragePower
+    _getCurrUtilization(sectorNo sector.SectorNumber) (utilization block.StoragePower, found bool)
 }
 
 type StorageMinerActorCode struct {

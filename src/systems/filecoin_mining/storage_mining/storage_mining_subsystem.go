@@ -71,6 +71,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
+	util.TODO()
 	provingSet := make([]sector.SectorID, 0)
 
 	candidates := sms.StorageProving().Impl().GenerateElectionPoStCandidates(postRandomness, provingSet)
@@ -80,14 +81,18 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	}
 
 	// TODO Fix
+	util.TODO()
 	var currState stateTree.StateTree
 	winningCandidates := make([]sector.PoStCandidate, 0)
 	st := sms._getStorageMinerActorState(currState, sms._keyStore().MinerAddress())
 
 	for _, candidate := range candidates {
-		// TODO: fix
-		sectorNum := sector.SectorNumber(0)
-		sectorPower := st._getCurrUtilization(sectorNum)
+		sectorNum := candidate.SectorID().Number()
+		sectorPower, found := st._getCurrUtilization(sectorNum)
+		if !found {
+			// panic("No sector with that ID found")
+			return
+		}
 		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
@@ -275,9 +280,12 @@ func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, on
 	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
 
 	for _, info := range onChainInfo.Candidates() {
-		// TODO: fix
-		sectorNum := sector.SectorNumber(0)
-		sectorPower := st._getCurrUtilization(sectorNum)
+		sectorNum := info.SectorID().Number()
+		sectorPower, found := st._getCurrUtilization(sectorNum)
+		if !found {
+			// panic("No sector with that ID found")
+			return false
+		}
 		if !sms._consensus().IsWinningPartialTicket(header.StateTree(), info.PartialTicket(), sectorPower) {
 			return false
 		}

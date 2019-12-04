@@ -88,9 +88,7 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 var node node_base.FilecoinNode
 
 func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) StoragePowerActorState {
-	// powerAddr := stateTree.GetActorAddress(stateTree.ActorName_StoragePowerActor)
-	// TODO Fix
-	var powerAddr addr.Address
+	powerAddr := addr.StoragePowerActorAddr
 	actorState := stateTree.GetActorState(powerAddr)
 	substateCID := actorState.State()
 

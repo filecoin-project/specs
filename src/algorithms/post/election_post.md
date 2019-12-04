@@ -72,7 +72,7 @@ Given a returned PartialTicket, miner checks it is a winning ticket. Specificall
     - `ChallengeTicket = Finalize(PartialTicket) = H(ChallengeTicket) / 2^len(H)`
     - Check that `ChallengeTicket < Target`
         - `Target = activePowerInSector/networkPower * 1/sectorsSampled * EC.ExpectedLeaders`.
-        - Put another way check `challengeTicket_num * networkPower * sectorsSampled_denom < activePowerInSector * sectorsSampled_num * EC.ExpectedLeaders * challengeTicket_denom`
+        - Put another way check `challengeTicket_num * networkPower * sectorsSampled_num < activePowerInSector * sectorsSampled_denom * EC.ExpectedLeaders * challengeTicket_denom`
     - If yes, it is a winning ticket and can be used to submit a block
     - In either case, try again with next sector to increase rewards
 
