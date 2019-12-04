@@ -7,6 +7,7 @@ app_address: "Address"
 vrf: "VRF"
 
 # blockchain
+message: "Message"
 sys_vm: "VM"
 ### blockchain
 block_producer: "Block Producer"

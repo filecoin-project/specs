@@ -2,7 +2,7 @@ import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 
 type Tipset struct {
-    BlockCIDs          [BlockCID]
+    BlockCIDs          [&BlockHeader]
     Blocks             [BlockHeader]
 
     Has(block Block)   bool            @(cached)

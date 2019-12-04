@@ -1,4 +1,3 @@
-import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
@@ -6,35 +5,35 @@ import clock "github.com/filecoin-project/specs/systems/filecoin_nodes/clock"
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import msg "github.com/filecoin-project/specs/systems/filecoin_vm/message"
 
-type BlockCID ipld.CID
-type MessageRoot ipld.CID
-type ReceiptRoot ipld.CID
 type ChainWeight UVarint
 type ChainEpoch UVarint
+type MessageReceipt util.Bytes
 
 // On-chain representation of a block header.
 type BlockHeader struct {
     // Chain linking
-    Parents          Tipset
-    Weight           ChainWeight
-    Epoch            ChainEpoch
-
-    // Miner Info
-    MinerAddress     addr.Address
-
+    Parents                [&BlockHeader]
+    ParentWeight           ChainWeight
     // State
-    StateTree        st.StateTree
-    Messages         MessageRoot
-    MessageReceipts  ReceiptRoot
+    ParentStateTree        &st.StateTree
+    ParentMessageReceipts  &[&MessageReceipt]  // array-mapped trie ref
 
     // Consensus things
-    Timestamp        clock.UnixTime
+    Epoch                  ChainEpoch
+    Timestamp              clock.UnixTime
     Ticket
     ElectionProof
 
+    MinerAddress           addr.Address
+    ElectionPoSt           OnChainPoStVerifyInfo
+
+    // Proposed update
+    BLSAggregateSig        filcrypto.Signature
+    BLSMessageCIDs         &[&msg.UnsignedMessage]  // array-mapped trie
+    SECPMessageCIDs        &[&msg.SignedMessage]  // array-mapped trie
+
     // Signatures
-    BlockSig         filcrypto.Signature
-    BLSAggregateSig  filcrypto.Signature
+    BlockSig               filcrypto.Signature
 
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
@@ -63,7 +62,7 @@ type Chain struct {
 // from here, we may consider many tipsets that _include_ Block
 // but we must indeed include t and not consider tipsets that
 // fork from Block.Parents, but do not include Block.
-type Checkpoint BlockCID
+type Checkpoint &BlockHeader
 
 // SoftCheckpoint is a checkpoint that Filecoin nodes may use as they
 // gain confidence in the blockchain. It is a unilateral checkpoint,
@@ -83,3 +82,16 @@ type SoftCheckpoint Checkpoint
 // For more, see the Checkpoints section.
 // TODO: consider renaming as EconomicCheckpoint
 type TrustedCheckpoint Checkpoint
+
+// HACK: Duplicated from posting.id (actual source)
+type OnChainPoStVerifyInfo struct {
+    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+    Candidates  [PoStCandidate]
+    Randomness  PoStRandomness
+    Proof       PoStProof
+}
+
+type ChallengeTicketsCommitment struct {}  // see sector
+type PoStCandidate struct {}  // see sector
+type PoStRandomness struct {}  // see sector
+type PoStProof struct {}

@@ -4,6 +4,9 @@ title: "Address"
 
 A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.
 
+{{< readfile file="address.id" code="true" lang="go" >}}
+{{< readfile file="address.go" code="true" lang="go" >}}
+
 # Design criteria
 
 1. **Identifiable**: The address must be easily identifiable as a Filecoin address.
@@ -44,7 +47,6 @@ When encoded to a string a filecoin address contains the following:
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 ```
 
-{{<goFile Address>}}
 
 
 ## Network Prefix

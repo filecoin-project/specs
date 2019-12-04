@@ -163,7 +163,7 @@ func (sms *StorageMiningSubsystem_I) GetWorkerKeyByMinerAddress(minerAddr addr.A
 
 func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
-	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
+	st := sms._getStorageMinerActorState(header.ParentStateTree(), header.MinerAddress())
 
 	// 1. Check that the miner in question is currently allowed to run election
 	if !st._canBeElected(header.Epoch()) {
@@ -175,10 +175,8 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), header.Epoch())
 	postRandomnessInput := sector.PoStRandomness(sms._preparePoStChallengeSeed(randomness, header.MinerAddress()))
 
-	// Hack because of type recognition
-	var randInBytes []byte
 	postRand := &filcrypto.VRFResult_I{
-		Output_: randInBytes,
+		Output_: onChainInfo.Randomness(),
 	}
 
 	if !postRand.Verify(postRandomnessInput, sms.GetWorkerKeyByMinerAddress(header.MinerAddress())) {
@@ -212,7 +210,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 
 func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo, posterAddr addr.Address) bool {
 
-	st := sms._getStorageMinerActorState(header.StateTree(), header.MinerAddress())
+	st := sms._getStorageMinerActorState(header.ParentStateTree(), header.MinerAddress())
 
 	// 1. Check that the miner in question is currently being challenged
 	if !st._isChallenged() {

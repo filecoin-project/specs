@@ -7,6 +7,7 @@ app_address: [appendix, address]
 vrf: [algorithms, crypto, vrf]
 
 # blockchain
+message: [systems, filecoin_vm, message]
 sys_vm: [systems, filecoin_vm]
 vm: [systems, filecoin_vm]
 
