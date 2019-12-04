@@ -153,7 +153,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 
 	Release(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse, false)
+	a._submitPowerReport(rt, lastPoStResponse)
 
 	// Note: NewDetectedFaults is now the sum of all
 	// previously active, committed, and recovering sectors minus expired ones
@@ -177,10 +177,10 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 // construct PowerReport from SectorTable
 // need lastPoSt to search for new expired deals in _updateSectorUtilization since the lastPost
 // where DealExpirationAMT takes in a range of Epoch and return a list of values that expire in that range
-func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch, processDealPayment bool) {
+func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
 	h, st := a.State(rt)
 	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
-	activePower, _ := st._getActivePower(rt, processDealPayment)
+	activePower := st._getActivePower(rt)
 	inactivePower := st._getInactivePower(rt)
 
 	// power report in processPowerReportParam
@@ -193,8 +193,6 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	processPowerReportParam := make([]util.Serialization, 1)
 	// @param dealIDs []deal.DealID
 	processDealExpirationParam := make([]util.Serialization, 1)
-	// @params dealIDs []deal.DealID activeDealIDs
-	processDealPaymentParam := make([]util.Serialization, 1)
 	panic("TODO: serialize arguments")
 
 	Release(rt, h, st)
@@ -220,14 +218,30 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 			Params_: processDealExpirationParam,
 		})
 	}
+}
 
-	if processDealPayment {
-		rt.SendPropagatingErrors(&vmr.InvocInput_I{
-			To_:     addr.StorageMarketActorAddr,
-			Method_: market.Method_StorageMarketActor_ProcessDealPayment,
-			Params_: processDealPaymentParam,
-		})
+func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
+	h, st := a.State(rt)
+
+	activeDealIDs := make([]deal.DealID, 0)
+
+	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		newActiveDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
+		activeDealIDs = append(activeDealIDs, newActiveDealIDs...)
 	}
+
+	// @params dealIDs []deal.DealID activeDealIDs
+	processDealPaymentParam := make([]util.Serialization, 1)
+	panic("TODO: serialize arguments")
+
+	Release(rt, h, st)
+
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: market.Method_StorageMarketActor_ProcessDealPayment,
+		Params_: processDealPaymentParam,
+	})
 }
 
 // this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
@@ -261,7 +275,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 		case SectorCommittedSN, SectorRecoveringSN:
 			st._updateActivateSector(rt, sectorNo)
 		case SectorActiveSN:
-			// do nothing, deal payment is made at the end
+			// do nothing, deal payment is made at the end of this method
 		default:
 			rt.AbortStateMsg("Invalid sector state in ProvingSet.SectorsOn()")
 		}
@@ -297,8 +311,7 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 	lastPoStResponse := st.ChallengeStatus().LastPoStResponseEpoch()
 	Release(rt, h, st)
 
-	// also process deal payment
-	a._submitPowerReport(rt, lastPoStResponse, true)
+	a._submitPowerReport(rt, lastPoStResponse)
 
 	a._slashCollateralForStorageFaults(
 		rt,
@@ -306,6 +319,8 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 		sector.CompactSectorSet(make([]byte, 0)), // NewDetectedFaults
 		newTerminatedFaults,
 	)
+
+	a._claimDealPayments(rt)
 
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnPoStSuccess(rt.CurrEpoch())
@@ -428,7 +443,7 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 	UpdateRelease(rt, h, st)
 
-	a._submitPowerReport(rt, lastPoStResponse, false)
+	a._submitPowerReport(rt, lastPoStResponse)
 
 	a._slashCollateralForStorageFaults(
 		rt,

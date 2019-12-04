@@ -106,7 +106,7 @@ type StorageMinerActorState struct {
     _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) [deal.DealID]
     _initializeUtilizationInfo(rt Runtime, deals [deal.OnChainDeal]) sector.SectorUtilizationInfo
 
-    _getActivePower(rt Runtime, getActiveDealIDs bool) (activePower block.StoragePower, activeDealIDs [deal.DealID])
+    _getActivePower(rt Runtime) block.StoragePower
     _getInactivePower(rt Runtime) block.StoragePower
     _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
     _getCurrUtilization(sectorNo sector.SectorNumber) (utilization block.StoragePower, found bool)
@@ -122,8 +122,6 @@ type StorageMinerActorCode struct {
     SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
 
     _checkSurprisePoStSubmissionHappened(rt Runtime)
-
-    // TODO: should depledge be in here or in storage market actor?
 
     DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
@@ -145,6 +143,7 @@ type StorageMinerActorCode struct {
         faultType      sector.StorageFaultType
     )
 
+    _claimDealPayments(rt Runtime)
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch, getActiveDealIDs bool)
     _expirePreCommittedSectors(rt Runtime)
     _ensurePledgeCollateralSatisfied(rt Runtime)
