@@ -12,7 +12,7 @@ func (tix *Ticket_I) ValidateSyntax() bool {
 
 func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
 
-	inputRand := Serialize_TicketProductionInput(&TicketProductionInput_I{
+	inputRand := Serialize_TicketProductionSeedInput(&TicketProductionSeedInput_I{
 		PastTicket_: randomness,
 		MinerAddr_:  minerActorAddr,
 	})
@@ -22,7 +22,7 @@ func (tix *Ticket_I) Verify(randomness util.Bytes, pk filcrypto.VRFPublicKey, mi
 }
 
 func (tix *Ticket_I) DrawRandomness(epoch ChainEpoch) util.Bytes {
-	input := Serialize_TicketDrawingInput(&TicketDrawingInput_I{
+	input := Serialize_TicketDrawingSeedInput(&TicketDrawingSeedInput_I{
 		PastTicket_: tix.Output(),
 		Epoch_:      epoch,
 	})
