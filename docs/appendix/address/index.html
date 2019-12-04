@@ -4574,6 +4574,45 @@ https://github.com/alex-shpak/hugo-book
 
 <p>A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.</p>
 
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>address.id</code> file was not found.</i></b></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>address.go</code> file was not found.</i></b></p>
+
+</p>
+
 <h1 id="design-criteria">Design criteria</h1>
 
 <ol>
@@ -4620,31 +4659,6 @@ https://github.com/alex-shpak/hugo-book
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 </code></pre></li>
 </ul>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Address</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="p">|</span> <span class="nx">AddressId</span> <span class="mi">0</span>
-    <span class="p">|</span> <span class="nx">AddressSecp256k1</span> <span class="mi">1</span>
-    <span class="p">|</span> <span class="nx">AddressActor</span> <span class="mi">2</span>
-    <span class="p">|</span> <span class="nx">AddressBLS12_381</span> <span class="mi">3</span>
-<span class="p">}</span> <span class="c1">// representation byteprefix
-</span><span class="c1"></span>
-<span class="c1">// ID
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressId</span> <span class="nx">UInt</span>
-
-<span class="c1">// Blake2b-160 Hash
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressSecp256k1</span> <span class="nx">Bytes</span>
-
-<span class="c1">// Blake2b-160 Hash
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressActor</span> <span class="nx">Bytes</span>
-
-<span class="c1">// 48 byte PublicKey
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressBLS12_381</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-
 
 <h2 id="network-prefix">Network Prefix</h2>
 

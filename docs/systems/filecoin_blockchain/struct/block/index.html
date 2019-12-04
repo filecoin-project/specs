@@ -4573,6 +4573,9 @@ https://github.com/alex-shpak/hugo-book
 <article class="markdown"><p><div id="systems__filecoin_blockchain__struct__block__block"></div>
 The Block is a unit of the Filecoin blockchain.</p>
 
+<p>A block header contains information relevant to a particular point in time over which the network may achieve consensus.</p>
+
+<div class="notices note" ><strong>Note:</strong> A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms <code>block</code> and <code>block header</code> interchangeably.</div>
 
 
 
@@ -4592,46 +4595,49 @@ The Block is a unit of the Filecoin blockchain.</p>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
-<span class="kd">type</span> <span class="nx">BlockCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">MessageRoot</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">ReceiptRoot</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">ChainWeight</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
 
 <span class="c1">// On-chain representation of a block header.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">BlockHeader</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Chain linking
-</span><span class="c1"></span>    <span class="nx">Parents</span>          <span class="nx">Tipset</span>
-    <span class="nx">Weight</span>           <span class="nx">ChainWeight</span>
-    <span class="nx">Epoch</span>            <span class="nx">ChainEpoch</span>
-
-    <span class="c1">// Miner Info
-</span><span class="c1"></span>    <span class="nx">MinerAddress</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-
+</span><span class="c1"></span>    <span class="nx">Parents</span>                <span class="p">[</span><span class="o">&amp;</span><span class="nx">BlockHeader</span><span class="p">]</span>
+    <span class="nx">ParentWeight</span>           <span class="nx">ChainWeight</span>
     <span class="c1">// State
-</span><span class="c1"></span>    <span class="nx">StateTree</span>        <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
-    <span class="nx">Messages</span>         <span class="nx">MessageRoot</span>
-    <span class="nx">MessageReceipts</span>  <span class="nx">ReceiptRoot</span>
-
+</span><span class="c1"></span>    <span class="nx">ParentState</span>            <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+    <span class="nx">ParentMessageReceipts</span>  <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">MessageReceipt</span><span class="p">]</span>  <span class="c1">// array-mapped trie ref
+</span><span class="c1"></span>
     <span class="c1">// Consensus things
-</span><span class="c1"></span>    <span class="nx">Timestamp</span>        <span class="nx">clock</span><span class="p">.</span><span class="nx">UnixTime</span>
+</span><span class="c1"></span>    <span class="nx">Epoch</span>                  <span class="nx">ChainEpoch</span>
+    <span class="nx">Timestamp</span>              <span class="nx">clock</span><span class="p">.</span><span class="nx">UnixTime</span>
     <span class="nx">Ticket</span>
-    <span class="nx">ElectionProof</span>
+
+    <span class="nx">Miner</span>                  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">ElectionPoStOutput</span>     <span class="nx">ElectionPoStVerifyInfo</span>
+
+    <span class="c1">// Proposed update
+</span><span class="c1"></span>    <span class="nx">Messages</span>               <span class="o">&amp;</span><span class="nx">TxMeta</span>
+    <span class="nx">BLSAggregate</span>           <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
 
     <span class="c1">// Signatures
-</span><span class="c1"></span>    <span class="nx">BlockSig</span>         <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
-    <span class="nx">BLSAggregateSig</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
+</span><span class="c1"></span>    <span class="nx">Signature</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
 
     <span class="c1">//	SerializeSigned()            []byte
 </span><span class="c1"></span>    <span class="c1">//	ComputeUnsignedFingerprint() []
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">TxMeta</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">BLSMessages</span>   <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">]</span>  <span class="c1">// array-mapped trie
+</span><span class="c1"></span>    <span class="nx">SECPMessages</span>  <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">]</span>  <span class="c1">// array-mapped trie
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// Internal representation of a full block, with all messages.
@@ -4657,7 +4663,7 @@ The Block is a unit of the Filecoin blockchain.</p>
 </span><span class="c1">// from here, we may consider many tipsets that _include_ Block
 </span><span class="c1">// but we must indeed include t and not consider tipsets that
 </span><span class="c1">// fork from Block.Parents, but do not include Block.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Checkpoint</span> <span class="nx">BlockCID</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Checkpoint</span> <span class="o">&amp;</span><span class="nx">BlockHeader</span>
 
 <span class="c1">// SoftCheckpoint is a checkpoint that Filecoin nodes may use as they
 </span><span class="c1">// gain confidence in the blockchain. It is a unilateral checkpoint,
@@ -4677,6 +4683,18 @@ The Block is a unit of the Filecoin blockchain.</p>
 </span><span class="c1">// For more, see the Checkpoints section.
 </span><span class="c1">// TODO: consider renaming as EconomicCheckpoint
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">TrustedCheckpoint</span> <span class="nx">Checkpoint</span>
+
+<span class="c1">// HACK: Duplicated from posting.id (actual source)
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ElectionPoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Candidates</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+    <span class="nx">Randomness</span>  <span class="nx">PoStRandomness</span>
+    <span class="nx">Proof</span>       <span class="nx">PoStProof</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ChallengeTicketsCommitment</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStCandidate</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
 

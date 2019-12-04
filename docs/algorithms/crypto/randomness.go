@@ -38,3 +38,12 @@ func _deriveRandInternal(tag DomainSeparationTag, s Serialization, index int) Ra
 	ret := SHA256(buffer)
 	return Randomness(ret)
 }
+
+type DomainSeparationTag int
+
+const (
+	DomainSeparationTag_TicketDrawing DomainSeparationTag = 1 + iota
+	DomainSeparationTag_TicketProduction
+	DomainSeparationTag_PoSt
+	// ...
+)

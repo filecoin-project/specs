@@ -166,7 +166,7 @@ The response contains the requested chain in reverse iteration order.</descripti
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/libraries/ipld/cid/</guid>
-      <description> type BytesKey string // so that we can use it in go maps  type CID BytesKey // TODO: remove util.  </description>
+      <description>For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. Any pointer inclusions in the Filecoin spec id files (e.g. &amp;amp;Object) denotes the CID of said object. Some objects explicitly name a CID field. The spec treats these notations interchangeably. This is effectively a hash value, prefixed with its hash function (multihash) as well as extra labels to inform applications about how to deserialize the given data.</description>
     </item>
     
     <item>
@@ -220,9 +220,19 @@ The response contains the requested chain in reverse iteration order.</descripti
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/listings/data_structures/</guid>
-      <description>Address An address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. An address encodes information about:
- Network this address belongs to Type of data the address contains The data itself Checksum (depending on the type of address)  For more detail, see the full address spec.
-Block A block header contains information relevant to a particular point in time over which the network may achieve consensus.</description>
+      <description>TODO
+See the old_data_structures.md file for portions.</description>
+    </item>
+    
+    <item>
+      <title>Data Structures</title>
+      <link>/docs/listings/old_data_structures/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/listings/old_data_structures/</guid>
+      <description>Basic Types RLE+ Bitset Encoding RLE+ is a lossless compression format based on RLE. Its primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly, while keeping the same level of compression for large sets of contiugous bits.
+In tests it has shown to be more compact than RLE itself, as well as Concise and Roaring.
+Format The format consists of a header, followed by a series of blocks, of which there are three different types.</description>
     </item>
     
     <item>
@@ -242,7 +252,7 @@ Block A block header contains information relevant to a particular point in time
       
       <guid>/docs/algorithms/post/election_post/</guid>
       <description>This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
-High Level API Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a ChallengeTicket any of which could yield a valid ElectionProof.</description>
+High Level API Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election.</description>
     </item>
     
     <item>
@@ -446,7 +456,7 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor
       
       <guid>/docs/systems/filecoin_blockchain/message_pool/message_syncer/</guid>
       <description>TODO:
- explain message syncer works include the message syncer code  Message Propagation Messages are propagated over the libp2p pubsub channel /fil/messages. On this channel, every serialised SignedMessage is announced.
+ explain message syncer works include the message syncer code  Message Propagation Messages are propagated over the libp2p pubsub channel /fil/messages. On this channel, every serialised SignedMessage is announced (see Message).
 Upon receiving the message, its validity must be checked: the signature must be valid, and the account in question must have enough funds to cover the actions specified. If the message is not valid it should be dropped and must not be forwarded.</description>
     </item>
     

@@ -17,7 +17,7 @@
       
       <guid>/docs/algorithms/post/election_post/</guid>
       <description>This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
-High Level API Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a ChallengeTicket any of which could yield a valid ElectionProof.</description>
+High Level API Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election.</description>
     </item>
     
     <item>

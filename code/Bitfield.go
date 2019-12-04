@@ -1,1 +1,0 @@
-type Bitfield Bytes

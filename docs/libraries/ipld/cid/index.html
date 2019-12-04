@@ -4570,7 +4570,13 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  
+  <p>For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. Any pointer inclusions in the Filecoin spec <code>id</code> files (e.g. <code>&amp;Object</code>) denotes the CID of said object. Some objects explicitly name a CID field. The spec treats these notations interchangeably.
+This is effectively a hash value, prefixed with its hash function (multihash) as well as extra labels to inform applications about how to deserialize the given data.</p>
+
+<p>For a more detailed specification, we refer the reader to the
+<a href="https://github.com/ipld/cid">IPLD repository</a>.</p>
+
+
 
 
 

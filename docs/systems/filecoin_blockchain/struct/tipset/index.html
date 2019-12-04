@@ -4614,7 +4614,7 @@ Expected Consensus probabilistically elects multiple leaders in each epoch meani
 <span class="kn">import</span> <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Tipset</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">BlockCIDs</span>          <span class="p">[</span><span class="nx">BlockCID</span><span class="p">]</span>
+    <span class="nx">BlockCIDs</span>          <span class="p">[</span><span class="o">&amp;</span><span class="nx">BlockHeader</span><span class="p">]</span>
     <span class="nx">Blocks</span>             <span class="p">[</span><span class="nx">BlockHeader</span><span class="p">]</span>
 
     <span class="nf">Has</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span>   <span class="kt">bool</span>            <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>

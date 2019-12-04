@@ -4583,7 +4583,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="message-propagation">Message Propagation</h1>
 
-<p>Messages are propagated over the libp2p pubsub channel <code>/fil/messages</code>. On this channel, every <a href="../data-structures#messages">serialised <code>SignedMessage</code></a> is announced.</p>
+<p>Messages are propagated over the libp2p pubsub channel <code>/fil/messages</code>. On this channel, every serialised <code>SignedMessage</code> is announced (see <a href="../../../../../#systems__filecoin_vm__message___index">Message</a>).</p>
 
 <p>Upon receiving the message, its validity must be checked: the signature must be valid, and the account in question must have enough funds to cover the actions specified. If the message is not valid it should be dropped and must not be forwarded.</p>
 

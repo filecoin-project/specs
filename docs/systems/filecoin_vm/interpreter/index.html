@@ -4572,6 +4572,8 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
+<div id="systems__filecoin_vm__interpreter__vm_interpreter"></div>
+
 <p>The VM interpreter orchestrates the execution of messages from a tipset on that tipset&rsquo;s parent state,
 producing a new state and a sequence of message receipts. The CIDs of this new state and of the receipt
 collection are included in blocks from the subsequent epoch, which must agree about those CIDs
@@ -4627,8 +4629,8 @@ state mutation or produce a receipt.</p>
 <h1 id="message-validity-and-failure">Message validity and failure</h1>
 
 <p>Every message in a valid block can be processed and produce a receipt (note that block validity
-implies all messages are syntactically valid and correctly signed). However, execution may
-or may not succeed, depending on the state to which the message is applied. If the execution
+implies all messages are syntactically valid &ndash; see <a href="../../../../#systems__filecoin_vm__message__message_syntax">Message Syntax</a> &ndash; and correctly signed).
+However, execution may or may not succeed, depending on the state to which the message is applied. If the execution
 of a message fails, the corresponding receipt will carry a non-zero exit code.</p>
 
 <p>If a message fails due to a reason that can reasonably be attributed to the miner including a

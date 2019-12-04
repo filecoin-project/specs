@@ -4584,12 +4584,12 @@ action like a storage deal.
 Filecoin uses signatures to verify the authenticity of the following objects (non
 exhaustive list):
 - Messages: Users authenticate their transactions to the blockchain.
-- Tickets: Miner authenticates its ticket (see <a href="../mining">mining</a>).
+- Tickets: Miner authenticates its ticket (see <a href="../../../../#systems__filecoin_mining__storage_mining">Storage Miner</a>).
 - Blocks: Block leader signs over all data in the block.</p>
 
 <h2 id="messages">Messages</h2>
 
-<p>To generate a signature for the <a href="../data-structures#message"><code>Message</code></a> type,
+<p>To generate a signature for the <a href="../../../../#systems__filecoin_vm__message___index">Message</a> type,
 first serialize it, then hash the serialized bytes with SHA256. Then, take
 the 32 byte digest output the hash and compute the signature over it.</p>
 
@@ -4710,8 +4710,7 @@ key locally from the signature rather than specify an ID of the public key.</p>
 
 <p><strong>Wire Format</strong>: Filecoin uses the standard secp256k1 signature serialization,
 as described below. For more details on how the Filecoin <code>Signature</code> type is
-serialized, see the relevant section in <a href="../data-structures#signature">the data structures
-spec</a></p>
+serialized, see <a href="../../../../#algorithms__crypto__signatures">Signatures</a>.</p>
 
 <pre><code>SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 </code></pre>

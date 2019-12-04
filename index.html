@@ -4747,9 +4747,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">d6db5430</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">ce8e6459</span>
     <br />
-    last published: <span id="spec-version-date">2019-12-03_23:40:26Z</span>
+    last published: <span id="spec-version-date">2019-12-04_15:08:49Z</span>
   </div>
 </div>
 
@@ -12240,6 +12240,8 @@ for the gas units consumed by a message&rsquo;s execution (including all nested 
 gas price they determine. A block producer chooses which messages to include in a block and is
 rewarded according to each message&rsquo;s gas price and consumption, forming a market.</p>
 
+<div id="systems__filecoin_vm__message__message_syntax"></div>
+
 <h4 id="message-syntax-validation">Message syntax validation</h4>
 
 <p>A syntactically invalid message must not be transmitted, retained in a message pool, or
@@ -14432,6 +14434,8 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 
 
 
+<div id="systems__filecoin_vm__interpreter__vm_interpreter"></div>
+
 <p>The VM interpreter orchestrates the execution of messages from a tipset on that tipset&rsquo;s parent state,
 producing a new state and a sequence of message receipts. The CIDs of this new state and of the receipt
 collection are included in blocks from the subsequent epoch, which must agree about those CIDs
@@ -14487,8 +14491,8 @@ state mutation or produce a receipt.</p>
 <h4 id="message-validity-and-failure">Message validity and failure</h4>
 
 <p>Every message in a valid block can be processed and produce a receipt (note that block validity
-implies all messages are syntactically valid and correctly signed). However, execution may
-or may not succeed, depending on the state to which the message is applied. If the execution
+implies all messages are syntactically valid &ndash; see <a href="./#systems__filecoin_vm__message__message_syntax">Message Syntax</a> &ndash; and correctly signed).
+However, execution may or may not succeed, depending on the state to which the message is applied. If the execution
 of a message fails, the corresponding receipt will carry a non-zero exit code.</p>
 
 <p>If a message fails due to a reason that can reasonably be attributed to the miner including a
@@ -15691,6 +15695,9 @@ Filecoin&rsquo;s blockchain runs on storage power. That is, its consensus algori
 <p><div id="systems__filecoin_blockchain__struct__block__block"></div>
 The Block is a unit of the Filecoin blockchain.</p>
 
+<p>A block header contains information relevant to a particular point in time over which the network may achieve consensus.</p>
+
+<div class="notices note" ><strong>Note:</strong> A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms <code>block</code> and <code>block header</code> interchangeably.</div>
 
 
 
@@ -15710,46 +15717,49 @@ The Block is a unit of the Filecoin blockchain.</p>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
-<span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
 
 <span class="kn">import</span> <span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 <span class="kn">import</span> <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
 <span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 
-<span class="kd">type</span> <span class="nx">BlockCID</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">MessageRoot</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
-<span class="kd">type</span> <span class="nx">ReceiptRoot</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span>
 <span class="kd">type</span> <span class="nx">ChainWeight</span> <span class="nx">UVarint</span>
 <span class="kd">type</span> <span class="nx">ChainEpoch</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
 
 <span class="c1">// On-chain representation of a block header.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">BlockHeader</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="c1">// Chain linking
-</span><span class="c1"></span>    <span class="nx">Parents</span>          <span class="nx">Tipset</span>
-    <span class="nx">Weight</span>           <span class="nx">ChainWeight</span>
-    <span class="nx">Epoch</span>            <span class="nx">ChainEpoch</span>
-
-    <span class="c1">// Miner Info
-</span><span class="c1"></span>    <span class="nx">MinerAddress</span>     <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-
+</span><span class="c1"></span>    <span class="nx">Parents</span>                <span class="p">[</span><span class="o">&amp;</span><span class="nx">BlockHeader</span><span class="p">]</span>
+    <span class="nx">ParentWeight</span>           <span class="nx">ChainWeight</span>
     <span class="c1">// State
-</span><span class="c1"></span>    <span class="nx">StateTree</span>        <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
-    <span class="nx">Messages</span>         <span class="nx">MessageRoot</span>
-    <span class="nx">MessageReceipts</span>  <span class="nx">ReceiptRoot</span>
-
+</span><span class="c1"></span>    <span class="nx">ParentState</span>            <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+    <span class="nx">ParentMessageReceipts</span>  <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">MessageReceipt</span><span class="p">]</span>  <span class="c1">// array-mapped trie ref
+</span><span class="c1"></span>
     <span class="c1">// Consensus things
-</span><span class="c1"></span>    <span class="nx">Timestamp</span>        <span class="nx">clock</span><span class="p">.</span><span class="nx">UnixTime</span>
+</span><span class="c1"></span>    <span class="nx">Epoch</span>                  <span class="nx">ChainEpoch</span>
+    <span class="nx">Timestamp</span>              <span class="nx">clock</span><span class="p">.</span><span class="nx">UnixTime</span>
     <span class="nx">Ticket</span>
-    <span class="nx">ElectionProof</span>
+
+    <span class="nx">Miner</span>                  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="nx">ElectionPoStOutput</span>     <span class="nx">ElectionPoStVerifyInfo</span>
+
+    <span class="c1">// Proposed update
+</span><span class="c1"></span>    <span class="nx">Messages</span>               <span class="o">&amp;</span><span class="nx">TxMeta</span>
+    <span class="nx">BLSAggregate</span>           <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
 
     <span class="c1">// Signatures
-</span><span class="c1"></span>    <span class="nx">BlockSig</span>         <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
-    <span class="nx">BLSAggregateSig</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
+</span><span class="c1"></span>    <span class="nx">Signature</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">Signature</span>
 
     <span class="c1">//	SerializeSigned()            []byte
 </span><span class="c1"></span>    <span class="c1">//	ComputeUnsignedFingerprint() []
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">TxMeta</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">BLSMessages</span>   <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">UnsignedMessage</span><span class="p">]</span>  <span class="c1">// array-mapped trie
+</span><span class="c1"></span>    <span class="nx">SECPMessages</span>  <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">]</span>  <span class="c1">// array-mapped trie
 </span><span class="c1"></span><span class="p">}</span>
 
 <span class="c1">// Internal representation of a full block, with all messages.
@@ -15775,7 +15785,7 @@ The Block is a unit of the Filecoin blockchain.</p>
 </span><span class="c1">// from here, we may consider many tipsets that _include_ Block
 </span><span class="c1">// but we must indeed include t and not consider tipsets that
 </span><span class="c1">// fork from Block.Parents, but do not include Block.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Checkpoint</span> <span class="nx">BlockCID</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Checkpoint</span> <span class="o">&amp;</span><span class="nx">BlockHeader</span>
 
 <span class="c1">// SoftCheckpoint is a checkpoint that Filecoin nodes may use as they
 </span><span class="c1">// gain confidence in the blockchain. It is a unilateral checkpoint,
@@ -15795,6 +15805,18 @@ The Block is a unit of the Filecoin blockchain.</p>
 </span><span class="c1">// For more, see the Checkpoints section.
 </span><span class="c1">// TODO: consider renaming as EconomicCheckpoint
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">TrustedCheckpoint</span> <span class="nx">Checkpoint</span>
+
+<span class="c1">// HACK: Duplicated from posting.id (actual source)
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">ElectionPoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Candidates</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+    <span class="nx">Randomness</span>  <span class="nx">PoStRandomness</span>
+    <span class="nx">Proof</span>       <span class="nx">PoStProof</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">ChallengeTicketsCommitment</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStCandidate</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStRandomness</span> <span class="kd">struct</span> <span class="p">{}</span>  <span class="c1">// see sector
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">PoStProof</span> <span class="kd">struct</span> <span class="p">{}</span>
 </code></pre></div>
 
 
@@ -15995,7 +16017,7 @@ Expected Consensus probabilistically elects multiple leaders in each epoch meani
 <span class="kn">import</span> <span class="nx">clock</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&#34;</span>
 
 <span class="kd">type</span> <span class="nx">Tipset</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">BlockCIDs</span>          <span class="p">[</span><span class="nx">BlockCID</span><span class="p">]</span>
+    <span class="nx">BlockCIDs</span>          <span class="p">[</span><span class="o">&amp;</span><span class="nx">BlockHeader</span><span class="p">]</span>
     <span class="nx">Blocks</span>             <span class="p">[</span><span class="nx">BlockHeader</span><span class="p">]</span>
 
     <span class="nf">Has</span><span class="p">(</span><span class="nx">block</span> <span class="nx">Block</span><span class="p">)</span>   <span class="kt">bool</span>            <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
@@ -16413,8 +16435,8 @@ Heaviest tipset at H-1 is {B0}</p>
 
 <ul>
 <li>M produces a ticket at H, from B0&rsquo;s ticket (the min ticket at H-1)</li>
-<li>M draws the ticket from height H-K to generate an ElectionProof</li>
-<li>That ElectionProof is invalid</li>
+<li>M draws the ticket from height H-K to generate a set of ElectionPoSt partial Tickets and uses them to run leader election</li>
+<li>If M has no winning tickets</li>
 <li>M has not heard about other blocks on the network.</li>
 </ul></li>
 <li>New Round:
@@ -16422,7 +16444,7 @@ Heaviest tipset at H-1 is {B0}</p>
 <ul>
 <li>Epoch/Height is incremented to H + 1.</li>
 <li>M generates a new ElectionProof with this new epoch number.</li>
-<li>That ElectionProof is valid</li>
+<li>If M has winning tickets</li>
 <li>M generates a block B1 using the new ElectionProof and the ticket drawn last round.</li>
 <li>M has received blocks B2, B3 from the network with the same parents and same height.</li>
 <li>M forms a tipset {B1, B2, B3}</li>
@@ -16433,26 +16455,36 @@ Heaviest tipset at H-1 is {B0}</p>
 
 <h6 id="block-creation">Block Creation</h6>
 
-<p>Scratching a winning ticket, and armed with a valid <code>ElectionProof</code>, a miner can now publish a new block!</p>
+<p>Scratching (a) winning ElectionPoSt ticket(s), and armed with the requisite <code>ElectionPoStOutput</code>, a miner can now publish a new block!</p>
 
 <p>To create a block, the eligible miner must compute a few fields:</p>
 
 <ul>
-<li><code>Ticket</code> - new ticket generated from that in the prior epoch (see <a href="./#systems__filecoin_blockchain__storage_power_consensus__ticket_generation">Ticket Generation</a>).</li>
-<li><code>ElectionProof</code> - A specific signature over the min_ticket from <code>randomness_lokkback</code> epochs back (see <a href="./#algorithms__expected_consensus__leader_election">Secret Leader Election</a>).</li>
-<li><code>ParentWeight</code> - The parent chain&rsquo;s weight (see <a href="./#algorithms__expected_consensus__chain_selection">Chain Selection</a>).</li>
 <li><code>Parents</code> - the CIDs of the parent blocks.</li>
-<li><code>ParentState</code> - Note that it will not end up in the newly generated block, but is necessary to compute to generate other fields. To compute this:
+<li><code>ParentWeight</code> - The parent chain&rsquo;s weight (see <a href="./#algorithms__expected_consensus__chain_selection">Chain Selection</a>).</li>
+<li><code>ParentState</code> - This is the state of the chain after all of the message from each of the <code>Parents</code> have been applied to their own <code>ParentState</code>. For more info on how to compute this, see the <a href="./#systems__filecoin_vm__interpreter">VM Interpreter - Message Invocation (Outside VM)</a>.</li>
+<li><code>ParentMessageReceipts</code> - To compute this:
 
 <ul>
-<li>Take the <code>ParentState</code> of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).</li>
-<li>For each block in the parent set, ordered by their tickets:</li>
-<li>Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.</li>
-<li>Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.</li>
-<li>It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state.</li>
-<li>TODO: define message conflicts in the state-machine doc, and link to it from here</li>
+<li>Apply the set of messages from <code>Parents</code> to the <code>ParentState</code> as described above, collecting invocation receipts as this happens.</li>
+<li>Insert them into a sharray and take its root.</li>
 </ul></li>
-<li><code>MsgRoot</code> - To compute this:
+<li><code>Epoch</code> - The block&rsquo;s epoch, derived from the <code>Parents</code> epoch and the number of epochs it took to generate this block.</li>
+<li><code>Timestamp</code> - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
+
+<ul>
+<li>the timestamp on the block corresponds to the current epoch (it is neither in the past nor in the future) as defined by the clock subsystem.</li>
+</ul></li>
+<li><code>Ticket</code> - new ticket generated from that in the prior epoch (see <a href="./#systems__filecoin_blockchain__storage_power_consensus__ticket_generation">Ticket Generation</a>).</li>
+<li><code>Miner</code> - The block producer&rsquo;s miner actor address.</li>
+<li><code>ElectionPoStVerifyInfo</code> - The byproduct of running an ElectionPoSt yielding requisite on-chain information (see <a href="./#algorithms__post__election_post">Election PoSt</a>), namely:
+
+<ul>
+<li>An array of <code>PoStCandidate</code> objects, all of which include a winning partial ticket used to run leader election.</li>
+<li><code>PoStRandomness</code> used to challenge the miner&rsquo;s sectors and generate the partial tickets.</li>
+<li>A <code>PoStProof</code> snark output to prove that the partial tickets were correctly generated.</li>
+</ul></li>
+<li><code>Messages</code> - To compute this:
 
 <ul>
 <li>Select a set of messages from the mempool to include in the block.</li>
@@ -16463,57 +16495,37 @@ Heaviest tipset at H-1 is {B0}</p>
 <li>For the secpk messages:</li>
 <li>Insert each of the secpk <code>SignedMessage</code>s into a sharray</li>
 <li>Create a <code>TxMeta</code> object and fill each of its fields as follows:</li>
-<li><code>blsMessages</code>: the root cid of the bls messages sharray</li>
-<li><code>secpkMessages</code>: the root cid of the secp messages sharray</li>
-<li>The cid of this <code>TxMeta</code> object should be used to fill the <code>MsgRoot</code> field of the block header.</li>
+<li><code>BLSMessages</code>: the root cid of the bls messages sharray</li>
+<li><code>SECPMessages</code>: the root cid of the secp messages sharray</li>
+<li>The cid of this <code>TxMeta</code> object should be used to fill the <code>Messages</code> field of the block header.</li>
 </ul></li>
 <li><code>BLSAggregate</code> - The aggregated signatures of all messages in the block that used BLS signing.</li>
-<li><code>StateRoot</code> - Apply each chosen message to the <code>ParentState</code> to get this.
-
-<ul>
-<li>Note: first apply bls messages in the order that they appear in the blsMsgs sharray, then apply secpk messages in the order that they appear in the secpkMessages sharray.</li>
-</ul></li>
-<li><code>ReceiptsRoot</code> - To compute this:
-
-<ul>
-<li>Apply the set of messages to the parent state as described above, collecting invocation receipts as this happens.</li>
-<li>Insert them into a sharray and take its root.</li>
-</ul></li>
-<li><code>Timestamp</code> - A Unix Timestamp generated at block creation. We use an unsigned integer to represent a UTC timestamp (in seconds). The Timestamp in the newly created block must satisfy the following conditions:
-
-<ul>
-<li>the timestamp on the block corresponds to the current epoch (it is neither in the past nor in the future) as defined by the clock subsystem.</li>
-</ul></li>
-<li><code>BlockSig</code> - A signature with the miner&rsquo;s private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.</li>
+<li><code>Signature</code> - A signature with the miner&rsquo;s worker account private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.</li>
 </ul>
 
-<p>An eligible miner can start by filling out <code>Parents</code>, <code>Tickets</code> and <code>ElectionProof</code> with values from the ticket checking process.</p>
+<p>An eligible miner can start by filling out <code>Parents</code>, <code>Tickets</code> and <code>ElectionPoStVerifyInfo</code>.</p>
 
 <p>Next, they compute the aggregate state of their selected parent blocks, the <code>ParentState</code>. This is done by taking the aggregate parent state of the blocks&rsquo; parent Tipset, sorting the parent blocks by their tickets, and applying each message in each block to that state. Any message whose nonce is already used (duplicate message) in an earlier block should be skipped (application of this message should fail anyway). Note that re-applied messages may result in different receipts than they produced in their original blocks, an open question is how to represent the receipt trie of this tipset&rsquo;s messages (one can think of a tipset as a &lsquo;virtual block&rsquo; of sorts).</p>
+
+<p>They gather the receipts from each above message execution into a set, merklize them, and put that root in <code>ReceiptsRoot</code>.</p>
 
 <p>Once the miner has the aggregate <code>ParentState</code>, they must apply the block reward. This is done by adding the correct block reward amount to the miner owner&rsquo;s account balance in the state tree. The reward will be spendable immediately in this block.</p>
 
 <p>Now, a set of messages is selected to put into the block. For each message, the miner subtracts <code>msg.GasPrice * msg.GasLimit</code> from the sender&rsquo;s account balance, returning a fatal processing error if the sender does not have enough funds (this message should not be included in the chain).</p>
 
-<p>They then apply the messages state transition, and generate a receipt for it containing the total gas actually used by the execution, the executions exit code, and the return value . Then, they refund the sender in the amount of <code>(msg.GasLimit - GasUsed) * msg.GasPrice</code>. In the event of a message processing error, the remaining gas is refunded to the user, and all other state changes are reverted. (Note: this is a divergence from the way things are done in Ethereum)</p>
-
-<p>Each message should be applied on the resultant state of the previous message execution, unless that message execution failed, in which case all state changes caused by that message are thrown out. The final state tree after this process will be the block&rsquo;s <code>StateRoot</code>.</p>
-
-<p>The miner merklizes the set of messages selected, and put the root in <code>MsgRoot</code>. They gather the receipts from each execution into a set, merklize them, and put that root in <code>ReceiptsRoot</code>. Finally, they set the <code>StateRoot</code> field with the resultant state.</p>
-
-<div class="notices info" >Note that the <code>ParentState</code> field from the expected consensus document is left out, this is to help minimize the size of the block header. The parent state for any given parent set should be computed by the client and cached locally.</div>
-
 <p>Finally, the miner can generate a Unix Timestamp to add to their block, to show that the block generation was appropriately delayed.</p>
 
-<p>The miner will wait until BLOCK_DELAY has passed since the latest block in the parent set was generated to timestamp and send out their block. We recommend using NTP or another clock synchronization protocol to ensure that the timestamp is correctly generated (lest the block be rejected). While this timestamp does not provide a hard proof that the block was delayed (we rely on the VDF in the ticket-chain to do so), it provides some softer form of block delay by ensuring that honest miners will reject undelayed blocks.</p>
-
-<p>Now the block is complete, all that&rsquo;s left is to sign it. The miner serializes the block now (without the signature field), takes the sha256 hash of it, and signs that hash. They place the resultant signature in the <code>BlockSig</code> field.</p>
+<p>Now the block is complete, all that&rsquo;s left is to sign it. The miner serializes the block now (without the signature field), takes the sha256 hash of it, and signs that hash. They place the resultant signature in the <code>Signature</code> field.</p>
 
 <h6 id="block-broadcast">Block Broadcast</h6>
 
 <p>An eligible miner broadcasts the completed block to the network and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!</p>
 
+<p>Miners should output their valid block as soon as it is produced, otherwise they risk other miners receiving the block after the EPOCH_CUTOFF and not including them.</p>
+
 <h5 id="block-rewards">Block Rewards</h5>
+
+<p>TODO: Rework this.</p>
 
 <p>Over the entire lifetime of the protocol, 1,400,000,000 FIL (<code>TotalIssuance</code>) will be given out to miners. The rate at which the funds are given out is set to halve every six years, smoothly (not a fixed jump like in Bitcoin). These funds are initially held by the network account actor, and are transferred to miners in blocks that they mine. Over time, the reward will eventually become close zero as the fractional amount given out at each step shrinks the network account&rsquo;s balance to 0.</p>
 
@@ -16730,8 +16742,8 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 <p>The message pool subsystem is made of two components:</p>
 
 <ul>
-<li>The message syncer <a href="./#systems__filecoin_blockchain__message_pool__message_syncer">Message Syncer</a> &ndash; which receives and propagates messages.</li>
-<li>Message storage <a href="./#systems__filecoin_blockchain__message_pool__message_storage">Message Storage</a> &ndash; which caches messages according to a given policy.</li>
+<li>The <a href="./#systems__filecoin_blockchain__message_pool__message_syncer">Message Syncer</a> &ndash; which receives and propagates messages.</li>
+<li><a href="./#systems__filecoin_blockchain__message_pool__message_storage">Message Storage</a> &ndash; which caches messages according to a given policy.</li>
 </ul>
 
 <p>TODOs:</p>
@@ -16811,7 +16823,7 @@ The Message Pool is a subsystem in the Filecoin blockchain system. The message p
 
 <h5 id="message-propagation">Message Propagation</h5>
 
-<p>Messages are propagated over the libp2p pubsub channel <code>/fil/messages</code>. On this channel, every <a href="data-structures.md#messages">serialised <code>SignedMessage</code></a> is announced.</p>
+<p>Messages are propagated over the libp2p pubsub channel <code>/fil/messages</code>. On this channel, every serialised <code>SignedMessage</code> is announced (see <a href="./#systems__filecoin_vm__message___index">Message</a>).</p>
 
 <p>Upon receiving the message, its validity must be checked: the signature must be valid, and the account in question must have enough funds to cover the actions specified. If the message is not valid it should be dropped and must not be forwarded.</p>
 
@@ -27866,6 +27878,12 @@ Response: CBOR Encoded RetrievalDealResponse Data Structure w/ Blocks</p>
 
 
 
+<p>For most objects referenced by Filecoin, a Content Identifier (CID for short) is used. Any pointer inclusions in the Filecoin spec <code>id</code> files (e.g. <code>&amp;Object</code>) denotes the CID of said object. Some objects explicitly name a CID field. The spec treats these notations interchangeably.
+This is effectively a hash value, prefixed with its hash function (multihash) as well as extra labels to inform applications about how to deserialize the given data.</p>
+
+<p>For a more detailed specification, we refer the reader to the
+<a href="https://github.com/ipld/cid">IPLD repository</a>.</p>
+
 
 
 
@@ -29322,7 +29340,7 @@ How is K selected?
 - Miners should be rewarded proportional to their power in the system
 - The system should be able to tune how many blocks are put out per epoch on expectation (hence &ldquo;expected consensus&rdquo;).</p>
 
-<p>As discussed in <a href="./#algorithms__proof_of_spacetime__election_post">Election PoSt</a>, a miner will use the challenge ticket of an ElectionPoSt to uniformly draw a value from 0 to 1 when crafting a block.</p>
+<p>As discussed in <a href="./#algorithms__post__election_post">Election PoSt</a>, a miner will use the challenge ticket of an ElectionPoSt to uniformly draw a value from 0 to 1 when crafting a block.</p>
 
 <p>The miner gets to draw one such challenge ticket per sector they have committed and must then compare the value derived from the challenge ticket against a target to determine whether they are eligible to mine. This is called finding a winning ticket.</p>
 
@@ -31086,7 +31104,9 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 
 <h4 id="high-level-api">High Level API</h4>
 
-<p>Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a ChallengeTicket any of which could yield a valid ElectionProof. The probability of scratching a winning ChallengeTicket is dependent on sector size and total storage. Miners are rewarded in proportion to the quantity of winning ChallengeTickets they generate in a given epoch, thereby incentivizing a miner to check as much of their storage as allowed in order to express their full power in a leader election.</p>
+<p>Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election. The probability of scratching a winning ChallengeTicket is dependent on sector size and total storage. Miners are rewarded in proportion to the quantity of winning ChallengeTickets they generate in a given epoch, thereby incentivizing a miner to check as much of their storage as allowed in order to express their full power in a leader election. The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.</p>
+
+<p>An election proof is generated from a given PartialTicket by Hashing it, and using that hash to generate a value in [0,1]. Specifically <code>ChallengeTicket = H(PartialTicket)/2^len(H)</code>.</p>
 
 <p>This does mean that, in a given round, a lucky miner may succeed in generating a block by proving only a single sector, but again on expectation, a miner will have to prove their sectors at every single round in order for their full power to contribute to block generation. In the event one of the miner’s sectors cannot be proven (i.e. the miner does not have access to the nodes from that sector), no tickets will be returned. In order to prevent this, a miner can declare faults on their faulty sectors to avoid having to include them in the eligible sector set. Their power will be reduced accordingly.</p>
 
@@ -31098,7 +31118,7 @@ To enable this, the prover must store <code>CommC</code> and use it to prove tha
 
 <p>The chain keeps track of the last time that a miner received and submitted a Challenge (Election or Surprise). It randomly challenges a miner to submit a surprisePoSt once per <code>ProvingPeriod</code> in the latter half of their <code>ProvingPeriod</code>. For every miner challenged, a <code>NotifyOfPoStSurpriseChallenge</code> is issued and sent as an on-chain message to surprised <code>StorageMinerActor</code>. However, if the <code>StorageMinerActor</code> is already proving a SurprisePoStChallenge (<code>IsChallenged</code> is True) or the <code>StorageMinerActor</code> has received a challenge (by Election or Surprise) within the <code>MIN_CHALLENGE_PERIOD</code> (<code>ShouldChallenge</code> is False), then the PoSt surprise notification will be ignored and return success.</p>
 
-<p>For more on these components, see <a href="./#algorithms__proof_of_spacetime__election_post">Election PoSt</a>. At a high-level though both are needed for different reasons:
+<p>For more on these components, see <a href="./#algorithms__post__election_post">Election PoSt</a>. At a high-level though both are needed for different reasons:
 - By coupling leader election and PoSt, <code>ElectionPoSt</code> ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, <code>SurprisePoSt</code> thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</p>
 
@@ -31835,12 +31855,12 @@ action like a storage deal.
 Filecoin uses signatures to verify the authenticity of the following objects (non
 exhaustive list):
 - Messages: Users authenticate their transactions to the blockchain.
-- Tickets: Miner authenticates its ticket (see <a href="mining.md">mining</a>).
+- Tickets: Miner authenticates its ticket (see <a href="./#systems__filecoin_mining__storage_mining">Storage Miner</a>).
 - Blocks: Block leader signs over all data in the block.</p>
 
 <h5 id="messages">Messages</h5>
 
-<p>To generate a signature for the <a href="data-structures.md#message"><code>Message</code></a> type,
+<p>To generate a signature for the <a href="./#systems__filecoin_vm__message___index">Message</a> type,
 first serialize it, then hash the serialized bytes with SHA256. Then, take
 the 32 byte digest output the hash and compute the signature over it.</p>
 
@@ -31961,8 +31981,7 @@ key locally from the signature rather than specify an ID of the public key.</p>
 
 <p><strong>Wire Format</strong>: Filecoin uses the standard secp256k1 signature serialization,
 as described below. For more details on how the Filecoin <code>Signature</code> type is
-serialized, see the relevant section in <a href="data-structures.md#signature">the data structures
-spec</a></p>
+serialized, see <a href="./#algorithms__crypto__signatures">Signatures</a>.</p>
 
 <pre><code>SignatureBytes = [0x30][len][0x02][r][indicator][s][indicator][recovery]
 </code></pre>
@@ -32423,41 +32442,29 @@ We describe this formatting below.</p>
 
 <p>For <a href="./#algorithms__crypto__signatures">Signatures</a> as well as <a href="./#algorithms__crypto__vrf">Verifiable Random Function</a> usage in the protocol, we define Domain Separation Tags with which we prepend random inputs.</p>
 
-<p>
+<p>The source of truth is defined below, but the currently defined DSTs are:
+- for drawing randomness from an on-chain ticket:
+    - <code>TicketDrawingDST = 1</code>
+- for generating a new random ticket:
+    - <code>TicketProductionDST = 2</code>
+- for generating randomness for running PoSt (ElectionPoSt or SurprisePoSt):
+    - <code>PoStDST = 3</code></p>
 
+<h5 id="forming-randomness-seeds">Forming Randomness Seeds</h5>
 
+<p>Different uses of randomness require randomness seeds predicated on a variety of inputs. For instance, the protocol defines the following objects (this list may not be exhaustive):
+- <code>TicketDrawingSeedInput</code> &ndash; uses ticket and epoch number
+- <code>TicketProductionSeedInput</code> &ndash; uses ticket and miner actor addr
+- <code>PoStChallengeSeedInput</code> &ndash; uses ticket and miner actor addr</p>
 
+<p>In all cases, a ticket is used as the base of randomness (see <a href="./#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>). In order to make randomness seed creation uniform, the protocol derives all such seeds in the same way, as follows (also see <a href="./#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>):</p>
+<div class="highlight"><pre class="chroma"><code class="language-text" data-lang="text">For a given randomness input object randInputObject (typically containing a random ticket from the chain and other elements such as an epoch or a miner actor address):
+buffer = Bytes{}
+buffer.append(IntToLittleEndianBytes(AppropriateDST))
+buffer.append(-1) // a flag to be used in cases where FIL might need longer randomness outputs. Currently unused
+buffer.append(CBOR_Serialization(randInputObj))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">crypto</span>
-
-<span class="kd">type</span> <span class="nx">DomainSeparationTag</span> <span class="kt">int</span>
-
-<span class="kd">const</span> <span class="p">(</span>
-	<span class="nx">DomainSeparationTag_TicketDrawing</span> <span class="nx">DomainSeparationTag</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="kc">iota</span>
-	<span class="nx">DomainSeparationTag_TicketProduction</span>
-	<span class="nx">DomainSeparationTag_PoSt</span>
-	<span class="c1">// ...
-</span><span class="c1"></span><span class="p">)</span>
-</code></pre></div>
-
-
-
-
-
+randomness = SHA256(buffer)</code></pre></div>
 
 
 
@@ -32517,22 +32524,21 @@ We describe this formatting below.</p>
 	<span class="nx">ret</span> <span class="o">:=</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nf">Randomness</span><span class="p">(</span><span class="nx">ret</span><span class="p">)</span>
 <span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">DomainSeparationTag</span> <span class="kt">int</span>
+
+<span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">DomainSeparationTag_TicketDrawing</span> <span class="nx">DomainSeparationTag</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="kc">iota</span>
+	<span class="nx">DomainSeparationTag_TicketProduction</span>
+	<span class="nx">DomainSeparationTag_PoSt</span>
+	<span class="c1">// ...
+</span><span class="c1"></span><span class="p">)</span>
 </code></pre></div>
 
 
 
 
-</p>
 
-<div class="notices todo" ><p><strong>TODO</strong>: sync with lotus about the following and accordingly, remove ot keep. It is currently not part of the
-Filecoin spec.</p>
-
-<h5 id="input-delimeters">Input Delimeters</h5>
-
-<p>As with Filecoin&rsquo;s use of hash function we also define an input delimeter to separate
-concatenated elements for input to a signature (or hash), as a byte representation of the following:
-- inputDelimeter = <code>0</code></p>
-</div>
 
 
 </div>
@@ -32728,495 +32734,9 @@ concatenated elements for input to a signature (or hash), as a byte representati
 
 
 
+<p>TODO</p>
 
-
-<h3 id="address">Address</h3>
-
-<p>An address is an identifier that refers to an actor in the Filecoin state. All <a href="actors.md">actors</a> (miner actors, the storage market actor, account actors) have an address. An address encodes information about:</p>
-
-<ul>
-<li>Network this address belongs to</li>
-<li>Type of data the address contains</li>
-<li>The data itself</li>
-<li>Checksum (depending on the type of address)</li>
-</ul>
-
-<p>For more detail, see the full <a href="./#appendix__address">address spec</a>.</p>
-
-<h3 id="block">Block</h3>
-
-<p>A block header contains information relevant to a particular point in time over which the network may achieve consensus. The block header contains:</p>
-
-<ul>
-<li>The address of the miner that mined the block</li>
-<li>A ticket associated to this block&rsquo;s creation to be used as randomness elsewhere in the protocol (see
-<a href="./#algorithms__expected_consensus__leader_election">Secret Leader Election</a> for more details)</li>
-<li>The set of parent blocks and aggregate <a href="./#algorithms__expected_consensus__chain_selection">chain weight</a> of the parents</li>
-<li>This block&rsquo;s height</li>
-<li>Merkle root of the state tree (after applying the messages &ndash; state transitions &ndash; included in this block)</li>
-<li>Merkle root of the messages (state transitions) in this block</li>
-<li>Merkle root of the message receipts in this block</li>
-<li>Timestamp</li>
-</ul>
-
-<div class="notices note" ><strong>Note:</strong> A block is functionally the same as a block header in the Filecoin protocol. While a block header contains Merkle links to the full system state, messages, and message receipts, a block can be thought of as the full set of this information (not just the Merkle roots, but rather the full data of the state tree, message tree, receipts tree, etc.). Because a full block is quite large, our chain consists of block headers rather than full blocks. We often use the terms <code>block</code> and <code>block header</code> interchangeably.</div>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Block</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// Miner is the address of the miner actor that mined this block.
-</span><span class="c1"></span>    <span class="nx">miner</span> <span class="nx">Address</span>
-
-    <span class="c1">// Tickets is a chain (possibly singleton) of tickets ending with a winning ticket
-</span><span class="c1"></span>    <span class="c1">// submitted with this block.
-</span><span class="c1"></span>    <span class="nx">tickets</span> <span class="p">[</span><span class="nx">Ticket</span><span class="p">]</span>
-
-    <span class="c1">// ElectionProof is generated from a past ticket and proves this miner is a leader
-</span><span class="c1"></span>    <span class="c1">// in this block&#39;s round.
-</span><span class="c1"></span>    <span class="nx">electionProof</span> <span class="nx">ElectionProof</span>
-
-    <span class="c1">// Parents is an array of distinct CIDs of parents on which this block was based.
-</span><span class="c1"></span>    <span class="c1">// Typically one, but can be several in the case where there were multiple winning
-</span><span class="c1"></span>    <span class="c1">// ticket-holders for a given round. The order of parent CIDs is not defined.
-</span><span class="c1"></span>    <span class="nx">parents</span> <span class="p">[</span><span class="o">&amp;</span><span class="nx">Block</span><span class="p">]</span>
-
-    <span class="c1">// ParentWeight is the aggregate chain weight of the parent set.
-</span><span class="c1"></span>    <span class="nx">parentWeight</span> <span class="nx">UInt</span>
-
-    <span class="c1">// Height is the chain height of this block.
-</span><span class="c1"></span>    <span class="nx">height</span> <span class="nx">UInt</span>
-
-    <span class="c1">// StateRoot is a CID pointer to the VM state tree after application of the state
-</span><span class="c1"></span>    <span class="c1">// transitions corresponding to this block&#39;s messages.
-</span><span class="c1"></span>    <span class="nx">stateRoot</span> <span class="o">&amp;</span><span class="nx">StateTree</span>
-
-    <span class="c1">// Messages is the set of messages included in this block. This field is the CID
-</span><span class="c1"></span>    <span class="c1">// of the TxMeta object that contains the bls and secpk signed message trees.
-</span><span class="c1"></span>    <span class="nx">messages</span> <span class="o">&amp;</span><span class="nx">TxMeta</span>
-
-    <span class="c1">// BLSAggregate is an aggregated BLS signature for all the messages in this block
-</span><span class="c1"></span>    <span class="c1">// that were signed using BLS signatures.
-</span><span class="c1"></span>    <span class="nx">blsAggregate</span> <span class="nx">Signature</span>
-
-    <span class="c1">// MessageReceipts is a set of receipts matching to the sending of the `Messages`.
-</span><span class="c1"></span>    <span class="c1">// This field is the CID of the root of a sharray of MessageReceipts.
-</span><span class="c1"></span>    <span class="nx">messageReceipts</span> <span class="o">&amp;</span><span class="p">[</span><span class="nx">MessageReceipt</span><span class="p">]</span>
-
-    <span class="c1">// The block Timestamp is used to enforce a form of block delay by honest miners.
-</span><span class="c1"></span>    <span class="c1">// Unix time UTC timestamp (in seconds) stored as an unsigned integer.
-</span><span class="c1"></span>    <span class="nx">timestamp</span> <span class="nx">Timestamp</span>
-
-    <span class="c1">// BlockSig is a signature over the hash of the entire block with the miners
-</span><span class="c1"></span>    <span class="c1">// worker key to ensure that it is not tampered with after creation
-</span><span class="c1"></span>    <span class="nx">blockSig</span> <span class="nx">Signature</span>
-<span class="p">}</span>
-
-<span class="kd">type</span> <span class="nx">TxMeta</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">blsMessages</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">Message</span><span class="p">]&lt;</span><span class="nx">Sharray</span><span class="p">&gt;</span>
-    <span class="nx">secpkMessages</span> <span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="nx">SignedMessage</span><span class="p">]&lt;</span><span class="nx">Sharray</span><span class="p">&gt;</span>
-<span class="p">}</span>
-</code></pre></div>
-  
-</div>
-
-
-<h3 id="tipset">Tipset</h3>
-
-<p>For more on Tipsets, see <a href="./#algorithms__expected_consensus___index">the Expected Consensus spec</a>. Implementations may choose not to create a Tipset data structure, instead representing its operations in terms of the underlying blocks.</p>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">TipSet</span> <span class="p">[</span><span class="o">&amp;</span><span class="nx">Block</span><span class="p">]</span>
-</code></pre></div>
-  
-</div>
-
-
-<h3 id="domain-separation-tags">Domain Separation Tags</h3>
-
-<p>We define Domain Separation Tags as follow, to enable domain separation across operations that make use of the same VRF (e.g. <code>Ticket</code> and
-<code>Post</code>).</p>
-
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Prefix</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>Ticket</td>
-<td><code>0x01</code></td>
-</tr>
-
-<tr>
-<td>Post</td>
-<td><code>0x02</code></td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="ticket">Ticket</h3>
-
-<p>A ticket contains a shared random value referenced by a particular <code>Block</code> in the Filecoin blockchain.
-Every miner must produce a new <code>Ticket</code> for each ticket used in a leader election attempt.</p>
-
-<p>To produce the ticket values,
-we use a <a href="./#algorithms__crypto__vrf">Verifiable Random Function</a> to obtain a deterministic, pseudorandom output.</p>
-
-<h4 id="ticket-comparison">Ticket Comparison</h4>
-
-<p>The ticket is represented concretely by the <code>Ticket</code> data structure.
-Whenever the Filecoin protocol refers to ticket values
-(notably in crafting <a href="./#algorithms__post___index">PoSTs</a> or running leader election),
-what is meant is that the bytes of the <code>VRFResult</code> field in the <code>Ticket</code> struct are used.
-Specifically, tickets are compared lexicographically,
-interpreting the bytes of the <code>VRFResult.Output</code> as an unsigned integer value (little-endian).</p>
-
-<h3 id="challengeticket">ChallengeTicket</h3>
-
-<p>An election proof is generated from a given PartialTicket by Hashing it, and using that hash to generate a value in [0,1]. Specifically <code>ChallengeTicket = H(PartialTicket)/2^len(H)</code>.
-Its output value is compared to a target to determine whether the miner is elected as one of the leaders and hence is eligible to produce a block for the current epoch.
-The inclusion of the <code>PartialTicket</code> in the block allows other network participants to verify that the block was mined by a valid leader. With every leader election attempt for a given ticket, (in cases where no blocks are found in a round) a miner increments the epoch value thus increasing
-block height with every leader election attempt.</p>
-
-<p>The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.</p>
-
-<h3 id="message">Message</h3>
-
-<p><code>Message</code> data structures in Filecoin describe operations that can be performed on the Filecoin VM state
-(e.g., FIL transactions between accounts).
-To facilitate the process of producing secure protocol implementations,
-we explicitly distinguish between
-<a href="./#algorithms__crypto__signatures">signed and unsigned</a> <code>Message</code> structures.</p>
-
-<p><div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Message</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="p">|</span> <span class="nx">UnsignedMessage</span> <span class="mi">0</span>
-    <span class="p">|</span> <span class="nx">SignedMessage</span> <span class="mi">1</span>
-<span class="p">}</span> <span class="c1">// representation keyed
-</span></code></pre></div>
-  
-</div>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">UnsignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">to</span> <span class="nx">Address</span>
-    <span class="nx">from</span> <span class="nx">Address</span>
-
-    <span class="c1">// When receiving a message from a user account the nonce in the message must match
-</span><span class="c1"></span>    <span class="c1">// the expected nonce in the &#34;from&#34; actor. This prevents replay attacks.
-</span><span class="c1"></span>    <span class="nx">nonce</span> <span class="nx">UInt</span>
-    <span class="nx">value</span> <span class="nx">UInt</span>
-
-    <span class="nx">gasPrice</span> <span class="nx">UInt</span>
-    <span class="nx">gasLimit</span> <span class="nx">UInt</span>
-
-    <span class="nx">method</span> <span class="nx">Uint</span>
-    <span class="nx">params</span> <span class="nx">Bytes</span>  <span class="c1">// Serialized parameters to the method.
-</span><span class="c1"></span><span class="p">}</span> <span class="c1">// representation tuple
-</span></code></pre></div>
-  
-</div>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SignedMessage</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">message</span>   <span class="nx">UnsignedMessage</span>
-    <span class="nx">signature</span> <span class="nx">Signature</span>
-<span class="p">}</span> <span class="c1">// representation tuple
-</span></code></pre></div>
-  
-</div>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">MessageReceipt</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">exitCode</span> <span class="nx">UInt</span>
-    <span class="nx">returnValue</span> <span class="nx">Bytes</span>
-    <span class="nx">gasUsed</span> <span class="nx">UInt</span>
-<span class="p">}</span> <span class="c1">// representation tuple
-</span></code></pre></div>
-  
-</div>
-</p>
-
-<h3 id="state-tree">State Tree</h3>
-
-<p>The state tree keeps track of the entire state of the <a href="./#systems__filecoin_vm">VM - Virtual Machine</a> at any given point.
-It is a map from <code>Address</code> structures to <code>Actor</code> structures, where each <code>Actor</code>
-may also contain some additional <code>ActorState</code> that is specific to a given actor
-type.</p>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">StateTree</span> <span class="kd">map</span><span class="p">[</span><span class="nx">Address</span><span class="p">]</span><span class="nx">Actor</span>
-</code></pre></div>
-  
-</div>
-
-
-<h3 id="actor">Actor</h3>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Actor</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="c1">// CID of the code object for this actor
-</span><span class="c1"></span>    <span class="nx">code</span> <span class="nx">CID</span>
-
-    <span class="c1">// Reference to the root of this actor&#39;s state
-</span><span class="c1"></span>    <span class="nx">head</span> <span class="o">&amp;</span><span class="nx">ActorState</span>
-
-    <span class="c1">// Counter of the number of messages this actor has sent
-</span><span class="c1"></span>    <span class="nx">nonce</span> <span class="nx">UInt</span>
-
-    <span class="c1">// Current Filecoin balance of this actor
-</span><span class="c1"></span>    <span class="nx">balance</span> <span class="nx">UInt</span>
-<span class="p">}</span>
-</code></pre></div>
-  
-</div>
-
-
-<h3 id="signature">Signature</h3>
-
-<p><a href="./#algorithms__crypto__signatures">Cryptographic signatures</a> in Filecoin are represented
-as byte arrays, and come with a tag that signifies what key type was used to create
-the signature.</p>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Signature</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="p">|</span> <span class="nx">Secp256k1Signature</span> <span class="mi">0</span>
-    <span class="p">|</span> <span class="nx">Bls12_381Signature</span> <span class="mi">1</span>
-<span class="p">}</span> <span class="c1">// representation byteprefix
-</span><span class="c1"></span>
-<span class="kd">type</span> <span class="nx">Secp256k1Signature</span> <span class="nx">Bytes</span>
-<span class="kd">type</span> <span class="nx">Bls12_381Signature</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-
-
-<h3 id="faultset">FaultSet</h3>
-
-<p><code>FaultSet</code> data structures are used to denote which sectors failed at which block heights.</p>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">FaultSet</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">index</span>    <span class="nx">UInt</span>
-    <span class="nx">bitField</span> <span class="nx">BitField</span>
-<span class="p">}</span>
-</code></pre></div>
-  
-</div>
-
-
-<p>In order to make the serialization more compact,
-the <code>index</code> field denotes a block height offset from the start of the corresponding
-miner&rsquo;s proving period.</p>
-
-<h3 id="basic-types">Basic Types</h3>
-
-<h4 id="cid">CID</h4>
-
-<p>For most objects referenced by Filecoin, a Content Identifier (CID for short) is used.
-This is effectively a hash value, prefixed with its hash function (multihash)
-as well as extra labels to inform applications about how to deserialize the given data.
-For a more detailed specification, we refer the reader to the
-<a href="https://github.com/ipld/cid">IPLD repository</a>.</p>
-
-<h4 id="timestamp">Timestamp</h4>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Timestamp</span> <span class="nx">UInt</span>
-</code></pre></div>
-  
-</div>
-
-
-<h4 id="publickey">PublicKey</h4>
-
-<p>The public key type is simply an array of bytes.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PublicKey</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<h4 id="bytesamount">BytesAmount</h4>
-
-<p>BytesAmount is just a re-typed Integer.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UInt</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<h4 id="peerid">PeerId</h4>
-
-<p>The serialized bytes of a libp2p peer ID.
-<div class="notices todo">
-  <strong>TODO</strong>:  Spec incomplete; take a look at <a href="https://github.com/libp2p/specs/pull/100">this PR</a>.
-</div></p>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PeerId</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-
-
-<h4 id="bitfield">Bitfield</h4>
-
-<p>Bitfields are a set encoded using a custom run length encoding: RLE+.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Bitfield</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<h4 id="sectorset">SectorSet</h4>
-
-<p>A sector set stores a mapping of sector IDs to the respective <code>commR</code>s.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SectorSet</span> <span class="kd">map</span><span class="p">[</span><span class="nx">SectorID</span><span class="p">]</span><span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<div class="notices todo">
-  <strong>TODO</strong>: 
-Improve on this; see https://github.com/filecoin-project/specs/issues/116.
-
-</div>
-
-<h4 id="sealproof">SealProof</h4>
-
-<p>SealProof is an opaque, dynamically-sized array of bytes.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SealProof</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<h4 id="postproof">PoSTProof</h4>
-
-<p>PoSTProof is an opaque, dynamically-sized array of bytes.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">PoSTProof</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<h4 id="tokenamount">TokenAmount</h4>
-
-<p>A type to represent an amount of Filecoin tokens.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">TokenAmount</span> <span class="nx">UInt</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<h4 id="sectorid">SectorID</h4>
-
-<p>Uniquely identifies a miner&rsquo;s sector.
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">SectorID</span> <span class="kt">uint64</span>
-</code></pre></div>
-  
-</div>
-</p>
-
-<h3 id="rle-bitset-encoding">RLE+ Bitset Encoding</h3>
-
-<p>RLE+ is a lossless compression format based on <a href="https://en.wikipedia.org/wiki/Run-length_encoding">RLE</a>.
-Its primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly,
-while keeping the same level of compression for large sets of contiugous bits.</p>
-
-<p>In tests it has shown to be more compact than RLE itself, as well as <a href="https://arxiv.org/pdf/1004.0403.pdf">Concise</a> and <a href="https://roaringbitmap.org/">Roaring</a>.</p>
-
-<h4 id="format">Format</h4>
-
-<p>The format consists of a header, followed by a series of blocks, of which there are three different types.</p>
-
-<p>The format can be expressed as the following <a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">BNF</a> grammar.</p>
-
-<pre><code>    &lt;encoding&gt; ::= &lt;header&gt; &lt;blocks&gt;
-      &lt;header&gt; ::= &lt;version&gt; &lt;bit&gt;
-     &lt;version&gt; ::= &quot;00&quot;
-      &lt;blocks&gt; ::= &lt;block&gt; &lt;blocks&gt; | &quot;&quot;
-       &lt;block&gt; ::= &lt;block_single&gt; | &lt;block_short&gt; | &lt;block_long&gt;
-&lt;block_single&gt; ::= &quot;1&quot;
- &lt;block_short&gt; ::= &quot;01&quot; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt;
-  &lt;block_long&gt; ::= &quot;00&quot; &lt;unsigned_varint&gt;
-         &lt;bit&gt; ::= &quot;0&quot; | &quot;1&quot;
-</code></pre>
-
-<p>An <code>&lt;unsigned_varint&gt;</code> is defined as specified <a href="https://github.com/multiformats/unsigned-varint">here</a>.</p>
-
-<h5 id="header">Header</h5>
-
-<p>The header indicates the very first bit of the bit vector to encode. This means the first bit is always
-the same for the encoded and non-encoded form.</p>
-
-<h5 id="blocks">Blocks</h5>
-
-<p>The blocks represent how many bits, of the current bit type there are. As <code>0</code> and <code>1</code> alternate in a bit vector
-the inital bit, which is stored in the header, is enough to determine if a length is currently referencing
-a set of <code>0</code>s, or <code>1</code>s.</p>
-
-<h6 id="block-single">Block Single</h6>
-
-<p>If the running length of the current bit is only <code>1</code>, it is encoded as a single set bit.</p>
-
-<h6 id="block-short">Block Short</h6>
-
-<p>If the running length is less than <code>16</code>, it can be encoded into up to four bits, which a short block
-represents. The length is encoded into a 4 bits, and prefixed with <code>01</code>, to indicate a short block.</p>
-
-<h6 id="block-long">Block Long</h6>
-
-<p>If the running length is <code>16</code> or larger, it is encoded into a varint, and then prefixed with <code>00</code> to indicate
-a long block.</p>
-
-<blockquote>
-<p><strong>Note:</strong> The encoding is unique, so no matter which algorithm for encoding is used, it should produce
-the same encoding, given the same input.</p>
-</blockquote>
-
-<h6 id="bit-numbering">Bit Numbering</h6>
-
-<p>For Filecoin, byte arrays representing RLE+ bitstreams are encoded using <a href="https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering">LSB 0</a> bit numbering.</p>
-
-<h3 id="other-considerations">Other Considerations</h3>
-
-<ul>
-<li>The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.</li>
-<li>Hashes should use a blake2b-256 multihash.</li>
-</ul>
+<p>See the <code>old_data_structures.md</code> file for portions.</p>
 
 
 </div>
@@ -34082,6 +33602,45 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>.
 
 <p>A Filecoin address is an identifier that refers to an actor in the Filecoin state. All actors (miner actors, the storage market actor, account actors) have an address. This address encodes information about the network to which an actor belongs, the specific type of address encoding, the address payload itself, and a checksum. The goal of this format is to provide a robust address format that is both easy to use and resistant to errors.</p>
 
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>address.id</code> file was not found.</i></b></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="color: #D74848"><b><i>Something's not right. The <code>address.go</code> file was not found.</i></b></p>
+
+</p>
+
 <h3 id="design-criteria">Design criteria</h3>
 
 <ol>
@@ -34128,31 +33687,6 @@ Given an array of size <code>N</code> and a fixed width of <code>W</code>.
 | 'f' or 't' |  1 byte  | n bytes | 4 bytes  |
 </code></pre></li>
 </ul>
-
-<div>
-  
-    <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">Address</span> <span class="nx">union</span> <span class="p">{</span>
-    <span class="p">|</span> <span class="nx">AddressId</span> <span class="mi">0</span>
-    <span class="p">|</span> <span class="nx">AddressSecp256k1</span> <span class="mi">1</span>
-    <span class="p">|</span> <span class="nx">AddressActor</span> <span class="mi">2</span>
-    <span class="p">|</span> <span class="nx">AddressBLS12_381</span> <span class="mi">3</span>
-<span class="p">}</span> <span class="c1">// representation byteprefix
-</span><span class="c1"></span>
-<span class="c1">// ID
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressId</span> <span class="nx">UInt</span>
-
-<span class="c1">// Blake2b-160 Hash
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressSecp256k1</span> <span class="nx">Bytes</span>
-
-<span class="c1">// Blake2b-160 Hash
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressActor</span> <span class="nx">Bytes</span>
-
-<span class="c1">// 48 byte PublicKey
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">AddressBLS12_381</span> <span class="nx">Bytes</span>
-</code></pre></div>
-  
-</div>
-
 
 <h4 id="network-prefix">Network Prefix</h4>
 
