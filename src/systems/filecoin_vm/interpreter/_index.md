@@ -54,8 +54,8 @@ The sequence of executions for a tipset is thus summarised:
 
 # Message validity and failure
 Every message in a valid block can be processed and produce a receipt (note that block validity
-implies all messages are syntactically valid and correctly signed). However, execution may
-or may not succeed, depending on the state to which the message is applied. If the execution
+implies all messages are syntactically valid -- see {{<sref message_syntax>}} -- and correctly signed).
+However, execution may or may not succeed, depending on the state to which the message is applied. If the execution
 of a message fails, the corresponding receipt will carry a non-zero exit code. 
 
 If a message fails due to a reason that can reasonably be attributed to the miner including a

@@ -20,8 +20,8 @@ Clients that use a message pool include:
 
 The message pool subsystem is made of two components:
 
-- The message syncer {{<sref message_syncer>}} -- which receives and propagates messages.
-- Message storage {{<sref message_storage>}} -- which caches messages according to a given policy.
+- The {{<sref message_syncer>}} -- which receives and propagates messages.
+- {{<sref message_storage>}} -- which caches messages according to a given policy.
 
 TODOs:
 

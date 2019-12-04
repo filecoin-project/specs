@@ -8,6 +8,7 @@ vrf: [algorithms, crypto, vrf]
 
 # blockchain
 message: [systems, filecoin_vm, message]
+message_syntax: [systems, filecoin_vm, message, message_syntax]
 sys_vm: [systems, filecoin_vm]
 vm_interpreter: [systems, filecoin_vm, interpreter]
 
@@ -38,8 +39,8 @@ block_validation: [systems, filecoin_blockchain, chainsync, block_validation]
 
 ### Message Pool
 message_pool: [systems, filecoin_blockchain, message_pool]
-message_syncer: [systems, filecoin_blockchain, message_syncer]
-message_storage: [systems, filecoin_blockchain, message_storage]
+message_syncer: [systems, filecoin_blockchain, message_pool, message_syncer]
+message_storage: [systems, filecoin_blockchain, message_pool, message_storage]
 
 # files
 

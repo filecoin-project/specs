@@ -8,6 +8,7 @@ vrf: "VRF"
 
 # blockchain
 message: "Message"
+message_syntax: "Message Syntax"
 sys_vm: "VM"
 vm_interpreter: "VM Interpreter"
 
