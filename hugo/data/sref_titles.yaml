@@ -9,6 +9,8 @@ vrf: "VRF"
 # blockchain
 message: "Message"
 sys_vm: "VM"
+vm_interpreter: "VM Interpreter"
+
 ### blockchain
 block_producer: "Block Producer"
 ### SPC
@@ -48,7 +50,7 @@ storage_miner_actor: "Storage Miner Actor"
 sector_sealer: "Sector Sealer"
 post_generator: "PoSt Generator"
 post: "Proof of Spacetime"
-election-post: "Election PoSt"
+election_post: "Election PoSt"
 
 
 # nodes

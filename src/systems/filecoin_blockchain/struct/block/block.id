@@ -15,28 +15,31 @@ type BlockHeader struct {
     Parents                [&BlockHeader]
     ParentWeight           ChainWeight
     // State
-    ParentStateTree        &st.StateTree
+    ParentState            &st.StateTree
     ParentMessageReceipts  &[&MessageReceipt]  // array-mapped trie ref
 
     // Consensus things
     Epoch                  ChainEpoch
     Timestamp              clock.UnixTime
     Ticket
-    ElectionProof
 
-    MinerAddress           addr.Address
-    ElectionPoSt           OnChainPoStVerifyInfo
+    Miner                  addr.Address
+    ElectionPoStOutput     ElectionPoStVerifyInfo
 
     // Proposed update
-    BLSAggregateSig        filcrypto.Signature
-    BLSMessageCIDs         &[&msg.UnsignedMessage]  // array-mapped trie
-    SECPMessageCIDs        &[&msg.SignedMessage]  // array-mapped trie
+    Messages               &TxMeta
+    BLSAggregate           filcrypto.Signature
 
     // Signatures
-    BlockSig               filcrypto.Signature
+    Signature              filcrypto.Signature
 
     //	SerializeSigned()            []byte
     //	ComputeUnsignedFingerprint() []
+}
+
+type TxMeta struct {
+    BLSMessages   &[&msg.UnsignedMessage]  // array-mapped trie
+    SECPMessages  &[&msg.SignedMessage]  // array-mapped trie
 }
 
 // Internal representation of a full block, with all messages.
@@ -84,8 +87,7 @@ type SoftCheckpoint Checkpoint
 type TrustedCheckpoint Checkpoint
 
 // HACK: Duplicated from posting.id (actual source)
-type OnChainPoStVerifyInfo struct {
-    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+type ElectionPoStVerifyInfo struct {
     Candidates  [PoStCandidate]
     Randomness  PoStRandomness
     Proof       PoStProof

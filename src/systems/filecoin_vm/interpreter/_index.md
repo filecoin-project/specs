@@ -4,6 +4,8 @@ statusIcon: ⚠️
 title: VM Interpreter - Message Invocation (Outside VM)
 ---
 
+{{<label vm_interpreter>}}
+
 The VM interpreter orchestrates the execution of messages from a tipset on that tipset's parent state,
 producing a new state and a sequence of message receipts. The CIDs of this new state and of the receipt
 collection are included in blocks from the subsequent epoch, which must agree about those CIDs 

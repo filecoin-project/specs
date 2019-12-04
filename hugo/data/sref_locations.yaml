@@ -9,7 +9,7 @@ vrf: [algorithms, crypto, vrf]
 # blockchain
 message: [systems, filecoin_vm, message]
 sys_vm: [systems, filecoin_vm]
-vm: [systems, filecoin_vm]
+vm_interpreter: [systems, filecoin_vm, interpreter]
 
 ### blockchain
 block_producer: [systems, filecoin_blockchain, struct]
@@ -57,7 +57,7 @@ storage_miner_actor: [systems, filecoin_mining, storage_mining, storage_miner_ac
 sector_sealer: [systems, filecoin_mining, storage_mining]
 post_generator: [systems, filecoin_mining, storage_mining]
 post: [algorithms, proof_of_spacetime]
-election-post: [algorithms, proof_of_spacetime, election_post]
+election_post: [algorithms, proof_of_spacetime, election_post]
 
 # nodes
 

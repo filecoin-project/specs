@@ -163,7 +163,7 @@ func (sms *StorageMiningSubsystem_I) GetWorkerKeyByMinerAddress(minerAddr addr.A
 
 func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
-	st := sms._getStorageMinerActorState(header.ParentStateTree(), header.MinerAddress())
+	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 
 	// 1. Check that the miner in question is currently allowed to run election
 	if !st._canBeElected(header.Epoch()) {
@@ -173,13 +173,13 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	// 2. Verify appropriate randomness
 	// TODO: fix away from BestChain()... every block should track its own chain up to its own production.
 	randomness := sms._consensus().GetPoStChallengeRand(sms._blockchain().BestChain(), header.Epoch())
-	postRandomnessInput := sector.PoStRandomness(sms._preparePoStChallengeSeed(randomness, header.MinerAddress()))
+	postRandomnessInput := sector.PoStRandomness(sms._preparePoStChallengeSeed(randomness, header.Miner()))
 
 	postRand := &filcrypto.VRFResult_I{
 		Output_: onChainInfo.Randomness(),
 	}
 
-	if !postRand.Verify(postRandomnessInput, sms.GetWorkerKeyByMinerAddress(header.MinerAddress())) {
+	if !postRand.Verify(postRandomnessInput, sms.GetWorkerKeyByMinerAddress(header.Miner())) {
 		return false
 	}
 
@@ -210,7 +210,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 
 func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo, posterAddr addr.Address) bool {
 
-	st := sms._getStorageMinerActorState(header.ParentStateTree(), header.MinerAddress())
+	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 
 	// 1. Check that the miner in question is currently being challenged
 	if !st._isChallenged() {
