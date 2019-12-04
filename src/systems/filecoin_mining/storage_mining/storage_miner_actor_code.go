@@ -695,21 +695,9 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
 	if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
-		// TODO: potentially some slashing if ProveCommitSector comes late
 
 		// TODO: remove dealIDs from PublishedDeals
-
-		// expired
-
-		TODO()
-		// TODO: perform the following cleanup elsewhere (e.g. cron?). State changes will not
-		// be committed upon abort)
-		//
-		// delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-		// UpdateRelease(rt, h, st)
-		//
-		// burn PRECOMMIT_DEPOSIT per sector
-
+		// PreCommittedSectors is cleaned up at _expirePreCommitSectors called by Cron
 		rt.Abort(
 			exitcode.UserDefinedError(exitcode.DeadlineExceeded),
 			"more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed")
@@ -827,16 +815,27 @@ func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
 func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 
 	h, st := a.State(rt)
+
+	expiredSectorNum := 0
 	for _, preCommitSector := range st.PreCommittedSectors() {
 
 		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
 
 		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-			// TODO: potentially some slashing if ProveCommitSector comes late
+			expiredSectorNum += 1
 		}
 	}
+
 	UpdateRelease(rt, h, st)
+
+	depositToBurn := actor.TokenAmount(expiredSectorNum * int(PRECOMMIT_DEPOSIT))
+
+	// send funds to BurntFundsActor
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    addr.BurntFundsActorAddr,
+		Value_: depositToBurn,
+	})
 
 }
 
