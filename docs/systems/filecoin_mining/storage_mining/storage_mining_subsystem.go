@@ -71,6 +71,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	postRandomness := sms._keyStore().WorkerKey().Impl().Generate(input).Output()
 
 	// TODO: add how sectors are actually stored in the SMS proving set
+	util.TODO()
 	provingSet := make([]sector.SectorID, 0)
 
 	candidates := sms.StorageProving().Impl().GenerateElectionPoStCandidates(postRandomness, provingSet)
@@ -79,11 +80,20 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 		return // fail to generate post candidates
 	}
 
+	// TODO Fix
+	util.TODO()
+	var currState stateTree.StateTree
 	winningCandidates := make([]sector.PoStCandidate, 0)
+	st := sms._getStorageMinerActorState(currState, sms._keyStore().MinerAddress())
 
 	for _, candidate := range candidates {
-		// TODO align on worker address
-		if sms._consensus().IsWinningPartialTicket(candidate.PartialTicket()) {
+		sectorNum := candidate.SectorID().Number()
+		sectorPower, found := st._getCurrUtilization(sectorNum)
+		if !found {
+			// panic("No sector with that ID found")
+			return
+		}
+		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
 	}
@@ -266,9 +276,21 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 	return isPoStVerified
 }
 
-func (a *StorageMinerActorCode_I) IsValidElection(onChainInfo sector.OnChainPoStVerifyInfo) bool {
-	panic("TODO")
-	return false
+func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
+	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
+
+	for _, info := range onChainInfo.Candidates() {
+		sectorNum := info.SectorID().Number()
+		sectorPower, found := st._getCurrUtilization(sectorNum)
+		if !found {
+			// panic("No sector with that ID found")
+			return false
+		}
+		if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower) {
+			return false
+		}
+	}
+	return true
 }
 
 // func (sms *StorageMiningSubsystem_I) submitPoStMessage(postSubmission poster.PoStSubmission) error {

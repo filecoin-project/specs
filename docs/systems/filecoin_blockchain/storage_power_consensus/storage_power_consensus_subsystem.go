@@ -2,9 +2,12 @@ package storage_power_consensus
 
 import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -21,35 +24,6 @@ const (
 
 func (spc *StoragePowerConsensusSubsystem_I) ValidateBlock(block block.Block_I) error {
 	panic("")
-	// minerPK := PowerTable.GetMinerPublicKey(block.MinerAddress())
-	// minerPower := PowerTable.GetMinerPower(block.MinerAddress())
-
-	// // 1. Verify miner has not been slashed and is still valid miner
-	// if minerPower <= 0 {
-	// 	return StoragePowerConsensusError("block miner not valid")
-	// }
-
-	// // 2. Verify ParentWeight
-	// if block.Weight() != computeTipsetWeight(block.Parents()) {
-	// 	return errors.New("invalid parent weight")
-	// }
-
-	// // 3. Verify Tickets
-	// if !validateTicket(block.Ticket, minerPK) {
-	// 	return StoragePowerConsensusError("ticket was invalid")
-	// }
-
-	// // 4. Verify ElectionProof construction
-	// if !ValidateElectionProof(block.Height, block.ElectionProof, block.MinerAddress) {
-	// 	return StoragePowerConsensusError("election proof was not a valid signature of the last ticket")
-	// }
-
-	// // 5. and value
-	// if !IsWinningElectionProof(block.ElectionProof, spa.GetMinerPower(), spa.GetTotalPower()) {
-	// 	return StoragePowerConsensusError("election proof was not a winner")
-	// }
-
-	// return nil
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket, pk filcrypto.VRFPublicKey, minerActorAddr addr.Address) bool {
@@ -66,25 +40,47 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(partialTicket sector.PartialTicket) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower) bool {
 
-	// TODO: Send message to SPA to get ActivePowerInSector associated with sector
-	activePowerInSector := uint64(block.StoragePower(0))
-
-	// TODO: Send message to SPA
-	totalPower := uint64(block.StoragePower(0))
-
+	// finalize the partial ticket
 	challengeTicket := block.SHA256(partialTicket)
 
-	return spc.ec().IsWinningChallengeTicket(challengeTicket, activePowerInSector, totalPower)
+	st := spc._getStoragePowerActorState(stateTree)
+	activePower := st._getActivePower()
+
+	// TODO: pull from constants
+	SAMPLE_NUM := util.UVarint(1)
+	SAMPLE_DENOM := util.UVarint(25)
+
+	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, activePower, SAMPLE_NUM, SAMPLE_DENOM)
+}
+
+// TODO: fix linking here
+var node node_base.FilecoinNode
+
+func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) StoragePowerActorState {
+	powerAddr := addr.StoragePowerActorAddr
+	actorState := stateTree.GetActorState(powerAddr)
+	substateCID := actorState.State()
+
+	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
+	if err != nil {
+		panic("TODO")
+	}
+
+	// TODO fix conversion to bytes
+	panic(substate)
+	var serializedSubstate util.Serialization
+	st, err := Deserialize_StoragePowerActorState(serializedSubstate)
+
+	if err == nil {
+		panic("Deserialization error")
+	}
+	return st
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_TICKET)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) GetElectionProofRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
-	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_RANDOMNESS)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
@@ -93,23 +89,6 @@ func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain block.Chain, epoc
 
 func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
-}
-
-func (spc *StoragePowerConsensusSubsystem_I) ValidateElectionProof(height block.ChainEpoch, electionProof block.ElectionProof, minerAddr addr.Address) bool {
-	panic("TODO")
-	// // 1. Check that ElectionProof was validated in appropriate time
-	// if height > clock.roundTime {
-	// 	return false
-	// }
-
-	// // 2. Determine that ticket was validly scratched
-	// minerPK := spc.PowerTable.GetMinerPublicKey(workerAddr)
-	// input := VRFPersonalizationElectionProof
-	// TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain, sms.block.LatestEpoch())
-	// input.append(TK.Output)
-	// input.append(height)
-
-	// return electionProof.Verify(input, minerPK)
 }
 
 func (spc *StoragePowerConsensusSubsystem_I) GetFinality() block.ChainEpoch {

@@ -4708,6 +4708,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">_getActivePower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="nf">_getInactivePower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="nf">_getUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span>
+    <span class="nf">_getCurrUtilization</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">utilization</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">found</span> <span class="kt">bool</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StorageMinerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -5034,6 +5035,12 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="nx">utilizationInfo</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_getCurrUtilization</span><span class="p">(</span><span class="nx">sectorNo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorNumber</span><span class="p">)</span> <span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">utilizationInfo</span><span class="p">,</span> <span class="nx">found</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">SectorUtilization</span><span class="p">()[</span><span class="nx">sectorNo</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nx">utilizationInfo</span><span class="p">.</span><span class="nf">CurrUtilization</span><span class="p">(),</span> <span class="nx">found</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMinerActorState_I</span><span class="p">)</span> <span class="nf">_initializeUtilizationInfo</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">deals</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">OnChainDeal</span><span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">SectorUtilizationInfo</span> <span class="p">{</span>

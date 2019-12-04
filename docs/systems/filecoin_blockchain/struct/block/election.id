@@ -14,14 +14,6 @@ type Ticket struct {
     ) bool
 }
 
-type ElectionProof struct {
-    VRFResult  filcrypto.VRFResult
-    Output     Bytes                @(cached)
-    Verify(input Bytes, pk filcrypto.VRFPublicKey) bool
-
-    ValidateSyntax() bool
-}
-
 type BytesAmount UVarint
 type StoragePower BytesAmount
 

@@ -4633,6 +4633,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">minerID</span>        <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
         <span class="nx">affectedPower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
+    <span class="nf">_getActivePower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4652,6 +4653,7 @@ https://github.com/alex-shpak/hugo-book
 
     <span class="c1">// PowerTable Operations
 </span><span class="c1"></span>    <span class="nf">GetTotalPower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">GetSectorPower</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
 
     <span class="nf">EnsurePledgeCollateralSatisfied</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">)</span>
 
@@ -4719,6 +4721,16 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getActivePower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
+    <span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">miner</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">activePower</span> <span class="p">=</span> <span class="nx">activePower</span> <span class="o">+</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">activePower</span>
+<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_slashPledgeCollateral</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerID</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
     <span class="k">if</span> <span class="nx">amount</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>

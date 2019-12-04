@@ -38,6 +38,7 @@ type StoragePowerActorState struct {
         minerID        addr.Address
         affectedPower  block.StoragePower
     ) actor.TokenAmount
+    _getActivePower() block.StoragePower
 }
 
 type StoragePowerActorCode struct {
@@ -57,6 +58,7 @@ type StoragePowerActorCode struct {
 
     // PowerTable Operations
     GetTotalPower(rt Runtime) block.StoragePower
+    GetSectorPower(rt Runtime) block.StoragePower
 
     EnsurePledgeCollateralSatisfied(rt Runtime)
 

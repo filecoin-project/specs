@@ -11,6 +11,7 @@ import storage_proving "github.com/filecoin-project/specs/systems/filecoin_minin
 import key_store "github.com/filecoin-project/specs/systems/filecoin_nodes/key_store"
 import node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 
 type StorageMiningSubsystem struct {
     FilecoinNode       node_base.FilecoinNode
@@ -66,6 +67,7 @@ type StorageMiningSubsystem struct {
     ) block.Ticket
 
     _preparePoStChallengeSeed(randomness util.Randomness, minerAddr addr.Address) util.Randomness
+    _getStorageMinerActorState(stateTree stateTree.StateTree, minerAddr addr.Address) StorageMinerActorState
 
     // call by BlockChain when a new block is produced
     OnNewBestChain()

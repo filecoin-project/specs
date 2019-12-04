@@ -4614,6 +4614,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">key_store</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&#34;</span>
 <span class="kn">import</span> <span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 <span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+<span class="kn">import</span> <span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 
 <span class="kd">type</span> <span class="nx">StorageMiningSubsystem</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">FilecoinNode</span>       <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
@@ -4669,6 +4670,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
 
     <span class="nf">_preparePoStChallengeSeed</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="nf">_getStorageMinerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">StorageMinerActorState</span>
 
     <span class="c1">// call by BlockChain when a new block is produced
 </span><span class="c1"></span>    <span class="nf">OnNewBestChain</span><span class="p">()</span>

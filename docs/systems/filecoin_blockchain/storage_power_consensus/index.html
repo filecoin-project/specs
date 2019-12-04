@@ -4615,7 +4615,6 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 </span><span class="c1"></span>    <span class="c1">// actor                StoragePowerActor
 </span><span class="c1"></span>    <span class="nx">associatedStateTree</span> <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>  <span class="c1">// TODO: remove this. should not store this here.
 </span><span class="c1"></span>
-    <span class="nf">GenerateElectionProof</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
     <span class="nf">ChooseTipsetToMine</span><span class="p">(</span><span class="nx">tipsets</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">])</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">]</span>
 
     <span class="nx">ec</span>          <span class="nx">ExpectedConsensus</span>
@@ -4625,14 +4624,12 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
-        <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
+        <span class="nx">st</span>                 <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+        <span class="nx">partialTicket</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
+        <span class="nx">sectorUtilization</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">validateElectionProof</span><span class="p">(</span>
-        <span class="nx">height</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">electionProof</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
-        <span class="nx">minerAddr</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">StoragePowerActorState</span>
 
     <span class="nf">validateTicket</span><span class="p">(</span>
         <span class="nx">tix</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
@@ -4648,9 +4645,6 @@ The Storage Power Consensus subsystem is the main interface which enables Fileco
 </span><span class="c1"></span>
     <span class="c1">// call by StorageMiningSubsystem during block production
 </span><span class="c1"></span>    <span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-
-    <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">GetElectionProofRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem in sealing sector
 </span><span class="c1"></span>    <span class="nf">GetSealRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
@@ -4839,7 +4833,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>    <span class="c1">// actor                StoragePowerActor
 </span><span class="c1"></span>    <span class="nx">associatedStateTree</span> <span class="o">&amp;</span><span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>  <span class="c1">// TODO: remove this. should not store this here.
 </span><span class="c1"></span>
-    <span class="nf">GenerateElectionProof</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
     <span class="nf">ChooseTipsetToMine</span><span class="p">(</span><span class="nx">tipsets</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">])</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">]</span>
 
     <span class="nx">ec</span>          <span class="nx">ExpectedConsensus</span>
@@ -4849,14 +4842,12 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>    <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">error</span>
 
     <span class="nf">IsWinningPartialTicket</span><span class="p">(</span>
-        <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
+        <span class="nx">st</span>                 <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+        <span class="nx">partialTicket</span>      <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span>
+        <span class="nx">sectorUtilization</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
-    <span class="nf">validateElectionProof</span><span class="p">(</span>
-        <span class="nx">height</span>         <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
-        <span class="nx">electionProof</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span>
-        <span class="nx">minerAddr</span>      <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">StoragePowerActorState</span>
 
     <span class="nf">validateTicket</span><span class="p">(</span>
         <span class="nx">tix</span>             <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span>
@@ -4872,9 +4863,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>
     <span class="c1">// call by StorageMiningSubsystem during block production
 </span><span class="c1"></span>    <span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
-
-    <span class="c1">// call by StorageMiningSubsystem during block production
-</span><span class="c1"></span>    <span class="nf">GetElectionProofRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
 
     <span class="c1">// call by StorageMiningSubsystem in sealing sector
 </span><span class="c1"></span>    <span class="nf">GetSealRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
@@ -4916,9 +4904,12 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <span class="kn">import</span> <span class="p">(</span>
 	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+	<span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
 	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+	<span class="nx">node_base</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_nodes/node_base&#34;</span>
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+	<span class="nx">stateTree</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
 
@@ -4935,36 +4926,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 </span><span class="c1"></span>
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">ValidateBlock</span><span class="p">(</span><span class="nx">block</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Block_I</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-	<span class="c1">// minerPK := PowerTable.GetMinerPublicKey(block.MinerAddress())
-</span><span class="c1"></span>	<span class="c1">// minerPower := PowerTable.GetMinerPower(block.MinerAddress())
-</span><span class="c1"></span>
-	<span class="c1">// // 1. Verify miner has not been slashed and is still valid miner
-</span><span class="c1"></span>	<span class="c1">// if minerPower &lt;= 0 {
-</span><span class="c1"></span>	<span class="c1">// 	return StoragePowerConsensusError(&#34;block miner not valid&#34;)
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>
-	<span class="c1">// // 2. Verify ParentWeight
-</span><span class="c1"></span>	<span class="c1">// if block.Weight() != computeTipsetWeight(block.Parents()) {
-</span><span class="c1"></span>	<span class="c1">// 	return errors.New(&#34;invalid parent weight&#34;)
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>
-	<span class="c1">// // 3. Verify Tickets
-</span><span class="c1"></span>	<span class="c1">// if !validateTicket(block.Ticket, minerPK) {
-</span><span class="c1"></span>	<span class="c1">// 	return StoragePowerConsensusError(&#34;ticket was invalid&#34;)
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>
-	<span class="c1">// // 4. Verify ElectionProof construction
-</span><span class="c1"></span>	<span class="c1">// if !ValidateElectionProof(block.Height, block.ElectionProof, block.MinerAddress) {
-</span><span class="c1"></span>	<span class="c1">// 	return StoragePowerConsensusError(&#34;election proof was not a valid signature of the last ticket&#34;)
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>
-	<span class="c1">// // 5. and value
-</span><span class="c1"></span>	<span class="c1">// if !IsWinningElectionProof(block.ElectionProof, spa.GetMinerPower(), spa.GetTotalPower()) {
-</span><span class="c1"></span>	<span class="c1">// 	return StoragePowerConsensusError(&#34;election proof was not a winner&#34;)
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>
-	<span class="c1">// return nil
-</span><span class="c1"></span><span class="p">}</span>
+<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">validateTicket</span><span class="p">(</span><span class="nx">ticket</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Ticket</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 	<span class="nx">randomness1</span> <span class="o">:=</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">spc</span><span class="p">.</span><span class="nf">blockchain</span><span class="p">().</span><span class="nf">BestChain</span><span class="p">(),</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">blockchain</span><span class="p">().</span><span class="nf">LatestEpoch</span><span class="p">())</span>
@@ -4980,25 +4942,47 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">IsWinningPartialTicket</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">,</span> <span class="nx">partialTicket</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PartialTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
 
-	<span class="c1">// TODO: Send message to SPA to get ActivePowerInSector associated with sector
-</span><span class="c1"></span>	<span class="nx">activePowerInSector</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+	<span class="c1">// finalize the partial ticket
+</span><span class="c1"></span>	<span class="nx">challengeTicket</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">partialTicket</span><span class="p">)</span>
 
-	<span class="c1">// TODO: Send message to SPA
-</span><span class="c1"></span>	<span class="nx">totalPower</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+	<span class="nx">st</span> <span class="o">:=</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span><span class="p">)</span>
+	<span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePower</span><span class="p">()</span>
 
-	<span class="nx">challengeTicket</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">SHA256</span><span class="p">(</span><span class="nx">partialTicket</span><span class="p">)</span>
+	<span class="c1">// TODO: pull from constants
+</span><span class="c1"></span>	<span class="nx">SAMPLE_NUM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="nx">SAMPLE_DENOM</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">UVarint</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">activePowerInSector</span><span class="p">,</span> <span class="nx">totalPower</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">spc</span><span class="p">.</span><span class="nf">ec</span><span class="p">().</span><span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">,</span> <span class="nx">sectorUtilization</span><span class="p">,</span> <span class="nx">activePower</span><span class="p">,</span> <span class="nx">SAMPLE_NUM</span><span class="p">,</span> <span class="nx">SAMPLE_DENOM</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// TODO: fix linking here
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">node</span> <span class="nx">node_base</span><span class="p">.</span><span class="nx">FilecoinNode</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">_getStoragePowerActorState</span><span class="p">(</span><span class="nx">stateTree</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nx">StateTree</span><span class="p">)</span> <span class="nx">StoragePowerActorState</span> <span class="p">{</span>
+	<span class="nx">powerAddr</span> <span class="o">:=</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">StoragePowerActorAddr</span>
+	<span class="nx">actorState</span> <span class="o">:=</span> <span class="nx">stateTree</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">powerAddr</span><span class="p">)</span>
+	<span class="nx">substateCID</span> <span class="o">:=</span> <span class="nx">actorState</span><span class="p">.</span><span class="nf">State</span><span class="p">()</span>
+
+	<span class="nx">substate</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">node</span><span class="p">.</span><span class="nf">LocalGraph</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ipld</span><span class="p">.</span><span class="nf">CID</span><span class="p">(</span><span class="nx">substateCID</span><span class="p">))</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="c1">// TODO fix conversion to bytes
+</span><span class="c1"></span>	<span class="nb">panic</span><span class="p">(</span><span class="nx">substate</span><span class="p">)</span>
+	<span class="kd">var</span> <span class="nx">serializedSubstate</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
+	<span class="nx">st</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">Deserialize_StoragePowerActorState</span><span class="p">(</span><span class="nx">serializedSubstate</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Deserialization error&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">st</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetTicketProductionRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_TICKET</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetElectionProofRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_RANDOMNESS</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetSealRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
@@ -5008,23 +4992,6 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetPoStChallengeRand</span><span class="p">(</span><span class="nx">chain</span> <span class="nx">block</span><span class="p">.</span><span class="nx">Chain</span><span class="p">,</span> <span class="nx">epoch</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="o">-</span> <span class="nx">SPC_LOOKBACK_POST</span><span class="p">)</span>
 <span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">ValidateElectionProof</span><span class="p">(</span><span class="nx">height</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span><span class="p">,</span> <span class="nx">electionProof</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ElectionProof</span><span class="p">,</span> <span class="nx">minerAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-	<span class="c1">// // 1. Check that ElectionProof was validated in appropriate time
-</span><span class="c1"></span>	<span class="c1">// if height &gt; clock.roundTime {
-</span><span class="c1"></span>	<span class="c1">// 	return false
-</span><span class="c1"></span>	<span class="c1">// }
-</span><span class="c1"></span>
-	<span class="c1">// // 2. Determine that ticket was validly scratched
-</span><span class="c1"></span>	<span class="c1">// minerPK := spc.PowerTable.GetMinerPublicKey(workerAddr)
-</span><span class="c1"></span>	<span class="c1">// input := VRFPersonalizationElectionProof
-</span><span class="c1"></span>	<span class="c1">// TK := storagePowerConsensus.GetElectionProofSeed(sms.CurrentChain, sms.block.LatestEpoch())
-</span><span class="c1"></span>	<span class="c1">// input.append(TK.Output)
-</span><span class="c1"></span>	<span class="c1">// input.append(height)
-</span><span class="c1"></span>
-	<span class="c1">// return electionProof.Verify(input, minerPK)
-</span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">spc</span> <span class="o">*</span><span class="nx">StoragePowerConsensusSubsystem_I</span><span class="p">)</span> <span class="nf">GetFinality</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
 	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
@@ -5045,7 +5012,7 @@ newRandomness = VRF_miner(H(TicketProdDST || index || Serialization(pastTicket, 
 
 <h3 id="repeated-leader-election-attempts">Repeated Leader Election attempts</h3>
 
-<p>In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to craft a new valid <code>ElectionProof</code> and trying again.
+<p>In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to find a new winning <code>PartialTicket</code> and trying again.
 Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch&rsquo;s appropriate time.</p>
 </article>
 

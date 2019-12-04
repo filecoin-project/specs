@@ -10,6 +10,16 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
+func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
+	activePower := block.StoragePower(0)
+
+	for _, miner := range st.PowerTable() {
+		activePower = activePower + miner.ActivePower()
+	}
+
+	return activePower
+}
+
 func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID addr.Address, amount actor.TokenAmount) actor.TokenAmount {
 	if amount < 0 {
 		rt.AbortArgMsg("negative amount.")

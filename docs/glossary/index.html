@@ -4681,11 +4681,7 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="height">Height</h2>
 
-<p><code>Height</code> and <code>round</code> are synonymous and used interchangeably in this spec.</p>
-
-<p><code>Height</code> refers to the number of tickets generated between this <code>TipSet</code> and the genesis block (height 0), counting only the tickets of the block in a TipSet whose final ticket &ndash; the one generated alongside the <code>ElectionProof</code> &ndash; is the smallest.</p>
-
-<p>If a <code>TipSet</code> contains multiple blocks, each block in the TipSet will have the same <code>height</code>. Put another way, there is a new <code>round</code> of leader election attempts at each <code>height</code>. Typically, such an attempt will find a single leader. If a single leader is found, that leader can generate a single block. If multiple leaders are found, they can each generate multiple blocks in the given round. If no leader is found, no block is generated (but a ticket is).</p>
+<p><code>Height</code> and <code>epoch</code> are synonymous and used interchangeably in this spec.</p>
 
 <h2 id="leader">Leader</h2>
 
