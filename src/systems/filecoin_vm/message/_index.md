@@ -19,6 +19,7 @@ for the gas units consumed by a message's execution (including all nested messag
 gas price they determine. A block producer chooses which messages to include in a block and is
 rewarded according to each message's gas price and consumption, forming a market.
 
+{{<label message_syntax>}}
 # Message syntax validation
 
 A syntactically invalid message must not be transmitted, retained in a message pool, or
