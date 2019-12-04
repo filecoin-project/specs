@@ -15,6 +15,7 @@ type SealedSectorCID ipld.CID
 type SectorNumber UInt
 
 type FaultSet CompactSectorSet
+type StorageFaultType int
 
 type SectorUtilizationInfo struct {
     DealExpirationAMT  deal.DealExpirationAMT

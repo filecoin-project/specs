@@ -233,8 +233,9 @@ func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
 
 	// @params dealIDs []deal.DealID activeDealIDs
 	processDealPaymentParam := make([]util.Serialization, 1)
-	panic("TODO: serialize arguments")
-
+	for _, dealID := range activeDealIDs {
+		processDealPaymentParam = append(processDealPaymentParam, deal.Serialize_DealID(dealID))
+	}
 	Release(rt, h, st)
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
@@ -472,8 +473,10 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 	// @param dealIDs []deal.DealID
 	// @param faultType sector.StorageFaultType
 	processDealSlashParam := make([]util.Serialization, 2)
-	panic("TODO: serialize arguments")
-
+	for _, dealID := range dealIDs {
+		processDealSlashParam = append(processDealSlashParam, deal.Serialize_DealID(dealID))
+	}
+	processDealSlashParam = append(processDealSlashParam, sector.Serialize_StorageFaultType(faultType))
 	Release(rt, h, st)
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
@@ -494,12 +497,13 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 
 	}
 
-	Release(rt, h, st)
-
 	// @param affectedPower block.StoragePower
 	// @param faultType sector.StorageFaultType
 	slashPledgeParams := make([]util.Serialization, 2)
-	panic("TODO: serialize arguments")
+	slashPledgeParams = append(slashPledgeParams, block.Serialize_StoragePower(affectedPower))
+	slashPledgeParams = append(slashPledgeParams, sector.Serialize_StorageFaultType(faultType))
+
+	Release(rt, h, st)
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
@@ -549,9 +553,12 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	// @param sectorSize util.UVarint
 	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
 	getPieceInfoParams := make([]util.Serialization, 2)
-	panic("TODO: serialize arguments")
+	getPieceInfoParams = append(getPieceInfoParams, util.SerializeUVarint(sectorSize))
+	for _, dealID := range onChainInfo.DealIDs() {
+		getPieceInfoParams = append(getPieceInfoParams, deal.Serialize_DealID(dealID))
+	}
 
-	Release(rt, h, st) // if no modifications made; or
+	Release(rt, h, st)
 
 	getPieceInfosReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
@@ -580,7 +587,7 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 
 	// @param address addr.Address info.Worker()
 	getActorIDParams := make([]util.Serialization, 1)
-	panic("TODO: serialize arguments")
+	getActorIDParams = append(getActorIDParams, addr.Serialize_Address(info.Worker()))
 
 	getActorIDReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.InitActorAddr,
@@ -637,7 +644,9 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 
 	// @param dealIDs []deal.DealID info.DealIDs()
 	params := make([]util.Serialization, 1)
-	panic("TODO: serialize arguments")
+	for _, dealID := range info.DealIDs() {
+		params = append(params, deal.Serialize_DealID(dealID))
+	}
 
 	Release(rt, h, st)
 
@@ -722,17 +731,27 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 	// Activate storage deals, abort if activation failed
 	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
 	activateDealsParams := make([]util.Serialization, 1)
-	panic("TODO: serialize arguments")
+	for _, dealID := range onChainInfo.DealIDs() {
+		activateDealsParams = append(activateDealsParams, deal.Serialize_DealID(dealID))
+	}
+
+	UpdateRelease(rt, h, st)
+
 	activateDealsReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
 		Method_: market.Method_StorageMarketActor_ActivateDeals,
 		Params_: activateDealsParams,
 	})
 
-	_ = activateDealsReceipt.ReturnValue()
-	panic("TODO: deserialize return values")
+	h, st = a.State(rt)
 
-	var deals []deal.OnChainDeal
+	activateDealsRet := activateDealsReceipt.ReturnValue()
+	deals := make([]deal.OnChainDeal, len(activateDealsRet))
+	onchainDeal, err := deal.Deserialize_OnChainDeal(activateDealsRet)
+	if err != nil {
+		rt.AbortStateMsg("Failed to deserialize OnChainDeal")
+	}
+	deals = append(deals, onchainDeal)
 	initialUtilization := st._initializeUtilizationInfo(rt, deals)
 	lastDealExpiration := initialUtilization.DealExpirationAMT().Impl().LastDealExpiration()
 
@@ -776,6 +795,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// now remove SectorNumber from PreCommittedSectors (processed)
 	delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
+
 	UpdateRelease(rt, h, st)
 
 	return rt.SuccessReturn()
