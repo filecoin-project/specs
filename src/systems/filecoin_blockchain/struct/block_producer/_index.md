@@ -48,12 +48,7 @@ To create a block, the eligible miner must compute a few fields:
 
 - `Parents` - the CIDs of the parent blocks.
 - `ParentWeight` - The parent chain's weight (see {{<sref chain_selection>}}).
-- `ParentState` - This is the state of the chain after all of the message from each of the `Parents` have been applied to their own `ParentState`. To compute this:
-  - Take the `ParentState` of one of the blocks in the chosen parent set (invariant: this is the same value for all blocks in a given parent set).
-  - For each block in the parent set, ordered by their tickets:
-    - Apply each message in the block to the parent state, in order. If a message was already applied in a previous block, skip it.
-    - Transaction fees are given to the miner of the block that the first occurance of the message is included in. If there are two blocks in the parent set, and they both contain the exact same set of messages, the second one will receive no fees.
-    - It is valid for messages in two different blocks of the parent set to conflict, that is, A conflicting message from the combined set of messages will always error.  Regardless of conflicts all messages are applied to the state.
+- `ParentState` - This is the state of the chain after all of the message from each of the `Parents` have been applied to their own `ParentState`. For more info on how to compute this, see the {{<sref vm_interpreter>}}.
 - `ParentMessageReceipts` - To compute this:
   - Apply the set of messages from `Parents` to the `ParentState` as described above, collecting invocation receipts as this happens.
   - Insert them into a sharray and take its root.
@@ -79,7 +74,7 @@ To create a block, the eligible miner must compute a few fields:
     - `SECPMessages`: the root cid of the secp messages sharray
   - The cid of this `TxMeta` object should be used to fill the `Messages` field of the block header.
 - `BLSAggregate` - The aggregated signatures of all messages in the block that used BLS signing.
-- `Signature` - A signature with the miner's private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
+- `Signature` - A signature with the miner's worker account private key (must also match the ticket signature) over the entire block. This is to ensure that nobody tampers with the block after it propagates to the network, since unlike normal PoW blockchains, a winning ticket is found independently of block generation.
 
 An eligible miner can start by filling out `Parents`, `Tickets` and `ElectionPoStVerifyInfo`.
 
@@ -99,7 +94,7 @@ Now the block is complete, all that's left is to sign it. The miner serializes t
 
 An eligible miner broadcasts the completed block to the network and assuming everything was done correctly, the network will accept it and other miners will mine on top of it, earning the miner a block reward!
 
-Miners will need to output their valid block as soon as it is produced, otherwise they risk other miners receiving the block after the EPOCH_CUTOFF and not including them.
+Miners should output their valid block as soon as it is produced, otherwise they risk other miners receiving the block after the EPOCH_CUTOFF and not including them.
 
 # Block Rewards
 

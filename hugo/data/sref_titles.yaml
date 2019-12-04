@@ -9,6 +9,8 @@ vrf: "VRF"
 # blockchain
 message: "Message"
 sys_vm: "VM"
+vm_interpreter: "VM Interpreter"
+
 ### blockchain
 block_producer: "Block Producer"
 ### SPC
