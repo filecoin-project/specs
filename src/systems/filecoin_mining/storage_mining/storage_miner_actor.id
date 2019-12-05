@@ -69,6 +69,7 @@ type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 // map from SectorNumber to amout of storage in active deals
 type SectorUtilizationAMT {sector.SectorNumber: sector.SectorUtilizationInfo}
 
+// Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits that are not yet returned or burned
 type StorageMinerActorState struct {
     PreCommittedSectors     PreCommittedSectorsAMT
     StagedCommittedSectors  StagedCommittedSectorAMT
