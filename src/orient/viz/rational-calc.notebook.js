@@ -18,8 +18,19 @@ combos = [wrapperVariant, wrapper, stackedReplicas]
 
 
 solved_many = (await solve_many(combos)).map(d => d[0])
+// solved_manys = (await solve_manys(combos)).flat()
 
-md`Graphs`
+md`#### Vars that matter`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'decoding_time_parallel',
+  'porep_time_parallel',
+  'porep_proof_size',
+  'epost_time_parallel',
+], [])
+
+md`#### Graphs`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
@@ -30,9 +41,12 @@ table_constraints(solved_many, [
   'stacked_layers',
   'expander_parents',
   'drg_parents',
+  'windows',
+  'window_size_mib',
+  'sector_size_gib',
 ], [])
 
-md`Encoding time`
+md`#### Encoding time`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
@@ -40,7 +54,7 @@ table_constraints(solved_many, [
   'encoding_time_parallel',
 ], [])
 
-md`PoRep`
+md`#### PoRep`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
@@ -49,24 +63,30 @@ table_constraints(solved_many, [
   'porep_time'
 ], [])
 
-md`PoSt`
+md`#### PoSt`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'post_proof_size',
   'post_snark_constraints',
   'post_time',
-  'post_data_access'
+  'post_time_parallel',
+  'post_inclusions_time',
+  'post_inclusions_time_parallel',
+  'post_data_access',
+  'post_data_access_parallel'
 ], [])
 
-md`EPoSt`
+md`#### EPoSt`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'epost_time',
-  'post_inclusions_time',
+  'epost_time_parallel',
   'epost_inclusions_time',
-  'epost_data_access'
+  'epost_inclusions_time_parallel',
+  'epost_data_access',
+  'epost_data_access_parallel'
 ], [])
 // report_from_result(solved_many[1], combos[1])
 
@@ -151,6 +171,7 @@ md`#### Hardware Config`
 
 rig = ({
   "rig_cores": 16,
+  "rig_snark_parallelization": 2,
   "rig_malicious_cost_per_year": 2.5,
   "rig_ram_gib": 32,
   "rig_storage_latency": 0.003,
@@ -254,7 +275,7 @@ function solve(json) {
   })
 }
 
-orientServer = 'http://127.0.0.1:8888/solve'
+orientServer = 'http://127.0.0.1:8888'
 
 md`### Orientable`
 
@@ -348,3 +369,4 @@ function flatten(items) {
 md`### Imports`
 
 d3 = require('d3')
+vl = require('@observablehq/vega-lite')
