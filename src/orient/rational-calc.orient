@@ -195,7 +195,7 @@ ProofOfSpacetime:
     // the remaining can be done in parallel
     // Similar in spirit to:
     // min(porep_snark_partition_time, porep_snark_time / snarrk_parallelization)
-    post_snark_time_parallel = post_snark_partition_time + (post_snark_time - post_snark_partition_time) / (rig_snark_parallelization - 1)
+    post_snark_time_parallel = post_snark_partition_time + (post_snark_time - post_snark_partition_time) / (rig_snark_parallelization)
 
 ProofOfReplication:
   Security:
@@ -426,7 +426,7 @@ ProofOfReplication:
     // the remaining can be done in parallel
     // Similar in spirit to:
     // min(porep_snark_partition_time, porep_snark_time / snarrk_parallelization)
-    porep_snark_time_parallel = porep_snark_partition_time + (porep_snark_time - porep_snark_partition_time) / (rig_snark_parallelization - 1)
+    porep_snark_time_parallel = porep_snark_partition_time + (porep_snark_time - porep_snark_partition_time) / (rig_snark_parallelization)
 
     Constraints (WindowEncoding):
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
@@ -577,7 +577,7 @@ Filecoin:
       epost_inclusions_time_parallel = epost_inclusions_time / rig_cores
 
       epost_time = epost_data_access + post_ticket_gen + epost_inclusions_time + post_snark_time
-      epost_time_parallel = epost_data_access_parallel + post_ticket_gen + epost_inclusions_time_parallel
+      epost_time_parallel = epost_data_access_parallel + post_ticket_gen + epost_inclusions_time_parallel + post_snark_time_parallel
 
 Rationality:
   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
