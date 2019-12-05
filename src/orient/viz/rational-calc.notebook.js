@@ -3,7 +3,7 @@ md`# Proofs Tradeoff Report`
 viewof config = {
   const form = formToObject(html`
 <form>
-  <div><input type=range name=post_lambda min=1 max=128 step=1 value=10> <i>post_lambda</i></div>
+  <div><input type=range name=post_lambda min=1 max=128 step=1 value=40> <i>post_lambda</i></div>
 </form>`)
   return form
 }
@@ -14,11 +14,17 @@ combos = [wrapperVariant, wrapper, stackedReplicas]
   .map(d => [
     Object.assign({}, constants, d, stackedChungParams, config),
     Object.assign({}, constants, d, stackedSDRParams, config)
-   ]).flat()
+  ]).flat()
 
 
 solved_many = (await solve_many(combos)).map(d => d[0])
+  .map(d => {
+    d.construction = `${d.graph_name}_${d.proof_name}`
+    return d
+  })
 // solved_manys = (await solve_manys(combos)).flat()
+
+
 
 md`#### Vars that matter`
 
@@ -89,14 +95,40 @@ table_constraints(solved_many, [
   'epost_data_access',
   'epost_data_access_parallel'
 ], [])
-// report_from_result(solved_many[1], combos[1])
 
+ report_from_result(solved_many[4], combos[4])
+
+md`---`
+
+md`## Graphs`
+md`### Impact of \`chung_delta\``
+queries = [...Array(8)].map((_, i) => {
+  return Object.assign(
+    {},
+    constants,
+    stackedReplicas,
+    stackedChungParams,
+    { chung_delta: 0.01 * (i+1) },
+    { window_size_mib: 1024 * 32 }
+  )
+})
+
+delta_solved = (await solve_many(queries)).map(d => d[0])
+
+graph_constraints(delta_solved, 'chung_delta', 'stacked_layers', [])
+graph_constraints(delta_solved, 'chung_delta', 'porep_challenges', [])
+graph_constraints(delta_solved, 'chung_delta', 'post_challenges', [])
+graph_constraints(delta_solved, 'chung_delta', 'decoding_time_parallel', [])
+graph_constraints(delta_solved, 'chung_delta', 'porep_time_parallel', [])
+graph_constraints(delta_solved, 'chung_delta', 'porep_proof_size', [])
+graph_constraints(delta_solved, 'chung_delta', 'epost_time_parallel', [])
 md`---`
 
 md`### Parameters`
 
 base = ({
   "porep_lambda": 10,
+  "post_mtree_layers_cached": 25,
   "post_lambda": 10,
   "sector_size_gib": 32,
   "window_size_mib": 64,
@@ -110,14 +142,12 @@ md`#### Graph`
 stackedChungParams = ({
   "graph_name": "Chung",
   "!StackedChungParameters": true,
-  "!StackedSDRParameters": false,
   "chung_delta": 0.01,
   "expander_parents": 16
 })
 
 stackedSDRParams = ({
   "graph_name": "SDR",
-  "!StackedChungParameters": false,
   "!StackedSDRParameters": true,
   "sdr_delta": 0.01
 })
@@ -158,7 +188,6 @@ filecoin = ({
   "filecoin_storage_capacity_eib": 10,
   "node_size": 32,
   "polling_time": 15,
-  "post_mtree_layers_cached": 25,
   "cost_amax": 1,
   "hashing_amax": 2,
   "spacegap": 0.2,
@@ -334,7 +363,7 @@ function formToObject (form) {
   Array.from(form.querySelectorAll('input')).forEach(el => {
     el.parentNode.append(html`<output name=output_${el.name} style="font: 14px Menlo, Consolas, monospace; margin-left: 0.5em;"></output>`)
   })
-  
+
 
   form.oninput = () => {
     form.value = Array.from(form.elements)
@@ -384,3 +413,28 @@ th {
   font-size: 10px;
 }
 </style>`
+
+graph_constraints = (solutions, x, y, group_by) => {
+  const results = multiple_solutions(solutions, group_by, [x, y])
+  return vl({
+    "title": `Plotting:  ${x} vs ${y}`,
+    "width": 600,
+    "data": {"values": results},
+    "mark": {"type": "line"},
+    "encoding": {
+      "x": {
+        "field": x,
+        "type": "quantitative",
+      },
+      "y": {
+        "field": y,
+        "type": "quantitative",
+      },
+      "color": {
+        "field": "name",
+        "type": "nominal",
+        "scale": {"scheme": "category10"}
+      },
+    },
+  })
+}

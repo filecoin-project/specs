@@ -49,12 +49,14 @@ Utils:
   describe(secs_in_month, "Number of seconds in a month")
   describe(secs_in_year, "Number of seconds in a year")
   describe(secs_in_day, "Number of seconds in a day")
+  describe(secs_in_min, "Number of seconds in a minute")
   describe(b_in_eib, "Number of bytes in a EiB")
   describe(b_in_pib, "Number of bytes in a PiB")
   describe(b_in_tib, "Number of bytes in a TiB")
   describe(b_in_gib, "Number of bytes in a GiB")
   describe(b_in_mib, "Number of bytes in a MiB")
   describe(b_in_kib, "Number of bytes in a KiB")
+  describe(gib_in_tib, "Number of GiB in a TiB")
   describe(gb_to_gib, "Ratio between GB and GiB")
   describe(mb_to_mib, "Ratio between MB and MiB")
 
@@ -63,10 +65,12 @@ Utils:
   b_in_tib = (1024 * 1024 * 1024 * 1024)
   b_in_gib = (1024 * 1024 * 1024)
   b_in_mib = (1024 * 1024)
+  gib_in_tib = 1024
   b_in_kib = 1024
   secs_in_month = (24 * 60 * 60 * 30)
   secs_in_year = (24  * 60 * 60 * 365)
   secs_in_day = (24 * 60 * 60)
+  secs_in_min = (60)
   cid_size = 32 + 1 + 1 + 1
   gb_to_gib = (1024 * 1024 * 1024) / (1000 * 1000 * 1000)
   mb_to_mib = (1024 * 1024) / (1000 * 1000)
@@ -224,9 +228,11 @@ ProofOfReplication:
       describe(window_nodes, "Number of nodes in a window")
       describe(window_size, "Size of a window", bytes)
       describe(window_size_mib, "Size of a window", mib)
+      describe(window_size_gib, "Size of a window", mib)
       describe(windows, "Number of windows in a sector")
 
       window_size = window_size_mib * b_in_mib 
+      window_size = window_size_gib * b_in_gib 
       windows = sector_size / window_size
       window_nodes = nodes / windows
 
@@ -253,6 +259,7 @@ ProofOfReplication:
 
   Time:
     describe(porep_time, "Time to seal a sector (PoRep proof)", secs)
+    describe(porep_time_mins, "Time to seal a sector (PoRep proof)", mins)
     describe(porep_time_parallel, "Time to seal a sector (PoRep proof) with parallelization", secs)
     describe(porep_proof_gen, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium)", secs)
     describe(porep_proof_gen_parallel, "Time to generate a PoRep proof (SNARK, witness generation, loading data from storage medium) in parallel", secs)
@@ -261,6 +268,7 @@ ProofOfReplication:
     porep_proof_gen_parallel = porep_snark_time_parallel
 
     porep_time = porep_proof_gen + porep_commit_time + encoding_time
+    porep_time_mins = porep_time / secs_in_min
     porep_time_parallel = porep_proof_gen_parallel + porep_commit_time_parallel + encoding_time_parallel
 
   Size:
@@ -330,7 +338,7 @@ ProofOfReplication:
 
     encoding_time = encoding_window_time * windows
 
-    encoding_window_time = (window_nodes * graph_parents) * kdf_time * stacked_layers
+    encoding_window_time = window_nodes * (graph_parents * kdf_time) * stacked_layers
 
     ParallelEncoding (StackedSDRParameters):
       encoding_time_parallel = encoding_window_time + ((windows - 1) * encoding_window_time) / rig_cores
@@ -353,15 +361,23 @@ ProofOfReplication:
     describe(window_read_time_parallel, "Time to read a window from storage unit in parallel", secs)
     describe(decoding_time, "Time to decode a sector", secs)
     describe(decoding_time_parallel, "Time to decode a sector in parallel", secs)
+    describe(decoding_first_node_time, "Time to decode the first node in a sector", secs)
+    describe(decoding_first_node_time_parallel, "Time to decode the first node in a sector in parallel", secs)
+
+    // This scales down encoding time by one layer
 
     Decoding (StackedReplicas):
       // Decoding in StackedReplicas: read the window output and decode it
       window_read_time = window_size_mib / rig_storage_read_mibs
       window_read_time_parallel = window_read_time / rig_storage_parallelization
       decoding_time = encoding_window_time + window_read_time
+
       // Note: this is an upperbound, it can be lower in theory min(time, disk access)
       decoding_time_parallel = encoding_window_time_parallel + window_read_time_parallel
 
+      decoding_first_node_time = encoding_window_time * ((stacked_layers - 1) / stacked_layers)
+      decoding_first_node_time_parallel = encoding_window_time_parallel * ((stacked_layers - 1) / stacked_layers)
+      
     Decoding (WrappingVariant):
       // Decoding in WrappingVariant: read the window output and decode them
       window_read_time = window_size_mib / rig_storage_read_mibs
@@ -382,6 +398,7 @@ ProofOfReplication:
     describe(porep_snark_constraints, "Constraints for a PoRep")
     describe(porep_snark_partitions, "Number of partitions of a PoRep proof")
     describe(porep_snark_time, "Time to generate a PoRep SNARK proof", secs)
+    describe(porep_snark_time_mins, "Time to generate a PoRep SNARK proof", mins)
     describe(porep_snark_time_parallel, "Time to compute a PoRep snark in parallel")
     describe(porep_snark_size, "Size of a PoRep proof", bytes)
     describe(porep_snark_size_kib, "Size of a PoRep proof", kib)
@@ -429,6 +446,7 @@ ProofOfReplication:
     porep_snark_size = porep_snark_partitions * snark_size
     porep_snark_size_kib = porep_snark_size / b_in_kib
     porep_snark_time = snark_constraint_time * porep_snark_constraints
+    porep_snark_time_mins = porep_snark_time / secs_in_min 
     porep_snark_partition_time = snark_constraint_time * porep_snark_constraints
     // Parallelization calculation: it must take at least the time for a single snark
     // the remaining can be done in parallel
@@ -500,6 +518,14 @@ Filecoin:
 
   filecoin_block_time = polling_time
   blocks_in_a_year = (secs_in_year / filecoin_block_time) * ec_e
+
+  Onboarding:
+    describe(onboard_gib_time, "Time to onboard 1 GiB in the network", secs)
+    describe(onboard_tib_time, "Time to onboard 1 TiB in the network", secs)
+    describe(onboard_tib_time_days, "Time to onboard 1 TiB in the network", days)
+    onboard_gib_time = (1 / sector_size_gib) * porep_time
+    onboard_tib_time = onboard_gib_time * gib_in_tib
+    onboard_tib_time_days = onboard_tib_time / secs_in_day 
 
   Storage:
     describe(filecoin_sectors, "Number of sectors in the Filecoin DSN")
