@@ -112,8 +112,8 @@ type StorageMinerActorState struct {
     _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) [deal.DealID]
     _initializeUtilizationInfo(rt Runtime, deals [deal.OnChainDeal]) sector.SectorUtilizationInfo
 
-    _getActivePower()              (block.StoragePower, error)
-    _getInactivePower(rt Runtime)  block.StoragePower
+    _getActivePower()    (block.StoragePower, error)
+    _getInactivePower()  (block.StoragePower, error)
     _safeGetUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
     _getUtilizationInfo(sectorNo sector.SectorNumber) (sector.SectorUtilizationInfo, error)
     _getPreCommitDepositReq(rt Runtime) actor.TokenAmount

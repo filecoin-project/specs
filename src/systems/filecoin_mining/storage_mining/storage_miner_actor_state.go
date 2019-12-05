@@ -98,7 +98,7 @@ func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePow
 	return activePower, nil
 }
 
-func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StoragePower {
+func (st *StorageMinerActorState_I) _getInactivePower() (block.StoragePower, error) {
 	var inactivePower = block.StoragePower(0)
 
 	// iterate over sectorNo in CommittedSectors, RecoveringSectors, and FailingSectors
@@ -106,11 +106,14 @@ func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StorageP
 	inactiveSectorSet := inactiveProvingSet.Extend(st.SectorTable().FailingSectors())
 
 	for _, sectorNo := range inactiveSectorSet.SectorsOn() {
-		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
+		utilizationInfo, err := st._getUtilizationInfo(sectorNo)
+		if err != nil {
+			return block.StoragePower(0), err
+		}
 		inactivePower += utilizationInfo.CurrUtilization()
 	}
 
-	return inactivePower
+	return inactivePower, nil
 }
 
 // move Sector from Active/Failing

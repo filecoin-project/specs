@@ -24,22 +24,20 @@ The above involves a number of steps to putting on and maintaining online storag
 
 ## Storage States
 
-When managing their storage sectors as part of Filecoin mining, storage providers will account for where in the mining cycle their sectors are. For instance, has a sector been committed? Does it need a new PoSt?
+When managing their storage {{<sref sector "sectors">}}  as part of Filecoin mining, storage providers will account for where in the mining cycle their sectors are. For instance, has a sector been committed? Does it need a new PoSt? Most of these operations happen as part of cycles of chain epochs called `Proving Period`s each of which yield high confidence that every miner in the chain has proven their power (see {{<sref election_post>}}).
 
-Through this cycle, sectors will fall into either a miner's:
-- *PreCommitted Sectors*: New sectors to be committed using PoRep
-- `Proving Set`: Committed sectors to be proven over time using PoSts
-  - Sectors can be faulted by the miner itself (`Declared Faults`).
-- `Fault Set`: Committed sectors that have failed to be proven.
-  - Fault recovery allows sectors to return to the `Proving Set`.
+Through most of this cycle, sectors will be part of the miner's `Proving Set`. This is the set of sectors that the miners are supposed to generate proofs against. It includes:
+- `Committed Sectors` which have an associated PoRep but have but yet to generate a PoSt, 
+- `Active Sectors` which have successfully been proven and are used in {{<sref storage_power_consensus>}} (SPC), and
+- `Recovering Sectors` which were faulted and are poised to recover through a new PoSt.
 
-Through the above workflows, Filecoin {{<sref sector "Sectors">}} (or Storage more generally) can be describede as beeing in the following states:
+Sectors in the `Proving Set` can be faulted and marked as `Failing` by the miner itself declaring a fault (`Declared Faults`), or through automatic fault detection by the network using on-chain data (`Detected Faults`).
 
-- *Not-on-Fil*: This includes *Precommitted sectors* that have yet to be proven (and do not account for storage in Filecoin).
-- **Active**: This includes sectors in the `Proving Set`.
-- **Inactive**: This includes sectors in the `Fault Set` (i.e. through `Declared Faults`) and faults detected by the system (`Detected Faults`) which render all of a miner's storage inactive.
+A sector that is in the `Failing` state for three consecutive `Proving Period`s will be terminated (`Terminated Faults`) meaning its data will be deemed unrecoverable by PoSt and the sector will have to be SEALed once more (as part of PoRep).
 
-All of these states end up affecting both a miner's ability to serve as a storage provider in the Filecoin Storage Market, and their ability to participate in Filecoin consensus through Storage Power Consensus (see {{<sref storage_power>}}). We illustrate this below.
+Through the above workflows, Filecoin (or Storage more generally) can more generally be described as being **Active**, or **Inactive** (taking together `Committed` and `Recovering` sectors). Specifically, active storage is used in SPC (and in-deal active storage counts toward {{<sref storage_power>}}) whereas inactive storage is not. Both active and inactive storage is tracked by the system and affect a miner's ability to serve as a storage provider in the Filecoin Storage Market. 
+
+We illustrate these states below.
 
 {{< readfile file="storage_mining_subsystem.id" code="true" lang="go" >}}
 

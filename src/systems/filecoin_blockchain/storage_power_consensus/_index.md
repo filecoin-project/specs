@@ -30,6 +30,7 @@ We must distinguish between both types of "miners" (storage and block miners). {
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
 
+{{<label storage_power>}}
 ## On Power
 
 Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called "Storage Power") as follows:
@@ -38,8 +39,9 @@ Per the above, we also clearly distinguish putting storage on-chain from gaining
 
 Thereafter, power can be either *active* or *inactive* as defined in {{<sref storage_mining_subsystem>}}.
 
-In-deal or not does not determine whether power is active or inactive. Power has to come from active in-deal data. Active Power comes from deal data in Active sectors (and hence the deals are also active). Inactive Power comes from data in Committed, Recovering and Failing sectors. Miners still need to maintain pledge collateral for Inactive Power.
+It is important to remember that storage contributing to power and storage state are orthogonal notions. Specifically, power comes from storage being used in live-deals in active sectors (as opposed to non-deal active storage or in-deal inactive storage).
 
+Miners need to maintain pledge collateral for both active and inactive in-deal storage.
 
 {{<label tickets>}}
 ## Tickets

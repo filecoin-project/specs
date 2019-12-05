@@ -177,7 +177,10 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 	if err != nil {
 		rt.AbortStateMsg(err.Error())
 	}
-	inactivePower := st._getInactivePower(rt)
+	inactivePower, err := st._getInactivePower()
+	if err != nil {
+		rt.AbortStateMsg(err.Error())
+	}
 
 	// power report in processPowerReportParam
 	_ = &spc.PowerReport_I{
