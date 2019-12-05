@@ -1,11 +1,34 @@
 md`# Proofs Tradeoff Report`
 
-starting_assignments = Object.assign({}, base, constraints, filecoin, bench, rig, wrapperVariant, stackedChungParams)
+viewof config = {
+  const form = formToObject(html`
+<form>
+  <div><input type=range name=post_lambda min=1 max=128 step=1 value=8> <i>post_lambda</i></div>
+</form>`)
+  return form
+}
+
+constants = Object.assign({}, base, constraints, filecoin, bench, rig)
+
+combos = [wrapperVariant, wrapper, stackedReplicas]
+  .map(d => [
+    Object.assign({}, constants, d, stackedChungParams, config),
+    Object.assign({}, constants, d, stackedSDRParams, config)
+   ]).flat()
 
 
-solved_many = solve_many([starting_assignments, starting_assignments])
+solved_many = (await solve_many(combos)).map(d => d[0])
 
-table_constraints(solved_many, ['porep_proof_size', 'post_proof_size'], [])
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'encoding_time',
+  'encoding_time_parallel',
+  'porep_proof_size',
+  'post_proof_size'
+], [])
+
+report_from_result(solved_many[1], combos[1])
 
 md`---`
 
@@ -24,6 +47,7 @@ md`### Constants`
 md`#### Graph`
 
 stackedChungParams = ({
+  "graph_name": "Chung",
   "!StackedChungParameters": true,
   "!StackedSDRParameters": false,
   "chung_delta": 0.01,
@@ -31,6 +55,7 @@ stackedChungParams = ({
 })
 
 stackedSDRParams = ({
+  "graph_name": "SDR",
   "!StackedChungParameters": false,
   "!StackedSDRParameters": true,
   "sdr_delta": 0.01
@@ -38,7 +63,8 @@ stackedSDRParams = ({
 
 md`#### Proofs`
 
-wrapping = ({
+wrapper = ({
+  "proof_name": "wrapping",
   "!ElectionWithFallbackPoSt": true,
   "!SectorEncoding": true,
   "!VectorR": true,
@@ -46,6 +72,7 @@ wrapping = ({
 })
 
 wrapperVariant = ({
+  "proof_name": "wrappingVariant",
   "!ElectionWithFallbackPoSt": true,
   "!SectorEncoding": true,
   "!VectorR": true,
@@ -53,6 +80,7 @@ wrapperVariant = ({
 })
 
 stackedReplicas = ({
+  "proof_name": "stackedReplicas",
   "!ElectionWithFallbackPoSt": true,
   "!SectorEncoding": true,
   "!VectorR": true,
@@ -144,8 +172,28 @@ function solve_multiple(json) {
   })
 }
 
-async function solve_many(json) {
-  return await Promise.all(json.map(j => solve(j)))
+function solve_manys(json) {
+  return fetch('http://localhost:8888/solve-many', {
+    body: JSON.stringify(json),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    method: 'POST'
+  }).then(res => {
+    return res.json()
+  }).then(res => {
+    return res.flat().map(d => {
+      const results = {}
+      Object.keys(res[0])
+        .filter(d => !d.includes('%'))
+        .map(d => {
+          results[d] = res[0][d]
+        })
+      return results
+    })
+  })
+}
+
+function solve_many(json) {
+  return Promise.all(json.map(j => solve(j)))
 }
 
 function solve(json) {
@@ -216,6 +264,46 @@ table_constraints = (solutions, filter, group_by, sort_by) => {
 md`### Utils`
 
 _f = (d) => typeof d == 'number' || !Number.isNaN(+d) ? d3.format('0.3~f')(d) : d
+
+function formToObject (form) {
+  // Array.from(form.children).forEach(el => {
+  //   el.append(html`<span>hey</span>`)
+  // })
+  Array.from(form.querySelectorAll('input')).forEach(el => {
+    el.parentNode.append(html`<output name=output_${el.name} style="font: 14px Menlo, Consolas, monospace; margin-left: 0.5em;"></output>`)
+  })
+  
+
+  form.oninput = () => {
+    form.value = Array.from(form.elements)
+      .reduce(function(map, _, i) {
+        if (form.elements[i].name.substr(0,6) !== 'output') {
+          map[form.elements[i].name] = form.elements[i].valueAsNumber
+        }
+        return map;
+      }, {});
+    
+    Object.keys(form.value).forEach(k => { form[`output_${k}`].value = form[k].value })
+  }
+
+  form.oninput()
+  
+  return form
+}
+
+function flatten(items) {
+  const flat = [];
+
+  items.forEach(item => {
+    if (Array.isArray(item)) {
+      flat.push(...flatten(item));
+    } else {
+      flat.push(item);
+    }
+  });
+
+  return flat;
+}
 
 md`### Imports`
 
