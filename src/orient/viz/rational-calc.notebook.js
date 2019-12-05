@@ -122,6 +122,7 @@ graph_constraints(delta_solved, 'chung_delta', 'decoding_time_parallel', [])
 graph_constraints(delta_solved, 'chung_delta', 'porep_time_parallel', [])
 graph_constraints(delta_solved, 'chung_delta', 'porep_proof_size', [])
 graph_constraints(delta_solved, 'chung_delta', 'epost_time_parallel', [])
+graph_constraints(delta_solved, 'chung_delta', 'onboard_tib_time_days', [])
 md`---`
 
 md`### Parameters`
@@ -437,4 +438,70 @@ graph_constraints = (solutions, x, y, group_by) => {
       },
     },
   })
+}
+
+Plotly = require("https://cdn.plot.ly/plotly-latest.min.js")
+
+plot3d('chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
+
+plot3d = (solutions, x, y, z) =>  {
+  const rows = delta_solved
+
+  var zData = rows.map(d => {
+    return [d[x], d[y], d[z]]
+  });
+
+  var data = [{
+    z: zData,
+    type: 'surface'
+  }];
+
+  var layout = {
+    title: `${x} vs ${y} ${z}`,
+    autosize: false,
+    width: width * 0.7,
+    height: width * 0.7,
+    scene: {
+      xaxis: {
+        title:{
+          text: x,
+          font: {
+            family: 'Courier New, monospace',
+            size: 18,
+            color: '#7f7f7f'
+          }
+        }
+      },
+      yaxis: {
+        title:{
+          text: y,
+          font: {
+            family: 'Courier New, monospace',
+            size: 18,
+            color: '#7f7f7f'
+          }
+        }
+      },
+      zaxis: {
+        title:{
+          text: z,
+          font: {
+            family: 'Courier New, monospace',
+            size: 18,
+            color: '#7f7f7f'
+          }
+        }
+      }
+    },
+    margin: {
+      l: 65,
+      r: 50,
+      b: 65,
+      t: 90,
+    }
+  };
+
+  const div = DOM.element('div');
+  Plotly.newPlot(div, data, layout);
+  return div;
 }
