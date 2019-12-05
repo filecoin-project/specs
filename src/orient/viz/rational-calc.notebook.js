@@ -275,7 +275,7 @@ function solve(json) {
   })
 }
 
-orientServer = `http://${window.location.hostname}:8888`
+orientServer = `http://${window.location.hostname}:8000`
 
 md`### Orientable`
 
