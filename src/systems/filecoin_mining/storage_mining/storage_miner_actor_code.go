@@ -627,11 +627,7 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 	h, st := a.State(rt)
 
 	msgValue := rt.ValueReceived()
-
-	// TODO: move this to Construct
-	minerInfo := st.Info()
-	sectorSize := minerInfo.SectorSize()
-	depositReq := actor.TokenAmount(uint64(PRECOMMIT_DEPOSIT_PER_BYTE) * sectorSize)
+	depositReq := st._getPreCommitDepositReq(rt)
 
 	if msgValue < depositReq {
 		rt.AbortFundsMsg("sm.PreCommitSector: insufficient precommit deposit.")
@@ -790,7 +786,7 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// now remove SectorNumber from PreCommittedSectors (processed)
 	delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-
+	depositReq := st._getPreCommitDepositReq(rt)
 	UpdateRelease(rt, h, st)
 
 	// return deposit requirement to sender
@@ -829,8 +825,7 @@ func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 		}
 	}
 
-	depositToBurn := actor.TokenAmount(expiredSectorNum * int(PRECOMMIT_DEPOSIT))
-
+	depositToBurn := st._getPreCommitDepositReq(rt)
 	UpdateRelease(rt, h, st)
 
 	// send funds to BurntFundsActor
