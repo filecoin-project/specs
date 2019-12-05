@@ -59,7 +59,7 @@ At a high level, `ChainSync` does the following:
 
 # libp2p Network Protocols
 
-As a networking-heavy protocol, `ChainSync` makes heavy use of `libp2p`. In particular, we use two sets of protocols:
+As a networking-heavy protocol, `ChainSync` makes heavy use of `libp2p`. In particular, we use three sets of protocols:
 
 - **`libp2p.PubSub` a family of publish/subscribe protocols to propagate recent `Blocks`.**
   The concrete protocol choice impacts `ChainSync`'s effectiveness, efficiency, and security dramatically.
@@ -72,21 +72,28 @@ As a networking-heavy protocol, `ChainSync` makes heavy use of `libp2p`. In part
   The set of peers we initially connect to may completely dominate our awareness of other peers, and therefore all state.
   We use a union of `PeerDiscovery` protocols as each by itself is not secure or appropriate for users' threat models.
   The union of these provides a pragmatic and effective solution.
+  Discovery protocols marked as **required** MUST be included in implementations and will be provided by implementation teams.  Protocols marked as **optional** MAY be provided by implementation teams but can be built independently by third parties to augment bootstrap security.
+- **`libp2p.DataTransfer` a family of protocols for transfering data**
+  Filecoin Nodes must run `libp2p.Graphsync`.
 
 More concretely, we use these protocols:
 
 - **`libp2p.PeerDiscovery`**
   - **(required)** `libp2p.BootstrapList` a protocol that uses a persistent and user-configurable list of semi-trusted
     bootstrap peers. The default list includes a set of peers semi-trusted by the Filecoin Community.
-  - **(required)** `libp2p.Gossipsub` a pub/sub protocol that -- as a side-effect -- disseminates peer information
-  - **(optional/TODO)** `libp2p.PersistentPeerstore` a connectivity component that keeps persistent information about peers
+  - **(required)** `libp2p.KademliaDHT` a dht protocol that enables random queries across the entire network  
+  - **(required)** `libp2p.Gossipsub` a pub/sub protocol that includes "prune peer exchange" by default, disseminating peer info as part of operation
+  - **(optional)** `libp2p.PersistentPeerstore` a connectivity component that keeps persistent information about peers
     observed in the network throughout the lifetime of the node. This is useful because we resume and continually
     improve Bootstrap security.
-  - **(optional/TODO)** `libp2p.DNSDiscovery` to learn about peers via DNS lookups to semi-trusted peer aggregators
-  - **(optional/TODO)** `libp2p.HTTPDiscovery` to learn about peers via HTTP lookups to semi-trusted peer aggregators
-  - **(optional)** `libp2p.KademliaDHT` a dht protocol that enables random queries across the entire network
+  - **(optional)** `libp2p.DNSDiscovery` to learn about peers via DNS lookups to semi-trusted peer aggregators
+  - **(optional)** `libp2p.HTTPDiscovery` to learn about peers via HTTP lookups to semi-trusted peer aggregators
+  - **(optional)** `libp2p.PEX` a general use peer exchange protocol distinct from pubsub peer exchange for 1:1 adhoc peer exchange
 - **`libp2p.PubSub`**
-  - **(required)** `libp2p.Gossipsub` the concrete `libp2p.PubSub` protocol `ChainSync` uses.
+  - **(required)** `libp2p.Gossipsub` the concrete `libp2p.PubSub` protocol `ChainSync` uses
+- **`libp2p.DataTransfer`**
+  - **(required)** `libp2p.Graphsync` the data transfer protocol nodes must support for providing blockchain and user data
+  - **(optional)** `BlockSync` a blockchain data transfer protocol that can be used by some nodes
 
 # Subcomponents
 
@@ -338,25 +345,14 @@ State Machine:
 - `ChainSync` delays syncing `Messages` until they are needed. Much of the structure of the partial chains can
   be checked and used to make syncing decisions without fetching the `Messages`.
 
-{{<label block_validation>}}
 ## Progressive Block Validation
 
+See {{<sref block_validation>}} for complete collection of block validation rules
 - Blocks can be validated in progressive stages, in order to minimize resource expenditure.
 - Validation computation is considerable, and a serious DOS attack vector.
 - Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.
 - `ChainSync` SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by `FinalityTipset`, or when `ChainSync` is under significant resource load.
 - It is key to note that any block received after the `ROUND_CUTOFF` time must be automatically discarded by the miner until the start of the next epoch.
-
-- **Progressive Stages of Block Validation**
-  - _(TODO: move this to blockchain/Block section)_
-  - **BV0 - Syntactic Validation**: Validate data structure packing and ensure correct typing.
-  - **BV1 - Light Consensus State Checks**: Validate `b.ChainWeight`, `b.ChainEpoch`, `b.MinerAddress`, `b.Timestamp`, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at `b.ChainEpoch - consensus.LookbackParameter`. Eg Weight and Epoch have well defined valid ranges, and `b.MinerAddress`
-  must exist in the lookback state). This requires some chain state, enough to establish plausibility levels of each of these values. A node should be able to estimate valid ranges for `b.ChainEpoch` based on the `LastTrustedCheckpoint`. `b.ChainWeight` is easy if some of the relatively recent chain is available, otherwise hard.
-  - **BV2 - Signature Validation**: Verify `b.BlockSig` is correct.
-  - **BV3 - Verify ElectionPoSt**: Verify `b.ElectionPoStOutput` was correct generated and yielded winning `PartialTickets`.
-  - **BV4 - Verify Ancestry links to chain**: Verify ancestry links back to trusted blocks. If the ancestry forks off before finality, or does not connect at all, it is a bad block.
-  - **BV4 - Verify MessageSigs**: Verify the signatures on messages
-  - **BV5 - Verify StateTree**: Verify the application of `b.Parents.Messages()` correctly produces `b.StateTree` and `b.MessageReceipts`
 - These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.
 
 Notes:

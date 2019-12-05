@@ -11,6 +11,7 @@ message: "Message"
 message_syntax: "Message Syntax"
 sys_vm: "VM"
 vm_interpreter: "VM Interpreter"
+block: "Block"
 
 ### blockchain
 block_producer: "Block Producer"
