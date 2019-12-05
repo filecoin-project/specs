@@ -442,11 +442,9 @@ graph_constraints = (solutions, x, y, group_by) => {
 
 Plotly = require("https://cdn.plot.ly/plotly-latest.min.js")
 
-plot3d('chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
+plot3d(delta_solved, 'chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
 
-plot3d = (solutions, x, y, z) =>  {
-  const rows = delta_solved
-
+plot3d = (rows, x, y, z) =>  {
   var zData = rows.map(d => {
     return [d[x], d[y], d[z]]
   });
