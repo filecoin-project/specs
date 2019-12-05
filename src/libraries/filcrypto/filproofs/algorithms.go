@@ -468,7 +468,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflineProof, sealSeed sector.SealSeed, randomness sector.InteractiveSealRandomness, commD Commitment, commR sector.SealedSectorCID) bool {
 	nodeSize := int(sdr.NodeSize())
 	windowCount := int(sdr.WindowCount())
-	windowSize := int(sdr.Cfg().SealCfg().SectorSize() / UInt(sdr.WindowCount())) // TOOD: Make this a function.
+	windowSize := int(UInt(sdr.Cfg().SealCfg().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
 	expander := sdr.Expander()
