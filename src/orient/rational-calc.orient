@@ -446,7 +446,7 @@ ProofOfReplication (StackedSDRParameters):
 
   sdr_eps = spacegap
 
-  stacked_layers = layers_b // TODO max(layers_a, layers_b) + 1
+  stacked_layers = sdr_layers_b // TODO max(layers_a, layers_b) + 1
   sdr_layers_a = (0.68 - sdr_eps + 4 * sdr_delta) / (0.12 - sdr_delta) + 2
   sdr_layers_b = (log2(1 / (3 * (sdr_eps - 4 * sdr_delta)))) + 0.24 / (0.12 - sdr_delta) + 1
   sdr_layers_c = (log2(2 / (1 + 3 * (sdr_eps - 5 * sdr_delta)))) + (0.57 - sdr_eps + 3 * sdr_delta) / (0.12 - sdr_delta) + 1
