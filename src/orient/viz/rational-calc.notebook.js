@@ -258,7 +258,7 @@ function solve_many(json) {
 }
 
 function solve(json) {
-  return fetch('http://localhost:8888/solve', {
+  return fetch(orientServer + '/solve', {
     body: JSON.stringify(json),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     method: 'POST'
