@@ -25,7 +25,7 @@ Rig:
   describe(rig_storage_read_mbs, "Sequential read speed (MB/s)")
   describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
 
-  rig_storage_read_mibs = rig_storage_read_mbs * to_i
+  rig_storage_read_mibs = rig_storage_read_mbs * mb_to_mib
   rig_storage_min = rig_storage_min_tib * b_in_tib
   rig_sectors_min = rig_storage_min / sector_size
   rig_storage_parallelization_min = epost_data_access / polling_time
@@ -55,7 +55,8 @@ Utils:
   describe(b_in_gib, "Number of bytes in a GiB")
   describe(b_in_mib, "Number of bytes in a MiB")
   describe(b_in_kib, "Number of bytes in a KiB")
-  describe(to_i, "Ratio between GB and GiB")
+  describe(gb_to_gib, "Ratio between GB and GiB")
+  describe(mb_to_mib, "Ratio between MB and MiB")
 
   b_in_eib = (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
   b_in_pib = (1024 * 1024 * 1024 * 1024 * 1024)
@@ -67,7 +68,8 @@ Utils:
   secs_in_year = (24  * 60 * 60 * 365)
   secs_in_day = (24 * 60 * 60)
   cid_size = 32 + 1 + 1 + 1
-  to_i = 1024/1000
+  gb_to_gib = (1024 * 1024 * 1024) / (1000 * 1000 * 1000)
+  mb_to_mib = (1024 * 1024) / (1000 * 1000)
 
 ProofOfSpacetime:
   // post_vanilla_size = node_size * (log2(nodes) + 1) * post_challenges
@@ -452,7 +454,7 @@ ProofOfReplication (StackedSDRParameters):
 
   sdr_eps = spacegap
 
-  stacked_layers = sdr_layers_b // TODO max(layers_a, layers_b) + 1
+  stacked_layers = sdr_layers_a // TODO max(layers_a, layers_b) + 1
   sdr_layers_a = (0.68 - sdr_eps + 4 * sdr_delta) / (0.12 - sdr_delta) + 2
   sdr_layers_b = (log2(1 / (3 * (sdr_eps - 4 * sdr_delta)))) + 0.24 / (0.12 - sdr_delta) + 1
   sdr_layers_c = (log2(2 / (1 + 3 * (sdr_eps - 5 * sdr_delta)))) + (0.57 - sdr_eps + 3 * sdr_delta) / (0.12 - sdr_delta) + 1
@@ -603,7 +605,7 @@ Rationality:
       describe(hash_gb_per_second, "GB that can be hashed per second")
       describe(hash_gib_per_second, "GiB that can be hashed per second")
 
-      hash_gib_per_second = hash_gb_per_second * to_i
+      hash_gib_per_second = hash_gb_per_second * gb_to_gib
       nodes_per_second = hash_gib_per_second / kdf_hash_size_gib
       nodes_per_year = nodes_per_second * secs_in_year 
       cost_node_encoding = rig_malicious_cost_per_year / nodes_per_year 
@@ -615,6 +617,6 @@ Rationality:
       describe(cost_storage_sector_polling_time, "Cost of storage for `polling_time`")
       describe(extra_storage_time, "Time for which an honest user must be storing a file beyond the challenge period")
 
-      cost_gib_per_month = cost_gb_per_month * to_i
+      cost_gib_per_month = cost_gb_per_month * gb_to_gib
       cost_storage_gibs = cost_gib_per_month / secs_in_month 
       cost_storage_sector_polling_time = cost_storage_gibs * (sector_size_gib * (polling_time + extra_storage_time))

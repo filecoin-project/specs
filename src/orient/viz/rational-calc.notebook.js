@@ -21,6 +21,7 @@ solved_many = (await solve_many(combos)).map(d => d[0])
 // solved_manys = (await solve_manys(combos)).flat()
 
 md`#### Vars that matter`
+
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
@@ -343,12 +344,11 @@ function formToObject (form) {
         }
         return map;
       }, {});
-    
+
     Object.keys(form.value).forEach(k => { form[`output_${k}`].value = form[k].value })
   }
 
   form.oninput()
-  
   return form
 }
 
@@ -370,3 +370,17 @@ md`### Imports`
 
 d3 = require('d3')
 vl = require('@observablehq/vega-lite')
+
+md`### Styles`
+
+html`<style>
+.markdown-body table td, .markdown-body table t {
+  padding: 4px !important;
+}
+table {
+  font-size: 12px
+}
+th {
+  font-size: 10px;
+}
+</style>`
