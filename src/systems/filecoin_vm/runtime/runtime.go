@@ -20,10 +20,16 @@ var EnsureErrorCode = exitcode.EnsureErrorCode
 var SystemError = exitcode.SystemError
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
+// This should be set per network
+var Name = "FilecoinMainnet"
 
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
 	IMPL_FINISH()
 	panic("")
+}
+
+func NetworkName() string {
+	return Name
 }
 
 // ActorCode is the interface that all actor code types should satisfy.

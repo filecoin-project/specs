@@ -59,6 +59,7 @@ func (a *InitActorCode_I) Constructor(rt Runtime) InvocOutput {
 	st := &InitActorState_I{
 		AddressMap_: map[addr.Address]addr.ActorID{}, // TODO: HAMT
 		NextID_:     addr.ActorID(addr.FirstNonSingletonActorId),
+		NetworkName_: vmr.NetworkName(),
 	}
 	UpdateRelease(rt, h, st)
 	return rt.ValueReturn(nil)
