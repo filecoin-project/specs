@@ -1,6 +1,5 @@
 package actor
 
-import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import util "github.com/filecoin-project/specs/util"
 
@@ -11,18 +10,12 @@ type Serialization = util.Serialization
 const (
 	MethodSend        = MethodNum(0)
 	MethodConstructor = MethodNum(1)
-	MethodCron        = MethodNum(2)
 
 	// TODO: remove this once canonical method numbers are finalized
 	MethodPlaceholder = MethodNum(-(1 << 30))
 )
 
 func (st *ActorState_I) CID() ipld.CID {
-	panic("TODO")
-}
-
-// Note: may be nil if actor has no public key
-func (st *ActorState_I) GetSignaturePublicKey() filcrypto.PublicKey {
 	panic("TODO")
 }
 

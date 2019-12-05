@@ -5,6 +5,10 @@ import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/e
 import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 
+const (
+	Method_CronActor_EpochTick = actor.MethodPlaceholder + iota
+)
+
 func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 	// Nothing. intentionally left blank.
 	return rt.SuccessReturn()
@@ -33,7 +37,7 @@ func (a *CronActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, param
 		rt.Assert(len(params) == 0)
 		return a.Constructor(rt)
 
-	case actor.MethodCron:
+	case Method_CronActor_EpochTick:
 		rt.Assert(len(params) == 0)
 		return a.EpochTick(rt)
 

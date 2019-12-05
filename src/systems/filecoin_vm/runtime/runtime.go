@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
@@ -546,19 +545,6 @@ func (rt *VMContext) AcquireState() ActorStateHandle {
 		_initValue: rt._globalStatePending.GetActorState(rt._actorAddress).State().Ref(),
 		_rt:        rt,
 	}
-}
-
-func (rt *VMContext) VerifySignature(signerActor addr.Address, sig filcrypto.Signature, m filcrypto.Message) bool {
-	st := rt._globalStatePending.Impl().GetActorState(signerActor)
-	if st == nil {
-		rt.AbortAPI("VerifySignature: signer actor not found")
-	}
-	pk := st.GetSignaturePublicKey()
-	if pk == nil {
-		rt.AbortAPI("VerifySignature: signer actor has no public key")
-	}
-	ret := rt.Compute(ComputeFunctionID_VerifySignature, []Any{pk, sig, m})
-	return ret.(bool)
 }
 
 func (rt *VMContext) Compute(f ComputeFunctionID, args []Any) Any {
