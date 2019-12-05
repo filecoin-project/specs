@@ -69,6 +69,8 @@ table_constraints(solved_many, [
   'graph_name',
   'post_proof_size',
   'post_snark_constraints',
+  'post_snark_time',
+  'post_snark_time_parallel',
   'post_time',
   'post_time_parallel',
   'post_inclusions_time',
@@ -310,7 +312,7 @@ table_constraints = (solutions, filter, group_by, sort_by) => {
     results = results.sort((a, b) => +a[sort_by] > +b[sort_by])
   }
   const header = `
-  Sorted by: ${sort_by}
+  ${sort_by ? `Sorted by: ${sort_by}` : ''}
 
   ${group_by.length ? `| name ` : ``}| ${filter.join(' | ')} |`
   const divider = `${group_by.length ? `| --- ` : ``}| ${filter.map(f => '--:').join(' | ')} |`
