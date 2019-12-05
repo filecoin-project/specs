@@ -18,3 +18,5 @@ Here is the list of libp2p protocols used by Filecoin.
 - Peer Exchange: spec [TODO](https://github.com/libp2p/specs/issues/222)
 - DNSDiscovery: Design and spec needed before implementing
 - HTTPDiscovery: Design and spec needed before implementing 
+
+Filecoin network protocols should be differentiated from non-filecoin network protocols.  Additionally different filecoin networks should differentiate protocols from each other.  To achieve this filecoin network protocol IDs MUST adhere to the following format: `/fil/<libp2p-protocol>/<network-name>`.  For example: `fil/kad-dht/mainnet`.
