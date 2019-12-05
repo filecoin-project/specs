@@ -5,7 +5,7 @@ type PoStRandomness Bytes
 // Can move to a new posting.id if we think worth it.
 type PoStCfg struct {
     Type         PoStType
-    SectorSize   UInt
+    SectorSize
     WindowCount  UInt
     Partitions   UInt
 }
