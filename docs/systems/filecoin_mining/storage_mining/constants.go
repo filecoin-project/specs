@@ -1,6 +1,9 @@
 package storage_mining
 
-import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import (
+	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+)
 
 // TODO: placeholder epoch value -- this will be set later
 const MAX_PROVE_COMMIT_SECTOR_PERIOD = block.ChainEpoch(3)    // placeholder
@@ -11,5 +14,10 @@ const PROVING_PERIOD = block.ChainEpoch(2)                    // placeholder
 const SURPRISE_CHALLENGE_FREQUENCY = 2 // placeholder
 // how far into their PP does a miner get their first challenge
 const SUPRISE_NO_CHALLENGE_PERIOD = PROVING_PERIOD / SURPRISE_CHALLENGE_FREQUENCY
+
 const EPOST_SAMPLE_NUM = 1
 const EPOST_SAMPLE_DENOM = 25
+
+// FIL deposit per sector precommit in Interactive PoRep
+// refunded after ProveCommit but burned if PreCommit expires
+const PRECOMMIT_DEPOSIT_PER_BYTE = actor.TokenAmount(0) // placeholder

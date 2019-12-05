@@ -14,7 +14,7 @@ type InteractiveSealRandomness Bytes
 type SealSeed Bytes
 
 type SealCfg struct {
-    SectorSize   UInt
+    SectorSize
     WindowCount  UInt
     Partitions   UInt
 }

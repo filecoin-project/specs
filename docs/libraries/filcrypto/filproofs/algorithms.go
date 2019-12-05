@@ -452,7 +452,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 	_ = replicaTree // FIXME: Use it.
 
 	windows := int(sdr.WindowCount())
-	windowSize := int(sdr.Cfg().SealCfg().SectorSize() / UInt(sdr.WindowCount()))
+	windowSize := int(uint64(sdr.Cfg().SealCfg().SectorSize()) / UInt(sdr.WindowCount()))
 
 	for c := range windowChallenges {
 		windowChallengeProof := createWindowChallengeProof(sdr.Drg(), sdr.Expander(), sealSeeds, UInt(c), nodeSize, columnTree, aux, windows, windowSize)
@@ -759,11 +759,11 @@ func (sdr *WinStackedDRG_I) VerifySeal(sv sector.SealVerifyInfo) bool {
 	return sdr._verifyOfflineCircuitProof(commD, commR, sealSeeds, windowChallenges, sealProof)
 }
 
-func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize UInt, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
+func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize sector.SectorSize, pieceInfos []PieceInfo) (unsealedCID sector.UnsealedSectorCID, err error) {
 	rootPieceInfo := computeRootPieceInfo(pieceInfos)
 	rootSize := rootPieceInfo.Size()
 
-	if rootSize != sectorSize {
+	if rootSize != uint64(sectorSize) {
 		return unsealedCID, errors.New("Wrong sector size.")
 	}
 

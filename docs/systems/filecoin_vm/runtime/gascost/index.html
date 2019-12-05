@@ -4591,29 +4591,103 @@ https://github.com/alex-shpak/hugo-book
 
 <div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">runtime</span>
 
+<span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 <span class="kn">import</span> <span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
+<span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
-<span class="c1">// TODO: assign all of these.
-</span><span class="c1"></span><span class="kd">var</span> <span class="p">(</span>
-	<span class="c1">// SimpleValueSend is the amount of gas charged for sending value from one
-</span><span class="c1"></span>	<span class="c1">// contract to another, without executing any other code.
-</span><span class="c1"></span>	<span class="nx">SimpleValueSend</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="kd">type</span> <span class="nx">Bytes</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
 
-	<span class="c1">// // ActorLookupFail is the amount of gas charged for a failure to lookup
-</span><span class="c1"></span>	<span class="c1">// // an actor
-</span><span class="c1"></span>	<span class="c1">// ActorLookupFail = msg.GasAmount(1)
-</span><span class="c1"></span>
-	<span class="c1">// CodeLookupFail is the amount of gas charged for a failure to lookup
-</span><span class="c1"></span>	<span class="c1">// code in the VM&#39;s code registry.
-</span><span class="c1"></span>	<span class="nx">CodeLookupFail</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
 
-	<span class="c1">// ApplyMessageFail represents the gas cost for failures to apply message.
-</span><span class="c1"></span>	<span class="c1">// These failures are basic failures encountered at first application.
-</span><span class="c1"></span>	<span class="nx">ApplyMessageFail</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-	<span class="c1">// TODO: determine these costs
-</span><span class="c1"></span>	<span class="nx">PublicKeyCryptoOp</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="kd">var</span> <span class="p">(</span>
+	<span class="c1">// TODO: assign all of these.
+</span><span class="c1"></span>	<span class="nx">GasAmountPlaceholder</span>                 <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="nx">GasAmountPlaceholder_UpdateStateTree</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
 <span class="p">)</span>
+
+<span class="kd">var</span> <span class="p">(</span>
+	<span class="c1">///////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>	<span class="c1">// System operations
+</span><span class="c1"></span>	<span class="c1">///////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+	<span class="c1">// Gas cost charged to the originator of an on-chain message (regardless of
+</span><span class="c1"></span>	<span class="c1">// whether it succeeds or fails in application) is given by:
+</span><span class="c1"></span>	<span class="c1">//   OnChainMessageBase + len(serialized message)*OnChainMessagePerByte
+</span><span class="c1"></span>	<span class="nx">OnChainMessageBase</span>    <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+	<span class="nx">OnChainMessagePerByte</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+
+	<span class="c1">// Gas cost charged to the originator of a non-nil return value produced
+</span><span class="c1"></span>	<span class="c1">// by an on-chain message is given by:
+</span><span class="c1"></span>	<span class="c1">//   len(return value)*OnChainReturnValuePerByte
+</span><span class="c1"></span>	<span class="nx">OnChainReturnValuePerByte</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+
+	<span class="c1">// Gas cost for any method invocation (including the original one initiated
+</span><span class="c1"></span>	<span class="c1">// by an on-chain message).
+</span><span class="c1"></span>	<span class="nx">InvokeMethodBase</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+
+	<span class="c1">// Gas cost charged, in addition to InvokeMethodBase, if a method invocation
+</span><span class="c1"></span>	<span class="c1">// is accompanied by any nonzero currency amount.
+</span><span class="c1"></span>	<span class="nx">InvokeMethodTransferFunds</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder_UpdateStateTree</span>
+
+	<span class="c1">// Gas cost (Base + len*PerByte) for any Get operation to the IPLD store
+</span><span class="c1"></span>	<span class="c1">// in the runtime VM context.
+</span><span class="c1"></span>	<span class="nx">IpldGetBase</span>    <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+	<span class="nx">IpldGetPerByte</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+
+	<span class="c1">// Gas cost (Base + len*PerByte) for any Put operation to the IPLD store
+</span><span class="c1"></span>	<span class="c1">// in the runtime VM context.
+</span><span class="c1"></span>	<span class="c1">//
+</span><span class="c1"></span>	<span class="c1">// Note: these costs should be significantly higher than the costs for Get
+</span><span class="c1"></span>	<span class="c1">// operations, since they reflect not only serialization/deserialization
+</span><span class="c1"></span>	<span class="c1">// but also persistent storage of chain data.
+</span><span class="c1"></span>	<span class="nx">IpldPutBase</span>    <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+	<span class="nx">IpldPutPerByte</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+
+	<span class="c1">// Gas cost for updating an actor&#39;s substate (i.e., UpdateRelease).
+</span><span class="c1"></span>	<span class="nx">UpdateActorSubstate</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder_UpdateStateTree</span>
+
+	<span class="c1">// Gas cost for creating a new actor (via InitActor&#39;s Exec method).
+</span><span class="c1"></span>	<span class="nx">ExecNewActor</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+
+	<span class="c1">///////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>	<span class="c1">// Pure functions (VM ABI)
+</span><span class="c1"></span>	<span class="c1">///////////////////////////////////////////////////////////////////////////
+</span><span class="c1"></span>
+	<span class="c1">// Gas cost charged per public-key cryptography operation (e.g., signature
+</span><span class="c1"></span>	<span class="c1">// verification).
+</span><span class="c1"></span>	<span class="nx">PublicKeyCryptoOp</span> <span class="p">=</span> <span class="nx">GasAmountPlaceholder</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">OnChainMessage</span><span class="p">(</span><span class="nx">onChainMessageLen</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">OnChainMessageBase</span><span class="p">,</span> <span class="nx">onChainMessageLen</span><span class="p">,</span> <span class="nx">OnChainMessagePerByte</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">OnChainReturnValue</span><span class="p">(</span><span class="nx">returnValue</span> <span class="nx">Bytes</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nx">retLen</span> <span class="o">:=</span> <span class="mi">0</span>
+	<span class="k">if</span> <span class="nx">returnValue</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">retLen</span> <span class="p">=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">returnValue</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">(),</span> <span class="nx">retLen</span><span class="p">,</span> <span class="nx">OnChainReturnValuePerByte</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">IpldGet</span><span class="p">(</span><span class="nx">dataSize</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">IpldGetBase</span><span class="p">,</span> <span class="nx">dataSize</span><span class="p">,</span> <span class="nx">IpldGetPerByte</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">dataSize</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">IpldPutBase</span><span class="p">,</span> <span class="nx">dataSize</span><span class="p">,</span> <span class="nx">IpldPutPerByte</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">valueSent</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="o">:=</span> <span class="nx">InvokeMethodBase</span>
+
+	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: BigInt
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">valueSent</span> <span class="p">&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nf">TokenAmount</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">InvokeMethodTransferFunds</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">ret</span>
+<span class="p">}</span>
 </code></pre></div>
 
 

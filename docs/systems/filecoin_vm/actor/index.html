@@ -4598,7 +4598,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="c1">// TokenAmount is an amount of Filecoin tokens. This type is used within
 </span><span class="c1">// the VM in message execution, to account movement of tokens, payment
 </span><span class="c1">// of VM gas, and more.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">TokenAmount</span> <span class="nx">UVarint</span>  <span class="c1">// TODO: bigint or varint?
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">TokenAmount</span> <span class="nx">Int</span>  <span class="c1">// TODO: should be BigInt (attoFIL)
 </span><span class="c1"></span>
 <span class="c1">// MethodNum is an integer that represents a particular method
 </span><span class="c1">// in an actor&#39;s function table. These numbers are used to compress
@@ -4739,6 +4739,8 @@ https://github.com/alex-shpak/hugo-book
 <span class="kn">import</span> <span class="nx">ipld</span> <span class="s">&#34;github.com/filecoin-project/specs/libraries/ipld&#34;</span>
 <span class="kn">import</span> <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 
+<span class="kd">var</span> <span class="nx">TODO</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">TODO</span>
+
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
 
 <span class="kd">const</span> <span class="p">(</span>
@@ -4800,6 +4802,11 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">ActorSubstateCID</span><span class="p">)</span> <span class="nf">Ref</span><span class="p">()</span> <span class="o">*</span><span class="nx">ActorSubstateCID</span> <span class="p">{</span>
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">x</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">TokenAmount_Placeholder</span><span class="p">()</span> <span class="nx">TokenAmount</span> <span class="p">{</span>
+	<span class="nf">TODO</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="c1">// Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)

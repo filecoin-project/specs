@@ -4715,6 +4715,8 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1"></span>    <span class="nf">ProcessDealExpiration</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 
     <span class="nf">GetPieceInfosForDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PieceInfo</span><span class="p">]</span>
+
+    <span class="nf">ClearInactiveDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">])</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -5015,7 +5017,7 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="c1">// delete deal from active deals
-</span><span class="c1">// send deal collateral to TreasuryActor
+</span><span class="c1">// send deal collateral to BurntFundsActor
 </span><span class="c1">// return locked storage fee to client
 </span><span class="c1">// return client collateral
 </span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StorageMarketActorState_I</span><span class="p">)</span> <span class="nf">_terminateDeal</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealID</span> <span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span> <span class="p">{</span>
@@ -5076,9 +5078,13 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kd">const</span> <span class="p">(</span>
     <span class="nx">Method_StorageMarketActor_EpochTick</span> <span class="p">=</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodPlaceholder</span> <span class="o">+</span> <span class="kc">iota</span>
-    <span class="nx">Method_StorageMarketActor_GetUnsealedCIDForDealIDs</span>
+    <span class="nx">Method_StorageMarketActor_GetPieceInfosForDealIDs</span>
     <span class="nx">Method_StorageMarketActor_ProcessDealExpiration</span>
     <span class="nx">Method_StorageMarketActor_ProcessDealSlash</span>
+    <span class="nx">Method_StorageMarketActor_ProcessDealPayment</span>
+    <span class="nx">Method_StorageMarketActor_VerifyPublishedDealIDs</span>
+    <span class="nx">Method_StorageMarketActor_ActivateDeals</span>
+    <span class="nx">Method_StorageMarketActor_ClearInactiveDealIDs</span>
 <span class="p">)</span>
 
 <span class="kd">const</span> <span class="nx">LastPaymentEpochNone</span> <span class="p">=</span> <span class="mi">0</span>
@@ -5348,6 +5354,32 @@ https://github.com/alex-shpak/hugo-book
     <span class="nf">Release</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nx">pieceInfos</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">ClearInactiveDealIDs</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">dealIDs</span> <span class="p">[]</span><span class="nx">deal</span><span class="p">.</span><span class="nx">DealID</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">.</span><span class="nf">State</span><span class="p">(</span><span class="nx">rt</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">dealID</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dealIDs</span> <span class="p">{</span>
+        <span class="nx">deal</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_safeGetOnChainDeal</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_assertPublishedDealState</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealID</span><span class="p">)</span>
+
+        <span class="nx">dealP</span> <span class="o">:=</span> <span class="nx">deal</span><span class="p">.</span><span class="nf">Deal</span><span class="p">().</span><span class="nf">Proposal</span><span class="p">()</span>
+        <span class="nb">delete</span><span class="p">(</span><span class="nx">st</span><span class="p">.</span><span class="nf">Deals</span><span class="p">(),</span> <span class="nx">dealID</span><span class="p">)</span>
+
+        <span class="c1">// return client lock up (client deal collateral and total storage fee)
+</span><span class="c1"></span>        <span class="nx">clientLockup</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ClientBalanceRequirement</span><span class="p">()</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Client</span><span class="p">(),</span> <span class="nx">clientLockup</span><span class="p">)</span>
+
+        <span class="c1">// return provider lock up
+</span><span class="c1"></span>        <span class="nx">providerLockup</span> <span class="o">:=</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">ProviderBalanceRequirement</span><span class="p">()</span>
+        <span class="nx">st</span><span class="p">.</span><span class="nf">_unlockBalance</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">dealP</span><span class="p">.</span><span class="nf">Provider</span><span class="p">(),</span> <span class="nx">providerLockup</span><span class="p">)</span>
+
+        <span class="c1">// Note that there is no penalty on provider deal collateral
+</span><span class="c1"></span>        <span class="c1">// since PreCommitDeposit has been burned
+</span><span class="c1"></span>        <span class="c1">// TODO: decide if this is sufficient and if we need to burn any deal collateral
+</span><span class="c1"></span>    <span class="p">}</span>
+
+    <span class="nf">UpdateRelease</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">st</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">StorageMarketActorCode_I</span><span class="p">)</span> <span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span> <span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="nx">InvocOutput</span> <span class="p">{</span>

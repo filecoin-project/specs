@@ -269,7 +269,7 @@ func (st *StorageMarketActorState_I) _slashDealCollateral(rt Runtime, dealP deal
 }
 
 // delete deal from active deals
-// send deal collateral to TreasuryActor
+// send deal collateral to BurntFundsActor
 // return locked storage fee to client
 // return client collateral
 func (st *StorageMarketActorState_I) _terminateDeal(rt Runtime, dealID deal.DealID) actor.TokenAmount {

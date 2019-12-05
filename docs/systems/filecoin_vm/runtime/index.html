@@ -4746,6 +4746,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 	<span class="nx">msg</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&#34;</span>
 	<span class="nx">exitcode</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&#34;</span>
+	<span class="nx">gascost</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/gascost&#34;</span>
 	<span class="nx">st</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&#34;</span>
 	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
@@ -4796,11 +4797,12 @@ https://github.com/alex-shpak/hugo-book
 </span><span class="c1">// interpreter once per actor method invocation, and responds to that method&#39;s Runtime
 </span><span class="c1">// API calls.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">VMContext</span> <span class="kd">struct</span> <span class="p">{</span>
-	<span class="nx">_globalStateInit</span>    <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
-	<span class="nx">_globalStatePending</span> <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
-	<span class="nx">_running</span>            <span class="kt">bool</span>
-	<span class="nx">_actorAddress</span>       <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
-	<span class="nx">_actorStateAcquired</span> <span class="kt">bool</span>
+	<span class="nx">_globalStateInit</span>      <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+	<span class="nx">_globalStatePending</span>   <span class="nx">st</span><span class="p">.</span><span class="nx">StateTree</span>
+	<span class="nx">_running</span>              <span class="kt">bool</span>
+	<span class="nx">_actorAddress</span>         <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+	<span class="nx">_actorStateAcquired</span>   <span class="kt">bool</span>
+	<span class="nx">_actorSubstateUpdated</span> <span class="kt">bool</span>
 
 	<span class="nx">_immediateCaller</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 	<span class="c1">// Note: This is the actor in the From field of the initial on-chain message.
@@ -4830,11 +4832,12 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">gasRemaining</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="o">*</span><span class="nx">VMContext</span> <span class="p">{</span>
 
 	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">VMContext</span><span class="p">{</span>
-		<span class="nx">_globalStateInit</span><span class="p">:</span>    <span class="nx">globalState</span><span class="p">,</span>
-		<span class="nx">_globalStatePending</span><span class="p">:</span> <span class="nx">globalState</span><span class="p">,</span>
-		<span class="nx">_running</span><span class="p">:</span>            <span class="kc">false</span><span class="p">,</span>
-		<span class="nx">_actorAddress</span><span class="p">:</span>       <span class="nx">actorAddress</span><span class="p">,</span>
-		<span class="nx">_actorStateAcquired</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+		<span class="nx">_globalStateInit</span><span class="p">:</span>      <span class="nx">globalState</span><span class="p">,</span>
+		<span class="nx">_globalStatePending</span><span class="p">:</span>   <span class="nx">globalState</span><span class="p">,</span>
+		<span class="nx">_running</span><span class="p">:</span>              <span class="kc">false</span><span class="p">,</span>
+		<span class="nx">_actorAddress</span><span class="p">:</span>         <span class="nx">actorAddress</span><span class="p">,</span>
+		<span class="nx">_actorStateAcquired</span><span class="p">:</span>   <span class="kc">false</span><span class="p">,</span>
+		<span class="nx">_actorSubstateUpdated</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
 
 		<span class="nx">_toplevelSender</span><span class="p">:</span>           <span class="nx">toplevelSender</span><span class="p">,</span>
 		<span class="nx">_toplevelBlockWinner</span><span class="p">:</span>      <span class="nx">toplevelBlockWinner</span><span class="p">,</span>
@@ -4875,6 +4878,14 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">Abort</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAPIError</span><span class="p">),</span> <span class="nx">msg</span><span class="p">)</span>
 <span class="p">}</span>
 
+<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_rtAllocGasCreateActor</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;Only InitActor may call rt.CreateActor_DeductGas&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">ExecNewActor</span><span class="p">)</span>
+<span class="p">}</span>
+
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CreateActor</span><span class="p">(</span>
 	<span class="nx">stateCID</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">ActorSystemStateCID</span><span class="p">,</span>
 	<span class="nx">address</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
@@ -4884,6 +4895,8 @@ https://github.com/alex-shpak/hugo-book
 	<span class="k">if</span> <span class="p">!</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">addr</span><span class="p">.</span><span class="nx">InitActorAddr</span><span class="p">)</span> <span class="p">{</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;Only InitActor may call rt.CreateActor&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
+
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGasCreateActor</span><span class="p">()</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSystemStateInternal</span><span class="p">(</span><span class="nx">address</span><span class="p">,</span> <span class="nx">stateCID</span><span class="p">)</span>
 
@@ -4915,6 +4928,7 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateAcquired</span><span class="p">()</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_updateActorSubstateInternal</span><span class="p">(</span><span class="nx">rt</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">newStateCID</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nx">_actorSubstateUpdated</span> <span class="p">=</span> <span class="kc">true</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_actorStateAcquired</span> <span class="p">=</span> <span class="kc">false</span>
 <span class="p">}</span>
 
@@ -5036,24 +5050,21 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwErrorFull</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">RuntimeAPIError</span><span class="p">),</span> <span class="nx">errMsg</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_checkGasRemaining</span><span class="p">()</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">())</span> <span class="p">{</span>
-		<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span><span class="p">))</span>
+<span class="kd">func</span> <span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">x</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">x</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">())</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;Interpreter error: negative gas amount&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_deductGasRemaining</span><span class="p">(</span><span class="nx">x</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// TODO: check x &gt;= 0
-</span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkGasRemaining</span><span class="p">()</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkGasRemaining</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_refundGasRemaining</span><span class="p">(</span><span class="nx">x</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">{</span>
-	<span class="c1">// TODO: check x &gt;= 0
-</span><span class="c1"></span>	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkGasRemaining</span><span class="p">()</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkGasRemaining</span><span class="p">()</span>
+<span class="c1">// Deduct an amount of gas corresponding to cost about to be incurred, but not necessarily
+</span><span class="c1">// incurred yet.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">x</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+	<span class="kd">var</span> <span class="nx">ok</span> <span class="kt">bool</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">,</span> <span class="nx">ok</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">SubtractIfNonnegative</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
+		<span class="nx">rt</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span><span class="p">))</span>
+	<span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">_transferFunds</span><span class="p">(</span><span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">to</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span> <span class="nx">amount</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
@@ -5110,25 +5121,24 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">actorCode</span> <span class="nx">ActorCode</span><span class="p">,</span>
 	<span class="nx">method</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodNum</span><span class="p">,</span>
 	<span class="nx">params</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodParams</span><span class="p">)</span> <span class="p">(</span>
-	<span class="nx">ret</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">internalCallSeqNumFinal</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="nx">InvocOutput</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="nx">exitcode</span><span class="p">.</span><span class="nx">ExitCode</span><span class="p">,</span> <span class="nx">internalCallSeqNumFinal</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">CallSeqNum</span><span class="p">)</span> <span class="p">{</span>
 
 	<span class="k">if</span> <span class="nx">method</span> <span class="o">==</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">MethodSend</span> <span class="p">{</span>
-		<span class="nx">gasUsed</span> <span class="p">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nf">GasAmount_Zero</span><span class="p">()</span> <span class="c1">// TODO: verify
-</span><span class="c1"></span>		<span class="nx">ret</span> <span class="p">=</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
+		<span class="nx">ret</span> <span class="p">=</span> <span class="nf">InvocOutput_Make</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
 		<span class="k">return</span>
 	<span class="p">}</span>
 
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">true</span>
 	<span class="nx">ret</span><span class="p">,</span> <span class="nx">exitCode</span> <span class="p">=</span> <span class="nf">_catchRuntimeErrors</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span> <span class="nx">InvocOutput</span> <span class="p">{</span>
 		<span class="nx">methodOutput</span> <span class="o">:=</span> <span class="nx">actorCode</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">params</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_actorSubstateUpdated</span> <span class="p">{</span>
+			<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nx">UpdateActorSubstate</span><span class="p">)</span>
+		<span class="p">}</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">_checkNumValidateCalls</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 		<span class="k">return</span> <span class="nx">methodOutput</span>
 	<span class="p">})</span>
 	<span class="nx">rt</span><span class="p">.</span><span class="nx">_running</span> <span class="p">=</span> <span class="kc">false</span>
-
-	<span class="c1">// TODO: Update gasUsed
-</span><span class="c1"></span>	<span class="nf">TODO</span><span class="p">()</span>
 
 	<span class="nx">internalCallSeqNumFinal</span> <span class="p">=</span> <span class="nx">rt</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span>
 
@@ -5139,6 +5149,10 @@ https://github.com/alex-shpak/hugo-book
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkRunning</span><span class="p">()</span>
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_checkActorStateNotAcquired</span><span class="p">()</span>
 
+	<span class="nx">initGasRemaining</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span>
+
+	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">InvokeMethod</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">Value</span><span class="p">()))</span>
+
 	<span class="nx">toActor</span> <span class="o">:=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_globalStatePending</span><span class="p">.</span><span class="nf">GetActorState</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nf">To</span><span class="p">())</span>
 
 	<span class="nx">toActorCode</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">loadActorCode</span><span class="p">(</span><span class="nx">toActor</span><span class="p">.</span><span class="nf">CodeID</span><span class="p">())</span>
@@ -5146,12 +5160,6 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">ActorCodeNotFound</span><span class="p">))</span>
 	<span class="p">}</span>
 
-	<span class="kd">var</span> <span class="nx">toActorMethodGasBound</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">GasAmount</span>
-	<span class="nf">TODO</span><span class="p">()</span> <span class="c1">// TODO: obtain from actor registry
-</span><span class="c1"></span>	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_deductGasRemaining</span><span class="p">(</span><span class="nx">toActorMethodGasBound</span><span class="p">)</span>
-	<span class="c1">// TODO: gasUsed may be larger than toActorMethodGasBound if toActor itself makes sub-calls.
-</span><span class="c1"></span>	<span class="c1">// To prevent this, we would need to calculate the gas bounds recursively.
-</span><span class="c1"></span>
 	<span class="nx">err</span> <span class="p">=</span> <span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_transferFunds</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_actorAddress</span><span class="p">,</span> <span class="nx">input</span><span class="p">.</span><span class="nf">To</span><span class="p">(),</span> <span class="nx">input</span><span class="p">.</span><span class="nf">Value</span><span class="p">())</span>
 	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">InsufficientFunds_System</span><span class="p">))</span>
@@ -5168,17 +5176,20 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">,</span>
 	<span class="p">)</span>
 
-	<span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">gasUsed</span><span class="p">,</span> <span class="nx">exitCode</span><span class="p">,</span> <span class="nx">internalCallSeqNumFinal</span> <span class="o">:=</span> <span class="nf">_invokeMethodInternal</span><span class="p">(</span>
+	<span class="nx">invocOutput</span><span class="p">,</span> <span class="nx">exitCode</span><span class="p">,</span> <span class="nx">internalCallSeqNumFinal</span> <span class="o">:=</span> <span class="nf">_invokeMethodInternal</span><span class="p">(</span>
 		<span class="nx">rtInner</span><span class="p">,</span>
 		<span class="nx">toActorCode</span><span class="p">,</span>
 		<span class="nx">input</span><span class="p">.</span><span class="nf">Method</span><span class="p">(),</span>
 		<span class="nx">input</span><span class="p">.</span><span class="nf">Params</span><span class="p">(),</span>
 	<span class="p">)</span>
 
+	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">rtInner</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">))</span>
+	<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span> <span class="p">=</span> <span class="nx">rtInner</span><span class="p">.</span><span class="nx">_gasRemaining</span>
+	<span class="nx">gasUsed</span> <span class="o">:=</span> <span class="nx">initGasRemaining</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_gasRemaining</span><span class="p">)</span>
+	<span class="nf">_gasAmountAssertValid</span><span class="p">(</span><span class="nx">gasUsed</span><span class="p">)</span>
+
 	<span class="nx">rtOuter</span><span class="p">.</span><span class="nx">_internalCallSeqNum</span> <span class="p">=</span> <span class="nx">internalCallSeqNumFinal</span>
 
-	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_refundGasRemaining</span><span class="p">(</span><span class="nx">toActorMethodGasBound</span><span class="p">)</span>
-	<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_deductGasRemaining</span><span class="p">(</span><span class="nx">gasUsed</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nx">exitCode</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nf">SystemError</span><span class="p">(</span><span class="nx">exitcode</span><span class="p">.</span><span class="nx">OutOfGas</span><span class="p">))</span> <span class="p">{</span>
 		<span class="c1">// OutOfGas error cannot be caught
 </span><span class="c1"></span>		<span class="nx">rtOuter</span><span class="p">.</span><span class="nf">_throwError</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">)</span>
@@ -5237,12 +5248,29 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">IpldPut</span><span class="p">(</span><span class="nx">x</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
+	<span class="kd">var</span> <span class="nx">serializedSize</span> <span class="kt">int</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// compute serializedSize
+</span><span class="c1"></span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">IpldPut</span><span class="p">(</span><span class="nx">serializedSize</span><span class="p">))</span>
+
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// write to IPLD store
+</span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">IpldGet</span><span class="p">(</span><span class="nx">c</span> <span class="nx">ipld</span><span class="p">.</span><span class="nx">CID</span><span class="p">)</span> <span class="nx">Runtime_IpldGet_FunRet</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
-<span class="p">}</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// get from IPLD store
+</span><span class="c1"></span>
+	<span class="kd">var</span> <span class="nx">serializedSize</span> <span class="kt">int</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// retrieve serializedSize
+</span><span class="c1"></span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gascost</span><span class="p">.</span><span class="nf">IpldGet</span><span class="p">(</span><span class="nx">serializedSize</span><span class="p">))</span>
+
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span> <span class="c1">// return item
+</span><span class="c1"></span><span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">rt</span> <span class="o">*</span><span class="nx">VMContext</span><span class="p">)</span> <span class="nf">CurrEpoch</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span> <span class="p">{</span>
 	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
@@ -5279,7 +5307,7 @@ https://github.com/alex-shpak/hugo-book
 		<span class="nx">rt</span><span class="p">.</span><span class="nf">AbortAPI</span><span class="p">(</span><span class="s">&#34;Function definition in rt.Compute() not found&#34;</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="nx">gasCost</span> <span class="o">:=</span> <span class="nx">def</span><span class="p">.</span><span class="nf">GasCostFn</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span>
-	<span class="nx">rt</span><span class="p">.</span><span class="nf">_deductGasRemaining</span><span class="p">(</span><span class="nx">gasCost</span><span class="p">)</span>
+	<span class="nx">rt</span><span class="p">.</span><span class="nf">_rtAllocGas</span><span class="p">(</span><span class="nx">gasCost</span><span class="p">)</span>
 	<span class="k">return</span> <span class="nx">def</span><span class="p">.</span><span class="nf">Body</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span>
 <span class="p">}</span>
 

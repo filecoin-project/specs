@@ -4,7 +4,25 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+	util "github.com/filecoin-project/specs/util"
 )
+
+var Assert = util.Assert
+
+// Get the owner account address associated to a given miner actor.
+func GetMinerOwnerAddress(tree st.StateTree, minerAddr addr.Address) (addr.Address, error) {
+	panic("TODO")
+}
+
+// Get the owner account address associated to a given miner actor.
+func GetMinerOwnerAddress_Assert(tree st.StateTree, a addr.Address) addr.Address {
+	ret, err := GetMinerOwnerAddress(tree, a)
+	Assert(err == nil)
+	return ret
+}
 
 func (st *StorageMinerActorState_I) _isChallenged() bool {
 	return st.ChallengeStatus().IsChallenged()
@@ -54,7 +72,6 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 			expiredPower := expiredDeal.Power()
 			newUtilization -= expiredPower
 			newExpiredDealIDs = append(newExpiredDealIDs, expiredDeal.ID())
-
 		}
 
 		st.SectorUtilization()[sectorNo].Impl().CurrUtilization_ = newUtilization
@@ -66,13 +83,10 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 }
 
 func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePower {
-	var activePower = block.StoragePower(0)
+	activePower := block.StoragePower(0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		utilizationInfo, found := st.SectorUtilization()[sectorNo]
-		if !found {
-			rt.AbortStateMsg("sm._getActivePower: sectorNo not found in SectorUtilization")
-		}
+		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
 		activePower += utilizationInfo.CurrUtilization()
 	}
 
@@ -116,8 +130,6 @@ func (st *StorageMinerActorState_I) _updateClearSector(rt Runtime, sectorNo sect
 	delete(st.SectorUtilization(), sectorNo)
 	st.ProvingSet_.Remove(sectorNo)
 	st.SectorExpirationQueue().Remove(sectorNo)
-
-	// Send message to SMA
 }
 
 // move Sector from Committed/Recovering into Active State
@@ -176,9 +188,7 @@ func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo secto
 	}
 
 	if newFaultCount > MAX_CONSECUTIVE_FAULTS {
-		// TODO: heavy penalization: slash pledge collateral and delete sector
-		// TODO: SendMessage(SPA.SlashPledgeCollateral)
-
+		// slashing is done at _slashCollateralForStorageFaults
 		st._updateClearSector(rt, sectorNo)
 		st.SectorTable().Impl().TerminatedFaults_.Add(sectorNo)
 	}
@@ -198,25 +208,19 @@ func (st *StorageMinerActorState_I) _updateExpireSectors(rt Runtime) {
 			// Note: in order to verify if something was stored in the past, one must
 			// scan the chain. SectorNumber can be re-used.
 
-			// do nothing about deal payment
-			// it will be evaluated after _updateSectorUtilization
+			// expiration settlement will be done at _updateSectorUtilization
 			st._updateClearSector(rt, expiredSectorNo)
 		case SectorFailingSN:
 			// TODO: check if there is any fault that we should handle here
-			// If a SectorFailing Expires, return remaining StorageDealCollateral and remove sector
-			// SendMessage(sma.SettleExpiredDeals(sc.DealIDs()))
 
 			// a failing sector expires, no change to FaultCount
+			// expiration settlement will be done at _updateSectorUtilization
 			st._updateClearSector(rt, expiredSectorNo)
 		default:
 			// Note: SectorCommittedSN, SectorRecoveringSN transition first to SectorFailingSN, then expire
 			rt.AbortStateMsg("Invalid sector state in SectorExpirationQueue")
 		}
 	}
-
-	// Return PledgeCollateral for active expirations
-	// SendMessage(spa.Depledge) // TODO
-	panic("TODO: refactor use of this method in order for caller to send this message")
 }
 
 func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber) {
@@ -272,4 +276,14 @@ func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals
 
 	return initialUtilizationInfo
 
+}
+
+func (st *StorageMinerActorState_I) _getPreCommitDepositReq(rt Runtime) actor.TokenAmount {
+
+	// TODO: move this to Construct
+	minerInfo := st.Info()
+	sectorSize := minerInfo.SectorSize()
+	depositReq := actor.TokenAmount(uint64(PRECOMMIT_DEPOSIT_PER_BYTE) * uint64(sectorSize))
+
+	return depositReq
 }

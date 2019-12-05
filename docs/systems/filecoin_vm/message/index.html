@@ -4660,7 +4660,16 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kn">import</span> <span class="nx">actor</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&#34;</span>
 
 <span class="c1">// GasAmount is a quantity of gas.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasAmount</span> <span class="nx">UVarint</span>
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasAmount</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">value</span>                <span class="nx">BigInt</span>
+
+    <span class="nf">Add</span><span class="p">(</span><span class="nx">GasAmount</span><span class="p">)</span>       <span class="nx">GasAmount</span>
+    <span class="nf">Subtract</span><span class="p">(</span><span class="nx">GasAmount</span><span class="p">)</span>  <span class="nx">GasAmount</span>
+    <span class="nf">SubtractIfNonnegative</span><span class="p">(</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span>
+    <span class="nf">LessThan</span><span class="p">(</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">Equals</span><span class="p">(</span><span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">Scale</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="nx">GasAmount</span>
+<span class="p">}</span>
 
 <span class="c1">// GasPrice is a Gas-to-FIL cost
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">GasPrice</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
@@ -4780,21 +4789,59 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 	<span class="k">return</span> <span class="nx">message</span><span class="p">.</span><span class="nf">Message</span><span class="p">(),</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nf">Subtract</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Subtract</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nf">LessThan</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">SubtractIfNonnegative</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="p">(</span><span class="nx">ret</span> <span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">ok</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">ret</span> <span class="p">=</span> <span class="nx">x</span><span class="p">.</span><span class="nf">Subtract</span><span class="p">(</span><span class="nx">y</span><span class="p">)</span>
+	<span class="nx">ok</span> <span class="p">=</span> <span class="kc">true</span>
+	<span class="k">if</span> <span class="nx">ret</span><span class="p">.</span><span class="nf">LessThan</span><span class="p">(</span><span class="nf">GasAmount_Zero</span><span class="p">())</span> <span class="p">{</span>
+		<span class="nx">ret</span> <span class="p">=</span> <span class="nx">x</span>
+		<span class="nx">ok</span> <span class="p">=</span> <span class="kc">false</span>
+	<span class="p">}</span>
+	<span class="k">return</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">LessThan</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Equals</span><span class="p">(</span><span class="nx">y</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span><span class="nx">GasAmount_I</span><span class="p">)</span> <span class="nf">Scale</span><span class="p">(</span><span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">GasAmount_Affine</span><span class="p">(</span><span class="nx">b</span> <span class="nx">GasAmount</span><span class="p">,</span> <span class="nx">x</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">m</span> <span class="nx">GasAmount</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">b</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nf">Scale</span><span class="p">(</span><span class="nx">x</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nf">GasAmount_Zero</span><span class="p">()</span> <span class="nx">GasAmount</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="nf">IMPL_FINISH</span><span class="p">()</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">GasAmount_SentinelUnlimited</span><span class="p">()</span> <span class="nx">GasAmount</span> <span class="p">{</span>
+	<span class="c1">// Amount of gas larger than any feasible execution; meant to indicated unlimited gas
+</span><span class="c1"></span>	<span class="c1">// (e.g., for builtin system method invocations).
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nf">GasAmount_FromInt</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nf">Scale</span><span class="p">(</span><span class="mf">1e9</span><span class="p">).</span><span class="nf">Scale</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span> <span class="c1">// 10^18
+</span><span class="c1"></span><span class="p">}</span>
 </code></pre></div>
 
 
