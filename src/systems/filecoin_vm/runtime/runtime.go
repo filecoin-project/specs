@@ -20,8 +20,9 @@ var EnsureErrorCode = exitcode.EnsureErrorCode
 var SystemError = exitcode.SystemError
 var IMPL_FINISH = util.IMPL_FINISH
 var TODO = util.TODO
-// This should be set per network
-var Name = "FilecoinMainnet"
+
+// Name should be set per unique filecoin network
+var Name = "mainnet"
 
 func ActorSubstateCID_Equals(x, y ActorSubstateCID) bool {
 	IMPL_FINISH()
