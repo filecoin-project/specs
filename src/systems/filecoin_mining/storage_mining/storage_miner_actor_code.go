@@ -66,13 +66,6 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	return ret
 }
 
-func (a *StorageMinerActorCode_I) _canBeElected(rt Runtime) bool {
-	h, st := a.State(rt)
-	ret := st._canBeElected(rt.CurrEpoch())
-	Release(rt, h, st)
-	return ret
-}
-
 func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
 	h, st := a.State(rt)
 	ret := st._challengeHasExpired(rt.CurrEpoch())
@@ -180,7 +173,10 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
 	h, st := a.State(rt)
 	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
-	activePower := st._getActivePower(rt)
+	activePower, err := st._getActivePower()
+	if err != nil {
+		rt.AbortStateMsg(err.Error())
+	}
 	inactivePower := st._getInactivePower(rt)
 
 	// power report in processPowerReportParam

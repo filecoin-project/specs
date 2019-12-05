@@ -17,15 +17,19 @@ block: "Block"
 block_producer: "Block Producer"
 ### SPC
 storage_power_consensus: "Storage Power Consensus"
-ticket_chain: "Ticket Chain"
-power_table: "Power Table"
-expected_consensus: "Expected Consensus"
 tickets: "Tickets"
+ticket_chain: "Ticket Chain"
+ticket_generation: "Ticket Generation"
+min_miner_size: "Minimum Miner Size"
+
+power_table: "Power Table"
+pledge_collateral: "Pledge Collateral"
+
+expected_consensus: "Expected Consensus"
 leader_election: "Secret Leader Election"
 chain_selection: "Chain Selection"
 finality: "EC Finality"
 consensus_faults: "Consensus Faults"
-ticket_generation: "Ticket Generation"
 
 ### Chain Sync
 chain_sync: "Chain Sync"

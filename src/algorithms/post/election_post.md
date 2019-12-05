@@ -4,25 +4,29 @@ title: Election PoSt
 
 This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
 
-# High Level API
+# At a High Level
 
 Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election. The probability of scratching a winning ChallengeTicket is dependent on sector size and total storage. Miners are rewarded in proportion to the quantity of winning ChallengeTickets they generate in a given epoch, thereby incentivizing a miner to check as much of their storage as allowed in order to express their full power in a leader election. The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.
 
 An election proof is generated from a given PartialTicket by Hashing it, and using that hash to generate a value in [0,1]. Specifically `ChallengeTicket = H(PartialTicket)/2^len(H)`. 
 
-This does mean that, in a given round, a lucky miner may succeed in generating a block by proving only a single sector, but again on expectation, a miner will have to prove their sectors at every single round in order for their full power to contribute to block generation. In the event one of the miner’s sectors cannot be proven (i.e. the miner does not have access to the nodes from that sector), no tickets will be returned. In order to prevent this, a miner can declare faults on their faulty sectors to avoid having to include them in the eligible sector set. Their power will be reduced accordingly. 
+This does mean that, in a given round, a lucky miner may succeed in generating a block by proving only a single sector, but again on expectation, a miner will have to prove their sectors at every single round in order for their full power to contribute to block generation. In the event one of the miner’s sectors cannot be proven (i.e. the miner does not have access to the nodes from that sector), no tickets will be returned. In order to prevent this, a miner can declare faults on their faulty sectors to avoid having to include them in the eligible sector set. Their power will be reduced accordingly.
 
-# ElectionPoSt
+The Election-PoSt construction includes a Surprise PoSt cleanup which will automatically challenge leaders who have not been elected in some time so they can prove their storage within a given proving period. Any miner who does not prove their power either by ElectionPoSt or SurprisePoSt within a proving period will be penalized accordingly.
+
+## ElectionPoSt
 
 To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that along with the winning PartialTickets. Both the PartialTickets and PoStProof are checked at Block Validation by `StoragePowerConsenusSubsystem`. When a block is included, a special message is added that calls `SubmitElectionPoSt` which will process sector updates in the same way as successful `SubmitSurprisePoSt` do.
 
-# SurprisePoSt
+## SurprisePoSt Cleanup
 
 The chain keeps track of the last time that a miner received and submitted a Challenge (Election or Surprise). It randomly challenges a miner to submit a surprisePoSt once per `ProvingPeriod` in the latter half of their `ProvingPeriod`. For every miner challenged, a `NotifyOfPoStSurpriseChallenge` is issued and sent as an on-chain message to surprised `StorageMinerActor`. However, if the `StorageMinerActor` is already proving a SurprisePoStChallenge (`IsChallenged` is True) or the `StorageMinerActor` has received a challenge (by Election or Surprise) within the `MIN_CHALLENGE_PERIOD` (`ShouldChallenge` is False), then the PoSt surprise notification will be ignored and return success.
 
 For more on these components, see {{<sref election_post>}}. At a high-level though both are needed for different reasons:
 - By coupling leader election and PoSt, `ElectionPoSt` ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, `SurprisePoSt` thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.
+
+# In Detail
 
 ## ElectionPoSt Generation
 
@@ -170,6 +174,8 @@ This is done as follows: if there are M miners in the power table and a Proving 
 
 An alternative approach would be to assign a probability of being challenged to each miner which grows at every epoch to be 1 PP epochs from the last challenge (but this would require more computation since every miner would have to be checked at every epoch).
 
+# Faults
+
 ## Fault Detection
 
 Fault detection happens over the course of the life time of a sector. When the sector is unavailable for some reason, the miner must submit the known `faults` in order for that sector not to be tested before the PoSt challenge begins.
@@ -196,4 +202,10 @@ Each reported fault carries a penality with it.
 
 Note that surprise PoSt will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network, since they will not be able to win any blocks (they have no power) and hence gain power through ElectionPoSt.
 
-While it resets a miner’s ElectionWindow, miners earn no reward from submitting SurprisePoSt messages. This mechanism does forces a miner to announce their faults and clean up the Power Table accordingly.
+While it resets a miner’s ElectionWindow, miners earn no reward from submitting SurprisePoSt messages. This mechanism does force a miner to announce their faults and clean up the Power Table accordingly.
+
+# Miner Onboarding
+
+Storage Power Consensus participants are subject to a {{<sref min_miner_size>}}, meaning miners smaller than `MIN_MINER_SIZE_STOR` of active (or in-deal) storage or whose active storage represents less than `MIN_MINER_SIZE_PERC`% of the network's cannot produce valid electionPoSts. 
+
+However, these miners can still run SurprisePosts and transmit them as messages to be added on-chain. Accordingly, new miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, they will be able to submit new blocks with ElectionPoSts as well.

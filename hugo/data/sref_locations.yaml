@@ -23,6 +23,7 @@ storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
 tickets: [systems, filecoin_blockchain, storage_power_consensus, tickets]
 ticket_chain: [systems, filecoin_blockchain, storage_power_consensus, ticket_chain]
 ticket_generation: [systems, filecoin_blockchain, storage_power_consensus, ticket_generation]
+min_miner_size: [systems, filecoin_blockchain, storage_power_consensus, min_miner_size]
 
 ### Storage Market Actor
 power_table: [systems, filecoin_blockchain, storage_power_consensus, storage_power_actor, power_table]

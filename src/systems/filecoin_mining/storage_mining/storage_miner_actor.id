@@ -5,6 +5,8 @@ import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/addr
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 
 type SectorExpirationQueueItem struct {
     SectorNumber  sector.SectorNumber
@@ -43,6 +45,8 @@ type ChallengeStatus struct {
     LastChallengeEpoch     block.ChainEpoch  // get updated by NotifyOfPoStSurpriseChallenge and SubmitElectionPoSt
     _lastPoStFailureEpoch  block.ChainEpoch  // get updated upon _onMissedSurprisePoSt
     _lastPoStSuccessEpoch  block.ChainEpoch  // get updated by successful Election or Suprise PoSt submission
+
+    _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState
 
     OnNewChallenge(currEpoch block.ChainEpoch)
     LastPoStResponseEpoch() block.ChainEpoch
@@ -87,7 +91,8 @@ type StorageMinerActorState struct {
 
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     _isChallenged()         bool
-    _canBeElected(currEpoch block.ChainEpoch) bool
+    _isSmallerThanMin(stateTree stateTree.StateTree) bool
+    _canBeElected(stateTree stateTree.StateTree, currEpoch block.ChainEpoch) bool
     _challengeHasExpired(currEpoch block.ChainEpoch) bool
     _shouldChallenge(
         currEpoch            block.ChainEpoch
@@ -108,8 +113,8 @@ type StorageMinerActorState struct {
     _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) [deal.DealID]
     _initializeUtilizationInfo(rt Runtime, deals [deal.OnChainDeal]) sector.SectorUtilizationInfo
 
-    _getActivePower(rt Runtime) block.StoragePower
-    _getInactivePower(rt Runtime) block.StoragePower
+    _getActivePower()              (block.StoragePower, error)
+    _getInactivePower(rt Runtime)  block.StoragePower
     _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
     _getCurrUtilization(sectorNo sector.SectorNumber) (utilization block.StoragePower, found bool)
 

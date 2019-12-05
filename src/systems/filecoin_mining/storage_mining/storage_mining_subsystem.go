@@ -176,7 +176,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
 
 	// 1. Check that the miner in question is currently allowed to run election
-	if !st._canBeElected(header.Epoch()) {
+	if !st._canBeElected(header.ParentState(), header.Epoch()) {
 		return false
 	}
 

@@ -10,7 +10,7 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
+func (st *StoragePowerActorState_I) GetActivePower() block.StoragePower {
 	activePower := block.StoragePower(0)
 
 	for _, miner := range st.PowerTable() {

@@ -1,12 +1,21 @@
 package storage_mining
 
 import (
+	"errors"
+
+	ipld "github.com/filecoin-project/specs/libraries/ipld"
+	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+<<<<<<< HEAD
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+=======
+	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+>>>>>>> first pass at min miner req throughout system
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -28,7 +37,47 @@ func (st *StorageMinerActorState_I) _isChallenged() bool {
 	return st.ChallengeStatus().IsChallenged()
 }
 
-func (st *StorageMinerActorState_I) _canBeElected(epoch block.ChainEpoch) bool {
+func (st *StorageMinerActorState_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState {
+	powerAddr := addr.StoragePowerActorAddr
+	actorState := stateTree.GetActorState(powerAddr)
+	substateCID := actorState.State()
+
+	substate, subErr := node.LocalGraph().Get(ipld.CID(substateCID))
+	if subErr != nil {
+		panic("No CID error")
+	}
+
+	// TODO fix conversion to bytes
+	panic(substate)
+	var serializedSubstate util.Serialization
+	spa, err := spc.Deserialize_StoragePowerActorState(serializedSubstate)
+
+	if err == nil {
+		panic("Deserialization error")
+	}
+	return spa
+}
+
+func (st *StorageMinerActorState_I) _isSmallerThanMin(state stateTree.StateTree) bool {
+	spa := st._getStoragePowerActorState(state)
+	totPower := spa.GetActivePower()
+	minPower, err := st._getActivePower()
+	if err != nil {
+		// TODO: better err handling
+		return true
+	}
+
+	// if miner smaller than both min size in bytes and min percentage
+	if (minPower*MIN_MINER_SIZE_PERC < totPower*100) && minPower < MIN_MINER_SIZE_STOR {
+		return true
+	}
+	return false
+}
+
+func (st *StorageMinerActorState_I) _canBeElected(stateTree stateTree.StateTree, epoch block.ChainEpoch) bool {
+	if st._isSmallerThanMin(stateTree) {
+		return false
+	}
 	return st.ChallengeStatus().CanBeElected(epoch)
 }
 
@@ -90,7 +139,7 @@ func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePow
 		activePower += utilizationInfo.CurrUtilization()
 	}
 
-	return activePower
+	return activePower, nil
 }
 
 func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StoragePower {
