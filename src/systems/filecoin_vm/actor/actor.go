@@ -4,6 +4,8 @@ import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import util "github.com/filecoin-project/specs/util"
 
+var TODO = util.TODO
+
 type Serialization = util.Serialization
 
 const (
@@ -65,6 +67,11 @@ func (id *CodeID_I) IsSingleton() bool {
 
 func (x ActorSubstateCID) Ref() *ActorSubstateCID {
 	return &x
+}
+
+func TokenAmount_Placeholder() TokenAmount {
+	TODO()
+	panic("")
 }
 
 // Interface for runtime/VMContext functionality (to avoid circular dependency in Go imports)
