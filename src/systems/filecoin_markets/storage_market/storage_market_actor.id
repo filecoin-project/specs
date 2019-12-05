@@ -116,4 +116,6 @@ type StorageMarketActorCode struct {
     ProcessDealExpiration(rt Runtime, dealIDs [deal.DealID])
 
     GetPieceInfosForDealIDs(rt Runtime, dealIDs [deal.DealID]) [sector.PieceInfo]
+
+    ClearInactiveDealIDs(rt Runtime, dealIDs [deal.DealID])
 }

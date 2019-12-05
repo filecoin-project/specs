@@ -4,6 +4,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 
 type SectorExpirationQueueItem struct {
     SectorNumber  sector.SectorNumber
@@ -69,6 +70,7 @@ type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 // map from SectorNumber to amout of storage in active deals
 type SectorUtilizationAMT {sector.SectorNumber: sector.SectorUtilizationInfo}
 
+// Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits that are not yet returned or burned
 type StorageMinerActorState struct {
     PreCommittedSectors     PreCommittedSectorsAMT
     StagedCommittedSectors  StagedCommittedSectorAMT
@@ -110,6 +112,8 @@ type StorageMinerActorState struct {
     _getInactivePower(rt Runtime) block.StoragePower
     _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
     _getCurrUtilization(sectorNo sector.SectorNumber) (utilization block.StoragePower, found bool)
+
+    _getPreCommitDepositReq(rt Runtime) actor.TokenAmount
 }
 
 type StorageMinerActorCode struct {

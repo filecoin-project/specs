@@ -19,6 +19,7 @@ const (
 	Method_StorageMarketActor_ProcessDealPayment
 	Method_StorageMarketActor_VerifyPublishedDealIDs
 	Method_StorageMarketActor_ActivateDeals
+	Method_StorageMarketActor_ClearInactiveDealIDs
 )
 
 const LastPaymentEpochNone = 0
@@ -288,6 +289,32 @@ func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, sectorSiz
 	Release(rt, h, st)
 
 	return pieceInfos
+}
+
+func (a *StorageMarketActorCode_I) ClearInactiveDealIDs(rt Runtime, dealIDs []deal.DealID) {
+	h, st := a.State(rt)
+
+	for _, dealID := range dealIDs {
+		deal := st._safeGetOnChainDeal(rt, dealID)
+		st._assertPublishedDealState(rt, dealID)
+
+		dealP := deal.Deal().Proposal()
+		delete(st.Deals(), dealID)
+
+		// return client lock up (client deal collateral and total storage fee)
+		clientLockup := dealP.ClientBalanceRequirement()
+		st._unlockBalance(rt, dealP.Client(), clientLockup)
+
+		// return provider lock up
+		providerLockup := dealP.ProviderBalanceRequirement()
+		st._unlockBalance(rt, dealP.Provider(), providerLockup)
+
+		// Note that there is no penalty on provider deal collateral
+		// since PreCommitDeposit has been burned
+		// TODO: decide if this is sufficient and if we need to burn any deal collateral
+	}
+
+	UpdateRelease(rt, h, st)
 }
 
 func (a *StorageMarketActorCode_I) InvokeMethod(rt Runtime, method actor.MethodNum, params actor.MethodParams) InvocOutput {

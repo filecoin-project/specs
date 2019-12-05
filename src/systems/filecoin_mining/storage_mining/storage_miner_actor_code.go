@@ -620,19 +620,23 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 // Optimization: PreCommitSector could contain a list of deals that are not published yet.
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) InvocOutput {
 	TODO() // TODO: validate caller
-
 	// can be called regardless of Challenged status
 
-	// TODO: might take collateral in case no ProveCommit follows within sometime
-	// TODO: collateral also penalizes repeated precommit to get randomness that one likes
 	// TODO: might be a good place for Treasury
 
 	h, st := a.State(rt)
 
+	msgValue := rt.ValueReceived()
+	depositReq := st._getPreCommitDepositReq(rt)
+
+	if msgValue < depositReq {
+		rt.AbortFundsMsg("sm.PreCommitSector: insufficient precommit deposit.")
+	}
+
 	_, found := st.PreCommittedSectors()[info.SectorNumber()]
 
 	if found {
-		// TODO: burn some funds?
+		// no burn funds since miners can't do repeated precommit
 		rt.AbortStateMsg("Sector already pre committed.")
 	}
 
@@ -670,6 +674,8 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) InvocOutput {
 	TODO() // TODO: validate caller
 
+	msgSender := rt.ImmediateCaller()
+
 	h, st := a.State(rt)
 
 	preCommitSector, precommitFound := st.PreCommittedSectors()[info.SectorNumber()]
@@ -685,19 +691,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
 	if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
-		// TODO: potentially some slashing if ProveCommitSector comes late
 
-		// TODO: remove dealIDs from PublishedDeals
-
-		// expired
-
-		TODO()
-		// TODO: perform the following cleanup elsewhere (e.g. cron?). State changes will not
-		// be committed upon abort)
-		//
-		// delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-		// UpdateRelease(rt, h, st)
-
+		// PreCommittedSectors is cleaned up at _expirePreCommitSectors triggered by Cron
 		rt.Abort(
 			exitcode.UserDefinedError(exitcode.DeadlineExceeded),
 			"more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed")
@@ -791,8 +786,14 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// now remove SectorNumber from PreCommittedSectors (processed)
 	delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-
+	depositReq := st._getPreCommitDepositReq(rt)
 	UpdateRelease(rt, h, st)
+
+	// return deposit requirement to sender
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    msgSender,
+		Value_: depositReq,
+	})
 
 	return rt.SuccessReturn()
 }
@@ -809,17 +810,46 @@ func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
 func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 
 	h, st := a.State(rt)
+
+	expiredSectorNum := 0
+	inactiveDealIDs := make([]deal.DealID, 0)
+
 	for _, preCommitSector := range st.PreCommittedSectors() {
 
 		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
 
 		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-			// TODO: potentially some slashing if ProveCommitSector comes late
+			expiredSectorNum += 1
+			inactiveDealIDs = append(inactiveDealIDs, preCommitSector.Info().DealIDs()...)
 		}
 	}
+
+	depositToBurn := st._getPreCommitDepositReq(rt)
 	UpdateRelease(rt, h, st)
 
+	// send funds to BurntFundsActor
+	if depositToBurn > 0 {
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:    addr.BurntFundsActorAddr,
+			Value_: depositToBurn,
+		})
+	}
+
+	// clear inactive deals
+	if len(inactiveDealIDs) > 0 {
+		// @param []deal.DealID inactiveDealIDs
+		dealsToClearParams := make([]util.Serialization, 1)
+		for _, dealID := range inactiveDealIDs {
+			dealsToClearParams = append(dealsToClearParams, deal.Serialize_DealID(dealID))
+		}
+
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: market.Method_StorageMarketActor_ClearInactiveDealIDs,
+			Params_: dealsToClearParams,
+		})
+	}
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {

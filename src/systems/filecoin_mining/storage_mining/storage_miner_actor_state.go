@@ -4,6 +4,7 @@ import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
+	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 )
 
 func (st *StorageMinerActorState_I) _isChallenged() bool {
@@ -258,4 +259,14 @@ func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals
 
 	return initialUtilizationInfo
 
+}
+
+func (st *StorageMinerActorState_I) _getPreCommitDepositReq(rt Runtime) actor.TokenAmount {
+
+	// TODO: move this to Construct
+	minerInfo := st.Info()
+	sectorSize := minerInfo.SectorSize()
+	depositReq := actor.TokenAmount(uint64(PRECOMMIT_DEPOSIT_PER_BYTE) * uint64(sectorSize))
+
+	return depositReq
 }
