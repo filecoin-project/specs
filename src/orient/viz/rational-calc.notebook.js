@@ -46,18 +46,16 @@ table_constraints(solved_many, [
   'sector_size_gib',
 ], [])
 
-md`#### Encoding time`
+md`#### PoRep`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'encoding_time',
   'encoding_time_parallel',
-], [])
-
-md`#### PoRep`
-table_constraints(solved_many, [
-  'proof_name',
-  'graph_name',
+  'porep_commit_time',
+  'porep_commit_time_parallel',
+  'porep_snark_time',
+  'porep_snark_time_parallel',
   'porep_proof_size',
   'porep_snark_constraints',
   'porep_time'
