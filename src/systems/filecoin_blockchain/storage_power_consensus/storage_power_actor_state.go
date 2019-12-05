@@ -10,7 +10,21 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) GetActivePower() block.StoragePower {
+func (st *StoragePowerActorState_I) PowerIsSmallerThanMin(minPower block.StoragePower) bool {
+	totPower := st._getActivePower()
+
+	// TODO import from consts
+	MIN_MINER_SIZE_STOR := block.StoragePower(0)
+	MIN_MINER_SIZE_PERC := 0
+
+	// if miner smaller than both min size in bytes and min percentage
+	if (int(minPower)*MIN_MINER_SIZE_PERC < int(totPower)*100) && minPower < MIN_MINER_SIZE_STOR {
+		return true
+	}
+	return false
+}
+
+func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
 	activePower := block.StoragePower(0)
 
 	for _, miner := range st.PowerTable() {

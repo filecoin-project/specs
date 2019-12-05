@@ -117,15 +117,16 @@ Each Ticket should be generated from the prior one in the ticket-chain and verif
 In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to find a new winning `PartialTicket` and trying again. 
 Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch's appropriate time.
 
-{{<sref min_miner_size>}}
+{{<label min_miner_size>}}
 ## Minimum Miner Size
 
 {{% notice placeholder %}}
 The below values are currently placeholders.
-{{% /notice %}
+{{% /notice %}}
 
 In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
 
-Specifically, miners must have either at least 100TB of active power (i.e. storage power currently used in storage deals) or 1/3 of the network's active storage power. Put another way, this means that in order to achieve liveness, the network must have at least 3 active miners (running storage deals) or 300TB of active power.
+Specifically, miners must have either at least 100TB of active power (i.e. storage power currently used in storage deals) or 1/3 of the network's active storage power to participate in SPC.
+Miners smaller than this cannot mine blocks and earn block rewards. Put another way, this means that network liveness requires at least 3 active miners (running storage deals) or 300TB of active power.
 
 Accordingly, to bootstrap the network, the genesis block must include 3 valid storage deals made between the genesis miners(along with appropriate committed storage).

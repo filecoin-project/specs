@@ -38,7 +38,8 @@ type StoragePowerActorState struct {
         minerID        addr.Address
         affectedPower  block.StoragePower
     ) actor.TokenAmount
-    GetActivePower() block.StoragePower
+    _getActivePower() block.StoragePower
+    PowerIsSmallerThanMin(minPower block.StoragePower) bool
 }
 
 type StoragePowerActorCode struct {

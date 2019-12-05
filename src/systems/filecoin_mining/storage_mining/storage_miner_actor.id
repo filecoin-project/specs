@@ -91,8 +91,7 @@ type StorageMinerActorState struct {
 
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     _isChallenged()         bool
-    _isSmallerThanMin(stateTree stateTree.StateTree) bool
-    _canBeElected(stateTree stateTree.StateTree, currEpoch block.ChainEpoch) bool
+    _canBeElected(state stateTree.StateTree, currEpoch block.ChainEpoch) bool
     _challengeHasExpired(currEpoch block.ChainEpoch) bool
     _shouldChallenge(
         currEpoch            block.ChainEpoch

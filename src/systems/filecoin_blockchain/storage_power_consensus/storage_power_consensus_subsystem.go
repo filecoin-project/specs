@@ -47,7 +47,7 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 	challengeTicket := filcrypto.SHA256(partialTicket)
 
 	st := spc._getStoragePowerActorState(stateTree)
-	activePower := st.GetActivePower()
+	activePower := st._getActivePower()
 
 	// TODO: pull from constants
 	SAMPLE_NUM := util.UVarint(1)

@@ -58,24 +58,15 @@ func (st *StorageMinerActorState_I) _getStoragePowerActorState(stateTree stateTr
 	return spa
 }
 
-func (st *StorageMinerActorState_I) _isSmallerThanMin(state stateTree.StateTree) bool {
+func (st *StorageMinerActorState_I) _canBeElected(state stateTree.StateTree, epoch block.ChainEpoch) bool {
 	spa := st._getStoragePowerActorState(state)
-	totPower := spa.GetActivePower()
 	minPower, err := st._getActivePower()
 	if err != nil {
 		// TODO: better err handling
-		return true
+		return false
 	}
 
-	// if miner smaller than both min size in bytes and min percentage
-	if (minPower*MIN_MINER_SIZE_PERC < totPower*100) && minPower < MIN_MINER_SIZE_STOR {
-		return true
-	}
-	return false
-}
-
-func (st *StorageMinerActorState_I) _canBeElected(stateTree stateTree.StateTree, epoch block.ChainEpoch) bool {
-	if st._isSmallerThanMin(stateTree) {
+	if spa.PowerIsSmallerThanMin(minPower) {
 		return false
 	}
 	return st.ChallengeStatus().CanBeElected(epoch)
