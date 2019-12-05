@@ -327,10 +327,16 @@ ProofOfReplication:
     describe(kdf_time, "Time to compute a KDF", secs)
 
     encoding_time = encoding_window_time * windows
-    encoding_time_parallel = encoding_time / rig_cores
 
     encoding_window_time = (window_nodes * graph_parents) * kdf_time * stacked_layers
-    encoding_window_time_parallel = encoding_window_time / rig_cores
+
+    ParallelEncoding (StackedSDRParameters):
+      encoding_time_parallel = encoding_window_time + ((windows - 1) * encoding_window_time) / rig_cores
+      encoding_window_time_parallel = encoding_window_time
+
+    ParallelEncoding (StackedChungParameters):
+      encoding_time_parallel = encoding_time / rig_cores
+      encoding_window_time_parallel = encoding_window_time / rig_cores
 
     // TODO: adding wrapper layer
 
