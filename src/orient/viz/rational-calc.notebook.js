@@ -214,7 +214,7 @@ md`## Dev`
 md`### Orient`
 
 function solve_multiple(json) {
-  return fetch('http://localhost:8888/solve', {
+  return fetch(orientServer + '/solve', {
     body: JSON.stringify(json),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     method: 'POST'
@@ -234,7 +234,7 @@ function solve_multiple(json) {
 }
 
 function solve_manys(json) {
-  return fetch('http://localhost:8888/solve-many', {
+  return fetch(orientServer + '/solve-many', {
     body: JSON.stringify(json),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     method: 'POST'
@@ -275,7 +275,7 @@ function solve(json) {
   })
 }
 
-orientServer = 'http://127.0.0.1:8888'
+orientServer = `http://${window.location.hostname}:8888`
 
 md`### Orientable`
 
