@@ -3,7 +3,7 @@ md`# Proofs Tradeoff Report`
 viewof config = {
   const form = formToObject(html`
 <form>
-  <div><input type=range name=post_lambda min=1 max=128 step=1 value=8> <i>post_lambda</i></div>
+  <div><input type=range name=post_lambda min=1 max=128 step=1 value=10> <i>post_lambda</i></div>
 </form>`)
   return form
 }
@@ -19,16 +19,56 @@ combos = [wrapperVariant, wrapper, stackedReplicas]
 
 solved_many = (await solve_many(combos)).map(d => d[0])
 
+md`Graphs`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'porep_lambda',
+  'porep_challenges',
+  'post_lambda',
+  'post_challenges',
+  'stacked_layers',
+  'expander_parents',
+  'drg_parents',
+], [])
+
+md`Encoding time`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'encoding_time',
   'encoding_time_parallel',
-  'porep_proof_size',
-  'post_proof_size'
 ], [])
 
-report_from_result(solved_many[1], combos[1])
+md`PoRep`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'porep_proof_size',
+  'porep_snark_constraints',
+  'porep_time'
+], [])
+
+md`PoSt`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'post_proof_size',
+  'post_snark_constraints',
+  'post_time',
+  'post_data_access'
+], [])
+
+md`EPoSt`
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'epost_time',
+  'post_inclusions_time',
+  'epost_inclusions_time',
+  'epost_data_access'
+], [])
+// report_from_result(solved_many[1], combos[1])
 
 md`---`
 
