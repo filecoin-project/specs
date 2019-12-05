@@ -30,6 +30,17 @@ We must distinguish between both types of "miners" (storage and block miners). {
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
 
+## On Power
+
+Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called "Storage Power") as follows:
+
+**Consensus power in Filecoin is determined by in-deal storage**. For instance, if a miner had a 32GB sector, 20 of which were used as part of storage deals, only those 20 would contribute to said miner's *Storage Power*.
+
+Thereafter, power can be either *active* or *inactive* as defined in {{<sref storage_mining_subsystem>}}.
+
+In-deal or not does not determine whether power is active or inactive. Power has to come from active in-deal data. Active Power comes from deal data in Active sectors (and hence the deals are also active). Inactive Power comes from data in Committed, Recovering and Failing sectors. Miners still need to maintain pledge collateral for Inactive Power.
+
+
 {{<label tickets>}}
 ## Tickets
 
@@ -120,13 +131,20 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 {{<label min_miner_size>}}
 ## Minimum Miner Size
 
+In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
+
+Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of active power (i.e. storage power currently used in storage deals) or `MIN_MINER_SIZE_PERC` of the network's active storage power to participate in leader election.
+
+Miners smaller than this cannot mine blocks and earn block rewards in the network. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**. In that sense, miners smaller than the minimum size cannot generate blocks but nonetheless help secure consensus.
+
+Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.
+
+The `MIN_MINER_SIZE_PERC` condition will not be used in a network with more than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active storage.
+
 {{% notice placeholder %}}
 The below values are currently placeholders.
 {{% /notice %}}
 
-In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
-
-Specifically, miners must have either at least 100TB of active power (i.e. storage power currently used in storage deals) or 1/3 of the network's active storage power to participate in SPC.
-Miners smaller than this cannot mine blocks and earn block rewards. Put another way, this means that network liveness requires at least 3 active miners (running storage deals) or 300TB of active power.
-
-Accordingly, to bootstrap the network, the genesis block must include 3 valid storage deals made between the genesis miners(along with appropriate committed storage).
+We currently set:
+- `MIN_MINER_SIZE_STOR = 1 << 40 Bytes` (100 TiB)
+- `MIN_MINER_SIZE_PERC = .33`

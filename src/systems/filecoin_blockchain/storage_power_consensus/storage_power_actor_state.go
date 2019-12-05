@@ -10,7 +10,7 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (st *StoragePowerActorState_I) PowerIsSmallerThanMin(minPower block.StoragePower) bool {
+func (st *StoragePowerActorState_I) ActivePowerMeetsConsensusMinimum(minerPower block.StoragePower) bool {
 	totPower := st._getActivePower()
 
 	// TODO import from consts
@@ -18,10 +18,10 @@ func (st *StoragePowerActorState_I) PowerIsSmallerThanMin(minPower block.Storage
 	MIN_MINER_SIZE_PERC := 0
 
 	// if miner smaller than both min size in bytes and min percentage
-	if (int(minPower)*MIN_MINER_SIZE_PERC < int(totPower)*100) && minPower < MIN_MINER_SIZE_STOR {
-		return true
+	if (int(minerPower)*MIN_MINER_SIZE_PERC < int(totPower)*100) && minerPower < MIN_MINER_SIZE_STOR {
+		return false
 	}
-	return false
+	return true
 }
 
 func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {

@@ -17,6 +17,7 @@ block: "Block"
 block_producer: "Block Producer"
 ### SPC
 storage_power_consensus: "Storage Power Consensus"
+storage_power: "Storage Power"
 tickets: "Tickets"
 ticket_chain: "Ticket Chain"
 ticket_generation: "Ticket Generation"
@@ -51,6 +52,7 @@ storage_faults: "Storage Faults"
 # mining
 
 ### Storage Mining
+sector: "Sector"
 storage_mining_subsystem: "Storage Mining Subsystem"
 storage_miner_actor: "Storage Miner Actor"
 sector_sealer: "Sector Sealer"

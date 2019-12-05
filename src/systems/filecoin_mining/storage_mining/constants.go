@@ -16,7 +16,7 @@ const SURPRISE_CHALLENGE_FREQUENCY = 2 // placeholder
 const SUPRISE_NO_CHALLENGE_PERIOD = PROVING_PERIOD / SURPRISE_CHALLENGE_FREQUENCY // placeholder
 const EPOST_SAMPLE_NUM = 1                                                        // placeholder
 const EPOST_SAMPLE_DENOM = 25                                                     // placeholder
-const MIN_MINER_SIZE_STOR = 100                                                   // placeholder
+const MIN_MINER_SIZE_STOR = 1 << 40                                               // placeholder
 const MIN_MINER_SIZE_PERC = 33                                                    // placeholder, 100 TB
 // FIL deposit per sector precommit in Interactive PoRep
 // refunded after ProveCommit but burned if PreCommit expires

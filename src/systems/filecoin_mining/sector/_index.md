@@ -6,6 +6,8 @@ entries:
 - sealing
 ---
 
+{{<label sector>}}
+
 The `Sector` is a fundamental "storage container" abstraction used in Filecoin Storage Mining. It is the basic unit of storage,
 and serves to make storage conform to a set of expectations.
 

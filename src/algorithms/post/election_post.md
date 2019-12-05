@@ -208,4 +208,6 @@ While it resets a miner’s ElectionWindow, miners earn no reward from submittin
 
 Storage Power Consensus participants are subject to a {{<sref min_miner_size>}}, meaning miners smaller than `MIN_MINER_SIZE_STOR` of active (or in-deal) storage or whose active storage represents less than `MIN_MINER_SIZE_PERC`% of the network's cannot produce valid electionPoSts. 
 
-However, these miners can still run SurprisePosts and transmit them as messages to be added on-chain. Accordingly, new miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, they will be able to submit new blocks with ElectionPoSts as well.
+However, these miners still have active power and can still run and transmit SurprisePosts as messages to be added on-chain. These miners can also be faulted as usual for lacking to prove their power in a proving period. 
+
+New miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, they will be able to submit new blocks with ElectionPoSts as well.

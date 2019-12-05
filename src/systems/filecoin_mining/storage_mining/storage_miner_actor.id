@@ -91,7 +91,7 @@ type StorageMinerActorState struct {
 
     // No DeclareFaults and CommitSector can happen when SM is in the isChallenged state
     _isChallenged()         bool
-    _canBeElected(state stateTree.StateTree, currEpoch block.ChainEpoch) bool
+    _canBeElected(currEpoch block.ChainEpoch) bool
     _challengeHasExpired(currEpoch block.ChainEpoch) bool
     _shouldChallenge(
         currEpoch            block.ChainEpoch
@@ -114,9 +114,8 @@ type StorageMinerActorState struct {
 
     _getActivePower()              (block.StoragePower, error)
     _getInactivePower(rt Runtime)  block.StoragePower
-    _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
-    _getCurrUtilization(sectorNo sector.SectorNumber) (utilization block.StoragePower, found bool)
-
+    _safeGetUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
+    _getUtilizationInfo(sectorNo sector.SectorNumber) (sector.SectorUtilizationInfo, error)
     _getPreCommitDepositReq(rt Runtime) actor.TokenAmount
 }
 

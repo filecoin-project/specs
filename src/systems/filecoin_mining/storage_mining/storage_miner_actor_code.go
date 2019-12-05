@@ -456,7 +456,7 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 
 	for _, sectorNo := range sectorNumbers {
 
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
 		dealIDs = append(dealIDs, activeDealIDs...)
 
@@ -484,7 +484,7 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 	affectedPower := block.StoragePower(0)
 	for _, sectorNo := range sectorNumbers {
 
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		affectedPower += utilizationInfo.CurrUtilization()
 
 	}
