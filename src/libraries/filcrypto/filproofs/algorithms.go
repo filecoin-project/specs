@@ -435,7 +435,7 @@ func (sdr *WinStackedDRG_I) CreateSealProof(challengeSeed sector.InteractiveSeal
 	// Sanity check: newly-created proofs must pass verification.
 	util.Assert(sdr.VerifyPrivateSealProof(privateProof, aux.Seed(), challengeSeed, aux.CommD(), aux.CommR()))
 
-	return sdr.CreateOfflineCircuitProof(privateProof.WindowProofs, aux)
+	return sdr.CreateOfflineCircuitProof(privateProof, aux)
 }
 
 func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.InteractiveSealRandomness, aux sector.ProofAuxTmp) (privateProof PrivateOfflineProof) {
@@ -702,7 +702,7 @@ func (proof *SDRColumnProof) Verify(root []byte, challenge UInt) bool {
 	return proof.InclusionProof.Verify(root, challenge)
 }
 
-func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(challengeProofs []OfflineWindowProof, aux sector.ProofAuxTmp) sector.SealProof {
+func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof, aux sector.ProofAuxTmp) sector.SealProof {
 	// partitions := sdr.Partitions()
 	// publicInputs := GeneratePublicInputs()
 	panic("TODO")
