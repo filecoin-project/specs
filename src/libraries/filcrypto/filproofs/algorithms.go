@@ -443,7 +443,10 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 	windowSize := int(uint64(sdr.Cfg().SealCfg().SectorSize()) / UInt(sdr.WindowCount()))
 
 	for c := range windowChallenges {
-		windowProof := createWindowProof(sdr.Drg(), sdr.Expander(), sealSeed, UInt(c), nodeSize, dataTree, columnTree, qTree, aux, windows, windowSize)
+		columnProofs := createColumnProofs(sdr.WindowDrg(), sdr.WindowExpander(), UInt(c), nodeSize, columnTree, aux, windows, windowSize)
+		privateProof.ColumnProofs = append(privateProof.ColumnProofs, columnProofs...)
+
+		windowProof := createWindowProof(sdr.WindowDrg(), sdr.WindowExpander(), UInt(c), nodeSize, dataTree, columnTree, qTree, aux, windows, windowSize)
 		privateProof.WindowProofs = append(privateProof.WindowProofs, windowProof)
 	}
 
@@ -465,28 +468,28 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 	windowSize := int(UInt(sdr.Cfg().SealCfg().SectorSize()) / UInt(sdr.WindowCount())) // TOOD: Make this a function.
 	layers := int(sdr.Layers())
 	curveModulus := sdr.Curve().FieldModulus()
-	expander := sdr.Expander()
 	windowChallenges, wrapperChallenges := sdr._generateOfflineChallenges(sealSeed, randomness, sdr.Challenges(), sdr.WindowChallenges())
 
-	// commC and commRLast must be the same for all challenge proofs, so we can arbitrarily verify against the first.
 	windowProofs := privateProof.WindowProofs
-
-	firstWindowProof := windowProofs[0]
-	commC := firstWindowProof.ColumnProofs[0].InclusionProof.Root()
-
+	columnProofs := privateProof.ColumnProofs
 	wrapperProofs := privateProof.WrapperProofs
-	firstWrapperProof := wrapperProofs[0]
 
+	// commC, commQ, and commRLast must be the same for all challenge proofs, so we can arbitrarily verify against the first.
+	firstColumnProof := columnProofs[0]
+	firstWrapperProof := wrapperProofs[0]
+	commC := firstColumnProof.InclusionProof.Root()
 	commQ := firstWrapperProof.QLayerProofs[0].Root()
 	commRLast := firstWrapperProof.ReplicaProof.Root()
 
-	var qLayer []byte
+	windowDrgParentCount := int(sdr.WindowDRGCfg().Degree())
+	windowExpanderParentCount := int(sdr.WindowDRGCfg().Degree())
+	wrapperExpanderParentCount := int(sdr.ExpanderGraphCfg().Degree())
 
 	for i, challenge := range windowChallenges {
 		// Verify one OfflineSDRChallengeProof.
 		windowProof := windowProofs[i]
 		dataProof := windowProof.DataProof
-		columnProofs := windowProof.ColumnProofs
+		qLayerProof := windowProof.QLayerProof
 
 		// Verify column proofs and that they represent the right columns.
 		columnElements := getColumnElements(sdr.Drg(), sdr.Expander(), challenge)
@@ -506,26 +509,39 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 			for layer := 0; layer < layers; layer++ {
 				var parents []Label
 
-				for _, parentProof := range columnProofs[1:] {
-					parent := parentProof.Column[layer]
+				// First column proof is the challenge.
+				// Then the DRG parents.
+				for _, drgParentProof := range columnProofs[1 : 1+windowDrgParentCount] {
+					parent := drgParentProof.Column[layer]
 					parents = append(parents, parent)
 				}
-				providedLabel := columnProofs[columnElements[0]].Column[layer]
+				// And the expander parents, if not the first layer.
+				if layer > 0 {
+					for _, expanderParentProof := range columnProofs[1+windowDrgParentCount : 1+windowExpanderParentCount] {
+						parent := expanderParentProof.Column[layer-1]
+						parents = append(parents, parent)
+					}
+				}
+
 				calculatedLabel := generateLabel(sealSeed, i, w, parents)
 
 				if layer == layers-1 {
 					// Last layer includes encoding.
 					dataNode := dataProof.Leaf()
+					qLayerNode := qLayerProof.Leaf()
+
 					if !dataProof.Verify(commD, UInt(windowSize*w)+challenge) {
 						return false
 					}
+
 					encodedNode := encodeNode(dataNode, calculatedLabel, &curveModulus, nodeSize)
-					if !bytes.Equal(encodedNode, providedLabel) {
+
+					if !bytes.Equal(encodedNode, qLayerNode) {
 						return false
 					}
-					qLayer = append(qLayer, encodedNode...)
 
 				} else {
+					providedLabel := columnProofs[columnElements[0]].Column[layer]
 
 					if !bytes.Equal(calculatedLabel, providedLabel) {
 						return false
@@ -538,15 +554,15 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 	for i, challenge := range wrapperChallenges {
 		wrapperProof := wrapperProofs[i]
 		replicaProof := wrapperProof.ReplicaProof
+		qLayerProofs := wrapperProof.QLayerProofs
 
 		if !replicaProof.Verify(commRLast, challenge) {
 			return false
 		}
 
-		parentIndexes := expander.Parents(challenge)
 		var parents []Label
-		for _, parentIndex := range parentIndexes {
-			parent := Label(qLayer[int(parentIndex)*nodeSize : (int(parentIndex)+1)*nodeSize])
+		for i := 0; i < wrapperExpanderParentCount; i++ {
+			parent := qLayerProofs[i].Leaf()
 			parents = append(parents, parent)
 		}
 
@@ -567,14 +583,28 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 	return true
 }
 
-func createWindowProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, challenge UInt, nodeSize UInt, dataTree MerkleTree, columnTree MerkleTree, qLayerTree MerkleTree, aux sector.ProofAuxTmp, windows int, windowSize int) (proof OfflineWindowProof) {
+func createColumnProofs(drg *DRG_I, expander *ExpanderGraph_I, challenge UInt, nodeSize UInt, columnTree MerkleTree, aux sector.ProofAuxTmp, windows int, windowSize int) []SDRColumnProof {
 	columnElements := getColumnElements(drg, expander, challenge)
 
 	var columnProofs []SDRColumnProof
 	for c := range columnElements {
 		chall := UInt(c)
 
-		columnProof := createColumnProof(chall, nodeSize, columnTree, aux)
+		columnProof := createColumnProof(chall, nodeSize, windows, windowSize, columnTree, aux)
+		columnProofs = append(columnProofs, columnProof)
+	}
+
+	return columnProofs
+}
+
+func createWindowProof(drg *DRG_I, expander *ExpanderGraph_I, challenge UInt, nodeSize UInt, dataTree MerkleTree, columnTree MerkleTree, qLayerTree MerkleTree, aux sector.ProofAuxTmp, windows int, windowSize int) (proof OfflineWindowProof) {
+	columnElements := getColumnElements(drg, expander, challenge)
+
+	var columnProofs []SDRColumnProof
+	for c := range columnElements {
+		chall := UInt(c)
+
+		columnProof := createColumnProof(chall, nodeSize, windows, windowSize, columnTree, aux)
 		columnProofs = append(columnProofs, columnProof)
 	}
 
@@ -582,9 +612,8 @@ func createWindowProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.Se
 	qLayerProof := qLayerTree.ProveInclusion(challenge)
 
 	proof = OfflineWindowProof{
-		DataProof:    dataProof,
-		ColumnProofs: columnProofs,
-		QLayerProof:  qLayerProof,
+		DataProof:   dataProof,
+		QLayerProof: qLayerProof,
 	}
 
 	return proof
@@ -609,14 +638,17 @@ func getColumnElements(drg *DRG_I, expander *ExpanderGraph_I, challenge UInt) (c
 	return columnElements
 }
 
-func createColumnProof(c UInt, nodeSize UInt, columnTree MerkleTree, aux sector.ProofAuxTmp) (columnProof SDRColumnProof) {
+func createColumnProof(c UInt, nodeSize UInt, windowSize int, windows int, columnTree MerkleTree, aux sector.ProofAuxTmp) (columnProof SDRColumnProof) {
 	layers := aux.KeyLayers()
 	var column []Label
 
-	for i := 0; i < len(layers); i++ {
-		column = append(column, layers[i][c*nodeSize:(c+1)*nodeSize])
+	for w := 0; w < windows; w++ {
+		for i := 0; i < len(layers); i++ {
+			start := (w * windowSize) + int(c)
+			end := start + int(nodeSize)
+			column = append(column, layers[i][start:end])
+		}
 	}
-
 	columnProof = SDRColumnProof{
 		Column:         column,
 		InclusionProof: columnTree.ProveInclusion(c),
@@ -626,23 +658,25 @@ func createColumnProof(c UInt, nodeSize UInt, columnTree MerkleTree, aux sector.
 }
 
 type PrivateOfflineProof struct {
+	ColumnProofs  []SDRColumnProof
 	WindowProofs  []OfflineWindowProof
 	WrapperProofs []OfflineWrapperProof
+}
+
+// // Column proofs for all windows.
+// type OfflineWindowColumnProof struct {
+// 	ColumnProofs []SDRColumnProof
+// }
+
+type OfflineWindowProof struct {
+	// TODO: these proofs need to depend on hash function.
+	DataProof   InclusionProof // SHA256
+	QLayerProof InclusionProof
 }
 
 type OfflineWrapperProof struct {
 	ReplicaProof InclusionProof // Pedersen
 	QLayerProofs []InclusionProof
-}
-
-type OfflineWindowProof struct {
-	CommRLast Commitment
-	CommC     Commitment
-
-	// TODO: these proofs need to depend on hash function.
-	DataProof    InclusionProof // SHA256
-	QLayerProof  InclusionProof
-	ColumnProofs []SDRColumnProof
 }
 
 func (ip *InclusionProof_I) Leaf() []byte {
