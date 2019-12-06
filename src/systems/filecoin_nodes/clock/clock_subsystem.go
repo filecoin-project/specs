@@ -2,9 +2,6 @@ package clock
 
 import "time"
 
-// UTCMaxDrift is how large the allowable drift is in Filecoin's use of UTC time.
-var UTCMaxDrift = time.Second
-
 // UTCSyncPeriod notes how often to sync the UTC clock with an authoritative
 // source, such as NTP, or a very precise hardware clock.
 var UTCSyncPeriod = time.Hour

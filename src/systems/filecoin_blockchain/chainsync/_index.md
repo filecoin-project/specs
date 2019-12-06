@@ -352,11 +352,10 @@ See {{<sref block_validation>}} for complete collection of block validation rule
 - Validation computation is considerable, and a serious DOS attack vector.
 - Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.
 - `ChainSync` SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by `FinalityTipset`, or when `ChainSync` is under significant resource load.
-- It is key to note that any block received after the `ROUND_CUTOFF` time must be automatically discarded by the miner until the start of the next epoch.
 - These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.
 
 Notes:
-- in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV1)
+- in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)
 - in `CHAIN_FOLLOW`, we're not receiving thousands, we're receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we'll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed
 
 ## Progressive Block Propagation (or BlockSend)
@@ -385,7 +384,7 @@ Notes:
           - This is a light-ish object (<4KB).
       - `receiver` receives `bh`.
           - This has many fields that can be validated before pulling the messages. (See **Progressive Block Validation**).
-          - **BV0**, **BV1**, and **BV2** validation takes place before propagating `bh` to other nodes.
+          - **BV0**, **BV1**, **BV2**, and **BV3** validation takes place before propagating `bh` to other nodes.
           - `receiver` MAY receive many advertisements for each winning block in an epoch in quick succession. this is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, (c) we want to enable `receiver` to choose who to ask it from (usually the first party to advertise it, and that's what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)
   - **Step 2. (receiver) `Pull MessageCids`**:
       - upon receiving `bh`, `receiver` checks whether it already has the full block for `bh.BlockCID`. if not:
