@@ -4,11 +4,12 @@ import (
 	"math/big"
 
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	util "github.com/filecoin-project/specs/util"
 )
 
-func (self *ExpectedConsensus_I) ComputeChainWeight(tipset block.Tipset) block.ChainWeight {
+func (self *ExpectedConsensus_I) ComputeChainWeight(tipset chain.Tipset) block.ChainWeight {
 	panic("")
 	// see expected_consensus.md for detail
 
