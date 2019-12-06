@@ -20,7 +20,6 @@ import (
 
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 )
-
 type SHA256Hash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
@@ -28,6 +27,8 @@ type UInt = util.UInt
 type PieceInfo = *sector.PieceInfo_I
 type Label Bytes32
 type Commitment = sector.Commitment
+
+const WRAPPER_LAYER_WINDOW_INDEX = -1
 
 func WinSDRParams(cfg SDRCfg) *WinStackedDRG_I {
 	// TODO: Bridge constants with orient model.
@@ -154,17 +155,6 @@ func randInRange(lowInclusive int, highExclusive int) UInt {
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
-func RandomInt(randomness util.Randomness, nonce int, limit *big.Int) *big.Int {
-	nonceBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
-	input := randomness
-	input = append(input, nonceBytes...)
-	ranHash := HashBytes_SHA256Hash(input[:])
-	hashInt := bigIntFromLittleEndianBytes(ranHash)
-	num := hashInt.Mod(hashInt, limit)
-	return num
-}
-
 func (exp *ExpanderGraph_I) Parents(node UInt) []UInt {
 	d := exp.Config().Degree()
 
@@ -234,13 +224,7 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 		windowCommDTreePaths = append(windowCommDTreePaths, windowCommDTreePath)
 	}
 
-	var windowDataRootLeafRow []byte
-	for _, comm := range windowCommDs {
-		rootLeaf := AsBytes_UnsealedSectorCID(comm)
-		windowDataRootLeafRow = append(windowDataRootLeafRow, rootLeaf...)
-	}
-
-	commD, _ := ComputeDataCommitment(windowDataRootLeafRow)
+	commD, _ := ComputeDataCommitment(data)
 	sealSeed := computeSealSeed(sid, randomness, commD)
 
 	for i := 0; i < windowCount; i++ {
@@ -252,9 +236,7 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 
 	qLayer := encodeDataInPlace(data, finalWindowKeyLayer, nodeSize, &curveModulus)
 
-	wrapperWindowIndex := windowCount
-
-	replica := labelLayer(sdr.Drg(), sdr.Expander(), sealSeed, wrapperWindowIndex, nodes, nodeSize, qLayer)
+	replica := labelLayer(nil, sdr.Expander(), sealSeed, WRAPPER_LAYER_WINDOW_INDEX, nodes, nodeSize, qLayer)
 
 	commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, windowKeyLayers, qLayer)
 
@@ -305,7 +287,6 @@ func computeSealSeed(sid sector.SectorID, randomness sector.SealRandomness, comm
 	var preimage []byte
 	preimage = append(preimage, proverId...)
 	preimage = append(preimage, bigEndianBytesFromUInt(UInt(sectorNumber), 8)...)
-	preimage = append(preimage, bigEndianBytesFromInt(windowIndex, 8)...)
 	preimage = append(preimage, randomness...)
 	preimage = append(preimage, Commitment_UnsealedSectorCID(commD)...)
 
@@ -370,12 +351,18 @@ func encodeDataInPlace(data []byte, key []byte, nodeSize int, modulus *big.Int) 
 }
 
 func generateLabel(sealSeed sector.SealSeed, node int, window int, dependencies []Label) []byte {
-	windowBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(windowBytes, uint64(window))
+	preimage := sealSeed
+
+	if window != WRAPPER_LAYER_WINDOW_INDEX {
+		windowBytes := make([]byte, 8)
+		binary.LittleEndian.PutUint64(windowBytes, uint64(window))
+
+		preimage = append(preimage, windowBytes...)
+	}
+
 	nodeBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(nodeBytes, uint64(node))
 
-	preimage := append(sealSeed, windowBytes...)
 	preimage = append(preimage, nodeBytes...)
 	for _, dependency := range dependencies {
 		preimage = append(preimage, dependency...)
@@ -1379,4 +1366,16 @@ func fromBytes_T(_ interface{}) util.T {
 
 func isPow2(n int) bool {
 	return n != 0 && n&(n-1) == 0
+}
+
+// FIXME: This does not belong in filproofs, and no effort is being made to ensure it has any particular properties.
+func RandomInt(randomness util.Randomness, nonce int, limit *big.Int) *big.Int {
+	nonceBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
+	input := randomness
+	input = append(input, nonceBytes...)
+	ranHash := HashBytes_SHA256Hash(input[:])
+	hashInt := bigIntFromLittleEndianBytes(ranHash)
+	num := hashInt.Mod(hashInt, limit)
+	return num
 }
