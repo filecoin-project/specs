@@ -116,6 +116,18 @@ func (sdr *WinStackedDRG_I) Expander() *ExpanderGraph_I {
 	}
 }
 
+func (sdr *WinStackedDRG_I) WindowDrg() *DRG_I {
+	return &DRG_I{
+		Config_: sdr.WindowDRGCfg(),
+	}
+}
+
+func (sdr *WinStackedDRG_I) WindowExpander() *ExpanderGraph_I {
+	return &ExpanderGraph_I{
+		Config_: sdr.WindowExpanderGraphCfg(),
+	}
+}
+
 func (drg *DRG_I) Parents(node UInt) []UInt {
 	config := drg.Config()
 	degree := UInt(config.Degree())
@@ -265,7 +277,7 @@ func (sdr *WinStackedDRG_I) _generateWindowKey(sealSeed sector.SealSeed, windowI
 	curveModulus := sdr.Curve().FieldModulus()
 	layers := int(sdr.Layers())
 
-	keyLayers := generateSDRKeyLayers(sdr.Drg(), sdr.Expander(), sealSeed, windowIndex, nodes, layers, nodeSize, curveModulus)
+	keyLayers := generateSDRKeyLayers(sdr.WindowDrg(), sdr.WindowExpander(), sealSeed, windowIndex, nodes, layers, nodeSize, curveModulus)
 
 	return keyLayers
 }

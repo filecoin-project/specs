@@ -89,6 +89,10 @@ type WinStackedDRG struct {
 
     Drg()                   DRG
     Expander()              ExpanderGraph
+
+    WindowDrg()             DRG
+    WindowExpander()        ExpanderGraph
+
     Seal(
         sid         sector.SectorID
         data        Bytes
