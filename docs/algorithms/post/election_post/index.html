@@ -1741,6 +1741,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+    
+    
+        RewardActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4173,6 +4204,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#algorithms__cryptoecon" class="menu-item depth-2">
+    
+    
+        Cryptoecon
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4574,7 +4638,7 @@ https://github.com/alex-shpak/hugo-book
 
 <p>This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.</p>
 
-<h1 id="high-level-api">High Level API</h1>
+<h1 id="at-a-high-level">At a High Level</h1>
 
 <p>Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election. The probability of scratching a winning ChallengeTicket is dependent on sector size and total storage. Miners are rewarded in proportion to the quantity of winning ChallengeTickets they generate in a given epoch, thereby incentivizing a miner to check as much of their storage as allowed in order to express their full power in a leader election. The number of election proofs a miner can generate in a given epoch will determine the block reward it earns.</p>
 
@@ -4582,17 +4646,21 @@ https://github.com/alex-shpak/hugo-book
 
 <p>This does mean that, in a given round, a lucky miner may succeed in generating a block by proving only a single sector, but again on expectation, a miner will have to prove their sectors at every single round in order for their full power to contribute to block generation. In the event one of the miner’s sectors cannot be proven (i.e. the miner does not have access to the nodes from that sector), no tickets will be returned. In order to prevent this, a miner can declare faults on their faulty sectors to avoid having to include them in the eligible sector set. Their power will be reduced accordingly.</p>
 
-<h1 id="electionpost">ElectionPoSt</h1>
+<p>The Election-PoSt construction includes a Surprise PoSt cleanup which will automatically challenge leaders who have not been elected in some time so they can prove their storage within a given proving period. Any miner who does not prove their power either by ElectionPoSt or SurprisePoSt within a proving period will be penalized accordingly.</p>
+
+<h2 id="electionpost">ElectionPoSt</h2>
 
 <p>To enable short PoSt response time, miners are required submit a PoSt when they are elected to mine a block, hence PoSt on election or ElectionPoSt. When miners win a block, they need to immediately generate a PoStProof and submit that along with the winning PartialTickets. Both the PartialTickets and PoStProof are checked at Block Validation by <code>StoragePowerConsenusSubsystem</code>. When a block is included, a special message is added that calls <code>SubmitElectionPoSt</code> which will process sector updates in the same way as successful <code>SubmitSurprisePoSt</code> do.</p>
 
-<h1 id="surprisepost">SurprisePoSt</h1>
+<h2 id="surprisepost-cleanup">SurprisePoSt Cleanup</h2>
 
 <p>The chain keeps track of the last time that a miner received and submitted a Challenge (Election or Surprise). It randomly challenges a miner to submit a surprisePoSt once per <code>ProvingPeriod</code> in the latter half of their <code>ProvingPeriod</code>. For every miner challenged, a <code>NotifyOfPoStSurpriseChallenge</code> is issued and sent as an on-chain message to surprised <code>StorageMinerActor</code>. However, if the <code>StorageMinerActor</code> is already proving a SurprisePoStChallenge (<code>IsChallenged</code> is True) or the <code>StorageMinerActor</code> has received a challenge (by Election or Surprise) within the <code>MIN_CHALLENGE_PERIOD</code> (<code>ShouldChallenge</code> is False), then the PoSt surprise notification will be ignored and return success.</p>
 
 <p>For more on these components, see <a href="../../../../#algorithms__post__election_post">Election PoSt</a>. At a high-level though both are needed for different reasons:
 - By coupling leader election and PoSt, <code>ElectionPoSt</code> ensures that miners must do the work to prove their sectors at every round in order to earn block rewards.
 - Small miners may not win on a regular basis however, <code>SurprisePoSt</code> thus comes in as a lower-bound to how often miners must PoSt and helps ensure the Power Table does not grow stale for its long-tail of smaller miners.</p>
+
+<h1 id="in-detail">In Detail</h1>
 
 <h2 id="electionpost-generation">ElectionPoSt Generation</h2>
 
@@ -4767,6 +4835,8 @@ For i=0; i &lt; challNumber; i++:
 
 <p>An alternative approach would be to assign a probability of being challenged to each miner which grows at every epoch to be 1 PP epochs from the last challenge (but this would require more computation since every miner would have to be checked at every epoch).</p>
 
+<h1 id="faults">Faults</h1>
+
 <h2 id="fault-detection">Fault Detection</h2>
 
 <p>Fault detection happens over the course of the life time of a sector. When the sector is unavailable for some reason, the miner must submit the known <code>faults</code> in order for that sector not to be tested before the PoSt challenge begins.
@@ -4789,7 +4859,15 @@ When such a PoSt proof is successfully submitted all faults are reset and assume
 
 <p>Note that surprise PoSt will frequently be used by small miners who do not win blocks, and by miners as they are onboarding power to the network, since they will not be able to win any blocks (they have no power) and hence gain power through ElectionPoSt.</p>
 
-<p>While it resets a miner’s ElectionWindow, miners earn no reward from submitting SurprisePoSt messages. This mechanism does forces a miner to announce their faults and clean up the Power Table accordingly.</p>
+<p>While it resets a miner’s ElectionWindow, miners earn no reward from submitting SurprisePoSt messages. This mechanism does force a miner to announce their faults and clean up the Power Table accordingly.</p>
+
+<h1 id="miner-onboarding">Miner Onboarding</h1>
+
+<p>Storage Power Consensus participants are subject to a <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__min_miner_size">Minimum Miner Size</a>, meaning miners smaller than <code>MIN_MINER_SIZE_STOR</code> of active (or in-deal) storage or whose active storage represents less than <code>MIN_MINER_SIZE_PERC</code>% of the network&rsquo;s cannot produce valid electionPoSts.</p>
+
+<p>However, these miners still have active power and can still run and transmit SurprisePosts as messages to be added on-chain. These miners can also be faulted as usual for lacking to prove their power in a proving period.</p>
+
+<p>New miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, they will be able to submit new blocks with ElectionPoSts as well.</p>
 
 </article>
 
@@ -4804,17 +4882,24 @@ When such a PoSt proof is successfully submitted all faults are reset and assume
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#high-level-api">High Level API</a></li>
+<li><a href="#at-a-high-level">At a High Level</a>
+<ul>
 <li><a href="#electionpost">ElectionPoSt</a></li>
-<li><a href="#surprisepost">SurprisePoSt</a>
+<li><a href="#surprisepost-cleanup">SurprisePoSt Cleanup</a></li>
+</ul></li>
+<li><a href="#in-detail">In Detail</a>
 <ul>
 <li><a href="#electionpost-generation">ElectionPoSt Generation</a></li>
 <li><a href="#electionpost-verification">ElectionPoSt verification</a></li>
 <li><a href="#surprise-post-cleanup">Surprise PoSt cleanup</a></li>
+</ul></li>
+<li><a href="#faults">Faults</a>
+<ul>
 <li><a href="#fault-detection">Fault Detection</a></li>
 <li><a href="#fault-recovery">Fault Recovery</a></li>
 <li><a href="#fault-penalization">Fault Penalization</a></li>
 </ul></li>
+<li><a href="#miner-onboarding">Miner Onboarding</a></li>
 </ul>
 </nav>
   </aside>

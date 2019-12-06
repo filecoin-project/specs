@@ -4,6 +4,7 @@ import (
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+	chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -32,7 +33,7 @@ func (spc *StoragePowerConsensusSubsystem_I) validateTicket(ticket block.Ticket,
 	return ticket.Verify(randomness1, pk, minerActorAddr)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset block.Tipset) block.ChainWeight {
+func (spc *StoragePowerConsensusSubsystem_I) ComputeChainWeight(tipset chain.Tipset) block.ChainWeight {
 	return spc.ec().ComputeChainWeight(tipset)
 }
 
@@ -43,7 +44,7 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower) bool {
 
 	// finalize the partial ticket
-	challengeTicket := block.SHA256(partialTicket)
+	challengeTicket := filcrypto.SHA256(partialTicket)
 
 	st := spc._getStoragePowerActorState(stateTree)
 	activePower := st._getActivePower()
@@ -79,15 +80,15 @@ func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTre
 	return st
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetTicketProductionRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_TICKET)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetSealRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_SEAL)
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness {
+func (spc *StoragePowerConsensusSubsystem_I) GetPoStChallengeRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness {
 	return chain.RandomnessAtEpoch(epoch - SPC_LOOKBACK_POST)
 }
 

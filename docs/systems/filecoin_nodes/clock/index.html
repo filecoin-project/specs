@@ -1742,6 +1742,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+    
+    
+        RewardActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4174,6 +4205,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#algorithms__cryptoecon" class="menu-item depth-2">
+    
+    
+        Cryptoecon
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4572,6 +4636,8 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
+<div id="systems__filecoin_nodes__clock__clock"></div>
+
 <p>
 
 
@@ -4639,9 +4705,6 @@ https://github.com/alex-shpak/hugo-book
 
 <span class="kn">import</span> <span class="s">&#34;time&#34;</span>
 
-<span class="c1">// UTCMaxDrift is how large the allowable drift is in Filecoin&#39;s use of UTC time.
-</span><span class="c1"></span><span class="kd">var</span> <span class="nx">UTCMaxDrift</span> <span class="p">=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>
-
 <span class="c1">// UTCSyncPeriod notes how often to sync the UTC clock with an authoritative
 </span><span class="c1">// source, such as NTP, or a very precise hardware clock.
 </span><span class="c1"></span><span class="kd">var</span> <span class="nx">UTCSyncPeriod</span> <span class="p">=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span>
@@ -4669,26 +4732,25 @@ https://github.com/alex-shpak/hugo-book
 
 </p>
 
-<p>Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock, tolerating bounded delay in honest clock lower than epoch time (more on this in a forthcoming paper).</p>
+<p>Filecoin assumes weak clock synchrony amongst participants in the system. That is, the system relies on participants having access to a globally synchronized clock (tolerating some bounded drift).</p>
 
-<p>Filecoin relies on this system clock in order to secure consensus, specifically ensuring that participants are only running leader elections once per epoch and enabling miners to catch such deviations from the protocol. Given a system start and epoch time by the genesis block, the system clock allows miners to associate epoch and wall clock time, thereby enabling them to reason about block validity and give the protocol liveness.</p>
+<p>Filecoin relies on this system clock in order to secure consensus.  Specifically the clock is necessary to support validation rules that prevent block producers from mining blocks with a future timstamp, and running leader elections more frequently than the protocol allows.</p>
 
 <h2 id="clock-uses">Clock uses</h2>
 
-<p>Specifically, the Filecoin system clock is used:</p>
+<p>The Filecoin system clock is used:</p>
 
 <ul>
-<li>to validate incoming blocks and ensure they were mined in the appropriate round, looking at the wall clock time in conjunction with the block&rsquo;s epoch number (see <a href="../../../../#systems__filecoin_blockchain__chainsync__block_validation">Block Validation</a>).</li>
-<li>to help protocol convergence by giving miners a specific cutoff after which to reject incoming blocks in this round (see <a href="../../../../#systems__filecoin_blockchain__chainsync">ChainSync - synchronizing the Blockchain</a>).</li>
-<li>to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in this round (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a>).</li>
+<li>by syncing nodes to validate that incoming blocks were mined in the appropriate epoch given their timestamp (see <a href="../../../../#systems__filecoin_blockchain__block__block_validation">Block Validation</a>).  This is possible because the system clock maps all times to a unique epoch number totally determined by the start time in the genesis block.</li>
+<li>by syncing nodes to drop blocks coming from a future epoch</li>
+<li>by mining nodes to maintain protocol liveness by allowing participants to try leader election in the next round if no one has produced a block in the current round (see <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a>).</li>
 </ul>
 
 <p>In order to allow miners to do the above, the system clock must:</p>
 
 <ol>
-<li>have low clock drift: at most on the order of 1s (i.e. markedly lower than epoch time) at any given time.</li>
-<li>maintain accurate network time over many epochs: resyncing and enforcing accurate network time.</li>
-<li>set epoch number on client initialization equal to <code>epoch ~= (current_time - genesis_time) / epoch_time</code></li>
+<li>Have low enough clock drift relative to other nodes so that blocks are not mined in epochs considered future epochs from the persective of other nodes.</li>
+<li>Set epoch number on node initialization equal to <code>epoch = Floor[(current_time - genesis_time) / epoch_time]</code></li>
 </ol>
 
 <p>It is expected that other subsystems will register to a NewRound() event from the clock subsystem.</p>
@@ -4709,21 +4771,18 @@ https://github.com/alex-shpak/hugo-book
 <li>We further recommend making 3 measurements in order to drop by using the network to drop outliers</li>
 <li>See how <a href="https://github.com/ethereum/go-ethereum/blob/master/p2p/discv5/ntp.go">go-ethereum does this</a> for inspiration</li>
 </ul></li>
-<li>clients CAN consider using cesium clocks instead for accurate synchrony within larger mining operations</li>
+<li>clients MAY consider using cesium clocks instead for accurate synchrony within larger mining operations</li>
 </ul>
 
-<p>Assuming a majority of rational participants, the above should lead to relatively low skew over time, with seldom more than 10-20% clock skew that should be rectified periodically by the network, as is the case in other networks. This assumption can be tested over time by ensuring that:</p>
-
-<ul>
-<li>(real-time) epoch time is as dictated by the protocol</li>
-<li>(historical) the current epoch number is as expected</li>
-</ul>
+<p>Mining operations have a strong incentive to prevent their clock from drifting ahead more than one epoch to keep their block submissions from being rejected.  Likewise they have an incentive to prevent their clocks from drifting behind more than one epoch to avoid partitioning themselves off from the synchronized nodes in the network.</p>
 
 <h2 id="future-work">Future work</h2>
 
 <p>If either of the above metrics show significant network skew over time, future versions of Filecoin may include potential timestamp/epoch correction periods at regular intervals.</p>
 
-<p>More generally, future versions of the Filecoin protocol will use Verifiable Delay Functions (VDFs) to strongly enforce block time and fulfill this leader election requirement; we choose to explicitly assume clock synchrony until hardware VDF security has been proven more extensively.</p>
+<p>When recoverying from exceptional chain halting outages (for example all implementations panic on a given block) the network can potentially opt for per-outage &ldquo;dead zone&rdquo; rules banning the authoring of blocks during the outage epochs to prevent attack vectors related to unmined epochs during chain restart.</p>
+
+<p>Future versions of the Filecoin protocol may use Verifiable Delay Functions (VDFs) to strongly enforce block time and fulfill this leader election requirement; we choose to explicitly assume clock synchrony until hardware VDF security has been proven more extensively.</p>
 </article>
 
       

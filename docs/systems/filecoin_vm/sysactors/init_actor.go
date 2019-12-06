@@ -69,33 +69,35 @@ func (a *InitActorCode_I) Exec(rt Runtime, codeID actor.CodeID, constructorParam
 		rt.AbortArgMsg("cannot exec an actor of this type")
 	}
 
-	newAddr := rt.NewActorAddress()
-
-	actorState := &actor.ActorState_I{
-		CodeID_:     codeID,
-		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
-		Balance_:    actor.TokenAmount(0),
-		CallSeqNum_: 0,
-	}
-
-	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
-
-	// Get the actor ID for this actor.
+	// Allocate an ID for this actor.
 	h, st := _loadState(rt)
 	actorID := st._assignNextID()
+	idAddr := addr.Address_Make_ID(addr.Address_NetworkID_Testnet, actorID)
 
-	// Store the mappings of address to actor ID.
+	// Store the mapping of a re-org-stable address to actor ID.
+	// This address exists for use by messages coming from outside the system, in order to
+	// stably address the newly created actor even if a chain re-org causes it to end up with
+	// a different ID.
+	newAddr := rt.NewActorAddress()
 	st.AddressMap()[newAddr] = actorID
-
 	UpdateRelease(rt, h, st)
 
-	// Note: the following call may fail (e.g., if the actor already exists, or the actor's own
-	// constructor call fails). In this case, an error should propagate up and cause Exec to fail
-	// as well.
-	rt.CreateActor(actorStateCID, newAddr, rt.ValueReceived(), constructorParams)
+	// Create the empty actor.
+	// It's (empty) state must be stored under the ID-address before the constructor can be
+	// invoked to initialize it.
+	rt.CreateActor(codeID, idAddr)
+
+	// Invoke its constructor. If construction fails, the error should propagate and cause
+	// Exec to fail too.
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     idAddr,
+		Method_: actor.MethodConstructor,
+		Params_: constructorParams,
+		Value_:  rt.ValueReceived(),
+	})
 
 	return rt.ValueReturn(
-		Bytes(addr.Serialize_Address_Compact(newAddr)))
+		Bytes(addr.Serialize_Address_Compact(idAddr)))
 }
 
 func (s *InitActorState_I) _assignNextID() addr.ActorID {

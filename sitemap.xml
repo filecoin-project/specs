@@ -154,6 +154,10 @@
   </url>
   
   <url>
+    <loc>/docs/algorithms/cryptoecon/</loc>
+  </url>
+  
+  <url>
     <loc>/docs/algorithms/crypto/</loc>
   </url>
   
@@ -487,6 +491,10 @@
   
   <url>
     <loc>/docs/systems/filecoin_markets/retrieval_market/retrieval_provider/</loc>
+  </url>
+  
+  <url>
+    <loc>/docs/systems/filecoin_vm/sysactors/reward_actor/</loc>
   </url>
   
   <url>

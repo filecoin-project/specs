@@ -252,7 +252,7 @@ Format The format consists of a header, followed by a series of blocks, of which
       
       <guid>/docs/algorithms/post/election_post/</guid>
       <description>This document describes Election-PoSt, the Proof-of-Spacetime used in Filecoin.
-High Level API Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election.</description>
+At a High Level Election PoSt couples the PoSt process with block production, meaning that in order to produce a block, the miner must produce a valid PoSt proof (snark output). Specifically, a subset of non-faulted sectors the miner is storing (i.e. eligible sectors) allows them to attempt a leader election using a PartialTicket any of which could yield a valid ChallengeTicket for leader election.</description>
     </item>
     
     <item>
@@ -274,8 +274,8 @@ This section should contain:
       <guid>/docs/systems/filecoin_markets/storage_market/faults/</guid>
       <description>There are two main categories of faults in the Filecoin network.
  ConsensusFaults StorageDealFaults  ConsensusFaults are faults that impact network consensus and StorageDealFaults are faults where data in a StorageDeal is not maintained by the providers pursuant to deal terms.
- is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
-Any misbehavior may result in more than one fault thus lead to slashing on both collaterals. For example, missing a PoStProof will incur a penalty on both PledgeCollateral and StorageDealCollateral given it impacts both a given StorageDeal and power derived from the sector commitments in Storage Power Consensus.</description>
+Pledge Collateral is slashed for ConsensusFaults and Storage Deal Collateral for StorageDealFaults.
+Any misbehavior may result in more than one fault thus lead to slashing on both collaterals.</description>
     </item>
     
     <item>
@@ -485,7 +485,7 @@ import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/ac
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/docs/systems/filecoin_nodes/node_types/node/</guid>
-      <description>Something&#39;s not right. The filecoin_node.id file was not found.</description>
+      <description> import repo &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/repository&amp;#34; import filestore &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/file&amp;#34; import clock &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/clock&amp;#34; import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import msg &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/message&amp;#34; import ipld &amp;#34;github.com/filecoin-project/specs/libraries/ipld&amp;#34; import key_store &amp;#34;github.com/filecoin-project/specs/systems/filecoin_nodes/key_store&amp;#34; type FilecoinNode struct { Node libp2p.Node Repository repo.Repository FileStore filestore.FileStore Clock clock.UTCClock LocalGraph ipld.GraphStore KeyStore key_store.KeyStore SubmitMessage(m msg.SignedMessage) error }  </description>
     </item>
     
     <item>
@@ -636,6 +636,15 @@ import piece &amp;#34;github.com/filecoin-project/specs/systems/filecoin_files/p
     </item>
     
     <item>
+      <title>RewardActor</title>
+      <link>/docs/systems/filecoin_vm/sysactors/reward_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/reward_actor/</guid>
+      <description>RewardActor is where unminted and unvested Filecoin tokens are kept. At genesis, RewardActor is initiailized with investor accounts, tokens, and vesting schedule in a RewardMap which is a mapping from owner addressws to Reward structs. A Reward struct contains a StartEpoch that keeps track of when this Reward is created, Value that represents the total number of tokens rewarded, and ReleaseRate which is the linear rate of release in the unit of FIL per Epoch.</description>
+    </item>
+    
+    <item>
       <title>Sector Builder</title>
       <link>/docs/systems/filecoin_mining/sector_index/sector_builder/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -776,7 +785,7 @@ Introduction Background on Proof-of-Replication Proof-of-Replication enables a p
       
       <guid>/docs/systems/filecoin_mining/storage_mining/storage_miner_actor/</guid>
       <description>(You can see the old Storage Miner Actor here )
-StorageMinerActor interface import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; type SectorExpirationQueueItem struct { SectorNumber sector.SectorNumber Expiration block.ChainEpoch } type SectorExpirationQueue struct { Add(i SectorExpirationQueueItem) Pop() SectorExpirationQueueItem Peek() SectorExpirationQueueItem Remove(n sector.SectorNumber) } type SectorTable struct { SectorSize sector.SectorSize ActiveSectors sector.CompactSectorSet CommittedSectors sector.CompactSectorSet RecoveringSectors sector.CompactSectorSet FailingSectors sector.</description>
+StorageMinerActor interface import libp2p &amp;#34;github.com/filecoin-project/specs/libraries/libp2p&amp;#34; import sealing &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import sector &amp;#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&amp;#34; import address &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import block &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&amp;#34; import deal &amp;#34;github.com/filecoin-project/specs/systems/filecoin_markets/deal&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import stateTree &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/state_tree&amp;#34; import spc &amp;#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus&amp;#34; type SectorExpirationQueueItem struct { SectorNumber sector.SectorNumber Expiration block.ChainEpoch } type SectorExpirationQueue struct { Add(i SectorExpirationQueueItem) Pop() SectorExpirationQueueItem Peek() SectorExpirationQueueItem Remove(n sector.SectorNumber) } type SectorTable struct { SectorSize sector.SectorSize ActiveSectors sector.</description>
     </item>
     
     <item>

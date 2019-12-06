@@ -61,5 +61,14 @@ import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor
 import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; type InitActorState struct { // responsible for create new actors  AddressMap {addr.Address: addr.ActorID} NextID addr.ActorID _assignNextID() addr.ActorID } type InitActorCode struct { Constructor(r vmr.Runtime) Exec(r vmr.Runtime, code actor.CodeID, params actor.MethodParams) addr.Address GetActorIDForAddress(r vmr.Runtime, address addr.Address) addr.ActorID }  package sysactors import addr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&amp;#34; import actor &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor&amp;#34; import vmr &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime&amp;#34; import exitcode &amp;#34;github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode&amp;#34; import util &amp;#34;github.</description>
     </item>
     
+    <item>
+      <title>RewardActor</title>
+      <link>/docs/systems/filecoin_vm/sysactors/reward_actor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/docs/systems/filecoin_vm/sysactors/reward_actor/</guid>
+      <description>RewardActor is where unminted and unvested Filecoin tokens are kept. At genesis, RewardActor is initiailized with investor accounts, tokens, and vesting schedule in a RewardMap which is a mapping from owner addressws to Reward structs. A Reward struct contains a StartEpoch that keeps track of when this Reward is created, Value that represents the total number of tokens rewarded, and ReleaseRate which is the linear rate of release in the unit of FIL per Epoch.</description>
+    </item>
+    
   </channel>
 </rss>

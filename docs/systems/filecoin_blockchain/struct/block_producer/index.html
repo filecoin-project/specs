@@ -1742,6 +1742,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+    
+    
+        RewardActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4174,6 +4205,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#algorithms__cryptoecon" class="menu-item depth-2">
+    
+    
+        Cryptoecon
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4594,11 +4658,11 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Let&rsquo;s illustrate this with an example.</p>
 
-<p>Miner M is mining at Height H.
+<p>Miner M is mining at epoch H.
 Heaviest tipset at H-1 is {B0}</p>
 
 <ul>
-<li>New Round:
+<li>New Epoch:
 
 <ul>
 <li>M produces a ticket at H, from B0&rsquo;s ticket (the min ticket at H-1)</li>
@@ -4606,19 +4670,58 @@ Heaviest tipset at H-1 is {B0}</p>
 <li>If M has no winning tickets</li>
 <li>M has not heard about other blocks on the network.</li>
 </ul></li>
-<li>New Round:
+<li>New Epoch:
 
 <ul>
-<li>Epoch/Height is incremented to H + 1.</li>
+<li>Height is incremented to H + 1.</li>
 <li>M generates a new ElectionProof with this new epoch number.</li>
 <li>If M has winning tickets</li>
-<li>M generates a block B1 using the new ElectionProof and the ticket drawn last round.</li>
+<li>M generates a block B1 using the new ElectionProof and the ticket drawn last epoch.</li>
 <li>M has received blocks B2, B3 from the network with the same parents and same height.</li>
 <li>M forms a tipset {B1, B2, B3}</li>
 </ul></li>
 </ul>
 
-<p>Anytime a miner receives new blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.</p>
+<p>Anytime a miner receives new valid blocks, it should evaluate what is the heaviest Tipset it knows about and mine atop it.</p>
+
+<h3 id="timing">Timing</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="diagram">
+
+<span class="diagram-title">Mining Cycle Timing</span>
+
+
+
+
+(<a href="docs/systems/filecoin_blockchain/struct/block_producer/../../../../diagrams/timing/timing.png" target="_blank">open in new tab</a>)
+<br />
+<img src="docs/systems/filecoin_blockchain/struct/block_producer/../../../../diagrams/timing/timing.png" />
+
+
+
+
+</div>
+
+
+<p>The mining cycle relies on receiving and producing blocks concurrently.  The sequence of these events in time is given by the timing diagram above.  The upper row represents the conceptual consumption channel consisting of successive receiving periods <code>Rx</code> during which nodes validate and select blocks as chain heads.  The lower row is the conceptual production channel made up of a period of mining <code>M</code> followed by a period of transmission <code>Tx</code>.  The lengths of the periods are not to scale.</p>
+
+<p>Blocks are received and validated during <code>Rx</code> up to the end of the epoch.  The heaviest tipset at the beginning of the next epoch is then used as the next head to mine against during <code>M</code>.  If mining is successful a block is transmitted during <code>Tx</code>.  The epoch boundaries are as shown.</p>
+
+<p>In a fully synchronized network most of period <code>Rx</code> does not see any network traffic, only the period lined up with <code>Tx</code>.  In practice we expect blocks from previous epochs to propagate during the remainder of <code>Rx</code>.  We also expect differences in operator mining time to cause additional variance.</p>
+
+<p>This sequence of events applies only when the node is in the <code>CHAIN_FOLLOW</code> syncing mode.  Nodes in other syncing modes do not mine blocks.</p>
 
 <h2 id="block-creation">Block Creation</h2>
 
@@ -4748,7 +4851,10 @@ IV = TotalIssuance * (1-e^(-λ)) // Converted to attoFIL (10e18)
 <ul>
 <li><a href="#mining-blocks">Mining Blocks</a>
 <ul>
-<li><a href="#mining-cycle">Mining Cycle</a></li>
+<li><a href="#mining-cycle">Mining Cycle</a>
+<ul>
+<li><a href="#timing">Timing</a></li>
+</ul></li>
 <li><a href="#block-creation">Block Creation</a></li>
 <li><a href="#block-broadcast">Block Broadcast</a></li>
 </ul></li>

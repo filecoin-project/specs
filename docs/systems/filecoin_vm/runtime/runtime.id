@@ -78,12 +78,12 @@ type Runtime interface {
     // different actor after messages are re-ordered).
     NewActorAddress() addr.Address
 
-    // Create an actor in the state tree. May only be called by InitActor.
+    // Creates an actor in the state tree, with empty state. May only be called by InitActor.
     CreateActor(
-        stateCID           actor.ActorSystemStateCID
-        a                  addr.Address
-        initBalance        actor.TokenAmount
-        constructorParams  actor.MethodParams
+        // The new actor's code identifier.
+        codeId   actor.CodeID
+        // Address under which the new actor's state will be stored.
+        address  addr.Address
     )
 
     IpldGet(c ipld.CID) union {Bytes, error}

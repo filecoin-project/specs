@@ -175,8 +175,7 @@ func (vmi *VMInterpreter_I) ApplyMessage(
 	}
 
 	// make sure this is the right message order for fromActor
-	// (this is protection against replay attacks, and useful sequencing)
-	if message.CallSeqNum() != fromActor.CallSeqNum()+1 {
+	if message.CallSeqNum() != fromActor.CallSeqNum() {
 		_applyError(inTree, exitcode.InvalidCallSeqNum, SenderResolveSpec_Invalid)
 		return
 	}

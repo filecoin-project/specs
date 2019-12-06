@@ -1742,6 +1742,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+    
+    
+        RewardActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4174,6 +4205,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../#algorithms__cryptoecon" class="menu-item depth-2">
+    
+    
+        Cryptoecon
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4580,11 +4644,14 @@ https://github.com/alex-shpak/hugo-book
 
 <p>At a very high level, with every new block generated, a miner will craft a new ticket from the prior one in the chain appended with the current epoch number (i.e. parentTipset.epoch + 1 to start). While on expectation at least one block will be generated at every round, in cases where no one finds a block in a given round, a miner will increment the round number and attempt a new leader election (using the new input) thereby ensuring liveness in the protocol.</p>
 
-<p>The <a href="../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a> subsystem uses access to EC to use the following facilities:
-- Access to verifiable randomness for the protocol, derived from <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>.
-- Running and verifying <a href="../../../#algorithms__expected_consensus__leader_election">leader election</a> for block generation.
-- Access to a weighting function enabling <a href="../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> by the chain manager.
-- Access to the most recently <a href="../../../#algorithms__expected_consensus__finality">finalized tipset</a> available to all protocol participants.</p>
+<p>The <a href="../../../#systems__filecoin_blockchain__storage_power_consensus___index">Storage Power Consensus</a> subsystem uses access to EC to use the following facilities:</p>
+
+<ul>
+<li>Access to verifiable randomness for the protocol, derived from <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__tickets">Tickets</a>.</li>
+<li>Running and verifying <a href="../../../#algorithms__expected_consensus__leader_election">leader election</a> for block generation.</li>
+<li>Access to a weighting function enabling <a href="../../../#algorithms__expected_consensus__chain_selection">Chain Selection</a> by the chain manager.</li>
+<li>Access to the most recently <a href="../../../#algorithms__expected_consensus__finality">finalized tipset</a> available to all protocol participants.</li>
+</ul>
 
 <p>
 
@@ -4602,7 +4669,40 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p style="color: #D74848"><b><i>Something's not right. The <code>expected_consensus.id</code> file was not found.</i></b></p>
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+<span class="kn">import</span> <span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
+<span class="kn">import</span> <span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+
+<span class="kd">type</span> <span class="nx">ExpectedConsensus</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">expectedBlocksPerEpoch</span>  <span class="nx">UVarint</span>
+    <span class="nx">expectedRewardPerEpoch</span>  <span class="nx">UVarint</span>
+
+    <span class="nf">ComputeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span>
+    <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">])</span> <span class="kt">bool</span>
+    <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span>
+        <span class="nx">challengeTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span>
+        <span class="nx">sectorPower</span>      <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">totalPower</span>       <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+        <span class="nx">sampleNum</span>        <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+        <span class="nx">sampleDenom</span>      <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+    <span class="nf">GetBlockRewards</span><span class="p">(</span>
+        <span class="nx">ePoStInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span>
+    <span class="p">)</span> <span class="nx">UVarint</span>
+
+    <span class="nf">log2b</span><span class="p">(</span><span class="nx">x</span> <span class="nx">UVarint</span><span class="p">)</span> <span class="nx">UVarint</span>
+    <span class="nx">wParams</span> <span class="nx">weightFunctionParameters</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">weightFunctionParameters</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">wRatio_num</span>  <span class="nx">UVarint</span>
+    <span class="nx">wRatio_den</span>  <span class="nx">UVarint</span>
+    <span class="nx">wPrecision</span>  <span class="nx">UVarint</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 
@@ -4621,7 +4721,80 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p style="color: #D74848"><b><i>Something's not right. The <code>expected_consensus.go</code> file was not found.</i></b></p>
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">storage_power_consensus</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;math/big&#34;</span>
+
+	<span class="nx">block</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block&#34;</span>
+	<span class="nx">chain</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain&#34;</span>
+	<span class="nx">sector</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_mining/sector&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">ComputeChainWeight</span><span class="p">(</span><span class="nx">tipset</span> <span class="nx">chain</span><span class="p">.</span><span class="nx">Tipset</span><span class="p">)</span> <span class="nx">block</span><span class="p">.</span><span class="nx">ChainWeight</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+	<span class="c1">// see expected_consensus.md for detail
+</span><span class="c1"></span>
+	<span class="c1">// wPowerFactor := self.log2b(spa.GetTotalPower())
+</span><span class="c1"></span>	<span class="c1">// wBlocksFactor_num := (wPowerFactor * len(tipset.Blocks) * self.wParams.wRatio_num)
+</span><span class="c1"></span>	<span class="c1">// wBlocksFactor_den := self.expectedBlocksPerEpoch * self.wParams.wRatio_den
+</span><span class="c1"></span>	<span class="c1">// return tipset.ParentTipset.ChainWeight
+</span><span class="c1"></span>	<span class="c1">// 	+wPowerFactor * self.wParams.wPrecision
+</span><span class="c1"></span>	<span class="c1">// 	+(wBlocksFactor_num * self.wParams.wPrecision / wBlocksFactor_den)
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">IsValidConsensusFault</span><span class="p">(</span><span class="nx">faults</span> <span class="nx">ConsensusFaultType</span><span class="p">,</span> <span class="nx">blocks</span> <span class="p">[]</span><span class="nx">block</span><span class="p">.</span><span class="nx">Block</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;TODO&#34;</span><span class="p">)</span>
+
+	<span class="c1">// 1. double-fork mining fault
+</span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner &amp;&amp; block1.Epoch == block2.Epoch
+</span><span class="c1"></span>
+	<span class="c1">// 2. time-offset mining fault
+</span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner
+</span><span class="c1"></span>	<span class="c1">// &amp;&amp; block1.ParentTipset == block2.ParentTipset
+</span><span class="c1"></span>
+	<span class="c1">// 3. parent grinding fault
+</span><span class="c1"></span>	<span class="c1">// return block1.Miner == block2.Miner
+</span><span class="c1"></span>	<span class="c1">// &amp;&amp; abs(block1.Epoch - block2.Epoch) == 1
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">IsWinningChallengeTicket</span><span class="p">(</span><span class="nx">challengeTicket</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">maxTicket</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">sectorPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">totalPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">,</span> <span class="nx">sampleNum</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">,</span> <span class="nx">sampleDenom</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="c1">// Conceptually we are mapping the pseudorandom, deterministic hash output of the challenge ticket onto [0,1]
+</span><span class="c1"></span>	<span class="c1">// by dividing by 2^HashLen and comparing that to the sector&#39;s target.
+</span><span class="c1"></span>	<span class="c1">// if the challenge ticket hash / max hash val &lt; activeSectorPower / totalPower * 1 / sectorSampled * ec.ExpectedLeaders
+</span><span class="c1"></span>	<span class="c1">// it is a winning challenge ticket.
+</span><span class="c1"></span>
+	<span class="c1">// lhs := challengeTicket * totalPower * sampleNum
+</span><span class="c1"></span>	<span class="c1">// rhs := maxTicket * minerPower * sampleDenom * self.expectedBlocksPerEpoch
+</span><span class="c1"></span>	<span class="nx">lhs</span> <span class="o">:=</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromBytes</span><span class="p">(</span><span class="nx">challengeTicket</span><span class="p">[:])</span>
+	<span class="nx">lhs</span> <span class="p">=</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">lhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">totalPower</span><span class="p">)))</span>
+	<span class="nx">lhs</span> <span class="p">=</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">lhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">sampleNum</span><span class="p">)))</span>
+
+	<span class="c1">// TODO: remove const here
+</span><span class="c1"></span>	<span class="nx">SHA256Len</span> <span class="o">:=</span> <span class="mi">256</span>
+	<span class="c1">// sectorPower * 2^len(H)
+</span><span class="c1"></span>	<span class="nx">rhs</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">big</span><span class="p">.</span><span class="nx">Int</span><span class="p">).</span><span class="nf">Lsh</span><span class="p">(</span><span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">sectorPower</span><span class="p">)),</span> <span class="nb">uint</span><span class="p">(</span><span class="nx">SHA256Len</span><span class="p">))</span>
+	<span class="nx">rhs</span> <span class="p">=</span> <span class="nx">rhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">rhs</span><span class="p">,</span> <span class="nx">util</span><span class="p">.</span><span class="nf">BigFromUint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nx">sampleDenom</span><span class="p">)))</span>
+	<span class="nx">rhs</span> <span class="p">=</span> <span class="nx">rhs</span><span class="p">.</span><span class="nf">Mul</span><span class="p">(</span><span class="nx">rhs</span><span class="p">,</span> <span class="nx">big</span><span class="p">.</span><span class="nf">NewInt</span><span class="p">(</span><span class="nb">int64</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nf">expectedBlocksPerEpoch</span><span class="p">())))</span>
+
+	<span class="c1">// lhs &lt; rhs?
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">lhs</span><span class="p">.</span><span class="nf">Cmp</span><span class="p">(</span><span class="nx">rhs</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">self</span> <span class="o">*</span><span class="nx">ExpectedConsensus_I</span><span class="p">)</span> <span class="nf">GetBlockRewards</span><span class="p">(</span><span class="nx">ePoStInfo</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">OnChainPoStVerifyInfo</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">UVarint</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
 
 </p>
 
@@ -4629,9 +4802,12 @@ https://github.com/alex-shpak/hugo-book
 
 <p>Within SPC, a miner generates a new ticket in their block for every ticket they use running leader election, thereby ensuring the ticket chain is always as long as the block chain.</p>
 
-<p>Tickets are used to achieve the following:
-- Ensure leader secrecy &ndash; meaning a block producer will not be known until they release their block to the network.
-- Prove leader election &ndash; meaning a block producer can be verified by any participant in the network.</p>
+<p>Tickets are used to achieve the following:</p>
+
+<ul>
+<li>Ensure leader secrecy &ndash; meaning a block producer will not be known until they release their block to the network.</li>
+<li>Prove leader election &ndash; meaning a block producer can be verified by any participant in the network.</li>
+</ul>
 
 <p>In practice, EC defines two different fields within a block:</p>
 
@@ -4656,7 +4832,38 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p style="color: #D74848"><b><i>Something's not right. The <code>election.id</code> file was not found.</i></b></p>
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+
+<span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">VRFResult</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult</span>
+
+    <span class="nx">Output</span>     <span class="nx">Bytes</span>                <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">round</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Bytes</span>
+    <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span>
+    <span class="nf">Verify</span><span class="p">(</span>
+        <span class="nx">input</span>           <span class="nx">Bytes</span>
+        <span class="nx">pk</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
+        <span class="nx">minerActorAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="kt">bool</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">BytesAmount</span>
+
+<span class="kd">type</span> <span class="nx">TicketProductionSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PastTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="nx">MinerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+<span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">TicketDrawingSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PastTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="nx">Epoch</span>       <span class="nx">ChainEpoch</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 
@@ -4675,7 +4882,46 @@ https://github.com/alex-shpak/hugo-book
 
 
 
-<p style="color: #D74848"><b><i>Something's not right. The <code>election.go</code> file was not found.</i></b></p>
+
+
+
+
+
+
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">block</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+	<span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
+	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">ValidateSyntax</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">Verify</span><span class="p">(</span><span class="nx">randomness</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">pk</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span><span class="p">,</span> <span class="nx">minerActorAddr</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+
+	<span class="nx">inputRand</span> <span class="o">:=</span> <span class="nf">Serialize_TicketProductionSeedInput</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">TicketProductionSeedInput_I</span><span class="p">{</span>
+		<span class="nx">PastTicket_</span><span class="p">:</span> <span class="nx">randomness</span><span class="p">,</span>
+		<span class="nx">MinerAddr_</span><span class="p">:</span>  <span class="nx">minerActorAddr</span><span class="p">,</span>
+	<span class="p">})</span>
+	<span class="nx">input</span> <span class="o">:=</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketProduction</span><span class="p">.</span><span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">inputRand</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="nx">tix</span><span class="p">.</span><span class="nx">VRFResult_</span><span class="p">.</span><span class="nf">Verify</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">pk</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">tix</span> <span class="o">*</span><span class="nx">Ticket_I</span><span class="p">)</span> <span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
+	<span class="nx">input</span> <span class="o">:=</span> <span class="nf">Serialize_TicketDrawingSeedInput</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">TicketDrawingSeedInput_I</span><span class="p">{</span>
+		<span class="nx">PastTicket_</span><span class="p">:</span> <span class="nx">tix</span><span class="p">.</span><span class="nf">Output</span><span class="p">(),</span>
+		<span class="nx">Epoch_</span><span class="p">:</span>      <span class="nx">epoch</span><span class="p">,</span>
+	<span class="p">})</span>
+	<span class="k">return</span> <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">DomainSeparationTag_TicketDrawing</span><span class="p">.</span><span class="nf">DeriveRand</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
 
 </p>
 
@@ -4689,10 +4935,12 @@ forks descended from the block in which the ticket is sampled.
 This is useful as it reduces opportunities for grinding, across forks or sybil identities.
 
 However this introduces a tradeoff:
+
 - The randomness lookback means that a miner can know K rounds in advance that they will win,
 decreasing the cost of running a targeted attack (given they have local predictability).
 
 How is K selected?
+
 - On the one end, there is no advantage to picking K larger than finality.
 - On the other, making K smaller reduces adversarial power to grind.
 </code></pre>
@@ -4709,9 +4957,12 @@ How is K selected?
 
 <p>Now, a miner must also check whether they are eligible to mine a block in this round.</p>
 
-<p>Design goals here include:
-- Miners should be rewarded proportional to their power in the system
-- The system should be able to tune how many blocks are put out per epoch on expectation (hence &ldquo;expected consensus&rdquo;).</p>
+<p>Design goals here include:</p>
+
+<ul>
+<li>Miners should be rewarded proportional to their power in the system</li>
+<li>The system should be able to tune how many blocks are put out per epoch on expectation (hence &ldquo;expected consensus&rdquo;).</li>
+</ul>
 
 <p>As discussed in <a href="../../../#algorithms__post__election_post">Election PoSt</a>, a miner will use the challenge ticket of an ElectionPoSt to uniformly draw a value from 0 to 1 when crafting a block.</p>
 
@@ -4746,10 +4997,13 @@ How is K selected?
 
 <p>In short, the weight at each block is equal to its <code>ParentWeight</code> plus that block&rsquo;s delta weight. Details of Filecoin&rsquo;s chain weighting function <a href="https://observablehq.com/d/3812cd65c054082d">are included here</a>.</p>
 
-<p>Delta weight is a term composed of a few elements:
-- wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).
-- wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain&rsquo;s power table.
-- wBlocksFactor: which adds weight to the chain proportional to the number of blocks mined in a given round. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).</p>
+<p>Delta weight is a term composed of a few elements:</p>
+
+<ul>
+<li>wForkFactor: which seeks to cut the weight derived from rounds in which produced Tipsets do not correspond to what an honest chain is likely to have yielded (pointing to selfish mining or other non-collaborative miner behavior).</li>
+<li>wPowerFactor: which adds weight to the chain proportional to the total power backing the chain, i.e. accounted for in the chain&rsquo;s power table.</li>
+<li>wBlocksFactor: which adds weight to the chain proportional to the number of blocks mined in a given round. Like wForkFactor, it rewards miner cooperation (which will yield more blocks per round on expectation).</li>
+</ul>
 
 <p>The weight should be calculated using big integer arithmetic with order of operations defined above. We use brackets instead of parentheses below for legibility. We have:</p>
 
@@ -4770,16 +5024,27 @@ Thus, for stability of weight across implementations, we take:</li>
 <li>wBlocksFactor[r+1] =  <code>(wPowerFactor[r+1] * b * wRatio_num) / (e * wRatio_den)</code></li>
 </ul>
 
-<p>We get:
-- <code>w[r+1] = w[r] + wFunction(totalPowerAtTipset(ts)) * 2^8 + (wFunction(totalPowerAtTipset(ts)) * len(ts.blocks) * wRatio_num * 2^8) / (e * wRatio_den)</code>
- Using the 2^8 here to prevent precision loss ahead of the division in the wBlocksFactor.</p>
+<p>We get:</p>
 
-<p>The exact value for these parameters remain to be determined, but for testing purposes, you may use:
- - <code>e = 5</code>
- - <code>wRatio = .5, or wRatio_num = 1, wRatio_den = 2</code>
-- <code>wFunction = log2b</code> with
-  - <code>log2b(X) = floor(log2(x)) = (binary length of X) - 1</code> and <code>log2b(0) = 0</code>. Note that that special case should never be used (given it would mean an empty power table.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Note that <span class="k">if</span> your implementation does not allow <span class="k">for</span> rounding to the fourth decimal, miners should apply the <span class="o">[</span>tie-breaker below<span class="o">](</span><span class="c1">#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.</span></code></pre></div>
+<ul>
+<li><code>w[r+1] = w[r] + wFunction(totalPowerAtTipset(ts)) * 2^8 + (wFunction(totalPowerAtTipset(ts)) * len(ts.blocks) * wRatio_num * 2^8) / (e * wRatio_den)</code>
+Using the 2^8 here to prevent precision loss ahead of the division in the wBlocksFactor.</li>
+</ul>
+
+<p>The exact value for these parameters remain to be determined, but for testing purposes, you may use:</p>
+
+<ul>
+<li><code>e = 5</code></li>
+<li><code>wRatio = .5, or wRatio_num = 1, wRatio_den = 2</code></li>
+
+<li><p><code>wFunction = log2b</code> with</p>
+
+<ul>
+<li><p><code>log2b(X) = floor(log2(x)) = (binary length of X) - 1</code> and <code>log2b(0) = 0</code>. Note that that special case should never be used (given it would mean an empty power table.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">Note that <span class="k">if</span> your implementation does not allow <span class="k">for</span> rounding to the fourth decimal, miners should apply the <span class="o">[</span>tie-breaker below<span class="o">](</span><span class="c1">#selecting-between-tipsets-with-equal-weight). Weight changes will be on the order of single digit numbers on expectation, so this should not have an outsized impact on chain consensus across implementations.</span></code></pre></div></li>
+</ul></li>
+</ul>
+
 <p><code>ParentWeight</code> is the aggregate chain weight of a given block&rsquo;s parent set. It is calculated as
 the <code>ParentWeight</code> of any of its parent blocks (all blocks in a given Tipset should have
 the same <code>ParentWeight</code> value) plus the delta weight of each parent. To make the
@@ -4904,11 +5169,14 @@ potentially long chain scans would be required to compute a given block&rsquo;s 
 </p></li>
 </ul>
 
-<p>Any node that detects any of the above events should submit both block headers to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method. The &ldquo;slasher&rdquo; will receive a portion (TODO: define how much) of the offending miner&rsquo;s <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral"></a> as a reward for notifying the network of the fault.
+<p>Any node that detects any of the above events should submit both block headers to the <code>StoragePowerActor</code>&rsquo;s <code>ReportConsensusFault</code> method. The &ldquo;slasher&rdquo; will receive a portion (TODO: define how much) of the offending miner&rsquo;s <a href="../../../#systems__filecoin_blockchain__storage_power_consensus__storage_power_actor__pledge_collateral">Pledge Collateral</a> as a reward for notifying the network of the fault.
 (TODO: FIP of submitting commitments to block headers to prevent miners censoring slashers in order to gain rewards).</p>
 
-<p>It is important to note that there exists a third type of consensus fault directly reported by the <code>CronActor</code> on <code>StorageDeal</code> failures via the <code>ReportUncommittedPowerFault</code> method:
-- (4) <code>uncommitted power fault</code> which occurs when a miner fails to submit their <code>PostProof</code> and is thus participating in leader election with undue power (see <a href="../../../#systems__filecoin_markets__storage_market__faults">Faults</a>).</p>
+<p>It is important to note that there exists a third type of consensus fault directly reported by the <code>CronActor</code> on <code>StorageDeal</code> failures via the <code>ReportUncommittedPowerFault</code> method:</p>
+
+<ul>
+<li>(4) <code>uncommitted power fault</code> which occurs when a miner fails to submit their <code>PostProof</code> and is thus participating in leader election with undue power (see <a href="../../../#systems__filecoin_markets__storage_market__faults">Faults</a>).</li>
+</ul>
 </article>
 
       

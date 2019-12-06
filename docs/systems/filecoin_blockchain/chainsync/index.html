@@ -1742,6 +1742,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+    
+    
+        RewardActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4174,6 +4205,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../#algorithms__cryptoecon" class="menu-item depth-2">
+    
+    
+        Cryptoecon
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4647,7 +4711,7 @@ and some target heads or paths to them may fail to validate.</li>
 
 <h1 id="libp2p-network-protocols">libp2p Network Protocols</h1>
 
-<p>As a networking-heavy protocol, <code>ChainSync</code> makes heavy use of <code>libp2p</code>. In particular, we use two sets of protocols:</p>
+<p>As a networking-heavy protocol, <code>ChainSync</code> makes heavy use of <code>libp2p</code>. In particular, we use three sets of protocols:</p>
 
 <ul>
 <li><strong><code>libp2p.PubSub</code> a family of publish/subscribe protocols to propagate recent <code>Blocks</code>.</strong>
@@ -4660,7 +4724,10 @@ nodes <code>MUST</code> connect and participate in the main channel, using <code
 This is especially important for security because network &ldquo;Bootstrap&rdquo; is a difficult problem in peer-to-peer networks.
 The set of peers we initially connect to may completely dominate our awareness of other peers, and therefore all state.
 We use a union of <code>PeerDiscovery</code> protocols as each by itself is not secure or appropriate for users&rsquo; threat models.
-The union of these provides a pragmatic and effective solution.</li>
+The union of these provides a pragmatic and effective solution.
+Discovery protocols marked as <strong>required</strong> MUST be included in implementations and will be provided by implementation teams.  Protocols marked as <strong>optional</strong> MAY be provided by implementation teams but can be built independently by third parties to augment bootstrap security.</li>
+<li><strong><code>libp2p.DataTransfer</code> a family of protocols for transfering data</strong>
+Filecoin Nodes must run <code>libp2p.Graphsync</code>.</li>
 </ul>
 
 <p>More concretely, we use these protocols:</p>
@@ -4671,18 +4738,25 @@ The union of these provides a pragmatic and effective solution.</li>
 <ul>
 <li><strong>(required)</strong> <code>libp2p.BootstrapList</code> a protocol that uses a persistent and user-configurable list of semi-trusted
 bootstrap peers. The default list includes a set of peers semi-trusted by the Filecoin Community.</li>
-<li><strong>(required)</strong> <code>libp2p.Gossipsub</code> a pub/sub protocol that &ndash; as a side-effect &ndash; disseminates peer information</li>
-<li><strong>(optional/TODO)</strong> <code>libp2p.PersistentPeerstore</code> a connectivity component that keeps persistent information about peers
+<li><strong>(optional)</strong> <code>libp2p.KademliaDHT</code> a dht protocol that enables random queries across the entire network<br /></li>
+<li><strong>(required)</strong> <code>libp2p.Gossipsub</code> a pub/sub protocol that includes &ldquo;prune peer exchange&rdquo; by default, disseminating peer info as part of operation</li>
+<li><strong>(optional)</strong> <code>libp2p.PersistentPeerstore</code> a connectivity component that keeps persistent information about peers
 observed in the network throughout the lifetime of the node. This is useful because we resume and continually
 improve Bootstrap security.</li>
-<li><strong>(optional/TODO)</strong> <code>libp2p.DNSDiscovery</code> to learn about peers via DNS lookups to semi-trusted peer aggregators</li>
-<li><strong>(optional/TODO)</strong> <code>libp2p.HTTPDiscovery</code> to learn about peers via HTTP lookups to semi-trusted peer aggregators</li>
-<li><strong>(optional)</strong> <code>libp2p.KademliaDHT</code> a dht protocol that enables random queries across the entire network</li>
+<li><strong>(optional)</strong> <code>libp2p.DNSDiscovery</code> to learn about peers via DNS lookups to semi-trusted peer aggregators</li>
+<li><strong>(optional)</strong> <code>libp2p.HTTPDiscovery</code> to learn about peers via HTTP lookups to semi-trusted peer aggregators</li>
+<li><strong>(optional)</strong> <code>libp2p.PEX</code> a general use peer exchange protocol distinct from pubsub peer exchange for 1:1 adhoc peer exchange</li>
 </ul></li>
 <li><strong><code>libp2p.PubSub</code></strong>
 
 <ul>
-<li><strong>(required)</strong> <code>libp2p.Gossipsub</code> the concrete <code>libp2p.PubSub</code> protocol <code>ChainSync</code> uses.</li>
+<li><strong>(required)</strong> <code>libp2p.Gossipsub</code> the concrete <code>libp2p.PubSub</code> protocol <code>ChainSync</code> uses</li>
+</ul></li>
+<li><strong><code>libp2p.DataTransfer</code></strong>
+
+<ul>
+<li><strong>(required)</strong> <code>libp2p.Graphsync</code> the data transfer protocol nodes must support for providing blockchain and user data</li>
+<li><strong>(optional)</strong> <code>BlockSync</code> a blockchain data transfer protocol that can be used by some nodes</li>
 </ul></li>
 </ul>
 
@@ -4944,7 +5018,7 @@ efficient syncing than comparable blockchain synchronization protocols, as synci
 <ul>
 <li><code>ChainSync</code> is well-bootstrapped, and has an initial <strong>trusted</strong> <code>StateTree</code> to start from.</li>
 <li><code>ChainSync</code> is receiving latest <code>Blocks</code> from <code>BlockPubsub</code></li>
-<li><code>ChainSync</code> starts fetching and validating blocks (see <em>Block Fetching and Validation</em> above).</li>
+<li><code>ChainSync</code> starts fetching and validating blocks</li>
 <li><code>ChainSync</code> has unvalidated blocks between <code>ChainSync.FinalityTipset</code> and <code>ChainSync.TargetHeads</code></li>
 </ul></li>
 <li><strong>Chain State and Finality</strong>:
@@ -4990,7 +5064,7 @@ This means all blocks <em>before</em> the best heads.</li>
 
 <ul>
 <li><code>ChainSync</code> is well-bootstrapped, and has an initial <strong>trusted</strong> <code>StateTree</code> to start from.</li>
-<li><code>ChainSync</code> fetches and validates blocks (see <em>Block Fetching and Validation</em>).</li>
+<li><code>ChainSync</code> fetches and validates blocks.</li>
 <li><code>ChainSync</code> is receiving and validating latest <code>Blocks</code> from <code>BlockPubsub</code></li>
 <li><code>ChainSync</code> DOES NOT have unvalidated blocks between <code>ChainSync.FinalityTipset</code> and <code>ChainSync.TargetHeads</code></li>
 <li><code>ChainSync</code> MUST drop back to another state if security conditions change.</li>
@@ -5061,37 +5135,31 @@ via <code>BlockPubsub</code>. As more blocks are received, the set of <code>Targ
 be checked and used to make syncing decisions without fetching the <code>Messages</code>.</li>
 </ul>
 
-<div id="systems__filecoin_blockchain__chainsync__block_validation"></div>
-
 <h2 id="progressive-block-validation">Progressive Block Validation</h2>
 
 <ul>
-<li>Blocks can be validated in progressive stages, in order to minimize resource expenditure.</li>
+<li><a href="../../../../#systems__filecoin_blockchain__struct__block___index">Blocks</a> may be validated in progressive stages, in order to minimize resource expenditure.</li>
 <li>Validation computation is considerable, and a serious DOS attack vector.</li>
 <li>Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.</li>
 <li><code>ChainSync</code> SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by <code>FinalityTipset</code>, or when <code>ChainSync</code> is under significant resource load.</li>
 
-<li><p>It is key to note that any block received after the <code>ROUND_CUTOFF</code> time must be automatically discarded by the miner until the start of the next epoch.</p></li>
+<li><p>These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.</p></li>
 
 <li><p><strong>Progressive Stages of Block Validation</strong></p>
 
 <ul>
-<li><em>(TODO: move this to blockchain/Block section)</em></li>
-<li><strong>BV0 - Syntactic Validation</strong>: Validate data structure packing and ensure correct typing.</li>
-<li><strong>BV1 - Light Consensus State Checks</strong>: Validate <code>b.ChainWeight</code>, <code>b.ChainEpoch</code>, <code>b.MinerAddress</code>, <code>b.Timestamp</code>, are plausible (some ranges of bad values can be detected easily, especially if we have the state of the chain at <code>b.ChainEpoch - consensus.LookbackParameter</code>. Eg Weight and Epoch have well defined valid ranges, and <code>b.MinerAddress</code>
-must exist in the lookback state). This requires some chain state, enough to establish plausibility levels of each of these values. A node should be able to estimate valid ranges for <code>b.ChainEpoch</code> based on the <code>LastTrustedCheckpoint</code>. <code>b.ChainWeight</code> is easy if some of the relatively recent chain is available, otherwise hard.</li>
-<li><strong>BV2 - Signature Validation</strong>: Verify <code>b.BlockSig</code> is correct.</li>
-<li><strong>BV3 - Verify ElectionPoSt</strong>: Verify <code>b.ElectionPoStOutput</code> was correct generated and yielded winning <code>PartialTickets</code>.</li>
-<li><strong>BV4 - Verify Ancestry links to chain</strong>: Verify ancestry links back to trusted blocks. If the ancestry forks off before finality, or does not connect at all, it is a bad block.</li>
-<li><strong>BV4 - Verify MessageSigs</strong>: Verify the signatures on messages</li>
-<li><strong>BV5 - Verify StateTree</strong>: Verify the application of <code>b.Parents.Messages()</code> correctly produces <code>b.StateTree</code> and <code>b.MessageReceipts</code></li>
+<li><strong>BV0 - Syntax</strong>: Serialization, typing, value ranges.</li>
+<li><strong>BV1 - Plausible Consensus</strong>: Plausible miner, weight, and epoch values (e.g from chain state at <code>b.ChainEpoch - consensus.LookbackParameter</code>).</li>
+<li><strong>BV2 - Block Signature</strong></li>
+<li><strong>BV3 - ElectionPoSt</strong>: Correct PoSt with a winning ticket.</li>
+<li><strong>BV4 - Chain ancestry and finality</strong>: Verify block links back to trusted chain, not prior to finality.</li>
+<li><strong>BV4 - Message Signatures</strong>:</li>
+<li><strong>BV5 - State tree</strong>: Parent tipset message execution produces the claimed state tree root and receipts.</li>
 </ul></li>
-
-<li><p>These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.</p></li>
 </ul>
 
 <p>Notes:
-- in <code>CHAIN_CATCHUP</code>, if a node is receiving/fetching hundreds/thousands of <code>BlockHeaders</code>, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV1)
+- in <code>CHAIN_CATCHUP</code>, if a node is receiving/fetching hundreds/thousands of <code>BlockHeaders</code>, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)
 - in <code>CHAIN_FOLLOW</code>, we&rsquo;re not receiving thousands, we&rsquo;re receiving maybe a dozen or 2 dozen packets in a few seconds. We receive cid w/ Sig and addr first (ideally fits in 1 packet), and can afford to (a) check if we already have the cid (if so done, cheap), or (b) if not, check if sig is correct before fetching header (expensive computation, but checking 1 sig is way faster than checking a ton). In practice likely that which one to do is dependent on miner tradeoffs. we&rsquo;ll recommend something but let miners decide, because one strat or the other may be much more effective depending on their hardware, on their bandwidth limitations, or their propensity to getting DOSed</p>
 
 <h2 id="progressive-block-propagation-or-blocksend">Progressive Block Propagation (or BlockSend)</h2>
@@ -5136,7 +5204,7 @@ must exist in the lookback state). This requires some chain state, enough to est
 
 <ul>
 <li>This has many fields that can be validated before pulling the messages. (See <strong>Progressive Block Validation</strong>).</li>
-<li><strong>BV0</strong>, <strong>BV1</strong>, and <strong>BV2</strong> validation takes place before propagating <code>bh</code> to other nodes.</li>
+<li><strong>BV0</strong>, <strong>BV1</strong>, <strong>BV2</strong>, and <strong>BV3</strong> validation takes place before propagating <code>bh</code> to other nodes.</li>
 <li><code>receiver</code> MAY receive many advertisements for each winning block in an epoch in quick succession. this is because (a) many want propagation as fast as possible, (b) many want to make those network advertisements as light as reasonable, &copy; we want to enable <code>receiver</code> to choose who to ask it from (usually the first party to advertise it, and that&rsquo;s what spec will recommend), and (d) want to be able to fall back to asking others if that fails (fail = dont get it in 1s or so)</li>
 </ul></li>
 </ul></li>

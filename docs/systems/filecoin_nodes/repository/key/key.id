@@ -23,12 +23,10 @@ type SignatureAlgoC struct {
     Verify(b Bytes, s Signature) union {b bool, e error}
 }
 
-type EdDSASignatureAlgorithm SignatureAlgoC
 type Secp256k1SignatureAlgorithm SignatureAlgoC
 type BLSAggregateSignatureAlgorithm SignatureAlgoC
 
 type SignatureAlgorithm union {
-    EdDSASigAlgo      EdDSASignatureAlgorithm
     Secp256k1SigAlgo  Secp256k1SignatureAlgorithm
     BLSSigAlgo        BLSAggregateSignatureAlgorithm
 }

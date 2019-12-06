@@ -1,15 +1,13 @@
 import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import st "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
-    // actor                StoragePowerActor
-    associatedStateTree &st.StateTree  // TODO: remove this. should not store this here.
-
-    ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]
+    ChooseTipsetToMine(tipsets [chain.Tipset]) [chain.Tipset]
 
     ec          ExpectedConsensus
     blockchain  blockchain.BlockchainSubsystem
@@ -31,20 +29,20 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
         minerActorAddr  addr.Address
     ) bool
 
-    computeChainWeight(tipset block.Tipset) block.ChainWeight
+    computeChainWeight(tipset chain.Tipset) block.ChainWeight
 
     StoragePowerConsensusError() StoragePowerConsensusError
 
     // Randomness methods
 
     // call by StorageMiningSubsystem during block production
-    GetTicketProductionRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
+    GetTicketProductionRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem in sealing sector
-    GetSealRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
+    GetSealRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness
 
     // call by StorageMiningSubsystem after sealing
-    GetPoStChallengeRand(chain block.Chain, epoch block.ChainEpoch) util.Randomness
+    GetPoStChallengeRand(chain chain.Chain, epoch block.ChainEpoch) util.Randomness
 
     GetFinality()     block.ChainEpoch
     FinalizedEpoch()  block.ChainEpoch

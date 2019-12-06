@@ -1742,6 +1742,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+    
+    
+        RewardActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4174,6 +4205,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#algorithms__cryptoecon" class="menu-item depth-2">
+    
+    
+        Cryptoecon
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4570,8 +4634,13 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown"><p><div id="systems__filecoin_blockchain__struct__block__block"></div>
-The Block is a unit of the Filecoin blockchain.</p>
+<article class="markdown">
+
+<div id="systems__filecoin_blockchain__struct__block__block"></div>
+
+<h1 id="block">Block</h1>
+
+<p>The Block is a unit of the Filecoin blockchain.</p>
 
 <p>A block header contains information relevant to a particular point in time over which the network may achieve consensus.</p>
 
@@ -4647,43 +4716,6 @@ The Block is a unit of the Filecoin blockchain.</p>
     <span class="nx">SECPMessages</span>  <span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">SignedMessage</span><span class="p">]</span>
 <span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">Chain</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nf">HeadEpoch</span><span class="p">()</span>         <span class="nx">ChainEpoch</span>
-    <span class="nf">HeadTipset</span><span class="p">()</span>        <span class="nx">Tipset</span>
-    <span class="nf">LatestCheckpoint</span><span class="p">()</span>  <span class="nx">ChainEpoch</span>
-
-    <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span>
-    <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Bytes</span>
-<span class="p">}</span>
-
-<span class="c1">// Checkpoint represents a particular block to use as a trust anchor
-</span><span class="c1">// in Consensus and ChainSync
-</span><span class="c1">//
-</span><span class="c1">// Note: a Block uniquely identifies a tipset (the parents)
-</span><span class="c1">// from here, we may consider many tipsets that _include_ Block
-</span><span class="c1">// but we must indeed include t and not consider tipsets that
-</span><span class="c1">// fork from Block.Parents, but do not include Block.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">Checkpoint</span> <span class="o">&amp;</span><span class="nx">BlockHeader</span>
-
-<span class="c1">// SoftCheckpoint is a checkpoint that Filecoin nodes may use as they
-</span><span class="c1">// gain confidence in the blockchain. It is a unilateral checkpoint,
-</span><span class="c1">// and derived algorithmically from notions of probabilistic consensus
-</span><span class="c1">// and finality.
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">SoftCheckpoint</span> <span class="nx">Checkpoint</span>
-
-<span class="c1">// TrustedCheckpoint is a Checkpoint that is trusted by the broader
-</span><span class="c1">// Filecoin Network. These TrustedCheckpoints are arrived at through
-</span><span class="c1">// the higher level economic consensus that surrounds Filecoin.
-</span><span class="c1">// TrustedCheckpoints:
-</span><span class="c1">// - MUST be at least 200,000 blocks old (&gt;1mo)
-</span><span class="c1">// - MUST be at least
-</span><span class="c1">// - MUST be widely known and accepted
-</span><span class="c1">// - MAY ship with Filecoin software implementations
-</span><span class="c1">// - MAY be propagated through other side-channel systems
-</span><span class="c1">// For more, see the Checkpoints section.
-</span><span class="c1">// TODO: consider renaming as EconomicCheckpoint
-</span><span class="c1"></span><span class="kd">type</span> <span class="nx">TrustedCheckpoint</span> <span class="nx">Checkpoint</span>
-
 <span class="c1">// HACK: Duplicated from posting.id (actual source)
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">ElectionPoStVerifyInfo</span> <span class="kd">struct</span> <span class="p">{</span>
     <span class="nx">Candidates</span>  <span class="p">[</span><span class="nx">PoStCandidate</span><span class="p">]</span>
@@ -4721,66 +4753,33 @@ The Block is a unit of the Filecoin blockchain.</p>
 
 
 
-<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">block</span>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="nx">filcrypto</span> <span class="s">&#34;github.com/filecoin-project/specs/algorithms/crypto&#34;</span>
+<span class="kn">import</span> <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
 
-<span class="kn">import</span> <span class="p">(</span>
-	<span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
-<span class="p">)</span>
+<span class="kd">type</span> <span class="nx">Ticket</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">VRFResult</span>  <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFResult</span>
 
-<span class="kd">func</span> <span class="nf">SmallerBytes</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">util</span><span class="p">.</span><span class="nf">CompareBytesStrict</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">b</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="nx">a</span>
+    <span class="nx">Output</span>     <span class="nx">Bytes</span>                <span class="err">@</span><span class="p">(</span><span class="nx">cached</span><span class="p">)</span>
+    <span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">round</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Bytes</span>
+    <span class="nf">ValidateSyntax</span><span class="p">()</span> <span class="kt">bool</span>
+    <span class="nf">Verify</span><span class="p">(</span>
+        <span class="nx">input</span>           <span class="nx">Bytes</span>
+        <span class="nx">pk</span>              <span class="nx">filcrypto</span><span class="p">.</span><span class="nx">VRFPublicKey</span>
+        <span class="nx">minerActorAddr</span>  <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
+    <span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
-<span class="c1">// TODO: add SHA256 to filcrypto
-</span><span class="c1">// TODO: import SHA256 from filcrypto
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">SHA256</span><span class="p">(</span><span class="nx">input</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
-	<span class="nx">ret</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">ret</span>
+<span class="kd">type</span> <span class="nx">BytesAmount</span> <span class="nx">UVarint</span>
+<span class="kd">type</span> <span class="nx">StoragePower</span> <span class="nx">BytesAmount</span>
+
+<span class="kd">type</span> <span class="nx">TicketProductionSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PastTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="nx">MinerAddr</span>   <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nf">sliceEqual</span><span class="p">(</span><span class="nx">a</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">,</span> <span class="nx">b</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span>
-	<span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="nx">v</span> <span class="o">!=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">{</span>
-			<span class="k">return</span> <span class="kc">false</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
-	<span class="k">return</span> <span class="kc">true</span>
-<span class="p">}</span>
-
-<span class="c1">// will return tipset from closest prior (or equal) epoch with a tipset
-</span><span class="c1">// return epoch should be checked accordingly
-</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">Tipset</span> <span class="p">{</span>
-
-	<span class="nx">dist</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadEpoch</span><span class="p">()</span> <span class="o">-</span> <span class="nx">epoch</span>
-	<span class="nx">current</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">HeadTipset</span><span class="p">()</span>
-	<span class="nx">parents</span> <span class="o">:=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
-	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="nx">dist</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-		<span class="nx">current</span> <span class="p">=</span> <span class="nx">parents</span>
-		<span class="nx">parents</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nf">Parents</span><span class="p">()</span>
-	<span class="p">}</span>
-
-	<span class="k">return</span> <span class="nx">current</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">RandomnessAtEpoch</span><span class="p">(</span><span class="nx">epoch</span> <span class="nx">ChainEpoch</span><span class="p">)</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Bytes</span> <span class="p">{</span>
-	<span class="c1">// doesn&#39;t matter if ts.Epoch() != epoch
-</span><span class="c1"></span>	<span class="c1">// since we generate new ticket from prior one in any case
-</span><span class="c1"></span>	<span class="nx">ts</span> <span class="o">:=</span> <span class="nx">chain</span><span class="p">.</span><span class="nf">TipsetAtEpoch</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">ts</span><span class="p">.</span><span class="nf">MinTicket</span><span class="p">().</span><span class="nf">DrawRandomness</span><span class="p">(</span><span class="nx">epoch</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">HeadEpoch</span><span class="p">()</span> <span class="nx">ChainEpoch</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">chain</span> <span class="o">*</span><span class="nx">Chain_I</span><span class="p">)</span> <span class="nf">HeadTipset</span><span class="p">()</span> <span class="nx">Tipset</span> <span class="p">{</span>
-	<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">)</span>
+<span class="kd">type</span> <span class="nx">TicketDrawingSeedInput</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">PastTicket</span>  <span class="nx">util</span><span class="p">.</span><span class="nx">Randomness</span>
+    <span class="nx">Epoch</span>       <span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -4788,6 +4787,85 @@ The Block is a unit of the Filecoin blockchain.</p>
 
 
 
+
+<h1 id="block-syntax-validation">Block syntax validation</h1>
+
+<p>Syntax validation refers to validation that may be performed on a block and its messages
+without reference to outside information such as the parent state tree.</p>
+
+<p>An invalid block must not be transmitted or referenced as a parent.</p>
+
+<p>A syntactically valid block header must decode into fields matching the type definition below.</p>
+
+<p>A syntactically valid header must have:</p>
+
+<ul>
+<li>a non-empty array of <code>Parents</code> CIDs if <code>Epoch</code> is greater than zero,</li>
+<li>a non-negative <code>ParentWeight</code>,</li>
+<li>a <code>Miner</code> address which is an ID-address,</li>
+<li>a non-negative <code>Epoch</code>,</li>
+<li>a positive <code>Timestamp</code>,</li>
+<li>a <code>Ticket</code> with non-empty <code>VRFResult</code>,</li>
+<li><code>ElectionPoStOutput</code> containing:
+
+<ul>
+<li>a non-empty <code>Candidates</code> array</li>
+<li>a non-empty <code>PoStRandomness</code> field</li>
+<li>a non-empty <code>Proof</code> field
+<br /></li>
+</ul></li>
+</ul>
+
+<p>A syntactically valid full block must have:</p>
+
+<ul>
+<li>all referenced messages syntactically valid,</li>
+<li>all referenced parent receipts syntactically valid,</li>
+</ul>
+
+<p>Note that validation of the block signature requires access to the miner worker address and
+public key from the parent tipset state, so signature validation forms part of semantic validation.
+Similarly, message signature validation requires lookup of the public key associated with
+each message&rsquo;s <code>From</code> account actor in the block&rsquo;s parent state.</p>
+
+<h1 id="block-semantic-validation">Block semantic validation</h1>
+
+<p>Semantic validation refers to validation that requires reference to information outside the block
+header and messages themselves, in particular the parent tipset and state on which the block is built.</p>
+
+<p>A semantically valid block must have:</p>
+
+<ul>
+<li><code>Parents</code> listed in lexicographic order of their header&rsquo;s <code>Ticket</code>,</li>
+<li><code>Parents</code> all reference valid blocks and form a valid <a href="../../../../../#systems__filecoin_blockchain__struct__tipset___index"></a>,</li>
+<li><code>ParentState</code> matching the state tree produced by executing the parent tipset&rsquo;s messages (as defined by the VM interpreter) against that tipset&rsquo;s parent state,</li>
+<li><code>ParentMessageReceipts</code> identifying the receipt list produced by parent tipset execution, with one receipt for each unique message from the parent tipset,</li>
+<li><code>ParentWeight</code> matching the weight of the chain up to and including the parent tipset,</li>
+<li><code>Epoch</code> greater than that of its parents, and not in the future according to the node&rsquo;s local clock reading of the current epoch,</li>
+<li><code>Miner</code> that is active in the storage power table in the parent tipset state,<br /></li>
+<li>a <code>Ticket</code> derived from the minimum ticket from the parent tipset&rsquo;s block headers,
+
+<ul>
+<li><code>Ticket.VRFResult</code> validly signed by the <code>Miner</code> actor&rsquo;s worker account public key,</li>
+</ul></li>
+<li><code>ElectionPoStOutput</code> yielding winning partial tickets that were generated validly,
+
+<ul>
+<li><code>ElectionPoSt.Randomness</code> is well formed and appropriately drawn from a past tipset according to the PoStLookback,</li>
+<li><code>ElectionPoSt.Proof</code> is a valid proof verifying the generation of the <code>ElectionPoSt.Candidates</code> from the <code>Miner</code>&rsquo;s eligible sectors,</li>
+<li><code>ElectionPoSt.Candidates</code> contains well formed <code>PoStCandidate</code>s each of which has a <code>PartialTicket</code> yielding a winning <code>ChallengeTicket</code> in Expected Consensus.</li>
+</ul></li>
+<li>a <code>Timestamp</code> in seconds lying within the quantized epoch window implied by the genesis block&rsquo;s timestamp and the block&rsquo;s <code>Epoch</code>,</li>
+<li>all SECP messages correctly signed by their sending actor&rsquo;s worker account key,</li>
+<li>a <code>BLSAggregate</code> signature that signs the array of CIDs of the BLS messages referenced by the block
+with their sending actor&rsquo;s key.</li>
+<li>a valid <code>Signature</code> over the block header&rsquo;s fields from the block&rsquo;s <code>Miner</code> actor&rsquo;s worker account public key.</li>
+</ul>
+
+<p>There is no semantic validation of the messages included in a block beyond validation of their signatures.
+If all messages included in a block are syntactically valid then they may be executed and produce a receipt.</p>
+
+<p>A chain sync system may perform syntactic and semantic validation in stages in order to minimize unnecessary resource expenditure.</p>
 </article>
 
       
@@ -4797,6 +4875,16 @@ The Block is a unit of the Filecoin blockchain.</p>
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#block">Block</a></li>
+<li><a href="#block-syntax-validation">Block syntax validation</a></li>
+<li><a href="#block-semantic-validation">Block semantic validation</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 

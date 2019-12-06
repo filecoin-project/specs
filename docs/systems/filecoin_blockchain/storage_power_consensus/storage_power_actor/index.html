@@ -1741,6 +1741,37 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+
+<a href="../../../../../#systems__filecoin_vm__sysactors__reward_actor" class="menu-item depth-4">
+    
+    
+        RewardActor
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-4">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4173,6 +4204,39 @@ https://github.com/alex-shpak/hugo-book
     
     </li>
 
+    <li>
+    
+      
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<a href="../../../../../#algorithms__cryptoecon" class="menu-item depth-2">
+    
+    
+        Cryptoecon
+    
+</a>
+
+
+
+<ul class="menu-item-section depth-2">
+
+</ul>
+
+
+    
+    </li>
+
 </ul>
 
 
@@ -4634,6 +4698,7 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">affectedPower</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
     <span class="p">)</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">TokenAmount</span>
     <span class="nf">_getActivePower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span>
+    <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">StoragePowerActorCode</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4679,6 +4744,8 @@ https://github.com/alex-shpak/hugo-book
         <span class="nx">challengeFreePeriod</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
     <span class="p">)</span> <span class="kt">bool</span>
 
+    <span class="nf">PowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">rt</span> <span class="nx">Runtime</span><span class="p">,</span> <span class="nx">minerPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span>
+
     <span class="c1">// this should call ReportConsensusFault, numSectors should be all sectors
 </span><span class="c1"></span>    <span class="c1">// ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)
 </span><span class="c1"></span><span class="p">}</span>
@@ -4721,6 +4788,20 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">addr</span> <span class="s">&#34;github.com/filecoin-project/specs/systems/filecoin_vm/actor/address&#34;</span>
     <span class="nx">util</span> <span class="s">&#34;github.com/filecoin-project/specs/util&#34;</span>
 <span class="p">)</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">minerPower</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="nx">totPower</span> <span class="o">:=</span> <span class="nx">st</span><span class="p">.</span><span class="nf">_getActivePower</span><span class="p">()</span>
+
+    <span class="c1">// TODO import from consts
+</span><span class="c1"></span>    <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">MIN_MINER_SIZE_PERC</span> <span class="o">:=</span> <span class="mi">0</span>
+
+    <span class="c1">// if miner smaller than both min size in bytes and min percentage
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">minerPower</span><span class="p">)</span><span class="o">*</span><span class="nx">MIN_MINER_SIZE_PERC</span> <span class="p">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="nx">totPower</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">minerPower</span> <span class="p">&lt;</span> <span class="nx">MIN_MINER_SIZE_STOR</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">true</span>
+<span class="p">}</span>
 
 <span class="kd">func</span> <span class="p">(</span><span class="nx">st</span> <span class="o">*</span><span class="nx">StoragePowerActorState_I</span><span class="p">)</span> <span class="nf">_getActivePower</span><span class="p">()</span> <span class="nx">block</span><span class="p">.</span><span class="nx">StoragePower</span> <span class="p">{</span>
     <span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>

@@ -148,26 +148,24 @@ func (rt *VMContext) _rtAllocGasCreateActor() {
 	rt._rtAllocGas(gascost.ExecNewActor)
 }
 
-func (rt *VMContext) CreateActor(
-	stateCID actor.ActorSystemStateCID,
-	address addr.Address,
-	initBalance actor.TokenAmount,
-	constructorParams actor.MethodParams) {
-
+func (rt *VMContext) CreateActor(codeID actor.CodeID, address addr.Address) {
 	if !rt._actorAddress.Equals(addr.InitActorAddr) {
 		rt.AbortAPI("Only InitActor may call rt.CreateActor")
 	}
 
+	// Create empty actor state.
+	actorState := &actor.ActorState_I{
+		CodeID_:     codeID,
+		State_:      actor.ActorSubstateCID(ipld.EmptyCID()),
+		Balance_:    actor.TokenAmount(0),
+		CallSeqNum_: 0,
+	}
+
+	// Put it in the state tree.
+	actorStateCID := actor.ActorSystemStateCID(rt.IpldPut(actorState))
+	rt._updateActorSystemStateInternal(address, actorStateCID)
+
 	rt._rtAllocGasCreateActor()
-
-	rt._updateActorSystemStateInternal(address, stateCID)
-
-	rt.SendPropagatingErrors(&InvocInput_I{
-		To_:     address,
-		Method_: actor.MethodConstructor,
-		Params_: constructorParams,
-		Value_:  initBalance,
-	})
 }
 
 func (rt *VMContext) _updateActorSystemStateInternal(actorAddress addr.Address, newStateCID actor.ActorSystemStateCID) {
