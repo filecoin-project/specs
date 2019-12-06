@@ -31,7 +31,7 @@ All Systems, as defined in this document, require the following:
 
 For this purpose, we use the `FilecoinNode` data structure, which is passed into all systems at initialization:
 
-{{< readfile file="../../systems/filecoin_nodes/node_types/filecoin_node.id" code="true" lang="go" >}}
+{{< readfile file="../../systems/filecoin_nodes/node_base/filecoin_node.id" code="true" lang="go" >}}
 
 {{< readfile file="../../systems/filecoin_nodes/repository/repository_subsystem.id" code="true" lang="go" >}}
 

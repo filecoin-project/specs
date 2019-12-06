@@ -78,7 +78,7 @@ In english, this means two things:
     - hash this concatenation for a usable ticket value
 
 See the `RandomnessAtEpoch` method below:
-{{< readfile file="block.go" code="true" lang="go" >}}
+{{< readfile file="../struct/chain/chain.go" code="true" lang="go" >}}
 
 The above means that ticket randomness is reseeded with every new block, but can indeed be derived by any miner for an arbitrary epoch number using a past epoch.
 
@@ -101,8 +101,7 @@ The VRF's deterministic output adds entropy to the ticket chain, limiting a mine
 
 We use the VRF from {{<sref vrf>}} for ticket generation in EC (see the `PrepareNewTicket` method below).
 
-{{< readfile file="storage_mining_subsystem.id" code="true" lang="go" >}}
-{{< readfile file="storage_mining_subsystem.go" code="true" lang="go" >}}
+{{< readfile file="../../filecoin_mining/storage_mining/storage_mining_subsystem.go" code="true" lang="go" >}}
 
 
 ### Ticket Validation
