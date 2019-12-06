@@ -3,7 +3,10 @@ package state_tree
 import (
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+	util "github.com/filecoin-project/specs/util"
 )
+
+var Assert = util.Assert
 
 func (inTree *StateTree_I) WithActorForAddress(a addr.Address) (StateTree, actor.ActorState) {
 	var err error
@@ -58,6 +61,14 @@ func (st *StateTree_I) WithNewAccountActor(a addr.Address) (StateTree, actor.Act
 
 func (st *StateTree_I) WithIncrementedCallSeqNum(a addr.Address) (StateTree, error) {
 	panic("TODO")
+}
+
+func (st *StateTree_I) WithIncrementedCallSeqNum_Assert(a addr.Address) StateTree {
+	ret, err := st.WithIncrementedCallSeqNum(a)
+	if err != nil {
+		panic("Error incrementing actor call sequence number")
+	}
+	return ret
 }
 
 /*

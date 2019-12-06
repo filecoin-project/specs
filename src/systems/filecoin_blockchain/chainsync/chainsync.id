@@ -1,11 +1,12 @@
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 
 type ChainSync struct {
     // LastTrustedCheckpoint is the most recent TrustedCheckpoint
     // ChainSync is aware of. This is used as the starting point from
     // which to synchronize the chain. (See block/checkpoints)
-    LastTrustedCheckpoint  block.TrustedCheckpoint
+    LastTrustedCheckpoint  chain.TrustedCheckpoint
 
     // VGraph is the ValidationGraph ChainSync uses to track all
     // Blocks and decide which blocks to validate, when.
@@ -96,6 +97,6 @@ type PartialGraph struct {
 }
 
 type BlockGraph struct {// TODO
-    Parents(b &block.BlockHeader) block.Tipset
+    Parents(b &block.BlockHeader) chain.Tipset
     Children(b &block.BlockHeader) [block.Block]
 }

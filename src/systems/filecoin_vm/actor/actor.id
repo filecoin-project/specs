@@ -7,7 +7,7 @@ import ipld "github.com/filecoin-project/specs/libraries/ipld"
 // TokenAmount is an amount of Filecoin tokens. This type is used within
 // the VM in message execution, to account movement of tokens, payment
 // of VM gas, and more.
-type TokenAmount UVarint  // TODO: bigint or varint?
+type TokenAmount Int  // TODO: should be BigInt (attoFIL)
 
 // MethodNum is an integer that represents a particular method
 // in an actor's function table. These numbers are used to compress

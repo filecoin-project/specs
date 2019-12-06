@@ -7,6 +7,16 @@ entries:
 - gascost
 ---
 
+# Receipts
+
+A `MessageReceipt` contains the result of a top-level message execution.
+
+A syntactically valid receipt has:
+
+- a non-negative `ExitCode`,
+- a non empty `ReturnValue` only if the exit code is zero,
+- a non-negative `GasUsed`.
+
 # `vm/runtime` interface
 
 {{< readfile file="runtime.id" code="true" lang="go" >}}

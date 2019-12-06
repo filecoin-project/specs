@@ -12,6 +12,7 @@ import (
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
 	exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
+	sys "github.com/filecoin-project/specs/systems/filecoin_vm/sysactors"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -65,13 +66,6 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	return ret
 }
 
-func (a *StorageMinerActorCode_I) _canBeElected(rt Runtime) bool {
-	h, st := a.State(rt)
-	ret := st._canBeElected(rt.CurrEpoch())
-	Release(rt, h, st)
-	return ret
-}
-
 func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
 	h, st := a.State(rt)
 	ret := st._challengeHasExpired(rt.CurrEpoch())
@@ -102,7 +96,9 @@ func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) Invo
 
 // Called by the cron actor at every tick.
 func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
-	a.CheckSurprisePoStSubmissionHappened(rt)
+	rt.ValidateImmediateCallerIs(addr.CronActorAddr)
+
+	a._checkSurprisePoStSubmissionHappened(rt)
 
 	return rt.SuccessReturn()
 
@@ -110,8 +106,7 @@ func (a *StorageMinerActorCode_I) OnCronTick(rt Runtime) InvocOutput {
 
 // If the miner fails to respond to a surprise PoSt,
 // cron triggers reporting every sector as failing for the current proving period.
-func (a *StorageMinerActorCode_I) CheckSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
-	TODO() // TODO: validate caller
+func (a *StorageMinerActorCode_I) _checkSurprisePoStSubmissionHappened(rt Runtime) InvocOutput {
 
 	// we can return if miner has not yet been challenged
 	if !a._isChallenged(rt) {
@@ -178,8 +173,14 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
 	h, st := a.State(rt)
 	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
-	activePower := st._getActivePower(rt)
-	inactivePower := st._getInactivePower(rt)
+	activePower, err := st._getActivePower()
+	if err != nil {
+		rt.AbortStateMsg(err.Error())
+	}
+	inactivePower, err := st._getInactivePower()
+	if err != nil {
+		rt.AbortStateMsg(err.Error())
+	}
 
 	// power report in processPowerReportParam
 	_ = &spc.PowerReport_I{
@@ -216,7 +217,31 @@ func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStRespons
 			Params_: processDealExpirationParam,
 		})
 	}
+}
 
+func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
+	h, st := a.State(rt)
+
+	activeDealIDs := make([]deal.DealID, 0)
+
+	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
+		newActiveDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
+		activeDealIDs = append(activeDealIDs, newActiveDealIDs...)
+	}
+
+	// @params dealIDs []deal.DealID activeDealIDs
+	processDealPaymentParam := make([]util.Serialization, 1)
+	for _, dealID := range activeDealIDs {
+		processDealPaymentParam = append(processDealPaymentParam, deal.Serialize_DealID(dealID))
+	}
+	Release(rt, h, st)
+
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: market.Method_StorageMarketActor_ProcessDealPayment,
+		Params_: processDealPaymentParam,
+	})
 }
 
 // this method is called by both SubmitElectionPoSt and SubmitSurprisePoSt
@@ -244,28 +269,23 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
 		sectorState, found := st.Sectors()[sectorNo]
 		if !found {
-			// TODO: determine proper error here and error-handling machinery
 			rt.AbortStateMsg("Sector state not found in map")
 		}
 		switch sectorState.State().StateNumber {
 		case SectorCommittedSN, SectorRecoveringSN:
 			st._updateActivateSector(rt, sectorNo)
 		case SectorActiveSN:
-			// do nothing
-			// deal payment is made at _onSuccessfulPoSt
+			// do nothing, deal payment is made at the end of this method
 		default:
-			// TODO: determine proper error here and error-handling machinery
 			rt.AbortStateMsg("Invalid sector state in ProvingSet.SectorsOn()")
 		}
 	}
 
-	// commit state change so that committed and recovering are now active
+	// committed and recovering sectors are now active
 
 	// Process ProvingSet.SectorsOff()
 	// ProvingSet.SectorsOff() contains SectorFailing
-	// SectorRecovering is Proving and hence will not be in GetZeros()
-	// heavy penalty if Failing for more than or equal to MAX_CONSECUTIVE_FAULTS
-	// otherwise increment FaultCount in Sectors().State
+	// SectorRecovering is Proving and hence will not be in SectorsOff()
 	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOff() {
 		sectorState, found := st.Sectors()[sectorNo]
 		if !found {
@@ -273,9 +293,10 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 		}
 		switch sectorState.State().StateNumber {
 		case SectorFailingSN:
+			// heavy penalty if Failing for more than or equal to MAX_CONSECUTIVE_FAULTS
+			// otherwise increment FaultCount in Sectors().State
 			st._updateFailSector(rt, sectorNo, true)
 		default:
-			// TODO: determine proper error here and error-handling machinery
 			rt.AbortStateMsg("Invalid sector state in ProvingSet.SectorsOff")
 		}
 	}
@@ -298,6 +319,8 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 		sector.CompactSectorSet(make([]byte, 0)), // NewDetectedFaults
 		newTerminatedFaults,
 	)
+
+	a._claimDealPayments(rt)
 
 	h, st = a.State(rt)
 	st.ChallengeStatus().Impl().OnPoStSuccess(rt.CurrEpoch())
@@ -366,15 +389,12 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 	for _, sectorNo := range recoveringSet.SectorsOn() {
 		sectorState, found := st.Sectors()[sectorNo]
 		if !found {
-			// TODO: determine proper error here and error-handling machinery
 			rt.AbortStateMsg("Sector state not found in map")
 		}
 		switch sectorState.State().StateNumber {
 		case SectorFailingSN:
-			// Check if miners have sufficient balances in sma
-
-			// SendMessage(sma.PublishStorageDeals) or sma.ResumeStorageDeals?
-			// throw if miner cannot cover StorageDealCollateral
+			// pledge collateral is ensured at PoSt submission
+			// no need to top up deal collateral because none was slashed during declared/detected faults
 
 			// copy over the same FaultCount
 			st.Sectors()[sectorNo].Impl().State_ = SectorRecovering(sectorState.State().FaultCount)
@@ -393,14 +413,10 @@ func (a *StorageMinerActorCode_I) RecoverFaults(rt Runtime, recoveringSet sector
 
 	UpdateRelease(rt, h, st)
 
-	// TODO: EnsureDealCollateral
-	panic("TODO")
-
 	return rt.SuccessReturn()
 }
 
 // DeclareFaults penalizes miners (slashStorageDealCollateral and remove power)
-// TODO: decide how much storage collateral to slash
 // - State Transition
 //   - Active / Commited / Recovering -> Failing
 // - Update State in Sectors()
@@ -409,7 +425,6 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 	TODO() // TODO: validate caller
 
 	if a._isChallenged(rt) {
-		// TODO: determine proper error here and error-handling machinery
 		rt.AbortStateMsg("cannot DeclareFaults when challenged")
 	}
 
@@ -428,9 +443,9 @@ func (a *StorageMinerActorCode_I) DeclareFaults(rt Runtime, faultSet sector.Comp
 
 	a._slashCollateralForStorageFaults(
 		rt,
-		faultSet,                                 // DeclaredFaults
-		sector.CompactSectorSet(make([]byte, 0)), // DetectedFaults
-		sector.CompactSectorSet(make([]byte, 0)), // TerminatedFault
+		faultSet,                                 // NewDeclaredFaults
+		sector.CompactSectorSet(make([]byte, 0)), // NewDetectedFaults
+		sector.CompactSectorSet(make([]byte, 0)), // NewTerminatedFault
 	)
 
 	return rt.SuccessReturn()
@@ -444,7 +459,7 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 
 	for _, sectorNo := range sectorNumbers {
 
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
 		dealIDs = append(dealIDs, activeDealIDs...)
 
@@ -453,8 +468,10 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 	// @param dealIDs []deal.DealID
 	// @param faultType sector.StorageFaultType
 	processDealSlashParam := make([]util.Serialization, 2)
-	panic("TODO: serialize arguments")
-
+	for _, dealID := range dealIDs {
+		processDealSlashParam = append(processDealSlashParam, deal.Serialize_DealID(dealID))
+	}
+	processDealSlashParam = append(processDealSlashParam, sector.Serialize_StorageFaultType(faultType))
 	Release(rt, h, st)
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
@@ -470,17 +487,18 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 	affectedPower := block.StoragePower(0)
 	for _, sectorNo := range sectorNumbers {
 
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		affectedPower += utilizationInfo.CurrUtilization()
 
 	}
 
-	Release(rt, h, st)
-
 	// @param affectedPower block.StoragePower
 	// @param faultType sector.StorageFaultType
 	slashPledgeParams := make([]util.Serialization, 2)
-	panic("TODO: serialize arguments")
+	slashPledgeParams = append(slashPledgeParams, block.Serialize_StoragePower(affectedPower))
+	slashPledgeParams = append(slashPledgeParams, sector.Serialize_StorageFaultType(faultType))
+
+	Release(rt, h, st)
 
 	rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StoragePowerActorAddr,
@@ -526,21 +544,25 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 	h, st := a.State(rt)
 	info := st.Info()
 	sectorSize := info.SectorSize()
-	dealIDs := onChainInfo.DealIDs()
-	params := make([]util.Serialization, 1+len(dealIDs))
-	panic("TODO: serialize arguments")
 
-	Release(rt, h, st) // if no modifications made; or
+	// @param sectorSize util.UVarint
+	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
+	getPieceInfoParams := make([]util.Serialization, 2)
+	getPieceInfoParams = append(getPieceInfoParams, sector.Serialize_SectorSize(sectorSize))
+	for _, dealID := range onChainInfo.DealIDs() {
+		getPieceInfoParams = append(getPieceInfoParams, deal.Serialize_DealID(dealID))
+	}
 
-	// TODO: serialize method param as {sectorSize,  DealIDs...}.
-	receipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
+	Release(rt, h, st)
+
+	getPieceInfosReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
 		To_:     addr.StorageMarketActorAddr,
-		Method_: market.Method_StorageMarketActor_GetUnsealedCIDForDealIDs,
-		Params_: params,
+		Method_: market.Method_StorageMarketActor_GetPieceInfosForDealIDs,
+		Params_: getPieceInfoParams,
 	})
 
-	ret := receipt.ReturnValue()
-	pieceInfos := sector.PieceInfosFromBytes(ret)
+	getPieceInfosRet := getPieceInfosReceipt.ReturnValue()
+	pieceInfos := sector.PieceInfosFromBytes(getPieceInfosRet)
 
 	// Unless we enforce a minimum padding amount, this totalPieceSize calculation can be removed.
 	// Leaving for now until that decision is entirely finalized.
@@ -557,9 +579,26 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 		WindowCount_: info.WindowCount(),
 		Partitions_:  info.SealPartitions(),
 	}
+
+	// @param address addr.Address info.Worker()
+	getActorIDParams := make([]util.Serialization, 1)
+	getActorIDParams = append(getActorIDParams, addr.Serialize_Address(info.Worker()))
+
+	getActorIDReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.InitActorAddr,
+		Method_: sys.Method_InitActor_GetActorIDForAddress,
+		Params_: getActorIDParams,
+	})
+
+	getActorIDRet := getActorIDReceipt.ReturnValue()
+	minerID, err := addr.Deserialize_Address(getActorIDRet)
+	if err != nil {
+		rt.AbortStateMsg("sm.verifySeal: failed to get actor id")
+	}
+
 	svInfo := sector.SealVerifyInfo_I{
 		SectorID_: &sector.SectorID_I{
-			MinerID_: info.Worker(), // TODO: This is actually miner address. MinerID needs to be derived.
+			MinerID_: minerID,
 			Number_:  onChainInfo.SectorNumber(),
 		},
 		OnChain_: onChainInfo,
@@ -577,33 +616,47 @@ func (a *StorageMinerActorCode_I) _verifySeal(rt Runtime, onChainInfo sector.OnC
 }
 
 // Deals must be posted on chain via sma.PublishStorageDeals before PreCommitSector
-// TODO(optimization): PreCommitSector could contain a list of deals that are not published yet.
+// Optimization: PreCommitSector could contain a list of deals that are not published yet.
 func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo) InvocOutput {
 	TODO() // TODO: validate caller
-
 	// can be called regardless of Challenged status
 
-	// TODO: might take collateral in case no ProveCommit follows within sometime
-	// TODO: collateral also penalizes repeated precommit to get randomness that one likes
 	// TODO: might be a good place for Treasury
 
 	h, st := a.State(rt)
 
+	msgValue := rt.ValueReceived()
+	depositReq := st._getPreCommitDepositReq(rt)
+
+	if msgValue < depositReq {
+		rt.AbortFundsMsg("sm.PreCommitSector: insufficient precommit deposit.")
+	}
+
 	_, found := st.PreCommittedSectors()[info.SectorNumber()]
 
 	if found {
-		// TODO: burn some funds?
+		// no burn funds since miners can't do repeated precommit
 		rt.AbortStateMsg("Sector already pre committed.")
 	}
 
 	st._assertSectorDidNotExist(rt, info.SectorNumber())
+
+	// @param dealIDs []deal.DealID info.DealIDs()
+	params := make([]util.Serialization, 1)
+	for _, dealID := range info.DealIDs() {
+		params = append(params, deal.Serialize_DealID(dealID))
+	}
 
 	Release(rt, h, st)
 
 	// verify every DealID has been published and will not expire
 	// before the MAX_PROVE_COMMIT_SECTOR_EPOCH + CurrEpoch
 	// abort otherwise
-	// Send(SMA.VerifyPublishedDealIDs(info.DealIDs()))
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: market.Method_StorageMarketActor_VerifyPublishedDealIDs,
+		Params_: params,
+	})
 
 	h, st = a.State(rt)
 
@@ -620,6 +673,8 @@ func (a *StorageMinerActorCode_I) PreCommitSector(rt Runtime, info sector.Sector
 func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo) InvocOutput {
 	TODO() // TODO: validate caller
 
+	msgSender := rt.ImmediateCaller()
+
 	h, st := a.State(rt)
 
 	preCommitSector, precommitFound := st.PreCommittedSectors()[info.SectorNumber()]
@@ -635,19 +690,8 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// if more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed
 	if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
-		// TODO: potentially some slashing if ProveCommitSector comes late
 
-		// TODO: remove dealIDs from PublishedDeals
-
-		// expired
-
-		TODO()
-		// TODO: perform the following cleanup elsewhere (e.g. cron?). State changes will not
-		// be committed upon abort)
-		//
-		// delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-		// UpdateRelease(rt, h, st)
-
+		// PreCommittedSectors is cleaned up at _expirePreCommitSectors triggered by Cron
 		rt.Abort(
 			exitcode.UserDefinedError(exitcode.DeadlineExceeded),
 			"more than MAX_PROVE_COMMIT_SECTOR_EPOCH has elapsed")
@@ -674,11 +718,30 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 		rt.AbortStateMsg("sm.ProveCommitSector: sector number found in SectorUtilization")
 	}
 
-	// ActivateStorageDeals
-	// Ok if deal has started
-	// Send(SMA.ActivateDeals(onChainInfo.DealIDs())
-	// abort if activation failed
-	var deals []deal.OnChainDeal
+	// Activate storage deals, abort if activation failed
+	// @param dealIDs []deal.DealID onChainInfo.DealIDs()
+	activateDealsParams := make([]util.Serialization, 1)
+	for _, dealID := range onChainInfo.DealIDs() {
+		activateDealsParams = append(activateDealsParams, deal.Serialize_DealID(dealID))
+	}
+
+	UpdateRelease(rt, h, st)
+
+	activateDealsReceipt := rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:     addr.StorageMarketActorAddr,
+		Method_: market.Method_StorageMarketActor_ActivateDeals,
+		Params_: activateDealsParams,
+	})
+
+	h, st = a.State(rt)
+
+	activateDealsRet := activateDealsReceipt.ReturnValue()
+	deals := make([]deal.OnChainDeal, len(activateDealsRet))
+	onchainDeal, err := deal.Deserialize_OnChainDeal(activateDealsRet)
+	if err != nil {
+		rt.AbortStateMsg("Failed to deserialize OnChainDeal")
+	}
+	deals = append(deals, onchainDeal)
 	initialUtilization := st._initializeUtilizationInfo(rt, deals)
 	lastDealExpiration := initialUtilization.DealExpirationAMT().Impl().LastDealExpiration()
 
@@ -722,7 +785,14 @@ func (a *StorageMinerActorCode_I) ProveCommitSector(rt Runtime, info sector.Sect
 
 	// now remove SectorNumber from PreCommittedSectors (processed)
 	delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
+	depositReq := st._getPreCommitDepositReq(rt)
 	UpdateRelease(rt, h, st)
+
+	// return deposit requirement to sender
+	rt.SendPropagatingErrors(&vmr.InvocInput_I{
+		To_:    msgSender,
+		Value_: depositReq,
+	})
 
 	return rt.SuccessReturn()
 }
@@ -739,17 +809,46 @@ func (a *StorageMinerActorCode_I) _ensurePledgeCollateralSatisfied(rt Runtime) {
 func (a *StorageMinerActorCode_I) _expirePreCommittedSectors(rt Runtime) {
 
 	h, st := a.State(rt)
+
+	expiredSectorNum := 0
+	inactiveDealIDs := make([]deal.DealID, 0)
+
 	for _, preCommitSector := range st.PreCommittedSectors() {
 
 		elapsedEpoch := rt.CurrEpoch() - preCommitSector.ReceivedEpoch()
 
 		if elapsedEpoch > sector.MAX_PROVE_COMMIT_SECTOR_EPOCH {
 			delete(st.PreCommittedSectors(), preCommitSector.Info().SectorNumber())
-			// TODO: potentially some slashing if ProveCommitSector comes late
+			expiredSectorNum += 1
+			inactiveDealIDs = append(inactiveDealIDs, preCommitSector.Info().DealIDs()...)
 		}
 	}
+
+	depositToBurn := st._getPreCommitDepositReq(rt)
 	UpdateRelease(rt, h, st)
 
+	// send funds to BurntFundsActor
+	if depositToBurn > 0 {
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:    addr.BurntFundsActorAddr,
+			Value_: depositToBurn,
+		})
+	}
+
+	// clear inactive deals
+	if len(inactiveDealIDs) > 0 {
+		// @param []deal.DealID inactiveDealIDs
+		dealsToClearParams := make([]util.Serialization, 1)
+		for _, dealID := range inactiveDealIDs {
+			dealsToClearParams = append(dealsToClearParams, deal.Serialize_DealID(dealID))
+		}
+
+		rt.SendPropagatingErrors(&vmr.InvocInput_I{
+			To_:     addr.StorageMarketActorAddr,
+			Method_: market.Method_StorageMarketActor_ClearInactiveDealIDs,
+			Params_: dealsToClearParams,
+		})
+	}
 }
 
 func getSectorNums(m map[sector.SectorNumber]SectorOnChainInfo) []sector.SectorNumber {

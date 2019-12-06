@@ -4,6 +4,9 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import stateTree "github.com/filecoin-project/specs/systems/filecoin_vm/state_tree"
+import spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 
 type SectorExpirationQueueItem struct {
     SectorNumber  sector.SectorNumber
@@ -43,6 +46,8 @@ type ChallengeStatus struct {
     _lastPoStFailureEpoch  block.ChainEpoch  // get updated upon _onMissedSurprisePoSt
     _lastPoStSuccessEpoch  block.ChainEpoch  // get updated by successful Election or Suprise PoSt submission
 
+    _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState
+
     OnNewChallenge(currEpoch block.ChainEpoch)
     LastPoStResponseEpoch() block.ChainEpoch
     OnPoStSuccess(currEpoch block.ChainEpoch)
@@ -69,6 +74,7 @@ type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
 // map from SectorNumber to amout of storage in active deals
 type SectorUtilizationAMT {sector.SectorNumber: sector.SectorUtilizationInfo}
 
+// Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits that are not yet returned or burned
 type StorageMinerActorState struct {
     PreCommittedSectors     PreCommittedSectorsAMT
     StagedCommittedSectors  StagedCommittedSectorAMT
@@ -106,10 +112,11 @@ type StorageMinerActorState struct {
     _updateSectorUtilization(rt Runtime, lastPoStResponse block.ChainEpoch) [deal.DealID]
     _initializeUtilizationInfo(rt Runtime, deals [deal.OnChainDeal]) sector.SectorUtilizationInfo
 
-    _getActivePower(rt Runtime) block.StoragePower
-    _getInactivePower(rt Runtime) block.StoragePower
-    _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
-    _getCurrUtilization(sectorNo sector.SectorNumber) (utilization block.StoragePower, found bool)
+    _getActivePower()    (block.StoragePower, error)
+    _getInactivePower()  (block.StoragePower, error)
+    _safeGetUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo
+    _getUtilizationInfo(sectorNo sector.SectorNumber) (sector.SectorUtilizationInfo, error)
+    _getPreCommitDepositReq(rt Runtime) actor.TokenAmount
 }
 
 type StorageMinerActorCode struct {
@@ -121,9 +128,7 @@ type StorageMinerActorCode struct {
     SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
     SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
 
-    CheckSurprisePoStSubmissionHappened(rt Runtime)
-
-    // TODO: should depledge be in here or in storage market actor?
+    _checkSurprisePoStSubmissionHappened(rt Runtime)
 
     DeclareFaults(rt Runtime, failingSet sector.CompactSectorSet)
     RecoverFaults(rt Runtime, recoveringSet sector.CompactSectorSet)
@@ -145,6 +150,7 @@ type StorageMinerActorCode struct {
         faultType      sector.StorageFaultType
     )
 
+    _claimDealPayments(rt Runtime)
     _submitPowerReport(rt Runtime, lastPoSt block.ChainEpoch)
     _expirePreCommittedSectors(rt Runtime)
     _ensurePledgeCollateralSatisfied(rt Runtime)
@@ -166,7 +172,7 @@ type MinerInfo struct {
     PeerId                  libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    SectorSize              util.BytesAmount
+    SectorSize              sector.SectorSize
     WindowCount             UVarint
     SealPartitions          UVarint
     ElectionPoStPartitions  UVarint
