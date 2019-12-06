@@ -386,7 +386,7 @@ func generateLabel(sealSeed sector.SealSeed, node int, window int, dependencies 
 }
 
 func deriveLabel(elements []byte) []byte {
-	return HashBytes_SHA256Hash(elements)
+	return  trimToFr32(HashBytes_SHA256Hash(elements))
 }
 
 func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
@@ -1187,7 +1187,8 @@ func HashBytes_PedersenHash(data []byte) PedersenHash {
 func HashBytes_SHA256Hash(data []byte) SHA256Hash {
 	// Digest is truncated to 254 bits.
 	result := SHA256Hash{}
-	return trimToFr32(result)
+
+	return result
 }
 
 ////////////////////////////////////////////////////////////////////////////////
