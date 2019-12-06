@@ -35,74 +35,37 @@ func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
 	return activePower
 }
 
-func (st *StoragePowerActorState_I) _slashPledgeCollateral(rt Runtime, minerID addr.Address, amount actor.TokenAmount) actor.TokenAmount {
-	if amount < 0 {
-		rt.AbortArgMsg("negative amount.")
+func (st *StoragePowerActorState_I) _slashPledgeCollateral(
+	minerAddr addr.Address, slashAmountRequested actor.TokenAmount) actor.TokenAmount {
+
+	if slashAmountRequested < 0 {
+		panic("_slashPledgeCollateral: error: negative amount specified")
 	}
 
-	currEntry := st._safeGetPowerEntry(rt, minerID)
-
-	amountToSlash := amount
-
-	if currEntry.Impl().LockedPledgeCollateral() < amount {
-		amountToSlash = currEntry.Impl().LockedPledgeCollateral_
-		currEntry.Impl().LockedPledgeCollateral_ = 0
-		// TODO: extra handling of not having enough pledge collateral to be slashed
-	} else {
-		currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amountToSlash
+	newTable, amountSlashed, ok := actor.BalanceTable_WithSubtractPreservingNonnegative(
+		st.EscrowTable(), minerAddr, slashAmountRequested)
+	// TODO: extra handling of not having enough pledge collateral to be slashed?
+	if !ok {
+		panic("_slashPledgeCollateral: error: miner address not found")
 	}
 
-	st.Impl().PowerTable_[minerID] = currEntry
+	st.Impl().EscrowTable_ = newTable
 
-	return amountToSlash
-
+	return amountSlashed
 }
 
-// TODO: batch process this if possible
-func (st *StoragePowerActorState_I) _lockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
-	// AvailableBalance -> LockedPledgeCollateral
-	if amount < 0 {
-		rt.AbortArgMsg("negative amount.")
-	}
-
-	minerID := rt.ImmediateCaller()
-	currEntry := st._safeGetPowerEntry(rt, minerID)
-
-	if currEntry.Impl().AvailableBalance() < amount {
-		rt.AbortFundsMsg("insufficient available balance.")
-	}
-
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() - amount
-	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() + amount
-	st.Impl().PowerTable_[minerID] = currEntry
+func (st *StoragePowerActorState_I) _getPledgeCollateralReq(power block.StoragePower) actor.TokenAmount {
+	PARAM_FINISH()
+	panic("")
 }
 
-func (st *StoragePowerActorState_I) _unlockPledgeCollateral(rt Runtime, address addr.Address, amount actor.TokenAmount) {
-	// lockedPledgeCollateral -> AvailableBalance
-	if amount < 0 {
-		rt.AbortArgMsg("negative amount.")
+func (st *StoragePowerActorState_I) _getPledgeCollateralReqForMiner(minerAddr addr.Address) actor.TokenAmount {
+	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
+	if !ok {
+		panic("Power entry not found for miner")
 	}
 
-	minerID := rt.ImmediateCaller()
-	panic("TODO: fix minerID usage and assert caller is miner worker")
-
-	currEntry := st._safeGetPowerEntry(rt, minerID)
-	if currEntry.Impl().LockedPledgeCollateral() < amount {
-		rt.AbortFundsMsg("insufficient locked balance.")
-	}
-
-	currEntry.Impl().LockedPledgeCollateral_ = currEntry.LockedPledgeCollateral() - amount
-	currEntry.Impl().AvailableBalance_ = currEntry.AvailableBalance() + amount
-	st.Impl().PowerTable_[minerID] = currEntry
-
-}
-
-func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power block.StoragePower) actor.TokenAmount {
-
-	// TODO: Implement
-	pcRequired := actor.TokenAmount(0)
-
-	return pcRequired
+	return st._getPledgeCollateralReq(minerPowerTotal)
 }
 
 func addrInArray(a addr.Address, list []addr.Address) bool {
@@ -115,7 +78,7 @@ func addrInArray(a addr.Address, list []addr.Address) bool {
 }
 
 // _selectMinersToSurprise implements the PoSt-Surprise sampling algorithm
-func (st *StoragePowerActorState_I) _selectMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) []addr.Address {
+func (st *StoragePowerActorState_I) _selectMinersToSurprise(challengeCount int, randomness util.Randomness) []addr.Address {
 	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
 	// support enumerating by int index. maybe we need that as an interface too,
 	// or something similar to an iterator (or iterator over the keys)
@@ -155,33 +118,32 @@ func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.
 	return powerEntry
 }
 
-func (st *StoragePowerActorState_I) _ensurePledgeCollateralSatisfied(rt Runtime) bool {
+func (st *StoragePowerActorState_I) _getTotalPower() block.StoragePower {
+	// TODO (optimization): cache this as a counter in the actor state,
+	// and update it for relevant operations.
 
-	minerID := rt.ImmediateCaller()
-
-	powerEntry := st._safeGetPowerEntry(rt, minerID)
-	pledgeCollateralRequired := st._getPledgeCollateralReq(rt, powerEntry.ActivePower()+powerEntry.InactivePower())
-
-	if pledgeCollateralRequired < powerEntry.LockedPledgeCollateral() {
-		extraLockedFund := powerEntry.LockedPledgeCollateral() - pledgeCollateralRequired
-		st._unlockPledgeCollateral(rt, minerID, extraLockedFund)
-		return true
-	} else if pledgeCollateralRequired < (powerEntry.LockedPledgeCollateral() + powerEntry.AvailableBalance()) {
-		fundToLock := pledgeCollateralRequired - powerEntry.LockedPledgeCollateral()
-		st._lockPledgeCollateral(rt, minerID, fundToLock)
-		return true
+	totalPower := block.StoragePower(0)
+	for _, minerEntry := range st.PowerTable() {
+		totalPower = totalPower + minerEntry.ActivePower() + minerEntry.InactivePower()
 	}
-
-	return false
+	return totalPower
 }
 
-func (st *StoragePowerActorState_I) _getAffectedPledge(rt Runtime, minerID addr.Address, affectedPower block.StoragePower) actor.TokenAmount {
+func (st *StoragePowerActorState_I) _getPowerTotalForMiner(minerAddr addr.Address) (
+	power block.StoragePower, ok bool) {
+
+	IMPL_FINISH()
+	panic("")
+}
+
+func (st *StoragePowerActorState_I) _getAffectedPledge(
+	rt Runtime, minerAddr addr.Address, affectedPower block.StoragePower) actor.TokenAmount {
 
 	// TODO: revisit this calculation
-	powerEntry := st._safeGetPowerEntry(rt, minerID)
-	totalPower := powerEntry.ActivePower() + powerEntry.InactivePower()
-	pledgeRequired := st._getPledgeCollateralReq(rt, totalPower)
-	affectedPledge := actor.TokenAmount(uint64(pledgeRequired) * uint64(affectedPower) / uint64(totalPower))
+	minerPowerTotal, ok := st._getPowerTotalForMiner(minerAddr)
+	Assert(ok)
+	pledgeRequired := st._getPledgeCollateralReq(minerPowerTotal)
+	affectedPledge := actor.TokenAmount(uint64(pledgeRequired) * uint64(affectedPower) / uint64(minerPowerTotal))
 
 	return affectedPledge
 }

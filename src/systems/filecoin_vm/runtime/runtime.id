@@ -17,6 +17,7 @@ type Runtime interface {
     // Not necessarily the actor in the From field of the initial on-chain Message.
     ImmediateCaller() addr.Address
     ValidateImmediateCallerIs(caller addr.Address)
+    ValidateImmediateCallerAcceptAnyOfType(type_ actor.BuiltinActorID)
     ValidateImmediateCallerAcceptAny()
     ValidateImmediateCallerMatches(CallerPattern)
 
