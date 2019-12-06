@@ -12,6 +12,5 @@ entries:
   - [CronActor](#CronActor) - runs critical functions at every epoch
   - [InitActor](#InitActor) - initializes new actors
 - There are two more VM level actors:
-  - [AccountActor](#AccountActor) - for user accounts.
-  - [RewardActor](#RewardActor) - for block reward and token vesting
-
+  - [AccountActor](#AccountActor) - for user accounts (non-singleton).
+  - [RewardActor](#RewardActor) - for block reward and token vesting (singleton).

@@ -39,18 +39,22 @@ func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Add
 		rt.AbortStateMsg("ra._withdrawReward: ownerAddr not found in RewardMap.")
 	}
 
-	rewardToWithdraw := actor.TokenAmount(0)
+	rewardToWithdrawTotal := actor.TokenAmount(0)
 	indicesToRemove := make([]int, len(rewards))
 
 	for i, r := range rewards {
 		elapsedEpoch := rt.CurrEpoch() - r.StartEpoch()
 		unlockedReward := actor.TokenAmount(uint64(r.ReleaseRate()) * uint64(elapsedEpoch))
-		withdrawableReward := unlockedReward - r.WithdrawAmount()
+		withdrawableReward := unlockedReward - r.AmountWithdrawn()
 
-		r.Impl().WithdrawAmount_ = unlockedReward // modify rewards in place
-		rewardToWithdraw += withdrawableReward
+		if withdrawableReward < 0 {
+			rt.AbortStateMsg("ra._withdrawReward: negative withdrawableReward.")
+		}
 
-		if r.WithdrawAmount() == r.Value() {
+		r.Impl().AmountWithdrawn_ = unlockedReward // modify rewards in place
+		rewardToWithdrawTotal += withdrawableReward
+
+		if r.AmountWithdrawn() == r.Value() {
 			indicesToRemove = append(indicesToRemove, i)
 		}
 	}
@@ -58,7 +62,7 @@ func (st *RewardActorState_I) _withdrawReward(rt vmr.Runtime, ownerAddr addr.Add
 	updatedRewards := removeIndices(rewards, indicesToRemove)
 	st.RewardMap()[ownerAddr] = updatedRewards
 
-	return rewardToWithdraw
+	return rewardToWithdrawTotal
 }
 
 func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
