@@ -304,7 +304,8 @@ func computeSealSeed(sid sector.SectorID, randomness sector.SealRandomness, comm
 
 	var preimage []byte
 	preimage = append(preimage, proverId...)
-	preimage = append(preimage, littleEndianBytesFromUInt(UInt(sectorNumber), 8)...)
+	preimage = append(preimage, bigEndianBytesFromUInt(UInt(sectorNumber), 8)...)
+	preimage = append(preimage, bigEndianBytesFromInt(windowIndex, 8)...)
 	preimage = append(preimage, randomness...)
 	preimage = append(preimage, Commitment_UnsealedSectorCID(commD)...)
 
@@ -1306,6 +1307,10 @@ func bigIntFromLittleEndianBytes(bytes []byte) *big.Int {
 	return new(big.Int).SetBytes(bytes)
 }
 
+func bigIntFromBigEndianBytes(bytes []byte) *big.Int {
+	return new(big.Int).SetBytes(bytes)
+}
+
 // size is number of bytes to return
 func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
 	bytes := z.Bytes()[0:size]
@@ -1314,16 +1319,33 @@ func littleEndianBytesFromBigInt(z *big.Int, size int) []byte {
 	return bytes
 }
 
+// size is number of bytes to return
+func bigEndianBytesFromBigInt(z *big.Int, size int) []byte {
+	return z.Bytes()[0:size]
+}
+
 func littleEndianBytesFromInt(n int, size int) []byte {
 	z := new(big.Int)
 	z.SetInt64(int64(n))
 	return littleEndianBytesFromBigInt(z, size)
 }
 
+func bigEndianBytesFromInt(n int, size int) []byte {
+	z := new(big.Int)
+	z.SetInt64(int64(n))
+	return bigEndianBytesFromBigInt(z, size)
+}
+
 func littleEndianBytesFromUInt(n UInt, size int) []byte {
 	z := new(big.Int)
 	z.SetUint64(uint64(n))
 	return littleEndianBytesFromBigInt(z, size)
+}
+
+func bigEndianBytesFromUInt(n UInt, size int) []byte {
+	z := new(big.Int)
+	z.SetUint64(uint64(n))
+	return bigEndianBytesFromBigInt(z, size)
 }
 
 func AsBytes_T(t util.T) []byte {
