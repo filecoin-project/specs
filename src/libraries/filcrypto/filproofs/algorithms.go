@@ -228,16 +228,7 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 	var windowKeyLayers [][]byte
 	var finalWindowKeyLayer []byte
 
-	var windowCommDs []sector.UnsealedSectorCID
-	var windowCommDTreePaths []file.Path
-
-	for _, data := range windowData {
-		windowCommD, windowCommDTreePath := ComputeDataCommitment(data)
-		windowCommDs = append(windowCommDs, windowCommD)
-		windowCommDTreePaths = append(windowCommDTreePaths, windowCommDTreePath)
-	}
-
-	commD, _ := ComputeDataCommitment(data)
+	commD, commDTreePath := ComputeDataCommitment(data)
 	sealSeed := computeSealSeed(sid, randomness, commD)
 
 	for i := 0; i < windowCount; i++ {
@@ -261,7 +252,7 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 		CommC_:             Commitment(commC),
 		CommQ_:             Commitment(commQ),
 		CommRLast_:         Commitment(commRLast),
-		CommDTreePaths_:    windowCommDTreePaths,
+		CommDTreePath_:     commDTreePath,
 		CommCTreePath_:     commCTreePath,
 		CommQTreePath_:     commQTreePath,
 		CommRLastTreePath_: commRLastTreePath,
@@ -386,7 +377,7 @@ func generateLabel(sealSeed sector.SealSeed, node int, window int, dependencies 
 }
 
 func deriveLabel(elements []byte) []byte {
-	return  trimToFr32(HashBytes_SHA256Hash(elements))
+	return trimToFr32(HashBytes_SHA256Hash(elements))
 }
 
 func computeCommC(keyLayers [][]byte, nodeSize int) (PedersenHash, file.Path) {
@@ -443,6 +434,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 	nodeSize := UInt(sdr.NodeSize())
 	wrapperChallenges, windowChallenges := sdr._generateOfflineChallenges(sealSeed, randomness, sdr.Challenges(), sdr.WindowChallenges())
 
+	dataTree := LoadMerkleTree(aux.CommDTreePath())
 	columnTree := LoadMerkleTree(aux.CommCTreePath())
 	replicaTree := LoadMerkleTree(aux.PersistentAux().CommRLastTreePath())
 	qTree := LoadMerkleTree(aux.CommQTreePath())
@@ -451,7 +443,7 @@ func (sdr *WinStackedDRG_I) CreatePrivateSealProof(randomness sector.Interactive
 	windowSize := int(uint64(sdr.Cfg().SealCfg().SectorSize()) / UInt(sdr.WindowCount()))
 
 	for c := range windowChallenges {
-		windowProof := createWindowProof(sdr.Drg(), sdr.Expander(), sealSeed, UInt(c), nodeSize, columnTree, aux, windows, windowSize)
+		windowProof := createWindowProof(sdr.Drg(), sdr.Expander(), sealSeed, UInt(c), nodeSize, dataTree, columnTree, qTree, aux, windows, windowSize)
 		privateProof.WindowProofs = append(privateProof.WindowProofs, windowProof)
 	}
 
@@ -493,7 +485,7 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 	for i, challenge := range windowChallenges {
 		// Verify one OfflineSDRChallengeProof.
 		windowProof := windowProofs[i]
-		dataProofs := windowProof.DataProofs
+		dataProof := windowProof.DataProof
 		columnProofs := windowProof.ColumnProofs
 
 		// Verify column proofs and that they represent the right columns.
@@ -521,9 +513,8 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 				providedLabel := columnProofs[columnElements[0]].Column[layer]
 				calculatedLabel := generateLabel(sealSeed, i, w, parents)
 
-				if w == windowCount-1 {
+				if layer == layers-1 {
 					// Last layer includes encoding.
-					dataProof := dataProofs[w]
 					dataNode := dataProof.Leaf()
 					if !dataProof.Verify(commD, UInt(windowSize*w)+challenge) {
 						return false
@@ -576,27 +567,24 @@ func (sdr *WinStackedDRG_I) VerifyPrivateSealProof(privateProof PrivateOfflinePr
 	return true
 }
 
-func createWindowProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, challenge UInt, nodeSize UInt, columnTree MerkleTree, aux sector.ProofAuxTmp, windows int, windowSize int) (proof OfflineWindowProof) {
+func createWindowProof(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed, challenge UInt, nodeSize UInt, dataTree MerkleTree, columnTree MerkleTree, qLayerTree MerkleTree, aux sector.ProofAuxTmp, windows int, windowSize int) (proof OfflineWindowProof) {
 	columnElements := getColumnElements(drg, expander, challenge)
-	commDTreePaths := aux.CommDTreePaths()
 
 	var columnProofs []SDRColumnProof
 	for c := range columnElements {
-		columnProof := createColumnProof(UInt(c), nodeSize, columnTree, aux)
+		chall := UInt(c)
+
+		columnProof := createColumnProof(chall, nodeSize, columnTree, aux)
 		columnProofs = append(columnProofs, columnProof)
 	}
 
-	var dataProofs []InclusionProof
-
-	for _, treePath := range commDTreePaths {
-		dataTree := LoadMerkleTree(treePath)
-		dataProof := dataTree.ProveInclusion(challenge)
-		dataProofs = append(dataProofs, dataProof)
-	}
+	dataProof := dataTree.ProveInclusion(challenge)
+	qLayerProof := qLayerTree.ProveInclusion(challenge)
 
 	proof = OfflineWindowProof{
-		DataProofs:   dataProofs,
+		DataProof:    dataProof,
 		ColumnProofs: columnProofs,
+		QLayerProof:  qLayerProof,
 	}
 
 	return proof
@@ -652,7 +640,8 @@ type OfflineWindowProof struct {
 	CommC     Commitment
 
 	// TODO: these proofs need to depend on hash function.
-	DataProofs   []InclusionProof // SHA256
+	DataProof    InclusionProof // SHA256
+	QLayerProof  InclusionProof
 	ColumnProofs []SDRColumnProof
 }
 

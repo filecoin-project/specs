@@ -55,7 +55,7 @@ type SealSetupArtifacts struct {
     CommC              sector.Commitment
     CommQ              sector.Commitment
     CommRLast          sector.Commitment
-    CommDTreePaths     [file.Path]
+    CommDTreePath      file.Path
     CommCTreePath      file.Path
     CommQTreePath      file.Path
     CommRLastTreePath  file.Path
