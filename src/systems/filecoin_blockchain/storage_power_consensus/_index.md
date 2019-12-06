@@ -39,10 +39,6 @@ Per the above, we also clearly distinguish putting storage on-chain from gaining
 
 Thereafter, power can be either *active* or *inactive* as defined in {{<sref storage_mining_subsystem>}}.
 
-It is important to remember that storage contributing to power and storage state are orthogonal notions. Specifically, power comes from storage being used in live-deals in active sectors (as opposed to non-deal active storage or in-deal inactive storage).
-
-Miners need to maintain pledge collateral for both active and inactive in-deal storage.
-
 {{<label tickets>}}
 ## Tickets
 
