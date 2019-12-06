@@ -20,7 +20,7 @@ Much of the Storage Power Consensus' subsystem functionality is detailed in the 
 
 {{< readfile file="storage_power_consensus_subsystem.id" code="true" lang="go" >}}
 
-# Distinguishing between storage miners and block miners
+## Distinguishing between storage miners and block miners
 
 There are two ways to earn Filecoin tokens in the Filecoin network:
 - By participating in the {{<sref storage_market>}} as a storage provider and being paid by clients for file storage deals.
@@ -29,6 +29,15 @@ There are two ways to earn Filecoin tokens in the Filecoin network:
 We must distinguish between both types of "miners" (storage and block miners). {{<sref leader_election>}} in Filecoin is predicated on a miner's storage power. Thus, while all block miners will be storage miners, the reverse is not necessarily true.
 
 However, given Filecoin's "useful Proof-of-Work" is achieved through file storage (PoRep and PoSt), there is little overhead cost for storage miners to participate in leader election. Such a {{<sref storage_miner_actor>}} need only register with the {{<sref storage_power_actor>}} in order to participate in Expected Consensus and mine blocks.
+
+{{<label storage_power>}}
+## On Power
+
+Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called "Storage Power") as follows:
+
+**Consensus power in Filecoin is determined by in-deal storage**. For instance, if a miner had a 32GB sector, 20 of which were used as part of storage deals, only those 20 would contribute to said miner's *Storage Power*.
+
+Thereafter, power can be either *active* or *inactive* as defined in {{<sref storage_mining_subsystem>}}.
 
 {{<label tickets>}}
 ## Tickets
@@ -111,7 +120,28 @@ Each Ticket should be generated from the prior one in the ticket-chain and verif
 {{< readfile file="storage_power_consensus_subsystem.id" code="true" lang="go" >}}
 {{< readfile file="storage_power_consensus_subsystem.go" code="true" lang="go" >}}
 
-### Repeated Leader Election attempts
+## Repeated Leader Election attempts
 
 In the case that no miner is eligible to produce a block in a given round of EC, the storage power consensus subsystem will be called by the block producer to attempt another leader election by incrementing the nonce appended to the ticket drawn from the past in order to attempt to find a new winning `PartialTicket` and trying again. 
 Note that a miner may attempt to grind through tickets by incrementing the nonce repeatedly until they find a winning ticket. However, any block so generated in the future will be rejected by other miners (with synchronized clocks) until that epoch's appropriate time.
+
+{{<label min_miner_size>}}
+## Minimum Miner Size
+
+In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
+
+Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of active power (i.e. storage power currently used in storage deals) or `MIN_MINER_SIZE_PERC` of the network's active storage power to participate in leader election.
+
+Miners smaller than this cannot mine blocks and earn block rewards in the network. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**. In that sense, miners smaller than the minimum size cannot generate blocks but nonetheless help secure consensus.
+
+Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.
+
+The `MIN_MINER_SIZE_PERC` condition will not be used in a network with more than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active storage.
+
+{{% notice placeholder %}}
+The below values are currently placeholders.
+{{% /notice %}}
+
+We currently set:
+- `MIN_MINER_SIZE_STOR = 1 << 40 Bytes` (100 TiB)
+- `MIN_MINER_SIZE_PERC = .33`

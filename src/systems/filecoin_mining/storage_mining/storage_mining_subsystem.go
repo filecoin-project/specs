@@ -7,6 +7,7 @@ import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
+	spc "github.com/filecoin-project/specs/systems/filecoin_blockchain/storage_power_consensus"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -88,11 +89,12 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 
 	for _, candidate := range candidates {
 		sectorNum := candidate.SectorID().Number()
-		sectorPower, found := st._getCurrUtilization(sectorNum)
-		if !found {
-			// panic("No sector with that ID found")
+		utilInfo, err := st._getUtilizationInfo(sectorNum)
+		if err != nil {
+			// panic(err)
 			return
 		}
+		sectorPower := utilInfo.CurrUtilization()
 		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
@@ -167,16 +169,52 @@ func (sms *StorageMiningSubsystem_I) _getStorageMinerActorState(stateTree stateT
 	return st
 }
 
+func (sms *StorageMiningSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) spc.StoragePowerActorState {
+	powerAddr := addr.StoragePowerActorAddr
+	actorState := stateTree.GetActorState(powerAddr)
+	substateCID := actorState.State()
+
+	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))
+	if err != nil {
+		panic("TODO")
+	}
+
+	// TODO fix conversion to bytes
+	panic(substate)
+	var serializedSubstate util.Serialization
+	st, err := spc.Deserialize_StoragePowerActorState(serializedSubstate)
+
+	if err == nil {
+		panic("Deserialization error")
+	}
+	return st
+}
+
 func (sms *StorageMiningSubsystem_I) GetWorkerKeyByMinerAddress(minerAddr addr.Address) filcrypto.VRFPublicKey {
 	panic("TODO")
 }
 
 func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 
-	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
+	sma := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
+	spa := sms._getStoragePowerActorState(header.ParentState())
 
 	// 1. Check that the miner in question is currently allowed to run election
-	if !st._canBeElected(header.Epoch()) {
+	// Note that this is two checks, namely:
+	// On SMA --> can the miner be elected per electionPoSt rules?
+	// On SPA --> Does the miner's power meet the consensus minimum requirement?
+	// we could bundle into a single call here for convenience
+	if !sma._canBeElected(header.Epoch()) {
+		return false
+	}
+
+	pow, err := sma._getActivePower()
+	if err != nil {
+		// TODO: better error handling
+		return false
+	}
+
+	if !spa.ActivePowerMeetsConsensusMinimum(pow) {
 		return false
 	}
 
@@ -195,7 +233,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElectionPoSt(header block.BlockHeader
 
 	// A proof must be a valid snark proof with the correct public inputs
 	// 3. Get public inputs
-	info := st.Info()
+	info := sma.Info()
 	sectorSize := info.SectorSize()
 
 	postCfg := sector.PoStCfg_I{
@@ -281,11 +319,12 @@ func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, on
 
 	for _, info := range onChainInfo.Candidates() {
 		sectorNum := info.SectorID().Number()
-		sectorPower, found := st._getCurrUtilization(sectorNum)
-		if !found {
-			// panic("No sector with that ID found")
+		utilInfo, err := st._getUtilizationInfo(sectorNum)
+		if err != nil {
+			// panic(err)
 			return false
 		}
+		sectorPower := utilInfo.CurrUtilization()
 		if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower) {
 			return false
 		}

@@ -20,9 +20,11 @@ block_validation: [systems, filecoin_blockchain, block, block_validation]
 
 ### SPC
 storage_power_consensus: [systems, filecoin_blockchain, storage_power_consensus]
+storage_power: [systems, filecoin_blockchain, storage_power_consensus, storage_power]
 tickets: [systems, filecoin_blockchain, storage_power_consensus, tickets]
 ticket_chain: [systems, filecoin_blockchain, storage_power_consensus, ticket_chain]
 ticket_generation: [systems, filecoin_blockchain, storage_power_consensus, ticket_generation]
+min_miner_size: [systems, filecoin_blockchain, storage_power_consensus, min_miner_size]
 
 ### Storage Market Actor
 power_table: [systems, filecoin_blockchain, storage_power_consensus, storage_power_actor, power_table]
@@ -55,6 +57,7 @@ storage_faults: [systems, filecoin_markets, storage_market, faults]
 # mining
 
 ### Storage Mining
+sector: [systems, filecoin_mining, sector]
 storage_mining_subsystem: [systems, filecoin_mining, storage_mining]
 storage_miner_actor: [systems, filecoin_mining, storage_mining, storage_miner_actor]
 sector_sealer: [systems, filecoin_mining, storage_mining]
