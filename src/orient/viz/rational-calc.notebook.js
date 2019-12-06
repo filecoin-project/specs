@@ -3,7 +3,7 @@ md`# Proofs Tradeoff Report`
 viewof config = {
   const form = formToObject(html`
 <form>
-  <div><input type=range name=post_lambda min=1 max=128 step=1 value=40> <i>post_lambda</i></div>
+  <div><input type=range name=post_lambda min=1 max=128 step=1 value=10> <i>post_lambda</i></div>
 </form>`)
   return form
 }
@@ -24,16 +24,25 @@ solved_many = (await solve_many(combos)).map(d => d[0])
   })
 // solved_manys = (await solve_manys(combos)).flat()
 
-
-
 md`#### Vars that matter`
 
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'decoding_time_parallel',
+  'block_size_kib',
+  'epost_time_parallel',
+], [])
+
+md`#### Other important vars`
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'decoding_time_parallel',
   'porep_time_parallel',
-  'porep_proof_size',
+  'porep_proof_size_kib',
+  'block_size_kib',
   'epost_time_parallel',
 ], [])
 
@@ -96,33 +105,73 @@ table_constraints(solved_many, [
   'epost_data_access_parallel'
 ], [])
 
- report_from_result(solved_many[4], combos[4])
 
 md`---`
 
 md`## Graphs`
-md`### Impact of \`chung_delta\``
+
+md`### Multi-dimensions`
+
+add_query = (query, ext) => {
+  return query.map(d => Object.assign({}, d, ext))
+}
+
+extend_query = (array, ...exts) => {
+  let query = array
+
+  const extend_one = (arr, ext) => arr.map(d => ext.map((_, i) => Object.assign({}, d, ext[i])))
+
+  exts.forEach(ext => {
+    query = extend_one(query, ext).flat()
+  })
+
+  return query
+}
+
+multiq = {
+  let query = [constants]
+  const proofs = [wrapper, wrapperVariant, stackedReplicas]
+  const post_mtree_layers_cached = [...Array(30)].map((_, i) => ({post_mtree_layers_cached: i}))
+
+  query = extend_query(query, proofs, post_mtree_layers_cached, [stackedChungParams])
+
+  return query
+}
+
+multiq_solved = (await solve_many(multiq)).map(d => d[0])
+
+graph_constraints(multiq_solved, 'post_mtree_layers_cached', 'decoding_time_parallel', ['proof_name'], {yrule: 0.5, height: 100})
+graph_constraints(multiq_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], {yrule: 10, height: 100})
+
+md`### Impact of \`chung_delta\` in StackedChung`
 queries = [...Array(8)].map((_, i) => {
-  return Object.assign(
+  const query = Object.assign(
     {},
     constants,
-    stackedReplicas,
     stackedChungParams,
     { chung_delta: 0.01 * (i+1) },
     { window_size_mib: 1024 * 32 }
   )
-})
+
+  return [
+    Object.assign({}, query, stackedReplicas),
+    Object.assign({}, query, wrapper),
+    Object.assign({}, query, wrapperVariant),
+  ]
+}).flat()
 
 delta_solved = (await solve_many(queries)).map(d => d[0])
 
-graph_constraints(delta_solved, 'chung_delta', 'stacked_layers', [])
-graph_constraints(delta_solved, 'chung_delta', 'porep_challenges', [])
-graph_constraints(delta_solved, 'chung_delta', 'post_challenges', [])
-graph_constraints(delta_solved, 'chung_delta', 'decoding_time_parallel', [])
-graph_constraints(delta_solved, 'chung_delta', 'porep_time_parallel', [])
-graph_constraints(delta_solved, 'chung_delta', 'porep_proof_size', [])
-graph_constraints(delta_solved, 'chung_delta', 'epost_time_parallel', [])
-graph_constraints(delta_solved, 'chung_delta', 'onboard_tib_time_days', [])
+// graph_constraints(delta_solved, 'chung_delta', 'stacked_layers', [], { height: 100 })
+// graph_constraints(delta_solved, 'chung_delta', 'porep_challenges', [], { height: 100 })
+// graph_constraints(delta_solved, 'chung_delta', 'post_challenges', [], { height: 100 })
+graph_constraints(delta_solved, 'chung_delta', 'decoding_time_parallel', ['proof_name'], {yrule: 0.5, height: 100})
+graph_constraints(delta_solved, 'chung_delta', 'epost_time_parallel', ['proof_name'], {yrule: 10, height: 100})
+graph_constraints(delta_solved, 'chung_delta', 'porep_proof_size_kib', ['proof_name'], { height: 100 })
+graph_constraints(delta_solved, 'chung_delta', 'block_size_kib', ['proof_name'], { height: 100 })
+graph_constraints(delta_solved, 'chung_delta', 'onboard_tib_time_days', ['proof_name'], { height: 100 })
+graph_constraints(delta_solved, 'chung_delta', 'porep_time_parallel', ['proof_name'], { height: 100 })
+plot3d(delta_solved, 'chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
 md`---`
 
 md`### Parameters`
@@ -186,7 +235,7 @@ filecoin = ({
   "fallback_period_days": 1,
   "fallback_ratio": 0.05,
   "filecoin_reseals_per_year": 1,
-  "filecoin_storage_capacity_eib": 10,
+  "filecoin_storage_capacity_eib": 1,
   "node_size": 32,
   "polling_time": 15,
   "cost_amax": 1,
@@ -240,6 +289,10 @@ constraints = ({
 
 md`---`
 
+md`## Debug`
+report_from_result(solved_many[4], combos[4])
+
+md`---`
 md`## Dev`
 
 md`### Orient`
@@ -415,34 +468,56 @@ th {
 }
 </style>`
 
-graph_constraints = (solutions, x, y, group_by) => {
+graph_constraints = (solutions, x, y, group_by, opts) => {
   const results = multiple_solutions(solutions, group_by, [x, y])
-  return vl({
+  const graph = {
     "title": `Plotting:  ${x} vs ${y}`,
     "width": 600,
-    "data": {"values": results},
-    "mark": {"type": "line"},
-    "encoding": {
-      "x": {
-        "field": x,
-        "type": "quantitative",
+    layer: [{
+      "data": {"values": results},
+      "mark": {"type": "line"},
+      "encoding": {
+        "x": {
+          "field": x,
+          "type": "quantitative",
+        },
+        "y": {
+          "field": y,
+          "type": "quantitative",
+        },
+        "color": {
+          "field": "name",
+          "type": "nominal",
+          "scale": {"scheme": "category10"}
+        },
       },
-      "y": {
-        "field": y,
-        "type": "quantitative",
-      },
-      "color": {
-        "field": "name",
-        "type": "nominal",
-        "scale": {"scheme": "category10"}
-      },
-    },
-  })
+    }]
+  }
+  if (opts && opts.height) {
+    graph.height = opts.height
+  }
+  if (opts && opts.yrule) {
+    const rule = [{}]
+    rule[0][y] = opts.yrule
+
+    graph.layer.push({
+      "data": { "values": rule },
+      "layer": [{
+        "mark": "rule",
+        "encoding": {
+          "y": {"field": y, "type": "quantitative"},
+          "color": {"value": "red"},
+          "size": {"value": 3}
+        }
+      }]
+    })
+  }
+  return vl(graph)
+
 }
 
 Plotly = require("https://cdn.plot.ly/plotly-latest.min.js")
 
-plot3d(delta_solved, 'chung_delta', 'epost_time_parallel', 'onboard_tib_time_days')
 
 plot3d = (rows, x, y, z) =>  {
   var zData = rows.map(d => {
@@ -454,8 +529,15 @@ plot3d = (rows, x, y, z) =>  {
     type: 'surface'
   }];
 
+  var data2 = [{
+    x: rows.map(d => d[x]),
+    y: rows.map(d => d[y]),
+    z: rows.map(d => d[z]),
+    type: 'scatter3d'
+  }]
+
   var layout = {
-    title: `${x} vs ${y} ${z}`,
+    title: `${x} vs ${y} vs ${z}`,
     autosize: false,
     width: width * 0.7,
     height: width * 0.7,
@@ -500,6 +582,54 @@ plot3d = (rows, x, y, z) =>  {
   };
 
   const div = DOM.element('div');
-  Plotly.newPlot(div, data, layout);
-  return div;
+  Plotly.newPlot(div, data2, layout);
+  return div
+}
+
+// plotMultiLine(delta_solved, 'chung_delta', ['decoding_time_parallel', 'epost_time_parallel', 'onboard_tib_time_days'])
+
+plotMultiLine = (solutions, x, names) => {
+
+  const traces = names.map(y => {
+    return {
+      x: solutions.map(d => d[x]),
+      y: solutions.map(d => d[y]),
+      name: `${y} data`,
+      yaxis: y,
+      type: 'scatter'
+    }
+  })
+
+  var layout = {
+    title: 'multiple y-axes example',
+    // width: 800,
+    autosize: false,
+    xaxis: {domain: [0.01, 0.20]},
+    yaxis: {
+      title: 'yaxis title',
+      titlefont: {color: '#1f77b4'},
+      tickfont: {color: '#1f77b4'}
+    },
+    yaxis2: {
+      title: 'yaxis2 title',
+      titlefont: {color: '#ff7f0e'},
+      tickfont: {color: '#ff7f0e'},
+      anchor: 'free',
+      overlaying: 'y',
+      side: 'left',
+      position: 0.15
+    },
+    yaxis3: {
+      title: 'yaxis4 title',
+      titlefont: {color: '#d62728'},
+      tickfont: {color: '#d62728'},
+      anchor: 'right',
+      overlaying: 'y',
+      side: 'left'
+    },
+  };
+
+  const div = DOM.element('div');
+  Plotly.newPlot(div, traces, layout);
+  return div
 }
