@@ -2,4 +2,4 @@
 title: Node Interface
 ---
 
-{{< readfile file="filecoin_node.id" code="true" lang="go" >}}
+{{< readfile file="../node_base/filecoin_node.id" code="true" lang="go" >}}
