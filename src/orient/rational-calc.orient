@@ -273,7 +273,9 @@ ProofOfReplication:
 
   Size:
     describe(porep_proof_size, "Size of a PoRep proof")
+    describe(porep_proof_size_kib, "Size of a PoRep proof", kib)
     porep_proof_size = porep_snark_size + seal_onchain_commitments_size
+    porep_proof_size_kib = porep_proof_size / b_in_kib
 
   Commitment:
     describe(window_comm_tree_time, "Time to generate a merkle tree of stacked windows", secs)
