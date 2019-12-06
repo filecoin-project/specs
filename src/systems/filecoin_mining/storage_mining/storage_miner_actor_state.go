@@ -84,7 +84,7 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 
 }
 
-func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePower {
+func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) (block.StoragePower, error) {
 	activePower := block.StoragePower(0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {

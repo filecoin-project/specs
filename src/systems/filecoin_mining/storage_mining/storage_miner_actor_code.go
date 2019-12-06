@@ -225,7 +225,7 @@ func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
 	activeDealIDs := make([]deal.DealID, 0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		newActiveDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
 		activeDealIDs = append(activeDealIDs, newActiveDealIDs...)
 	}

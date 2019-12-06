@@ -7,7 +7,7 @@ import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 import blockchain "github.com/filecoin-project/specs/systems/filecoin_blockchain"
 
 type StoragePowerConsensusSubsystem struct {//(@mutable)
-    ChooseTipsetToMine(tipsets [block.Tipset]) [block.Tipset]
+    ChooseTipsetToMine(tipsets [chain.Tipset]) [chain.Tipset]
 
     ec          ExpectedConsensus
     blockchain  blockchain.BlockchainSubsystem

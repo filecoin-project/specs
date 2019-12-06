@@ -87,7 +87,7 @@ In english, this means two things:
     - hash this concatenation for a usable ticket value
 
 See the `RandomnessAtEpoch` method below:
-{{< readfile file="block.go" code="true" lang="go" >}}
+{{< readfile file="chain.go" code="true" lang="go" >}}
 
 The above means that ticket randomness is reseeded with every new block, but can indeed be derived by any miner for an arbitrary epoch number using a past epoch.
 
