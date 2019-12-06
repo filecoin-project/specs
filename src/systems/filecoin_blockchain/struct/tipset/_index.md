@@ -21,6 +21,4 @@ Due to network propagation delay, it is possible for a miner in epoch N+1 to omi
 
 Block producers are expected to coordinate how they select messages for inclusion in blocks in order to avoid duplicates and thus maximize their expected earnings from transaction fees (see {{<sref message_pool>}}).
 
-{{< readfile file="../block/tipset.id" code="true" lang="go" >}}
-
-{{< readfile file="../block/tipset.go" code="true" lang="go" >}}
+{{< readfile file="../chain/tipset.id" code="true" lang="go" >}}

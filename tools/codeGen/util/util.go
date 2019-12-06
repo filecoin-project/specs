@@ -121,6 +121,18 @@ func SerializeBytes(b Bytes) Serialization {
 	return b
 }
 
+func SerializeBool(b bool) Serialization {
+	panic("TODO")
+	var byt []byte
+	return byt
+}
+
+func DeserializeBool(s Serialization) bool {
+	panic("TODO")
+	var b bool
+	return b
+}
+
 func IntMin(x, y int) int {
 	if y < x {
 		return y

@@ -1,6 +1,8 @@
 package storage_mining
 
 import (
+	"errors"
+
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
@@ -61,7 +63,7 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 
 	for _, sectorNo := range st.Impl().ProvingSet_.SectorsOn() {
 
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		newUtilization := utilizationInfo.CurrUtilization()
 
 		currEpoch := rt.CurrEpoch()
@@ -82,18 +84,21 @@ func (st *StorageMinerActorState_I) _updateSectorUtilization(rt Runtime, lastPoS
 
 }
 
-func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) block.StoragePower {
+func (st *StorageMinerActorState_I) _getActivePower(rt Runtime) (block.StoragePower, error) {
 	activePower := block.StoragePower(0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
-		activePower += utilizationInfo.CurrUtilization()
+		utilInfo, err := st._getUtilizationInfo(sectorNo)
+		if err != nil {
+			return block.StoragePower(0), err
+		}
+		activePower += utilInfo.CurrUtilization()
 	}
 
-	return activePower
+	return activePower, nil
 }
 
-func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StoragePower {
+func (st *StorageMinerActorState_I) _getInactivePower() (block.StoragePower, error) {
 	var inactivePower = block.StoragePower(0)
 
 	// iterate over sectorNo in CommittedSectors, RecoveringSectors, and FailingSectors
@@ -101,11 +106,14 @@ func (st *StorageMinerActorState_I) _getInactivePower(rt Runtime) block.StorageP
 	inactiveSectorSet := inactiveProvingSet.Extend(st.SectorTable().FailingSectors())
 
 	for _, sectorNo := range inactiveSectorSet.SectorsOn() {
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo, err := st._getUtilizationInfo(sectorNo)
+		if err != nil {
+			return block.StoragePower(0), err
+		}
 		inactivePower += utilizationInfo.CurrUtilization()
 	}
 
-	return inactivePower
+	return inactivePower, nil
 }
 
 // move Sector from Active/Failing
@@ -230,20 +238,24 @@ func (st *StorageMinerActorState_I) _assertSectorDidNotExist(rt Runtime, sectorN
 	}
 }
 
-func (st *StorageMinerActorState_I) _getUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo {
-	utilizationInfo, found := st.SectorUtilization()[sectorNo]
+func (st *StorageMinerActorState_I) _safeGetUtilizationInfo(rt Runtime, sectorNo sector.SectorNumber) sector.SectorUtilizationInfo {
+	utilizationInfo, err := st._getUtilizationInfo(sectorNo)
 
-	if !found {
-		rt.AbortStateMsg("sm._getUtilizationInfo: utilization info not found.")
+	if err != nil {
+		rt.AbortStateMsg(err.Error())
 	}
 
 	return utilizationInfo
 }
 
-func (st *StorageMinerActorState_I) _getCurrUtilization(sectorNo sector.SectorNumber) (block.StoragePower, bool) {
+func (st *StorageMinerActorState_I) _getUtilizationInfo(sectorNo sector.SectorNumber) (sector.SectorUtilizationInfo, error) {
 	utilizationInfo, found := st.SectorUtilization()[sectorNo]
 
-	return utilizationInfo.CurrUtilization(), found
+	if !found {
+		err := errors.New("sm._getUtilizationInfo: utilization info not found.")
+		return nil, err
+	}
+	return utilizationInfo, nil
 }
 
 func (st *StorageMinerActorState_I) _initializeUtilizationInfo(rt Runtime, deals []deal.OnChainDeal) sector.SectorUtilizationInfo {
