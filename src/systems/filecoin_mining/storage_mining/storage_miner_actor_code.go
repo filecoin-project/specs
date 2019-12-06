@@ -66,13 +66,6 @@ func (a *StorageMinerActorCode_I) _isChallenged(rt Runtime) bool {
 	return ret
 }
 
-func (a *StorageMinerActorCode_I) _canBeElected(rt Runtime) bool {
-	h, st := a.State(rt)
-	ret := st._canBeElected(rt.CurrEpoch())
-	Release(rt, h, st)
-	return ret
-}
-
 func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
 	h, st := a.State(rt)
 	ret := st._challengeHasExpired(rt.CurrEpoch())
@@ -180,8 +173,14 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 func (a *StorageMinerActorCode_I) _submitPowerReport(rt Runtime, lastPoStResponse block.ChainEpoch) {
 	h, st := a.State(rt)
 	newExpiredDealIDs := st._updateSectorUtilization(rt, lastPoStResponse)
-	activePower := st._getActivePower(rt)
-	inactivePower := st._getInactivePower(rt)
+	activePower, err := st._getActivePower()
+	if err != nil {
+		rt.AbortStateMsg(err.Error())
+	}
+	inactivePower, err := st._getInactivePower()
+	if err != nil {
+		rt.AbortStateMsg(err.Error())
+	}
 
 	// power report in processPowerReportParam
 	_ = &spc.PowerReport_I{
@@ -226,7 +225,7 @@ func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
 	activeDealIDs := make([]deal.DealID, 0)
 
 	for _, sectorNo := range st.SectorTable().Impl().ActiveSectors_.SectorsOn() {
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		newActiveDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
 		activeDealIDs = append(activeDealIDs, newActiveDealIDs...)
 	}
@@ -460,7 +459,7 @@ func (a *StorageMinerActorCode_I) _slashDealsForStorageFault(rt Runtime, sectorN
 
 	for _, sectorNo := range sectorNumbers {
 
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		activeDealIDs := utilizationInfo.DealExpirationAMT().Impl().ActiveDealIDs()
 		dealIDs = append(dealIDs, activeDealIDs...)
 
@@ -488,7 +487,7 @@ func (a *StorageMinerActorCode_I) _slashPledgeForStorageFault(rt Runtime, sector
 	affectedPower := block.StoragePower(0)
 	for _, sectorNo := range sectorNumbers {
 
-		utilizationInfo := st._getUtilizationInfo(rt, sectorNo)
+		utilizationInfo := st._safeGetUtilizationInfo(rt, sectorNo)
 		affectedPower += utilizationInfo.CurrUtilization()
 
 	}

@@ -39,6 +39,7 @@ type StoragePowerActorState struct {
         affectedPower  block.StoragePower
     ) actor.TokenAmount
     _getActivePower() block.StoragePower
+    ActivePowerMeetsConsensusMinimum(minPower block.StoragePower) bool
 }
 
 type StoragePowerActorCode struct {
@@ -83,6 +84,8 @@ type StoragePowerActorCode struct {
         currEpoch            block.ChainEpoch
         challengeFreePeriod  block.ChainEpoch
     ) bool
+
+    PowerMeetsConsensusMinimum(rt Runtime, minerPower block.StoragePower)
 
     // this should call ReportConsensusFault, numSectors should be all sectors
     // ReportUncommittedPowerFault(cheaterAddr addr.Address, numSectors UVarint)

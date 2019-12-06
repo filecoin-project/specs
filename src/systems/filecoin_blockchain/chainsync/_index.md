@@ -263,7 +263,7 @@ State Machine:
 - While in this state:
   - `ChainSync` is well-bootstrapped, and has an initial **trusted** `StateTree` to start from.
   - `ChainSync` is receiving latest `Blocks` from `BlockPubsub`
-  - `ChainSync` starts fetching and validating blocks (see _Block Fetching and Validation_ above).
+  - `ChainSync` starts fetching and validating blocks
   - `ChainSync` has unvalidated blocks between `ChainSync.FinalityTipset` and `ChainSync.TargetHeads`
 - **Chain State and Finality**:
   - In this state, the **chain MUST NOT advance** beyond whatever the node already has:
@@ -295,7 +295,7 @@ State Machine:
 
 - While in this state:
   - `ChainSync` is well-bootstrapped, and has an initial **trusted** `StateTree` to start from.
-  - `ChainSync` fetches and validates blocks (see _Block Fetching and Validation_).
+  - `ChainSync` fetches and validates blocks.
   - `ChainSync` is receiving and validating latest `Blocks` from `BlockPubsub`
   - `ChainSync` DOES NOT have unvalidated blocks between `ChainSync.FinalityTipset` and `ChainSync.TargetHeads`
   - `ChainSync` MUST drop back to another state if security conditions change.
@@ -347,12 +347,20 @@ State Machine:
 
 ## Progressive Block Validation
 
-See {{<sref block_validation>}} for complete collection of block validation rules
-- Blocks can be validated in progressive stages, in order to minimize resource expenditure.
+- {{<sref block "Blocks">}} may be validated in progressive stages, in order to minimize resource expenditure.
 - Validation computation is considerable, and a serious DOS attack vector.
 - Secure implementations must carefully schedule validation and minimize the work done by pruning blocks without validating them fully.
 - `ChainSync` SHOULD keep a cache of unvalidated blocks (ideally sorted by likelihood of belonging to the chain), and delete unvalidated blocks when they are passed by `FinalityTipset`, or when `ChainSync` is under significant resource load.
 - These stages can be used partially across many blocks in a candidate chain, in order to prune out clearly bad blocks long before actually doing the expensive validation work.
+
+- **Progressive Stages of Block Validation**
+  - **BV0 - Syntax**: Serialization, typing, value ranges.
+  - **BV1 - Plausible Consensus**: Plausible miner, weight, and epoch values (e.g from chain state at `b.ChainEpoch - consensus.LookbackParameter`).
+  - **BV2 - Block Signature**
+  - **BV3 - ElectionPoSt**: Correct PoSt with a winning ticket.
+  - **BV4 - Chain ancestry and finality**: Verify block links back to trusted chain, not prior to finality.
+  - **BV4 - Message Signatures**:
+  - **BV5 - State tree**: Parent tipset message execution produces the claimed state tree root and receipts.
 
 Notes:
 - in `CHAIN_CATCHUP`, if a node is receiving/fetching hundreds/thousands of `BlockHeaders`, validating signatures can be very expensive, and can be deferred in favor of other validation. (ie lots of BlockHeaders coming in through network pipe, dont want to bound on sig verification, other checks can help dump blocks on the floor faster (BV0, BV2)

@@ -1,11 +1,12 @@
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/chain"
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type ExpectedConsensus struct {
     expectedBlocksPerEpoch  UVarint
     expectedRewardPerEpoch  UVarint
 
-    ComputeChainWeight(tipset block.Tipset) block.ChainWeight
+    ComputeChainWeight(tipset chain.Tipset) block.ChainWeight
     IsValidConsensusFault(faults ConsensusFaultType, blocks [block.Block]) bool
     IsWinningChallengeTicket(
         challengeTicket  util.Bytes

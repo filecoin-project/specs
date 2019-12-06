@@ -8,4 +8,5 @@ entries:
   - block_sync
   - gossip_sub
   - crypto
+  - cryptoecon
 ---
