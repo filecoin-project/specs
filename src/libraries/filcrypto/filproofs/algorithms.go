@@ -340,7 +340,7 @@ func labelLayer(drg *DRG_I, expander *ExpanderGraph_I, sealSeed sector.SealSeed,
 		if prevLayer != nil {
 			for parent := range expander.Parents(UInt(i)) {
 				start := parent * nodeSize
-				parents = append(parents, labels[start:start+nodeSize])
+				parents = append(parents, prevLayer[start:start+nodeSize])
 			}
 		}
 
