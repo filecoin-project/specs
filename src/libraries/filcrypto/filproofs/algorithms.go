@@ -20,6 +20,7 @@ import (
 
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 )
+
 type SHA256Hash Bytes32
 type PedersenHash Bytes32
 type Bytes32 []byte
@@ -80,7 +81,7 @@ func WinSDRParams(cfg SDRCfg) *WinStackedDRG_I {
 				ParentsAlgorithm_: DRGCfg_Algorithm_ParentsAlgorithm_DRSample,
 				RNGAlgorithm_:     DRGCfg_Algorithm_RNGAlgorithm_ChaCha20,
 			},
-			Degree_: 6,
+			Degree_: 0,
 			Nodes_:  DRGNodeCount(nodes),
 		},
 		WindowExpanderGraphCfg_: &ExpanderGraphCfg_I{
@@ -230,13 +231,15 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 	for i := 0; i < windowCount; i++ {
 		keyLayers := sdr._generateWindowKey(sealSeed, i, sid, commD, nodes, randomness)
 
-		windowKeyLayers = append(windowKeyLayers, keyLayers...)
-		finalWindowKeyLayer = append(finalWindowKeyLayer, keyLayers[len(keyLayers)-1]...)
+		lastIndex := len(keyLayers) - 1
+		windowKeyLayers = append(windowKeyLayers, keyLayers[:lastIndex]...)
+		finalWindowKeyLayer = append(finalWindowKeyLayer, keyLayers[lastIndex]...)
 	}
 
 	qLayer := encodeDataInPlace(data, finalWindowKeyLayer, nodeSize, &curveModulus)
+	// NOTE: qLayer and data are now the same, and qLayer is introduced here for descriptive clarity only.
 
-	replica := labelLayer(nil, sdr.Expander(), sealSeed, WRAPPER_LAYER_WINDOW_INDEX, nodes, nodeSize, qLayer)
+	replica := labelLayer(sdr.Drg(), sdr.Expander(), sealSeed, WRAPPER_LAYER_WINDOW_INDEX, nodes, nodeSize, qLayer)
 
 	commC, commQ, commRLast, commR, commCTreePath, commQTreePath, commRLastTreePath := sdr.GenerateCommitments(replica, windowKeyLayers, qLayer)
 
@@ -252,7 +255,6 @@ func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness se
 		CommRLastTreePath_: commRLastTreePath,
 		Seed_:              sealSeed,
 		KeyLayers_:         windowKeyLayers,
-		QLayer_:            qLayer,
 		Replica_:           replica,
 	}
 	return &result
