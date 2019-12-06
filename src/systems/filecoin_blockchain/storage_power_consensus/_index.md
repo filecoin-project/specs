@@ -110,8 +110,7 @@ The VRF's deterministic output adds entropy to the ticket chain, limiting a mine
 
 We use the VRF from {{<sref vrf>}} for ticket generation in EC (see the `PrepareNewTicket` method below).
 
-{{< readfile file="storage_mining_subsystem.id" code="true" lang="go" >}}
-{{< readfile file="storage_mining_subsystem.go" code="true" lang="go" >}}
+{{< readfile file="../../filecoin_mining/storage_mining/storage_mining_subsystem.go" code="true" lang="go" >}}
 
 
 ### Ticket Validation
