@@ -43,6 +43,17 @@ def find_max_beta(d,alpha):
             max_beta = b
     return max_beta
 
+## find_optimal returns the lowest degree and highest beta given such an alpha
+## Priority is given to lowest degree: 
+## If (d1,b1) and (d2,b2) with d1 < d2, but target_beta < b1 < b2, 
+## then (d1,b1) is chosen
+def find_optimal(alpha, target_beta):
+    degree = 1
+    while True:
+        beta = find_max_beta(degree,alpha) 
+        if beta > target_beta:
+            return (degree,beta)
+        degree += 1
 
 def parse():
     parser = argparse.ArgumentParser()
@@ -88,37 +99,24 @@ def extract_value(obj, key):
         return None
     return results[0]
 
-def inject_value(input_json,search_key,inject_key,inject_value):
-    def extract(obj):
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                if isinstance(v, (dict, list)):
-                    extract(v)
-                elif k == search_key:
-                    # add the key/value here
-                    obj[inject_key] = inject_value
-                    return
-        elif isinstance(obj, list):
-            for item in obj:
-                extract(item)
-    extract(input_json)
-
 def main():
     jinput, alphaT,betaT, degreeT = parse()
     alpha = extract_value(jinput,alphaT)
     degree = extract_value(jinput,degreeT)
 
-    if alpha is None or degree is None:
-        # default behavior: return same thing if nothing to be done
-        # sys.stderr.write("alpha %s or degree %s" % (alpha,degree))
-        json.dump(jinput, sys.stdout)
-        sys.exit(0)
+    if alpha is None:
+        sys.exit(1)
 
-    beta = find_max_beta(degree,alpha)
-    # sys.stderr.write("found alpha %f -> beta %f" % (alpha,beta))
-    rounded = round(beta,5)
-    inject_value(jinput,alphaT,betaT,rounded)
-    # json.dump(jinput,sys.stdout)
-    print("{\"chung_beta\": %s}" % rounded)
+    v = {}
+    if degree is None:
+        # find min degree and max beta for this given alpha
+        degree,beta = find_optimal(alpha,0.80)
+        v["expander_parents"] = degree
+    else:
+        # find beta for this given alpha + degree
+        beta = find_max_beta(degree,alpha)
+    
+    v["chung_beta"] = round(beta,5)
+    json.dump(v, sys.stdout)
 
 main()
