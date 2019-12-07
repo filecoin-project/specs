@@ -24,6 +24,8 @@ Rig:
   describe(rig_snark_parallelization, "Number of SNARK proofs that can be generated in parallel")
   describe(rig_storage_read_mbs, "Sequential read speed (MB/s)")
   describe(rig_storage_read_mibs, "Sequential read speed (MiB/s)")
+  describe(cache_size_mib,"size of one ASIC cache in mib")
+  describe(nodes_cache,"number of nodes that fit in the cache")
 
   rig_storage_read_mibs = rig_storage_read_mbs * mb_to_mib
   rig_storage_min = rig_storage_min_tib * b_in_tib
@@ -32,6 +34,8 @@ Rig:
 
   rig_storage_unit_max = rig_storage_min / rig_storage_parallelization_min
   rig_storage_unit_max_tib = rig_storage_unit_max / b_in_tib 
+
+  nodes_cache = cache_size_mib / node_size_mib
 
 Crypto:
   describe(snark_size, "Size of a SNARK proof", bytes)
@@ -495,7 +499,7 @@ ProofOfReplication (StackedChungParameters):
 
   drg_parents = 0
 
-  chung_alpha = regeneration_fraction * cost_amax
+  // chung_alpha = breakeven_cost
   chung_eps = spacegap
 
   chung_a = chung_eps - (chung_c * chung_delta  / (chung_c -1)) + (((chung_c - 1) * (chung_sigma - 1))/ chung_c)
@@ -503,6 +507,7 @@ ProofOfReplication (StackedChungParameters):
 
   chung_psi = chung_alpha
   chung_sigma = 1 - chung_eps + chung_delta + 0.0001
+  assume(chung_sigma < 1)
 
   Chung: ./bin/chung_spec.py
     chung_beta = extern(chung_alpha, expander_parents)
@@ -614,16 +619,16 @@ Filecoin:
       epost_time_parallel = epost_data_access_parallel + post_ticket_gen + epost_inclusions_time_parallel + post_snark_time_parallel
 
 Rationality:
-  describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
+  describe(breakeven_cost, "ratio between cost of storing full sector versus regenerating for a polling time")
   describe(polling_time, "Time between two PoSt proofs", secs)
   describe(challenge_periods_per_month, "Number of challenge periods in a month")
-  describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them")
 
-  breakeven_nodes = ((cost_gib_per_month *  sector_size_gib) / (cost_node_encoding * challenge_periods_per_month))
   challenge_periods_per_month = secs_in_month / polling_time
-  regeneration_fraction = breakeven_nodes / nodes
+  breakeven_cost = cost_storage_sector_polling_time / cost_challenges_polling_time 
+  //assume(breakeven_cost < 1)
 
   Costs:
+    // Cost is only considered for a polling time
     Compute:
       describe(cost_node_encoding, "Cost of encoding a single node")
       describe(nodes_per_second, "Nodes encoded per second using the fastest hardware")
@@ -636,13 +641,30 @@ Rationality:
       nodes_per_year = nodes_per_second * secs_in_year 
       cost_node_encoding = rig_malicious_cost_per_year / nodes_per_year 
 
+      CostChallenges (GenericCost):
+        describe(cost_challenges,"Cost of encoding all challenges in a given period")
+        cost_challenges = cost_node_encoding * post_challenges
+
+      CostChallenges (MemoryCost):
+        describe(cost_challenges,"of challenges in a given period")
+        // We consider the cost_challenges to be the cost of *transfering* all
+        // challenges in a given period, not just one node.
+        // For each challenge we have a (1-sigma) pr. that it leads to
+        // regenerating alpha * n nodes; from that number of nodes we remove the
+        // cache size to allow the attacker to use the cache to its full
+        // capacity always. Then the cost is given for all challenges in a
+        // period
+        describe(prob_regen,"probability that a challenged node leads to a large regeneration of nodes")
+        describe(regen_size,"size of the portion to regenerate, using cache")
+        prob_regen = 1 - chung_sigma
+        regen_size = chung_alpha * window_nodes - nodes_cache
+        cost_challenges_polling_time = prob_regen * regen_size * cost_memory_node * post_challenges 
     Storage:
       describe(cost_gb_per_month, "Cost of storing 1GB per month")
       describe(cost_gib_per_month, "Cost of storing 1GiB per month")
       describe(cost_storage_gibs, "Cost of storing 1GiB per second")
-      describe(cost_storage_sector_polling_time, "Cost of storage for `polling_time`")
+      describe(cost_storage_sector_polling_time, "Cost of storing a sector for `polling_time`")
       describe(extra_storage_time, "Time for which an honest user must be storing a file beyond the challenge period")
-
       cost_gib_per_month = cost_gb_per_month * gb_to_gib
       cost_storage_gibs = cost_gib_per_month / secs_in_month 
       cost_storage_sector_polling_time = cost_storage_gibs * (sector_size_gib * (polling_time + extra_storage_time))

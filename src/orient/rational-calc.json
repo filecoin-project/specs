@@ -4,22 +4,6 @@
       "!ElectionWithFallbackPoSt": true,
       "!SectorEncoding": true,
       "!VectorR": true,
-      "!Wrapping": true,
-      "!WrappingVariant": false,
-      "!StackedReplicas": false
-    },
-    {
-      "!ElectionWithFallbackPoSt": true,
-      "!SectorEncoding": true,
-      "!VectorR": true,
-      "!WrappingVariant": true,
-      "!Wrapping": false,
-      "!StackedReplicas": false
-    },
-    {
-      "!ElectionWithFallbackPoSt": true,
-      "!SectorEncoding": true,
-      "!VectorR": true,
       "!Wrapping": false,
       "!WrappingVariant": false,
       "!StackedReplicas": true
@@ -30,14 +14,10 @@
       "!StackedChungParameters": true,
       "!StackedSDRParameters": false,
       "chung_delta": 0.01
-    },
-    {
-      "!StackedChungParameters": false,
-      "!StackedSDRParameters": true,
-      "sdr_delta": 0.01
     }
   ],
   {
+    "!MemoryCost": true,
     "spacegap": 0.2,
     "column_leaf_hash_constraints": 1376,
     "column_leaf_hash_time": 2.56e-7,
@@ -79,6 +59,10 @@
     "ticket_constraints": 1376,
     "ticket_hash": 2.56e-7,
     "window_size_mib": 32768,
-    "wrapper_parents": 10
+    "wrapper_parents": 10,
+    "expander_parents": 14,
+    "cache_size_mib": 1024,
+    "cost_memory_node": 0.00000000000000586,
+    "chung_alpha":0.6
   }
 ]
