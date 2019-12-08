@@ -132,7 +132,7 @@ In order to secure Storage Power Consensus, the system defines a minimum miner s
 
 Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of active power (i.e. storage power currently used in storage deals) or `MIN_MINER_SIZE_PERC` of the network's active storage power to participate in leader election.
 
-Miners smaller than this cannot mine blocks and earn block rewards in the network. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**. In that sense, miners smaller than the minimum size cannot generate blocks but nonetheless help secure consensus.
+Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
 
 Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.
 
