@@ -63,6 +63,6 @@
     "expander_parents": 14,
     "cache_size_mib": 1024,
     "cost_memory_node": 0.00000000000000586,
-    "chung_alpha":0.6
+    "cost_ratio":0.05
   }
 ]

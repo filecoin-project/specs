@@ -499,7 +499,7 @@ ProofOfReplication (StackedChungParameters):
 
   drg_parents = 0
 
-  // chung_alpha = breakeven_cost
+  chung_alpha = cost_storage_sector_polling_time / (cost_challenges_polling_time * cost_ratio)
   chung_eps = spacegap
 
   chung_a = chung_eps - (chung_c * chung_delta  / (chung_c -1)) + (((chung_c - 1) * (chung_sigma - 1))/ chung_c)
@@ -641,12 +641,11 @@ Rationality:
       nodes_per_year = nodes_per_second * secs_in_year 
       cost_node_encoding = rig_malicious_cost_per_year / nodes_per_year 
 
+      describe(cost_challenges_polling_time,"Cost of encoding all challenges in a given period")
       CostChallenges (GenericCost):
-        describe(cost_challenges,"Cost of encoding all challenges in a given period")
-        cost_challenges = cost_node_encoding * post_challenges
+        cost_challenges_polling_time = cost_node_encoding * post_challenges
 
       CostChallenges (MemoryCost):
-        describe(cost_challenges,"of challenges in a given period")
         // We consider the cost_challenges to be the cost of *transfering* all
         // challenges in a given period, not just one node.
         // For each challenge we have a (1-sigma) pr. that it leads to
@@ -657,8 +656,9 @@ Rationality:
         describe(prob_regen,"probability that a challenged node leads to a large regeneration of nodes")
         describe(regen_size,"size of the portion to regenerate, using cache")
         prob_regen = 1 - chung_sigma
-        regen_size = chung_alpha * window_nodes - nodes_cache
-        cost_challenges_polling_time = prob_regen * regen_size * cost_memory_node * post_challenges 
+        regen_size = window_nodes - nodes_cache
+        cost_challenges_polling_time = prob_regen * regen_size * cost_memory_node * post_challenges
+
     Storage:
       describe(cost_gb_per_month, "Cost of storing 1GB per month")
       describe(cost_gib_per_month, "Cost of storing 1GiB per month")
