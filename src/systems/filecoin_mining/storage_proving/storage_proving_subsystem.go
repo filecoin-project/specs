@@ -9,9 +9,6 @@ import (
 	util "github.com/filecoin-project/specs/util"
 )
 
-const POST_SECTOR_SAMPLE_RATE_NUM = 1
-const POST_SECTOR_SAMPLE_RATE_DEN = 25
-
 func (sps *StorageProvingSubsystem_I) VerifySeal(sv sector.SealVerifyInfo) StorageProvingSubsystem_VerifySeal_FunRet {
 	cfg := filproofs.SDRCfg_I{
 		SealCfg_: sv.SealCfg(),
@@ -34,9 +31,13 @@ func (sps *StorageProvingSubsystem_I) ComputeUnsealedSectorCID(sectorSize sector
 	}
 }
 
+// TODO: get from consts
+const EPOST_SAMPLE_NUM = 1
+const EPOST_SAMPLE_DENOM = 25
+
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
-	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
+	numChallengeTickets := util.UInt(len(sectorIDs) * EPOST_SAMPLE_NUM / EPOST_SAMPLE_DENOM)
 
 	// TODO: Get these correctly.
 	var cfg sector.PoStCfg
@@ -64,7 +65,7 @@ func (sps *StorageProvingSubsystem_I) GenerateElectionPoStProof(challengeSeed se
 
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
-	numChallengeTickets := util.UInt(len(sectorIDs) * POST_SECTOR_SAMPLE_RATE_NUM / POST_SECTOR_SAMPLE_RATE_DEN)
+	numChallengeTickets := util.UInt(len(sectorIDs) * EPOST_SAMPLE_NUM / EPOST_SAMPLE_DENOM)
 
 	// TODO: Get these correctly.
 	var cfg sector.PoStCfg

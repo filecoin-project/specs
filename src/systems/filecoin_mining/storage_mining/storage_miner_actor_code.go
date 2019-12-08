@@ -18,6 +18,7 @@ import (
 
 const (
 	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,6 +74,13 @@ func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
 	return ret
 }
 
+func (a *StorageMinerActorCode_I) _shouldChallenge(rt Runtime) bool {
+	h, st := a.State(rt)
+	ret := st._shouldChallenge(rt.CurrEpoch())
+	Release(rt, h, st)
+	return ret
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Surprise PoSt
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +89,8 @@ func (a *StorageMinerActorCode_I) _challengeHasExpired(rt Runtime) bool {
 func (a *StorageMinerActorCode_I) NotifyOfSurprisePoStChallenge(rt Runtime) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.StoragePowerActorAddr)
 
-	if a._isChallenged(rt) {
+	// check that this is a valid challenge
+	if !a._shouldChallenge(rt) {
 		return rt.SuccessReturn() // silent return, dont re-challenge
 	}
 
@@ -150,7 +159,7 @@ func (a *StorageMinerActorCode_I) _onMissedSurprisePoSt(rt Runtime) {
 
 	// Note: NewDetectedFaults is now the sum of all
 	// previously active, committed, and recovering sectors minus expired ones
-	// and any previously Failing sectors that did not exceed MaxFaultCount
+	// and any previously Failing sectors that did not exceed MAX_CONSECUTIVE_FAULTS
 	// Note: previously declared faults is now treated as part of detected faults
 	a._slashCollateralForStorageFaults(
 		rt,

@@ -150,17 +150,6 @@ func randInRange(lowInclusive int, highExclusive int) UInt {
 	return UInt(rand.Intn(highExclusive-lowInclusive) + lowInclusive)
 }
 
-func RandomInt(randomness util.Randomness, nonce int, limit *big.Int) *big.Int {
-	nonceBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(nonceBytes, uint64(nonce))
-	input := randomness
-	input = append(input, nonceBytes...)
-	ranHash := HashBytes_SHA256Hash(input[:])
-	hashInt := bigIntFromLittleEndianBytes(ranHash)
-	num := hashInt.Mod(hashInt, limit)
-	return num
-}
-
 func (exp *ExpanderGraph_I) Parents(node UInt) []UInt {
 	d := exp.Config().Degree()
 

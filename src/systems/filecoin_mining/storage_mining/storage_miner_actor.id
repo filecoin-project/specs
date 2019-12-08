@@ -57,8 +57,7 @@ type ChallengeStatus struct {
     ChallengeHasExpired(currEpoch block.ChainEpoch) bool
     CanBeElected(currEpoch block.ChainEpoch) bool
     ShouldChallenge(
-        currEpoch            block.ChainEpoch
-        challengeFreePeriod  block.ChainEpoch
+        currEpoch block.ChainEpoch
     ) bool
 }
 
@@ -94,8 +93,7 @@ type StorageMinerActorState struct {
     _canBeElected(currEpoch block.ChainEpoch) bool
     _challengeHasExpired(currEpoch block.ChainEpoch) bool
     _shouldChallenge(
-        currEpoch            block.ChainEpoch
-        challengeFreePeriod  block.ChainEpoch
+        currEpoch block.ChainEpoch
     ) bool
     _verifySeal(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _assertSectorDidNotExist(rt Runtime, sectorNo sector.SectorNumber)

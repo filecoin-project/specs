@@ -48,6 +48,8 @@ retrieval_market: "Retrieval Market"
 storage_market: "Storage Market"
 storage_deal_collateral: "Storage Deal Collateral"
 storage_faults: "Storage Faults"
+deals: "Deals"
+deal_states: "Deal States"
 
 # mining
 
