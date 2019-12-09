@@ -130,9 +130,10 @@ md`## Graphs`
 md`### On-chain footprint`
 
 bar_chart(solved_many, 'block_size_kib', [
-  'block_size_kib'
+  'not_proofs_per_block_kib',
+  'seals_size_per_block_kib',
+  'posts_size_per_block_kib',
 ], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 1000})
-
 
 md`### Retrieval`
 
