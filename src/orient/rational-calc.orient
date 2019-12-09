@@ -655,9 +655,11 @@ Rationality:
         // period
         describe(prob_regen,"probability that a challenged node leads to a large regeneration of nodes")
         describe(regen_size,"size of the portion to regenerate, using cache")
-        prob_regen = 1 - chung_sigma
+        prob_regen = 1 - expt(2,-post_lambda)
         regen_size = window_nodes - nodes_cache
-        cost_challenges_polling_time = prob_regen * regen_size * cost_memory_node * post_challenges
+        // cost_challenges_polling_time = prob_regen * regen_size * cost_memory_node 
+        cost_challenges_polling_time = prob_regen * regen_size * cost_memory_node * 50
+
 
     Storage:
       describe(cost_gb_per_month, "Cost of storing 1GB per month")
