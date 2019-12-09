@@ -10,18 +10,28 @@ viewof config = {
 
 constants = Object.assign({}, base, constraints, filecoin, bench, rig)
 
-combos = [wrapperVariant, wrapper, stackedReplicas]
-  .map(d => [
-    Object.assign({}, constants, d, stackedChungParams, config),
-    Object.assign({}, constants, d, stackedSDRParams, config)
-  ]).flat()
+combos = {
+  let start = [constants]
+  let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
+  let query = extend_query(proofs, [stackedChungParams, stackedSDRParams])
+
+  return query
+}
+
+// combos = [wrapperVariant, wrapper, stackedReplicas]
+//   .map(d => [
+//     Object.assign({}, constants, d, stackedChungParams, config),
+//     Object.assign({}, constants, d, stackedSDRParams, config)
+//   ]).flat()
 
 
-solved_many = (await solve_many(combos)).map(d => d[0])
+solved_many_pre = (await solve_many(combos)).map(d => d[0])
   .map(d => {
     d.construction = `${d.graph_name}_${d.proof_name}`
     return d
   })
+
+solved_many = solved_many_pre
 // solved_manys = (await solve_manys(combos)).flat()
 
 md`#### Vars that matter`
@@ -121,14 +131,18 @@ bar_chart(solved_many, 'decoding_time_parallel', [
 md`### EPoSt`
 
 bar_chart(solved_many, 'epost_time_parallel', [
-  'epost_data_access_parallel',
+  'epost_leaves_read_parallel',
+  'epost_mtree_read_parallel',
+  // 'epost_data_access_parallel',
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
 ])
 
 bar_chart(solved_many, 'post_time_parallel', [
-  'post_data_access_parallel',
+  // 'post_data_access_parallel',
+  'post_leaves_read_parallel',
+  'post_mtree_read_parallel',
   'post_ticket_gen',
   'post_inclusions_time_parallel',
   'post_snark_time_parallel'
@@ -138,7 +152,9 @@ table_constraints(solved_many, [
   'proof_name',
   'graph_name',
   'epost_time_parallel',
-  'epost_data_access',
+  'epost_data_access_parallel',
+  'epost_mtree_read_parallel',
+  'epost_leaves_read_parallel',
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel',
@@ -172,7 +188,7 @@ bar_chart = (data, title, vars) => {
   })
 }
 
-md`### Multi-dimensions`
+md`### Merkle tree caching`
 
 add_query = (query, ext) => {
   return query.map(d => Object.assign({}, d, ext))
@@ -193,7 +209,7 @@ extend_query = (array, ...exts) => {
 mtree_query = {
   let query = [constants]
   const proofs = [wrapper, wrapperVariant, stackedReplicas]
-  const post_mtree_layers_cached = [...Array(20)].map((_, i) => ({post_mtree_layers_cached: i+10}))
+  const post_mtree_layers_cached = [...Array(10)].map((_, i) => ({post_mtree_layers_cached: i+20}))
 
   query = extend_query(query, proofs, post_mtree_layers_cached, [stackedChungParams])
 
@@ -202,7 +218,8 @@ mtree_query = {
 
 mtree_solved = (await solve_many(mtree_query)).map(d => d[0])
 
-graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], { height: 100 })
+graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], { height: 100, yrule: 15 })
+graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'post_inclusion_time', ['proof_name'], { height: 100 })
 
 md`### Impact of \`chung_delta\` in StackedChung`
 queries = [...Array(8)].map((_, i) => {
@@ -242,7 +259,7 @@ base = ({
   "post_mtree_layers_cached": 25,
   "post_lambda": 10,
   "sector_size_gib": 32,
-  "window_size_mib": 64,
+  "window_size_mib": 1024,
   "wrapper_parents": 100,
   "!StackedReplicaUnaligned": true
 })
@@ -318,7 +335,7 @@ rig = ({
   "rig_ram_gib": 32,
   "rig_storage_latency": 0.003,
   "rig_storage_min_tib": 100,
-  "rig_storage_parallelization": 30,
+  "rig_storage_parallelization": 32,
   "rig_storage_read_mbs": 80,
   "cost_gb_per_month": 0.005,
   "extra_storage_time": 0,
