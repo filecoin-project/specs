@@ -123,8 +123,8 @@ type StorageMinerActorCode struct {
     PreCommitSector(rt Runtime, info sector.SectorPreCommitInfo)  // TODO: check with Magik on sizes
     ProveCommitSector(rt Runtime, info sector.SectorProveCommitInfo)
 
-    SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
-    SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
+    SubmitVerifiedSurprisePoSt(rt Runtime)
+    SubmitVerifiedElectionPoSt(rt Runtime)
 
     _checkSurprisePoStSubmissionHappened(rt Runtime)
 
@@ -134,7 +134,7 @@ type StorageMinerActorCode struct {
     _isChallenged(rt Runtime) bool
     _isSealVerificationCorrect(rt Runtime, onChainInfo sector.OnChainSealVerifyInfo) bool
     _onMissedSurprisePoSt(rt Runtime)
-    _onSuccessfulPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo)
+    _onSuccessfulPoSt(rt Runtime)
 
     _slashCollateralForStorageFaults(
         rt          Runtime

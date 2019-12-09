@@ -268,7 +268,7 @@ func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
 //       - Failing / Recovering / Active / Committed -> Cleared
 //     - Remove SectorNumber from Sectors, ProvingSet
 // - Update ChallengeEndEpoch
-func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
+func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 	h, st := a.State(rt)
 
 	// TODO add info on chain
@@ -342,20 +342,22 @@ func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime, onChainInfo sect
 }
 
 // called by verifier to update miner state on successful surprise post
-func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
+// after it has been verified in the storage_mining_subsystem
+func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime) InvocOutput {
 	TODO() // TODO: validate caller
 
 	// Ensure pledge collateral satisfied
 	// otherwise, abort SubmitVerifiedSurprisePoSt
 	a._ensurePledgeCollateralSatisfied(rt)
 
-	return a._onSuccessfulPoSt(rt, onChainInfo)
+	return a._onSuccessfulPoSt(rt)
 
 }
 
 // Called by StoragePowerConsensus subsystem after verifying the Election proof
 // and verifying the PoSt proof in the block header.
-// Assume ElectionPoSt has already been successfully verified when the function gets called.
+// Assume ElectionPoSt has already been successfully verified (both proof and partial ticket
+// value) when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
 func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
@@ -369,7 +371,7 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChain
 	// notneeded := a._verifyPoStSubmission(rt)
 
 	// the following will update last challenge response time
-	return a._onSuccessfulPoSt(rt, onChainInfo)
+	return a._onSuccessfulPoSt(rt)
 
 }
 
