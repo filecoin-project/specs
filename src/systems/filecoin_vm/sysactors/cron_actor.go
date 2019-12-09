@@ -1,6 +1,7 @@
 package sysactors
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 import exitcode "github.com/filecoin-project/specs/systems/filecoin_vm/runtime/exitcode"
 import util "github.com/filecoin-project/specs/util"
 import vmr "github.com/filecoin-project/specs/systems/filecoin_vm/runtime"
@@ -15,7 +16,7 @@ func (a *CronActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 }
 
 func (a *CronActorCode_I) EpochTick(rt vmr.Runtime) InvocOutput {
-	// Hook period actions in here.
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 
 	// a.Entries is basically a static registry for now, loaded
 	// in the interpreter static registry.

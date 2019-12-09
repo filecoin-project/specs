@@ -26,7 +26,8 @@ For each tipset:
 
 - the `CronActor`'s tick method is invoked implicitly after all the blocks' messages.
 
-These implicit messages specify a gas price of zero, but must be included in the computation.
+These implicit messages have a `From` address being the distinguished system account actor.
+They specify a gas price of zero, but must be included in the computation.
 They must succeed (have an exit code of zero) in order for the new state to be
 computed. Receipts for them are excluded from the receipt list; only explicit messages have an 
 explicit receipt. 

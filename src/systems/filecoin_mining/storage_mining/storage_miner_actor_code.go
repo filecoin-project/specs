@@ -18,6 +18,7 @@ import (
 
 const (
 	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_SubmitVerifiedElectionPoSt
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
 
@@ -357,11 +358,9 @@ func (a *StorageMinerActorCode_I) SubmitVerifiedSurprisePoSt(rt Runtime, onChain
 // Assume ElectionPoSt has already been successfully verified when the function gets called.
 // Likewise assume that the rewards have already been granted to the storage miner actor. This only handles sector management.
 func (a *StorageMinerActorCode_I) SubmitVerifiedElectionPoSt(rt Runtime, onChainInfo sector.OnChainPoStVerifyInfo) InvocOutput {
-
-	// TODO: validate caller
-	// the caller MUST be the miner who won the block (who won the block should be callable as a a VM runtime call)
-	// we also need to enforce that this call happens only once per block, OR make it not callable by special privileged messages
-	TODO()
+	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
+	// The receiver must be the miner who produced the block for which this message is created.
+	Assert(rt.ToplevelBlockWinner() == rt.CurrReceiver())
 
 	// we do not need to verify post submission here, as this should have already been done
 	// outside of the VM, in StoragePowerConsensus Subsystem. Doing so again would waste
