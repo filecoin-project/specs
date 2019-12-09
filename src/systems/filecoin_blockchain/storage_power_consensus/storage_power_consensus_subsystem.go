@@ -1,6 +1,8 @@
 package storage_power_consensus
 
 import (
+	"math"
+
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	ipld "github.com/filecoin-project/specs/libraries/ipld"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
@@ -41,19 +43,20 @@ func (spc *StoragePowerConsensusSubsystem_I) StoragePowerConsensusError(errMsg s
 	panic("TODO")
 }
 
-func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower) bool {
+func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree stateTree.StateTree, partialTicket sector.PartialTicket, sectorUtilization block.StoragePower, numSectors util.UVarint) bool {
 
 	// finalize the partial ticket
 	challengeTicket := filcrypto.SHA256(partialTicket)
 
 	st := spc._getStoragePowerActorState(stateTree)
-	activePower := st._getActivePower()
+	totalActivePower := st._getActivePower()
 
 	// TODO: pull from constants
-	SAMPLE_NUM := util.UVarint(1)
-	SAMPLE_DENOM := util.UVarint(25)
+	EPOST_SAMPLE_RATE_NUM := util.UVarint(1)
+	EPOST_SAMPLE_RATE_DENOM := util.UVarint(25)
+	sectorsSampled := uint64(math.Ceil(float64(EPOST_SAMPLE_RATE_NUM/EPOST_SAMPLE_RATE_DENOM) * float64(numSectors)))
 
-	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, activePower, SAMPLE_NUM, SAMPLE_DENOM)
+	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, totalActivePower, sectorsSampled, numSectors)
 }
 
 // TODO: fix linking here

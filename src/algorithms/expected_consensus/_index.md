@@ -78,11 +78,21 @@ As discussed in {{<sref election_post>}}, a miner will use the challenge ticket 
 The miner gets to draw one such challenge ticket per sector they have committed and must then compare the value derived from the challenge ticket against a target to determine whether they are eligible to mine. This is called finding a winning ticket.
 
 The target is set as follows, for each ticket and its associated sector:
-`target = activePowerInSector/networkPower * sectorsSampled * EC.ExpectedLeaders`.
+`target = activePowerInSector/networkPower * EC.ExpectedLeaders * numSectorsMiner / numSectorsSampled`
 
-This means that on expectation, sampling sectorsSampled * storedSectors challenge tickets in every epoch, a miner will find `minerPower * EC.ExpectedLeaders` winning tickets per round on expectation. 
+The target ensures that the miner can express the power across all of their sectors through the tickets they have sampled. Specifically, on expectation, checking `numSectorsSampled` challenge tickets in every epoch, a miner will find `minerPower * EC.ExpectedLeaders` winning tickets per round on expectation.
 
-If the miner wins the election in this round, it can use wining challengeTicket, along with a new randomness ticket to generate and publish a new block. Otherwise, it waits to hear of another block generated in this round.
+We show this below, removing division for ease of implementation:
+
+```text
+const maxChallengeTicketSize = 2^len(H)
+
+def TicketIsWinner(challengeTicket):
+    // Check that `ChallengeTicket < Target`
+    return challengeTicket * networkPower * numSectorsSampled < activePowerInSector * EC.ExpectedLeaders * maxChallengeTicketSize * numSectorsMiner
+```
+
+If the miner finds any winning ticket in this round, it can use it, along with a new randomness ticket to generate and publish a new block. Otherwise, it waits to hear of another block generated in this round.
 
 Each miner will be rewarded `blockRewardPerEpoch / EC.ExpectedLeaders` FIL per found winning ticket, all of which are submitted on chain.
 

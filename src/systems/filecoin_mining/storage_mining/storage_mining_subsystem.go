@@ -87,6 +87,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	winningCandidates := make([]sector.PoStCandidate, 0)
 	st := sms._getStorageMinerActorState(currState, sms._keyStore().MinerAddress())
 
+	numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
 	for _, candidate := range candidates {
 		sectorNum := candidate.SectorID().Number()
 		utilInfo, err := st._getUtilizationInfo(sectorNum)
@@ -95,7 +96,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 			return
 		}
 		sectorPower := utilInfo.CurrUtilization()
-		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower) {
+		if sms._consensus().IsWinningPartialTicket(currState, candidate.PartialTicket(), sectorPower, numMinerSectors) {
 			winningCandidates = append(winningCandidates, candidate)
 		}
 	}
@@ -316,6 +317,7 @@ func (sms *StorageMiningSubsystem_I) VerifySurprisePoSt(header block.BlockHeader
 
 func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, onChainInfo sector.OnChainPoStVerifyInfo) bool {
 	st := sms._getStorageMinerActorState(header.ParentState(), header.Miner())
+	numMinerSectors := uint64(len(st.SectorTable().Impl().ActiveSectors_.SectorsOn()))
 
 	for _, info := range onChainInfo.Candidates() {
 		sectorNum := info.SectorID().Number()
@@ -325,7 +327,7 @@ func (sms *StorageMiningSubsystem_I) VerifyElection(header block.BlockHeader, on
 			return false
 		}
 		sectorPower := utilInfo.CurrUtilization()
-		if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower) {
+		if !sms._consensus().IsWinningPartialTicket(header.ParentState(), info.PartialTicket(), sectorPower, numMinerSectors) {
 			return false
 		}
 	}

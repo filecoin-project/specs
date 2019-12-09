@@ -42,7 +42,7 @@ Filecoin's ElectionPoSt process makes use of two calls to the system library:
 
 As stated above, a miner is incentivized to repeat this process at every block time in order to check whether they were elected leaders (see <<sref expected_consensus>>). The rationality assumption made by ElectionPoSt is thus that storing files continuously and earning block rewards accordingly will be more profitable to miners than regenerating data at various epochs to sporadically participate in leader election.
 
-At every epoch, each miner will challenge a portion of sectors at random proportional to ePostSampleRate, with each sector being issued K PoSt challenges (coverage may not be perfect).
+At every epoch, each miner will challenge a portion of sectors `numSectorsSampled` from their `Proving Set` at random, according to some `ePoStSampleRate` with each sector being issued K PoSt challenges (coverage may not be perfect).
 
 By proving access to the challenged range of nodes (i.e. merkle tree leaf from the committed sector) in the sector, the miner can generate a set of valid ChallengeTickets in order to check them as part of leader election in EC (in order to find the winning tickets). The winning tickets will be stored on the block and used to generate a PoSt (using a SNARK). A block header will thus contain a number of “winning” PoStCandidates (each containing a partialTicket, SectorID and other elements, used to verify the leader election) and a PostProof generated from the ChallengeTickets.
 
@@ -61,11 +61,13 @@ The miner draws a randomness ticket from the randomness chain from a given epoch
     - `post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))`
 
 2. **(select eligible sectors)**
-The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with a chosen number of `PartialTickets` (`ePostSampleRate*eligibleSectors`).
+The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with `numSectorsSampled` `PartialTickets`.
 
-    - Select a subset of sectors of size `ePostSampleRate*minerSectors` [details omitted]
+```text
+    numSectorsSampled = ceil(samplingRate * numSectorsMiner)
+```
 
-    Note also that even with `challengeTicketNum == numSectors`, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
+Note also that even with `numSectorsSampled == numSectors`, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
 
 3. **(generate Partial Ticket(s))** for each selected sector
 
@@ -78,14 +80,22 @@ The miner calls `GenerateCandidates` from proofs with their non-faulted (declare
     - `PartialTicket = H(post_randomness || minerID ||S_ j || C_1_Output || … || C_K_Output)`
 
 4. **(check Challenge Ticket(s) for winners)**
-Given a returned PartialTicket, miner checks it is a winning ticket. Specifically, they do the following:
+Given returned PartialTickets, miner checks them for winning tickets using the target set by expected consensus in {{<sref expected_consensus>}} (per the `TicketIsWinner()` method below).
 
-    - `ChallengeTicket = Finalize(PartialTicket) = H(ChallengeTicket) / 2^len(H)`
-    - Check that `ChallengeTicket < Target`
-        - `Target = activePowerInSector/networkPower * 1/ePostSampleRate * EC.ExpectedLeaders`.
-        - Put another way check `challengeTicket_num * networkPower * ePostSampleRate_num < activePowerInSector * ePostSampleRate_denom * EC.ExpectedLeaders * challengeTicket_denom`
-    - If yes, it is a winning ticket and can be used to submit a block
-    - In either case, try again with next sector to increase rewards
+```text
+winningTickets = []
+def checkTicketForWinners(partialTickets):
+    for partialTicket in partialTickets:
+        challengeTicket = Finalize(PartialTicket) 
+        if TicketIsWinner(challengeTicket):
+            winningTickets += partialTicket
+
+def finalizeTicket(partialTicket):
+    return H(ChallengeTicket) / 2^len(H)
+
+```
+
+A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `samplingRate` into account.
 
 5. **(generate a `PoStProof`)** for inclusion in the block header
 
@@ -99,7 +109,8 @@ If no one has found a winning ticket in this epoch, increment epoch value as par
 - `Randomness_lookback` -- how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
 - `K (e.g. 20-100s)` - number of  challenges per sector -- must be large enough such that the PoSpace is secure.
 - `ChallengeRangeSize` - challenge read size (between 32B and 256KB)  -- based on security analysis.
-- `ePostSampleRate` - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
+- `samplingRate` - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
+- `sectorsSampled` - Number of sectors sampled given the `samplingRate`. `sectorsSampled = sectorsMiner * samplingRate`
 - `networkPower` - filecoin network’s power - read from the power table, expressed in number of bytes
 
 ## ElectionPoSt verification

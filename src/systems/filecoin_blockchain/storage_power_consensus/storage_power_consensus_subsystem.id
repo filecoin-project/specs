@@ -19,6 +19,7 @@ type StoragePowerConsensusSubsystem struct {//(@mutable)
         st                 st.StateTree
         partialTicket      sector.PartialTicket
         sectorUtilization  block.StoragePower
+        numSectors         util.UVarint
     ) bool
 
     _getStoragePowerActorState(stateTree st.StateTree) StoragePowerActorState
