@@ -4807,7 +4807,10 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">miner</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">activePower</span> <span class="p">=</span> <span class="nx">activePower</span> <span class="o">+</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
+        <span class="c1">// only count miner power if they are larger than MIN_MINER_SIZE
+</span><span class="c1"></span>        <span class="k">if</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">())</span> <span class="p">{</span>
+            <span class="nx">activePower</span> <span class="p">=</span> <span class="nx">activePower</span> <span class="o">+</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
+        <span class="p">}</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="nx">activePower</span>

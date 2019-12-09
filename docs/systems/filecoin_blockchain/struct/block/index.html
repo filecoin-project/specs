@@ -4800,7 +4800,7 @@ without reference to outside information such as the parent state tree.</p>
 <p>A syntactically valid header must have:</p>
 
 <ul>
-<li>a non-empty array of <code>Parents</code> CIDs if <code>Epoch</code> is greater than zero,</li>
+<li>between 1 and <code>5*ec.ExpectedLeaders</code> <code>Parents</code> CIDs if <code>Epoch</code> is greater than zero (else empty <code>Parents</code>),</li>
 <li>a non-negative <code>ParentWeight</code>,</li>
 <li>a <code>Miner</code> address which is an ID-address,</li>
 <li>a non-negative <code>Epoch</code>,</li>
@@ -4809,9 +4809,9 @@ without reference to outside information such as the parent state tree.</p>
 <li><code>ElectionPoStOutput</code> containing:
 
 <ul>
-<li>a non-empty <code>Candidates</code> array</li>
-<li>a non-empty <code>PoStRandomness</code> field</li>
-<li>a non-empty <code>Proof</code> field
+<li>a <code>Candidates</code> array with between 1 and <code>EC.ExpectedLeaders</code> values (inclusive),</li>
+<li>a non-empty <code>PoStRandomness</code> field,</li>
+<li>a non-empty <code>Proof</code> field.
 <br /></li>
 </ul></li>
 </ul>
@@ -4821,6 +4821,8 @@ without reference to outside information such as the parent state tree.</p>
 <ul>
 <li>all referenced messages syntactically valid,</li>
 <li>all referenced parent receipts syntactically valid,</li>
+<li>the sum of the serialized sizes of the block header and included messages is no greater than <code>block.BlockMaxSize</code>,</li>
+<li>the sum of the gas limit of all explicit messages is no greater than <code>block.BlockGasLimit</code>.</li>
 </ul>
 
 <p>Note that validation of the block signature requires access to the miner worker address and

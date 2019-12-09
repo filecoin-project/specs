@@ -4811,9 +4811,9 @@ https://github.com/alex-shpak/hugo-book
   <img id="spec-logo" src="./docs/filspeclogo.png" />
   <div id="spec-version">
     protocol version: <span id="protocol-version-number">v0.1.0</span><br />
-    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">62ebee9e</span>
+    spec doc version: <span id="spec-version-number">v1.1</span>-<span id="spec-version-hash">c213f7f2</span>
     <br />
-    last published: <span id="spec-version-date">2019-12-09_09:33:54Z</span>
+    last published: <span id="spec-version-date">2019-12-09_21:57:18Z</span>
   </div>
 </div>
 
@@ -12413,8 +12413,14 @@ included in a block.</p>
 <li>has non-empty <code>Params</code> only if <code>MethodNum</code> is zero,</li>
 <li>has non-negative <code>GasPrice</code>,</li>
 <li>has <code>GasLimit</code> that is at least equal to the gas consumption associated with the message&rsquo;s serialized bytes,</li>
-<li>has <code>GasLimit</code> that is no greater than the block gas limit network parameter</li>
-<li>has a total serialized size no greater than 32 KiB.</li>
+<li>has <code>GasLimit</code> that is no greater than the block gas limit network parameter.</li>
+</ul>
+
+<p>When transmitted individually (before inclusion in a block), a message is packaged as
+<code>SignedMessage</code>, regardless of signature scheme used. A valid signed message:</p>
+
+<ul>
+<li>has a total serialized size no greater than <code>message.MessageMaxSize</code>.</li>
 </ul>
 
 <h4 id="message-semantic-validation">Message semantic validation</h4>
@@ -12540,6 +12546,9 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
+
+<span class="c1">// The maximum serialized size of a SignedMessage.
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">MessageMaxSize</span> <span class="p">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span>
 
 <span class="kd">func</span> <span class="nf">UnsignedMessage_Make</span><span class="p">(</span>
 	<span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>
@@ -16518,7 +16527,7 @@ without reference to outside information such as the parent state tree.</p>
 <p>A syntactically valid header must have:</p>
 
 <ul>
-<li>a non-empty array of <code>Parents</code> CIDs if <code>Epoch</code> is greater than zero,</li>
+<li>between 1 and <code>5*ec.ExpectedLeaders</code> <code>Parents</code> CIDs if <code>Epoch</code> is greater than zero (else empty <code>Parents</code>),</li>
 <li>a non-negative <code>ParentWeight</code>,</li>
 <li>a <code>Miner</code> address which is an ID-address,</li>
 <li>a non-negative <code>Epoch</code>,</li>
@@ -16527,9 +16536,9 @@ without reference to outside information such as the parent state tree.</p>
 <li><code>ElectionPoStOutput</code> containing:
 
 <ul>
-<li>a non-empty <code>Candidates</code> array</li>
-<li>a non-empty <code>PoStRandomness</code> field</li>
-<li>a non-empty <code>Proof</code> field
+<li>a <code>Candidates</code> array with between 1 and <code>EC.ExpectedLeaders</code> values (inclusive),</li>
+<li>a non-empty <code>PoStRandomness</code> field,</li>
+<li>a non-empty <code>Proof</code> field.
 <br /></li>
 </ul></li>
 </ul>
@@ -16539,6 +16548,8 @@ without reference to outside information such as the parent state tree.</p>
 <ul>
 <li>all referenced messages syntactically valid,</li>
 <li>all referenced parent receipts syntactically valid,</li>
+<li>the sum of the serialized sizes of the block header and included messages is no greater than <code>block.BlockMaxSize</code>,</li>
+<li>the sum of the gas limit of all explicit messages is no greater than <code>block.BlockGasLimit</code>.</li>
 </ul>
 
 <p>Note that validation of the block signature requires access to the miner worker address and
@@ -19291,7 +19302,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 <p>Specifically, miners must have either at least <code>MIN_MINER_SIZE_STOR</code> of active power (i.e. storage power currently used in storage deals) or <code>MIN_MINER_SIZE_PERC</code> of the network&rsquo;s active storage power to participate in leader election.</p>
 
-<p>Miners smaller than this cannot mine blocks and earn block rewards in the network. However, <strong>it is important to note that such miners can still have their power faulted and be penalized accordingly</strong>. In that sense, miners smaller than the minimum size cannot generate blocks but nonetheless help secure consensus.</p>
+<p>Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, <strong>it is important to note that such miners can still have their power faulted and be penalized accordingly</strong>.</p>
 
 <p>Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.</p>
 
@@ -19533,7 +19544,10 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 	<span class="nx">activePower</span> <span class="o">:=</span> <span class="nx">block</span><span class="p">.</span><span class="nf">StoragePower</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">miner</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">st</span><span class="p">.</span><span class="nf">PowerTable</span><span class="p">()</span> <span class="p">{</span>
-		<span class="nx">activePower</span> <span class="p">=</span> <span class="nx">activePower</span> <span class="o">+</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
+		<span class="c1">// only count miner power if they are larger than MIN_MINER_SIZE
+</span><span class="c1"></span>		<span class="k">if</span> <span class="nx">st</span><span class="p">.</span><span class="nf">ActivePowerMeetsConsensusMinimum</span><span class="p">(</span><span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">())</span> <span class="p">{</span>
+			<span class="nx">activePower</span> <span class="p">=</span> <span class="nx">activePower</span> <span class="o">+</span> <span class="nx">miner</span><span class="p">.</span><span class="nf">ActivePower</span><span class="p">()</span>
+		<span class="p">}</span>
 	<span class="p">}</span>
 
 	<span class="k">return</span> <span class="nx">activePower</span>
@@ -32830,9 +32844,9 @@ When such a PoSt proof is successfully submitted all faults are reset and assume
 
 <p>Storage Power Consensus participants are subject to a <a href="./#systems__filecoin_blockchain__storage_power_consensus__min_miner_size">Minimum Miner Size</a>, meaning miners smaller than <code>MIN_MINER_SIZE_STOR</code> of active (or in-deal) storage or whose active storage represents less than <code>MIN_MINER_SIZE_PERC</code>% of the network&rsquo;s cannot produce valid electionPoSts.</p>
 
-<p>However, these miners still have active power and can still run and transmit SurprisePosts as messages to be added on-chain. These miners can also be faulted as usual for lacking to prove their power in a proving period.</p>
+<p>These miners&rsquo; power does not count as part of the total network power, nor are they able to sumit electionPoSts but they can still run and transmit SurprisePosts as messages to be added on-chain. These miners can also be faulted as usual for lacking to prove their power after a challenge.</p>
 
-<p>New miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, they will be able to submit new blocks with ElectionPoSts as well.</p>
+<p>New miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, their power will be included in total power and they will be able to submit new blocks with ElectionPoSts as well.</p>
 
 
 </div>

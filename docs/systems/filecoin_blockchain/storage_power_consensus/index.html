@@ -5487,7 +5487,7 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 <p>Specifically, miners must have either at least <code>MIN_MINER_SIZE_STOR</code> of active power (i.e. storage power currently used in storage deals) or <code>MIN_MINER_SIZE_PERC</code> of the network&rsquo;s active storage power to participate in leader election.</p>
 
-<p>Miners smaller than this cannot mine blocks and earn block rewards in the network. However, <strong>it is important to note that such miners can still have their power faulted and be penalized accordingly</strong>. In that sense, miners smaller than the minimum size cannot generate blocks but nonetheless help secure consensus.</p>
+<p>Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, <strong>it is important to note that such miners can still have their power faulted and be penalized accordingly</strong>.</p>
 
 <p>Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.</p>
 

@@ -4671,8 +4671,14 @@ included in a block.</p>
 <li>has non-empty <code>Params</code> only if <code>MethodNum</code> is zero,</li>
 <li>has non-negative <code>GasPrice</code>,</li>
 <li>has <code>GasLimit</code> that is at least equal to the gas consumption associated with the message&rsquo;s serialized bytes,</li>
-<li>has <code>GasLimit</code> that is no greater than the block gas limit network parameter</li>
-<li>has a total serialized size no greater than 32 KiB.</li>
+<li>has <code>GasLimit</code> that is no greater than the block gas limit network parameter.</li>
+</ul>
+
+<p>When transmitted individually (before inclusion in a block), a message is packaged as
+<code>SignedMessage</code>, regardless of signature scheme used. A valid signed message:</p>
+
+<ul>
+<li>has a total serialized size no greater than <code>message.MessageMaxSize</code>.</li>
 </ul>
 
 <h1 id="message-semantic-validation">Message semantic validation</h1>
@@ -4798,6 +4804,9 @@ which the block&rsquo;s messages will apply from the declared parent state.</p>
 <span class="kd">var</span> <span class="nx">IMPL_FINISH</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">IMPL_FINISH</span>
 
 <span class="kd">type</span> <span class="nx">Serialization</span> <span class="p">=</span> <span class="nx">util</span><span class="p">.</span><span class="nx">Serialization</span>
+
+<span class="c1">// The maximum serialized size of a SignedMessage.
+</span><span class="c1"></span><span class="kd">const</span> <span class="nx">MessageMaxSize</span> <span class="p">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span>
 
 <span class="kd">func</span> <span class="nf">UnsignedMessage_Make</span><span class="p">(</span>
 	<span class="nx">from</span> <span class="nx">addr</span><span class="p">.</span><span class="nx">Address</span><span class="p">,</span>

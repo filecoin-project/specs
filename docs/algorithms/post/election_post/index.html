@@ -4865,9 +4865,9 @@ When such a PoSt proof is successfully submitted all faults are reset and assume
 
 <p>Storage Power Consensus participants are subject to a <a href="../../../../#systems__filecoin_blockchain__storage_power_consensus__min_miner_size">Minimum Miner Size</a>, meaning miners smaller than <code>MIN_MINER_SIZE_STOR</code> of active (or in-deal) storage or whose active storage represents less than <code>MIN_MINER_SIZE_PERC</code>% of the network&rsquo;s cannot produce valid electionPoSts.</p>
 
-<p>However, these miners still have active power and can still run and transmit SurprisePosts as messages to be added on-chain. These miners can also be faulted as usual for lacking to prove their power in a proving period.</p>
+<p>These miners&rsquo; power does not count as part of the total network power, nor are they able to sumit electionPoSts but they can still run and transmit SurprisePosts as messages to be added on-chain. These miners can also be faulted as usual for lacking to prove their power after a challenge.</p>
 
-<p>New miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, they will be able to submit new blocks with ElectionPoSts as well.</p>
+<p>New miners are expected to be onboarded through SurprisePoSts. Once they reach the requisite size, their power will be included in total power and they will be able to submit new blocks with ElectionPoSts as well.</p>
 
 </article>
 
