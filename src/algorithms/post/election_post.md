@@ -222,7 +222,7 @@ Only faults which have been reported at challenge time, will be accounted for. I
 - Faults cannot be declared during a ChallengePeriod
 - Faults cannot be recovered during a ChallengePeriod
 
-Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to `MAX_CONSECUTIVE_FAULTS` challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see {{<sref deal_states>}} for more).
+Accordingly, if the miner does not respond to the challenge, they will lose all their Power and a portion of their pledge collateral. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. The miner will get challenged again in the next proving period. If the miner does not provide a valid response to `MAX_CONSECUTIVE_FAULTS` challenges in a row, their pledge collateral is slashed and their sectors are permanently terminated. Their storage deal collateral is slashed accordingly (see {{<sref storage_deal_states>}} for more).
 
 Any faulted sectors will not count toward miner power in {{<sref expected_consensus>}}. Through these `Detected` and `Declared` faults, the power table should closely track power in the network.
 

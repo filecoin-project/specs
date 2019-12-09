@@ -2,7 +2,7 @@ package storage_mining
 
 import (
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
-	deal "github.com/filecoin-project/specs/systems/filecoin_markets/deal"
+	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	node_base "github.com/filecoin-project/specs/systems/filecoin_nodes/node_base"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"

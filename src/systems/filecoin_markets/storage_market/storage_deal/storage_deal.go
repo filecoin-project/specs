@@ -1,4 +1,4 @@
-package deal
+package storage_deal
 
 import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"

@@ -2,10 +2,10 @@
 title: "Storage Provider"
 ---
 
-Both `StorageProvider` and `StorageClient` are `StorageMarketParticipant`. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. `StorageClient` will initiate the storage deal protocol by submitting a `StorageDealProposal` to the `StorageProvider` who will then add the deal data to a `Sector` and commit the sector onto the blockchain.
+The `StorageProvider` is a module that handles incoming queries for Asks and proposals for Deals from a `StorageClient`. It also tracks deals as they move through the deal flow, handling off chain actions during the negotiation phases of the deal and ultimately telling the `StorageMarketActor` to publish on chain. The `StorageProvider`'s last action is to handoff a published deal for storage and sealing to the Storage Mining Subsystem. Note that any address registered as a `StorageMarketParticipant` with the `StorageMarketActor` can be used with the `StorageClient`. A single participant can be a client, provider, or both at the same time.
+
+Because most of what a Storage Provider does is respond to actions initiated by a `StorageClient`, most of it's public facing methods relate to getting current status on deals, as opposed to initiating new actions. However, a user of the `StorageProvider` module can update the current Ask for the provider.
 
 {{< readfile file="storage_provider.id" code="true" lang="go" >}}
-
-{{< readfile file="storage_provider.go" code="true" lang="go" >}}
 
 <!-- # Storage Provider State Machine -->

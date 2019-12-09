@@ -1,0 +1,79 @@
+import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
+import block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
+import actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
+import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
+import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
+import ipld "github.com/filecoin-project/specs/libraries/ipld"
+
+type StorageDealProposalNotFound struct {}
+type StorageDealProposalRejected struct {}
+type StorageDealProposalAccepted struct {}
+type StorageDealProposalSigned struct {}
+type StorageDealPublished struct {}
+type StorageDealCommitted struct {}
+type StorageDealActive struct {}
+type StorageDealFailing struct {}
+type StorageDealRecovering struct {}
+type StorageDealExpired struct {}
+type StorageDealNotFound struct {}
+
+type StorageDealStatus union {
+    StorageDealProposalNotFound
+    StorageDealProposalRejected
+    StorageDealProposalAccepted
+    StorageDealProposalSigned
+    StorageDealPublished
+    StorageDealCommitted
+    StorageDealActive
+    StorageDealFailing
+    StorageDealRecovering
+    StorageDealExpired
+    StorageDealNotFound
+}
+
+type Signature struct {}
+
+type StorageAsk struct {
+    Price         actor.TokenAmount  // attoFIL per GiB per epoch
+    Collateral    actor.TokenAmount  // attoFIL per GiB per epoch
+
+    MinPieceSize  piece.PieceSize
+    Miner         addr.Address
+    Timestamp     block.ChainEpoch
+    MaxDuration   block.ChainEpoch
+    MinDuration   block.ChainEpoch
+    SeqNo         UVarint
+}
+
+type SignedStorageAsk struct {
+    Ask StorageAsk
+    Signature
+}
+
+type AskRequest struct {
+    Miner addr.Address
+}
+
+type AskResponse struct {
+    Ask SignedStorageAsk
+}
+
+type DealRequest struct {
+    DealProposal  deal.StorageDealProposal
+    Payload       ipld.CID  // root of the data to be transferred
+}
+
+type DealResponse struct {
+    State           StorageDealStatus
+
+    Message         string
+    Proposal        ipld.CID
+
+    // when published
+    StorageDeal     deal.StorageDeal
+    PublishMessage  ipld.CID
+}
+
+type StorageDataTransferVoucher struct {
+    Proposal ipld.CID
+}

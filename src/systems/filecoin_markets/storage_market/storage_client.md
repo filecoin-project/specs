@@ -2,10 +2,10 @@
 title: "Storage Client"
 ---
 
-Both `StorageProvider` and `StorageClient` are `StorageMarketParticipant`. Any party can be a storage provider or client or both at the same time. Storage deal negotiation is expected to happen completely off chain and the request-response style storage deal protocol is to submit agreed-upon storage deal onto the network and gain storage power on chain. `StorageClient` will initiate the storage deal protocol by submitting a `StorageDealProposal` to the `StorageProvider` who will then add the deal data to a `Sector` and commit the sector onto the blockchain.
+The `StorageClient` is a module that discovers miners, determines their asks, and proposes deals to `StorageProviders`. It also tracks deals as they move through the deal flow. Note that any address registered as a `StorageMarketParticipant` with the `StorageMarketActor` can be used with the `StorageClient`. A single participant can be a client, provider, or both at the same time.
+
+--
 
 {{< readfile file="storage_client.id" code="true" lang="go" >}}
-
-{{< readfile file="storage_client.go" code="true" lang="go" >}}
 
 <!-- # Storage Client State Machine -->

@@ -67,9 +67,3 @@ type OnChainDeal struct {
     LastUpdatedEpoch  block.ChainEpoch  // -1 if deal state never updated
     SlashEpoch        block.ChainEpoch  // -1 if deal never slashed
 }
-
-type RetrievalDealProposal struct {}  // TODO
-type RetrievalDeal struct {
-    Proposal          RetrievalDealProposal
-    CounterSignature  Signature
-}
