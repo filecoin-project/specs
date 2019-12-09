@@ -63,9 +63,13 @@ func (sps *StorageProvingSubsystem_I) GenerateElectionPoStProof(challengeSeed se
 	return poster.GeneratePoStProof(cfg, witness)
 }
 
+// TODO: get from consts
+const SPOST_SAMPLE_NUM = 1
+const SPOST_SAMPLE_DENOM = 50
+
 // TODO also return error
 func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
-	numChallengeTickets := util.UInt(len(sectorIDs) * EPOST_SAMPLE_NUM / EPOST_SAMPLE_DENOM)
+	numChallengeTickets := util.UInt(len(sectorIDs) * SPOST_SAMPLE_NUM / SPOST_SAMPLE_DENOM)
 
 	// TODO: Get these correctly.
 	var cfg sector.PoStCfg

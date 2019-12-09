@@ -42,7 +42,7 @@ Filecoin's ElectionPoSt process makes use of two calls to the system library:
 
 As stated above, a miner is incentivized to repeat this process at every block time in order to check whether they were elected leaders (see <<sref expected_consensus>>). The rationality assumption made by ElectionPoSt is thus that storing files continuously and earning block rewards accordingly will be more profitable to miners than regenerating data at various epochs to sporadically participate in leader election.
 
-At every epoch, each miner will challenge a portion of sectors at random proportional to sectorsSampled, with each sector being issued K PoSt challenges (coverage may not be perfect).
+At every epoch, each miner will challenge a portion of sectors at random proportional to ePostSampleRate, with each sector being issued K PoSt challenges (coverage may not be perfect).
 
 By proving access to the challenged range of nodes (i.e. merkle tree leaf from the committed sector) in the sector, the miner can generate a set of valid ChallengeTickets in order to check them as part of leader election in EC (in order to find the winning tickets). The winning tickets will be stored on the block and used to generate a PoSt (using a SNARK). A block header will thus contain a number of “winning” PoStCandidates (each containing a partialTicket, SectorID and other elements, used to verify the leader election) and a PostProof generated from the ChallengeTickets.
 
@@ -61,9 +61,9 @@ The miner draws a randomness ticket from the randomness chain from a given epoch
     - `post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))`
 
 2. **(select eligible sectors)**
-The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with a chosen number of `PartialTickets` (`sectorsSampled*eligibleSectors`).
+The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with a chosen number of `PartialTickets` (`ePostSampleRate*eligibleSectors`).
 
-    - Select a subset of sectors of size `sectorsSampled*minerSectors` [details omitted]
+    - Select a subset of sectors of size `ePostSampleRate*minerSectors` [details omitted]
 
     Note also that even with `challengeTicketNum == numSectors`, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
 
@@ -82,8 +82,8 @@ Given a returned PartialTicket, miner checks it is a winning ticket. Specificall
 
     - `ChallengeTicket = Finalize(PartialTicket) = H(ChallengeTicket) / 2^len(H)`
     - Check that `ChallengeTicket < Target`
-        - `Target = activePowerInSector/networkPower * 1/sectorsSampled * EC.ExpectedLeaders`.
-        - Put another way check `challengeTicket_num * networkPower * sectorsSampled_num < activePowerInSector * sectorsSampled_denom * EC.ExpectedLeaders * challengeTicket_denom`
+        - `Target = activePowerInSector/networkPower * 1/ePostSampleRate * EC.ExpectedLeaders`.
+        - Put another way check `challengeTicket_num * networkPower * ePostSampleRate_num < activePowerInSector * ePostSampleRate_denom * EC.ExpectedLeaders * challengeTicket_denom`
     - If yes, it is a winning ticket and can be used to submit a block
     - In either case, try again with next sector to increase rewards
 
@@ -99,7 +99,7 @@ If no one has found a winning ticket in this epoch, increment epoch value as par
 - `Randomness_lookback` -- how far back to draw randomness from the randomness ticket chain - it will be as large as allowed by PoSt security, likely 1 or 2 epochs
 - `K (e.g. 20-100s)` - number of  challenges per sector -- must be large enough such that the PoSpace is secure.
 - `ChallengeRangeSize` - challenge read size (between 32B and 256KB)  -- based on security analysis.
-- `sectorsSampled` - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
+- `ePostSampleRate` - sector sampling fraction (e.g. 1, .10, .04) -- 1 to start-- It should be large enough to make it irrational to fully regenerate sectors. We may choose some subset if cost of verifying all is deleterious to disk
 - `networkPower` - filecoin network’s power - read from the power table, expressed in number of bytes
 
 ## ElectionPoSt verification
@@ -137,7 +137,7 @@ There is no requirement to persist the witnesses (list of merkle proofs) for fai
 
 ## Surprise PoSt cleanup
 
-But while this means a miner will never win blocks from faked power, they won’t be penalized either when storage is lost. How do we ensure that the Power Table is accurate? Likewise, how do we onboard new power since it will not win a block unless it has at least X TB or Y % of the network (see {{<sref min_miner_size>}}). Enter SurprisePoSt.
+But while this means a miner will never win blocks from unproven power, they won’t be penalized either when storage is lost. How do we ensure that the Power Table is accurate? Likewise, how do we onboard new power since it will not win a block unless it has at least X TB or Y % of the network (see {{<sref min_miner_size>}}). Enter SurprisePoSt.
 
 ## PoStSurprise Challenge
 
@@ -170,13 +170,13 @@ The surprise process described above is triggered by the cron actor in the `Stor
 
 - they are not currently being challenged,
 - they are not already selected for a challenge this round,
-- their last PoSt (election or surprise) is older than SURPRISE_NO_CHALLENGE_PERIOD epochs.
+- their last PoSt (election or surprise) is older than `SURPRISE_NO_CHALLENGE_PERIOD` epochs.
 
 ## PoStSurprise Response
 
 Upon receiving a PoSt surprise challenge, a miner has a given `CHALLENGE_DURATION` (~2 hours) to respond.
 
-The miner's response must be a PoSt proof over the PartialTickets for all sectors that miner is storing (i.e. unlike with ElectionPoSt a miner must submit a PoStProof made up of all partialTickets for all sectors in the `ProvingSet`, not just the winning ones on sampled sectors).
+The miner's response must be a PoSt proof over the PartialTickets for a  sectors that miner is storing (i.e. unlike with ElectionPoSt a miner must submit a PoStProof made up of all `PartialTickets` for a portion of their sectors in the `ProvingSet` proportional with `SPoStSampleRate` (not just the winning ones on sampled sectors).
 
 If the miner responds to the challenge with a SurprisePoSt, they will keep/recover their power.
 
