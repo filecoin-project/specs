@@ -144,16 +144,20 @@ ProofOfSpacetime:
       Generation (WrappingVariant):
         describe(wrapper_kdf_time, "Time to generate a node on the wrapper layer", secs)
 
-        wrapper_kdf_time = kdf_time * wrapper_parents * post_mtree_regen_nodes
+        wrapper_kdf_time = kdf_time * wrapper_parents_all * post_mtree_regen_nodes
         post_inclusion_time = (post_mtree_regen_hashnodes * 2) * merkle_tree_hash_time + wrapper_kdf_time
 
   StorageAccess:
     describe(post_challenge_read, "Time to read from storage medium data required for a single challenge in PoSt", secs)
     describe(post_data_access, "Time to retrieve from the storage unit the data for PoSt", secs)
     describe(post_data_access_parallel, "Time to retrieve from the storage unit the data in parallel for PoSt", secs)
+    describe(post_leaf_read, "Time to retrieve the challenged leaf in PoSt", secs)
+    describe(post_leaves_read, "Time to retrieve the all the challenged leaves in PoSt", secs)
+    describe(post_leaves_read_parallel, "Time to retrieve the all the challenged leaves in PoSt in parallel", secs)
 
     post_data_access = post_challenge_read * post_challenges
     post_leaves_read = post_leaf_read * post_challenges
+    // TODO(enhancement): calculate first mtree and then challenge_read
     post_mtree_read = (post_challenge_read - post_leaf_read) * post_challenges
     post_data_access_parallel = post_data_access / rig_storage_parallelization
     post_leaves_read_parallel = post_leaves_read / rig_storage_parallelization
@@ -169,13 +173,15 @@ ProofOfSpacetime:
       describe(wrapper_lookup_read, "Time to retrieve from storage medium all the parents of a wrapper layer node", secs)
       describe(wrapper_lookup_with_mtree, "Time to retrieved from storage medium all the parents of the challenged node and those required for the merkle tree regeneration", secs)
 
-      wrapper_lookup_read = wrapper_parents * rig_storage_latency
+      wrapper_lookup_read = wrapper_parents_all * rig_storage_latency
       post_leaf_read = wrapper_lookup_read
 
       wrapper_lookup_with_mtree = wrapper_lookup_read * (1 + post_mtree_regen_nodes)
       post_challenge_read = wrapper_lookup_with_mtree 
 
     // TODO: this might be incorrect depending on the vector
+    // TODO: fix vector calculation
+    // TODO: add merkle tree reads
     Access (StackedReplicas):
       describe(stack_lookup_read, "Time to read from storage medium the column of a single window", secs)
       describe(rig_storage_random_access_size, "Size of storage read via a random access in the storage medium", bytes)
@@ -263,7 +269,9 @@ ProofOfReplication:
       describe(graph_parents, "Number of parents of a node in the PoRep window graph")
       describe(drg_parents, "Number of DRG parents of a node in the PoRep window graph")
       describe(expander_parents, "Number of Chung Expander parents of a node in the PoRep window graph")
-      describe(wrapper_parents, "Number of parents in the wrapper layer")
+      describe(wrapper_parents, "Number of parents in the wrapper layer per window")
+      describe(wrapper_parents_all, "Number of parents in the wrapper layer")
+      wrapper_parents_all = wrapper_parents * windows
 
       graph_parents = drg_parents + expander_parents
 
@@ -638,8 +646,12 @@ Filecoin:
       describe(epost_inclusions_time_parallel, "Time to generate all the inclusions in Election PoSt in parallel", secs)
 
       epost_challenged_sectors = rig_sectors_min * epost_challenged_sectors_fraction
-      epost_data_access = post_data_access * epost_challenged_sectors
+      epost_leaves_read = post_leaves_read * epost_challenged_sectors
+      epost_mtree_read = post_mtree_read
+      epost_data_access = epost_leaves_read + epost_mtree_read
       epost_data_access_parallel = epost_data_access / rig_storage_parallelization  
+      epost_mtree_read_parallel = epost_mtree_read / rig_storage_parallelization  
+      epost_leaves_read_parallel = epost_leaves_read / rig_storage_parallelization  
       epost_inclusions_time = post_inclusions_time * epost_challenged_sectors
       epost_inclusions_time_parallel = epost_inclusions_time / rig_cores
 
