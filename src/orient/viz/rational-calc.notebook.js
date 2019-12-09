@@ -13,7 +13,8 @@ constants = Object.assign({}, base, constraints, filecoin, bench, rig)
 combos = {
   let start = [constants]
   let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
-  let query = extend_query(proofs, [stackedChungParams, stackedSDRParams])
+  let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
+  let query = extend_query(graphs, [4, 64, 1024, 16384, 32768].map(d => ({window_size_mib: d})))
 
   return query
 }
@@ -39,6 +40,7 @@ md`#### Vars that matter`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
+  'window_size_mib',
   'decoding_time_parallel',
   'block_size_kib',
   'epost_time_parallel',
@@ -49,6 +51,7 @@ md`#### Other important vars`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
+  'window_size_mib',
   'decoding_time_parallel',
   'porep_time_parallel',
   'porep_proof_size_kib',
@@ -60,6 +63,7 @@ md`#### Graphs`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
+  'window_size_mib',
   'porep_lambda',
   'porep_challenges',
   'post_lambda',
@@ -76,6 +80,7 @@ md`#### PoRep`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
+  'window_size_mib',
   'encoding_time',
   'encoding_time_parallel',
   'porep_commit_time',
@@ -91,6 +96,7 @@ md`#### PoSt`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
+  'window_size_mib',
   'post_proof_size',
   'post_snark_constraints',
   'post_snark_time',
@@ -107,6 +113,7 @@ md`#### EPoSt`
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
+  'window_size_mib',
   'epost_time',
   'epost_time_parallel',
   'epost_inclusions_time',
@@ -120,13 +127,29 @@ md`---`
 
 md`## Graphs`
 
+md`### On-chain footprint`
+
+bar_chart(solved_many, 'block_size_kib', [
+  'block_size_kib'
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 1000})
+
+
 md`### Retrieval`
 
 
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
-])
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 100})
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'window_size_mib',
+  'decoding_time_parallel',
+  'encoding_window_time_parallel',
+  'window_read_time_parallel'
+], [])
 
 md`### EPoSt`
 
@@ -137,7 +160,7 @@ bar_chart(solved_many, 'epost_time_parallel', [
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
-])
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 40})
 
 bar_chart(solved_many, 'post_time_parallel', [
   // 'post_data_access_parallel',
@@ -146,11 +169,12 @@ bar_chart(solved_many, 'post_time_parallel', [
   'post_ticket_gen',
   'post_inclusions_time_parallel',
   'post_snark_time_parallel'
-])
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 100})
 
 table_constraints(solved_many, [
   'proof_name',
   'graph_name',
+  'window_size_mib',
   'epost_time_parallel',
   'epost_data_access_parallel',
   'epost_mtree_read_parallel',
@@ -163,16 +187,20 @@ table_constraints(solved_many, [
   'windows'
 ], [])
 
-bar_chart = (data, title, vars) => {
-  const organized_data = data
+bar_chart = (data, title, vars, group_by, opts) => {
+  let organized_data = data
     .map(d => {
       return vars.map(key => ({
-        construction: `${d['proof_name']}-${d['graph_name']}`,
+        construction: group_by.map(g => `${d[g]}`).join(', '),
         type: key,
-        value: d[key]
+        value: d[key],
+        title: d[title]
       }))
     })
-    .flat()
+        .flat()
+  if (opts && opts.filter) {
+    organized_data = organized_data.filter(d => opts.filter(d['title']))
+  }
 
   return vl({
     "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
