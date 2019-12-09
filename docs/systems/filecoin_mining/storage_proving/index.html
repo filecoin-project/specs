@@ -4672,12 +4672,22 @@ https://github.com/alex-shpak/hugo-book
     <span class="c1">// TODO: remove this?
 </span><span class="c1"></span>    <span class="c1">// GetPieceInclusionProof(pieceRef CID) union { PieceInclusionProofs, error }
 </span><span class="c1"></span>
-    <span class="nf">GeneratePoStCandidates</span><span class="p">(</span>
+    <span class="nf">GenerateElectionPoStCandidates</span><span class="p">(</span>
         <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
         <span class="nx">sectorIDs</span>      <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
     <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
 
-    <span class="nf">GeneratePoStProof</span><span class="p">(</span>
+    <span class="nf">GenerateSurprisePoStCandidates</span><span class="p">(</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">sectorIDs</span>      <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">SectorID</span><span class="p">]</span>
+    <span class="p">)</span> <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+
+    <span class="nf">CreateElectionPoStProof</span><span class="p">(</span>
+        <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
+        <span class="nx">candidates</span>     <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
+    <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>
+
+    <span class="nf">CreateSurprisePoStProof</span><span class="p">(</span>
         <span class="nx">challengeSeed</span>  <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStRandomness</span>
         <span class="nx">candidates</span>     <span class="p">[</span><span class="nx">sector</span><span class="p">.</span><span class="nx">PoStCandidate</span><span class="p">]</span>
     <span class="p">)</span> <span class="nx">sector</span><span class="p">.</span><span class="nx">PoStProof</span>

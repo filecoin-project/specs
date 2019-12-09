@@ -4721,7 +4721,7 @@ https://github.com/alex-shpak/hugo-book
     <span class="nx">InteractiveEpoch</span>  <span class="nx">block</span><span class="p">.</span><span class="nx">ChainEpoch</span>
 <span class="p">}</span>
 
-<span class="c1">// ProofAux is meta data required to generate certain proofs
+<span class="c1">// PersistentProofAux is meta data required to generate certain proofs
 </span><span class="c1">// for a sector, for example PoSt.
 </span><span class="c1">// These should be stored and indexed somewhere by CommR.
 </span><span class="c1"></span><span class="kd">type</span> <span class="nx">PersistentProofAux</span> <span class="kd">struct</span> <span class="p">{</span>
@@ -4735,17 +4735,17 @@ https://github.com/alex-shpak/hugo-book
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">ProofAuxTmp</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">PersistentAux</span>   <span class="nx">PersistentProofAux</span>  <span class="c1">// TODO: Move this to sealer.SealOutputs.
+    <span class="nx">PersistentAux</span>  <span class="nx">PersistentProofAux</span>  <span class="c1">// TODO: Move this to sealer.SealOutputs.
 </span><span class="c1"></span>
     <span class="nx">SectorID</span>
-    <span class="nx">CommD</span>           <span class="nx">Commitment</span>
-    <span class="nx">CommR</span>           <span class="nx">SealedSectorCID</span>
-    <span class="nx">CommDTreePaths</span>  <span class="p">[</span><span class="nx">file</span><span class="p">.</span><span class="nx">Path</span><span class="p">]</span>
-    <span class="nx">CommCTreePath</span>   <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
-    <span class="nx">CommQTreePath</span>   <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">CommD</span>          <span class="nx">Commitment</span>
+    <span class="nx">CommR</span>          <span class="nx">SealedSectorCID</span>
+    <span class="nx">CommDTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">CommCTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
+    <span class="nx">CommQTreePath</span>  <span class="nx">file</span><span class="p">.</span><span class="nx">Path</span>
 
-    <span class="nx">Seeds</span>           <span class="p">[</span><span class="nx">SealSeed</span><span class="p">]</span>
-    <span class="nx">KeyLayers</span>       <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
+    <span class="nx">Seed</span>           <span class="nx">SealSeed</span>
+    <span class="nx">KeyLayers</span>      <span class="p">[</span><span class="nx">Bytes</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="kd">type</span> <span class="nx">SealArguments</span> <span class="kd">struct</span> <span class="p">{</span>
