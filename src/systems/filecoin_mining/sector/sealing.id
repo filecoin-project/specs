@@ -64,7 +64,7 @@ type SectorProveCommitInfo struct {
     InteractiveEpoch  block.ChainEpoch
 }
 
-// ProofAux is meta data required to generate certain proofs
+// PersistentProofAux is meta data required to generate certain proofs
 // for a sector, for example PoSt.
 // These should be stored and indexed somewhere by CommR.
 type PersistentProofAux struct {
@@ -78,17 +78,17 @@ type PersistentProofAux struct {
 }
 
 type ProofAuxTmp struct {
-    PersistentAux   PersistentProofAux  // TODO: Move this to sealer.SealOutputs.
+    PersistentAux  PersistentProofAux  // TODO: Move this to sealer.SealOutputs.
 
     SectorID
-    CommD           Commitment
-    CommR           SealedSectorCID
-    CommDTreePaths  [file.Path]
-    CommCTreePath   file.Path
-    CommQTreePath   file.Path
+    CommD          Commitment
+    CommR          SealedSectorCID
+    CommDTreePath  file.Path
+    CommCTreePath  file.Path
+    CommQTreePath  file.Path
 
-    Seeds           [SealSeed]
-    KeyLayers       [Bytes]
+    Seed           SealSeed
+    KeyLayers      [Bytes]
 }
 
 type SealArguments struct {

@@ -57,13 +57,13 @@ func (s *SectorSealer_I) SealSector(si SealInputs) *SectorSealer_SealSector_FunR
 						CommRLast_:         sealArtifacts.CommRLast(),
 						CommRLastTreePath_: sealArtifacts.CommRLastTreePath(),
 					},
-					CommD_:          sealArtifacts.CommD(),
-					CommR_:          sealArtifacts.CommR(),
-					CommDTreePaths_: sealArtifacts.CommDTreePaths(),
-					CommCTreePath_:  sealArtifacts.CommCTreePath(),
-					CommQTreePath_:  sealArtifacts.CommQTreePath(),
-					Seeds_:          sealArtifacts.Seeds(),
-					KeyLayers_:      sealArtifacts.KeyLayers(),
+					CommD_:         sealArtifacts.CommD(),
+					CommR_:         sealArtifacts.CommR(),
+					CommDTreePath_: sealArtifacts.CommDTreePath(),
+					CommCTreePath_: sealArtifacts.CommCTreePath(),
+					CommQTreePath_: sealArtifacts.CommQTreePath(),
+					Seed_:          sealArtifacts.Seed(),
+					KeyLayers_:     sealArtifacts.KeyLayers(),
 				}})).Impl()
 }
 
