@@ -4634,9 +4634,69 @@ https://github.com/alex-shpak/hugo-book
 
       
 <article class="markdown">
-  <p>TODO</p>
+  
 
-<p>See the <code>old_data_structures.md</code> file for portions.</p>
+<h1 id="rle-bitset-encoding">RLE+ Bitset Encoding</h1>
+
+<p>RLE+ is a lossless compression format based on <a href="https://en.wikipedia.org/wiki/Run-length_encoding">RLE</a>.
+Its primary goal is to reduce the size in the case of many individual bits, where RLE breaks down quickly,
+while keeping the same level of compression for large sets of contiugous bits.</p>
+
+<p>In tests it has shown to be more compact than RLE itself, as well as <a href="https://arxiv.org/pdf/1004.0403.pdf">Concise</a> and <a href="https://roaringbitmap.org/">Roaring</a>.</p>
+
+<h2 id="format">Format</h2>
+
+<p>The format consists of a header, followed by a series of blocks, of which there are three different types.</p>
+
+<p>The format can be expressed as the following <a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">BNF</a> grammar.</p>
+
+<pre><code>    &lt;encoding&gt; ::= &lt;header&gt; &lt;blocks&gt;
+      &lt;header&gt; ::= &lt;version&gt; &lt;bit&gt;
+     &lt;version&gt; ::= &quot;00&quot;
+      &lt;blocks&gt; ::= &lt;block&gt; &lt;blocks&gt; | &quot;&quot;
+       &lt;block&gt; ::= &lt;block_single&gt; | &lt;block_short&gt; | &lt;block_long&gt;
+&lt;block_single&gt; ::= &quot;1&quot;
+ &lt;block_short&gt; ::= &quot;01&quot; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt; &lt;bit&gt;
+  &lt;block_long&gt; ::= &quot;00&quot; &lt;unsigned_varint&gt;
+         &lt;bit&gt; ::= &quot;0&quot; | &quot;1&quot;
+</code></pre>
+
+<p>An <code>&lt;unsigned_varint&gt;</code> is defined as specified <a href="https://github.com/multiformats/unsigned-varint">here</a>.</p>
+
+<h3 id="blocks">Blocks</h3>
+
+<p>The blocks represent how many bits, of the current bit type there are. As <code>0</code> and <code>1</code> alternate in a bit vector
+the inital bit, which is stored in the header, is enough to determine if a length is currently referencing
+a set of <code>0</code>s, or <code>1</code>s.</p>
+
+<h4 id="block-single">Block Single</h4>
+
+<p>If the running length of the current bit is only <code>1</code>, it is encoded as a single set bit.</p>
+
+<h4 id="block-short">Block Short</h4>
+
+<p>If the running length is less than <code>16</code>, it can be encoded into up to four bits, which a short block
+represents. The length is encoded into a 4 bits, and prefixed with <code>01</code>, to indicate a short block.</p>
+
+<h4 id="block-long">Block Long</h4>
+
+<p>If the running length is <code>16</code> or larger, it is encoded into a varint, and then prefixed with <code>00</code> to indicate
+a long block.</p>
+
+<blockquote>
+<p><strong>Note:</strong> The encoding is unique, so no matter which algorithm for encoding is used, it should produce
+the same encoding, given the same input.</p>
+</blockquote>
+
+<h4 id="bit-numbering">Bit Numbering</h4>
+
+<p>For Filecoin, byte arrays representing RLE+ bitstreams are encoded using <a href="https://en.wikipedia.org/wiki/Bit_numbering#LSB_0_bit_numbering">LSB 0</a> bit numbering.</p>
+
+<h1 id="other-considerations">Other Considerations</h1>
+
+<ul>
+<li>The maximum size of an Object should be 1MB (2^20 bytes). Objects larger than this are invalid.</li>
+</ul>
 
 </article>
 
@@ -4647,6 +4707,27 @@ https://github.com/alex-shpak/hugo-book
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#rle-bitset-encoding">RLE+ Bitset Encoding</a>
+<ul>
+<li><a href="#format">Format</a>
+<ul>
+<li><a href="#blocks">Blocks</a>
+<ul>
+<li><a href="#block-single">Block Single</a></li>
+<li><a href="#block-short">Block Short</a></li>
+<li><a href="#block-long">Block Long</a></li>
+<li><a href="#bit-numbering">Bit Numbering</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#other-considerations">Other Considerations</a></li>
+</ul>
+</nav>
+  </aside>
 
 
 
