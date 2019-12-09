@@ -504,6 +504,9 @@ ProofOfReplication:
     Constraints (Wrapping):
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
 
+    Constraints (WrappingVariant):
+      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
+
     // Column comitting data or replica. 
 
 ProofOfReplication (StackedSDRParameters):
@@ -688,6 +691,7 @@ Rationality:
       cost_node_encoding = rig_malicious_cost_per_year / nodes_per_year 
 
     Storage:
+      // TODO(important): add the hardware cost from first principle
       describe(cost_gb_per_month, "Cost of storing 1GB per month")
       describe(cost_gib_per_month, "Cost of storing 1GiB per month")
       describe(cost_storage_gibs, "Cost of storing 1GiB per second")

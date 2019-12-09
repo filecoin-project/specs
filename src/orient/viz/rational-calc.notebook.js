@@ -1,4 +1,9 @@
-md`# Proofs Tradeoff Report`
+md`# Proofs Tradeoff Report
+
+1. Calculator may contain errors and definitely TODOs
+2. Adding new graphs is easy
+3. Fixing errors or change construction is easy
+`
 
 viewof config = {
   const form = formToObject(html`
@@ -14,10 +19,12 @@ combos = {
   let start = [constants]
   let proofs = extend_query(start, [wrapperVariant, wrapper, stackedReplicas])
   let graphs = extend_query(proofs, [stackedChungParams, stackedSDRParams])
-  let query = extend_query(graphs, [4, 64, 1024, 16384, 32768].map(d => ({window_size_mib: d})))
+  let query = extend_query(graphs, [4, 64, 128, 1024, 16384, 32768].map(d => ({window_size_mib: d})))
 
   return query
 }
+
+createJsonDownloadButton(combos)
 
 // combos = [wrapperVariant, wrapper, stackedReplicas]
 //   .map(d => [
@@ -34,6 +41,8 @@ solved_many_pre = (await solve_many(combos)).map(d => d[0])
 
 solved_many = solved_many_pre
 // solved_manys = (await solve_manys(combos)).flat()
+
+createJsonDownloadButton(solved_many)
 
 md`#### Vars that matter`
 
@@ -151,6 +160,15 @@ table_constraints(solved_many, [
   'encoding_window_time_parallel',
   'window_read_time_parallel'
 ], [])
+
+md`### PoRep`
+
+bar_chart(solved_many, 'porep_time_parallel', [
+  'porep_snark_time_parallel',
+  'porep_commit_time_parallel',
+  'encoding_time_parallel'
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 60*60*24})
+
 
 md`### EPoSt`
 
@@ -315,7 +333,6 @@ md`#### Proofs`
 wrapper = ({
   "proof_name": "wrapping",
   "!ElectionWithFallbackPoSt": true,
-  "!SectorEncoding": true,
   "!VectorR": true,
   "!Wrapping": true,
 })
@@ -323,7 +340,6 @@ wrapper = ({
 wrapperVariant = ({
   "proof_name": "wrappingVariant",
   "!ElectionWithFallbackPoSt": true,
-  "!SectorEncoding": true,
   "!VectorR": true,
   "!WrappingVariant": true,
 })
@@ -746,3 +762,5 @@ plotMultiLine = (solutions, x, names) => {
   Plotly.newPlot(div, traces, layout);
   return div
 }
+
+import { createJsonDownloadButton } from "@trebor/download-json"
