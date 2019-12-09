@@ -592,6 +592,10 @@ Filecoin:
 
     // Note this is simplistic and accounts for no framing
     block_size = (proofs_per_block / proofs_block_fraction) 
+    not_proofs_per_block = block_size - proofs_per_block
+
+    proofs_per_block_kib = proofs_per_block / b_in_kib
+    not_proofs_per_block_kib = not_proofs_per_block / b_in_kib
 
   OnChainProofs: 
     describe(seals_per_year, "Number of PoRep proofs per year")
@@ -616,6 +620,8 @@ Filecoin:
     posts_size_per_block = posts_size_per_year / blocks_in_a_year
 
     proofs_per_block = seals_size_per_block + posts_size_per_block
+    seals_size_per_block_kib = seals_size_per_block / b_in_kib
+    posts_size_per_block_kib = posts_size_per_block / b_in_kib
 
     PoSt (ElectionWithFallbackPoSt):
       describe(fposts_per_sector_per_year, "Number of fallback post proofs per sector per year")
