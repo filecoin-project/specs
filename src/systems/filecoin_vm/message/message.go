@@ -9,6 +9,9 @@ var IMPL_FINISH = util.IMPL_FINISH
 
 type Serialization = util.Serialization
 
+// The maximum serialized size of a SignedMessage.
+const MessageMaxSize = 32 * 1024
+
 func UnsignedMessage_Make(
 	from addr.Address,
 	to addr.Address,
