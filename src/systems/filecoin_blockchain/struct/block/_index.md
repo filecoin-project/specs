@@ -42,6 +42,8 @@ A syntactically valid full block must have:
 
 - all referenced messages syntactically valid,
 - all referenced parent receipts syntactically valid,
+- the sum of the serialized sizes of all messages is no greater than `block.BlockMaxSize`,
+- the sum of the gas limit of all messages is no greater than `block.BlockGasLimit`.
 
 Note that validation of the block signature requires access to the miner worker address and
 public key from the parent tipset state, so signature validation forms part of semantic validation. 
