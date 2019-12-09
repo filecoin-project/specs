@@ -35,8 +35,12 @@ A syntactically valid `UnsignedMessage`:
 - has non-empty `Params` only if `MethodNum` is zero,
 - has non-negative `GasPrice`,
 - has `GasLimit` that is at least equal to the gas consumption associated with the message's serialized bytes,
-- has `GasLimit` that is no greater than the block gas limit network parameter
-- has a total serialized size no greater than 32 KiB.
+- has `GasLimit` that is no greater than the block gas limit network parameter.
+
+When transmitted individually (before inclusion in a block), a message is packaged as
+`SignedMessage`, regardless of signature scheme used. A valid signed message:
+
+- has a total serialized size no greater than `message.MessageMaxSize`.
 
 # Message semantic validation
 
