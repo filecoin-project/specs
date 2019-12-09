@@ -110,6 +110,68 @@ md`---`
 
 md`## Graphs`
 
+md`### Retrieval`
+
+
+bar_chart(solved_many, 'decoding_time_parallel', [
+  'encoding_window_time_parallel',
+  'window_read_time_parallel',
+])
+
+md`### EPoSt`
+
+bar_chart(solved_many, 'epost_time_parallel', [
+  'epost_data_access_parallel',
+  'post_ticket_gen',
+  'epost_inclusions_time_parallel',
+  'post_snark_time_parallel'
+])
+
+bar_chart(solved_many, 'post_time_parallel', [
+  'post_data_access_parallel',
+  'post_ticket_gen',
+  'post_inclusions_time_parallel',
+  'post_snark_time_parallel'
+])
+
+table_constraints(solved_many, [
+  'proof_name',
+  'graph_name',
+  'epost_time_parallel',
+  'epost_data_access',
+  'post_ticket_gen',
+  'epost_inclusions_time_parallel',
+  'post_snark_time_parallel',
+  'post_challenges',
+  'post_challenge_read',
+  'windows'
+], [])
+
+bar_chart = (data, title, vars) => {
+  const organized_data = data
+    .map(d => {
+      return vars.map(key => ({
+        construction: `${d['proof_name']}-${d['graph_name']}`,
+        type: key,
+        value: d[key]
+      }))
+    })
+    .flat()
+
+  return vl({
+    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+    "title": "Composition of " + title,
+    "data": { values: organized_data },
+    "width": 800,
+    "mark": "bar",
+    "encoding": {
+      "x": {"aggregate": "sum", "field": "value", "type": "quantitative"},
+      "y": {"field": "construction", "type": "nominal"},
+      "color": {"field": "type", "type": "nominal"}
+    }
+  })
+}
+
 md`### Multi-dimensions`
 
 add_query = (query, ext) => {
@@ -128,20 +190,19 @@ extend_query = (array, ...exts) => {
   return query
 }
 
-multiq = {
+mtree_query = {
   let query = [constants]
   const proofs = [wrapper, wrapperVariant, stackedReplicas]
-  const post_mtree_layers_cached = [...Array(30)].map((_, i) => ({post_mtree_layers_cached: i}))
+  const post_mtree_layers_cached = [...Array(20)].map((_, i) => ({post_mtree_layers_cached: i+10}))
 
   query = extend_query(query, proofs, post_mtree_layers_cached, [stackedChungParams])
 
   return query
 }
 
-multiq_solved = (await solve_many(multiq)).map(d => d[0])
+mtree_solved = (await solve_many(mtree_query)).map(d => d[0])
 
-graph_constraints(multiq_solved, 'post_mtree_layers_cached', 'decoding_time_parallel', ['proof_name'], {yrule: 0.5, height: 100})
-graph_constraints(multiq_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], {yrule: 10, height: 100})
+graph_constraints(mtree_solved, 'post_mtree_layers_cached', 'epost_time_parallel', ['proof_name'], { height: 100 })
 
 md`### Impact of \`chung_delta\` in StackedChung`
 queries = [...Array(8)].map((_, i) => {
@@ -150,7 +211,7 @@ queries = [...Array(8)].map((_, i) => {
     constants,
     stackedChungParams,
     { chung_delta: 0.01 * (i+1) },
-    { window_size_mib: 1024 * 32 }
+    { window_size_mib: 128 }
   )
 
   return [
@@ -182,7 +243,8 @@ base = ({
   "post_lambda": 10,
   "sector_size_gib": 32,
   "window_size_mib": 64,
-  "wrapper_parents": 10
+  "wrapper_parents": 100,
+  "!StackedReplicaUnaligned": true
 })
 
 md`### Constants`
@@ -290,7 +352,12 @@ constraints = ({
 md`---`
 
 md`## Debug`
+report_from_result(solved_many[0], combos[0])
+report_from_result(solved_many[1], combos[1])
+report_from_result(solved_many[2], combos[2])
+report_from_result(solved_many[3], combos[3])
 report_from_result(solved_many[4], combos[4])
+report_from_result(solved_many[5], combos[5])
 
 md`---`
 md`## Dev`
