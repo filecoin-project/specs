@@ -27,23 +27,24 @@ A syntactically valid block header must decode into fields matching the type def
 
 A syntactically valid header must have:
 
-- a non-empty array of `Parents` CIDs if `Epoch` is greater than zero,
+- between 1 and `5*ec.ExpectedLeaders` `Parents` CIDs if `Epoch` is greater than zero (else empty `Parents`),
 - a non-negative `ParentWeight`,
 - a `Miner` address which is an ID-address,
 - a non-negative `Epoch`,
 - a positive `Timestamp`,
 - a `Ticket` with non-empty `VRFResult`,
 - `ElectionPoStOutput` containing:
-   - a non-empty `Candidates` array
-   - a non-empty `PoStRandomness` field
-   - a non-empty `Proof` field
+   - a `Candidates` array with between 1 and `EC.ExpectedLeaders` values (inclusive),
+   - a non-empty `PoStRandomness` field,
+   - a non-empty `Proof` field.
    
 A syntactically valid full block must have:
 
 - all referenced messages syntactically valid,
 - all referenced parent receipts syntactically valid,
-- the sum of the serialized sizes of all messages is no greater than `block.BlockMaxSize`,
-- the sum of the gas limit of all messages is no greater than `block.BlockGasLimit`.
+- the sum of the serialized sizes of the block header and included messages is no greater than `block.BlockMaxSize`,
+- the sum of the gas limit of all explicit messages is no greater than `block.BlockGasLimit`.
+
 
 Note that validation of the block signature requires access to the miner worker address and
 public key from the parent tipset state, so signature validation forms part of semantic validation. 
