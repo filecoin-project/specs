@@ -129,8 +129,9 @@ ProofOfSpacetime:
         describe(post_mtree_regen_nodes, "Number of leaf nodes to be access for a single replica merkle tree inclusion proof in PoSt")
         describe(post_inclusion_time, "Time to generate a Merkle tree inclusion proof for PoSt (assuming all data in memory)", secs)
 
-        post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1
-        post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted) - 1
+        post_mtree_regen_hashnodes = expt(2, post_mtree_layers_deleted + 1) - 1 // TODO check if -1 should be removed
+
+        post_mtree_regen_nodes = expt(2, post_mtree_layers_deleted) - 1 // TODO check if -1 should be removed
         post_inclusions_time = post_inclusion_time * post_challenges
         post_inclusions_time_parallel = post_inclusions_time / rig_cores
 
@@ -152,10 +153,15 @@ ProofOfSpacetime:
     describe(post_data_access_parallel, "Time to retrieve from the storage unit the data in parallel for PoSt", secs)
 
     post_data_access = post_challenge_read * post_challenges
+    post_leaves_read = post_leaf_read * post_challenges
+    post_mtree_read = (post_challenge_read - post_leaf_read) * post_challenges
     post_data_access_parallel = post_data_access / rig_storage_parallelization
+    post_leaves_read_parallel = post_leaves_read / rig_storage_parallelization
+    post_mtree_read_parallel = post_mtree_read / rig_storage_parallelization
 
     Access (Wrapping):
       // TODO(enhancement): this is using random access, we should use seq access instead
+      post_leaf_read = rig_storage_latency
       post_challenge_read = (1 + post_mtree_regen_nodes) * rig_storage_latency
       // TODO: log2(nodes) > post_mtree_layers_cached
 
@@ -164,13 +170,30 @@ ProofOfSpacetime:
       describe(wrapper_lookup_with_mtree, "Time to retrieved from storage medium all the parents of the challenged node and those required for the merkle tree regeneration", secs)
 
       wrapper_lookup_read = wrapper_parents * rig_storage_latency
+      post_leaf_read = wrapper_lookup_read
+
       wrapper_lookup_with_mtree = wrapper_lookup_read * (1 + post_mtree_regen_nodes)
       post_challenge_read = wrapper_lookup_with_mtree 
 
+    // TODO: this might be incorrect depending on the vector
     Access (StackedReplicas):
       describe(stack_lookup_read, "Time to read from storage medium the column of a single window", secs)
+      describe(rig_storage_random_access_size, "Size of storage read via a random access in the storage medium", bytes)
+      describe(rig_storage_random_access_nodes, "Number of nodes read via a random access in the storage medium")
 
-      stack_lookup_read = windows * rig_storage_latency
+
+      // TODO: this should be a parameter, not hardcoded
+      DataAligned (StackedReplicaAligned):
+        rig_storage_random_access_size = 4 * b_in_kib
+        rig_storage_random_access_nodes = rig_storage_random_access_size / node_size
+
+        // The first random_access_nodes are read by the random read, the remaining ones are read sequentially
+        stack_lookup_read = rig_storage_latency + ((windows - rig_storage_random_access_nodes) * node_size_mib) / rig_storage_read_mibs
+
+      DataAligned (StackedReplicaUnaligned):
+        stack_lookup_read = rig_storage_latency * windows
+
+      post_leaf_read = stack_lookup_read 
       post_challenge_read = stack_lookup_read 
 
   SNARK:
@@ -314,15 +337,23 @@ ProofOfReplication:
     porep_commit_time_parallel = porep_commit_time / rig_cores 
     porep_commit_time_mins = porep_commit_time / 60
 
-    CommR (VectorR):
+    CommR (Wrapping): // was VectorR
       commr_time = merkle_tree_hash_time * nodes
       commr_tree_depth = log2(nodes) 
       commr_column_size = 1
 
-    CommR (ColumnR):
-      commr_time = window_comm_tree_time + window_comm_leaves_time 
-      commr_tree_depth = log2(window_nodes)
-      commr_column_size = windows
+    CommR (WrappingVariant): // was VectorR
+      commr_time = merkle_tree_hash_time * nodes
+      commr_tree_depth = log2(nodes) 
+      commr_column_size = 1
+
+    CommR (StackedReplicas): // was ColumnR
+      commr_time = merkle_tree_hash_time * nodes
+      commr_tree_depth = log2(nodes) 
+      commr_column_size = 1
+      // commr_time = window_comm_tree_time + window_comm_leaves_time 
+      // commr_tree_depth = log2(window_nodes)
+      // commr_column_size = windows
 
     CommC:
       commc_time = (window_comm_tree_time + window_comm_leaves_time) * stacked_layers
