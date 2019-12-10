@@ -35,7 +35,7 @@
       "!StackedChungParameters": false,
       "!StackedSDRParameters": true,
       "sdr_delta": 0.01
-    },
+    }
   ],
   {
     "!MemoryCost": true,
