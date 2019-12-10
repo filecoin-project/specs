@@ -64,7 +64,8 @@ var node node_base.FilecoinNode
 
 func (spc *StoragePowerConsensusSubsystem_I) _getStoragePowerActorState(stateTree stateTree.StateTree) StoragePowerActorState {
 	powerAddr := addr.StoragePowerActorAddr
-	actorState := stateTree.GetActorState(powerAddr)
+	actorState, ok := stateTree.GetActor(powerAddr)
+	util.Assert(ok)
 	substateCID := actorState.State()
 
 	substate, err := node.LocalGraph().Get(ipld.CID(substateCID))

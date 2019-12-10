@@ -56,6 +56,10 @@ func Deserialize_Address_Compact(AddressString) (Address, error) {
 	panic("TODO")
 }
 
+func (a *Address_I) IsIDType() bool {
+	panic("TODO")
+}
+
 func (a *Address_I) IsKeyType() bool {
 	panic("TODO")
 }
