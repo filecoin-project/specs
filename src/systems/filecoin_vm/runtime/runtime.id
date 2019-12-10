@@ -62,8 +62,11 @@ type Runtime interface {
     // functions, and should be used for any function whose computation is expensive.
     Compute(ComputeFunctionID, args [Any]) Any
 
-    // Send allows the current execution context to invoke methods on other actors in the system.
+    // Sends a message to another actor.
+    // If the invoked method does not return successfully, this caller will be aborted too.
     SendPropagatingErrors(input InvocInput) InvocOutput
+    // Sends a message to another actor, trapping an unsuccessful execution.
+    // This may only be invoked by the singleton Cron actor.
     SendCatchingErrors(input InvocInput) (output InvocOutput, exitCode exitcode.ExitCode)
 
     // Computes an address for a new actor. The returned address is intended to uniquely refer to
