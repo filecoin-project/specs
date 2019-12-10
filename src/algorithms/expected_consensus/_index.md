@@ -78,9 +78,27 @@ As discussed in {{<sref election_post>}}, a miner will use the challenge ticket 
 The miner gets to draw one such challenge ticket per sector they have committed and must then compare the value derived from the challenge ticket against a target to determine whether they are eligible to mine. This is called finding a winning ticket.
 
 The target is set as follows, for each sector sampled for a ticket from the miner's `ProvingSet` and the number of sectors in the set:
-`target = activePowerInSector/networkPower * EC.ExpectedLeaders * numSectorsMiner / numSectorsSampled`
+`target = activePowerInSector/networkPower * EC.ExpectedLeadersPerEpoch * numSectorsMiner / numSectorsSampled`
 
-The target ensures that the miner can express the power across all of their sectors through the tickets they have sampled. Specifically, on expectation, checking `numSectorsSampled` (with `numSectorsSampled = ceil(len(provingSet) * EPoStSamplingRate)`) challenge tickets in every epoch, a miner will find `minerPower * EC.ExpectedLeaders` winning tickets per round on expectation.
+```text
+
+```
+
+The target ensures that the miner can express the power across all of their sectors through the tickets they have sampled. Specifically, on expectation, checking `numSectorsSampled` (with `numSectorsSampled = ceil(len(provingSet) * EPoStSamplingRate)`) challenge tickets in every epoch, a miner will find `minerPower/networkPower * EC.ExpectedLeadersPerEpoch` winning tickets per epoch on expectation. Note that while the sectorPower may differ based on the challenged sector, i.e. in any given epoch a miner may have an advantage (if picking sectors with more than the average across all their sectors) or a disadvantage (conversely) in their election; but over multiple epochs, on expectation the election will be fair.
+
+```text
+We elaborate on the above claim:
+
+We want the miner's expected wins over time to be equal to w = minerPower/networkPower * EC.ExpectedLeadersPerEpoch
+
+Take P to be the average miner power over the N sectors in their ProvingSet.
+We have P = SUM_{i=0}^N P_i / N
+
+The miner's likelihood of winning an election in any epoch is, for C tickets randomly drawn
+W = C * target = C * P_i/networkPower * EC.ExpectedLeadersPerEpoch * N/C = N * P_i/networkPower * EC.ExpectedLeadersPerEpoch
+
+with N * P_i ~= minerPower on expectation over enough epochs. That is to say: W = minerPower/networkPower * EC.ExpectedLeadersPerEpoch as wanted.
+```
 
 We show this below, removing division for ease of implementation:
 
@@ -89,12 +107,10 @@ const maxChallengeTicketSize = 2^len(H)
 
 def TicketIsWinner(challengeTicket):
     // Check that `ChallengeTicket < Target`
-    return challengeTicket * networkPower * numSectorsSampled < activePowerInSector * EC.ExpectedLeaders * maxChallengeTicketSize * numSectorsMiner
+    return challengeTicket * networkPower * numSectorsSampled < activePowerInSector * EC.ExpectedLeadersPerEpoch * maxChallengeTicketSize * numSectorsMiner
 ```
 
 If the miner finds any winning ticket in this round, it can use it, along with a new randomness ticket to generate and publish a new block. Otherwise, it waits to hear of another block generated in this round.
-
-Each miner will be rewarded `blockRewardPerEpoch / EC.ExpectedLeaders` FIL per found winning ticket, all of which are submitted on chain.
 
 We also use the VRF from {{<sref vrf>}} to draw randomness as part of crafting the Challenge Tickets in order to ensure leader election is secret (a miner cannot be known to win until they publish their ticket on the chain).
 

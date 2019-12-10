@@ -3,7 +3,7 @@ import chain "github.com/filecoin-project/specs/systems/filecoin_blockchain/stru
 import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type ExpectedConsensus struct {
-    expectedBlocksPerEpoch  UVarint
+    expectedLeadersPerEpoch  UVarint
     expectedRewardPerEpoch  UVarint
 
     ComputeChainWeight(tipset chain.Tipset) block.ChainWeight
@@ -11,7 +11,7 @@ type ExpectedConsensus struct {
     IsWinningChallengeTicket(
         challengeTicket    util.Bytes
         sectorPower        block.StoragePower
-        totalPower         block.StoragePower
+        networkPower       block.StoragePower
         numSectorsSampled  util.UVarint
         numSectorsMiner    util.UVarint
     ) bool

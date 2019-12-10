@@ -35,9 +35,12 @@ However, given Filecoin's "useful Proof-of-Work" is achieved through file storag
 
 Per the above, we also clearly distinguish putting storage on-chain from gaining power in consensus (sometimes called "Storage Power") as follows:
 
-**Consensus power in Filecoin is determined by in-deal storage**. For instance, if a miner had a 32GB sector, 20 of which were used as part of storage deals, only those 20 would contribute to said miner's *Storage Power*.
+Consensus power in Filecoin is defined as the intersection between:
+- Proven Storage as of the PoSts verification (i.e. storage in the `Proving Set` since it will all be active by the time the PoSt is computed)
+- In-deal storage.
+Put another way **consensus power is in-deal storage in the Proving Set**. For instance, if a miner had two 32GB sector, each with 20 GB of in-deal storage; the miner would have 40GB worth of storage power for SPC.
 
-Thereafter, power can be either *active* or *inactive* as defined in {{<sref storage_mining_subsystem>}}.
+Read more in {{<sref storage_mining_subsystem>}}.
 
 {{<label tickets>}}
 ## Tickets
@@ -130,13 +133,13 @@ Note that a miner may attempt to grind through tickets by incrementing the nonce
 
 In order to secure Storage Power Consensus, the system defines a minimum miner size required to participate in consensus.
 
-Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of active power (i.e. storage power currently used in storage deals) or `MIN_MINER_SIZE_PERC` of the network's active storage power to participate in leader election.
+Specifically, miners must have either at least `MIN_MINER_SIZE_STOR` of power (i.e. storage power currently used in storage deals) or `MIN_MINER_SIZE_PERC` of the network's active storage power to participate in leader election.
 
 Miners smaller than this cannot mine blocks and earn block rewards in the network. Their power will not be counted as part of total network power. However, **it is important to note that such miners can still have their power faulted and be penalized accordingly**.
 
 Accordingly, to bootstrap the network, the genesis block must include miners taking part in valid storage deals along with appropriate committed storage.
 
-The `MIN_MINER_SIZE_PERC` condition will not be used in a network with more than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active storage.
+The `MIN_MINER_SIZE_PERC` condition will not be used in a network with more than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of power. It is nonetheless defined to ensure liveness in small networks (e.g. close to genesis or after large power drops). Simply, a single miner can maintain network liveness for networks with less than `MIN_MINER_SIZE_STOR/MIN_MINER_SIZE_PERC` of active storage.
 
 {{% notice placeholder %}}
 The below values are currently placeholders.

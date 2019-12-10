@@ -49,14 +49,14 @@ func (spc *StoragePowerConsensusSubsystem_I) IsWinningPartialTicket(stateTree st
 	challengeTicket := filcrypto.SHA256(partialTicket)
 
 	st := spc._getStoragePowerActorState(stateTree)
-	totalActivePower := st._getActivePower()
+	networkPower := st._getActivePower()
 
 	// TODO: pull from constants
 	EPOST_SAMPLE_RATE_NUM := util.UVarint(1)
 	EPOST_SAMPLE_RATE_DENOM := util.UVarint(25)
 	sectorsSampled := uint64(math.Ceil(float64(EPOST_SAMPLE_RATE_NUM/EPOST_SAMPLE_RATE_DENOM) * float64(numSectors)))
 
-	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, totalActivePower, sectorsSampled, numSectors)
+	return spc.ec().IsWinningChallengeTicket(challengeTicket, sectorUtilization, networkPower, sectorsSampled, numSectors)
 }
 
 // TODO: fix linking here

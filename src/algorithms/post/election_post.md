@@ -42,7 +42,7 @@ Filecoin's ElectionPoSt process makes use of two calls to the system library:
 
 As stated above, a miner is incentivized to repeat this process at every block time in order to check whether they were elected leaders (see <<sref expected_consensus>>). The rationality assumption made by ElectionPoSt is thus that storing files continuously and earning block rewards accordingly will be more profitable to miners than regenerating data at various epochs to sporadically participate in leader election.
 
-At every epoch, each miner will challenge a portion of sectors `numSectorsSampled` from their `Proving Set` at random, according to some `ePoStSampleRate` with each sector being issued K PoSt challenges (coverage may not be perfect).
+At every epoch, each miner will challenge a portion of sectors `numSectorsSampled` from their `Proving Set` at random, according to some `ElectionPoStSamplingRate` with each sector being issued K PoSt challenges (coverage may not be perfect).
 
 By proving access to the challenged range of nodes (i.e. merkle tree leaf from the committed sector) in the sector, the miner can generate a set of valid ChallengeTickets in order to check them as part of leader election in EC (in order to find the winning tickets). The winning tickets will be stored on the block and used to generate a PoSt (using a SNARK). A block header will thus contain a number of “winning” PoStCandidates (each containing a partialTicket, SectorID and other elements, used to verify the leader election) and a PostProof generated from the ChallengeTickets.
 
@@ -61,14 +61,14 @@ The miner draws a randomness ticket from the randomness chain from a given epoch
     - `post_randomness = VRF_miner(ChainRandomness(currentBlockHeight - SPC.post_lookback))`
 
 2. **(select eligible sectors)**
-The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with `numSectorsSampled` `PartialTickets`.
+The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with `numSectorsSampled` `PartialTickets`. Note that the PoSt sectors are sampled over the `ProvingSet` and not just active sectors since if the PoSt is successful all PoSt in the `ProvingSet` will become active. That is, by including these sectors in their `ProvingSet`, miners are claiming that these are active sectors, which will be proven in the PoSt itself. Therefore we can use these sectors to generate the PoSt.
 
 ```text
     numSectorsMiner = len(miner.provingSet)
     numSectorsSampled = ceil(EPoStSamplingRate * numSectorsMiner)
 ```
 
-Note also that even with `numSectorsSampled == len(ProvingSet)`, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
+Note also that even with `numSectorsSampled == len(ProvingSet)`, this process may not sample all of a miner’s sectors in any given epoch, given how the data to be proven in challenged sectors is selected (there could be collisions, e.g. the same sectors selected multiple times).
 
 3. **(generate Partial Ticket(s))** for each selected sector
 
@@ -87,7 +87,7 @@ Given returned PartialTickets, miner checks them for winning tickets using the t
 winningTickets = []
 def checkTicketForWinners(partialTickets):
     for partialTicket in partialTickets:
-        challengeTicket = Finalize(PartialTicket) 
+        challengeTicket = finalizeTicket(PartialTicket) 
         if TicketIsWinner(challengeTicket):
             winningTickets += partialTicket
 
@@ -96,7 +96,7 @@ def finalizeTicket(partialTicket):
 
 ```
 
-A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `samplingRate` into account.
+A single winning ticket and can be used to submit a block but a miner would want to check as many as possible to increase their potential rewards. The target ensures that on expectation, a miner's total power is expressed if they check all of their tickets, taking the `ElectionPoStSamplingRate` into account.
 
 5. **(generate a `PoStProof`)** for inclusion in the block header
 
@@ -149,7 +149,16 @@ There is no requirement to persist the witnesses (list of merkle proofs) for fai
 
 ## Surprise PoSt cleanup
 
-But while this means a miner will never win blocks from unproven power, they won’t be penalized either when storage is lost. How do we ensure that the Power Table is accurate? Likewise, how do we onboard new power since it will not win a block unless it has at least X TB or Y % of the network (see {{<sref min_miner_size>}}). Enter SurprisePoSt.
+But while this means a miner will never win blocks from faked power, they won’t be penalized either when storage is lost. How do we ensure that the Power Table is accurate? Likewise, how do we onboard new power since it will not win a block unless it has at least X TB or Y % of the network.
+
+This is why we need PoSt surprise: 
+
+Atop ElectionPost, a miner will be surprised with a PoSt challenge in every ProvingPeriod (~2 days). The ProvingPeriod resets whenever the miner publishes a PoSt (election or surprise). 
+This SurprisePoSt will use a challenge drawn from the chain at the start of this recovery period. Its PoStProof must be a proof over the PartialTickets for all sectors a miner is storing (i.e. a miner must submit a PoStProof made up of all partialTickets for all sectors in the `ProvingSet`, not just the winning ones on sampled sectors). For this reason a miner is incentivized to declare faults in order to successfully generate this PoStProof.)
+
+Upon receiving a PoSt surprise challenge, a miner has a given ChallengePeriod (~2 hours) past which they, they will lose all their power and a portion of their pledge collateral if they have not submitted a PoSt on chain. This is considered a `DetectedFault` and all sectors in the `ProvingSet` will be marked as `Failing`. No deal collateral will be slashed if miners can recover within the next three proving periods. Note that the exact amount of slashed pledge collateral and pledge collateral function itself are subject to change.
+
+Thereafter, the miner will have three more ProvingPeriods (specifically three challenges, so three ProvingPeriods on expectation) to recover their power by submitting a SurprisePoSt. If the miner does not do so, their sectors are permanently terminated and their storage deal collateral slashed (see the StorageMinerActor in the spec).
 
 ## PoStSurprise Challenge
 
