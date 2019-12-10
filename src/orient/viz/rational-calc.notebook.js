@@ -138,19 +138,36 @@ md`## Graphs`
 
 md`### On-chain footprint`
 
+chooser = (data, field) => {
+  const maximum = Math.log10(Math.max(...solved_many.map(d => d[field]))) 
+  const minimum = Math.log10(Math.min(...solved_many.map(d => d[field])))
+  const format = v => `${_f(Math.pow(10, v))}`
+
+  return slider({
+    min: minimum,
+    max: maximum,
+    value: maximum,
+    step: 0.01,
+    format: format,
+  })
+}
+
+viewof block_size_kib_ruler = chooser(solved_many, 'block_size_kib')
+
 bar_chart(solved_many, 'block_size_kib', [
   'not_proofs_per_block_kib',
   'seals_size_per_block_kib',
   'posts_size_per_block_kib',
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 1000})
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, block_size_kib_ruler)})
 
 md`### Retrieval`
 
+viewof decoding_time_parallel_ruler = chooser(solved_many, 'decoding_time_parallel')
 
 bar_chart(solved_many, 'decoding_time_parallel', [
   'encoding_window_time_parallel',
   'window_read_time_parallel',
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 100})
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, decoding_time_parallel_ruler)})
 
 table_constraints(solved_many, [
   'proof_name',
@@ -163,14 +180,18 @@ table_constraints(solved_many, [
 
 md`### PoRep`
 
+viewof porep_time_parallel_ruler = chooser(solved_many, 'porep_time_parallel')
+
 bar_chart(solved_many, 'porep_time_parallel', [
   'porep_snark_time_parallel',
   'porep_commit_time_parallel',
   'encoding_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 60*60*24})
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, porep_time_parallel_ruler)})
 
 
 md`### EPoSt`
+
+viewof epost_time_parallel_ruler = chooser(solved_many, 'epost_time_parallel')
 
 bar_chart(solved_many, 'epost_time_parallel', [
   'epost_leaves_read_parallel',
@@ -179,16 +200,7 @@ bar_chart(solved_many, 'epost_time_parallel', [
   'post_ticket_gen',
   'epost_inclusions_time_parallel',
   'post_snark_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 40})
-
-bar_chart(solved_many, 'post_time_parallel', [
-  // 'post_data_access_parallel',
-  'post_leaves_read_parallel',
-  'post_mtree_read_parallel',
-  'post_ticket_gen',
-  'post_inclusions_time_parallel',
-  'post_snark_time_parallel'
-], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < 100})
+], ['proof_name', 'graph_name', 'window_size_mib'], {filter: d => d < Math.pow(10, epost_time_parallel_ruler)})
 
 table_constraints(solved_many, [
   'proof_name',
@@ -380,7 +392,7 @@ rig = ({
   "rig_ram_gib": 32,
   "rig_storage_latency": 0.003,
   "rig_storage_min_tib": 100,
-  "rig_storage_parallelization": 32,
+  "rig_storage_parallelization": 16,
   "rig_storage_read_mbs": 80,
   "cost_gb_per_month": 0.005,
   "extra_storage_time": 0,
@@ -580,8 +592,10 @@ function flatten(items) {
 
 md`### Imports`
 
+import {slider} from "@jashkenas/inputs"
 d3 = require('d3')
 vl = require('@observablehq/vega-lite')
+import { createJsonDownloadButton } from "@trebor/download-json"
 
 md`### Styles`
 
@@ -763,4 +777,3 @@ plotMultiLine = (solutions, x, names) => {
   return div
 }
 
-import { createJsonDownloadButton } from "@trebor/download-json"
