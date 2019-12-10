@@ -77,6 +77,7 @@ func (a *RewardActorCode_I) Constructor(rt vmr.Runtime) InvocOutput {
 func (a *RewardActorCode_I) AwardBlockReward(rt vmr.Runtime, miner addr.Address, penalty actor.TokenAmount) {
 	rt.ValidateImmediateCallerIs(addr.SystemActorAddr)
 	// block reward function should live here
+	// handle penalty greater than reward
 	// put Reward into RewardMap
 	panic("TODO")
 }

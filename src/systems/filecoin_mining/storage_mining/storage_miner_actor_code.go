@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	Method_StorageMinerActor_SubmitSurprisePoSt = actor.MethodPlaceholder + iota
+	Method_StorageMinerActor_SubmitVerifiedSurprisePoSt = actor.MethodPlaceholder + iota
 	Method_StorageMinerActor_SubmitVerifiedElectionPoSt
 	Method_StorageMinerActor_NotifyOfSurprisePoStChallenge
 )
