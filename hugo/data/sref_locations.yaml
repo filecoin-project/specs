@@ -53,6 +53,8 @@ retrieval_market: [systems, filecoin_markets, retrieval_market]
 storage_market: [systems, filecoin_markets, storage_market]
 storage_deal_collateral: [systems, filecoin_markets, storage_market, storage_deal_collateral]
 storage_faults: [systems, filecoin_markets, storage_market, faults]
+deals: [systems, filecoin_markets, deal]
+deal_states: [systems, filecoin_markets, deal, deal_states]
 
 # mining
 

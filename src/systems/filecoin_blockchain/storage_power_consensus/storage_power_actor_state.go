@@ -1,9 +1,7 @@
 package storage_power_consensus
 
 import (
-	"math/big"
-
-	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
+	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	block "github.com/filecoin-project/specs/systems/filecoin_blockchain/struct/block"
 	actor "github.com/filecoin-project/specs/systems/filecoin_vm/actor"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
@@ -107,14 +105,23 @@ func (st *StoragePowerActorState_I) _getPledgeCollateralReq(rt Runtime, power bl
 	return pcRequired
 }
 
-// _sampleMinersToSurprise implements the PoSt-Surprise sampling algorithm
-func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) []addr.Address {
+func addrInArray(a addr.Address, list []addr.Address) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+// _selectMinersToSurprise implements the PoSt-Surprise sampling algorithm
+func (st *StoragePowerActorState_I) _selectMinersToSurprise(rt Runtime, challengeCount int, randomness util.Randomness) []addr.Address {
 	// this wont quite work -- a.PowerTable() is a HAMT by actor address, doesn't
 	// support enumerating by int index. maybe we need that as an interface too,
 	// or something similar to an iterator (or iterator over the keys)
 	// or even a seeded random call directly in the HAMT: myhamt.GetRandomElement(seed []byte, idx int) using the ticket as a seed
 
-	ptSize := big.NewInt(int64(len(st.PowerTable())))
+	ptSize := len(st.PowerTable())
 	allMiners := make([]addr.Address, len(st.PowerTable()))
 	index := 0
 
@@ -123,23 +130,19 @@ func (st *StoragePowerActorState_I) _sampleMinersToSurprise(rt Runtime, challeng
 		index++
 	}
 
-	sampledMiners := make([]addr.Address, 0)
-
+	selectedMiners := make([]addr.Address, 0)
 	for chall := 0; chall < challengeCount; chall++ {
-		minerIndex := filproofs.RandomInt(randomness, chall, ptSize)
-		panic(minerIndex)
-		// hack to turn bigint into int
-		minerIndexInt := 0
-		potentialChallengee := allMiners[minerIndexInt]
-		// call to storage miner actor:
-		// if should_challenge(lookupMinerActorStateByAddr(potentialChallengee).ShouldChallenge(rt, SURPRISE_NO_CHALLENGE_PERIOD)){
-		// hack below TODO fix
-		if true {
-			sampledMiners = append(sampledMiners, potentialChallengee)
+		minerIndex := filcrypto.RandomInt(randomness, chall, ptSize)
+		potentialChallengee := allMiners[minerIndex]
+		// skip dups
+		for addrInArray(potentialChallengee, selectedMiners) {
+			minerIndex := filcrypto.RandomInt(randomness, chall, ptSize)
+			potentialChallengee = allMiners[minerIndex]
 		}
+		selectedMiners = append(selectedMiners, potentialChallengee)
 	}
 
-	return sampledMiners
+	return selectedMiners
 }
 
 func (st *StoragePowerActorState_I) _safeGetPowerEntry(rt Runtime, minerID addr.Address) PowerTableEntry {

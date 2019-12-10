@@ -2,7 +2,6 @@ package util
 
 import (
 	"bytes"
-	"encoding/binary"
 	"io"
 	"log"
 	big "math/big"
@@ -107,13 +106,6 @@ func TextAbbrev(s string, maxLen int) string {
 		return s
 	}
 	return s[:maxLen-3] + "..."
-}
-
-func IntToBytesLittleEndian(x int) Bytes {
-	buf := bytes.NewBuffer(make([]byte, 0, 8))
-	err := binary.Write(buf, binary.LittleEndian, x)
-	Assert(err == nil)
-	return buf.Bytes()
 }
 
 func SerializeBytes(b Bytes) Serialization {

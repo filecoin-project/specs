@@ -30,7 +30,7 @@ Filecoin Storage Market Deal Flow
 
 - 7. Declared faults are penalized to a smaller degree than detected faults by `CronActor`. Miners declare failing sectors by invoking `StorageMinerActor.DeclareFaults` and X of the `StorageDealCollateral` will be slashed and power corresponding to these sectors will be tempororily lost. However, miners can only declare faults when they are not in `Challenged` status.
 - 8. Miners can then recover faults by invoking `StorageMinerActor.RecoverFaults` and have sufficient `StorageDealCollateral` in their available balances. FaultySectors are recommitted and power is only restored at the next PoSt submission. Miners will not be able to invoke `RecoverFaults` when they are in the `Challenged` status.
-- 9. Sectors that are failing for `storagemining.MaxFaults` consecutive ChainEpochs will be cleared and result in `StoragePowerActor.SlashPledgeCollateral`.
+- 9. Sectors that are failing for `storagemining.MAX_CONSECUTIVE_FAULTS` consecutive ChainEpochs will be cleared and result in `StoragePowerActor.SlashPledgeCollateral`.
   - TODO: set `X` parameter
 
 # Submit PoSt
@@ -40,7 +40,7 @@ Filecoin Storage Market Deal Flow
 On every PoSt Submission, the following steps happen.
 
 - 10. `StorageMinerActor` first verifies the PoSt Submission. If PoSt is done correctly, all `Committed` and `Recovering` sectors will be marked as `Active` and power is credited to these sectors. Payments will be processed for deals that are `Active` by invoking `StorageMarketActor.ProcessStorageDealsPayment`.
-- 11. For all sectors that are off from the `ProvingSet`, these sectors are failing. Increment `FaultCount` on these sectors and if any of these sectors are failing for `MaxFaultCount` consecutive `ChainEpoch`, these sectors are terminated and cleared from the network.
+- 11. For all sectors that are off from the `ProvingSet`, these sectors are failing. Increment `FaultCount` on these sectors and if any of these sectors are failing for `MAX_CONSECUTIVE_FAULTS` consecutive `ChainEpoch`, these sectors are terminated and cleared from the network.
 - 13. Process sector expiration. Sectors expire when all deals in that sector have expired. Expired sectors will be cleared and `StorageDealCollateral` for both miners and users returned depending on the state that the sectors are in.
 - 14. Submit `FaultReport` and `PowerReport` to `StoragePowerActor` for slashing and power accounting.
 - 15. Check and ensure that Pledge Collateral is statisfied. TODO: some details are missing here, also related to ProvingPeriod depending on PoSt construction.
@@ -55,7 +55,7 @@ On every PoSt Submission, the following steps happen.
   - If no PoSt is submitted by the end of the `ProvingPeriod`, `onMissedSurprisePoSt` detects the missing PoSt, and sets all sectors to `Failing`.
     - TODO: reword in terms of a conditional in the mining cycle
   - When there are sector faults are detected, some of `StorageDealCollateral` and `PledgeCollateral` are slashed, and power is lost.
-    - If the faults persist for `storagemining.MaxFaultCount` then sectors are removed/cleared from `StorageMinerActor`.
+    - If the faults persist for `storagemining.MAX_CONSECUTIVE_FAULTS` then sectors are removed/cleared from `StorageMinerActor`.
 
 # Deal Code
 
@@ -65,6 +65,7 @@ On every PoSt Submission, the following steps happen.
 
 {{< diagram src="diagrams/deal-flow.mmd.svg" title="Deal Flow Sequence Diagram" >}}
 
+{{<label deal_states>}}
 # Deal States
 
 All on-chain economic activities in Filecoin start with the deal. This section aims to explain different states of a deal and their relationship with other concepts in the protocol such as Power, Payment, and Collaterals.
@@ -86,12 +87,12 @@ The following describes how a deal transitions between its different states.
 - `Active -> Deleted`: this can happen under the following conditions:
   - The deal itself has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenever a PoSt is submitted. Power associated with the deal will be lost, collaterals returned, and all remaining storage fees unlocked (allowing miners to call `WithdrawBalance` successfully).
   - The sector containing the deal has expired. This is triggered by `StorageMinerActorCode._submitPowerReport` which is called whenver a PoSt is submitted. Power associated with the deals in the sector will be lost, collaterals returned, and all remaining storage fees unlocked.
-  - The sector containing the active deal has been terminated. This is triggered by `StorageMinerActor._submitFaultReport` for `TerminatedFaults`. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the `Failing` state for `MaxFaultCount` consecutive proving periods.
+  - The sector containing the active deal has been terminated. This is triggered by `StorageMinerActor._submitFaultReport` for `TerminatedFaults`. No storage deal collateral will be slashed on fault declaration or detection, only on termination. A terminated fault is triggered when a sector is in the `Failing` state for `MAX_CONSECUTIVE_FAULTS` consecutive proving periods.
 
 Given deal states and their transitions, the following are the relationships between deal states and other economic states and activities in the protocol.
 
 - `Power`: only payload data in an Active storage deal counts towards power.
 - `Deal Payment`: happens on `_onSuccessfulPoSt` and at deal/sector expiration through `_submitPowerReport`, paying out `StoragePricePerEpoch` for each epoch since the last PoSt.
-- `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed given these faults' impact on consensus power. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from `Failing` within the `MaxFaultCount` threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to `RecoverFaults` given the earlier slashing.
+- `Deal Collateral`: no storage deal collateral will be slashed for `NewDeclaredFaults` and `NewDetectedFaults` but instead some pledge collateral will be slashed given these faults' impact on consensus power. In the event of `NewTerminatedFaults`, all storage deal collateral and some pledge collateral will be slashed. Provider and client storage deal collaterals will be returned when a deal or a sector has expired. If a sector recovers from `Failing` within the `MAX_CONSECUTIVE_FAULTS` threshold, deals in that sector are still considered active. However, miners may need to top up pledge collateral when they try to `RecoverFaults` given the earlier slashing.
 
 {{< diagram src="diagrams/deal-payment.mmd.svg" title="Deal States Sequence Diagram" >}}

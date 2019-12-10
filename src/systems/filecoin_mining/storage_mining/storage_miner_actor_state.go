@@ -38,8 +38,8 @@ func (st *StorageMinerActorState_I) _challengeHasExpired(epoch block.ChainEpoch)
 	return st.ChallengeStatus().ChallengeHasExpired(epoch)
 }
 
-func (st *StorageMinerActorState_I) ShouldChallenge(currEpoch block.ChainEpoch, challengeFreePeriod block.ChainEpoch) bool {
-	return st.ChallengeStatus().ShouldChallenge(currEpoch, challengeFreePeriod)
+func (st *StorageMinerActorState_I) _shouldChallenge(currEpoch block.ChainEpoch) bool {
+	return st.ChallengeStatus().ShouldChallenge(currEpoch)
 }
 
 func (st *StorageMinerActorState_I) _processStagedCommittedSectors(rt Runtime) {
@@ -160,7 +160,7 @@ func (st *StorageMinerActorState_I) _updateActivateSector(rt Runtime, sectorNo s
 
 // failSector moves Sector from Active/Committed/Recovering into Failing State
 // and increments FaultCount if asked to do so (DeclareFaults does not increment faultCount)
-// move Sector from Failing to Cleared State if increment results in faultCount exceeds MaxFaultCount
+// move Sector from Failing to Cleared State if increment results in faultCount exceeds MAX_CONSECUTIVE_FAULTS
 // update SectorTable
 // remove from ProvingSet
 func (st *StorageMinerActorState_I) _updateFailSector(rt Runtime, sectorNo sector.SectorNumber, increment bool) {
