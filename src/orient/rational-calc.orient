@@ -495,12 +495,13 @@ ProofOfReplication:
     // min(porep_snark_partition_time, porep_snark_time / snarrk_parallelization)
     porep_snark_time_parallel = porep_snark_partition_time + (porep_snark_time - porep_snark_partition_time) / (rig_snark_parallelization)
 
-    Constraints (WindowEncoding):
-      porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
+    // Constraints (WindowEncoding):
+    //   porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + window_data_inclusions + window_replica_inclusions*2
 
-    Constraints (SectorEncoding):
+    Constraints (StackedReplicas):
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
 
+    // TODO: add wrapper constraints
     Constraints (Wrapping):
       porep_snark_constraints = window_inclusions + window_column_leaves + window_labeling_proof + data_inclusions + replica_inclusions*2
 
