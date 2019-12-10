@@ -26,7 +26,10 @@ func (st *StoragePowerActorState_I) _getActivePower() block.StoragePower {
 	activePower := block.StoragePower(0)
 
 	for _, miner := range st.PowerTable() {
-		activePower = activePower + miner.ActivePower()
+		// only count miner power if they are larger than MIN_MINER_SIZE
+		if st.ActivePowerMeetsConsensusMinimum(miner.ActivePower()) {
+			activePower = activePower + miner.ActivePower()
+		}
 	}
 
 	return activePower

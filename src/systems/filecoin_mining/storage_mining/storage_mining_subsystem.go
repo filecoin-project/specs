@@ -108,7 +108,7 @@ func (sms *StorageMiningSubsystem_I) _tryLeaderElection() {
 	randomness1 := sms._consensus().GetTicketProductionRand(sms._blockchain().BestChain(), sms._blockchain().LatestEpoch())
 	newTicket := sms.PrepareNewTicket(randomness1, sms._keyStore().MinerAddress())
 
-	postProof := sms.StorageProving().Impl().GenerateElectionPoStProof(postRandomness, winningCandidates)
+	postProof := sms.StorageProving().Impl().CreateElectionPoStProof(postRandomness, winningCandidates)
 	chainHead := sms._blockchain().BestChain().HeadTipset()
 
 	sms._blockProducer().GenerateBlock(postProof, winningCandidates, newTicket, chainHead, sms._keyStore().MinerAddress())

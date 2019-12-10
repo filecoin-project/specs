@@ -3,9 +3,7 @@ package storage_proving
 import (
 	filproofs "github.com/filecoin-project/specs/libraries/filcrypto/filproofs"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 
-	//	poster "github.com/filecoin-project/specs/systems/filecoin_mining/storage_proving/poster"
 	util "github.com/filecoin-project/specs/util"
 )
 
@@ -39,28 +37,21 @@ const EPOST_SAMPLE_DENOM = 25
 func (sps *StorageProvingSubsystem_I) GenerateElectionPoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
 	numChallengeTickets := util.UInt(len(sectorIDs) * EPOST_SAMPLE_NUM / EPOST_SAMPLE_DENOM)
 
-	// TODO: Get these correctly.
-	var cfg sector.PoStCfg
-	var sectorStore sector_index.SectorStore
-
 	var poster = sps.PoStGenerator()
 
-	poster.GeneratePoStCandidates(cfg, challengeSeed, numChallengeTickets, sectorIDs, sectorStore)
+	poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
 
 	todo := make([]sector.PoStCandidate, 0)
 	return todo
 }
 
-func (sps *StorageProvingSubsystem_I) GenerateElectionPoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) CreateElectionPoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: challengeTickets,
 	}
 
-	// TODO: Get this correctly. Maybe move into PoStGenerator struct.
-	var cfg sector.PoStCfg
-
 	var poster = sps.PoStGenerator()
-	return poster.GeneratePoStProof(cfg, witness)
+	return poster.CreateElectionPoStProof(witness)
 }
 
 // TODO: get from consts
@@ -71,26 +62,19 @@ const SPOST_SAMPLE_DENOM = 50
 func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStCandidates(challengeSeed sector.PoStRandomness, sectorIDs []sector.SectorID) []sector.PoStCandidate {
 	numChallengeTickets := util.UInt(len(sectorIDs) * SPOST_SAMPLE_NUM / SPOST_SAMPLE_DENOM)
 
-	// TODO: Get these correctly.
-	var cfg sector.PoStCfg
-	var sectorStore sector_index.SectorStore
-
 	var poster = sps.PoStGenerator()
 
-	poster.GeneratePoStCandidates(cfg, challengeSeed, numChallengeTickets, sectorIDs, sectorStore)
+	poster.GeneratePoStCandidates(challengeSeed, numChallengeTickets, sectorIDs)
 
 	todo := make([]sector.PoStCandidate, 0)
 	return todo
 }
 
-func (sps *StorageProvingSubsystem_I) GenerateSurprisePoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
+func (sps *StorageProvingSubsystem_I) CreateSurprisePoStProof(challengeSeed sector.PoStRandomness, challengeTickets []sector.PoStCandidate) sector.PoStProof {
 	witness := &sector.PoStWitness_I{
 		Candidates_: challengeTickets,
 	}
 
-	// TODO: Get this correctly. Maybe move into PoStGenerator struct.
-	var cfg sector.PoStCfg
-
 	var poster = sps.PoStGenerator()
-	return poster.GeneratePoStProof(cfg, witness)
+	return poster.CreateSurprisePoStProof(witness)
 }

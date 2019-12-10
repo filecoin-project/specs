@@ -9,6 +9,9 @@ type WinStackedDRGWindowCount UInt
 type WinStackedDRGPartitions UInt
 type WinStackedDRGChallenges UInt
 type WinStackedDRGWindowChallenges UInt
+type WinStackedDRGLeafChallengeCount UInt
+type WinStackedDRGChallengeRangeSize UInt
+
 type DRGDepth struct {}
 type DRGFraction struct {}
 type DRGDegree UInt
@@ -52,13 +55,12 @@ type SealSetupArtifacts struct {
     CommC              sector.Commitment
     CommQ              sector.Commitment
     CommRLast          sector.Commitment
-    CommDTreePaths     [file.Path]
+    CommDTreePath      file.Path
     CommCTreePath      file.Path
     CommQTreePath      file.Path
     CommRLastTreePath  file.Path
-    Seeds              [sector.SealSeed]
+    Seed               sector.SealSeed
     KeyLayers          [Bytes]
-    QLayer             Bytes  // This is what is stored on disk and allows fast/cheap retrieval. TODO: Maybe a better name, ideally still allowing CommQ.
     Replica            Bytes  // This is what we challenge in PoSt. It will be regenerated just in time. Should probably be removed from here.
 }
 
@@ -74,6 +76,8 @@ type WinStackedDRG struct {
     Partitions              WinStackedDRGPartitions
     Challenges              WinStackedDRGChallenges
     WindowChallenges        WinStackedDRGWindowChallenges
+    LeafChallengeCount      WinStackedDRGLeafChallengeCount
+    ChallengeRangeSize      WinStackedDRGChallengeRangeSize
     Algorithm               struct {}
     DRGCfg
     ExpanderGraphCfg
@@ -85,6 +89,10 @@ type WinStackedDRG struct {
 
     Drg()                   DRG
     Expander()              ExpanderGraph
+
+    WindowDrg()             DRG
+    WindowExpander()        ExpanderGraph
+
     Seal(
         sid         sector.SectorID
         data        Bytes
@@ -100,11 +108,11 @@ type WinStackedDRG struct {
     ) PrivateOfflineProof
 
     CreateOfflineCircuitProof(
-        challengeProofs  [OfflineWindowChallengeProof]
+        challengeProofs  [OfflineWindowProof]
         aux              sector.ProofAuxTmp
     ) sector.SealProof
     VerifyPrivateSealProof(
-        privateProof  [OfflineWindowChallengeProof]
+        privateProof  [OfflineWindowProof]
         sealSeeds     [sector.SealSeed]
         randomness    sector.InteractiveSealRandomness
         commD         Commitment
@@ -118,7 +126,7 @@ type WinStackedDRG struct {
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
     ) [sector.PoStCandidate]
-    GenerateElectionPoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    CreateElectionPoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
     VerifyElectionPoSt(sv sector.PoStVerifyInfo) bool
 
     GenerateSurprisePoStCandidates(
@@ -127,8 +135,18 @@ type WinStackedDRG struct {
         candidateCount   int
         sectorStore      sectorIndex.SectorStore
     ) [sector.PoStCandidate]
-    GenerateSurprisePoStProof(privateProofs [sector.PrivatePoStProof]) sector.PoStProof
+    CreateSurprisePoStProof(privateProofs [PrivatePoStProof]) sector.PoStProof
     VerifySurprisePoSt(sv sector.PoStVerifyInfo) bool
+    CreatePrivatePoStProof(
+        candidateProofs  [sector.PrivatePoStCandidateProof]
+        challengeSeed    sector.PoStRandomness
+        aux              sector.PersistentProofAux
+    ) PrivatePoStProof
+    VerifyPrivatePoStProof(
+        privateProof  PrivatePoStProof
+        candidates    [sector.PoStCandidate]
+        commRLast     sector.Commitment
+    ) bool
 }
 
 type SDRCfg struct {
@@ -193,6 +211,7 @@ type Feistel struct {
 
 type MerkleTree struct {
     ProveInclusion(challenge UInt) InclusionProof
+    Leaf(index UInt) Bytes
 }
 
 // TODO: Needs to be generic over hash.
