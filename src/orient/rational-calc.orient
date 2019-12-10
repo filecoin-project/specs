@@ -623,13 +623,14 @@ Filecoin:
       epost_time_parallel = epost_data_access_parallel + post_ticket_gen + epost_inclusions_time_parallel + post_snark_time_parallel
 
 Rationality:
-  describe(breakeven_cost, "ratio between cost of storing full sector versus regenerating for a polling time")
-  describe(polling_time, "Time between two PoSt proofs", secs)
-  describe(challenge_periods_per_month, "Number of challenge periods in a month")
+   describe(breakeven_nodes, "number of nodes / sector / challenge period after which it's cheaper to store the entire sector, than re-encode those")
+   describe(polling_time, "Time between two PoSt proofs", secs)
+   describe(challenge_periods_per_month, "Number of challenge periods in a month")
+   describe(regeneration_fraction, "Fraction of nodes of a sector for which re-encoding them every `polling_time` costs as much as storing them")
 
-  challenge_periods_per_month = secs_in_month / polling_time
-  // XXX this is not used anymore
-  breakeven_cost = cost_storage_sector_polling_time / cost_challenges_polling_time 
+   challenge_periods_per_month = secs_in_month / polling_time
+   // XXX this is not used anymore
+   breakeven_nodes = ((cost_gib_per_month *  sector_size_gib) / (cost_node_encoding * challenge_periods_per_month))
   //assume(breakeven_cost < 1)
 
   Costs:

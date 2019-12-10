@@ -4,6 +4,22 @@
       "!ElectionWithFallbackPoSt": true,
       "!SectorEncoding": true,
       "!VectorR": true,
+      "!Wrapping": true,
+      "!WrappingVariant": false,
+      "!StackedReplicas": false
+    },
+    {
+      "!ElectionWithFallbackPoSt": true,
+      "!SectorEncoding": true,
+      "!VectorR": true,
+      "!WrappingVariant": true,
+      "!Wrapping": false,
+      "!StackedReplicas": false
+    },
+    {
+      "!ElectionWithFallbackPoSt": true,
+      "!SectorEncoding": true,
+      "!VectorR": true,
       "!Wrapping": false,
       "!WrappingVariant": false,
       "!StackedReplicas": true
@@ -14,7 +30,12 @@
       "!StackedChungParameters": true,
       "!StackedSDRParameters": false,
       "chung_delta": 0.01
-    }
+    },
+    {
+      "!StackedChungParameters": false,
+      "!StackedSDRParameters": true,
+      "sdr_delta": 0.01
+    },
   ],
   {
     "!MemoryCost": true,
