@@ -271,8 +271,6 @@ func (a *StorageMinerActorCode_I) _claimDealPayments(rt Runtime) {
 func (a *StorageMinerActorCode_I) _onSuccessfulPoSt(rt Runtime) InvocOutput {
 	h, st := a.State(rt)
 
-	// TODO add info on chain
-
 	// The proof is verified, process ProvingSet.SectorsOn():
 	// ProvingSet.SectorsOn() contains SectorCommitted, SectorActive, SectorRecovering
 	// ProvingSet itself does not store states, states are all stored in Sectors.State
