@@ -6,7 +6,7 @@ statusIcon: ⚠️
 {{< readfile file="network.id" code="true" lang="go" >}}
 
 
-Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under `/filecoin/...` protocol identifiers.
+Filecoin nodes use the libp2p protocol for peer discovery, peer routing, and message multicast, and so on. Libp2p is a set of modular protocols common to the peer-to-peer networking stack. Nodes open connections with one another and mount different protocols or streams over the same connection. In the initial handshake, nodes exchange the protocols that each of them supports and all Filecoin related protcols will be mounted under `/fil/...` protocol identifiers.
 
 Here is the list of libp2p protocols used by Filecoin.
 
