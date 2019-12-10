@@ -64,10 +64,11 @@ The miner draws a randomness ticket from the randomness chain from a given epoch
 The miner calls `GenerateCandidates` from proofs with their non-faulted (declared or detected) sectors, meaning those in their `proving set` (from the `StorageMinerActor`) along with `numSectorsSampled` `PartialTickets`.
 
 ```text
-    numSectorsSampled = ceil(samplingRate * numSectorsMiner)
+    numSectorsMiner = len(miner.provingSet)
+    numSectorsSampled = ceil(EPoStSamplingRate * numSectorsMiner)
 ```
 
-Note also that even with `numSectorsSampled == numSectors`, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
+Note also that even with `numSectorsSampled == len(ProvingSet)`, this process may not sample all of a miner’s sectors in any given epoch, due to collisions in the pseudorandom sector ID selection process.
 
 3. **(generate Partial Ticket(s))** for each selected sector
 

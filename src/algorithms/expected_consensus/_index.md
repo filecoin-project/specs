@@ -77,10 +77,10 @@ As discussed in {{<sref election_post>}}, a miner will use the challenge ticket 
 
 The miner gets to draw one such challenge ticket per sector they have committed and must then compare the value derived from the challenge ticket against a target to determine whether they are eligible to mine. This is called finding a winning ticket.
 
-The target is set as follows, for each ticket and its associated sector:
+The target is set as follows, for each sector sampled for a ticket from the miner's `ProvingSet` and the number of sectors in the set:
 `target = activePowerInSector/networkPower * EC.ExpectedLeaders * numSectorsMiner / numSectorsSampled`
 
-The target ensures that the miner can express the power across all of their sectors through the tickets they have sampled. Specifically, on expectation, checking `numSectorsSampled` challenge tickets in every epoch, a miner will find `minerPower * EC.ExpectedLeaders` winning tickets per round on expectation.
+The target ensures that the miner can express the power across all of their sectors through the tickets they have sampled. Specifically, on expectation, checking `numSectorsSampled` (with `numSectorsSampled = ceil(len(provingSet) * EPoStSamplingRate)`) challenge tickets in every epoch, a miner will find `minerPower * EC.ExpectedLeaders` winning tickets per round on expectation.
 
 We show this below, removing division for ease of implementation:
 
